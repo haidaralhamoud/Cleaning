@@ -1,0 +1,196 @@
+body {
+  margin: 0;
+  font-family: "Vesper Libre", serif;
+  background: #fff;
+  color: #000;
+}
+
+/* ===== GENERAL STRUCTURE ===== */
+.about-us section {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+
+/* ===== INTRO ===== */
+.intro-section .intro-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.intro-section .intro-image {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+.intro-text {
+  flex: 1;
+  text-align: left;
+  min-width: 320px;
+}
+.hembla-title {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+.hembla-description,
+.hembla-subtext {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+/* ===== GUIDES ===== */
+.guides-section {
+  text-align: left;
+}
+.guides-section h3 {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+}
+.principles {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+.principle {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  width: 300px;
+}
+.guide-icon {
+  width: 40px;
+  height: 40px;
+}
+.principle h4 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+.principle p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* ===== FUTURE ===== */
+.future-section {
+  background: rgba(3,159,200,0.05);
+  border-radius: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 50px;
+}
+.future-section .text-side {
+  flex: 1;
+  min-width: 320px;
+}
+.future-section .image-side img {
+  width: 100%;
+  max-width: 550px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+}
+.cta-btn {
+  background: #039FC8;
+  color: #fff;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-top: 20px;
+  cursor: pointer;
+}
+
+/* ===== GOALS ===== */
+.goals-section {
+  text-align: center;
+}
+.goals-section h3 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+}
+.goals-intro {
+  font-size: 1rem;
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+}
+.goals-cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.goal-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 320px;
+  padding: 20px;
+}
+.goal-icon {
+  background: #81CFE3;
+  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px auto;
+}
+.goal-icon img {
+  width: 45px;
+  height: 45px;
+}
+.goal-card h4 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+.goal-card p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* ===== CIRCLES ===== */
+.circles-section {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 60px 0;
+}
+.circles-section img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .intro-section .intro-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .principles,
+  .goals-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  .future-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  .future-section .image-side img {
+    max-width: 100%;
+  }
+  .circles-section {
+    flex-direction: column;
+  }
+}

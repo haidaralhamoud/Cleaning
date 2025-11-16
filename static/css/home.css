@@ -1,0 +1,225 @@
+/* ===== Variables ===== */
+:root{
+  --green:#71b247;
+  --blue:#039fc8;
+  --ink:#000;
+  --muted:#898989;
+  --bg:#fff;
+  --panel:#ffffffd9;
+  --soft-blue: rgba(3,159,200,.15);
+  --solid-blue:#9bd7e6;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Inter",sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+}
+img{display:block;max-width:100%}
+
+/* ===== Helpers ===== */
+.container{width:min(1200px, 90%); margin-inline:auto}
+.section-title{
+  font-family:"Vesper Libre",serif;
+  font-weight:700;
+  color:var(--green);
+  font-size:40px;
+  text-align:center;
+  margin:0 0 10px;
+}
+.lead{
+  font-family:"Vesper Libre",serif;
+  font-weight:700;
+  font-size:24px;
+  line-height:40px;
+  text-align:center;
+  margin:10px auto 40px;
+  max-width:1070px;
+}
+.lead.small{max-width:900px}
+
+/* ===== NAVBAR ===== */
+.topbar{
+  background:#fff;
+  border-bottom:1px solid #eee;
+  position:sticky; top:0; z-index:20;
+}
+.topbar .container{
+  display:grid;
+  grid-template-columns:auto 1fr auto auto;
+  gap:20px; align-items:center; padding:12px 0;
+}
+.brand img{width:120px; height:120px; object-fit:cover}
+.main-nav{
+  display:flex; gap:28px; justify-content:center; align-items:center;
+}
+.main-nav a{
+  font-weight:700; color:#000; text-decoration:none; letter-spacing:.3px;
+}
+.main-nav a.active{position:relative}
+.main-nav a.active::after{
+  content:""; position:absolute; left:0; bottom:-10px; width:100%; height:2px; background:var(--green);
+}
+.actions .btn-profile{
+  background:var(--green); color:#fff; font-weight:700;
+  padding:10px 18px; border-radius:24px; text-decoration:none; display:inline-block;
+}
+.nav-toggle{display:none; background:#fff; font-size:22px; padding:6px 10px; border:1px solid #ddd; border-radius:8px}
+
+/* ===== HERO ===== */
+.hero{position:relative; min-height:620px}
+.hero-bg{
+  position:absolute; inset:0; background-position:center; background-size:cover;
+}
+.hero-panel{
+  position:absolute; inset:0; width:53%; background:var(--panel); backdrop-filter: blur(0.5px);
+}
+.hero-inner{position:relative; display:flex; align-items:center; min-height:620px}
+.hero-copy{max-width:720px}
+.hero-copy h1{
+  font-family:"Inter",sans-serif; font-weight:700; font-size:48px; margin:0 0 14px; color:#000;
+}
+.hero-copy p{
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:24px; line-height:40px; margin:0 0 24px;
+}
+.hero-buttons{display:flex; gap:18px; flex-wrap:wrap}
+.btn{
+  display:inline-block; padding:14px 28px; border-radius:30px; font-weight:700; text-decoration:none; text-align:center;
+}
+.btn-primary{background:var(--green); color:#fff}
+.btn-secondary{background:#fff; color:var(--green); border:2px solid var(--green)}
+
+/* ===== SERVICES ===== */
+.services{padding:60px 0}
+.cards{
+  display:grid; gap:28px; grid-template-columns:repeat(4,1fr); margin-top:30px;
+}
+.card{
+  border-radius:30px; padding:26px 20px 28px; box-shadow:var(--shadow); text-align:center;
+}
+.card.soft{background:var(--soft-blue)}
+.card.solid{background:var(--solid-blue)}
+.card .card-icon{
+  width:125px; height:125px; margin:0 auto 12px; background:#fff; border-radius:50%;
+  box-shadow:0 4px 6px rgba(0,0,0,.25); display:grid; place-items:center;
+}
+.card .card-icon img{width:90px; height:90px; object-fit:contain}
+.card h3{
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:24px; margin:8px 0 6px; color:#000;
+}
+.card p{
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:20px; line-height:26px; color:#000;
+}
+.card .white{color:#fff}
+
+.btn-naked{
+  display:inline-block; margin:30px auto 0; padding:14px 34px; border-radius:30px;
+  border:1px solid var(--blue); color:var(--green); font-family:"Vesper Libre",serif; font-weight:700; text-decoration:none;
+  box-shadow: inset 0 4px 10px rgba(3,159,200,.25), 0 4px 8px rgba(0,0,0,.25);
+}
+
+/* ===== EXTRAS ===== */
+.extras{padding:30px 0 60px}
+.mini-cards{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:30px; margin-top:20px;
+}
+.mini{
+  background:#fff; border-radius:10px; padding:20px; text-align:center; box-shadow:0 1px 2px rgba(0,0,0,.06);
+}
+.mini-badge{
+  width:108px; height:108px; margin:0 auto 8px; background:rgba(3,159,200,.25);
+  border-radius:50%; display:grid; place-items:center; box-shadow:0 4px 6px rgba(0,0,0,.25);
+}
+.mini-badge img{width:104px; height:100px; border-radius:100px; object-fit:cover}
+.mini h4{
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:24px; margin:10px 0 6px;
+}
+.mini p{font-family:"Vesper Libre",serif; font-weight:700; font-size:20px; color:rgba(0,0,0,.7)}
+
+/* ===== HOW IT WORKS ===== */
+.how{background:rgba(3,159,200,.25); padding:40px 0}
+.steps{
+  position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:10px; padding:50px 0 10px;
+}
+.track{
+  position:absolute; left:8%; right:8%; top:102px; height:3px; background:var(--green);z-index: -100;;
+}
+.step{ text-align:center; padding:0 10px}
+.dot{
+  width:100px; height:100px; border:3px solid var(--green); background:#fff; color:var(--green);
+  border-radius:50%; display:grid; place-items:center; font-family:"Vesper Libre",serif; font-size:36px; font-weight:700;
+  margin:0 auto 10px; box-shadow:0 4px 6px rgba(0,0,0,.25);
+}
+.step h3{
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:24px; margin:14px 0 8px;
+}
+.step p{
+  font-family:"Vesper Libre",serif; font-size:24px; line-height:40px; color:rgba(0,0,0,.7);
+}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials{background:#f6f8f8; padding:40px 0 60px}
+.t-grid{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:26px; margin-top:20px;
+}
+.t-card{
+  background:#f6f8f8; border-radius:10px; padding:22px; box-shadow:0 4px 15px rgba(3,159,200,.25);
+}
+.t-card.raised{background:#fff}
+.t-name{color:#039fc8; font-family:"Vesper Libre",serif; font-weight:700; font-size:24px; margin:0 0 10px}
+.t-text{font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; line-height:20px; color:#000}
+.stars{display:flex; gap:6px; margin-top:12px}
+.bullets{display:flex; justify-content:center; gap:12px; margin-top:20px}
+.bullets span{
+  width:20px; height:20px; border-radius:50%; background:#d9d9d9; display:inline-block
+}
+.bullets span.active{background:var(--green)}
+
+/* ===== FOOTER ===== */
+.site-footer{background:#fff; border-top:3px solid var(--green)}
+.footer-grid{
+  display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1.3fr; gap:28px; padding:28px 0;
+}
+.f-about .logo{width:235px; height:235px; object-fit:cover}
+.f-about p{font-weight:700; font-size:18px; margin:8px 0 16px}
+.f-about h5{color:var(--green); font-size:22px; margin:10px 0}
+.social{display:flex; gap:12px; align-items:center; margin-bottom:16px}
+.social img{width:40px; height:40px; object-fit:cover}
+.lang{display:flex; align-items:center; gap:10px; background:rgba(241,241,241,.44); border:1px solid #d9d9d9; border-radius:15px; padding:10px 14px; width:235px}
+.lang img{width:24px; height:24px}
+.f-col h5{color:var(--green); font-size:22px; margin:10px 0}
+.f-col a{display:block; color:#000; font-weight:700; font-size:18px; text-decoration:none; margin:8px 0}
+.f-app h5{color:var(--green); font-size:22px; margin:10px 0}
+.f-app .app-box{display:flex; gap:12px; align-items:center}
+.copy{border-top:2px solid #f9f9f9; padding:14px 0; color:rgba(137,137,137,.75); font-weight:700; font-size:18px; text-align:right}
+
+/* ===== Responsive ===== */
+@media (max-width:1100px){
+  .cards{grid-template-columns:repeat(2,1fr)}
+  .mini-cards{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr; gap:20px}
+  .copy{text-align:center}
+}
+@media (max-width:900px){
+  .topbar .container{grid-template-columns:auto 1fr auto auto}
+  .brand img{width:90px; height:90px}
+  .main-nav{display:none}
+  .main-nav.open{display:flex; position:absolute; left:0; right:0; top:100%; background:#fff; padding:12px 5%; border-top:1px solid #eee}
+  .nav-toggle{display:block}
+  .hero-panel{width:100%; background:#ffffffc9}
+  .hero-inner{min-height:520px}
+  .hero-copy h1{font-size:36px}
+  .hero-copy p{font-size:20px; line-height:32px}
+  .steps{grid-template-columns:1fr; gap:30px}
+  .track{display:none}
+}
+@media (max-width:600px){
+  .btn{width:100%}
+  .cards{grid-template-columns:1fr}
+  .mini-cards{grid-template-columns:1fr}
+  .t-grid{grid-template-columns:1fr}
+  .f-about .logo{width:180px; height:180px}
+}

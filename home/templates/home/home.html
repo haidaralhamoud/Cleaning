@@ -1,0 +1,366 @@
+
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./vars.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+
+  
+  <style>
+   a,
+   button,
+   input,
+   select,
+   h1,
+   h2,
+   h3,
+   h4,
+   h5,
+   * {
+       box-sizing: border-box;
+       margin: 0;
+       padding: 0;
+       border: none;
+       text-decoration: none;
+       background: none;
+   
+       -webkit-font-smoothing: antialiased;
+   }
+   
+   menu, ol, ul {
+       list-style-type: none;
+       margin: 0;
+       padding: 0;
+   }
+
+  .hero-bg {
+    background-image: url("{% static 'images/image-home0.png' %}");
+  }   
+   </style>
+  <title>Document</title>
+</head>
+<body>
+<!-- ✅ HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-10.png' %}" alt="Logo">
+  </div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+
+<!-- ============================================================================================= -->
+
+  
+  <!-- ===== HERO (الصورة + النص + الأزرار فوق الصورة) ===== -->
+  <section class="hero">
+    <div class="hero-bg" ></div>
+
+    <!-- اللوح الأبيض على يسار الصورة (مطابق للإطار الأبيض بالتصميم) -->
+    <div class="hero-panel"></div>
+
+    <div class="hero-inner container">
+      <div class="hero-copy">
+        <h1>More Time for What Matters Most</h1>
+        <p>
+          Life’s busy, finding help shouldn’t be. Between work, family, and everyday stress, your time is precious.
+          Hembla makes it easy to book trusted pros who treat your home like their own, fast, fair, and worry free.
+        </p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary" href="#">Book Cleaning</a>
+          <a class="btn btn-secondary" href="#">Same Day Service</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OUR SERVICES ===== -->
+  <section class="services container">
+    <h2 class="section-title">Our Standout Services</h2>
+    <p class="lead">
+      From sparkling homes to helping hands, we’re here for every moment, whether it’s a quick refresh, a full transformation, or urgent care when you need it most.
+    </p>
+
+    <div class="cards">
+      <article class="card soft">
+        <div class="card-icon circle">
+          <img src="{% static 'images/work-from-home0.png'%}" alt="Home Cleaning">
+        </div>
+        <h3>Home Cleaning</h3>
+        <p>Standard Cleaning done right, consistent, detailed, and one less thing to worry about.</p>
+      </article>
+
+      <article class="card solid">
+        <div class="card-icon circle">
+          <img src="{% static 'images/sparkles0.png'%}" alt="Deep Cleaning">
+        </div>
+        <h3 class="white">Deep Cleaning</h3>
+        <p class="white">We clean where regular cleaning doesn’t, for a home that feels fresh, clear, and truly cared for.</p>
+      </article>
+
+      <article class="card soft">
+        <div class="card-icon circle">
+          <img src="{% static 'images/work-from-home1.png'%}" alt="Business Cleaning">
+        </div>
+        <h3>Business Cleaning</h3>
+        <p>Your workplace reflects your brand. Our expert cleaning keeps it looking sharp, professional, and always ready for business.</p>
+      </article>
+
+      <article class="card solid">
+        <div class="card-icon circle">
+          <img src="{% static 'images/last-24-hours0.png'%}" alt="Urgent Cleaning">
+        </div>
+        <h3 class="white">Urgent Cleaning</h3>
+        <p class="white">Need cleaning now? We arrive within 1–3 hours, fast, reliable, and hassle-free.</p>
+      </article>
+    </div>
+
+    <a href="#" class="btn-naked" >See All Services</a>
+  </section>
+
+  <!-- ===== EXTRA SERVICES ===== -->
+  <section class="extras container">
+    <h2 class="section-title">More Than Just Cleaning</h2>
+    <p class="lead small">
+      From caring for your pets to fixing what’s broken, we’re here for life’s little (and big) moments, personal, reliable, and tailored to you
+    </p>
+
+    <div class="mini-cards">
+      <article class="mini">
+        <div class="mini-badge">
+          <img src="{% static 'images/attachment-10.png'%}" alt="Pet Walking">
+        </div>
+        <h4>Pet Walking</h4>
+        <p>Loving care and happy walks for your furry friends while you’re away</p>
+      </article>
+
+      <article class="mini">
+        <div class="mini-badge">
+          <img src="{% static 'images/attachment-1-10.png'%}" alt="Home Repairs">
+        </div>
+        <h4>Home Repairs</h4>
+        <p>Quick fixes and skilled hands to keep your home feeling perfect</p>
+      </article>
+
+      <article class="mini">
+        <div class="mini-badge">
+          <img src="{% static 'images/attachment-2-10.png'%}" alt="Event Assistance">
+        </div>
+        <h4>Event Assistance</h4>
+        <p>Helping hands for every occasion, from setup to cleanup</p>
+      </article>
+
+      <article class="mini">
+        <div class="mini-badge">
+          <img src="{% static 'images/attachment-3-10.png'%}" alt="Special Assistance">
+        </div>
+        <h4>Special Assistance</h4>
+        <p>Compassionate support for individuals needing extra help at home</p>
+      </article>
+    </div>
+
+    <a href="#" class="btn-naked">See All Services</a>
+  </section>
+
+  <!-- ===== HOW IT WORKS (دوائر + خط موصول) ===== -->
+  <section class="how">
+    <div class="container">
+      <h2 class="section-title">How it Works</h2>
+      <p class="lead">A Helping Hand in Just Three Simple Steps</p>
+
+      <div class="steps">
+        <div class="track"></div>
+
+        <div class="step">
+          <div class="dot">1</div>
+          <h3>Book Online</h3>
+          <p>Choose the service you need, pick a date and time, and get an instant quote, fast, simple, and stress-free</p>
+        </div>
+
+        <div class="step">
+          <div class="dot">2</div>
+          <h3>We Help</h3>
+          <p>A vetted, friendly professional arrives on time with everything needed, whether it’s cleaning, repairs, or special assistance.</p>
+        </div>
+
+        <div class="step">
+          <div class="dot">3</div>
+          <h3>You Relax</h3>
+          <p>Enjoy more free time, a comfortable home, and the peace of mind that comes with knowing it’s all taken care of</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TESTIMONIALS ===== -->
+  <section class="testimonials">
+    <div class="container">
+      <h2 class="section-title">What Our Customers Say</h2>
+      <p class="lead">We’re proud to make life easier for our customers. Here’s what they have to say about their Hembla experience</p>
+
+      <div class="t-grid">
+        <article class="t-card">
+          <h4 class="t-name">Emma Johansson</h4>
+          <p class="t-text">So impressed with Hembla! They arrived on time, worked quickly but with such attention to detail, and my apartment has never looked better. It honestly feels like a fresh start every time they come. Highly recommend!</p>
+          <div class="stars">
+            <img src="{% static 'images/star0.svg'%}" alt=""><img src="{% static 'images/star1.svg'%}" alt=""><img src="{% static 'images/star2.svg'%}" alt=""><img src="{% static 'images/star3.svg'%}" alt=""><img src="{% static 'images/star4.svg'%}" alt="">
+          </div>
+        </article>
+
+        <article class="t-card raised">
+          <h4 class="t-name">Lucas Meyer</h4>
+          <p class="t-text">The deep cleaning service was worth every Krona. My home smells amazing, looks spotless, and they even made sure everything was safe for my dog. The team was friendly, efficient, and professional from start to finish</p>
+          <div class="stars">
+            <img src="{% static 'images/star5.svg'%}" alt=""><img src="{% static 'images/star6.svg'%}" alt=""><img src="{% static 'images/star7.svg'%}" alt=""><img src="{% static 'images/star8.svg'%}" alt=""><img src="{% static 'images/star9.svg'%}" alt="">
+          </div>
+        </article>
+
+        <article class="t-card">
+          <h4 class="t-name">Sofia Andersson</h4>
+          <p class="t-text">I use their service every two weeks and it’s been a total lifesaver for my busy schedule. They’re reliable, trustworthy, and always leave my home sparkling. It’s such a relief knowing I can count on them!</p>
+          <div class="stars">
+            <img src="{% static 'images/star10.svg'%}" alt=""><img src="{% static 'images/star11.svg'%}" alt=""><img src="{% static 'images/star12.svg'%}" alt=""><img src="{% static 'images/star13.svg'%}" alt="">
+          </div>
+        </article>
+      </div>
+
+      <div class="bullets">
+        <span class="active"></span><span></span><span></span>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- مينو موبايل بسيطة بدون JS ثقيل -->
+  <script>
+    const toggle = document.querySelector('.nav-toggle');
+    const nav = document.querySelector('.main-nav');
+    toggle.addEventListener('click', () => nav.classList.toggle('open'));
+  </script>
+
+
+
+
+
+
+
+
+<!-- ============================================================================================= -->
+
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = document.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+
+
+  
+</body>
+</html>
