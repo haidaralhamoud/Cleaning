@@ -1,0 +1,254 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customer Profile Overview</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/customer_profile_view.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+</head>
+<body>
+
+  <div class="layout">
+    <!-- Sidebar -->
+     <!-- زر المينيو يظهر فقط بالموبايل -->
+<div class="mobile-header">
+  <button class="menu-toggle floating" id="menuToggle">
+    <span class="arrow">&#8250;</span> <!-- › -->
+  </button>
+  <h2 class="mobile-title">Customer Profile</h2>
+</div>
+
+
+
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="../Customer Profile/index.html" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+        <a class="nav-item"><img src="{% static 'images/logout-rounded0.png'%}" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="content">
+      <h1 class="page-title">Customer Profile Overview</h1>
+
+      <div class="cards-container">
+        <div class="left-column">
+
+          <article class="card ongoing-orders">
+  <div class="card-header">
+    <div class="card-title with-icon">
+      <img src="{% static 'images/logistics0.png'%}" class="tiny-ico" alt="">
+      <span>Ongoing Orders</span>
+    </div>
+    <button class="btn btn-sky-subtle big">View All Orders</button>
+  </div>
+  <p class="muted subtitle">Active and scheduled services.</p>
+
+  <div class="order-block">
+    <div class="order-line">
+      <div class="order-info">
+        <div class="order-name">Weekly House Cleaning</div>
+        <div class="order-id">Order ID: #SO-987654</div>
+        <div class="order-date">
+          <img src="{% static 'images/calendar1.png'%}" alt="">
+          <span>Next Service: Oct 23, 2024</span>
+        </div>
+      </div>
+      <div class="order-actions">
+        <span class="pill pill-info">In Progress</span>
+        <button class="btn btn-outline">View Details</button>
+      </div>
+    </div>
+
+    <div class="order-line">
+      <div class="order-info">
+        <div class="order-name">Deep Carpet Cleaning</div>
+        <div class="order-id">Order ID: #SO-987655</div>
+        <div class="order-date">
+          <img src="{% static 'images/calendar1.png'%}" alt="">
+          <span>Scheduled: Oct 28, 2024</span>
+        </div>
+      </div>
+      <div class="order-actions">
+        <span class="pill pill-warn">Scheduled</span>
+        <button class="btn btn-outline">View Details</button>
+      </div>
+    </div>
+  </div>
+</article>
+
+     <article class="card basic-info">
+  <div class="card-header">
+    <div class="card-title with-icon">
+      <img src="{% static 'images/person0.png'%}" class="tiny-ico">
+      <span>Basic Information</span>
+    </div>
+    <button class="icon-ghost"><img src="{% static 'images/edit-pencil1.png'%}" alt=""></button>
+  </div>
+
+  <div class="info-grid3">
+    <!-- Column 1 -->
+    <div class="col">
+      <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon">
+      <div class="field">
+        <div class="label">Email Address</div>
+        <div class="val">SophiaBennite@gmail.com</div>
+      </div>
+      <div class="field">
+        <div class="label">Preferred language</div>
+        <div class="val">English</div>
+      </div>
+      <div class="field">
+        <div class="label">Date of birth</div>
+        <div class="val">15/2/2025</div>
+      </div>
+    </div>
+
+    <!-- Column 2 -->
+    <div class="col">
+      <div class="field">
+        <div class="label">First Name</div>
+        <div class="val">Sophia</div>
+      </div>
+      <div class="field">
+        <div class="label">country code</div>
+        <div class="val">+(555)</div>
+      </div>
+      <div class="field">
+        <div class="label">Preferred contact method</div>
+        <div class="val">Email</div>
+      </div>
+      <div class="field">
+        <div class="label">Gender</div>
+        <div class="val">Female</div>
+      </div>
+    </div>
+
+    <!-- Column 3 -->
+    <div class="col">
+      <div class="field">
+        <div class="label">Last Name</div>
+        <div class="val">Bennite</div>
+      </div>
+      <div class="field">
+        <div class="label">Phone number</div>
+        <div class="val">123456789</div>
+      </div>
+      <div class="field">
+        <div class="label">Pronouns</div>
+        <div class="val">She</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="emergency">
+    <div class="em-title">Emergency contact</div>
+    <div class="grid">
+      <div>
+        <div class="label">First Name</div>
+        <div class="val">Samer</div>
+      </div>
+      <div>
+        <div class="label">Last Name</div>
+        <div class="val">Bennite</div>
+      </div>
+      <div>
+        <div class="label">Phone number</div>
+        <div class="val">123456789</div>
+      </div>
+      <div>
+        <div class="label">Relation</div>
+        <div class="val">123 Maple Street, Apartment 4B</div>
+      </div>
+    </div>
+  </div>
+</article>
+
+
+
+          <article class="card">
+            <div class="card-header">
+              <div class="card-title with-icon">
+                <img src="{% static 'images/home-address0.png'%}" class="tiny-ico">
+                <span>Address & Locations</span>
+              </div>
+              <button class="icon-ghost"><img src="{% static 'images/edit-pencil2.png' %}"></button>
+            </div>
+
+            <div class="stack">
+              <div class="row-ic"><img src="{% static 'images/star0.png' %}"><div><div class="row-title">Primary Address</div><div class="row-text">123 Maple Street, Apartment 4B, Anytown, CA 91234</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/locations1.png' %}"><div><div class="row-title">Additional Locations</div><div class="row-text">123 Maple Street, Apartment 4B, Anytown, CA 91234</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/access0.png'%}"><div><div class="row-title">Entry code / Access</div><div class="row-text">Gate 3, code 1234#; concierge Abdul</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/notes0.png'%}"><div><div class="row-title">Parking notes</div><div class="row-text">Guest spot #5 on the right</div></div></div>
+            </div>
+          </article>
+        </div>
+
+        <div class="right-column">
+          <article class="card side">
+            <div class="side-head"><img src="{% static 'images/heart0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil0.png'%}"></button></div>
+            <h3 class="side-title">Service<br>Preferences</h3>
+            <p class="side-text">Set your preferences for cleaning services.</p>
+            <button class="btn btn-primary full">View preferences</button>
+          </article>
+
+          <article class="card side">
+            <div class="side-head"><img src="{% static 'images/subscription0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil3.png'%}"></button></div>
+            <h3 class="side-title">Subscription</h3>
+            <p class="side-text">you are on the Bi-Weekly Bliss plan</p>
+            <button class="btn btn-primary full">Manage Subscription</button>
+          </article>
+
+          <article class="card side">
+            <div class="side-head"><img src="{% static 'images/receive-cash0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil4.png'%}"></button></div>
+            <h3 class="side-title">Payment & Billing</h3>
+            <p class="side-text">Next billing date : Oct 25, 2024</p>
+            <button class="btn btn-primary full">View billing Details</button>
+          </article>
+        </div>
+      </div>
+    </main>
+  </div>
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector(".menu-toggle .arrow");
+
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    // لما تفتح القائمة السهم ينعكس
+    if (sidebar.classList.contains("open")) {
+      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
+    } else {
+      arrow.innerHTML = "&#8250;"; // › سهم لليمين
+    }
+  });
+</script>
+
+
+</body>
+</html>
