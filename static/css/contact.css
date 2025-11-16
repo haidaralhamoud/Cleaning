@@ -1,0 +1,338 @@
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+}
+
+.contact-wrapper {
+  background: linear-gradient(
+    180deg,
+    rgba(3, 159, 200, 1) 0%,
+    rgba(3, 159, 200, 0.75) 35%,
+    rgba(3, 159, 200, 0.5) 63%,
+    rgba(3, 159, 200, 0.25) 100%
+  );
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+}
+
+.contact-section {
+  width: 90%;
+  max-width: 1200px;
+  background: transparent;
+  color: #fff;
+}
+
+.contact-title {
+  font-family: "VesperLibre-Bold", serif;
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.contact-subtitle {
+  font-size: 20px;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.contact-content {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+}
+
+.contact-form {
+  background: #fff;
+  color: #000;
+  border-radius: 15px;
+  padding: 40px;
+  flex: 2;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.contact-info {
+  background: #fff;
+  color: #000;
+  border-radius: 15px;
+  padding: 30px 40px;
+  flex: 1;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.contact-info h2 {
+  font-family: "VesperLibre-Bold", serif;
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.contact-info p {
+  font-family: "VesperLibre-Medium", serif;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.form-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-family: "VesperLibre-Bold", serif;
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+label span {
+  color: red;
+}
+
+input,
+textarea,
+select {
+  border: 1px solid rgba(137, 137, 137, 0.75);
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 16px;
+  color: rgba(137, 137, 137, 0.75);
+}
+
+textarea {
+  resize: none;
+  height: 150px;
+}
+
+.file-box .file-drop {
+  border: 1px dashed rgba(137, 137, 137, 0.75);
+  border-radius: 10px;
+  padding: 25px;
+  text-align: center;
+  color: rgba(137, 137, 137, 0.75);
+}
+
+.agreement {
+  margin: 25px 0;
+  font-size: 16px;
+}
+
+.agreement a {
+  color: #039fc8;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.send-btn {
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  padding: 18px 40px;
+  font-size: 20px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.3s ease;
+}
+
+.send-btn:hover {
+  background: #0283a9;
+}
+
+@media (max-width: 992px) {
+  .contact-content {
+    flex-direction: column;
+  }
+  .contact-info {
+    width: 100%;
+  }
+}
+
+/* ✅ إصلاح الخلفية بالأجهزة الصغيرة */
+@media (max-width: 768px) {
+  .contact-wrapper {
+    background: linear-gradient(
+      180deg,
+      rgba(3, 159, 200, 1) 0%,
+      rgba(3, 159, 200, 0.75) 35%,
+      rgba(3, 159, 200, 0.5) 63%,
+      rgba(3, 159, 200, 0.25) 100%
+    );
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 40px 15px; /* مسافة من الجوانب للموبايل */
+  }
+
+  .contact-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contact-form, .contact-info {
+    width: 100%;
+    max-width: 500px;
+  }
+
+  .contact-title,
+  .contact-subtitle {
+    text-align: center;
+  }
+}
+/* ✅ تحسين توزيع الحقول على الموبايل */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .file-box .file-drop {
+    font-size: 14px;
+    padding: 20px;
+  }
+
+  .contact-form {
+    padding: 25px 20px;
+  }
+}
+/* ✅ ضبط تمركز الفورم والحقول داخل الإطار على الموبايل */
+@media (max-width: 768px) {
+  .contact-section {
+    width: 100%;
+    padding: 0 15px; /* يضيف مسافة من الطرفين */
+    box-sizing: border-box;
+  }
+
+  .contact-form {
+    width: 100%;
+    max-width: 420px; /* يمنع الفورم من التمدد أكتر من اللزوم */
+    margin: 0 auto; /* يوسّطه أفقياً */
+    padding: 25px 20px;
+    border-radius: 15px;
+    box-sizing: border-box;
+  }
+
+  .form-group,
+  input,
+  textarea,
+  select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .agreement {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .agreement input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #039fc8;
+  }
+
+  .agreement label {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+/* ✅ تنسيق قسم معلومات التواصل */
+.contact-info {
+  background: #fff;
+  padding: 25px 30px; /* نفس المسافات يمين ويسار */
+  border-radius: 15px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25); /* نفس الظل تبع الفورم */
+  margin-top: 25px; /* مسافة حلوة فوقه */
+  box-sizing: border-box;
+}
+
+.contact-info p {
+  margin: 10px 0;
+}
+
+.contact-info i,
+.contact-info svg {
+  color: #039fc8; /* لون الأيقونات أزرق متناسق */
+  margin-right: 8px;
+}
+
+}
+
+/* ✅ أيقونة رفع الملفات داخل مربع الرفع */
+.file-upload {
+  border: 1px dashed #aaa;
+  border-radius: 10px;
+  padding: 25px;
+  text-align: center;
+  color: #777;
+  font-size: 14px;
+  position: relative;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.file-upload::before {
+  content: "";
+  display: block;
+  width: 48px;
+  height: 48px;
+  background: url("upload-to-cloud0.png") no-repeat center;
+  background-size: contain;
+  margin: 0 auto 10px; /* المسافة بين الأيقونة والنص */
+  opacity: 0.8;
+}
+
+.file-upload:hover::before {
+  opacity: 1;
+  transform: scale(1.05);
+  transition: 0.2s ease;
+}
+
+/* ✅ ضبط المسافات بين الحقول (Laptop + Mobile) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px; /* المسافة بين كل حقل والتاني */
+}
+
+/* ✅ مسافات أوسع قليلاً بين الأقسام الكبيرة */
+textarea,
+select {
+  margin-bottom: 22px;
+}
+
+/* ✅ ضبط المسافات على الشاشات الصغيرة */
+@media (max-width: 768px) {
+  .form-group {
+    margin-bottom: 16px; /* شوي أصغر للموبايل ليوصل توازن بصري */
+  }
+
+  textarea,
+  select {
+    margin-bottom: 20px;
+  }
+
+  .send-btn {
+    margin-top: 10px;
+  }
+}
