@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 # خيارات اللغات
 LANGUAGE_CHOICES = [
     ('sw-ar-en', 'Swedish - Arabic - English'),
@@ -26,6 +25,15 @@ ADD_ON_CHOICES = [
     ('three', 'Three'),
 ]
 
+
+class Service(models.Model):
+    key = models.CharField(max_length=50, choices=SERVICE_CHOICES, unique=True)
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.label
+
+
 class Customer(models.Model):
     personal_identity_number = models.CharField(max_length=20)
 
@@ -42,11 +50,11 @@ class Customer(models.Model):
     house_num = models.CharField(max_length=20)
     full_address = models.CharField(max_length=255)
 
-    # Desired services: many services possible
-    desired_services = models.ManyToManyField("Service")
+    # Desired services
+    desired_services = models.ManyToManyField(Service)
 
-    # Add-ons
-    special_add_ons = models.CharField(max_length=10, choices=ADD_ON_CHOICES, null=True, blank=True)
+    # Custom Add-ons (JSON Compatible — perfect for SQLite & PostgreSQL)
+    custom_addons = models.JSONField(default=list, blank=True)
 
     optional_note = models.TextField(blank=True, null=True)
 
@@ -60,11 +68,3 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-
-
-class Service(models.Model):
-    key = models.CharField(max_length=50, choices=SERVICE_CHOICES, unique=True)
-    label = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.label
