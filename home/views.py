@@ -18,6 +18,11 @@ def Privacy_Policy(request):
     return render(request , 'home/Privacy_Policy.html',) 
 
 
+def faq(request):
+
+    return render(request , 'home/FAQ.html',) 
+
+
 
 
 def contact(request):
