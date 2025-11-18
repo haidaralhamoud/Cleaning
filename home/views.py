@@ -23,6 +23,9 @@ def faq(request):
     return render(request , 'home/FAQ.html',) 
 
 
+def Accessibility_Statement(request):
+
+    return render(request , 'home/Accessibility_Statement.html',) 
 
 
 def contact(request):
