@@ -1,3 +1,10 @@
+input.hembla-field,
+textarea.hembla-field,
+select.hembla-field {
+    all: unset;
+    box-sizing: border-box;
+}
+
 body {
   margin: 0;
   font-family: "Inter", sans-serif;
@@ -335,4 +342,22 @@ select {
   .send-btn {
     margin-top: 10px;
   }
+}
+
+/* FORCE styling */
+.hembla-field {
+    border: 2px solid #c9c9c9 !important;
+    padding: 12px 15px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    border-radius: 10px !important;
+    font-size: 16px !important;
+    width: 100% !important;
+}
+
+/* focus */
+.hembla-field:focus {
+    border-color: #007bff !important;
+    box-shadow: 0 0 6px rgba(0,123,255,0.4) !important;
+    outline: none !important;
 }
