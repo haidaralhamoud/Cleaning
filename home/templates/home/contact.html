@@ -114,7 +114,7 @@
       </label>
     </div>
 
-    <button class="send-btn" type="submit">Send Message</button>
+<button class="send-btn" type="button" onclick="validateAndSubmit()">Send Message</button>
   </form>
 </div>
 
@@ -129,6 +129,31 @@
       </div>
     </div>
   </div>
+  {% if show_popup %}
+<div class="thankyou-popup">
+  <div class="popup-content">
+    <img src="{% static 'images/vector0.svg'%}" alt="Success Icon" class="popup-icon">
+
+    <h2 class="popup-title">Thank You! We've Got Your Message</h2>
+    <p class="popup-text">
+      We appreciate you reaching out to Hembla. Our team will review your message<br>
+      and get back to you within 24 hours.
+    </p>
+
+    <div class="popup-buttons">
+      <button onclick="closePopup()" class="btn btn-green">Close</button>
+      <a href="{% url 'home:home' %}" class="btn btn-green">Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function closePopup() {
+  document.querySelector('.thankyou-popup').style.display = 'none';
+}
+</script>
+{% endif %}
+
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -219,5 +244,38 @@ toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+
+<script>
+function validateAndSubmit() {
+    const requiredFields = [
+        'id_first_name',
+        'id_last_name',
+        'id_email',
+        'id_country_code',
+    ];
+
+    let isValid = true;
+
+    requiredFields.forEach(id => {
+        const field = document.getElementById(id);
+
+        if (!field.value.trim()) {
+            field.style.border = "2px solid red";
+            isValid = false;
+        } else {
+            field.style.border = "2px solid #c9c9c9";
+        }
+    });
+
+    if (!isValid) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    // إذا كلشي تمام → أرسل الفورم
+    document.querySelector("form").submit();
+}
+</script>
+
 </body>
 </html>
