@@ -27,6 +27,10 @@ def Accessibility_Statement(request):
 
     return render(request , 'home/Accessibility_Statement.html',) 
 
+def Cookies_Policy(request):
+
+    return render(request , 'home/Cookies_Policy.html',) 
+
 
 def contact(request):
     show_popup = False  # المتغير الافتراضي
