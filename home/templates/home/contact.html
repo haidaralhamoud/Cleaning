@@ -8,36 +8,12 @@
   <title>Contact Us</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/contact.css' %}">
-  <style>
-   a,
-   button,
-   input,
-   select,
-   h1,
-   h2,
-   h3,
-   h4,
-   h5,
-   * {
-       box-sizing: border-box;
-       margin: 0;
-       padding: 0;
-       border: none;
-       text-decoration: none;
-       background: none;
-   
-       -webkit-font-smoothing: antialiased;
-   }
-   
-   menu, ol, ul {
-       list-style-type: none;
-       margin: 0;
-       padding: 0;
-   }
+<style>
+*, *:before, *:after {
+  box-sizing: border-box;
+}
 
-  .hero-bg {
-    background-image: url("{% static 'images/image-home0.png' %}");
-  }   
+
    </style>
 </head>
 <body>
@@ -59,7 +35,8 @@
   </nav>
 
   <div class="profile-btn">
-    <a href="#">My Profile</a>
+<a href="#" style="text-decoration: none;">My Profile</a>
+
   </div>
 </header>
 
@@ -72,74 +49,76 @@
 
       <div class="contact-content">
         <!-- Left: Form -->
-        <div class="contact-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label>First Name <span>*</span></label>
-              <input type="text" placeholder="Your First Name" />
-            </div>
-            <div class="form-group">
-              <label>Last Name <span>*</span></label>
-              <input type="text" placeholder="Your Last Name" />
-            </div>
-          </div>
+    <!-- Left: Form -->
+<div class="contact-form">
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Email <span>*</span></label>
-              <input type="email" placeholder="Your Email" />
-            </div>
-            <div class="form-group">
-              <label>Country Code <span>*</span></label>
-              <input type="text" placeholder="Your Country" />
-            </div>
-          </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>First Name <span>*</span></label>
+        {{ form.first_name }}
+      </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Phone Number</label>
-              <input type="text" placeholder="Your Phone Number" />
-            </div>
-          </div>
+      <div class="form-group">
+        <label>Last Name <span>*</span></label>
+        {{ form.last_name }}
+      </div>
+    </div>
 
-          <div class="form-group">
-            <label>Message</label>
-            <textarea placeholder="Your Message"></textarea>
-          </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Email <span>*</span></label>
+        {{ form.email }}
+      </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label>Inquiry Type</label>
-              <select>
-                <option>Select an option</option>
-              </select>
-            </div>
+      <div class="form-group">
+        <label>Country Code <span>*</span></label>
+        {{ form.country_code }}
+      </div>
+    </div>
 
-            <div class="form-group file-box">
-              <label>Attach file</label>
-              <div class="file-drop file-upload" >
-                <p>Choose file or drag and drop<br>PNG, JPG, GIF up to 10MB</p>
-              </div>
-            </div>
-          </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Phone Number</label>
+        {{ form.phone }}
+      </div>
+    </div>
 
-          <div class="form-group">
-            <label>Preferred Contact Method</label>
-            <select>
-              <option>Email</option>
-            </select>
-          </div>
+    <div class="form-group">
+      <label>Message</label>
+      {{ form.message }}
+    </div>
 
-          <div class="agreement">
-            <label>
-              <input type="checkbox" />
-              I agree to the Processing of my data in accordance with the
-              <a href="#">privacy policy</a>
-            </label>
-          </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Inquiry Type</label>
+        {{ form.inquiry_type }}
+      </div>
 
-          <button class="send-btn">Send Message</button>
-        </div>
+      <div class="form-group">
+        <label>Attach file</label>
+        {{ form.file }}
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Preferred Contact Method</label>
+      {{ form.preferred_method }}
+    </div>
+
+    <div class="agreement">
+      <label>
+        <input type="checkbox" />
+        I agree to the Processing of my data in accordance with the
+        <a href="#">privacy policy</a>
+      </label>
+    </div>
+
+<button class="send-btn" type="button" onclick="validateAndSubmit()">Send Message</button>
+  </form>
+</div>
+
 
         <!-- Right: Contact Info -->
         <div class="contact-info">
@@ -151,11 +130,36 @@
       </div>
     </div>
   </div>
+  {% if show_popup %}
+<div class="thankyou-popup">
+  <div class="popup-content">
+    <img src="{% static 'images/vector0.svg'%}" alt="Success Icon" class="popup-icon">
+
+    <h2 class="popup-title">Thank You! We've Got Your Message</h2>
+    <p class="popup-text">
+      We appreciate you reaching out to Hembla. Our team will review your message<br>
+      and get back to you within 24 hours.
+    </p>
+
+    <div class="popup-buttons">
+      <button onclick="closePopup()" class="btn btn-green">Close</button>
+      <a href="{% url 'home:home' %}" class="btn btn-green">Back to Home</a>
+    </div>
+  </div>
+</div>
+
+<script>
+function closePopup() {
+  document.querySelector('.thankyou-popup').style.display = 'none';
+}
+</script>
+{% endif %}
+
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
     <div class="footer-col about">
-      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
       <p>
         At Hembla, we believe home should be your haven, not your to-do list. 
         From cleaning to care, we’re here to make life easier, one home at a time.
@@ -241,5 +245,38 @@ toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+
+<script>
+function validateAndSubmit() {
+    const requiredFields = [
+        'id_first_name',
+        'id_last_name',
+        'id_email',
+        'id_country_code',
+    ];
+
+    let isValid = true;
+
+    requiredFields.forEach(id => {
+        const field = document.getElementById(id);
+
+        if (!field.value.trim()) {
+            field.style.border = "2px solid red";
+            isValid = false;
+        } else {
+            field.style.border = "2px solid #c9c9c9";
+        }
+    });
+
+    if (!isValid) {
+        alert("Please fill all required fields.");
+        return;
+    }
+
+    // إذا كلشي تمام → أرسل الفورم
+    document.querySelector("form").submit();
+}
+</script>
+
 </body>
 </html>

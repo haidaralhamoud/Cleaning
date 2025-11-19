@@ -1,0 +1,269 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/Privacy_Policy.css' %}" />
+</head>
+<body>
+<!-- ✅ HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="{% url 'home:contact' %}">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#"  >My Profile</a>
+  </div>
+</header>
+  <section class="privacy-container">
+
+    <!-- ✅ Top Blue Box -->
+    <div class="summary-box">
+      <h1>Privacy Policy</h1>
+      <p class="intro">
+        At Hembla we respect your privacy and keep your data safe. Here's the most important information in simple terms:
+      </p>
+
+<ul class="summary-list" style="list-style: none;">
+  <li>
+    <img src="{% static 'images/file0.png' %}" alt="file icon" class="icon">
+    <strong>What we collect:</strong>
+    Your name, contact details, address, payment details, and information about the services you book. Sometimes we also collect technical information like your IP address or location (with your consent).
+  </li>
+
+  <li>
+    <img src="{% static 'images/heart0.png' %}" alt="heart icon" class="icon">
+    <strong>Why we collect it:</strong>
+    To deliver the services you order, manage your account, process payments, improve our services, and (if you agree) send you relevant offers.
+  </li>
+
+  <li>
+    <img src="{% static 'images/instagram-check-mark0.png'%}" alt="check mark" class="icon">
+    <strong>Who we share it with:</strong>
+    Only with trusted partners who help us provide our services — like payment processors, IT hosting, and support providers — and between our two companies so you get a smoother experience. We never sell your data.
+  </li>
+
+  <li>
+    <img src="{% static 'images/hour0.png'%}" alt="hourglass icon" class="icon">
+    <strong>How long we keep it:</strong>
+    Only as long as needed to provide our services or meet Swedish legal requirements (like 7 years for accounting records). Then we delete or anonymise it.
+  </li>
+
+  <li>
+    <img src="{% static 'images/person0.png'%}" alt="person icon" class="icon">
+    <strong>Your rights:</strong>
+    You can ask to see your data, correct it, delete it, or limit how it's used. You can also withdraw consent for marketing at any time.
+  </li>
+
+  <li>
+    <img src="{% static 'images/email0.png'%}" alt="email icon" class="icon">
+    <strong>Contact us at:</strong>
+    <a href="mailto:privacy@rwmhelservice.se">privacy@rwmhelservice.se</a>
+    if you have any questions or want to use your rights.
+  </li>
+</ul>
+
+    </div>
+
+    <!-- ✅ Full Policy Content -->
+    <div class="full-policy">
+
+      <p class="updated">Last updated: October 26, 2025</p>
+
+      <p>
+        At RWM Helservice AB, your privacy matters to us. We operate Hembla Home Services AB and Hembla Energy AB under one ownership.
+        This policy explains how we collect, use, and protect your personal information when you interact with Hembla Home Services AB in Sweden.
+        By using our services, you agree to the practices described in this policy.
+      </p>
+
+      <h2>1. Who We Are</h2>
+      <ul>
+        <li><strong>Hembla Home Services AB</strong> – Provides cleaning, repairs, childcare, event assistance, and other home services.</li>
+        <li><strong>Hembla Energy AB</strong> – Provides electricity and energy-related services.</li>
+      </ul>
+      <p>
+        This Privacy Policy applies only to Hembla Home Services AB. Your personal data will be stored only within Hembla Home Services AB and will not be shared with Hembla Energy AB.
+        We are joint data controllers under Swedish data protection law, incorporating GDPR.
+      </p>
+
+      <h2>2. Information We Collect</h2>
+      <p>We only collect the personal information needed to deliver, manage, and improve our services:</p>
+      <ul>
+        <li><strong>a)</strong> Personal Identification Information: Name, address, email, phone number, personal identity number (personnummer) if required for billing or verification.</li>
+        <li><strong>b)</strong> Service & Account Information: Records of services booked, electricity usage data, payment history, and customer support interactions.</li>
+        <li><strong>c)</strong> Technical Data: Device type, IP address, browser type, and cookies (see Section 8).</li>
+        <li><strong>d)</strong> Location Data: With your consent, we may collect location information to provide location-based services (e.g., finding the nearest technician).</li>
+        <li><strong>e)</strong> Communication Data: Emails, phone calls, or messages sent to us, including attachments and related correspondence.</li>
+      </ul>
+
+      <h2>3. Why We Use Your Data</h2>
+      <ul>
+        <li>Service Delivery – To process bookings, deliver requested services, and manage your account.</li>
+        <li>Billing & Payments – To process transactions and comply with Swedish accounting laws.</li>
+        <li>Customer Support – To respond to inquiries or complaints.</li>
+        <li>Service Improvement – To analyse trends and develop new offerings.</li>
+        <li>Personalisation – To tailor services and offers (with consent).</li>
+        <li>Marketing – To send relevant offers (only if you have opted in).</li>
+        <li>Legal Compliance – To comply with Swedish laws.</li>
+        <li>Security & Fraud Prevention – To detect and prevent misuse of our services.</li>
+      </ul>
+
+      <h2>4. Sharing Your Data</h2>
+      <ul>
+        <li><strong>a)</strong> With Service Providers: We use trusted third parties for payment processing, IT hosting, analytics, and customer communication — all compliant with GDPR.</li>
+        <li><strong>b)</strong> Legal & Regulatory: We may share data if required by Swedish law, court order, or governmental authority (e.g., Skatteverket). We never sell your data.</li>
+      </ul>
+
+      <h2>5. Data Storage & Retention</h2>
+      <ul>
+        <li>All data is stored on secure servers in Sweden.</li>
+        <li>Accounting records: 7 years (per Bokföringslagen).</li>
+        <li>Customer records: up to 3 years after last contact.</li>
+        <li>Marketing consent data: until you withdraw consent.</li>
+        <li>After retention, we securely delete or anonymise your data.</li>
+      </ul>
+
+      <h2>6. Your Rights</h2>
+      <ul>
+        <li>Access – Request a copy of your personal data.</li>
+        <li>Correction – Update or correct inaccurate information.</li>
+        <li>Deletion – Request deletion of your data when no longer needed.</li>
+        <li>Restriction – Limit how we process your data.</li>
+        <li>Objection – Object to certain processing, including marketing.</li>
+        <li>Data Portability – Receive your data in a machine-readable format.</li>
+        <li>Withdraw Consent – At any time for processing based on consent.</li>
+        <li>File a Complaint – With the Swedish Authority for Privacy Protection (IMY).</li>
+      </ul>
+
+      <h2>7. Security Measures</h2>
+      <ul>
+        <li>Encryption of sensitive data in storage and transmission.</li>
+        <li>Secure access control and authentication.</li>
+        <li>Regular system updates and monitoring.</li>
+        <li>Staff training on data protection.</li>
+      </ul>
+
+      <h2>8. Cookies & Tracking</h2>
+      <ul>
+        <li>Ensure basic website functionality.</li>
+        <li>Analyse site usage (with consent).</li>
+        <li>Personalise marketing (with consent).</li>
+      </ul>
+      <p>You can manage your cookie preferences via our Cookie Settings page at any time.</p>
+
+      <h2>9. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy to reflect changes in our practices or Swedish law. Any changes will be posted on our website with the updated date.</p>
+
+      <h2>10. Contact Us</h2>
+      <p>
+        If you have questions about your personal data or this policy, contact our Data Protection Officer:<br><br>
+        RWM Helservice AB<br>
+        Attn: Privacy Team<br>
+        [Street Address]<br>
+        [City, Postal Code], Sweden<br>
+        📧 <a href="mailto:privacy@rwmhelservice.se">privacy@rwmhelservice.se</a>
+      </p>
+    </div>
+  </section>
+<!-- ============================================================================================= -->
+
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>

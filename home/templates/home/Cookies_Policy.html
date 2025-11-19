@@ -1,0 +1,228 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookies Policy</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/Cookies_Policy.css'%}">
+</head>
+  <style>
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+.logo img {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;   /* يمنع تمدد الصورة أو قصّها */
+    display: block;
+}
+@media (max-width: 768px) {
+    .logo img {
+        width: 110px;
+        height: 110px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo img {
+        width: 90px;
+        height: 90px;
+    }
+}
+
+   </style>
+<body>
+    <!-- ✅ HEADER -->
+<header class="main-header" >
+ <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+</div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+<a href="#" style="text-decoration: none;">My Profile</a>
+  </div>
+</header>
+  <!-- === MAIN CONTENT === -->
+  <main class="cookies-container">
+    <h1>Cookies Policy</h1>
+    <p class="updated-date">Last updated: 06/10/2025</p>
+
+    <p>
+      At Hembla AB, we use cookies and similar technologies to improve your experience on our website,
+      make our services work properly, and provide relevant information to you.
+    </p>
+
+    <p>
+      By using our website, you agree to our use of cookies as described in this policy.
+    </p>
+
+    <h2>1. What Are Cookies?</h2>
+    <p>
+      Cookies are small text files that are stored on your device (computer, tablet, or mobile)
+      when you visit a website. They help the website remember your preferences, logins, and
+      activity so it can work more efficiently.
+    </p>
+
+    <h2>2. Types of Cookies We Use</h2>
+    <ul>
+      <li><b>Essential Cookies</b> – Required for the website to function.</li>
+      <ul>
+        <li>Keeping you logged in during a session.</li>
+        <li>Remembering your booking details in the cart.</li>
+      </ul>
+      <li><b>Functional Cookies</b> – Help us remember your preferences and settings.</li>
+      <ul>
+        <li>Language selection.</li>
+        <li>Saved addresses for bookings.</li>
+      </ul>
+      <li><b>Analytics Cookies</b> – Help us understand how people use our website.</li>
+      <ul>
+        <li>Google Analytics to track visits and popular pages.</li>
+        <li>Identifying navigation issues.</li>
+      </ul>
+      <li><b>Marketing Cookies</b> – Used to show you relevant ads.</li>
+      <ul>
+        <li>Retargeting ads on Facebook or Google.</li>
+        <li>Tracking which campaigns brought you to our site.</li>
+      </ul>
+    </ul>
+
+    <h2>3. Third-Party Cookies</h2>
+    <p>Some cookies come from third-party services we use, such as:</p>
+    <ul>
+      <li>Google Analytics (website performance tracking)</li>
+      <li>Facebook Pixel (marketing and ads)</li>
+      <li>Payment providers (secure payment processing)</li>
+    </ul>
+
+    <h2>4. How Long Are Cookies Stored?</h2>
+    <ul>
+      <li>Session cookies – Deleted automatically when you close your browser.</li>
+      <li>Persistent cookies – Stay until expired or manually deleted.</li>
+    </ul>
+
+    <h2>5. Managing & Disabling Cookies</h2>
+    <p>You can control cookies by:</p>
+    <ul>
+      <li>Adjusting your browser settings to block or delete cookies.</li>
+      <li>Using our Cookie Settings tool to choose which cookies you allow.</li>
+    </ul>
+    <p><b>Note:</b> If you block essential cookies, some parts of the website may not work correctly.</p>
+
+    <h2>6. Consent</h2>
+    <p>
+      When you visit our website for the first time, you will see a cookie banner asking for your
+      consent for non-essential cookies (functional, analytics, and marketing).
+    </p>
+
+    <h2>7. Changes to This Policy</h2>
+    <p>
+      We may update this Cookies Policy to reflect changes in technology, law, or our services.
+    </p>
+
+    <h2>8. Contact Us</h2>
+    <p>
+      If you have any questions about how we use cookies, contact us at:<br>
+      <b>Hembla AB</b><br>
+      Owned by RWM Helservice AB<br>
+      <img src="{% static 'images/mail0.png'%}" alt="Mail Icon" class="mail-icon">
+      <a href="mailto:privacy@rwmhelservice.se">privacy@rwmhelservice.se</a>
+    </p>
+  </main>
+  <footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+</body>
+</html>

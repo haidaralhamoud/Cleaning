@@ -1,0 +1,306 @@
+/* === RESET === */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: "Vesper Libre", serif;
+  background-color: #fff;
+  color: #000;
+  line-height: 1.6;
+}
+
+/* === MAIN CONTAINER === */
+.privacy-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 0 20px;
+}
+
+/* === BLUE SUMMARY BOX === */
+.summary-box {
+  background: #f4fafa;
+  border-radius: 15px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  padding: 40px 40px 30px;
+  margin-bottom: 40px;
+}
+
+.summary-box h1 {
+  text-align: center;
+  font-size: 34px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 10px;
+}
+
+.summary-box .intro {
+  text-align: center;
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.8);
+  margin-bottom: 25px;
+}
+
+.summary-list {
+  list-style-type: none;
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary-list li {
+  padding-left: 25px;
+  position: relative;
+}
+
+.summary-list li::before {
+  position: absolute;
+  left: 0;
+  color: #039fc8;
+  font-weight: bold;
+}
+
+.summary-list strong {
+  color: #039fc8;
+}
+
+/* === FULL POLICY SECTION === */
+.full-policy {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  padding: 35px 40px;
+}
+
+.full-policy h2 {
+  font-size: 22px;
+  color: #039fc8;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+.full-policy p {
+  font-size: 17px;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 15px;
+}
+
+.full-policy ul {
+  padding-left: 25px;
+  margin-bottom: 15px;
+}
+
+.full-policy ul li {
+  font-size: 17px;
+  margin-bottom: 10px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.full-policy strong {
+  color: #000;
+}
+
+.full-policy a {
+  color: #039fc8;
+  text-decoration: none;
+}
+
+.full-policy a:hover {
+  text-decoration: underline;
+}
+
+/* === LAST UPDATED === */
+.updated {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 20px;
+  font-style: italic;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 992px) {
+  .summary-box,
+  .full-policy {
+    padding: 30px 25px;
+  }
+
+  .summary-box h1 {
+    font-size: 30px;
+  }
+
+  .full-policy h2 {
+    font-size: 20px;
+  }
+
+  .full-policy p,
+  .full-policy ul li {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .privacy-container {
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+
+  .summary-box {
+    padding: 25px 20px;
+  }
+
+  .summary-box h1 {
+    font-size: 26px;
+  }
+
+  .summary-list li {
+    font-size: 15px;
+  }
+
+  .full-policy {
+    padding: 25px 20px;
+  }
+
+  .full-policy h2 {
+    font-size: 18px;
+  }
+
+  .full-policy p,
+  .full-policy ul li {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-box h1 {
+    font-size: 22px;
+  }
+
+  .summary-box .intro {
+    font-size: 16px;
+  }
+
+  .summary-list li {
+    font-size: 14px;
+  }
+
+  .full-policy {
+    padding: 20px;
+  }
+
+  .full-policy h2 {
+    font-size: 16px;
+  }
+
+  .full-policy p,
+  .full-policy ul li {
+    font-size: 14px;
+  }
+}
+
+/* === ICON STYLING === */
+.summary-list i {
+  color: #039fc8;
+  margin-right: 8px;
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
+}
+
+.summary-box h1 i {
+  color: #039fc8;
+  margin-right: 10px;
+  font-size: 26px;
+  vertical-align: middle;
+}
+
+i.fa-solid {
+  color: #039fc8 !important;
+  display: inline-block;
+  font-style: normal;
+}
+
+.summary-list {
+  list-style: none !important;
+  padding-left: 0;
+  margin: 0;
+}
+
+.summary-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  line-height: 1.6;
+  color: #333;
+  font-size: 16px;
+}
+
+/* 🔹 الأيقونة */
+.summary-list .icon {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  margin-top: 4px;
+  object-fit: contain;
+}
+
+/* 🔹 العنوان والجملة يكونوا بنفس السطر */
+.summary-list strong {
+  color: #039fc8;
+  font-weight: 600;
+  margin-right: 6px;
+  white-space: nowrap; /* يمنع انقسام العنوان لسطرين */
+}
+
+/* 🔹 الروابط */
+.summary-list a {
+  color: #039fc8;
+  text-decoration: none;
+}
+
+.summary-list a:hover {
+  text-decoration: underline;
+}
+
+
+/* === Responsive Design for Mobile === */
+@media (max-width: 600px) {
+  .summary-list li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .summary-list .icon {
+    width: 28px;
+    height: 28px;
+    margin: 0 auto 6px;
+  }
+
+  .summary-list strong {
+    color: #039fc8;
+    font-weight: 600;
+    white-space: normal; /* يخلي النص ينزل سطر إذا لازم */
+    margin: 0;
+  }
+
+  .summary-list li a {
+    display: inline-block;
+    margin-top: 3px;
+  }
+
+  .summary-list li span,
+  .summary-list li p,
+  .summary-list li {
+    text-align: center;
+  }
+}
+
