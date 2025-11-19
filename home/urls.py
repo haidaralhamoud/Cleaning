@@ -10,4 +10,5 @@ urlpatterns = [
     path("faq/", views.faq, name="faq"),
     path("Accessibility_Statement/", views.Accessibility_Statement, name="Accessibility_Statement"),
     path("Cookies_Policy/", views.Cookies_Policy, name="Cookies_Policy"),
+    path("T_C/", views.T_C, name="T_C"),
 ]

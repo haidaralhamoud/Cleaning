@@ -32,6 +32,10 @@ def Cookies_Policy(request):
     return render(request , 'home/Cookies_Policy.html',) 
 
 
+def T_C(request):
+
+    return render(request , 'home/T&C.html',) 
+
 def contact(request):
     show_popup = False  # المتغير الافتراضي
 
