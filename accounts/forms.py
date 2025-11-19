@@ -3,7 +3,7 @@ from .models import Customer, Service
 import json
 
 class CustomerForm(forms.ModelForm):
-
+    
     # Checkbox list للـ Services
     desired_services = forms.ModelMultipleChoiceField(
         queryset=Service.objects.all(),
@@ -19,7 +19,7 @@ class CustomerForm(forms.ModelForm):
     custom_addons = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     accepted_terms = forms.BooleanField()
-
+    
     class Meta:
         model = Customer
         fields = [

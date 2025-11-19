@@ -36,7 +36,8 @@ class Service(models.Model):
 
 class Customer(models.Model):
     personal_identity_number = models.CharField(max_length=20)
-
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
 
@@ -61,8 +62,6 @@ class Customer(models.Model):
     preferred_language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
 
     profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
-
-    password = models.CharField(max_length=255)
 
     accepted_terms = models.BooleanField(default=False)
 
