@@ -1,6 +1,7 @@
 {% load static %}
 
 {% load bootstrap4 %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,6 +10,8 @@
   <title>Sign Up | Hembla</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+
 </head>
 <body>
 
@@ -35,12 +38,22 @@
 
 
 
+  
+  <main class="signin-container">
+    <div class="signin-box">
+      <img src="{% static 'images/confetti0.png'%}" alt="Confetti" class="confetti">
 
+      <h1 class="title">Welcome Back</h1>
+      <p class="subtitle">Login to your account</p>
 
-  {% if form.errors %}
+      <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+        <input type="text" name="username" placeholder="Email or Phone Number" class="input-field" required>
+
+        <input type="password" name="password" placeholder="Password" class="input-field" required>
+ {% if form.errors %}
     <p>Your username and password didn't match. Please try again.</p>
   {% endif %}
-
   {% if next %}
     {% if user.is_authenticated %}
       <p>Your account doesn't have access to this page. To proceed,
@@ -49,16 +62,30 @@
       <p>Please login to see this page.</p>
     {% endif %}
   {% endif %}
+        <div class="form-options">
+          <label><input type="checkbox"> Remember me</label>
+          <a href="{% url 'password_reset' %}" class="forgot">Forgot Password?</a>
+        </div>
 
-  <form method="post" action="{% url 'login' %}">
-    {% csrf_token %}
-    {% bootstrap_form form %} 
-    <input type="submit" value="login" class="boxed-btn3 w-100" />
-    <input type="hidden" name="next" value="{{ next }}" />
-  </form>
+        <button type="submit" class="btn-login">Log In</button>
 
-  {# Assumes you setup the password_reset view in your URLconf #}
-  <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+        <div class="divider"><span>OR</span></div>
+
+        <button type="button" class="btn-social google">
+          <img src="{% static 'images/google0.png'%}" alt="Google Icon"> Continue with Google
+        </button>
+
+        <button type="button" class="btn-social bankid">
+          <img src="{% static 'images/attachment-6-10.png'%}" alt="BankID Icon"> Continue with BankID
+        </button>
+
+        <p class="signup-text">
+          Don’t have an account? <a href="{% url 'accounts:sign_up' %}">Sign up</a>
+        </p>
+      </form>
+    </div>
+  </main>
+
 
 
 

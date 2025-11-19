@@ -1,0 +1,272 @@
+/* ====== RESET ====== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: #fff;
+  overflow-x: hidden;
+}
+
+/* ====== HEADER ====== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 5%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.logo img {
+  width: 130px;
+  height: auto;
+}
+
+.menu {
+  display: flex;
+  gap: 2rem;
+}
+
+.menu a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.menu a:hover {
+  color: #71b247;
+}
+
+.buttons {
+  display: flex;
+  gap: 0.8rem;
+}
+
+.btn {
+  border-radius: 30px;
+  padding: 8px 20px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.signup {
+  background: #71b247;
+  color: #fff;
+  border: none;
+}
+
+.signin {
+  background: #fff;
+  color: #71b247;
+  border: 1px solid #71b247;
+}
+
+/* ====== SIGN IN BOX ====== */
+.signin-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 3rem 1rem;
+}
+
+.signin-box {
+  background: #fff;
+  max-width: 500px;
+  width: 100%;
+  border-radius: 15px;
+  box-shadow: 0px 4px 15px rgba(3, 159, 200, 0.8);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.confetti {
+  width: 90px;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 16px;
+  margin-bottom: 1.5rem;
+}
+
+/* ====== FORM ====== */
+.input-field {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(137, 137, 137, 0.75);
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  font-size: 14px;
+  color: rgba(137, 137, 137, 0.8);
+}
+
+.form-options .forgot {
+  color: #039fc8;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.btn-login {
+  width: 100%;
+  padding: 15px;
+  background: transparent;
+  color: #039fc8;
+  border: 2px solid #039fc8;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-login:hover {
+  background: #039fc8;
+  color: #fff;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2rem 0;
+  position: relative;
+  color: rgba(137, 137, 137, 0.75);
+  font-weight: 700;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(137, 137, 137, 0.4);
+  margin: 0 1rem;
+}
+
+/* ====== SOCIAL BUTTONS ====== */
+.btn-social {
+  width: 100%;
+  padding: 15px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(3, 159, 200, 0.6);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-social:hover {
+  background: rgba(3, 159, 200, 0.8);
+}
+
+.btn-social img {
+  width: 28px;
+  height: 28px;
+}
+
+.signup-text {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.signup-text a {
+  color: #039fc8;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .menu {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+ .signin-box {
+  background: #fff;
+  width: 90%;
+  max-width: 600px;
+  min-width: 320px;
+  border-radius: 15px;
+  box-shadow: 0px 4px 15px rgba(3, 159, 200, 0.8);
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  margin: auto;
+}
+
+  .btn-login,
+  .btn-social,
+  .input-field {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .input-field,
+  .btn-login,
+  .btn-social {
+    font-size: 15px;
+    padding: 12px;
+  }
+
+  .confetti {
+    width: 70px;
+  }
+
+  .divider {
+    margin: 1.5rem 0;
+  }
+}
+
+/* على الشاشات الكبيرة نخليه أعرض شوي */
+@media (min-width: 1200px) {
+  .signin-box {
+    max-width: 700px;
+  }
+}
