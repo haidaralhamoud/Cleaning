@@ -1,0 +1,168 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Vesper Libre", serif;
+}
+
+body {
+  background: #fff;
+  color: #000;
+  overflow-x: hidden;
+}
+
+/* === HERO SECTION === */
+.hero {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.hero-image {
+  width: 100%;
+  max-width: 600px;
+  display: block;
+  margin: 0 auto 20px;
+  border-radius: 10px;
+}
+
+.hero-text {
+  max-width: 900px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 15px;
+  padding: 25px;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.75);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* === FORM SECTION === */
+.form-section {
+  padding: 60px 8%;
+}
+
+.form-section h2 {
+  font-size: 30px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.form-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+form {
+  flex: 1 1 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+input, textarea, select {
+  border: 1px solid #039fc8;
+  border-radius: 10px;
+  padding: 15px;
+  font-size: 16px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+button {
+  background: #039fc8;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #028fb4;
+}
+
+.side-image {
+  flex: 1 1 400px;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 169, 199, 1);
+  object-fit: cover;
+}
+
+/* === BENEFITS SECTION === */
+.benefits-section {
+  background: rgba(3, 159, 200, 0.05);
+  padding: 80px 5%;
+  text-align: center;
+}
+
+.benefits-section h2 {
+  font-size: 32px;
+  margin-bottom: 50px;
+}
+
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 30px;
+  justify-items: center;
+}
+
+.benefit-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  padding-bottom: 20px;
+  max-width: 330px;
+}
+
+.benefit-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 15px 15px 0 0;
+}
+
+.benefit-card h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-top: 15px;
+}
+
+.benefit-card p {
+  padding: 10px 15px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .form-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .side-image {
+    width: 100%;
+  }
+
+  .hero-text {
+    font-size: 18px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
+
+

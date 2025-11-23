@@ -1,0 +1,235 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join the Hembla Team</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/career_page.css'%}" />
+    <style>
+*, *:before, *:after {
+  box-sizing: border-box;
+  .fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.9s ease-out;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.join-section img,
+.why-section img,
+.growth-section img {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: all 1s ease-out;
+}
+
+.fade-in.show img {
+  opacity: 1;
+  transform: scale(1);
+}
+.join-section h1 {
+  animation: slideIn 1.2s ease forwards;
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.job-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0px 12px 25px rgba(0,0,0,0.15);
+}
+.job-card img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center;
+}
+
+}
+   </style>
+</head>
+<body>
+<!-- ✅ HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="{% url 'home:contact' %}">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
+  </div>
+</header>
+  <section class="join-section fade-in" >
+    <h1>Join the Hembla Team</h1>
+    <p>At Hembla, we believe that every home, every family, and every business deserves care they can rely on. We're not just here to fix or install, we're here to bring comfort, safety, and peace of mind to the people we serve.</p>
+  </section>
+
+  <section class="openings-section fade-in">
+    <h2>Current Openings</h2>
+
+    {% for job in jobs %}
+    <div class="job-card">
+      <img src="{{ job.image.url }}" alt="{{ job.title }}">
+      <div class="job-content">
+        <h3>{{ job.title }}</h3>
+        <p>{{ job.description }}</p>
+        <div class="job-buttons">
+          <button class="btn blue">{{ job.job_type }}</button>
+
+          <!-- 🔥 زر التقديم مع تمرير رقم الوظيفة -->
+          <a href="{% url 'home:apply_page' job.id %}" class="btn green">Apply Now</a>
+
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </section>
+
+  <section class="why-section fade-in">
+    <h2>Why Work at Hembla?</h2>
+    <div class="why-container">
+      <div class="why-text">
+        <p><strong>Because here, you’re not just an employee,</strong><br>
+        you’re part of a family that believes in trust, respect, and kindness. We celebrate small wins, support each other through challenges, and always strive to make life a little easier for our customers, and for each other.</p>
+      </div>
+      <img src="{% static 'images/frame-16865528320.png'%}" alt="Team Meeting">
+    </div>
+  </section>
+
+  <section class="growth-section fade-in">
+    <h2>Your Growth Matters</h2>
+    <div class="growth-container">
+      <img src="{% static 'images/frame-16865528330.png'%}" alt="Team Growth">
+      <div class="growth-text">
+        <p>We want you to grow with us, not just as a professional, but as a person. At Hembla, you’ll find encouragement to learn, space to be creative, and support to reach your full potential.</p>
+      </div>
+    </div>
+  </section>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+<script>
+  const elements = document.querySelectorAll('.fade-in');
+
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('show');
+      }
+    });
+  });
+
+  elements.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Vesper Libre", serif;
+}
+
+body {
+  background-color: #fff;
+  color: #000;
+  overflow-x: hidden;
+}
+
+.apply-section {
+  width: 100%;
+  padding: 40px 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.available-banner img {
+  width: 750px;
+  margin-top: 40px;
+}
+
+.intro-box {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  width: 90%;
+  max-width: 1100px;
+  text-align: center;
+  padding: 20px 30px;
+  margin: 30px 0;
+}
+
+.intro-box p {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.7);
+  font-weight: 600;
+}
+
+.apply-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  align-self: flex-start;
+  margin-left: 4%;
+}
+
+.apply-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 1300px;
+}
+
+.apply-form {
+  flex: 1 1 400px;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.apply-form input,
+.apply-form select,
+.apply-form textarea {
+  border: 1px solid #039fc8;
+  border-radius: 6px;
+  padding: 15px 20px;
+  font-size: 16px;
+  outline: none;
+}
+
+.apply-form textarea {
+  resize: none;
+  height: 100px;
+}
+
+.upload-row {
+  display: flex;
+  gap: 10px;
+  margin: 5px 0 15px;
+}
+
+.upload-btn {
+  width: 45px;
+  height: 45px;
+  border: none;
+  border-radius: 8px;
+  font-size: 20px;
+  background-color: #e6f9ff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 169, 199, 0.4);
+}
+
+.submit-btn {
+  background-color: #039fc8;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  align-self: flex-start;
+  cursor: pointer;
+}
+
+.apply-image img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 169, 199, 0.8);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .available-banner img {
+    max-width: 100%;
+    align-items: center;
+  }
+  .apply-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  .apply-image img {
+    max-width: 90%;
+    align-items: center;
+    margin: 7%;
+
+  }
+  .submit-btn {
+    width: 100%;
+  }
+}
