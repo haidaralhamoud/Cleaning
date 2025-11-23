@@ -1,0 +1,290 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Communication</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'css/Communication.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+<!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+  <!-- ===== Mobile Header ===== -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span>
+    </button>
+    <h2 class="mobile-title">Customer Profile</h2>
+  </div>
+
+  <!-- ===== Layout ===== -->
+  <div class="layout">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="../Customer Profile/index.html" class="nav-item active"><img src="user-location0.png" class="ico"><span>Overview</span></a>
+        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Address & Locations</span></a>
+        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="event-accepted0.png" class="ico"><span>My Bookings</span></a>
+        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Incidents</span></a>
+        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="settings0.png" class="ico"><span>Service Preferences</span></a>
+        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="communication0.png" class="ico"><span>Communication</span></a>
+        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="list-view0.png" class="ico"><span>Customer Notes</span></a>
+        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="magnetic-card0.png" class="ico"><span>Payment & Billing</span></a>
+        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="person1.png" class="ico"><span>Change Password</span></a>
+        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="vector2.svg" class="ico"><span>Service History & Ratings</span></a>
+        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="prize0.png" class="ico"><span>Loyalty & Rewards</span></a>
+        <a class="nav-item"><img src="logout-rounded0.png" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <!-- ===== Main Content ===== -->
+    <main class="content">
+      <h1 class="page-title">Communication</h1>
+
+      <div class="card">
+        <h2 class="section-title">Notifications</h2>
+
+        <div class="section">
+          <h3>Receive Service Reminders</h3>
+          <p>Includes appointment reminders and schedule updates.</p>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="section">
+          <h3>Receive Promotions & Offers</h3>
+          <p>Includes discounts and special offers.</p>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="frequency-section">
+          <button class="frequency-btn">Weekly</button>
+          <button class="frequency-btn">Monthly</button>
+          <button class="frequency-btn">Never</button>
+        </div>
+
+        <div class="section">
+          <h3>Preferred communication method</h3>
+          <div class="checkboxes">
+            <label><input type="checkbox"> Email</label>
+            <label><input type="checkbox" checked> SMS/Text Message</label>
+            <label><input type="checkbox" checked> Phone Call</label>
+            <label><input type="checkbox" checked> Push Notification</label>
+            <label><input type="checkbox" checked> In-App Messages</label>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Language Preference for Communication</h3>
+          <div class="language-fields column">
+            <div>
+              <label>Language</label>
+              <select>
+                <option>English</option>
+                <option>Arabic</option>
+                <option>Swedish</option>
+              </select>
+            </div>
+            <div>
+              <label>Alternative option</label>
+              <select>
+                <option>Swedish</option>
+                <option>English</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Notification Timing</h3>
+          <div class="time-options">
+            <button>Morning (8 AM - 12 PM)</button>
+            <button>Afternoon (12 PM - 4 PM)</button>
+            <button>Evening (4 PM - 8 PM)</button>
+            <button>Any Time</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary">Save Changes</button>
+          <button class="btn outline">Cancel</button>
+        </div>
+
+        <p class="update-text">
+          You can update your preferences anytime.
+          <span class="red">Last updated: [date]</span>
+        </p>
+      </div>
+    </main>
+  </div>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = docume6nt.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+  <!-- ===== Scripts ===== -->
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const arrow = document.querySelector(".menu-toggle .arrow");
+
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      if (sidebar.classList.contains("open")) {
+        arrow.innerHTML = "&#8249;";
+      } else {
+        arrow.innerHTML = "&#8250;";
+      }
+    });
+  </script>
+
+  <script>
+    const timeButtons = document.querySelectorAll(".time-options button");
+    timeButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        timeButtons.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      });
+    });
+  </script>
+
+  <script>
+    function activateButtons(selector) {
+      const buttons = document.querySelectorAll(selector);
+      buttons.forEach(btn => {
+        btn.classList.add("selectable-btn");
+        btn.addEventListener("click", () => {
+          buttons.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+        });
+      });
+    }
+    activateButtons(".time-options button");
+    activateButtons(".frequency-section button");
+  </script>
+</body>
+</html>

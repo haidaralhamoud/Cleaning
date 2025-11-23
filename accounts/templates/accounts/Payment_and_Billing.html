@@ -1,0 +1,304 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment & Billing — Customer Profile</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
+<body>
+<!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+
+  <div class="layout">
+    <!-- Mobile header -->
+    <div class="mobile-header">
+      <button class="menu-toggle floating" id="menuToggle">
+        <span class="arrow">&#8250;</span>
+      </button>
+      <h2 class="mobile-title">Customer Profile</h2>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="../Customer Profile/index.html" class="nav-item active"><img src="user-location0.png" class="ico"><span>Overview</span></a>
+        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Address & Locations</span></a>
+        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="event-accepted0.png" class="ico"><span>My Bookings</span></a>
+        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Incidents</span></a>
+        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="settings0.png" class="ico"><span>Service Preferences</span></a>
+        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="communication0.png" class="ico"><span>Communication</span></a>
+        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="list-view0.png" class="ico"><span>Customer Notes</span></a>
+        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="magnetic-card0.png" class="ico"><span>Payment & Billing</span></a>
+        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="person1.png" class="ico"><span>Change Password</span></a>
+        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="vector2.svg" class="ico"><span>Service History & Ratings</span></a>
+        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="prize0.png" class="ico"><span>Loyalty & Rewards</span></a>
+        <a class="nav-item"><img src="logout-rounded0.png" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <h1>Payment & Billing</h1>
+
+      <!-- Main 2-column layout -->
+      <div class="page-grid">
+        <!-- Payment methods -->
+        <section class="card payment-methods-card">
+          <div class="card-header">
+            <h2>Payment Methods</h2>
+            <button id="addPayment" class="btn-icon">＋</button>
+          </div>
+          <div id="paymentsList" class="payments-list"></div>
+        </section>
+
+        <!-- Subscription -->
+        <aside class="card subscription-card">
+          <h3>Subscription</h3>
+          <div id="subscriptionContent"></div>
+        </aside>
+      </div>
+
+      <!-- Invoice History -->
+      <section class="card invoice-history">
+        <h2>Invoice History</h2>
+        <table id="invoiceTable">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Payment Method</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- dynamic rows -->
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = docume6nt.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+  <script>
+    /* ====== Payment data ====== */
+    const paymentMethods = [
+      { id: 1, provider: "Visa", last4: "4567", expiry: "08/2025", img: "visa.png", isDefault: true },
+      { id: 2, provider: "Mastercard", last4: "1234", expiry: "08/2025", img: "mastercard.png", isDefault: false },
+      { id: 3, provider: "Klarna", last4: "", expiry: "", img: "klarna.png", isDefault: false },
+      { id: 4, provider: "Paypal", last4: "", expiry: "", img: "paypal.png", isDefault: false },
+      { id: 5, provider: "Swish", last4: "", expiry: "", img: "swish.png", isDefault: false }
+    ];
+
+    const subscription = {
+      title: "Weekly Cleaning - 2 hrs $150/session",
+      nextCharge: "July 20, 2025 ($150)",
+      nextService: "July 22, 2025"
+    };
+
+    /* ====== Invoice history data ====== */
+    const invoices = [
+      { id: "#12345", date: "July 1, 2025", amount: "$150.00", method: "klarna.png", status: "Paid" },
+      { id: "#12346", date: "July 10, 2025", amount: "$150.00", method: "paypal.png", status: "Paid" },
+      { id: "#12347", date: "July 20, 2025", amount: "$150.00", method: "swish.png", status: "Paid" }
+    ];
+
+    /* ===== Render payment methods ===== */
+    const paymentsListEl = document.getElementById("paymentsList");
+    const subscriptionEl = document.getElementById("subscriptionContent");
+    const invoiceTable = document.querySelector("#invoiceTable tbody");
+
+    function renderPayments() {
+      paymentsListEl.innerHTML = "";
+      paymentMethods.forEach(pm => {
+        const card = document.createElement("div");
+        card.className = "payment-row";
+        card.innerHTML = `
+          <div class="payment-left">
+            <img src="${pm.img}" alt="${pm.provider}" class="pm-icon">
+            <div class="pm-text">
+              <div class="pm-title"><strong>${pm.provider}${pm.last4 ? " ••••" + pm.last4 : ""}</strong></div>
+              <div class="pm-sub">${pm.expiry ? "Expires " + pm.expiry : ""}</div>
+            </div>
+          </div>
+          <div class="payment-right">
+            <button class="btn-default ${pm.isDefault ? "state" : ""}" onclick="setDefault(${pm.id})">
+              ${pm.isDefault ? "Default" : "Set as default"}
+            </button>
+            <button class="icon-edit">✎</button>
+          </div>
+        `;
+        paymentsListEl.appendChild(card);
+      });
+    }
+
+    function renderSubscription() {
+      subscriptionEl.innerHTML = `
+        <p><strong>${subscription.title}</strong></p>
+        <p>Next charge: ${subscription.nextCharge}</p>
+        <p>Next service: ${subscription.nextService}</p>
+        <div class="sub-actions">
+          <button class="btn-outline">Manage</button>
+          <button class="btn-outline">Cancel</button>
+        </div>
+      `;
+    }
+
+    function renderInvoices() {
+      invoiceTable.innerHTML = "";
+      invoices.forEach(inv => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${inv.id}</td>
+          <td>${inv.date}</td>
+          <td>${inv.amount}</td>
+          <td><img src="${inv.method}" alt="method" class="method-icon"></td>
+          <td><span class="status paid">${inv.status}</span></td>
+          <td><a href="#">Download</a></td>
+        `;
+        invoiceTable.appendChild(tr);
+      });
+    }
+
+    function setDefault(id) {
+      paymentMethods.forEach(pm => pm.isDefault = (pm.id === id));
+      renderPayments();
+    }
+
+    renderPayments();
+    renderSubscription();
+    renderInvoices();
+
+    /* ===== Sidebar toggle ===== */
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const arrow = document.querySelector(".menu-toggle .arrow");
+
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+    });
+  </script>
+</body>
+</html>

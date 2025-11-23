@@ -1,0 +1,336 @@
+:root{
+  --sky: #c0e7f1;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Inter", sans-serif;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+
+  padding: 10px ;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+
+
+
+.logo { width: 130px; height: auto; }
+.nav-links { display: flex; gap: 30px; align-items: center; }
+.nav-links a {
+  color: #000;
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 18px;
+}
+.nav-links a:hover { color: #71b247; }
+.drop { width: 10px; margin-left: 5px; }
+
+.auth { display: flex; gap: 10px; }
+.btn {
+  border: none;
+  border-radius: 30px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .25s;
+}
+.btn-signup {
+  background: #71b247;
+  color: #fff;
+  padding: 8px 20px;
+}
+.btn-signin {
+  background: #fff;
+  border: 1px solid #71b247;
+  color: #71b247;
+  padding: 8px 20px;
+}
+
+
+
+
+
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+}
+.main h1 {
+  font-family: "Vesper Libre", serif;
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+.main h2 {
+  font-family: "Vesper Libre", serif;
+  font-size: 22px;
+  margin-bottom: 25px;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 25px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.left { flex: 1; min-width: 240px; }
+.left .icon { width: 35px; vertical-align: middle; margin-right: 5px; }
+.left .star { width: 22px; margin-left: 5px; vertical-align: middle; }
+.left h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.badge {
+  background: #85ef40;
+  padding: 3px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.left p {
+  margin: 4px 0;
+  color: #777;
+  font-weight: 600;
+}
+
+/* Right buttons */
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+.btn-default {
+  background: #039fc8;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 15px;
+  height: 40px;
+}
+.btn-gray {
+  background: #e2eaed;
+  color: #000;
+  border-radius: 8px;
+  font-size: 15px;
+  height: 40px;
+}
+
+/* Add Location */
+.btn-add {
+  background: #039fc8;
+  color: #fff;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 12px 40px;
+  display: block;
+  margin: 30px auto;
+  cursor: pointer;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1100px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; order: 2; }
+  .main { order: 1; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .auth { display: none; }
+  .navbar { justify-content: center; }
+  .card { flex-direction: column; align-items: flex-start; }
+  .right { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 10px; }
+  .right .btn { flex: 1; min-width: 45%; }
+  .btn-add { width: 100%; }
+}
+
+/* === Mobile Header === */
+
+
+.mobile-title {
+  font-weight: 700;
+  font-size: 18px;
+  text-align: center;
+  margin: 0;
+}
+
+/* === Floating Menu Button (السهم العائم) === */
+.menu-toggle.floating {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: 44px;
+  height: 44px;
+  background: #039fc8;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  z-index: 200;
+  transition: background 0.3s, transform 0.3s;
+}
+.menu-toggle.floating:hover {
+  background: #028eb3;
+  transform: scale(1.08);
+}
+
+
+
+/* Smaller mobile */
+@media (max-width: 560px) {
+  .main h1{
+
+    text-align: center;
+   
+  
+  }
+}
+
+
+/* === إخفاء الزر الفلوتينغ على اللابتوب === */
+@media (min-width: 921px) {
+  .menu-toggle.floating {
+    display: none; /* ✅ الزر ما بيبين إلا عالموبايل */
+  }
+}
+
+/* === تحسين التباعد للموبايل (رفع المحتوى للأعلى) === */
+@media (max-width: 920px) {
+  .main {
+    margin-top: 0;        /* يلغي الفراغ الزايد */
+    padding-top: 5px;     /* يرفع المحتوى شوي */
+  }
+
+  .main h2 {
+    margin-top: 0;
+  }
+}
+
+
+
+
+/* ===== Sidebar Base ===== */
+
+
+
+/* ===== Floating Button (Mobile Menu Button) ===== */
+.menu-toggle.floating {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 150;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sky-strong);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+}
+.menu-toggle.floating:hover {
+  background: #028eb3;
+  transform: scale(1.1);
+}
+.menu-toggle .arrow {
+  font-size: 28px;
+  line-height: 1;
+  transform: translateX(1px);
+  transition: transform 0.3s ease;
+}
+
+/* ===== Mobile Header ===== */
+.mobile-header {
+  display: none;
+  background: #fff;
+  padding: 10px 16px;
+  box-shadow: var(--shadow);
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+.mobile-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  margin: 0;
+}
+
+/* ===== Responsive Sidebar ===== */
+@media (max-width: 920px) {
+  .mobile-header { display: flex; }
+  .menu-toggle.floating { display: flex; }
+
+  .sidebar {
+    position: fixed;
+    top: 55px;
+    left: -320px; /* مخفية افتراضيًا */
+    width: 260px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 10px;
+    transition: left 0.3s ease;
+    z-index: 99;
+  }
+
+  .sidebar.open { left: 0; } /* لما تفتح */
+}

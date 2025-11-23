@@ -1,0 +1,293 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customize Your Cleaning Preferences</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/Service_Preferences.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+</head>
+<body>
+<!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+  <!-- ===== Mobile Header ===== -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span> <!-- › -->
+    </button>
+
+  </div>
+
+  <!-- ===== Layout ===== -->
+  <div class="layout">
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="../Customer Profile/index.html" class="nav-item active"><img src="user-location0.png" class="ico"><span>Overview</span></a>
+        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Address & Locations</span></a>
+        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="event-accepted0.png" class="ico"><span>My Bookings</span></a>
+        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Incidents</span></a>
+        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="settings0.png" class="ico"><span>Service Preferences</span></a>
+        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="communication0.png" class="ico"><span>Communication</span></a>
+        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="list-view0.png" class="ico"><span>Customer Notes</span></a>
+        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="magnetic-card0.png" class="ico"><span>Payment & Billing</span></a>
+        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="person1.png" class="ico"><span>Change Password</span></a>
+        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="vector2.svg" class="ico"><span>Service History & Ratings</span></a>
+        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="prize0.png" class="ico"><span>Loyalty & Rewards</span></a>
+        <a class="nav-item"><img src="logout-rounded0.png" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <!-- ===== Main Content ===== -->
+    <main class="main">
+      <h1 class="page-title">Customize Your Cleaning Preferences</h1>
+
+      <!-- ===== Summary Box ===== -->
+      <div class="summary-card">
+        <div class="summary-top">
+          <div class="title-left">
+            <img src="{% static 'images/summary0.png' %}" alt="Summary Icon" class="icon">
+            <h3>summary of preferences</h3>
+          </div>
+          <img src="{% static 'images/edit-pencil0.png' %}" alt="Edit Icon" class="edit-icon">
+        </div>
+
+        <div class="summary-grid">
+          <div class="column">
+            <h4>Tasks</h4>
+            <p>5 selected ,</p>
+            <div class="tags">
+              <span class="tag blue">Dusting</span>
+              <span class="tag green">Kitchen-only</span>
+              <span class="tag yellow">Window cleaning</span>
+              <span class="tag sky">Fridge/Oven</span>
+              <span class="tag red">Carpet cleaning</span>
+            </div>
+            <p><strong>Product:</strong> 2 Preferred , 1 excluded</p>
+            <p><strong>Frequency:</strong> Bi-weekly</p>
+          </div>
+
+          <div class="column">
+            <h4>Priorities</h4>
+            <div class="tags">
+              <span class="tag sky">Kitchen</span>
+              <span class="tag green">Living Room</span>
+              <span class="tag yellow">Bathroom</span>
+            </div>
+            <p><strong>Lifestyle & Add-ons Tab:</strong> 2 selected</p>
+            <p><strong>Assembly & Renovations:</strong> 1 selected</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Cards Grid ===== -->
+      <div class="cards-grid">
+
+        <div class="card">
+          <div class="card-header"><img src="{% static 'images/text-file0.png' %}"><h3>Cleaning</h3></div>
+          <label><input type="checkbox" name="clean" /> Standard Clean</label>
+          <label><input type="checkbox" name="clean" /> Deep Clean</label>
+          <label><input type="checkbox" name="clean" /> Move-in/Move-out</label>
+          <label><input type="checkbox" name="clean" /> Event/Party (before & after)</label>
+          <label><input type="checkbox" name="clean" /> Airbnb/Short-stay</label>
+          <label><input type="checkbox" name="clean" /> Emergency/Urgent</label>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><img src="{% static 'images/product0.png' %}"><h3>Products</h3></div>
+          <label><input type="checkbox" name="prod" /> Eco-friendly</label>
+          <label><input type="checkbox" name="prod" /> Standard</label>
+          <label><input type="checkbox" name="prod" /> Fragrance-free</label>
+          <label><input type="checkbox" name="prod" /> Disinfectant / Anti-bacterial</label>
+          <label><input type="checkbox" name="prod" /> Customer-provided</label>
+          <input type="text" class="custom-input" placeholder="">
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>⏰ Frequency</h3></div>
+          <label><input type="checkbox" name="freq" /> Weekly</label>
+          <label><input type="checkbox" name="freq" /> Bi-Weekly</label>
+          <label><input type="checkbox" name="freq" /> Monthly</label>
+          <label><input type="checkbox" name="freq" /> One-Time</label>
+          <label><input type="checkbox" name="freq" /> On-Demand (urgent within 3h)</label>
+          <input type="text" class="custom-input" placeholder="">
+        </div>
+
+        <div class="card">
+          <div class="card-header"><img src="{% static 'images/scrum0.png' %}"><h3>Priorities</h3></div>
+          <label><input type="checkbox" name="prio" /> Kitchen</label>
+          <label><input type="checkbox" name="prio" /> Living Room</label>
+          <label><input type="checkbox" name="prio" /> Bedrooms</label>
+          <label><input type="checkbox" name="prio" /> Bathrooms</label>
+          <label><input type="checkbox" name="prio" /> Balcony / Garden</label>
+          <label><input type="checkbox" name="prio" /> Office</label>
+          <label><input type="checkbox" name="prio" /> Storage</label>
+          <input type="text" class="custom-input" placeholder="">
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>🌿 Lifestyle & Add-ons Tab</h3></div>
+          <label><input type="checkbox" name="life" /> Event staffing (setup, serving, after-cleaning)</label>
+          <label><input type="checkbox" name="life" /> Errand services (package pickup, deliveries, groceries)</label>
+          <label><input type="checkbox" name="life" /> Elderly assistance (non-medical)</label>
+          <label><input type="checkbox" name="life" /> Pet care (feeding, walking, sitting)</label>
+          <label><input type="checkbox" name="life" /> Plant care (watering, replanting)</label>
+          <label><input type="checkbox" name="life" /> Decluttering & organizing assistance</label>
+          <label><input type="checkbox" name="life" /> House sitting (vacation care)</label>
+          <label><input type="checkbox" name="life" /> Babysitting (child care, hourly)</label>
+          <label><input type="checkbox" name="life" /> Housemaid per hour (help beyond cleaning)</label>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3>🧰 Assembly & Renovations</h3></div>
+          <label><input type="checkbox" name="assem" /> IKEA & furniture assembly</label>
+          <label><input type="checkbox" name="assem" /> Minor renovations (painting, flooring, repairs)</label>
+          <label><input type="checkbox" name="assem" /> Mounting (TVs, shelves, artwork)</label>
+          <label><input type="checkbox" name="assem" /> Light repairs (doors, seals, curtain rods)</label>
+          <label><input type="checkbox" name="assem" /> Large renovation project</label>
+        </div>
+
+      </div>
+    </main>
+  </div>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = docume6nt.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+  <!-- ===== Script (Menu Toggle) ===== -->
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const arrow = document.querySelector(".menu-toggle .arrow");
+
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      if (sidebar.classList.contains("open")) {
+        arrow.innerHTML = "&#8249;"; // ‹ left
+      } else {
+        arrow.innerHTML = "&#8250;"; // › right
+      }
+    });
+  </script>
+
+</body>
+</html>

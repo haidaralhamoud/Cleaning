@@ -1,0 +1,217 @@
+:root{
+  --sky: #c0e7f1;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Inter", sans-serif;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+
+  padding: 10px ;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+  padding: 30px;
+}
+
+.main h1 {
+  font-family: "Vesper Libre", serif;
+  font-size: 30px;
+  margin-bottom: 5px;
+}
+
+.main h2 {
+  font-family: "Vesper Libre", serif;
+  font-size: 22px;
+  margin-bottom: 25px;
+  color: #0334c8;
+}
+
+/* ===== CARD ===== */
+.card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: var(--shadow);
+  padding: 25px 30px;
+  margin-bottom: 25px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  gap: 25px;
+}
+
+.column {
+  flex: 1;
+  min-width: 360px;
+}
+
+.column.full {
+  width: 100%;
+}
+
+.column h3 {
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: 6px;
+  color: #000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.column p {
+  font-weight: 500;
+  color: rgba(0,0,0,0.8);
+  line-height: 1.4;
+}
+
+.icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  color: var(--sky-strong);
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform .2s, opacity .2s;
+}
+
+.icon:hover {
+  transform: scale(1.15);
+  opacity: .8;
+}
+
+
+/* ===== MOBILE HEADER ===== */
+.mobile-header {
+  display: none;
+  background: #fff;
+  padding: 10px 16px;
+  box-shadow: var(--shadow);
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+.mobile-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  margin: 0;
+}
+
+/* ===== FLOATING BUTTON ===== */
+.menu-toggle.floating {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: 44px;
+  height: 44px;
+  background: var(--sky-strong);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  z-index: 200;
+  transition: background 0.3s, transform 0.3s;
+}
+.menu-toggle.floating:hover {
+  background: #028eb3;
+  transform: scale(1.08);
+}
+.menu-toggle .arrow {
+  font-size: 28px;
+  line-height: 1;
+  transform: translateX(1px);
+  transition: transform 0.3s ease;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 920px) {
+  .mobile-header { display: flex; }
+  .menu-toggle.floating { display: flex; }
+
+  .sidebar {
+    position: fixed;
+    top: 55px;
+    left: -320px;
+    width: 260px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 10px;
+    transition: left 0.3s ease;
+    z-index: 99;
+  }
+  .sidebar.open { left: 0; }
+
+  .main { padding: 20px; }
+
+  .card {
+    padding: 20px;
+    width: 92%;
+    max-width: 450px;
+    margin: 0 auto;
+  }
+
+  .column {
+    min-width: 100%;
+  }
+}

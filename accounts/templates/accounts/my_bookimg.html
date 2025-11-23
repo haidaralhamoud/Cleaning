@@ -1,0 +1,292 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Bookings - Hembla</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<body>
+<!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+
+  <div class="page">
+
+    <!-- ===== Mobile Header ===== -->
+    <div class="mobile-header">
+<!-- Floating Menu Button -->
+<button class="menu-toggle inside-btn" id="menuToggle">
+  <span class="arrow">&#8250;</span>
+</button>
+
+ 
+    </div>
+
+    <!-- ===== Sidebar ===== -->
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="../Customer Profile/index.html" class="nav-item active"><img src="user-location0.png" class="ico"><span>Overview</span></a>
+        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Address & Locations</span></a>
+        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="event-accepted0.png" class="ico"><span>My Bookings</span></a>
+        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Incidents</span></a>
+        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="settings0.png" class="ico"><span>Service Preferences</span></a>
+        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="communication0.png" class="ico"><span>Communication</span></a>
+        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="list-view0.png" class="ico"><span>Customer Notes</span></a>
+        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="magnetic-card0.png" class="ico"><span>Payment & Billing</span></a>
+        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="person1.png" class="ico"><span>Change Password</span></a>
+        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="vector2.svg" class="ico"><span>Service History & Ratings</span></a>
+        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="prize0.png" class="ico"><span>Loyalty & Rewards</span></a>
+        <a class="nav-item"><img src="logout-rounded0.png" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <!-- ===== Main Content ===== -->
+    <main class="main">
+      <h1 class="page-title">My Bookings</h1>
+      <p class="subtitle">Your bookings, your history, your peace of mind</p>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-target="all">All</button>
+        <button class="tab" data-target="upcoming">Upcoming</button>
+        <button class="tab" data-target="ongoing">Ongoing</button>
+        <button class="tab" data-target="completed">Completed</button>
+        <button class="tab" data-target="cancelled">Cancelled</button>
+      </div>
+
+      <!-- Tables -->
+      <div class="tables">
+        <!-- All -->
+        <div class="table-container active" id="all">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer Name</th>
+                <th>Service Type</th>
+                <th>Date</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>View</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>#12345</td>
+                <td>Sophia Clark</td>
+                <td>House Cleaning</td>
+                <td>July 15, 2025</td>
+                <td>Lorem ipsum dolor sit amet</td>
+                <td><span class="status scheduled">Scheduled</span></td>
+                <td>
+                  <div class="menu-wrap">
+                    <button class="dots">•••</button>
+                    <div class="dropdown">
+                      <a>Reschedule</a>
+                      <a>Cancel</a>
+                      <a>Download Invoice</a>
+                      <a>Add Service</a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>#12346</td>
+                <td>Ethan Harris</td>
+                <td><a href="../Customer-Profile-service-view/index.html">Deep Cleaning</a></td>
+                <td>July 16, 2025</td>
+                <td>West End</td>
+                <td><span class="status completed">Completed</span></td>
+                <td>
+                  <div class="menu-wrap">
+                    <button class="dots">•••</button>
+                    <div class="dropdown">
+                      <a>Reschedule</a>
+                      <a>Cancel</a>
+                      <a>Download Invoice</a>
+                      <a>Add Service</a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="overlay" id="overlay"></div>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = document.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+
+  <script src="script.js">
+    // Sidebar toggle
+const toggle = document.getElementById("menuToggle");
+const sidebar = document.querySelector(".sidebar");
+const arrow = toggle.querySelector(".arrow");
+
+toggle.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+});
+
+// Tabs switching
+const tabs = document.querySelectorAll(".tab");
+const tables = document.querySelectorAll(".table-container");
+
+tabs.forEach(tab => {
+  tab.addEventListener("click", () => {
+    tabs.forEach(t => t.classList.remove("active"));
+    tab.classList.add("active");
+
+    tables.forEach(t => t.classList.remove("active"));
+    document.getElementById(tab.dataset.target).classList.add("active");
+  });
+});
+toggle.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+  toggle.classList.toggle("rot");
+});
+
+// Dots dropdown
+document.querySelectorAll(".dots").forEach(btn => {
+  btn.addEventListener("click", e => {
+    e.stopPropagation();
+    document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
+    btn.closest(".menu-wrap").classList.toggle("show");
+  });
+});
+
+document.addEventListener("click", () => {
+  document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
+});
+
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    toggle.classList.toggle("rot");
+  });
+
+
+  </script>
+</body>
+</html>

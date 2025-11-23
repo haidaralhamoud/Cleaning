@@ -1,0 +1,152 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Customer Profile - Address & Locations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/Address_and_Locations_view.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+</head>
+<body>
+<!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+
+   <div class="layout"> 
+    <!-- Sidebar -->
+     <!-- زر المينيو يظهر فقط بالموبايل -->
+<div class="mobile-header">
+  <button class="menu-toggle floating" id="menuToggle">
+    <span class="arrow">&#8250;</span> <!-- › -->
+  </button>
+  <h2 class="mobile-title">Customer Profile</h2>
+</div>
+
+
+
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <a href="../Customer Profile/index.html" class="nav-item active"><img src="user-location0.png" class="ico"><span>Overview</span></a>
+        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Address & Locations</span></a>
+        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="event-accepted0.png" class="ico"><span>My Bookings</span></a>
+        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Incidents</span></a>
+        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="settings0.png" class="ico"><span>Service Preferences</span></a>
+        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="communication0.png" class="ico"><span>Communication</span></a>
+        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="list-view0.png" class="ico"><span>Customer Notes</span></a>
+        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="magnetic-card0.png" class="ico"><span>Payment & Billing</span></a>
+        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="person1.png" class="ico"><span>Change Password</span></a>
+        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="vector2.svg" class="ico"><span>Service History & Ratings</span></a>
+        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="prize0.png" class="ico"><span>Loyalty & Rewards</span></a>
+        <a class="nav-item"><img src="logout-rounded0.png" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      <h1>Address & Locations</h1>
+      <h2>My addresses</h2>
+
+      <div class="card">
+        <div class="left">
+          <img src="{% static 'images/home2.png'%}" class="icon">
+          <h3>Home <img src="{% static 'images/star0.png'%}" class="star"> <span class="badge">Active</span></h3>
+          <p>📍 123 Maple Street, Apartment 4B, Anytown, CA 91234</p>
+          <p>📅 Next service: Aug 20, 2025, 10:00 AM</p>
+          <p>☎ Layal Hassan · +1 555-123-4567</p>
+          <p>🅿 Guest spot #5 · 🔑 Gate 3, code 1234#</p>
+        </div>
+        <div class="right">
+          <button class="btn btn-default">Set as default</button>
+          <button class="btn btn-gray">View on Map</button>
+          <button class="btn btn-gray">Edit</button>
+          <button class="btn btn-gray">Remove</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="left">
+          <img src="{% static 'images/home-address1.png'%}" class="icon">
+          <h3>Office</h3>
+          <p>📍 123 Maple Street, Apartment 4B, Anytown, CA 91234</p>
+          <p>📅 Next service: Aug 20, 2025, 10:00 AM</p>
+          <p>☎ Layal Hassan · +1 555-123-4567</p>
+          <p>🅿 Guest spot #5 · 🔑 Gate 3, code 1234#</p>
+        </div>
+        <div class="right">
+          <button class="btn btn-default">Set as default</button>
+          <button class="btn btn-gray">View on Map</button>
+          <button class="btn btn-gray">Edit</button>
+          <button class="btn btn-gray">Remove</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="left">
+          <img src="{% static 'images/home-address2.png '%}" class="icon">
+          <h3>Vacation Home</h3>
+          <p>📍 123 Maple Street, Apartment 4B, Anytown, CA 91234</p>
+          <p>📅 Next service: Aug 20, 2025, 10:00 AM</p>
+          <p>☎ Layal Hassan · +1 555-123-4567</p>
+          <p>🅿 Guest spot #5 · 🔑 Gate 3, code 1234#</p>
+        </div>
+        <div class="right">
+          <button class="btn btn-default">Set as default</button>
+          <button class="btn btn-gray">View on Map</button>
+          <button class="btn btn-gray">Edit</button>
+          <button class="btn btn-gray">Remove</button>
+        </div>
+      </div>
+
+      <button  class="btn btn-add"><a href="../Add Address & Locations/index.html"  class="nav-item">Add Location</a></button>
+    </main>
+  </div>
+
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector(".menu-toggle .arrow");
+
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    // لما تفتح القائمة السهم ينعكس
+    if (sidebar.classList.contains("open")) {
+      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
+    } else {
+      arrow.innerHTML = "&#8250;"; // › سهم لليمين
+    }
+  });
+</script>
+
+
+
+</body>
+</html>

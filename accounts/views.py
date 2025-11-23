@@ -32,3 +32,39 @@ def sign_up(request):
         form = CustomerForm()
 
     return render(request, "registration/sign_up.html", {"form": form})
+
+
+def customer_profile_view(request):
+
+    return render(request , 'accounts/customer_profile_view.html',) 
+
+def Address_and_Locations_view(request):
+
+    return render(request , 'accounts/Address_and_Locations_view.html',) 
+
+def my_bookimg(request):
+
+    return render(request , 'accounts/my_bookimg.html',) 
+
+def incident(request):
+
+    return render(request , 'accounts/incident.html',) 
+
+
+def Service_Preferences(request):
+
+    return render(request , 'accounts/Service_Preferences.html',) 
+
+
+def Communication(request):
+
+    return render(request , 'accounts/Communication.html',) 
+
+
+def Customer_Notes(request):
+
+    return render(request , 'accounts/Customer_Notes.html',) 
+
+def Payment_and_Billing(request):
+
+    return render(request , 'accounts/Payment_and_Billing.html',) 
