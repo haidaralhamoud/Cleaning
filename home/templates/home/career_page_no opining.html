@@ -1,0 +1,279 @@
+
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>No Current Openings | Hembla</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <link rel="stylesheet" href="{% static 'css/career_page_no opining.css'%}" />
+    <style>
+*, *:before, *:after {
+  box-sizing: border-box;
+  /* ---------- Global Fade-in ---------- */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.9s ease-out;
+}
+
+.fade-in.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- Zoom-in Images ---------- */
+.zoom-in {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: transform 1s ease, opacity 1s ease;
+}
+
+.zoom-in.show {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---------- Benefit card hover ---------- */
+.benefit-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.benefit-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0px 12px 25px rgba(0,0,0,0.15);
+}
+
+/* ---------- Form field fade ---------- */
+form input, form textarea, form select {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+form .show-field {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* ---------- Button bounce ---------- */
+button[type="submit"] {
+  transition: transform 0.2s ease;
+}
+
+button[type="submit"]:hover {
+  transform: translateY(-3px) scale(1.03);
+}
+
+/* ---------- Smooth Scroll ---------- */
+html {
+  scroll-behavior: smooth;
+}
+
+}
+   </style>
+</head>
+<body>
+  <!-- ✅ HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="{% url 'home:contact' %}">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
+  </div>
+</header>
+  <section class="career-no-opening fade-in">
+    <div class="hero fade-in zoom-in">
+      <img src="{% static 'images/frame-16865528100.png'%}" alt="No Current Vacancies" class="hero-image zoom-in" />
+      <div class="hero-text">
+        No Current Openings — At the moment, our Hembla family is complete but families grow.
+        If you feel connected to our mission, we’d love to hear from you. Share your application,
+        and let’s stay in touch until the right role opens up.
+      </div>
+    </div>
+
+    <div class="form-section fade-in">
+      <h2>Submit Open Application</h2>
+      <div class="form-container">
+  <form method="POST" enctype="multipart/form-data">
+  {% csrf_token %}
+
+  <input type="text" name="full_name" placeholder="Full Name" required />
+  <input type="email" name="email" placeholder="Email" required />
+  <input type="tel" name="phone" placeholder="Phone Number" required />
+
+  <textarea name="message" placeholder="Cover Letter / Short Motivation"></textarea>
+
+  <input type="file" name="cv" class="file-upload" />
+
+  <select name="area">
+    <option disabled selected>Preferred Role / Area of Interest</option>
+    <option>Electrician</option>
+    <option>Customer Service</option>
+    <option>Business Support</option>
+    <option>Management</option>
+  </select>
+
+  <select name="availability">
+    <option disabled selected>Availability</option>
+    <option>Immediately</option>
+    <option>1–3 months</option>
+  </select>
+
+  <button type="submit">Send The Request</button>
+</form>
+
+        <img src="{% static 'images/frame-16865528070.png'%}" alt="Application Form" class="side-image zoom-in" />
+      </div>
+    </div>
+
+    <div class="benefits-section fade-in">
+      <h2>What You’ll Find at Hembla</h2>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <img src="{% static 'images/frame-16865525432.png'%}" alt="Work that has meaning " class=" zoom-in"/>
+          <h3>Work that has meaning</h3>
+          <p>Helping people in their homes and workplaces every day</p>
+        </div>
+        <div class="benefit-card">
+          <img src="{% static 'images/frame-16865525432.png'%}" alt="A team that feels like family" />
+          <h3>A team that feels like family</h3>
+          <p>Where your voice is heard and your efforts are valued</p>
+        </div>
+        <div class="benefit-card">
+          <img src="{% static 'images/frame-16865525432.png'%}" alt="Our Commitment to You" />
+          <h3>Our Commitment to You</h3>
+          <p>Fair pay, flexibility, and benefits that support your well-being</p>
+        </div>
+        <div class="benefit-card">
+          <img src="{% static 'images/frame-16865525432.png'%}" alt="What We Do" />
+          <h3>What We Do</h3>
+          <p>Helping people in their homes and workplaces every day</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+<script>
+  // Sections fade-in + zoom-in
+  const fadeElements = document.querySelectorAll('.fade-in, .zoom-in');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('show');
+      }
+    });
+  });
+
+  fadeElements.forEach(el => observer.observe(el));
+
+  // Form fields – delay animation
+  const formFields = document.querySelectorAll('form input, form textarea, form select');
+
+  formFields.forEach((field, index) => {
+    setTimeout(() => {
+      field.classList.add("show-field");
+    }, index * 120); // delay
+  });
+</script>
+
+</body>
+</html>
