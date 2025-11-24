@@ -4,15 +4,14 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Incident Overview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Service History & Ratings</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/Service_History_and_Ratings.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
 
-  <link rel="stylesheet" href="{% static 'css/incident.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-</head>
 <body>
-<!-- HEADER -->
+  <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -32,23 +31,16 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-
   <div class="layout">
-  <!-- زر المنيو (يظهر فقط بالموبايل) -->
-  <button class="menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span>
-  </button>
+    <!-- ===== Mobile Header ===== -->
+    <div class="mobile-header">
+      <button class="menu-toggle floating" id="menuToggle">
+        <span class="arrow">&#8250;</span>
+      </button>
 
-  <!-- Sidebar -->
-<div class="mobile-header">
-  <button class="menu-toggle floating" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- › -->
-  </button>
+    </div>
 
-</div>
-
-
-
+    <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
@@ -78,61 +70,74 @@
       </nav>
     </aside>
 
-  <!-- المحتوى الرئيسي -->
-  <div class="main-content">
-    <h1>Incident Overview</h1>
+    <!-- ===== Main Content ===== -->
+    <main class="content">
+      <h1 class="page-title">Service History & Ratings</h1>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Incident ID</th>
-            <th>Incident Type</th>
-            <th>Reported Date</th>
-            <th>Last Updated</th>
-            <th>Summary</th>
-            <th>View</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#12345</td>
-            <td>Sophia Clark</td>
-            <td>July 15, 2024</td>
-            <td>July 15, 2024</td>
-            <td>Issue with order #7890</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12346</td>
-            <td>Ethan Harris</td>
-            <td>July 16, 2024</td>
-            <td>July 16, 2024</td>
-            <td>Delivery delay for order #5678</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12347</td>
-            <td>Olivia Turner</td>
-            <td>July 17, 2024</td>
-            <td>July 17, 2024</td>
-            <td>Product return for order #3456</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12348</td>
-            <td>Liam Foster</td>
-            <td>July 18, 2024</td>
-            <td>July 18, 2024</td>
-            <td>Payment issue for order #1234</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <div class="card">
+        <div class="search-row">
+          <img class="search" src="{% static 'images/search0.png' %}" alt="Search" />
+          <input type="text" placeholder="Search service history" class="search-input"/>
+        </div>
+
+        <div class="filters">
+          <button class="chip"><img src="{% static 'images/calendar0.png' %}" alt=""><span>Date Range</span></button>
+          <button class="chip"><span>Service Type</span><img src="{% static 'images/vector1.svg' %}" alt=""></button>
+          <button class="chip"><span>Provider</span><img src="{% static 'images/conversion0.png' %}" alt=""></button>
+        </div>
+
+        <div class="summary-grid">
+          <div class="left-summary">
+            <div class="big-score">4.8</div>
+            <div class="stars">
+              <img src="{% static 'images/star0.svg' %}"><img src="{% static 'images/star1.svg' %}"><img src="{% static 'images/star2.svg' %}"><img src="{% static 'images/star3.svg' %}"><img src="{% static 'images/star4.svg' %}">
+            </div>
+            <div class="reviews-count">12 reviews</div>
+          </div>
+
+          <div class="right-summary">
+            <h4>Category Averages</h4>
+            <div class="metric-row"><span>Punctuality</span><div class="bar"><span class="fill" data-width="90"></span></div><span>4.5</span></div>
+            <div class="metric-row"><span>Quality</span><div class="bar"><span class="fill" data-width="96"></span></div><span>4.8</span></div>
+            <div class="metric-row"><span>Professionalism</span><div class="bar"><span class="fill" data-width="98"></span></div><span>4.9</span></div>
+            <div class="metric-row"><span>Value</span><div class="bar"><span class="fill" data-width="86"></span></div><span>4.3</span></div>
+          </div>
+        </div>
+
+        <h4 class="past-title">Past Services</h4>
+        <ul class="past-list">
+          <li class="past-item">
+            <div>
+              <h5>Deep Cleaning</h5>
+              <p>Feedback: Excellent service, very thorough.</p>
+              <span class="date">July 15, 2024</span>
+            </div>
+            <button class="details-link">View Details</button>
+          </li>
+          <li class="past-item">
+            <div>
+              <h5>Standard Cleaning</h5>
+              <p>Feedback: Good job, but missed a spot.</p>
+              <span class="date">June 20, 2024</span>
+            </div>
+            <button class="details-link">View Details</button>
+          </li>
+        </ul>
+      </div>
+    </main>
   </div>
+
+  <!-- Popup -->
+  <div class="popup-overlay" id="popupOverlay"></div>
+  <div class="popup" id="popup">
+    <button class="close-popup" id="closePopup">&times;</button>
+    <h2>Service Details</h2>
+    <p><strong>Service Type:</strong> Deep Cleaning</p>
+    <p><strong>Date:</strong> July 15, 2024</p>
+    <p><strong>Provider:</strong> Emily Watson</p>
+    <p><strong>Rating:</strong> ⭐⭐⭐⭐⭐</p>
+    <p><strong>Feedback:</strong> Excellent service, very thorough and professional.</p>
   </div>
-<div class="overlay" id="menuOverlay"></div>
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -223,25 +228,37 @@ toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+  <script>
+    // Popup logic
+    const popup = document.getElementById("popup");
+    const overlay = document.getElementById("popupOverlay");
+    const closePopup = document.getElementById("closePopup");
+    const detailButtons = document.querySelectorAll(".details-link");
 
- <script>
+    detailButtons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        popup.classList.add("show");
+        overlay.classList.add("show");
+      });
+    });
+
+    [closePopup, overlay].forEach(el => el.addEventListener("click", () => {
+      popup.classList.remove("show");
+      overlay.classList.remove("show");
+    }));
+
+    // Sidebar toggle
     const toggle = document.getElementById("menuToggle");
     const sidebar = document.querySelector(".sidebar");
-    const overlay = document.getElementById("menuOverlay");
     const arrow = document.querySelector(".menu-toggle .arrow");
 
-    toggle.addEventListener("click", () => {
-      const open = sidebar.classList.toggle("open");
-      overlay.classList.toggle("show", open);
-      arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
-    });
+    sidebar.classList.remove("open");
+    arrow.innerHTML = "&#8250;";
 
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-      arrow.style.transform = "rotate(0deg)";
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
     });
   </script>
-
 </body>
 </html>

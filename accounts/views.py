@@ -33,7 +33,7 @@ def sign_up(request):
 
     return render(request, "registration/sign_up.html", {"form": form})
 
-
+    # Sidebar
 def customer_profile_view(request):
 
     return render(request , 'accounts/customer_profile_view.html',) 
@@ -68,3 +68,15 @@ def Customer_Notes(request):
 def Payment_and_Billing(request):
 
     return render(request , 'accounts/Payment_and_Billing.html',) 
+
+def Change_Password(request):
+
+    return render(request , 'accounts/Change_Password.html',)
+
+def Service_History_and_Ratings(request):
+
+    return render(request , 'accounts/Service_History_and_Ratings.html',)
+
+def Loyalty_and_Rewards(request):
+
+    return render(request , 'accounts/Loyalty_and_Rewards.html',)

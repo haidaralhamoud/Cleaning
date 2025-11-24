@@ -43,7 +43,7 @@
     </div>
 
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
         <div>
@@ -52,19 +52,23 @@
         </div>
       </div>
 
+      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+          {% csrf_token %}
+      </form>
+
       <nav class="side-nav">
-        <a href="../Customer Profile/index.html" class="nav-item active"><img src="user-location0.png" class="ico"><span>Overview</span></a>
-        <a href="../Customer Profile - Address & Locations view/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Address & Locations</span></a>
-        <a href="../Customer Profile  -Orders/index.html" class="nav-item"><img src="event-accepted0.png" class="ico"><span>My Bookings</span></a>
-        <a href="../Customer Profile - Incident History/index.html" class="nav-item"><img src="user-location1.png" class="ico"><span>Incidents</span></a>
-        <a href="../Customer Profile -Customize Your Cleaning Preferences/index.html" class="nav-item"><img src="settings0.png" class="ico"><span>Service Preferences</span></a>
-        <a class="nav-item" href="../Customer Profile - Communication/index.html"><img src="communication0.png" class="ico"><span>Communication</span></a>
-        <a href="../Customer Profile - Customer Notes/index.html" class="nav-item" ><img src="list-view0.png" class="ico"><span>Customer Notes</span></a>
-        <a href="../Customer Profile - Payment & Billing/index.html" class="nav-item"><img src="magnetic-card0.png" class="ico"><span>Payment & Billing</span></a>
-        <a href="../Customer Profile- Change Password/index.html" class="nav-item"><img src="person1.png" class="ico"><span>Change Password</span></a>
-        <a class="nav-item" href="../Service History & Ratings/index.html"><img src="vector2.svg" class="ico"><span>Service History & Ratings</span></a>
-        <a class="nav-item" href="../Loyalty & Rewards/index.html"><img src="prize0.png" class="ico"><span>Loyalty & Rewards</span></a>
-        <a class="nav-item"><img src="logout-rounded0.png" class="ico"><span>Logout</span></a>
+        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
       </nav>
     </aside>
 
@@ -204,11 +208,11 @@ toggleBtn.addEventListener("click", () => {
   <script>
     /* ====== Payment data ====== */
     const paymentMethods = [
-      { id: 1, provider: "Visa", last4: "4567", expiry: "08/2025", img: "visa.png", isDefault: true },
-      { id: 2, provider: "Mastercard", last4: "1234", expiry: "08/2025", img: "mastercard.png", isDefault: false },
-      { id: 3, provider: "Klarna", last4: "", expiry: "", img: "klarna.png", isDefault: false },
-      { id: 4, provider: "Paypal", last4: "", expiry: "", img: "paypal.png", isDefault: false },
-      { id: 5, provider: "Swish", last4: "", expiry: "", img: "swish.png", isDefault: false }
+      { id: 1, provider: "Visa", last4: "4567", expiry: "08/2025", img: "{% static 'images/visa.png'%}", isDefault: true },
+      { id: 2, provider: "Mastercard", last4: "1234", expiry: "08/2025", img: "{% static 'images/mastercard.png'%}", isDefault: false },
+      { id: 3, provider: "Klarna", last4: "", expiry: "", img: "{% static 'images/klarna.png'%}", isDefault: false },
+      { id: 4, provider: "Paypal", last4: "", expiry: "", img: "{% static 'images/paypal.png'%}", isDefault: false },
+      { id: 5, provider: "Swish", last4: "", expiry: "", img: "{% static 'images/swish.png'%}", isDefault: false }
     ];
 
     const subscription = {
