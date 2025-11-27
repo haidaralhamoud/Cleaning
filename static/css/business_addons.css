@@ -1,0 +1,212 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Vesper Libre", serif;
+}
+
+body {
+  background: #fff;
+  color: #000;
+  line-height: 1.6;
+}
+
+/* ===== HEADER ===== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 80px;
+  border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #000;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.auth button {
+  border-radius: 25px;
+  padding: 6px 16px;
+  border: 1px solid #71b247;
+  background: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.signup {
+  background: #71b247;
+  color: #fff;
+  margin-right: 10px;
+}
+
+/* ===== STEPS ===== */
+.steps {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 40px auto;
+  flex-wrap: wrap;
+}
+
+.step {
+  border: 1px solid #00a9c7;
+  color: #00a9c7;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.step.active {
+  background: #00a9c7;
+  color: #fff;
+}
+
+/* ===== TITLE ===== */
+.section-title {
+  text-align: center;
+  margin: 30px auto 50px;
+  max-width: 900px;
+}
+
+.section-title h2 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.section-title p {
+  font-size: 17px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ===== GRID ===== */
+.addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+  width: 85%;
+  margin: 0 auto;
+}
+
+.addon-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.addon-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.addon-card input[type="checkbox"] {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 22px;
+  height: 22px;
+  accent-color: #00a9c7;
+  cursor: pointer;
+}
+
+.addon-content {
+  padding: 30px 25px;
+}
+
+.addon-content h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.addon-content ul {
+  list-style-type: disc;
+  padding-left: 25px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.other-note {
+  font-size: 15px;
+  color: rgba(0, 0, 0, 0.5);
+  border: 1px solid #00a9c7;
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+/* ===== BUTTON ===== */
+.confirm-btn {
+  text-align: center;
+  margin: 60px 0 80px;
+}
+
+.confirm-btn button {
+  background: #00a9c7;
+  color: #fff;
+  border: none;
+  border-radius: 15px;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.confirm-btn button:hover {
+  opacity: 0.85;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .nav {
+    justify-content: center;
+  }
+
+  .section-title h2 {
+    font-size: 26px;
+  }
+
+  .section-title p {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .addons-grid {
+    width: 90%;
+    grid-template-columns: 1fr;
+  }
+
+  .addon-content {
+    padding: 25px 20px;
+  }
+
+  .addon-content h3 {
+    font-size: 20px;
+  }
+
+  .confirm-btn button {
+    width: 90%;
+    max-width: 350px;
+  }
+}

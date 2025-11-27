@@ -1,5 +1,5 @@
 from django import forms
-from .models import Contact ,Application, Job
+from .models import Contact ,Application, Job , BusinessBooking
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -80,3 +80,136 @@ class ApplicationForm(forms.ModelForm):
             "area": forms.TextInput(attrs={"class": "hembla-field", "placeholder": "Preferred Role / Area of Interest"}),
             "availability": forms.TextInput(attrs={"class": "hembla-field", "placeholder": "Availability"}),
         }
+
+
+
+class BusinessCompanyInfoForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # 🔵 كل الحقول إجبارية
+        for field in self.fields.values():
+            field.required = True
+
+    class Meta:
+        model = BusinessBooking
+        fields = [
+            "company_name",
+            "contact_person",
+            "role",
+            "office_address",
+            "email",
+            "phone",
+        ]
+
+        widgets = {
+            "company_name": forms.TextInput(attrs={"placeholder": "Enter your company name"}),
+            "contact_person": forms.TextInput(attrs={"placeholder": "Enter contact person"}),
+            "role": forms.TextInput(attrs={"placeholder": "Enter role"}),
+            "office_address": forms.TextInput(attrs={"placeholder": "Enter office address"}),
+            "email": forms.EmailInput(attrs={"placeholder": "Enter email"}),
+            "phone": forms.TextInput(attrs={"placeholder": "Enter phone number"}),
+        }
+
+
+OFFICE_SIZE_CHOICES = [
+    ("Small", "Small"),
+    ("Medium", "Medium"),
+    ("Large", "Large"),
+]
+
+EMPLOYEE_CHOICES = [
+    ("1-10", "1–10"),
+    ("11-25", "11–25"),
+    ("26-50", "26–50"),
+    ("50+", "+50"),
+]
+
+FLOOR_CHOICES = [
+    ("1", "1"),
+    ("2", "2"),
+    ("3", "3"),
+    ("4+", "4+"),
+]
+
+RESTROOM_CHOICES = [
+    ("1", "1"),
+    ("2", "2"),
+    ("3", "3"),
+    ("4+", "4+"),
+]
+
+class OfficeSetupForm(forms.ModelForm):
+
+    restrooms = forms.ChoiceField(
+        choices=RESTROOM_CHOICES,
+        widget=forms.RadioSelect(attrs={"class": "restroom-btn"}),
+        required=True
+    )
+
+    kitchen_cleaning = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "toggle-checkbox"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # كل الحقول المطلوبة
+        self.fields["office_size"].required = True
+        self.fields["num_employees"].required = True
+        self.fields["floors"].required = True
+        self.fields["restrooms"].required = True
+
+    class Meta:
+        model = BusinessBooking
+        fields = [
+            "office_size",
+            "num_employees",
+            "floors",
+            "restrooms",
+            "kitchen_cleaning",
+        ]
+
+        widgets = {
+            "office_size": forms.Select(attrs={"class": "hembla-select"}),
+            "num_employees": forms.Select(attrs={"class": "hembla-select"}),
+            "floors": forms.Select(attrs={"class": "hembla-select"}),
+        }
+
+    restrooms = forms.ChoiceField(
+        choices=RESTROOM_CHOICES,
+        widget=forms.RadioSelect(attrs={"class": "restroom-btn"})
+    )
+
+    kitchen_cleaning = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": "toggle-checkbox"}),
+    )
+
+    class Meta:
+        model = BusinessBooking
+        fields = [
+            "office_size",
+            "num_employees",
+            "floors",
+            "restrooms",
+            "kitchen_cleaning",
+        ]
+
+        widgets = {
+            "office_size": forms.Select(
+                choices=OFFICE_SIZE_CHOICES,
+                attrs={"class": "hembla-select"}
+            ),
+            "num_employees": forms.Select(
+                choices=EMPLOYEE_CHOICES,
+                attrs={"class": "hembla-select"}
+            ),
+            "floors": forms.Select(
+                choices=FLOOR_CHOICES,
+                attrs={"class": "hembla-select"}
+            ),
+        }
+
+
