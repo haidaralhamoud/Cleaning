@@ -1,0 +1,278 @@
+@import url('https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Vesper Libre", serif;
+  background: #f7f7ff;
+  color: #000;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 60px;
+}
+.navbar .logo { width: 80px; height: 80px; object-fit: cover; }
+.navbar ul { display: flex; gap: 40px; list-style: none; }
+.navbar li { font-weight: 700; cursor: pointer; }
+.navbar li.active { border-bottom: 2px solid #039FC8; }
+.profile-btn {
+  background: #71b247;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== HERO ===== */
+.hero {
+  position: relative;
+  background: url('frame-16865527220.png') center/cover no-repeat;
+  height: 300px;
+}
+.hero .overlay {
+  background: rgba(0,0,0,0.4);
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero h1 {
+  color: #fff;
+  font-size: 48px;
+}
+
+/* ===== MAIN CONTENT ===== */
+.content {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+.section-title {
+  font-size: 26px;
+  color: #039FC8;
+  text-align: center;
+  font-weight: 700;
+}
+.subtitle {
+  text-align: center;
+  color: #000;
+  font-size: 18px;
+  font-weight: 500;
+  margin-bottom: 25px;
+}
+
+/* ===== ADD-ONS GRID ===== */
+.addons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+.addon-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  padding: 25px 10px;
+  text-align: center;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.addon-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+.addon-card img {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 10px;
+}
+.addon-card p {
+  font-size: 18px;
+  font-weight: 500;
+}
+.check-box {
+  position: absolute;
+  top: 18px; right: 18px;
+  width: 24px; height: 24px;
+  border: 2px solid #039FC8;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.check-box.checked {
+  background: #039FC8;
+  box-shadow: 0 0 8px rgba(3,159,200,0.4);
+}
+.check-box.checked::after {
+  content: "✓";
+  position: absolute;
+  color: #fff;
+  font-weight: 700;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -55%);
+}
+
+/* ===== POPUP ===== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.popup-content {
+  background: #fff;
+  border-radius: 15px;
+  padding: 25px;
+  width: 90%;
+  max-width: 550px;
+  animation: zoom 0.3s ease;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+}
+@keyframes zoom {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.popup-header h3 {
+  color: #039FC8;
+  font-weight: 700;
+}
+.popup-header button {
+  background: #039FC8;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 20px;
+}
+.popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.btn-outline, .btn-filled {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-family: "Vesper Libre", serif;
+  cursor: pointer;
+  border: 2px solid #039FC8;
+}
+.btn-outline { background: #fff; color: #039FC8; }
+.btn-outline:hover { background: #e6f7fb; }
+.btn-filled { background: #039FC8; color: #fff; }
+.btn-filled:hover { background: #0287ac; }
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .hero h1 { font-size: 32px; }
+  .navbar { flex-direction: column; padding: 10px 20px; }
+  .navbar ul { gap: 20px; flex-wrap: wrap; }
+  .popup-content { padding: 20px; }
+}
+/* ===== BOOKING SUMMARY ===== */
+.booking-summary {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  padding: 30px 40px;
+  max-width: 400px; /* ✅ وسّعنا العرض */
+  width: 100%; /* يخليها تتناسب بسلاسة */
+  height: fit-content;
+  margin-left: auto;
+  font-family: "Vesper Libre", serif;
+}
+
+
+.booking-summary h3 {
+  text-align: center;
+  color: #000;
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+.booking-summary hr {
+  border: none;
+  border-top: 1.5px solid #039FC8;
+  margin: 10px 0;
+}
+
+.summary-item, .summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 17px;
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+.summary-total {
+  font-weight: 700;
+  margin-top: 15px;
+}
+
+.continue-btn {
+  display: block;
+  width: 100%;
+  background: #039FC8;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 0;
+  margin-top: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.continue-btn:hover {
+  background: #0287ad;
+}
+
+/* === GRID تعديل بسيط لعرضه جنب القائمة === */
+@media (min-width: 900px) {
+  .content {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 40px;
+    align-items: start;
+  }
+}
+
+/* === موبايل: خلي الصندوق تحت === */
+@media (max-width: 899px) {
+  .booking-summary {
+    margin: 40px auto 0;
+    max-width: 90%;
+  }
+}
+@media (min-width: 900px) {
+  .content {
+    display: grid;
+    grid-template-columns: 1fr 400px; /* 🔹 بدل 320px */
+    gap: 25px; /* 🔹 خففنا المسافة بين الأعمدة */
+    align-items: start;
+  }
+}

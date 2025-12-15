@@ -1,0 +1,300 @@
+/* ====== GLOBAL RESET ====== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Vesper Libre", serif;
+  background: #ffffff;
+  color: #000;
+  overflow-x: hidden;
+}
+
+/* ====== HEADER ====== */
+.navbar {
+  width: 100%;
+  height: 100px;
+  background: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 5%;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.logo-text h2 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: #039fc8;
+}
+
+.logo-text p {
+  font-size: 12px;
+  color: #b9b9b9;
+}
+
+.nav-links {
+  display: flex;
+  gap: 30px;
+}
+
+.nav-links a {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  color: #000;
+  font-size: 16px;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-links a.active::after,
+.nav-links a:hover::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #71b247;
+}
+
+.nav-links a:hover {
+  color: #039fc8;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-buttons button {
+  border-radius: 30px;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  width: 100px;
+  height: 36px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.signup {
+  background: #71b247;
+  color: #fff;
+}
+
+.signup:hover {
+  background: #5fa53b;
+  transform: scale(1.05);
+}
+
+.signin {
+  background: #fff;
+  border: 1px solid #71b247;
+  color: #71b247;
+}
+
+.signin:hover {
+  background: #71b247;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+/* ====== SERVICES SECTION ====== */
+.services-section {
+  padding: 60px 5%;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.section-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #000;
+}
+
+.section-header .filter img {
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.section-header .filter img:hover {
+  transform: rotate(15deg);
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #039fc8;
+  margin: 15px 0 40px;
+}
+
+/* ====== SERVICES LIST ====== */
+.services-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 25px;
+}
+
+.service-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  gap: 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.service-card img {
+  width: 220px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+.service-info {
+  flex: 1;
+}
+
+.service-info h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.service-info p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #000;
+  margin-bottom: 10px;
+}
+
+.service-info span {
+  font-size: 14px;
+  color: #b9b9b9;
+}
+
+.service-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.service-actions button {
+  width: 140px;
+  height: 45px;
+  border-radius: 12px;
+  border: none;
+  color: #fff;
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-cart,
+.btn-book {
+  background: #039fc8;
+}
+
+.btn-cart:hover,
+.btn-book:hover {
+  background: #0289ad;
+  transform: scale(1.05);
+}
+
+/* ====== FADE-IN ANIMATION ====== */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeIn 0.9s ease forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
+@media (max-width: 992px) {
+  .service-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .service-card img {
+    width: 100%;
+    height: 200px;
+  }
+
+  .service-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .auth-buttons {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    height: auto;
+    padding: 20px;
+  }
+
+  .nav-links {
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .section-header h1 {
+    font-size: 24px;
+  }
+
+  .service-actions button {
+    width: 120px;
+    height: 40px;
+  }
+
+  .services-list {
+    gap: 20px;
+  }
+}

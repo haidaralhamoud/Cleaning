@@ -1,0 +1,1144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Booking Schedule</title>
+
+<link rel="stylesheet" href="{% static 'css/Private_scheduale.css' %}">
+
+<style>
+  body{
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:#f7f9fc;
+  }
+
+  /* ====== توزيع الصفحة يمين/يسار ====== */
+  .container {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 25px;
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 20px;
+  }
+
+  .left {
+      flex: 1;
+      min-width: 650px;
+  }
+
+  .right {
+      width: 350px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid #e6eff8;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+  }
+
+  /* ====== summary ====== */
+  .summary-item{
+      display:flex;
+      justify-content:space-between;
+      margin:8px 0;
+      font-size:.95rem;
+  }
+  .summary-item.total{
+      font-size:1.25rem;
+      font-weight:700;
+      color:#00a3c8;
+  }
+  .line{
+      border-bottom:1px solid #eee;
+      margin:10px 0;
+  }
+
+  .checkout-wrapper{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:18px;
+  }
+
+  /* ====== اختيار نوع الـ Schedule (نفس الكل / لكل خدمة) ====== */
+  .mode-row{
+      display:flex;
+      gap:15px;
+      margin:25px auto 30px;
+      flex-wrap:wrap;
+      max-width:700px;
+      justify-content:center;
+  }
+  .mode-card{
+      flex:1 1 230px;
+      border:1px solid #d4e5f0;
+      border-radius:14px;
+      padding:14px 16px;
+      cursor:pointer;
+      background:#f8fbff;
+      transition:.2s;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+  }
+  .mode-card small{
+      color:#666;
+      font-size:.8rem;
+  }
+  .mode-card span.badge{
+      align-self:flex-start;
+      font-size:.7rem;
+      padding:2px 8px;
+      border-radius:999px;
+      background:#e3f7fb;
+      color:#0089a8;
+      margin-top:4px;
+  }
+  .mode-card.selected{
+      border-color:#00a3c8;
+      box-shadow:0 0 0 2px rgba(0,163,200,0.15);
+      background:#ffffff;
+  }
+  .mode-title{
+      font-weight:600;
+  }
+
+  /* ====== منطقة الجدولة حسب كل خدمة ====== */
+  .per-service-area{
+      margin-top:20px;
+  }
+  .service-acc{
+      background:#ffffff;
+      border-radius:16px;
+      border:1px solid #dde6f2;
+      margin-bottom:12px;
+      overflow:hidden;
+      transition:.2s;
+  }
+  .service-acc.open{
+      box-shadow:0 8px 16px rgba(0,0,0,0.05);
+      border-color:#00a3c8;
+  }
+  .acc-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 16px;
+      cursor:pointer;
+      gap:12px;
+  }
+  .acc-main-info{
+      display:flex;
+      align-items:center;
+      gap:10px;
+  }
+  .acc-main-info img{
+      width:40px;
+      height:40px;
+      border-radius:12px;
+      object-fit:cover;
+  }
+  .acc-name{
+      font-weight:600;
+      font-size:.98rem;
+  }
+  .acc-cat{
+      font-size:.8rem;
+      color:#777;
+  }
+  .acc-toggle-btn{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      border:none;
+      background:#e6f6fb;
+      color:#0089a8;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:600;
+  }
+  .acc-arrow{
+      display:inline-block;
+      transition:.2s;
+  }
+  .service-acc.open .acc-arrow{
+      transform:rotate(180deg);
+  }
+  .acc-body{
+      max-height:0;
+      overflow:hidden;
+      transition:max-height .25s ease;
+      border-top:1px solid #eef3fb;
+      background:#fcfeff;
+  }
+  .acc-inner{
+      padding:14px 16px 18px;
+  }
+
+  .svc-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:16px;
+      margin-bottom:14px;
+  }
+  .svc-col{
+      flex:1 1 240px;
+  }
+  .svc-label{
+      display:block;
+      font-size:.85rem;
+      font-weight:600;
+      margin-bottom:4px;
+  }
+  .svc-input,
+  .svc-select,
+  .svc-textarea{
+      width:100%;
+      border-radius:10px;
+      border:1px solid #d4e5f0;
+      padding:8px 10px;
+      font-size:.88rem;
+      outline:none;
+      transition:.2s;
+      background:#ffffff;
+  }
+  .svc-input:focus,
+  .svc-select:focus,
+  .svc-textarea:focus{
+      border-color:#00a3c8;
+      box-shadow:0 0 0 2px rgba(0,163,200,0.15);
+  }
+  .svc-textarea{
+      min-height:70px;
+      resize:vertical;
+  }
+
+  .svc-days{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:4px;
+  }
+  .svc-day-pill{
+      border-radius:999px;
+      border:1px solid #d4e5f0;
+      padding:4px 10px;
+      font-size:.78rem;
+      display:flex;
+      align-items:center;
+      gap:4px;
+      background:#ffffff;
+      cursor:pointer;
+  }
+  .svc-day-pill input{
+      accent-color:#00a3c8;
+  }
+
+  .svc-end-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      margin-top:4px;
+  }
+
+  /* ====== شكل اليوم + الزيادة تحته ====== */
+  .day{
+      position:relative;
+      text-align:center;
+      padding-top:6px;
+      padding-bottom:2px;
+      font-size:0.9rem;
+      cursor:pointer;
+  }
+  .day.selected{
+      background:#00a3c8;
+      color:#fff;
+      border-radius:999px;
+  }
+  .surcharge-tag{
+      font-size:0.6rem;
+      margin-top:2px;
+      font-weight:600;
+      line-height:1;
+  }
+
+
+.day-check input {
+    transform: scale(1.2);
+    
+
+}
+
+.weekend-tag {
+    margin-left: auto;
+    color: #d9534f;
+    font-weight: 700;
+    font-size: 0.9rem;
+
+}
+.day-check {
+    display: flex;
+    align-items: center;
+    justify-content: center;   /* 🔥 يخلي الاسم بالنص */
+    gap: 6px;
+    padding: 10px 20px;
+    border: 2px solid #00a3c8;
+    border-radius: 30px;
+    margin-bottom: 12px;
+    width: 240px; /* 🔥 عرض ثابت ليصير الصفين متساويين */
+    font-weight: 700;
+    width:300px ;
+    font-size: 1rem;
+    background: white;
+    position: relative;  /* مهم للـ +20% */
+}
+
+.day-check input {
+    position: absolute;
+    left: 15px;  /* 🔥 checkbox يصير دائماً اليسار */
+    transform: scale(1.15);
+}
+
+.weekend-tag {
+    position: absolute;
+    right: 15px;   /* 🔥 +20% على اليمين */
+    color: #d9534f;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.input-error {
+    border: 2px solid #e74c3c !important;
+    background: #fff6f6;
+}
+
+</style>
+</head>
+<body>
+
+<form method="post" id="scheduleForm" action="{% url 'home:private_booking_schedule' booking.id %}">
+  {% csrf_token %}
+
+  <!-- hidden fields لمود same -->
+  <input type="hidden" name="appointment_date" id="appointment_date">
+  <input type="hidden" name="appointment_time_window" id="appointment_time_window">
+  <input type="hidden" name="day_work_best" id="day_work_best">
+  <input type="hidden" name="End_Date" id="End_Date">
+  <input type="hidden" name="frequency_type" id="frequency_type">
+  <input type="hidden" name="special_timing_requests" id="special_timing_requests">
+
+  <!-- نوع الجدولة -->
+  <input type="hidden" name="schedule_mode" id="schedule_mode" value="">
+  <!-- JSON لكل خدمة في حال per_service -->
+  <input type="hidden" name="schedules_json" id="schedules_json">
+
+  <div class="container">
+    <!-- LEFT SECTION -->
+    <div class="left">
+      <div class="step-title">Step 3 of 4</div>
+      <div class="progress"></div>
+
+      <h2>When would you like your services</h2>
+
+      <!-- اختيار نوع الـ schedule -->
+      {% if services|length > 1 %}
+        <p style="margin:8px 0 6px;font-weight:600;">How would you like to schedule your services?</p>
+
+        <div class="mode-row">
+            <div class="mode-card" data-mode="same">
+              <div class="mode-title">Use the same schedule for all services</div>
+              <small>We’ll apply this date, time window and frequency to every service in your cart.</small>
+              <span class="badge">Fast &amp; easy</span>
+            </div>
+            <div class="mode-card" data-mode="per_service">
+              <div class="mode-title">Set a separate schedule for each service</div>
+              <small>Customize date and timing individually for each service.</small>
+              <span class="badge">More control</span>
+            </div>
+        </div>
+      {% else %}
+        <!-- خدمة واحدة → نفس الجدولة تلقائياً -->
+        <input type="hidden" id="schedule_mode" name="schedule_mode" value="same">
+      {% endif %}
+
+      <!-- 🟦 نفس الـ Schedule لكل الخدمات -->
+      <div id="sameScheduleArea" style="display:none;">
+
+        <p style="margin-bottom: 10px;">Schedule for all services:</p>
+
+        <div class="q-row">
+          <!-- Calendar -->
+          <div class="q-col">
+            <div class="calendar-container">
+              <div class="calendar-header">
+                <div class="month-nav" id="prevMonth">&#10094;</div>
+                <div class="month-title" id="monthTitle">Month</div>
+                <div class="month-nav" id="nextMonth">&#10095;</div>
+              </div>
+              <div class="days-of-week">
+                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+              </div>
+              <div class="days-grid" id="calendarDays"></div>
+            </div>
+          </div>
+
+          <!-- Time Window -->
+          <div class="q-col">
+            <div class="time-box">
+              <h3>Q2. Choose a Time Window</h3>
+              <div class="time-option" data-time="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</div>
+              <div class="time-option" data-time="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</div>
+              <div class="time-option" data-time="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</div>
+              <div class="time-option" data-time="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Special Requests -->
+        <div class="request-box">
+          <h3>Q3. Special Timing Requests (optional)</h3>
+          <textarea id="specialRequest" placeholder="Tell us if there&apos;s anything we should know..."></textarea>
+        </div>
+
+        <!-- Frequency & Days -->
+        <h2>Schedule &amp; Frequency</h2>
+        <div class="freq-row">
+          <div class="freq-col">
+            <h3>Q1. How often would you like this service?</h3>
+  <div class="freq-btn" data-freq="weekly">
+      Weekly <span class="save-tag">(save up to 15%)</span>
+  </div>
+
+  <div class="freq-btn" data-freq="biweekly">
+      Every 2 weeks <span class="save-tag">(save up to 10%)</span>
+  </div>
+
+  <div class="freq-btn" data-freq="monthly">
+      Monthly <span class="save-tag">(save up to 5%)</span>
+  </div>
+
+          </div>
+
+          <div class="freq-col">
+<h3>Q2. Which day(s) work best for you?</h3>
+
+<div class="days-grid2" id="weekDays">
+
+    <label class="day-check weekend">
+        <input type="checkbox" data-day="Mon"/> Monday
+    </label>
+
+    <label class="day-check">
+        <input type="checkbox" data-day="Tue"/> Tuesday
+    </label>
+
+    <label class="day-check">
+        <input type="checkbox" data-day="Wed"/> Wednesday
+    </label>
+
+    <label class="day-check">
+        <input type="checkbox" data-day="Thu"/> Thursday
+    </label>
+
+    <label class="day-check weekend">
+        <input type="checkbox" data-day="Fri"/> Friday
+    </label>
+
+    <label class="day-check weekend">
+        <input type="checkbox" data-day="Sat"/> Saturday 
+        <span class="weekend-tag">+20%</span>
+    </label>
+
+    <label class="day-check weekend">
+        <input type="checkbox" data-day="Sun"/> Sunday 
+        <span class="weekend-tag">+20%</span>
+    </label>
+
+</div>
+
+          </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="end-date">
+          <h3>Q3. End Date (optional)</h3>
+          <div class="end-date-buttons">
+            <div class="end-btn" id="noBtn">No, ongoing until further notice</div>
+            <div class="end-btn" id="yesBtn">Yes</div>
+          </div>
+          <input type="date" id="endDate" style="display:none;">
+        </div>
+      </div>
+
+      <!-- 🟣 Schedule منفصل لكل خدمة -->
+      <div id="perServiceArea" class="per-service-area" style="display:none;">
+        <h3 style="margin-bottom:10px;">Set a dedicated schedule for each service</h3>
+
+        {% for s in services %}
+        <div class="service-acc" data-service="{{ s.slug }}">
+          <div class="acc-header">
+            <div class="acc-main-info">
+              {% if s.image %}
+              <img src="{{ s.image.url }}" alt="{{ s.title }}">
+              {% endif %}
+              <div>
+                <div class="acc-name">{{ s.title }}</div>
+                <div class="acc-cat">{{ s.category.name }}</div>
+              </div>
+            </div>
+            <button type="button" class="acc-toggle-btn">
+              <span>Schedule</span>
+              <span class="acc-arrow">▾</span>
+            </button>
+          </div>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="svc-row">
+                <div class="svc-col">
+                  <label class="svc-label">Date</label>
+                  <input type="date" class="svc-input svc-date">
+                </div>
+                <div class="svc-col">
+                  <label class="svc-label">Time Window</label>
+                  <select class="svc-select svc-time">
+                    <option value="">Select…</option>
+                    <option value="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</option>
+                    <option value="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</option>
+                    <option value="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</option>
+                    <option value="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="svc-row">
+                <div class="svc-col">
+                  <label class="svc-label">Frequency</label>
+                  <select class="svc-select svc-frequency">
+                    <option value="">One time only</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Every 2 weeks</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="seasonal">Seasonal</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="svc-row">
+                <div class="svc-col">
+                  <label class="svc-label">Preferred days</label>
+                  <div class="svc-days">
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Mon"> Mon</label>
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Tue"> Tue</label>
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Wed"> Wed</label>
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Thu"> Thu</label>
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Fri"> Fri</label>
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Sat"> Sat</label>
+                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Sun"> Sun</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="svc-row">
+                <div class="svc-col">
+                  <label class="svc-label">End Date (optional)</label>
+                  <div class="svc-end-row">
+                    <span style="font-size:.8rem;color:#666;">Leave empty for ongoing booking.</span>
+                    <input type="date" class="svc-input svc-end-date">
+                  </div>
+                </div>
+              </div>
+
+              <div class="svc-row">
+                <div class="svc-col">
+                  <label class="svc-label">Special Timing Requests (optional)</label>
+                  <textarea class="svc-textarea svc-notes" placeholder="Anything we should know for this service?"></textarea>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- زر المتابعة في اليسار -->
+      <div style="margin-top: 25px;">
+        <button type="submit" class="checkout-btn" style="
+          width: 100%;
+          padding: 14px;
+          border-radius: 12px;
+          font-size: 1.05rem;
+          background: #00a3c8;
+          color: white;
+          border: none;
+          cursor: pointer;
+        ">
+          Continue →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- RIGHT SUMMARY (REAL DYNAMIC FROM API) -->
+    <div class="right">
+        <h3>Booking Summary</h3>
+        <div class="line"></div>
+
+        <div class="summary-item">
+            <span>Services</span>
+            <span id="sum_services">$0</span>
+        </div>
+
+        <div class="summary-item">
+            <span>Add-ons</span>
+            <span id="sum_addons">$0</span>
+        </div>
+
+        <div class="summary-item">
+            <span>ROT Deduction</span>
+            <span id="sum_rot">$0</span>
+        </div>
+
+        <div class="line"></div>
+
+        <div class="summary-item total">
+            <span>Total</span>
+            <span id="sum_total">$0</span>
+        </div>
+
+        <div class="checkout-wrapper">
+            <button type="submit" class="checkout-btn">Continue →</button>
+        </div>
+    </div>
+
+  </div>
+</form>
+
+
+
+{{ date_rules|json_script:"dateRules" }}
+<script>
+const DATE_RULES = JSON.parse(document.getElementById("dateRules").textContent); 
+</script>
+<script>
+/* ---------- Helpers ---------- */
+function pad(n){return n<10? "0"+n : n;}
+
+/* ---------- Elements & State ---------- */
+const inputDate    = document.getElementById("appointment_date");
+const inputWindow  = document.getElementById("appointment_time_window");
+const inputFreq    = document.getElementById("frequency_type");
+const inputSpecial = document.getElementById("special_timing_requests");
+const inputMode    = document.getElementById("schedule_mode");
+const inputSchedulesJson = document.getElementById("schedules_json");
+
+const sameArea       = document.getElementById("sameScheduleArea");
+const perServiceArea = document.getElementById("perServiceArea");
+
+const monthNames = ["January","February","March","April","May","June",
+                    "July","August","September","October","November","December"];
+let currentMonth = new Date().getMonth();
+let currentYear  = new Date().getFullYear();
+
+const monthTitle   = document.getElementById("monthTitle");
+const calendarDays = document.getElementById("calendarDays");
+
+/* ---------- اختيار نوع الـ schedule ---------- */
+const modeCards = document.querySelectorAll(".mode-card");
+
+// خدمة واحدة → same mode تلقائي
+const serviceCount = {{ services|length|default:0 }};
+if (serviceCount === 1) {
+    inputMode.value = "per_service";  // ← هذا هو التعديل
+    inputMode.value = "same";
+    if (sameArea) sameArea.style.display = "block";
+    if (perServiceArea) perServiceArea.style.display = "none";
+}
+
+modeCards.forEach(card => {
+  card.addEventListener("click", () => {
+    modeCards.forEach(c => c.classList.remove("selected"));
+    card.classList.add("selected");
+    const mode = card.getAttribute("data-mode");
+    inputMode.value = mode;
+
+    if (mode === "same"){
+      if (sameArea) sameArea.style.display = "block";
+      if (perServiceArea) perServiceArea.style.display = "none";
+    } else {
+      if (sameArea) sameArea.style.display = "none";
+      if (perServiceArea) perServiceArea.style.display = "block";
+    }
+
+    updateScheduleSummary();
+  });
+});
+
+/* ---------- Calendar (same mode) مع الزيادات ---------- */
+function renderCalendar(month, year){
+  if (!calendarDays || !monthTitle) return;
+
+  monthTitle.textContent = `${monthNames[month]} ${year}`;
+  calendarDays.innerHTML = "";
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.appendChild(document.createElement("div"));
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+
+    const cell = document.createElement("div");
+    cell.className = "day";
+    cell.textContent = d;
+
+    // ----------------------
+    // 1) اكتشاف اليوم S أو S (Saturday / Sunday)
+    // ----------------------
+    const jsDate = new Date(year, month, d);
+    const weekday = jsDate.getDay(); // 0=Sun, 6=Sat
+
+    let surcharge = 0;
+
+    if (weekday === 0 || weekday === 6) {
+      surcharge = 10;
+      const badge = document.createElement("div");
+      badge.className = "day-surcharge";
+      badge.textContent = `+${surcharge}%`;
+      cell.appendChild(badge);
+      cell.classList.add("weekend");
+    }
+
+    // ----------------------
+    // 2) عند الضغط على اليوم
+    // ----------------------
+cell.addEventListener("click", () => {
+    // 1) إزالة select من كل الأيام
+    document.querySelectorAll(".day").forEach(el => 
+        el.classList.remove("selected")
+    );
+
+    // 2) اختيار اليوم الجديد
+    cell.classList.add("selected");
+
+    // 3) تخزين التاريخ بالحقل المخفي
+    const dateStr = `${year}-${pad(month+1)}-${pad(d)}`;
+    inputDate.value = dateStr;
+
+    // 4) تحديد اليوم (Sat / Sun / Mon ...)
+    const weekdayCode = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][weekday];
+    document.getElementById("day_work_best").value = JSON.stringify([weekdayCode]);
+
+    // 5) إعادة حساب السعر فوراً
+    updateScheduleSummary();
+});
+
+
+    calendarDays.appendChild(cell);
+  }
+}
+
+renderCalendar(currentMonth, currentYear);
+
+const prevMonthBtn = document.getElementById("prevMonth");
+const nextMonthBtn = document.getElementById("nextMonth");
+if (prevMonthBtn && nextMonthBtn){
+  prevMonthBtn.onclick = () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar(currentMonth, currentYear);
+  };
+  nextMonthBtn.onclick = () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar(currentMonth, currentYear);
+  };
+}
+
+/* ---------- Time Window (same mode) ---------- */
+document.querySelectorAll(".time-option").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".time-option").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    if (inputWindow) inputWindow.value = btn.getAttribute("data-time") || "";
+    updateScheduleSummary();
+  });
+});
+
+/* ---------- Frequency (same mode) ---------- */
+document.querySelectorAll(".freq-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".freq-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const freqVal = btn.getAttribute("data-freq") || "";
+    if (inputFreq) inputFreq.value = freqVal;
+
+    updateScheduleSummary();
+  });
+});
+
+/* ---------- Weekday checkboxes (same mode) ---------- */
+document.querySelectorAll(".day-check input").forEach(chk=>{
+  chk.addEventListener("change",()=>{
+    const label = chk.closest(".day-check");
+    if (label){
+      if (chk.checked) label.classList.add("active");
+      else label.classList.remove("active");
+    }
+    updateScheduleSummary();
+  });
+});
+
+/* ---------- End Date yes/no (same mode) ---------- */
+const yesBtn = document.getElementById("yesBtn");
+const noBtn  = document.getElementById("noBtn");
+const endDate= document.getElementById("endDate");
+
+if (noBtn && yesBtn && endDate){
+  noBtn.classList.add("active");
+
+  yesBtn.onclick = ()=>{ 
+    yesBtn.classList.add("active"); 
+    noBtn.classList.remove("active"); 
+    endDate.style.display="block"; 
+    updateScheduleSummary();
+  };
+  noBtn.onclick  = ()=>{ 
+    noBtn.classList.add("active");  
+    yesBtn.classList.remove("active"); 
+    endDate.style.display="none"; 
+    endDate.value = "";
+    updateScheduleSummary();
+  };
+}
+
+/* ---------- Accordion لكل خدمة (per_service) ---------- */
+document.querySelectorAll(".service-acc").forEach(acc => {
+  const header = acc.querySelector(".acc-header");
+  const body   = acc.querySelector(".acc-body");
+
+  if (!header || !body) return;
+
+  header.addEventListener("click", () => {
+    const isOpen = acc.classList.contains("open");
+    if (isOpen){
+      acc.classList.remove("open");
+      body.style.maxHeight = 0;
+    } else {
+      acc.classList.add("open");
+      body.style.maxHeight = body.scrollHeight + "px";
+    }
+  });
+
+  // أي تغيير داخل الـ body → حدّث الملخص
+  body.querySelectorAll("input, select, textarea").forEach(el => {
+    el.addEventListener("change", () => {
+      updateScheduleSummary();
+    });
+  });
+});
+
+/* ---------- قبل الإرسال – تخزين بيانات الجدولة ---------- */
+document.getElementById("scheduleForm").addEventListener("submit", function(e){
+  // لو في أكثر من خدمة لازم يختار مود
+  if ({{ services|length }} > 1 && !inputMode.value){
+      alert("Please choose how you'd like to schedule your services.");
+      e.preventDefault();
+      return;
+  }
+
+  // Mode 1: نفس الجدولة لكل الخدمات
+  if (inputMode.value === "same"){
+    const specialText = document.getElementById("specialRequest")
+      ? document.getElementById("specialRequest").value || ""
+      : "";
+
+    const days = Array.from(
+      document.querySelectorAll(".day-check input:checked")
+    ).map(chk => chk.dataset.day);
+
+    document.getElementById("day_work_best").value = JSON.stringify(days);
+
+    const endVal = endDate ? (endDate.value || null) : null;
+    const endType = (yesBtn && yesBtn.classList.contains("active") && endVal)
+      ? "end_on"
+      : "no_end";
+
+    const payload = {
+      special_request: specialText,
+      days: days,
+      end_type: endType,
+      end_date: endVal
+    };
+
+    inputSpecial.value = JSON.stringify(payload);
+
+  } else if (inputMode.value === "per_service") {
+    // Mode 2: جدول منفصل لكل خدمة
+    const schedules = {};
+
+    document.querySelectorAll(".service-acc").forEach(acc => {
+      const slug = acc.getAttribute("data-service");
+      if (!slug) return;
+
+      const dateEl   = acc.querySelector(".svc-date");
+      const timeEl   = acc.querySelector(".svc-time");
+      const freqEl   = acc.querySelector(".svc-frequency");
+      const notesEl  = acc.querySelector(".svc-notes");
+      const endEl    = acc.querySelector(".svc-end-date");
+      const dayChecks= acc.querySelectorAll(".svc-day:checked");
+
+      const days = Array.from(dayChecks).map(ch => ch.value);
+
+      const dateVal = dateEl ? (dateEl.value || null) : null;
+      const timeVal = timeEl ? (timeEl.value || "") : "";
+      const freqVal = freqEl ? (freqEl.value || "") : "";
+      const notesVal= notesEl ? (notesEl.value || "") : "";
+      const endVal  = endEl ? (endEl.value || null) : null;
+
+      schedules[slug] = {
+        date: dateVal,
+        time_window: timeVal,
+        frequency: freqVal,
+        days: days,
+        end_date: endVal,
+        special_request: notesVal
+      };
+    });
+
+    inputSchedulesJson.value = JSON.stringify(schedules);
+
+    // تفريغ حقول مود same
+    inputDate.value = "";
+    inputWindow.value = "";
+    inputFreq.value = "";
+    inputSpecial.value = "";
+    document.getElementById("day_work_best").value = "";
+    document.getElementById("End_Date").value = "";
+  }
+});
+
+/* ---------- Summary from REAL API (with small animation on Total) ---------- */
+let lastTotal = 0;
+
+function animateTotal(from, to, duration = 250) {
+    const el = document.getElementById("sum_total");
+    if (!el) return;
+    const start = performance.now();
+
+    function step(now){
+        const p = Math.min(1, (now - start) / duration);
+        const val = from + (to - from) * p;
+        el.textContent = "$" + val.toFixed(2);
+        if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+function updateScheduleSummary() {
+
+    const params = new URLSearchParams();
+
+    params.append("mode", inputMode.value || "");
+
+    if (inputMode.value === "same") {
+
+        // SAME MODE
+        params.append("date", inputDate.value || "");
+        params.append("time_window", inputWindow.value || "");
+        params.append("frequency", inputFreq.value || "");
+        params.append("weekday", document.getElementById("day_work_best").value);
+
+        const days = Array.from(document.querySelectorAll(".day-check input:checked"))
+                          .map(c => c.dataset.day);
+
+        params.append("days", JSON.stringify(days));
+
+    } else {
+
+        // PER SERVICE MODE
+        const schedules = {};
+
+        document.querySelectorAll(".service-acc").forEach(acc => {
+            const slug = acc.dataset.service;
+
+            const date = acc.querySelector(".svc-date")?.value || "";
+            const time = acc.querySelector(".svc-time")?.value || "";
+            const freq = acc.querySelector(".svc-frequency")?.value || "";
+            const notes = acc.querySelector(".svc-notes")?.value || "";
+            const endDate = acc.querySelector(".svc-end-date")?.value || "";
+
+            const days = Array.from(acc.querySelectorAll(".svc-day:checked"))
+                              .map(el => el.value);
+
+            schedules[slug] = {
+                date,
+                time_window: time,
+                frequency: freq,
+                days,
+                end_date: endDate,
+                special_request: notes
+            };
+        });
+
+        params.append("schedules_json", JSON.stringify(schedules));
+
+    }
+
+
+    fetch(`/private/api/booking/{{ booking.id }}/price/?` + params.toString())
+        .then(res => res.json())
+        .then(data => {
+
+            document.getElementById("sum_services").textContent =
+                "$" + Number(data.services_total).toFixed(2);
+
+            document.getElementById("sum_addons").textContent =
+                "$" + Number(data.addons_total).toFixed(2);
+
+            document.getElementById("sum_rot").textContent =
+                "$" + Number(data.rot).toFixed(2);
+
+            animateTotal(lastTotal, Number(data.final));
+
+            lastTotal = Number(data.final);
+        })
+        .catch(err => console.error("SUMMARY ERROR:", err));
+}
+
+// أول تحميل للصفحة
+document.addEventListener("DOMContentLoaded", () => {
+    updateScheduleSummary();
+});
+</script>
+
+
+<script>
+function validateScheduleForm() {
+
+    // -------- 1) اختيار المود --------
+    if ({{ services|length }} > 1 && !inputMode.value) {
+        alert("Please choose how you'd like to schedule your services.");
+        return false;
+    }
+
+    // تنظيف أخطاء سابقة
+    document.querySelectorAll(".input-error").forEach(el =>
+        el.classList.remove("input-error")
+    );
+
+    // -------- 2) SAME MODE --------
+    if (inputMode.value === "same") {
+
+        if (!inputDate.value) {
+            alert("Please select a date.");
+            document.getElementById("calendarDays").scrollIntoView({behavior:"smooth"});
+            return false;
+        }
+
+        if (!inputWindow.value) {
+            alert("Please choose a time window.");
+            document.querySelector(".time-box").scrollIntoView({behavior:"smooth"});
+            return false;
+        }
+
+        if (!inputFreq.value) {
+            alert("Please select a frequency.");
+            document.querySelector(".freq-row").scrollIntoView({behavior:"smooth"});
+            return false;
+        }
+
+        const days = document.querySelectorAll(".day-check input:checked");
+        if (days.length === 0) {
+            alert("Please select at least one preferred day.");
+            document.getElementById("weekDays").scrollIntoView({behavior:"smooth"});
+            return false;
+        }
+
+        return true;
+    }
+
+    // -------- 3) PER SERVICE MODE --------
+    if (inputMode.value === "per_service") {
+
+        let valid = true;
+        let firstErrorAcc = null;
+
+        document.querySelectorAll(".service-acc").forEach(acc => {
+
+            const date = acc.querySelector(".svc-date");
+            const time = acc.querySelector(".svc-time");
+            const freq = acc.querySelector(".svc-frequency");
+            const days = acc.querySelectorAll(".svc-day:checked");
+
+            let localError = false;
+
+            if (!date.value) {
+                date.classList.add("input-error");
+                localError = true;
+            }
+
+            if (!time.value) {
+                time.classList.add("input-error");
+                localError = true;
+            }
+
+            if (!freq.value) {
+                freq.classList.add("input-error");
+                localError = true;
+            }
+
+            if (days.length === 0) {
+                acc.querySelector(".svc-days").classList.add("input-error");
+                localError = true;
+            }
+
+            if (localError) {
+                valid = false;
+
+                // افتح accordion
+                if (!acc.classList.contains("open")) {
+                    acc.classList.add("open");
+                    acc.querySelector(".acc-body").style.maxHeight =
+                        acc.querySelector(".acc-body").scrollHeight + "px";
+                }
+
+                if (!firstErrorAcc) firstErrorAcc = acc;
+            }
+        });
+
+        if (!valid) {
+            alert("Please complete schedule details for all services.");
+            firstErrorAcc.scrollIntoView({behavior:"smooth", block:"center"});
+            return false;
+        }
+
+        return true;
+    }
+
+    return true;
+}
+</script>
+<script>
+document.getElementById("scheduleForm").addEventListener("submit", function(e){
+
+    if (!validateScheduleForm()) {
+        e.preventDefault();
+        return;
+    }
+
+    // ⬇️ خليه يكمل كود التخزين تبعك طبيعي
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | Hembla</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+</head>
+
+<body>
+<div class="checkout-container">
+
+  <!-- HEADER -->
+  <header>
+    <h1>Checkout</h1>
+    <p class="subtitle">
+      One step to a hassle-free day. Confirm your booking and let us take it from here.
+    </p>
+  </header>
+
+  <!-- ⭐ SELECTED SERVICES -->
+  <section class="card">
+    <div class="card-header">
+      <h2>Selected Services</h2>
+      <a href="{% url 'home:private_booking_services' booking.id %}" class="edit-btn">✏️ Edit</a>
+    </div>
+
+    <hr>
+
+    {% for s in services %}
+    <div class="service">
+      <div>
+        <h3>{{ s.title }}</h3>
+        <p>{{ s.category.title }}</p>
+      </div>
+      <span>+{{ s.price }}$</span>
+    </div>
+    {% endfor %}
+
+{% for service_slug, addons in booking.addons_selected.items %}
+  {% for addon_slug, addon in addons.items %}
+    <div class="service">
+      <div>
+        <h3>{{ addon.title }}</h3>
+        <p>Quantity: {{ addon.quantity }}</p>
+      </div>
+      <span>+{{ addon.price }}$</span>
+    </div>
+  {% endfor %}
+{% endfor %}
+
+
+
+    <div class="summary">
+      <div><p>Total</p><span>{{ booking.subtotal }}$</span></div>
+      <div><p>ROT</p><span>-{{ booking.rot_discount }}$</span></div>
+      <div class="final">
+        <p>Final Sum</p><span>{{ booking.total_price }}$</span>
+      </div>
+    </div>
+
+    <div class="note">
+      💡 This price includes your ROT deduction. You only pay the reduced amount.
+    </div>
+  </section>
+
+  <!-- ⭐ BOOKING SUMMARY -->
+  <section class="card">
+    <div class="card-header">
+      <h2>Booking Summary</h2>
+    </div>
+
+    <hr>
+
+    <!-- DATE & TIME -->
+    <div class="summary-item">
+      <div>
+        <h4>Service Date & Time</h4>
+
+        {% if booking.schedule_mode == "same" %}
+          <p>
+            Date: {{ booking.appointment_date }}<br>
+            Time: {{ booking.appointment_time_window }}<br>
+            Frequency: {{ booking.frequency_type }}
+          </p>
+        {% else %}
+          <p>
+            Separate schedules per service
+          </p>
+        {% endif %}
+      </div>
+
+      <a href="{% url 'home:private_booking_schedule' booking.id %}" class="edit-btn">✏️ Edit</a>
+    </div>
+
+    <!-- ADDRESS -->
+    <div class="summary-item">
+      <div>
+        <h4>Location / Address</h4>
+        <p>{{ booking.address }}</p>
+      </div>
+      <a href="#" class="edit-btn">✏️ Edit</a>
+    </div>
+
+    <!-- DURATION -->
+    <div class="summary-item">
+      <div>
+        <h4>Duration</h4>
+        <p>{{ booking.duration_hours }} hours</p>
+      </div>
+    </div>
+
+    <!-- AREA -->
+    <div class="summary-item">
+      <div>
+        <h4>Service Area</h4>
+        <p>{{ booking.area }}</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ⭐ PAYMENT -->
+  <section class="card">
+    <div class="card-header">
+      <h2>Payment Method</h2>
+    </div>
+    <hr>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="payment-options">
+        <label><input type="radio" name="payment_method" value="card" checked> 💳 Credit Card</label>
+        <label><input type="radio" name="payment_method" value="paypal"> 🅿️ Paypal</label>
+        <label><input type="radio" name="payment_method" value="klarna"> Klarna</label>
+        <label><input type="radio" name="payment_method" value="swish"> Swish</label>
+      </div>
+
+      <div class="payment-inputs">
+        <input type="text" name="card_number" placeholder="Card Number">
+        <div class="input-row">
+          <input class="inputrow" name="card_expiry" type="text" placeholder="MM/YY">
+          <input class="inputrow" name="card_cvv" type="text" placeholder="CVV">
+        </div>
+        <input type="text" name="card_name" placeholder="Name on Card">
+      </div>
+
+      <button class="save">Save Payment Method</button>
+    </form>
+
+  </section>
+
+  <!-- ⭐ FINAL CONFIRM -->
+  <section class="checkout-bottom">
+    <h2>Cancellation Policy</h2>
+    <ul>
+      <li>Free cancellation up to 24 hours before start time.</li>
+      <li>Same-day bookings are non-refundable once confirmed.</li>
+    </ul>
+
+    <label class="agree">
+      <input type="checkbox"> I agree to the
+      <a href="#">terms and conditions</a> and
+      <a href="#">privacy policy</a>.
+    </label>
+
+    <form method="POST">
+      {% csrf_token %}
+      <button class="confirm">Confirm Payment</button>
+    </form>
+  </section>
+
+</div>
+</body>
+</html>

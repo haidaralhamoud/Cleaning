@@ -76,4 +76,66 @@ path(
         views.business_thank_you,
         name="business_thank_you"
     ),
+#===============================================================================================
+
+
+    path("services/private/", views.all_services, name="all_services_private"), 
+    path("private/booking/<slug:service_slug>/zip/",views.private_zip_step1,name="private_zip_step1"),
+    path(
+        "private/booking/<slug:service_slug>/available/",
+        views.private_zip_available,
+        name="private_zip_available"
+    ),
+    path("ajax/submit-call-request/", views.submit_call_request, name="submit_call_request"),
+
+    path(
+            "private/booking/<slug:service_slug>/start/",
+            views.private_booking_start,
+            name="private_booking_start"
+        ),
+        path(
+            "private/booking/<int:booking_id>/services/",
+            views.private_booking_services,
+            name="private_booking_services"
+        ),
+
+        path("private/cart/continue/", views.private_cart_continue, name="private_cart_continue"),
+        path("private/cart/", views.private_cart, name="private_cart"),
+path("private/cart/remove-json/<slug:service_slug>/", 
+     views.private_cart_remove_json, 
+     name="private_cart_remove_json"),
+        path("private/cart/add/<slug:slug>/", views.private_cart_add, name="private_cart_add"),
+path("private/cart/count/", views.private_cart_count, name="private_cart_count"),
+path(
+    "private/booking/<int:booking_id>/schedule/",
+    views.private_booking_schedule,
+    name="private_booking_schedule"
+),
+path(
+    "private/api/booking/<int:booking_id>/price/",
+    views.private_price_api,
+    name="private_price_api"
+),
+
+path(
+    "private/api/booking/<int:booking_id>/update-answer/",
+    views.private_update_answer_api,
+    name="private_update_answer_api"
+),
+
+
+
+path(
+    "private/api/booking/<int:booking_id>/update-addons/",
+    views.private_update_addons_api,
+    name="private_update_addons_api"
+),
+
+# Checkout page
+path(
+    "booking/<int:booking_id>/checkout/",
+    views.private_booking_checkout,
+    name="private_booking_checkout"
+),
+
 ]

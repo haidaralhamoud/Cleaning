@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cleaning & Housemaid Add-ons</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+  <section class="hero">
+    <div class="overlay">
+      <h1>Booking your cleaning</h1>
+    </div>
+  </section>
+
+  <main class="content">
+    <h2 class="section-title">🧹 Cleaning & Housemaid Add-ons</h2>
+    <p class="subtitle">Standard Cleaning</p>
+
+    <div class="addons-grid">
+      
+      <div class="addon-card" data-key="laundry">
+        <img src="wash-by-hand0.png" alt="">
+        <p>Laundry washing & folding</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="ironing">
+        <img src="ironing0.png" alt="">
+        <p>Ironing</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="dishwashing">
+        <img src="dishwasher0.png" alt="">
+        <p>Dishwashing</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="window">
+        <img src="open-window0.png" alt="">
+        <p>Window cleaning (inside/outside)</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="appliance">
+        <img src="fridge0.png" alt="">
+        <p>Fridge / oven / appliance deep clean</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="cabinet">
+        <img src="sliding-door-closet0.png" alt="">
+        <p>Cabinet / closet organizing</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="eco">
+        <img src="eco-fuel0.png" alt="">
+        <p>Eco-friendly cleaning products</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="carpet">
+        <img src="carpet0.png" alt="">
+        <p>Carpet / upholstery cleaning</p>
+        <div class="check-box"></div>
+      </div>
+      <div class="addon-card" data-key="curtain">
+        <img src="cleaning-services0.png" alt="">
+        <p>Curtain cleaning</p>
+        <div class="check-box"></div>
+      </div>
+    </div>
+    <div class="booking-summary">
+  <h3>Booking Summary</h3>
+  <hr>
+  <div class="summary-item">
+    <span>Cleaning</span>
+    <span>50$</span>
+  </div>
+  <div class="summary-item">
+    <span>Babysitter</span>
+    <span>100$</span>
+  </div>
+  <hr>
+  <div class="summary-total">
+    <span>Total</span>
+    <span>150$</span>
+  </div>
+  <button class="continue-btn">Continue</button>
+</div>
+
+  </main>
+
+  <!-- ===== POPUP ===== -->
+  <div class="popup-overlay" id="popup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3 id="popupTitle"></h3>
+        <button id="closePopup">×</button>
+      </div>
+      <div id="popupBody" class="popup-body"></div>
+      <div class="popup-buttons">
+        <button class="btn-outline" id="cancelPopup">Cancel</button>
+        <button class="btn-filled" id="savePopup">Save & Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ الكود داخل سكربت داخلي بدون src -->
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const popup = document.getElementById("popup");
+  const popupTitle = document.getElementById("popupTitle");
+  const popupBody = document.getElementById("popupBody");
+  const closePopup = document.getElementById("closePopup");
+  const cancelPopup = document.getElementById("cancelPopup");
+  const savePopup = document.getElementById("savePopup");
+
+  const forms = {
+    laundry: `
+      <p><strong>Q1.</strong> How many loads of laundry?</p>
+      <label><input type="radio" name="load"> 1 load</label><br>
+      <label><input type="radio" name="load"> 2–3 loads</label><br>
+      <label><input type="radio" name="load"> 4–5 loads</label><br>
+      <label><input type="radio" name="load"> 6+ loads</label><hr>
+      <p><strong>Q2.</strong> Service type?</p>
+      <label><input type="radio" name="service"> Washing only</label><br>
+      <label><input type="radio" name="service"> Folding only</label><br>
+      <label><input type="radio" name="service"> Washing & folding</label><hr>
+      <p><strong>Q3.</strong> Detergent preference?</p>
+      <label><input type="radio" name="detergent"> Use customer’s detergent</label><br>
+      <label><input type="radio" name="detergent"> Bring our own</label><hr>
+      <p><strong>Folding & organizing after wash?</strong></p>
+      <label><input type="radio" name="fold"> Yes</label>
+      <label><input type="radio" name="fold"> No</label>
+    `,
+    ironing: `
+      <p><strong>Q1.</strong> How many items need ironing?</p>
+      <label><input type="radio" name="ironing"> Up to 10 items</label><br>
+      <label><input type="radio" name="ironing"> 11–20 items</label><br>
+      <label><input type="radio" name="ironing"> 21–40 items</label><br>
+      <label><input type="radio" name="ironing"> 40+ items</label><hr>
+      <p><strong>Q2.</strong> Finish preference?</p>
+      <label><input type="radio" name="finish"> Folded</label>
+      <label><input type="radio" name="finish"> On hangers</label>
+    `,
+    dishwashing: `
+      <p><strong>Q1.</strong> How many dishes need washing?</p>
+      <label><input type="radio" name="dishes"> Small load (10–20 items)</label><br>
+      <label><input type="radio" name="dishes"> Medium load (20–50 items)</label><br>
+      <label><input type="radio" name="dishes"> Large load (50+ items)</label><hr>
+      <p><strong>Q2.</strong> Include pots & pans?</p>
+      <label><input type="radio" name="pots"> Yes</label>
+      <label><input type="radio" name="pots"> No</label>
+    `,
+    window: `
+      <p><strong>Q1.</strong> Windows count</p>
+      <input type="number" placeholder="e.g., 10"><hr>
+      <p><strong>Q2.</strong> Type</p>
+      <label><input type="radio" name="type"> Regular</label>
+      <label><input type="radio" name="type"> Sliding</label>
+      <label><input type="radio" name="type"> French</label><hr>
+      <p><strong>Q3.</strong> Inside / Outside</p>
+      <label><input type="radio" name="side"> Inside only</label>
+      <label><input type="radio" name="side"> Outside only</label>
+      <label><input type="radio" name="side"> Both</label><hr>
+      <p><strong>Floor level</strong></p>
+      <input type="text" placeholder="e.g., 3rd floor">
+    `,
+    appliance: `
+      <p><strong>Q1.</strong> Which appliances should we clean?</p>
+      <label><input type="checkbox"> Fridge</label>
+      <label><input type="checkbox"> Freezer</label>
+      <label><input type="checkbox"> Oven</label>
+      <label><input type="checkbox"> Microwave</label><br>
+      <label>Other: <input type="text"></label><hr>
+      <p><strong>Q2.</strong> Should we empty contents for you?</p>
+      <label><input type="radio" name="empty"> Yes, please</label>
+      <label><input type="radio" name="empty"> No, I’ll do it</label><hr>
+      <p><strong>Last deep clean</strong></p>
+      <label><input type="radio" name="time"> &lt; 3 months</label>
+      <label><input type="radio" name="time"> 3–6 months</label>
+      <label><input type="radio" name="time"> &gt; 6 months</label>
+    `,
+    cabinet: `
+      <p><strong>Q1.</strong> Which area(s) to organize?</p>
+      <label><input type="checkbox"> Kitchen cabinets</label>
+      <label><input type="checkbox"> Wardrobe</label>
+      <label><input type="checkbox"> Storage closet</label>
+      <label><input type="checkbox"> Other</label><hr>
+      <p><strong>Q2.</strong> Organization type?</p>
+      <label><input type="radio" name="org"> Light tidy-up</label>
+      <label><input type="radio" name="org"> Full re-organization</label><hr>
+      <p><strong>Number of cabinets/closets</strong></p>
+      <input type="number" placeholder="e.g., 4"><hr>
+      <p><strong>Do you have storage bins/boxes?</strong></p>
+      <label><input type="radio" name="bins"> Yes</label>
+      <label><input type="radio" name="bins"> No</label>
+    `,
+    eco: `
+      <p><strong>Should we use eco-friendly products?</strong></p>
+      <label><input type="radio" name="eco"> Yes, bring eco-products</label><br>
+      <label><input type="radio" name="eco"> I’ll provide eco-products</label><br>
+      <label><input type="radio" name="eco"> No, standard products are fine</label><hr>
+      <p><strong>Allergies or sensitivities?</strong></p>
+      <label><input type="radio" name="allergy"> Yes</label>
+      <label><input type="radio" name="allergy"> No</label><br>
+      <textarea placeholder="Describe allergies or sensitivities..."></textarea>
+    `,
+    carpet: `
+      <p><strong>Number & size of carpets</strong></p>
+      <input type="text" placeholder="e.g., 2 medium, 1 large"><hr>
+      <p><strong>Upholstery type</strong></p>
+      <label><input type="radio" name="type"> Sofa</label>
+      <label><input type="radio" name="type"> Chairs</label>
+      <label><input type="radio" name="type"> Mattress</label><hr>
+      <p><strong>Stains present?</strong></p>
+      <label><input type="radio" name="stain"> Yes</label>
+      <label><input type="radio" name="stain"> No</label><hr>
+      <p><strong>Upload photo</strong></p>
+      <input type="file" accept="image/*">
+    `,
+    curtain: `
+      <p><strong>Type of curtains</strong></p>
+      <label><input type="radio" name="curtain"> Sheer</label>
+      <label><input type="radio" name="curtain"> Blackout</label><hr>
+      <p><strong>Number of sets</strong></p>
+      <input type="number" placeholder="e.g., 3"><hr>
+      <p><strong>Removable?</strong></p>
+      <label><input type="radio" name="removable"> Yes</label>
+      <label><input type="radio" name="removable"> No</label><hr>
+      <p><strong>Upload photo (optional)</strong></p>
+      <input type="file" accept="image/*">
+    `
+  };
+
+  // === عرض البوب-أب عند الضغط على أي Check Box ===
+  document.querySelectorAll(".addon-card").forEach(card => {
+    const box = card.querySelector(".check-box");
+    box.addEventListener("click", () => {
+      const key = card.dataset.key;
+      popupTitle.textContent = card.querySelector("p").textContent;
+      popupBody.innerHTML = forms[key] || `<p>No form available.</p>`;
+      popup.style.display = "flex";
+    });
+  });
+
+  // === إغلاق البوب-أب ===
+  const closePopupHandler = () => popup.style.display = "none";
+  closePopup.onclick = closePopupHandler;
+  cancelPopup.onclick = closePopupHandler;
+  popup.addEventListener("click", e => { if (e.target === popup) closePopupHandler(); });
+
+  // === عند الضغط على Save & Close
+  savePopup.onclick = () => {
+    const title = popupTitle.textContent;
+    document.querySelectorAll(".addon-card").forEach(c => {
+      if (c.querySelector("p").textContent === title) {
+        c.querySelector(".check-box").classList.add("checked");
+      }
+    });
+    closePopupHandler();
+  };
+});
+
+    const popup = document.getElementById("popup");
+    const popupTitle = document.getElementById("popupTitle");
+    const popupBody = document.getElementById("popupBody");
+    const closePopup = document.getElementById("closePopup");
+    const cancelPopup = document.getElementById("cancelPopup");
+    const savePopup = document.getElementById("savePopup");
+
+    const forms = {
+      laundry: `
+        <p><strong>Q1.</strong> How many loads of laundry?</p>
+        <label><input type="radio" name="load"> 1 load</label><br>
+        <label><input type="radio" name="load"> 2–3 loads</label><br>
+        <label><input type="radio" name="load"> 4–5 loads</label><br>
+        <label><input type="radio" name="load"> 6+ loads</label><hr>
+        <p><strong>Q2.</strong> Service type?</p>
+        <label><input type="radio" name="service"> Washing only</label><br>
+        <label><input type="radio" name="service"> Folding only</label><br>
+        <label><input type="radio" name="service"> Washing & folding</label><hr>
+        <p><strong>Q3.</strong> Detergent preference?</p>
+        <label><input type="radio" name="detergent"> Use customer’s detergent</label><br>
+        <label><input type="radio" name="detergent"> Bring our own</label><hr>
+        <p><strong>Folding & organizing after wash?</strong></p>
+        <label><input type="radio" name="fold"> Yes</label>
+        <label><input type="radio" name="fold"> No</label>
+      `,
+      ironing: `
+        <p><strong>Q1.</strong> How many items need ironing?</p>
+        <label><input type="radio" name="ironing"> Up to 10 items</label><br>
+        <label><input type="radio" name="ironing"> 11–20 items</label><br>
+        <label><input type="radio" name="ironing"> 21–40 items</label><br>
+        <label><input type="radio" name="ironing"> 40+ items</label><hr>
+        <p><strong>Q2.</strong> Finish preference?</p>
+        <label><input type="radio" name="finish"> Folded</label>
+        <label><input type="radio" name="finish"> On hangers</label>
+      `
+      // باقي الفورمز نفس اللي عندك
+    };
+
+    document.querySelectorAll(".addon-card").forEach(card => {
+      const box = card.querySelector(".check-box");
+      box.addEventListener("click", () => {
+        const key = card.dataset.key;
+        popupTitle.textContent = card.querySelector("p").textContent;
+        popupBody.innerHTML = forms[key] || `<p>No form available.</p>`;
+        popup.style.display = "flex";
+      });
+    });
+
+    function close() { popup.style.display = "none"; }
+    closePopup.onclick = close;
+    cancelPopup.onclick = close;
+    popup.addEventListener("click", e => { if (e.target === popup) close(); });
+
+    savePopup.onclick = () => {
+      const title = popupTitle.textContent;
+      document.querySelectorAll(".addon-card").forEach(c => {
+        if (c.querySelector("p").textContent === title) {
+          c.querySelector(".check-box").classList.add("checked");
+        }
+      });
+      close();
+    };
+
+  </script>
+</body>
+</html>

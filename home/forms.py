@@ -1,5 +1,5 @@
 from django import forms
-from .models import Contact ,Application, Job , BusinessBooking
+from .models import Contact ,Application, Job , BusinessBooking,NotAvailableZipRequest,CallRequest,EmailRequest
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -213,3 +213,43 @@ class OfficeSetupForm(forms.ModelForm):
         }
 
 
+class ZipCheckForm(forms.Form):
+    zip = forms.CharField(
+        label="Zip Code",
+        max_length=20,
+        widget=forms.TextInput(attrs={
+            "placeholder": "Enter your zip...",
+        })
+    )
+
+class NotAvailableZipForm(forms.ModelForm):
+
+    class Meta:
+        model = NotAvailableZipRequest
+        fields = ["first_name", "last_name", "email", "phone", "message", "zip_code"]
+        widgets = {
+            "first_name": forms.TextInput(attrs={"placeholder": "Your Name"}),
+            "last_name":  forms.TextInput(attrs={"placeholder": "Your Last Name"}),
+            "email":      forms.EmailInput(attrs={"placeholder": "Your Email"}),
+            "phone":      forms.TextInput(attrs={"placeholder": "Your Phone"}),
+            "message":    forms.Textarea(attrs={"placeholder": "Your Message"}),
+            "zip_code":   forms.HiddenInput(),  # نخزّن zip بدون ما يغيّرو
+        }
+
+
+
+
+class CallRequestForm(forms.ModelForm):
+    class Meta:
+        model = CallRequest
+        fields = ["full_name", "phone", "email", "preferred_time", "message", "language"]
+
+        widgets = {
+            "preferred_time": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        }        
+
+
+class EmailRequestForm(forms.ModelForm):
+    class Meta:
+        model = EmailRequest
+        fields = ["email_from", "subject", "message", "attachment"]        

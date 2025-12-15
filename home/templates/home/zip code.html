@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking | Hembla</title>
+  <link rel="stylesheet" href="{% static 'css/zip_code.css' %}">
+
+  <style>
+    .hero {
+        background-image: url("{% static 'images/hero.png' %}");
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero">
+    <div class="overlay"></div>
+    <h1 class="choose-book-done fade-in-onload">Choose. Book. Done.</h1>
+  </section>
+
+  <!-- ===== ZIP FORM SECTION ===== -->
+  <section class="zip-section">
+    <h2 class="reveal">Enter Your Zip Code</h2>
+
+    <!-- فورم فحص الـ ZIP -->
+    <form method="POST" class="zip-form reveal">
+      {% csrf_token %}
+      <label>Zip Code</label>
+      <div class="zip-inputs">
+        {{ zip_form.zip }}
+        <button type="submit" name="zip-submit">Check Availability</button>
+      </div>
+    </form>
+
+    <!-- يظهر فقط إذا المنطقة غير متاحة -->
+    {% if show_not_available %}
+      <div class="not-served-box reveal" data-dir="up">
+        <img src="{% static 'images/sad0.png' %}" alt="sad" />
+        <p>
+          We don’t serve your area yet. Please leave your phone number and email so we can
+          assess the possibility of serving your location and notify you as soon as we expand.
+        </p>
+      </div>
+
+      <!-- فورم تخزين بيانات الزبون + الـ ZIP -->
+      <form method="POST" class="contact-form">
+        {% csrf_token %}
+        <div class="form-left">
+          <div class="form-grid">
+            <div class="form-group reveal">
+              <label>First Name</label>
+              {{ not_available_form.first_name }}
+            </div>
+
+            <div class="form-group reveal">
+              <label>Last Name</label>
+              {{ not_available_form.last_name }}
+            </div>
+
+            <div class="form-group reveal">
+              <label>Email</label>
+              {{ not_available_form.email }}
+            </div>
+
+            <div class="form-group reveal">
+              <label>Phone</label>
+              {{ not_available_form.phone }}
+            </div>
+
+            <div class="form-group full-width reveal">
+              <label>Message</label>
+              {{ not_available_form.message }}
+            </div>
+
+            {{ not_available_form.zip_code }}  {# hidden #}
+          </div>
+
+          <button type="submit" name="contact-submit" class="submit-btn reveal">
+            Submit
+          </button>
+        </div>
+
+        <aside class="booking-summary reveal" data-dir="left">
+          <h3>Booking Summary</h3>
+          <hr />
+          <p>Your Booking Is Empty</p>
+          <div class="summary-row">
+            <span>Time estimate</span><span>0</span>
+          </div>
+          <div class="summary-row">
+            <span>Subtotal</span><span>0$</span>
+          </div>
+        </aside>
+      </form>
+    {% endif %}
+
+  </section>
+
+  <!-- لو حابب ترجع سكربت الأنيميشن بتحطّه هون -->
+     <!-- ===== SCROLL REVEAL SCRIPT ===== -->
+  <script>
+  (function () {
+    const hero = document.querySelector('.choose-book-done');
+    if (hero) hero.classList.add('fade-in-onload');
+
+    const reveals = document.querySelectorAll('.reveal');
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('show');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    reveals.forEach((el, i) => {
+      el.style.setProperty('--d', (i * 0.08) + 's');
+      io.observe(el);
+    });
+  })();
+  </script>
+
+</body>
+</html>
+
+

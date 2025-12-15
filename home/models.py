@@ -193,3 +193,326 @@ class BusinessBooking(models.Model):
 
     def __str__(self):
         return f"Booking #{self.id}"
+
+
+
+
+
+
+
+
+
+#---------------------------------------------------------------------------------------------------------------------------------
+
+class PrivateMainCategory(models.Model):
+    title = models.CharField(max_length=200)
+    icon = models.ImageField(upload_to="private/categories/", blank=True, null=True)
+    slug = models.SlugField(unique=True)   # ← أضفناه
+    def __str__(self):
+        return self.title
+
+
+class PrivateService(models.Model):
+    category = models.ForeignKey(
+        PrivateMainCategory,
+        on_delete=models.CASCADE,
+        related_name="services"
+    )
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    recommended = models.CharField(max_length=200, blank=True, null=True)
+
+    image = models.ImageField(upload_to="private/services/", blank=True, null=True)
+
+    # نوع الخدمة (لتسهيل الأسئلة)
+    slug = models.SlugField(unique=True)
+
+    # 🔥 السعر الأساسي للخدمة
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # كل خدمة فيها أسئلة مختلفة → JSON
+    questions = models.JSONField(blank=True, null=True)
+
+    # Add-ons الخاصة بالخدمة (ربط)
+   
+    def __str__(self):
+        return self.title
+
+class PrivateBooking(models.Model):
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # -------------------------
+    # STEP 1 → ZIP CODE CHECK
+    # -------------------------
+    zip_code = models.CharField(max_length=20, blank=True, null=True)
+    zip_is_available = models.BooleanField(default=False)
+
+    # -------------------------
+    # STEP 1.2 → BOOKING METHOD
+    # (Book online, Request a Call, Send Email)
+    # -------------------------
+    booking_method = models.CharField(
+        max_length=20,
+        choices=[
+            ("online", "Book Online Now"),
+            ("call", "Request a Call"),
+            ("email", "Send Email"),
+        ],
+        blank=True,
+        null=True
+    )
+
+
+    # -------------------------
+    # STEP 2 → CATEGORY SELECTION
+    # (Cleaning / Family & Care / Repairs)
+    # -------------------------
+    main_category = models.CharField(max_length=100, blank=True, null=True)
+
+    # خدمة واحدة فقط في البداية، لكنها قد تصبح عدة خدمات (service 1, service 2...)
+    selected_services = models.JSONField(blank=True, null=True)
+    # مثال: ["standard_cleaning", "deep_cleaning"]
+
+    # -------------------------
+    # STEP 3 → SERVICE QUESTIONS
+    # (dynamic)
+    # -------------------------
+    # يتم تخزين الإجابات كلها كـ JSON مثل:
+    # { "service1": { "Q1": "value", "Q2": 2, "Q3": "Option A" } }
+    service_answers = models.JSONField(blank=True, null=True)
+
+    # -------------------------
+    # STEP 4 → ADD-ONS
+    # -------------------------
+    addons_selected = models.JSONField(blank=True, null=True)
+
+    # -------------------------
+    # STEP 5 → SCHEDULING
+    # -------------------------
+    service_schedules = models.JSONField(blank=True, null=True)
+    schedule_mode = models.CharField(
+        max_length=20,
+        default="same",
+        choices=[
+            ("same", "Same schedule for all services"),
+            ("per_service", "Separate schedule for each service"),
+        ]
+    )
+# ----------- SAME SCHEDULE MODE -----------
+    appointment_date = models.DateField(blank=True, null=True)
+    appointment_time_window = models.CharField(max_length=50, blank=True, null=True)
+
+    # Weekly / Monthly / One-time
+    frequency_type = models.CharField(max_length=50, blank=True, null=True)
+
+    # Special requests JSON → (converted to text)
+    special_timing_requests = models.TextField(blank=True, null=True)
+
+    # Best working days (list)
+    day_work_best = models.JSONField(blank=True, null=True)
+
+    # End date for recurring cleaning
+    End_Date = models.DateField(blank=True, null=True)
+
+    # 🔥 تفاصيل الأسعار (مهم للـ Checkout)
+    pricing_details = models.JSONField(blank=True, null=True)
+
+    # -------------------------
+    # STEP 6 → CHECKOUT
+    # -------------------------
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    rot_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # Location
+    address = models.CharField(max_length=255, blank=True, null=True)
+    area = models.CharField(max_length=255, blank=True, null=True)
+    duration_hours = models.CharField(max_length=100, blank=True, null=True)
+
+    # -------------------------
+    # STEP 7 → PAYMENT
+    # -------------------------
+    payment_method = models.CharField(
+        max_length=50,
+        choices=[
+            ("card", "Credit Card"),
+            ("paypal", "Paypal"),
+            ("klarna", "Klarna"),
+            ("swish", "Swish"),
+        ],
+        blank=True,
+        null=True
+    )
+
+    card_number = models.CharField(max_length=50, blank=True, null=True)
+    card_expiry = models.CharField(max_length=10, blank=True, null=True)
+    card_cvv = models.CharField(max_length=10, blank=True, null=True)
+    card_name = models.CharField(max_length=255, blank=True, null=True)
+
+    accepted_terms = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"PrivateBooking #{self.id}"
+
+
+
+class AvailableZipCode(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+
+    def __str__(self):
+        return self.code
+    
+
+    
+
+class NotAvailableZipRequest(models.Model):
+    service = models.ForeignKey(
+        PrivateService,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="not_available_requests"
+    )
+    zip_code = models.CharField(max_length=20)
+
+    first_name = models.CharField(max_length=100)
+    last_name  = models.CharField(max_length=100, blank=True)
+    email      = models.EmailField()
+    phone      = models.CharField(max_length=50)
+    message    = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.zip_code} - {self.first_name} {self.last_name}"
+    
+
+
+
+
+class CallRequest(models.Model):
+    full_name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=50)
+    email = models.EmailField()
+    preferred_time = models.DateTimeField()
+    message = models.TextField(blank=True, null=True)
+    language = models.CharField(max_length=50, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.phone}"    
+    
+class EmailRequest(models.Model):
+    email_from = models.EmailField()
+    subject = models.CharField(max_length=255)
+    message = models.TextField()
+    attachment = models.FileField(upload_to="email_attachments/", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.subject} - {self.email_from}"
+
+class PrivateAddon(models.Model):
+    service = models.ForeignKey(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="addons_list"
+    )
+
+    title = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
+    icon = models.ImageField(upload_to="private/addons/", blank=True, null=True)
+    # 🔥 سعر ثابت للـ Add-on
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # 🔥 سعر لكل وحدة (نوافذ، loads، سجّادة… الخ)
+    price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    # HTML form
+    form_html = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.service.title})"
+
+
+
+class ServiceQuestionRule(models.Model):
+    """
+    قاعدة تسعير لسؤال معيّن في خدمة معيّنة.
+    مثال:
+      service = Standard Office Cleaning
+      question_key = "size"
+      answer_value = "80-120"
+      price_change = +20
+    """
+    service = models.ForeignKey(PrivateService, on_delete=models.CASCADE, related_name="pricing_rules")
+    question_key = models.CharField(max_length=100)
+    answer_value = models.CharField(max_length=200)
+    price_change = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.service.title} – {self.question_key} = {self.answer_value} → {self.price_change}"
+class AddonRule(models.Model):
+    addon = models.ForeignKey(PrivateAddon, on_delete=models.CASCADE, related_name="pricing_rules")
+    question_key = models.CharField(max_length=100)
+    answer_value = models.CharField(max_length=200)
+    price_change = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.addon.title} – {self.question_key} = {self.answer_value} → {self.price_change}"
+class ScheduleRule(models.Model):
+    key = models.CharField(max_length=100)      # مثال: "frequency_type" أو "time_window"
+    value = models.CharField(max_length=100)    # مثال: "weekly" أو "evening"
+    price_change = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.key} = {self.value} → {self.price_change}"
+
+
+
+
+class DateSurcharge(models.Model):
+    DAY_CHOICES = [
+        ("Mon", "Monday"),
+        ("Tue", "Tuesday"),
+        ("Wed", "Wednesday"),
+        ("Thu", "Thursday"),
+        ("Fri", "Friday"),
+        ("Sat", "Saturday"),
+        ("Sun", "Sunday"),
+    ]
+
+    # نوع القانون
+    rule_type = models.CharField(
+        max_length=50,
+        choices=[
+            ("weekday", "Specific Weekday"),
+            ("date", "Specific Date"),
+        ]
+    )
+
+    # إذا كان نوع القانون weekday
+    weekday = models.CharField(max_length=3, choices=DAY_CHOICES, blank=True, null=True)
+
+    # إذا كان نوع القانون date
+    date = models.DateField(blank=True, null=True)
+
+    # نوع الزيادة
+    surcharge_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("percent", "Percent"),
+            ("fixed", "Fixed Amount"),
+        ]
+    )
+
+    # النسبة أو الرقم
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        if self.rule_type == "weekday":
+            return f"{self.weekday} → {self.amount} ({self.surcharge_type})"
+        return f"{self.date} → {self.amount} ({self.surcharge_type})"

@@ -1,0 +1,166 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking | Hembla</title>
+
+  <!-- ترتيب الستيلات: الأساسي، بعدين البوب أب -->
+  <link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
+  <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
+  <link rel="stylesheet" href="{% static 'css/send_email.css' %}">
+</head>
+<body>
+
+  <section class="hero">
+    <div class="overlay">
+      <h1 class="hero-title animate">Booking your cleaning</h1>
+    </div>
+  </section>
+
+  <main class="content animate">
+
+    <div class="left-section">
+      <div class="step">Step 1 of 4</div>
+
+      <div class="notice">
+        🎉 Boom! Your area is covered. Please proceed with your booking.
+      </div>
+
+      <section class="booking-method">
+        <h3>Choose Your Booking Method</h3>
+        <p>We offer flexible options to suit your needs...</p>
+
+        <div class="methods-grid">
+
+          <div class="method-card">
+            <div class="icon-circle"><img src="{% static 'images/booking0.png' %}"></div>
+            <h4>Book Online Now</h4>
+            <p>Choose your service, pick a date...</p>
+<a href="{% url 'home:private_booking_start' service.slug %}" class="btn">
+    Book Now
+</a>
+
+          </div>
+
+          <div class="method-card">
+            <div class="icon-circle"><img src="{% static 'images/incoming-call0.png' %}"></div>
+            <h4>Schedule a Call</h4>
+            <button class="btn" onclick="openCallPopup()">Request a Call</button>
+          </div>
+
+          <div class="method-card">
+            <div class="icon-circle"><img src="{% static 'images/booking1.png' %}"></div>
+            <h4>Send an Email</h4>
+            <button class="btn" onclick="openEmailPopup()">Send Email</button>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <aside class="summary-card">
+      <h3>Booking Summary</h3>
+      <div class="divider"></div>
+      <p class="empty">Your Booking is Empty</p>
+      <div class="summary-row"><span>Time estimate</span><span>0</span></div>
+      <div class="summary-row"><span>SubTotal</span><span>0$</span></div>
+    </aside>
+
+  </main>
+
+  <!-- ===== POPUP REQUEST A CALL ===== -->
+  <div id="call-overlay" class="call-overlay">
+    <div class="popup">
+      <img src="{% static 'images/close-window0.png' %}" class="close-btn" onclick="closeCallPopup()">
+
+      <h2>Request a Call</h2>
+      <p class="subtitle">Let’s find the best time to call you!</p>
+
+      <form id="call-request-form" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="call_request">
+
+        <label>Full Name</label>
+        <input type="text" name="name" placeholder="Your full name" required>
+
+        <label>Phone Number</label>
+        <input type="text" name="phone" placeholder="Your phone number" required>
+
+        <label>Email</label>
+        <input type="email" name="email" placeholder="Your email" required>
+
+        <label>Preferred Time</label>
+        <div class="input-with-icon">
+          <input type="datetime-local" name="preferred_time" required>
+          <img src="{% static 'images/calendar0.png' %}" class="calendar-icon">
+        </div>
+
+        <label>Message (Optional)</label>
+        <textarea name="message" rows="4" placeholder="Write your message..."></textarea>
+
+        <label>Preferred Language</label>
+        <input type="text" name="language" placeholder="Preferred language">
+
+        <button type="submit" class="submit-btn">Request a Call</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== POPUP SEND EMAIL ===== -->
+  <div id="email-overlay" class="email-overlay">
+    <div class="popup">
+      <img src="{% static 'images/close-window0.png' %}" class="close-btn" onclick="closeEmailPopup()">
+
+      <div class="popup-header">
+        <img src="{% static 'images/send0.png' %}" class="send-icon">
+        <h2>Send Email</h2>
+      </div>
+
+      <p class="subtitle">A brief summary is included in your email</p>
+
+      <!-- ⭐ أهم تعديل هون: class="email-form" -->
+      <form method="POST" enctype="multipart/form-data" class="email-form">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="email_request">
+
+        <label>From</label>
+        <input type="email" name="email_from" placeholder="Your email" required>
+
+        <label>Subject</label>
+        <input type="text" name="subject" placeholder="Email subject" required>
+
+        <label>Message</label>
+        <textarea name="message" placeholder="Write your message..." rows="4" required></textarea>
+
+        <label>Attachment (Optional)</label>
+        <div class="attachment-box">
+          <input type="file" name="attachment">
+          <img src="{% static 'images/upload-to-cloud0.png' %}" class="upload-icon">
+        </div>
+
+        <button type="submit" class="send-btn">Send Email</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openCallPopup() {
+      document.getElementById("call-overlay").classList.add("show");
+    }
+    function closeCallPopup() {
+      document.getElementById("call-overlay").classList.remove("show");
+    }
+
+    function openEmailPopup() {
+      document.getElementById("email-overlay").classList.add("show");
+    }
+    function closeEmailPopup() {
+      document.getElementById("email-overlay").classList.remove("show");
+    }
+  </script>
+
+</body>
+</html>
