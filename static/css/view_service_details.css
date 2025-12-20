@@ -1,0 +1,997 @@
+/* ---------- RESET ---------- */ 
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: "Vesper Libre", serif;
+  background: #c0e7f1;
+  color: #000;
+  overflow-x: hidden;
+  transition: background .3s ease;
+}
+
+/* ---------- VARIABLES ---------- */
+:root {
+  --brand: #039fc8;
+  --brand-dark: #028eb3;
+  --green: #71b247;
+  --muted: rgba(0,0,0,.55);
+  --shadow: 0 4px 10px rgba(0,0,0,.1);
+  --radius: 14px;
+  --sky: #c0e7f1;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+/* ---------- LAYOUT ---------- */
+.page {
+  display: flex;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+
+/* ---------- MENU TOGGLE ---------- */
+.menu-toggle {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: var(--brand);
+  color: #fff;
+  font-size: 26px;
+  font-weight: bold;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(3,159,200,0.35);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 1100;
+}
+.menu-toggle:hover {
+  background: var(--brand-dark);
+  transform: scale(1.05);
+}
+.arrow {
+  transition: transform .25s ease;
+}
+
+/* ---------- OVERLAY ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 1000;
+}
+.overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 990px) {
+  .sidebar {
+    position: fixed;
+    left: -320px;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    border-radius: 0 16px 16px 0;
+    transition: left 0.3s ease;
+    z-index: 1003;
+  }
+  .sidebar.open { left: 0; }
+  .menu-toggle { display: flex; }
+  .page {
+    margin-left: 0;
+    padding-top: 80px;
+  }
+}
+
+/* ---------- CONTENT ---------- */
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+h1.deep-clean-service {
+  font-size: 30px;
+  font-weight: 700;
+  text-align: center;
+}
+p {
+  text-align: center;
+  color: var(--muted);
+  font-weight: 700;
+}
+.grid.two-cols {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+/* ---------- CARD ---------- */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn .4s ease;
+  margin-bottom: 24px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- BUTTONS ---------- */
+.btn {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.btn-blue { background: var(--brand); color: #fff; }
+.btn-blue:hover { background: var(--brand-dark); }
+.btn-light { background: #e7f7fb; color: var(--brand); }
+.btn-light:hover { filter: brightness(1.05); }
+
+/* ---------- TIMELINE (خط واحد بالنص) ---------- */
+.track {
+  position: relative;
+
+  margin-left: 10px;
+}
+.track::before {
+  content: "";
+  position: absolute;
+  left: 25px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--brand), #b8e8f5);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+  opacity: 0.9;
+  z-index: 1;
+}
+.stage {
+  position: relative;
+  margin-bottom: 26px;
+}
+.stage .dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--brand);
+  border: 3px solid #fff;
+  position: absolute;
+  left: 17px;
+  top: 3px;
+  box-shadow: 0 0 0 3px var(--sky);
+  transition: all 0.25s ease;
+  z-index: 2;
+}
+.stage.done .dot {
+  background: var(--green);
+}
+.stage .dot:hover {
+  transform: scale(1.25);
+  box-shadow: 0 0 8px rgba(3,159,200,0.4);
+  background: var(--brand-dark);
+  cursor: pointer;
+}
+.track:hover::before {
+  background: linear-gradient(to bottom, var(--brand-dark), var(--brand));
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(3,159,200,0.4);
+}
+.stage .info {
+  margin-left: 50px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stage .info b {
+  font-size: 16px;
+  font-weight: 700;
+}
+.stage .info small {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+/* ---------- CHECKLIST ---------- */
+.check-grid {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.check-col label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.notes-field {
+  margin-top: 14px;
+}
+.notes-field textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: none;
+  height: 80px;
+}
+.end-actions { text-align: right; margin-top: 10px; }
+
+/* ---------- NOTES ---------- */
+.notes-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.notes-list li {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-weight: 700;
+  color: var(--muted);
+}
+.dot.green {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--green);
+  margin-top: 6px;
+}
+.fab-plus {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  background: var(--brand);
+  color: #fff;
+  font-size: 30px;
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  cursor: pointer;
+  box-shadow: 0 6px 10px rgba(3,159,200,0.3);
+  transition: all 0.25s ease;
+}
+.fab-plus:hover {
+  transform: scale(1.1);
+  background: var(--brand-dark);
+}
+.add-note-form {
+  display: none;
+  margin-top: 16px;
+  background: #f7fcfd;
+  border: 1px solid var(--brand);
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: var(--shadow);
+}
+.add-note-form.show {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+.add-note-form textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  resize: none;
+  height: 80px;
+}
+.note-actions {
+  margin-top: 10px;
+  text-align: right;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ---------- RIGHT SIDE ---------- */
+.provider-row { display: flex; align-items: center; gap: 10px; }
+.avatar.ellipse-1857 {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #ccc;
+}
+.timing p, .charges p { margin: 4px 0; font-weight: 700; }
+.rows { display: grid; gap: 6px; margin-top: 6px; }
+.row { display: flex; justify-content: space-between; font-weight: 700; }
+.row .green { color: var(--green); }
+.total-row {
+  border-top: 1px solid #ccc;
+  margin-top: 6px;
+  padding-top: 6px;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+}
+.total-row .blue { color: var(--brand); }
+
+/* ---------- REQUEST ADDON ---------- */
+.pill.request-addon {
+  background: rgba(3,159,200,.15);
+  border: 1px solid var(--brand);
+  text-align: center;
+  font-weight: 700;
+  padding: 12px;
+  border-radius: 10px;
+  transition: transform .2s;
+}
+.pill.request-addon:hover { transform: translateY(-2px); }
+
+/* ---------- HELP CARD ---------- */
+.card.help {
+  background: rgba(3,159,200,.08);
+  border: 1px solid var(--brand);
+}
+.need-help {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 18px;
+}
+.card.help p {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+}
+.card.help .actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.btn-danger-outline {
+  background: none;
+  border: 2px solid #ff3b3b;
+  color: #ff3b3b;
+}
+.btn-danger-outline:hover { background: #ff3b3b; color: #fff; }
+
+/* ---------- RESPONSIVE SMALL ---------- */
+@media (max-width: 768px) {
+  .grid.two-cols { grid-template-columns: 1fr; }
+  .check-grid { flex-direction: column; gap: 20px; }
+  h1.deep-clean-service { font-size: 24px; margin-top: 60px; }
+  p { font-size: 14px; }
+  .page { padding: 12px; }
+  .card { width: 100%; }
+}
+
+/* ===== Sidebar position tweak ===== */
+@media (min-width: 991px) {
+  .sidebar {
+    position: fixed;
+    left: 25px;
+    top: 20px;
+  }
+  .page {
+    margin-left: 340px;
+  }
+}
+/* ---------- TIMELINE (خط بالنص تماماً داخل الدوائر) ---------- */
+/* ---------- TIMELINE مضبوط 100% ---------- */
+/* ===== Timeline مضبوط متل الصورة تماماً ===== */
+.track {
+  position: relative;
+
+}
+
+/* 🔹 الخط الرئيسي يمر من نص الدوائر */
+.track::before {
+  content: "";
+  position: absolute;
+  left: 33px; /* هذا الرقم بالضبط يخلي الخط بالنص */
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--brand);
+  border-radius: 2px;
+  z-index: 1;
+}
+
+/* كل مرحلة */
+.stage {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+/* 🔹 النقطة */
+.stage .dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid var(--brand);
+  position: absolute;
+  left: 24px;
+  top: 0;
+  z-index: 2;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* 🔹 النقاط المنجزة */
+.stage.done .dot {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+/* تأثير hover */
+.stage .dot:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 6px rgba(3,159,200,0.5);
+}
+
+/* 🔹 النصوص بجانب النقطة */
+.stage .info {
+  margin-left: 70px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stage .info b {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.stage .info small {
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+/* ===== MEDIA GALLERY ===== */
+.media-gallery {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  margin-top: 10px;
+}
+
+.media-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.media-header h3 {
+  font-size: 18px;
+}
+
+.media-header .see-more {
+  color: var(--brand);
+  font-weight: 700;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.25s;
+}
+.media-header .see-more:hover {
+  color: var(--brand-dark);
+}
+
+.media-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.media-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+}
+
+.media-track img {
+  border-radius: 12px;
+  height: 100px;
+  width: 130px;
+  object-fit: cover;
+  border: 2px solid #e3f6fb;
+  transition: transform 0.25s ease;
+}
+.media-track img:hover {
+  transform: scale(1.05);
+}
+
+.arrow-btn {
+  background: var(--brand);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 700;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+.arrow-btn:hover {
+  background: var(--brand-dark);
+}
+
+.arrow-btn.left {
+  position: absolute;
+  left: 0;
+}
+.arrow-btn.right {
+  position: absolute;
+  right: 0;
+}
+
+.gallery-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+/* === OVERLAY (Popup) === */
+#popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 999;
+}
+#popupOverlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* === POPUP BOX === */
+.popup {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 30px;
+  width: 600px;
+  max-width: 90%;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  transform: scale(0.8);
+  opacity: 0;
+  transition: all 0.4s ease;
+  animation: popIn 0.4s ease forwards;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* === CLOSE BUTTON === */
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+.close-btn:hover { transform: rotate(90deg); }
+
+/* === CONTENT === */
+.popup .logo {
+  width: 250px;
+  max-width: 80%;
+  margin-bottom: 20px;
+}
+.popup .message {
+  color: #000;
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 20px 0 30px;
+}
+.popup .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+}
+.popup button.primary {
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.popup button.secondary {
+  background: #e7ebed;
+  color: #000;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+  .popup { padding: 30px 20px; }
+  .popup .message { font-size: 16px; }
+  .popup .buttons { flex-direction: column; gap: 10px; }
+  .popup button.primary, .popup button.secondary { width: 100%; }
+}
+/* ===== Request Fix Popup Overlay ===== */
+#fixPopupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 1001;
+}
+
+#fixPopupOverlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ===== نفس شكل بوب أب approve ===== */
+#fixPopupOverlay .popup {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 30px;
+  width: 600px;
+  max-width: 90%;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  position: relative;
+  transform: scale(0.9);
+  opacity: 0;
+  animation: popIn 0.4s ease forwards;
+}
+
+/* زر × */
+#fixPopupOverlay .close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #039fc8;
+  border: none;
+  color: #fff;
+  font-size: 20px;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+#fixPopupOverlay .close-btn:hover {
+  transform: rotate(90deg);
+}
+/* ===== MEDIA GALLERY FIX ===== */
+.media-carousel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  overflow: hidden; /* منع الاهتزاز والتمرير */
+  margin-bottom: 14px;
+}
+
+/* نخفي السكورول تماماً */
+.media-track {
+  display: flex;
+  gap: 10px;
+  scroll-behavior: smooth;
+  overflow: hidden !important;
+}
+
+/* صور الcarousel */
+.media-track img {
+  border-radius: 12px;
+  height: 100px;
+  width: 130px;
+  object-fit: cover;
+  border: 2px solid #e3f6fb;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+.media-track img:hover {
+  transform: scale(1.05);
+}
+
+/* ===== PAGINATION DOTS ===== */
+.media-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+.media-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #b3e4f2;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.media-dot.active {
+  background: #039fc8;
+  transform: scale(1.2);
+}
+/* ===== Provider Section Fix ===== */
+
+
+
+.card.provider .btn {
+  margin-top: 10px;
+  padding: 10px 28px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+}
+a {
+  text-decoration: none; /* يزيل الخط التحتاني */
+}
+.report-btn {
+  display: inline-flex;
+  align-items: center; /* يخلي النص بمحاذاة الأيقونة */
+  gap: 10px;
+  padding: 10px 20px;
+  border: 2px solid #e33;
+  border-radius: 10px;
+  color: #3a007d;
+  font-weight: 700;
+  font-family: 'Vesper Libre', serif;
+  text-decoration: none;
+  background: #c0e7f1;
+  transition: all 0.3s ease;
+}
+
+.report-btn img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.report-btn:hover {
+  background: #e33;
+  color: white;
+}
+/* تحسين مظهر select */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select select {
+  width: 100%;
+  padding: 10px 40px 10px 14px;
+  border-radius: 10px;
+  border: 1.8px solid #00a9d4;
+  font-size: 15px;
+  color: #333;
+  background: #f7fbfd;
+  appearance: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+}
+
+.custom-select select:focus {
+  border-color: #028bb3;
+  box-shadow: 0 0 5px rgba(3,159,200,0.4);
+  outline: none;
+}
+
+.custom-select .arrow {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00a9d4;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* تحسين الزر × */
+.close-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #00a9d4;
+  color: #fff;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+  transition: 0.25s ease;
+}
+
+.close-btn:hover {
+  transform: rotate(90deg);
+  background: #008bb3;
+}
+/* === Reschedule Popup Overlay === */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 2000;
+}
+.popup-overlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+/* === Reschedule Success Popup === */
+#rescheduleSuccessOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+  z-index: 3000;
+}
+
+#rescheduleSuccessOverlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+#rescheduleSuccessPopup {
+  background: #fff;
+  border-radius: 15px;
+  padding: 1.5rem 2rem;
+  width: 480px;
+  max-width: 90%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  opacity: 0;
+  z-index: 3100;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+#rescheduleSuccessPopup.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* === Icon === */
+#rescheduleSuccessPopup .check-icon {
+  width: 60px;
+  height: 60px;
+}
+
+/* === Text === */
+#rescheduleSuccessPopup .popup-text {
+  color: #000;
+  font-size: 16px;
+  line-height: 1.5;
+  flex: 1;
+}
+
+/* === Close Button === */
+.close-popup-btn {
+  background: none;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  color: #666;
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  transition: color 0.2s;
+}
+.close-popup-btn:hover {
+  color: #000;
+}
+#rescheduleSuccessOverlay,
+#rescheduleSuccessPopup {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+#rescheduleSuccessOverlay.active,
+#rescheduleSuccessPopup.active {
+  opacity: 1;
+  visibility: visible;
+}

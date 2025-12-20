@@ -11,6 +11,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/Customer_Notes.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <style>
+    .details-link {
+  background: var(--sky-strong); color: #fff;
+  border: none; border-radius: 10px;
+  padding: 8px 16px; cursor: pointer;
+  font-weight: 600; transition: 0.25s;
+}
+.details-link:hover { background: #028eb3; }
+  </style>
 </head>
 <body>
 <!-- HEADER -->
@@ -150,8 +159,11 @@
             </h3>
             <p>Lorem ipsum dolor sit amet, consectetur ,Lorem ipsum dolor sit amet, consectetur</p>
           </div>
+          
         </div>
       </div>
+      <button class="details-link"><a href="{% url 'accounts:add_Customer_Notes' %}"> Add</button></a>
+
     </main>
   </div>
 <footer class="footer">

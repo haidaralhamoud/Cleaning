@@ -5,14 +5,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Bookings - Hembla</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />
+  <title>Customer Profile – Chat</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Vesper+Libre:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/chat.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
-<body>
-<!-- HEADER -->
+
+<body >
+    <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -32,20 +34,16 @@
     <a href="#">My Profile</a>
   </div>
 </header>
+<div class="layout">
+  <!-- ===== المينيو للموبايل ===== -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span>
+    </button>
+    <h2 class="mobile-title">Customer Profile</h2>
+  </div>
 
-  <div class="page">
-
-    <!-- ===== Mobile Header ===== -->
-    <div class="mobile-header">
-<!-- Floating Menu Button -->
-<button class="menu-toggle inside-btn" id="menuToggle">
-  <span class="arrow">&#8250;</span>
-</button>
-
- 
-    </div>
-
-    <!-- ===== Sidebar ===== -->
+  <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
@@ -75,83 +73,86 @@
       </nav>
     </aside>
 
-    <!-- ===== Main Content ===== -->
-    <main class="main">
-      <h1 class="page-title">My Bookings</h1>
-      <p class="subtitle">Your bookings, your history, your peace of mind</p>
+  <!-- ===== الصفحة ===== -->
+  <div class="page container">
+    <main class="content">
+      <section class="page-head">
+        <h1>Chat With Provider Assigned</h1>
+        <p class="subline">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
+        <p class="booking-line">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
+      </section>
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab active" data-target="all">All</button>
-        <button class="tab" data-target="upcoming">Upcoming</button>
-        <button class="tab" data-target="ongoing">Ongoing</button>
-        <button class="tab" data-target="completed">Completed</button>
-        <button class="tab" data-target="cancelled">Cancelled</button>
-      </div>
+      <!-- ===== بطاقة المحادثة ===== -->
+<!-- ===== بطاقة المحادثة ===== -->
+<section class="chat-card">
 
-      <!-- Tables -->
-      <div class="tables">
-        <!-- All -->
-        <div class="table-container active" id="all">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer Name</th>
-                <th>Service Type</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>View</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>#12345</td>
-                <td>Sophia Clark</td>
-                <td>House Cleaning</td>
-                <td>July 15, 2025</td>
-                <td>Lorem ipsum dolor sit amet</td>
-                <td><span class="status scheduled">Scheduled</span></td>
-                <td>
-                  <div class="menu-wrap">
-                    <button class="dots">•••</button>
-                    <div class="dropdown">
-                      <a>Reschedule</a>
-                      <a>Cancel</a>
-                      <a>Download Invoice</a>
-                      <a>Add Service</a>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>#12346</td>
-                <td>Ethan Harris</td>
-                <td><a href="../Customer-Profile-service-view/index.html">Deep Cleaning</a></td>
-                <td>July 16, 2025</td>
-                <td>West End</td>
-                <td><span class="status completed">Completed</span></td>
-                <td>
-                  <div class="menu-wrap">
-                    <button class="dots">•••</button>
-                    <div class="dropdown">
-                      <a>Reschedule</a>
-                      <a>Cancel</a>
-                      <a>Download Invoice</a>
-                      <a>Add Service</a>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+  <!-- زر الرجوع -->
+  <button class="back-btn" onclick="history.back()">
+    <span class="back-icon">←</span>
+    <span class="back-text">Back</span>
+  </button>
+
+  <!-- عنوان الطلب -->
+  <h2>Order #12345 · Deep Clean · Today 10AM</h2>
+
+  <!-- سطر فاصل بسيط -->
+  <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;" />
+
+  <!-- محتوى المحادثة -->
+  <div class="chat-thread">
+
+    <!-- Incoming -->
+    <article class="message message--in">
+      <div class="message__row">
+        <img class="message__avatar" src="{% static 'images/ellipse-18580.png'%}" alt="Customer" />
+        <div class="message__bubble">
+          <p>Hi Sophia, just a reminder about the deep clean in the kitchen and bathroom. Thanks!</p>
         </div>
       </div>
-    </main>
+      <div class="message__meta">
+        <span class="from">Customer</span>
+        <time class="time">10:00 AM</time>
+      </div>
+    </article>
+
+    <!-- Outgoing -->
+    <article class="message message--out">
+      <div class="message__row">
+        <div class="message__bubble">
+          <p>Got it! Make sure to pay extra attention to those areas.</p>
+        </div>
+        <img class="message__avatar" src="{% static 'images/ellipse-18590.png'%}" alt="Sophia Carter" />
+      </div>
+      <div class="message__meta">
+        <time class="time">11:00 AM</time>
+        <span class="from">Sophia Carter</span>
+      </div>
+    </article>
+
   </div>
 
-  <div class="overlay" id="overlay"></div>
+  <!-- Composer -->
+  <form class="composer" onsubmit="return false" aria-label="Message composer">
+    <label class="upload-btn" for="fileUpload" aria-label="Attach file">
+      <img src="{% static 'images/vector1.svg'%}" alt="Attach file" />
+      <input type="file" id="fileUpload" hidden />
+    </label>
+
+    <label class="composer__field">
+      <input type="text" placeholder="Type a message..." aria-label="Type a message" />
+      <img src="{% static 'images/happy0.png'%}" alt="" class="emoji" />
+    </label>
+
+    <button class="send-btn" type="submit" aria-label="Send message">
+      <span>Send</span>
+      <img src="{% static 'images/paper-plane0.png'%}" alt="" />
+    </button>
+  </form>
+
+</section>
+
+</div>
+</div>
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -233,64 +234,25 @@
     <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
   </div>
 </footer>
-
 <script>
-const toggleBtn = document.getElementById("menu-toggle");
+const toggleBtn = docume6nt.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
   
 toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+  <!-- ===== JS ===== -->
+  <script>
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.getElementById("sidebar");
+    const arrow = document.querySelector(".menu-toggle .arrow");
 
-  <script src="script.js">
-    // Sidebar toggle
-const toggle = document.getElementById("menuToggle");
-const sidebar = document.querySelector(".sidebar");
-const arrow = toggle.querySelector(".arrow");
-
-toggle.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
-  arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-});
-
-// Tabs switching
-const tabs = document.querySelectorAll(".tab");
-const tables = document.querySelectorAll(".table-container");
-
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-
-    tables.forEach(t => t.classList.remove("active"));
-    document.getElementById(tab.dataset.target).classList.add("active");
-  });
-});
-toggle.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
-  toggle.classList.toggle("rot");
-});
-
-// Dots dropdown
-document.querySelectorAll(".dots").forEach(btn => {
-  btn.addEventListener("click", e => {
-    e.stopPropagation();
-    document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-    btn.closest(".menu-wrap").classList.toggle("show");
-  });
-});
-
-document.addEventListener("click", () => {
-  document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-});
-
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    toggle.classList.toggle("rot");
-  });
-
-
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+    });
   </script>
+  
 </body>
 </html>

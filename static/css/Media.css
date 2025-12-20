@@ -1,0 +1,314 @@
+:root{
+  --sky: #c0e7f1;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Inter", sans-serif;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+
+  padding: 10px ;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+/* ===== MOBILE HEADER ===== */
+.mobile-header {
+  display: none;
+
+  padding: 10px 16px;
+
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+.mobile-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  text-align: center;
+  margin: 0;
+}
+
+/* ===== FLOATING MENU BUTTON ===== */
+.menu-toggle.floating {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 150;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--sky-strong);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: all 0.3s ease;
+}
+.menu-toggle .arrow {
+  font-size: 28px;
+  line-height: 1;
+  transform: translateX(1px);
+  transition: transform 0.3s ease;
+}
+.menu-toggle.floating:hover {
+  background: #028eb3;
+  transform: scale(1.1);
+}
+
+/* ===== PAGE CONTENT ===== */
+.content {
+  flex: 1;
+  padding: 20px;
+}
+.page-title {
+  font: 700 30px "Vesper Libre", serif;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ===== RESPONSIVE SIDEBAR ===== */
+@media (max-width: 920px) {
+  .mobile-header { display: flex; }
+  .menu-toggle.floating { display: flex; }
+
+  .layout { flex-direction: column; }
+
+  .sidebar {
+    position: fixed;
+    top: 55px;
+    left: -320px;
+    width: 260px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 10px;
+    transition: left 0.3s ease;
+    z-index: 99;
+  }
+  .sidebar.open { left: 0; }
+
+  .content {
+    margin-top: 10px;
+    padding: 15px;
+  }
+}
+
+/* ===== MEDIA CONTENT ===== */
+.media { font-size: 30px; font-weight: 700; margin-bottom: 10px; }
+.service-meta { margin-bottom: 20px; }
+.service-name { font-size: 18px; font-weight: 700; }
+.date { color: rgba(0,0,0,0.6); font-size: 15px; margin-bottom: 4px; }
+.info-text { color: rgba(0,0,0,0.5); font-size: 14px; }
+
+/* ===== MEDIA SECTIONS ===== */
+.media-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  margin-bottom: 24px;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.section-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+
+/* ===== SLIDER تحسين عرض الصور ===== */
+.slider {
+  position: relative;
+  overflow: hidden;
+  padding: 8px 40px;
+}
+.track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+.track::-webkit-scrollbar { display: none; }
+
+.track img {
+  width: 220px;
+  height: 150px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #f5fafd;
+  border: none;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.track img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+/* ===== الأسهم ===== */
+.nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(3,159,200,0.85);
+  color: #fff;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 2;
+}
+.nav:hover {
+  background: rgba(3,159,200,1);
+  transform: translateY(-50%) scale(1.1);
+}
+.nav.prev { left: 8px; }
+.nav.next { right: 8px; }
+
+/* ===== ISSUES CARD ===== */
+/* ===== Responsive Fix for Issues Section ===== */
+@media (max-width: 768px) {
+  .issues-card {
+    padding: 14px 16px;
+  }
+
+  .issues-card .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .issues-card .section-header h3 {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .issues-card .section-header .btn {
+    align-self: flex-end;
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+
+  .issues-grid {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .issues-grid img,
+  .add-box button {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    aspect-ratio: 4/3;
+  }
+}
+/* ===== تحسين شكل أزرار Issues ===== */
+.issues-card .btn {
+  background: var(--sky-strong);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(3,159,200,0.25);
+}
+
+.issues-card .btn:hover {
+  background: #028eb3;
+  transform: scale(1.05);
+  box-shadow: 0 6px 14px rgba(3,159,200,0.35);
+}
+
+/* زر + Add Media */
+.add-box button {
+  border: 2px dashed var(--sky-strong);
+  color: var(--sky-strong);
+  background: #f9fdff;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+}
+
+.add-box button:hover {
+  background: var(--sky-soft);
+  color: #fff;
+  border-style: solid;
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 6px 12px rgba(3,159,200,0.25);
+}
+
+/* تحسين الspacing بين الأزرار والصور */
+.issues-card .section-header {
+  margin-bottom: 15px;
+}
+.issues-grid {
+  justify-content: flex-start;
+}

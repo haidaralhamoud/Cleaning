@@ -46,13 +46,18 @@
 
 
     <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+<div class="profile-head">
+  <div class="avatar">
+    {% if customer.profile_photo %}
+      <img src="" alt="">
+    {% endif %}
+  </div>
+  <div>
+    <div class="name">{{ customer.first_name }} {{ customer.last_name }}</div>
+    <div class="id">ID: {{ customer.id }}</div>
+  </div>
+</div>
+
 
       <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
           {% csrf_token %}
@@ -87,7 +92,7 @@
       <img src="{% static 'images/logistics0.png'%}" class="tiny-ico" alt="">
       <span>Ongoing Orders</span>
     </div>
-    <button class="btn btn-sky-subtle big">View All Orders</button>
+     <a href="{% url 'accounts:my_bookimg' %}"><button class="btn btn-sky-subtle big">View All Orders</button></a>
   </div>
   <p class="muted subtitle">Active and scheduled services.</p>
 
@@ -139,15 +144,20 @@
       <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon">
       <div class="field">
         <div class="label">Email Address</div>
-        <div class="val">SophiaBennite@gmail.com</div>
+        <div class="val">{{ customer.email }}</div>
       </div>
       <div class="field">
         <div class="label">Preferred language</div>
-        <div class="val">English</div>
+        <div class="val">{{ customer.get_preferred_language_display }}</div>
       </div>
       <div class="field">
         <div class="label">Date of birth</div>
-        <div class="val">15/2/2025</div>
+        <div class="val">{% if customer.date_of_birth %}
+      {{ customer.date_of_birth|date:"d/m/Y" }}
+    {% else %}
+      —
+    {% endif %}
+  </div>
       </div>
     </div>
 
@@ -155,19 +165,19 @@
     <div class="col">
       <div class="field">
         <div class="label">First Name</div>
-        <div class="val">Sophia</div>
+        <div class="val">{{ customer.first_name }}</div>
       </div>
       <div class="field">
         <div class="label">country code</div>
-        <div class="val">+(555)</div>
+        <div class="val">{{ customer.country_code|default:"—" }}</div>
       </div>
       <div class="field">
         <div class="label">Preferred contact method</div>
-        <div class="val">Email</div>
+        <div class="val"> {{ customer.get_preferred_contact_method_display|default:"—" }}</div>
       </div>
       <div class="field">
         <div class="label">Gender</div>
-        <div class="val">Female</div>
+        <div class="val">{{ customer.gender|capfirst|default:"—" }}</div>
       </div>
     </div>
 
@@ -175,15 +185,15 @@
     <div class="col">
       <div class="field">
         <div class="label">Last Name</div>
-        <div class="val">Bennite</div>
+        <div class="val">{{ customer.last_name }}</div>
       </div>
       <div class="field">
         <div class="label">Phone number</div>
-        <div class="val">123456789</div>
+        <div class="val">{{ customer.phone }}</div>
       </div>
       <div class="field">
         <div class="label">Pronouns</div>
-        <div class="val">She</div>
+        <div class="val">{{ customer.pronouns|default:"—" }}</div>
       </div>
     </div>
   </div>
@@ -193,19 +203,19 @@
     <div class="grid">
       <div>
         <div class="label">First Name</div>
-        <div class="val">Samer</div>
+        <div class="val">{{ customer.emergency_first_name|default:"—" }}</div>
       </div>
       <div>
         <div class="label">Last Name</div>
-        <div class="val">Bennite</div>
+        <div class="val">{{ customer.emergency_last_name|default:"—" }}</div>
       </div>
       <div>
         <div class="label">Phone number</div>
-        <div class="val">123456789</div>
+        <div class="val">{{ customer.emergency_phone|default:"—" }}</div>
       </div>
       <div>
         <div class="label">Relation</div>
-        <div class="val">123 Maple Street, Apartment 4B</div>
+        <div class="val">{{ customer.emergency_relation|default:"—" }}</div>
       </div>
     </div>
   </div>
@@ -223,10 +233,10 @@
             </div>
 
             <div class="stack">
-              <div class="row-ic"><img src="{% static 'images/star0.png' %}"><div><div class="row-title">Primary Address</div><div class="row-text">123 Maple Street, Apartment 4B, Anytown, CA 91234</div></div></div>
-              <div class="row-ic"><img src="{% static 'images/locations1.png' %}"><div><div class="row-title">Additional Locations</div><div class="row-text">123 Maple Street, Apartment 4B, Anytown, CA 91234</div></div></div>
-              <div class="row-ic"><img src="{% static 'images/access0.png'%}"><div><div class="row-title">Entry code / Access</div><div class="row-text">Gate 3, code 1234#; concierge Abdul</div></div></div>
-              <div class="row-ic"><img src="{% static 'images/notes0.png'%}"><div><div class="row-title">Parking notes</div><div class="row-text">Guest spot #5 on the right</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/star0.png' %}"><div><div class="row-title">Primary Address</div><div class="row-text">{{ customer.primary_address|default:"—" }}</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/locations1.png' %}"><div><div class="row-title">Additional Locations</div><div class="row-text">{{ customer.additional_locations|default:"—" }}</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/access0.png'%}"><div><div class="row-title">Entry code / Access</div><div class="row-text">{{ customer.entry_code|default:"—" }}</div></div></div>
+              <div class="row-ic"><img src="{% static 'images/notes0.png'%}"><div><div class="row-title">Parking notes</div><div class="row-text">{{ customer.parking_notes|default:"—" }}</div></div></div>
             </div>
           </article>
         </div>
@@ -236,7 +246,7 @@
             <div class="side-head"><img src="{% static 'images/heart0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil0.png'%}"></button></div>
             <h3 class="side-title">Service<br>Preferences</h3>
             <p class="side-text">Set your preferences for cleaning services.</p>
-            <button class="btn btn-primary full">View preferences</button>
+            <a href="{% url 'accounts:Service_Preferences' %}"><button class="btn btn-primary full">View preferences</button></a>
           </article>
 
           <article class="card side">
@@ -250,7 +260,7 @@
             <div class="side-head"><img src="{% static 'images/receive-cash0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil4.png'%}"></button></div>
             <h3 class="side-title">Payment & Billing</h3>
             <p class="side-text">Next billing date : Oct 25, 2024</p>
-            <button class="btn btn-primary full">View billing Details</button>
+             <a href="{% url 'accounts:Payment_and_Billing' %}"><button class="btn btn-primary full">View billing Details</button></a>
           </article>
         </div>
       </div>
@@ -340,7 +350,7 @@
 </footer>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
+const toggleBtn = document.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
   
 toggleBtn.addEventListener("click", () => {

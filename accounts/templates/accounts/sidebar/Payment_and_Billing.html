@@ -82,7 +82,7 @@
         <section class="card payment-methods-card">
           <div class="card-header">
             <h2>Payment Methods</h2>
-            <button id="addPayment" class="btn-icon">＋</button>
+            <a href="{% url 'accounts:Add_Payment_Method' %}"><button id="addPayment" class="btn-icon"> ＋</button></a>
           </div>
           <div id="paymentsList" class="payments-list"></div>
         </section>

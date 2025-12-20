@@ -16,6 +16,16 @@ urlpatterns = [
     path("Change_Password/", views.Change_Password, name="Change_Password"),
     path("Service_History_and_Ratings/", views.Service_History_and_Ratings, name="Service_History_and_Ratings"),
     path("Loyalty_and_Rewards/", views.Loyalty_and_Rewards, name="Loyalty_and_Rewards"),
-
+    
+    # Subpages
+    path("add_Customer_Notes/", views.add_Customer_Notes, name="add_Customer_Notes"),
+    path("Add_Payment_Method/", views.Add_Payment_Method, name="Add_Payment_Method"),
+    path("Add_Address_and_Locations/", views.Add_Address_and_Locations, name="Add_Address_and_Locations"),
+    path("Incident_Report_order/", views.Incident_Report_order, name="Incident_Report_order"),
+    path("view_service_details/", views.view_service_details, name="view_service_details"),
+    path("chat/", views.chat, name="chat"),
+    path("Add_on_Service_Request/", views.Add_on_Service_Request, name="Add_on_Service_Request"),
+    path("Media/", views.Media, name="Media"),
+    path("Report_Incident/", views.Report_Incident, name="Report_Incident"),
     
 ]

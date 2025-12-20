@@ -1,0 +1,457 @@
+:root{
+  --sky: #c0e7f1;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Inter", sans-serif;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+
+  padding: 10px ;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+
+/* ===== Sidebar ===== */
+
+
+/* ===== Main Content ===== */
+.content {
+  margin-left: 320px;
+  padding: 40px 60px;
+  width: 100%;
+}
+
+h1 {
+  font-family: "Vesper Libre", serif;
+  font-weight: 700;
+  font-size: 28px;
+}
+
+.subtitle {
+  color: #0352c8;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.form-box {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  padding: 30px;
+}
+
+.form-box h2 {
+  font-family: "Vesper Libre", serif;
+  font-size: 20px;
+  margin: 20px 0 10px;
+}
+
+.option {
+  border: 1px solid #039fc8;
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 10px;
+  background: #f9feff;
+}
+
+.option.active {
+  background: #e6faff;
+}
+
+.option p.title {
+  font-weight: 600;
+}
+
+.option p.desc {
+  color: #777;
+  font-size: 14px;
+}
+
+input[type="text"], textarea {
+  width: 100%;
+  border: 1px solid #039fc8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+textarea {
+  height: 100px;
+  resize: none;
+}
+
+.save-btn {
+  background: #039fc8;
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 25px;
+  float: right;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #0282a3;
+}
+
+/* ===== Floating Arrow Button (Mobile) ===== */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  bottom: 90px;
+  right: 20px;
+  background: #039fc8;
+  color: white;
+  font-size: 28px;
+  border: none;
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+  z-index: 1100;
+}
+
+.menu-toggle.open .arrow {
+  transform: rotate(180deg);
+}
+
+.arrow {
+  display: inline-block;
+  transform: rotate(0deg);
+  transition: transform 0.3s ease;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .content {
+    margin-left: 280px;
+    padding: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+
+
+  .content {
+    margin-left: 0;
+    padding: 25px;
+  }
+
+  .menu-toggle {
+    display: block;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .save-btn {
+    float: none;
+    display: block;
+    margin: 20px auto 0;
+    width: 80%;
+    text-align: center;
+  }
+}
+/* ===== Cards Animation ===== */
+.form-box > * {
+  opacity: 0;
+  transform: translateY(15px);
+  animation: fadeInUp 0.6s ease forwards;
+}
+
+.form-box > *:nth-child(1) { animation-delay: 0.1s; }
+.form-box > *:nth-child(2) { animation-delay: 0.2s; }
+.form-box > *:nth-child(3) { animation-delay: 0.3s; }
+.form-box > *:nth-child(4) { animation-delay: 0.4s; }
+.form-box > *:nth-child(5) { animation-delay: 0.5s; }
+.form-box > *:nth-child(6) { animation-delay: 0.6s; }
+.form-box > *:nth-child(7) { animation-delay: 0.7s; }
+.form-box > *:nth-child(8) { animation-delay: 0.8s; }
+.form-box > *:nth-child(9) { animation-delay: 0.9s; }
+.form-box > *:nth-child(10) { animation-delay: 1.0s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+/* ضبط زر Save Notes */
+.save-btn {
+  background: #039fc8;
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 25px;
+  position: relative;
+  right: 0;
+  bottom: 0;
+  margin-top: 15px;
+  align-self: flex-end;
+  display: inline-block;
+  transition: 0.3s;
+  cursor: pointer;
+}
+
+/* زر Save الأخير داخل الكارد */
+.form-box .save-btn:last-of-type {
+  display: block;
+  margin: 30px auto 0 auto;
+  float: none;
+  text-align: center;
+}
+
+/* لإزالة الانزياح المزعج عاليمين */
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+/* ===== الزر العائم أعلى اليسار على الموبايل ===== */
+@media (max-width: 768px) {
+  .menu-toggle {
+    top: 20px;
+    left: 20px;
+    right: auto;
+    bottom: auto;
+    transform: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 24px;
+  }
+}
+
+/* ===== أنيميشن Hover للكروت ===== */
+.option, input[type="text"], textarea {
+  transition: all 0.3s ease;
+}
+
+.option:hover,
+input[type="text"]:hover,
+textarea:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+}
+
+
+
+/* Sidebar */
+
+
+
+
+
+
+
+
+/* ===== Responsive Sidebar Behavior ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  }
+
+  .sidebar.open {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  }
+}
+.content {
+  margin-left: 320px;
+  padding: 40px 60px;
+  width: 100%;
+  max-width: 950px;        /* ✅ تحديد أقصى عرض مريح */
+  margin-right: auto;      /* ✅ توسيط المحتوى */
+  margin-left: auto;       /* ✅ توسيط المحتوى */
+}
+
+.form-box {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  padding: 30px;
+  max-width: 100%;
+  margin-top: 20px;
+}
+
+
+
+/* ===== Mobile Layout Enhancements ===== */
+@media (max-width: 768px) {
+
+  /* === Sidebar (Mobile Menu) === */
+  .sidebar {
+    position: fixed;
+    top: 55px;
+    left: -320px; /* مخفية افتراضياً */
+    width: 260px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: var(--shadow);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 10px;
+    transition: left 0.3s ease;
+    z-index: 99;
+  }
+
+  
+ .sidebar.open {
+    left: 0; /* لما تنفتح */
+  }
+
+
+ 
+
+  /* === Floating Toggle Button Always Visible === */
+  .menu-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background: #039fc8;
+    color: #fff;
+    font-size: 24px;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2100; /* أعلى من المنيو */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+  }
+
+  .menu-toggle:hover {
+    transform: scale(1.05);
+  }
+
+  /* === Page Content === */
+  .content {
+    margin: 0;
+    padding: 15px;
+    width: 100%;
+  }
+
+  .form-box {
+    border-radius: 18px;
+    padding: 20px 16px;
+    background: #fff;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  }
+
+  h1 {
+    font-size: 22px;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #039fc8;
+    margin-bottom: 25px;
+  }
+
+  /* === Options Cards === */
+  .option {
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1.5px solid #c6e8f0;
+    background: #f8fcfd;
+    transition: all 0.3s ease;
+  }
+
+  .option.active {
+    background: #e6faff;
+    border-color: #039fc8;
+    box-shadow: 0 4px 10px rgba(3,159,200,0.15);
+  }
+
+  input[type="text"],
+  textarea {
+    font-size: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1.5px solid #c6e8f0;
+    background: #fcfeff;
+    transition: box-shadow 0.3s ease;
+  }
+
+  input[type="text"]:focus,
+  textarea:focus {
+    box-shadow: 0 0 8px rgba(3,159,200,0.25);
+    border-color: #039fc8;
+    outline: none;
+  }
+
+  .save-btn {
+    width: 100%;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    background: #039fc8;
+    margin-top: 25px;
+  }
+
+  .save-btn:hover {
+    background: #0282a3;
+  }
+}

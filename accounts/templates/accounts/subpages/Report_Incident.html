@@ -1,0 +1,257 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Report Incident</title>
+  <link rel="stylesheet" href="{% static 'css/Report_Incident.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+  <div class="layout">
+    <!-- Sidebar -->
+     <!-- زر المينيو يظهر فقط بالموبايل -->
+<div class="mobile-header">
+  <button class="menu-toggle floating" id="menuToggle">
+    <span class="arrow">&#8250;</span> <!-- › -->
+  </button>
+</div>
+
+
+
+  <!-- Sidebar -->
+
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+          {% csrf_token %}
+      </form>
+
+      <nav class="side-nav">
+        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="main-content">
+    <div class="report-container">
+      <h1 class="title">Report Incident</h1>
+
+      <div class="form-section">
+        <div class="input-group">
+          <label>Incident Type</label>
+          <select>
+            <option>Select Incident Type</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Severity</label>
+          <select>
+            <option>Select Severity</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Order</label>
+          <select>
+            <option>Select Order</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Date & Time</label>
+          <input type="datetime-local" />
+        </div>
+
+        <div class="input-group">
+          <label>Location</label>
+          <input type="text" placeholder="Enter Location" />
+        </div>
+
+        <div class="input-group">
+          <label>Involved Person</label>
+          <select>
+            <option>Select Involved Person</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Preferred Resolution</label>
+          <select>
+            <option>Select Preferred Resolution</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>Description</label>
+          <textarea placeholder="Describe the incident..."></textarea>
+        </div>
+
+        <div class="input-group upload-box">
+          <p>Upload Evidence</p>
+          <div class="upload-zone">
+            <p>📎 Drag and drop or browse</p>
+            <button>Browse Files</button>
+          </div>
+        </div>
+
+        <div class="confirmation">
+          <input type="checkbox" id="confirm" />
+          <label for="confirm">I confirm this report is accurate. False claims may affect account status.</label>
+        </div>
+
+        <button class="submit-btn">Submit</button>
+      </div>
+    </div>
+  </main>
+</div>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = docume6nt.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector(".menu-toggle .arrow");
+
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    // لما تفتح القائمة السهم ينعكس
+    if (sidebar.classList.contains("open")) {
+      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
+    } else {
+      arrow.innerHTML = "&#8250;"; // › سهم لليمين
+    }
+  });
+</script>
+
+</body>
+</html>
