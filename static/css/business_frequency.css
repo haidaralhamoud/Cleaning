@@ -1,0 +1,241 @@
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Vesper Libre", serif;
+  }
+
+  body {
+    background-color: #fff;
+    color: #000;
+  }
+
+  /* Navbar */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 80px;
+    flex-wrap: wrap;
+  }
+
+  .navbar ul {
+    display: flex;
+    gap: 40px;
+    list-style: none;
+    font-family: "Inter", sans-serif;
+    font-weight: 700;
+  }
+
+  .auth-buttons {
+    display: flex;
+    gap: 15px;
+  }
+
+  .signup {
+    background: #71b247;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 18px;
+    cursor: pointer;
+  }
+
+  .signin {
+    background: #fff;
+    color: #71b247;
+    border: 1px solid #71b247;
+    border-radius: 20px;
+    padding: 8px 18px;
+    cursor: pointer;
+  }
+
+  /* Steps */
+  .steps {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .step {
+    border: 1px solid #00a9c7;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 14px;
+    color: #00a9c7;
+  }
+
+  .step.active {
+    background: #00a9c7;
+    color: #fff;
+  }
+
+  /* Title */
+  .title {
+    text-align: center;
+    font-size: 28px;
+    margin: 40px 0 10px;
+  }
+
+  /* Frequency box */
+  .frequency-container {
+    width: 700px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    text-align: center;
+  }
+
+  .question {
+    font-size: 18px;
+    margin-bottom: 25px;
+  }
+
+  /* Options grid */
+  .options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-items: center;
+    margin-bottom: 40px;
+  }
+
+  .card {
+    width: 200px;
+    height: 120px;
+    border: 1px solid #00a9c7;
+    border-radius: 10px;
+    text-align: center;
+    padding-top: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .card img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 10px;
+  }
+
+  .card.selected {
+    background: rgba(3,159,200,0.2);
+    border: 2px solid #00a9c7;
+  }
+
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .times-select {
+    border: 1px solid #00a9c7;
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin-bottom: 5px;
+  }
+
+  /* Buttons */
+  .buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .back {
+    border: 1px solid #00a9c7;
+    color: #00a9c7;
+    background: #fff;
+    border-radius: 15px;
+    padding: 10px 25px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  .next {
+    background: #00a9c7;
+    color: #fff;
+    border: none;
+    border-radius: 15px;
+    padding: 10px 25px;
+    font-weight: 600;
+    cursor: pointer;
+    flex: 1;
+  }
+
+  /* =================== */
+  /* RESPONSIVE DESIGN */
+  /* =================== */
+
+  @media (max-width: 1024px) {
+    .frequency-container {
+      width: 90%;
+    }
+    .options {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .navbar {
+      padding: 15px 40px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .navbar ul {
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .frequency-container {
+      width: 95%;
+      padding: 25px 15px;
+    }
+
+    .options {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      width: 100%;
+      height: auto;
+      padding: 20px 0;
+    }
+
+    .card img {
+      width: 45px;
+      height: 45px;
+      margin-bottom: 5px;
+    }
+
+    .buttons {
+      flex-direction: column;
+    }
+
+    .back, .next {
+      width: 100%;
+      font-size: 18px;
+    }
+
+    .title {
+      font-size: 24px;
+    }
+
+    .question {
+      font-size: 17px;
+    }
+  }

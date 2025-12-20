@@ -1,0 +1,23 @@
+<div id="booking-summary-box" class="summary">
+    <h3>Booking Summary</h3>
+    <hr>
+
+    <div class="item">
+        <span>Services</span>
+        <span id="sum_services">${{ pricing.services_total|default:"0" }}</span>
+    </div>
+
+    <div class="item">
+        <span>Add-ons</span>
+        <span id="sum_addons">${{ pricing.addons_total|default:"0" }}</span>
+    </div>
+
+    <hr>
+
+    <div class="item total">
+        <span>Total</span>
+        <span id="sum_total">${{ pricing.final|default:"0" }}</span>
+    </div>
+
+    <a href="#" class="btn-blue">Continue</a>
+</div>

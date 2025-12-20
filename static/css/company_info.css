@@ -1,0 +1,161 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 850px;
+  text-align: center;
+}
+
+/* ===== Steps ===== */
+.steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.step {
+  border: 1px solid #039fc8;
+  color: #039fc8;
+  border-radius: 10px;
+  padding: 5px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.step.active {
+  background-color: #039fc8;
+  color: #fff;
+  border-color: #039fc8;
+}
+
+/* ===== Title ===== */
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.title h1 {
+  font-family: "Vesper Libre", serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #000;
+}
+
+.icon {
+  font-size: 38px;
+}
+
+/* ===== Form Card ===== */
+.form-card {
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  padding: 40px 35px;
+  text-align: left;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-family: "Vesper Libre", serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  border: 1px solid #039fc8;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #028bb0;
+}
+
+.full {
+  width: 100%;
+}
+
+.half {
+  flex: 1;
+  min-width: 45%;
+}
+
+.next-btn {
+  display: block;
+  background-color: #039fc8;
+  color: #fff;
+  font-family: "Vesper Libre", serif;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 25px;
+  margin-left: auto;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.next-btn:hover {
+  background-color: #028bb0;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+  }
+
+  .form-card {
+    padding: 25px 20px;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .half {
+    width: 100%;
+  }
+
+  .next-btn {
+    width: 100%;
+    font-size: 17px;
+  }
+}

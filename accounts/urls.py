@@ -28,4 +28,5 @@ urlpatterns = [
     path("Media/", views.Media, name="Media"),
     path("Report_Incident/", views.Report_Incident, name="Report_Incident"),
     
+    path("logout/", views.logout_view, name="logout"),
 ]

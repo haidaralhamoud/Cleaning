@@ -1,0 +1,112 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Thank You</title>
+
+<style>
+body {
+    font-family: "Inter", sans-serif;
+    background:#f8f9fb;
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+/* Overlay */
+.popup-overlay {
+    position: fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:10;
+}
+
+/* Popup box */
+.popup-box {
+    background: white;
+    width: 70%;
+    max-width: 650px;
+    padding: 40px 45px;
+    border-radius: 18px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.10);
+    animation: pop 0.25s ease-out;
+}
+
+@keyframes pop {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+/* X Button */
+.close-btn {
+    position:absolute;
+    top:18px;
+    right:20px;
+    background:#00a3c8;
+    color:white;
+    width:35px;
+    height:35px;
+    border-radius:10px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+    cursor:pointer;
+    border:none;
+}
+
+/* Check icon */
+.check-icon {
+    width:80px;
+    margin-bottom:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="popup-overlay">
+  <div class="popup-box">
+
+    <button class="close-btn" id="closePopup">×</button>
+
+    <img src="https://cdn-icons-png.flaticon.com/512/845/845646.png" class="check-icon">
+
+    <h2 style="color:#0096c7; font-weight:700;">💙 Thank you for your request!</h2>
+
+    <p style="margin-top:15px; line-height:1.8; font-size:17px;">
+      We’ve received your details and our team is already reviewing them.  
+      Within 24 hours, you’ll receive a tailored quote based on your office size,
+      needs, and selected services.
+    </p>
+
+    <p style="margin-top:15px; font-size:17px;">
+      👉 If we need more details, we’ll get in touch directly.  
+      Otherwise, expect your proposal in your inbox soon.
+    </p>
+
+    <p style="margin-top:25px; font-size:17px;">
+      In the meantime, if you have urgent questions, please contact us at  
+      <b>[support@email.com]</b>
+    </p>
+
+  </div>
+</div>
+
+<script>
+document.getElementById("closePopup").onclick = function() {
+    window.location.href = "/";   // يرجعو عالصفحة الرئيسية
+};
+</script>
+
+</body>
+</html>

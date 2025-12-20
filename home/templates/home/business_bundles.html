@@ -1,0 +1,604 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Service Bundles</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <link rel="stylesheet" href="{% static 'css/business_bundles.css'%}" />
+
+  <style>
+    *, *:before, *:after {
+    box-sizing: border-box;
+    }
+/*--------------------------
+       CUSTOM BUNDLE CARD
+---------------------------*/
+.bundle--custom {
+    border: 2px dashed #009dbe;
+    background: #f9fdff;
+}
+.bundle__media--custom {
+    background: #e8faff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.bundle--custom .plus {
+    font-size: 55px;
+    color: #009dbe;
+}
+
+/*--------------------------
+            MODAL
+---------------------------*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background: #fff;
+  margin: 5% auto;
+  padding: 25px;
+  width: 70%;
+  max-width: 900px;
+  border-radius: 12px;
+  animation: pop .3s ease;
+}
+
+@keyframes pop { 
+  from { transform: scale(0.8); opacity: 0; } 
+  to   { transform: scale(1); opacity: 1; } 
+}
+
+.close-btn {
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+}
+/* === MODAL MAIN BOX === */
+.modal-content {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px 30px;
+    max-width: 900px;
+    width: 90%;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.25);
+    font-family: "Inter", sans-serif;
+}
+
+/* Title */
+.modal-content h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+/* Sub title */
+.modal-content p {
+    font-size: 14px;
+    color: #444;
+}
+
+/* === GRID LAYOUT LIKE THE DESIGN === */
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+/* SECTION BOXES */
+.modal-box-section {
+    background: #f3f7f9;
+    padding: 15px 18px;
+    border-radius: 10px;
+}
+
+/* Section Titles */
+.modal-box-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+/* List */
+.modal-box-section ul {
+    padding-left: 0;
+    list-style: none;
+}
+
+.modal-box-section li {
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Blue check icons */
+.modal-check {
+    color: #009dbe;
+    font-size: 15px;
+}
+
+/* Add-ons and Notes layout */
+.modal-bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+/* “Add Bundle” button */
+.modal-action-btn {
+    margin-top: 25px;
+    display: block;
+    width: 240px;
+    margin-left: auto;
+    background: #009dbe;
+    color: #fff;
+    padding: 12px 15px;
+    text-align: center;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+}
+.modal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.check-item {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.check-item::before {
+    content: "⭐"; /* فيك تغيرها لـ ✔️ أو ✓ */
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #00a3c8;
+    font-size: 18px;
+}
+.bundle__media {
+  width: 100%;
+  height: 230px;         /* 🔥 هذا المقاس ثابت لكل الصور */
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 15px;
+}
+
+/* الصورة داخل البوكس */
+.bundle__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;     /* 🔥 أهم سطر! يجعل الصورة تملأ الصندوق دون تشويه */
+  object-position: center;
+  display: block;
+}
+.selected-plan {
+    outline: 3px solid #00a3c8 !important;
+    background: #eafdff !important;
+    box-shadow: 0 0 12px rgba(0,163,200,0.4);
+}
+
+.disabled-plan {
+    opacity: 0.4;
+    pointer-events: none;
+}
+.steps {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 25px 0;
+}
+
+.step {
+    padding: 8px 16px;
+    border: 1px solid #00a3c8;
+    border-radius: 18px;
+    color: #00a3c8;
+    font-weight: 600;
+    background: #fff;
+}
+
+.step.active {
+    background: #00a3c8;
+    color: #fff;
+}
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: #f1f5f7;
+    color: #009dbe;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid #d9e4e8;
+    transition: 0.25s ease;
+}
+
+.back-btn:hover {
+    background: #e7f4f7;
+    border-color: #b8d7df;
+    color: #007c96;
+}
+
+.back-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+  </style>
+</head>
+
+<body>
+    <!-- ✅ HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="{% url 'home:contact' %}">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
+  </div>
+</header>
+<div class="steps">
+    {% for i in range_total_steps %}
+        <div class="step {% if step == i %}active{% endif %}">
+            Step {{ i }}
+        </div>
+    {% endfor %}
+</div>
+
+
+<!-- ====================== TITLE ======================= -->
+<section class="page-head">
+  <div class="container">
+    <h1 class="page-title">Service Bundles</h1>
+  </div>
+</section>
+
+<!-- =================== BUNDLE CARDS ==================== -->
+<main class="container">
+  <div class="grid">
+
+    {% for b in bundles %}
+    <article class="bundle">
+      <div class="bundle__media">
+        {% if b.image %}
+        <img src="{{ b.image.url }}" alt="{{ b.title }}">
+        {% endif %}
+
+        {% if b.discount %}
+        <span class="badge">Save {{ b.discount }}</span>
+        {% endif %}
+      </div>
+
+      <div class="bundle__body">
+        <h3 class="bundle__title">{{ b.title }}</h3>
+        <p class="bundle__lead">{{ b.short_description }}</p>
+
+        <ul class="bundle__list">
+          {% for item in b.features %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+
+        <div class="bundle__actions">
+
+          <!-- Learn More Button -->
+          <button 
+            type="button" 
+            class="btn btn-ghost learn-more-btn"
+            data-id="{{ b.id }}"
+            data-title="{{ b.title }}"
+            data-description="{{ b.short_description }}"
+            data-target="{{ b.target_audience }}"
+            data-included="{{ b.what_included|join:'||' }}"
+            data-why="{{ b.why_choose|join:'||' }}"
+            data-addons="{{ b.addons|join:'||' }}"
+            data-notes="{{ b.notes }}"
+            data-discount="{{ b.discount }}"
+          >
+            Learn More
+          </button>
+
+          <!-- Add To Booking -->
+          <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="bundle_id" value="{{ b.id }}">
+            <button type="submit" class="btn btn-primary choose-plan" data-type="bundle">
+              Add to booking
+            </button>
+          </form>
+
+        </div>
+      </div>
+
+    </article>
+    {% endfor %}
+
+    <!-- Custom Plan -->
+    <article class="bundle bundle--custom">
+      <div class="bundle__media bundle__media--custom">
+        <div class="plus">+</div>
+      </div>
+      <div class="bundle__body">
+        <h3 class="bundle__title">Custom Plan</h3>
+        <p class="bundle__lead">
+          Want something unique?<br>
+          Tell us what combination works best for your office.
+        </p>
+        <div class="bundle__actions bundle__actions--single">
+          <a href="{% url 'home:business_services_needed' booking.id %}?path=custom" 
+             class="btn btn-primary btn-wide">
+             Create Your Plan
+          </a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+  <br>
+  <div>
+  <a onclick="window.history.back();" class="back-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    Back
+</a>
+</div>
+</main>
+<br>
+<br>
+<br>
+<br>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+<!-- ✅ فورم خفي ليستخدمه زر Add Bundle داخل المودال -->
+<form id="modalBundleForm" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="bundle_id" id="modal_bundle_id">
+</form>
+
+<!-- ===================== MODAL ===================== -->
+<div id="bundleModal" class="modal">
+  <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ===================== SCRIPT ===================== -->
+<script>
+document.querySelectorAll(".learn-more-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+
+        const bundleId = btn.dataset.id;  // 👈 رقم الباندل
+        const title = btn.dataset.title;
+        const desc = btn.dataset.description;
+        const target = btn.dataset.target;
+        const included = btn.dataset.included.split("||");
+        const why = btn.dataset.why.split("||");
+        const addons = btn.dataset.addons.split("||");
+        const notes = btn.dataset.notes;
+        const discount = btn.dataset.discount || "10%";
+
+        // نحط رقم الباندل داخل الحقل المخفي
+        document.getElementById("modal_bundle_id").value = bundleId;
+
+        const html = `
+    <h2><strong>${title}</strong></h2>
+    <p>${desc}</p>
+    <p><strong>${target}</strong></p>
+
+    <div class="modal-grid">
+        <div class="modal-box-section">
+            <h3>What's included</h3>
+            <ul class="modal-list">
+                ${included.map(i => `<li class="check-item">${i}</li>`).join("")}
+            </ul>
+        </div>
+
+        <div class="modal-box-section">
+            <h3>Why choose this bundle</h3>
+            <ul>
+                ${why.map(i => `
+                    <li>
+                        <span class="modal-check">✔</span> ${i}
+                    </li>
+                `).join("")}
+            </ul>
+        </div>
+    </div>
+
+    <div class="modal-bottom-grid">
+        <div class="modal-box-section">
+            <h3>Popular add-ons</h3>
+            <p>${addons.join(", ")}</p>
+        </div>
+
+        <div class="modal-box-section">
+            <h3>Notes</h3>
+            <p>${notes}</p>
+        </div>
+    </div>
+
+    <button class="modal-action-btn" id="modalAddBtn">
+        Add Bundle and save ${discount}
+    </button>
+`;
+
+        document.getElementById("modal-body").innerHTML = html;
+        document.getElementById("bundleModal").style.display = "block";
+
+        // زر Add Bundle داخل المودال → submit لنفس POST تاع Add to booking
+        document.getElementById("modalAddBtn").onclick = () => {
+            document.getElementById("modalBundleForm").submit();
+        };
+    });
+});
+
+// Close Modal
+document.querySelector(".close-btn").onclick = () => {
+    document.getElementById("bundleModal").style.display = "none";
+};
+
+window.onclick = (e) => {
+    if (e.target.id === "bundleModal") {
+        document.getElementById("bundleModal").style.display = "none";
+    }
+};
+</script>
+
+<script>
+let choice = null;
+
+const buttons = document.querySelectorAll(".choose-plan");
+
+buttons.forEach(btn => {
+    btn.addEventListener("click", (e) => {
+
+        const type = btn.dataset.type;
+
+        // إذا رجع كبس نفس الزر → إلغاء الاختيار
+        if (choice === type) {
+            choice = null;
+            resetAll();
+            return;
+        }
+
+        // تحديد الاختيار الجديد
+        choice = type;
+
+        resetAll();
+        highlight(btn);
+    });
+});
+
+function resetAll() {
+    buttons.forEach(b => {
+        b.classList.remove("selected-plan");
+        b.classList.remove("disabled-plan");
+    });
+}
+
+function highlight(activeBtn) {
+    activeBtn.classList.add("selected-plan");
+
+    buttons.forEach(b => {
+        if (b !== activeBtn) {
+            b.classList.add("disabled-plan");
+        }
+    });
+}
+</script>
+
+</body>
+</html>

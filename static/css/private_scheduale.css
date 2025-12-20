@@ -1,0 +1,123 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:'Vesper Libre',serif;
+  background:#f7f7ff;
+  color:#000;
+  display:flex;
+  justify-content:center;
+  padding:40px 20px;
+}
+.container{
+  max-width:1250px;width:100%;
+  display:flex;flex-wrap:wrap;gap:20px;
+}
+
+/* LEFT */
+.left{
+  flex:1 1 70%;
+  background:#fff;border-radius:15px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);
+  padding:25px 30px;
+}
+.step-title{font-weight:700;font-size:18px;margin-bottom:5px}
+.progress{height:7px;background:#f0f0f0;border-radius:10px;margin-bottom:25px;overflow:hidden;position:relative}
+.progress::after{content:"";position:absolute;top:0;left:0;height:100%;width:75%;background:#039FC8}
+
+/* Q1 + Q2 side-by-side */
+.q-row{display:flex;gap:25px;flex-wrap:wrap}
+.q-col{flex:1 1 48%}
+
+h2{font-size:20px;font-weight:700;margin:30px 0 10px}
+
+/* Calendar */
+.calendar-container{
+  background:#f7f7ff;border-radius:15px;padding:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.calendar-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.month-nav{cursor:pointer;color:#039FC8;font-weight:700;font-size:22px;user-select:none}
+.month-title{font-size:20px;font-weight:700;}
+.days-of-week{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;color:#999;font-weight:700;margin-bottom:5px}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}
+.day{
+  padding:8px 0;border-radius:8px;cursor:pointer;font-weight:700;transition:.25s;position:relative
+}
+.day:hover{background:#039FC8;color:#fff}
+.day.selected{background:#039FC8;color:#fff}
+.day.weekend{color:#71B247}
+.day small{display:block;font-size:10px;color:#039FC8;margin-top:2px}
+
+/* Time window */
+.time-box{
+  background:#f7f7ff;border-radius:15px;padding:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);
+}
+.time-box h3{font-size:20px;font-weight:700;margin-bottom:10px}
+.time-option{
+  background:#e4e4e9;color:#000;padding:10px;border-radius:15px;
+  font-weight:700;text-align:center;margin:8px 0;cursor:pointer;transition:.25s
+}
+.time-option:hover,.time-option.active{background:#039FC8;color:#fff}
+
+/* Requests */
+.request-box{margin-top:25px}
+.request-box h3{font-size:20px;font-weight:700;margin-bottom:10px}
+.request-box textarea{
+  width:100%;height:80px;padding:10px;border-radius:10px;border:1px solid #ccc;font-size:16px;resize:none
+}
+
+/* Schedule & Frequency */
+.freq-row{display:flex;flex-wrap:wrap;gap:25px}
+.freq-col{flex:1 1 48%}
+.freq-col h3{font-size:18px;font-weight:700;margin-bottom:10px}
+
+.freq-btn{
+  padding:10px;border-radius:15px;text-align:center;cursor:pointer;font-weight:700;
+  background:#d3d3d5;transition:.25s;margin-bottom:10px
+}
+.freq-btn.active{background:#039FC8;color:#fff}
+
+/* Days selector (Q2 in section 2) */
+.days-grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.day-check{
+  border:2px solid #039FC8;border-radius:20px;padding:8px 12px;
+  display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.25s;font-weight:700
+}
+.day-check:hover{background:#e6f8fc}
+.day-check input{accent-color:#039FC8;margin-right:8px;transform:scale(1.1)}
+.day-check.weekend span:last-child{font-size:12px;color:#039FC8;margin-left:6px}
+.day-check.active{background:#039FC8;color:#fff}
+
+/* End Date */
+.end-date{margin-top:15px}
+.end-date-buttons{display:flex;gap:10px;margin-top:5px}
+.end-btn{
+  background:#d3d3d5;border-radius:10px;padding:8px 16px;cursor:pointer;transition:.25s;font-weight:700
+}
+.end-btn.active{background:#039FC8;color:#fff}
+.end-date input{margin-top:10px;padding:8px;border-radius:10px;border:1px solid #ccc;font-size:16px}
+
+/* RIGHT (Summary) */
+.right{
+  flex:1 1 28%;background:#fff;border-radius:15px;
+  box-shadow:0 2px 10px rgba(0,0,0,.1);padding:25px;height:fit-content
+}
+.right h3{text-align:center;font-size:24px;font-weight:700;margin-bottom:10px}
+.line{border-top:2px solid rgba(0,169,199,.5);margin:10px 0}
+.summary-item{display:flex;justify-content:space-between;font-size:18px;margin:8px 0}
+.total{font-weight:700;border-top:2px solid rgba(0,169,199,.5);padding-top:8px;margin-top:10px}
+.checkout-btn{
+  background:#00A9C7;color:#fff;border:none;border-radius:15px;
+  padding:12px 20px;font-weight:700;width:100%;margin-top:25px;cursor:pointer;transition:.25s
+}
+.checkout-btn:hover{background:#039FC8}
+
+/* Responsive */
+@media(max-width:900px){
+  .container{flex-direction:column}
+  .q-row{flex-direction:column}
+  .freq-row{flex-direction:column}
+}

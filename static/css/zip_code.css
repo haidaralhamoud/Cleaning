@@ -1,0 +1,408 @@
+@import url('https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Vesper Libre", serif;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  padding: 15px 5%;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar nav {
+  display: flex;
+  gap: 25px;
+}
+
+.navbar a {
+  color: #000;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+  position: relative;
+}
+
+.navbar a:hover::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: -4px;
+  width: 100%; height: 2px;
+  background: #71b247;
+}
+
+.logo {
+  width: 120px;
+}
+
+.btn-profile {
+  background: #71b247;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== HERO ===== */
+.hero {
+  background: url('frame-16865527220.png') center/cover no-repeat;
+  height: 450px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+}
+.hero h1 {
+  color: #fff;
+  font-size: 60px;
+  z-index: 2;
+}
+
+/* ===== ZIP SECTION ===== */
+.zip-section {
+  padding: 80px 5%;
+  background: #fff;
+}
+
+.zip-section h2 {
+  font-size: 38px;
+  margin-bottom: 20px;
+}
+
+.zip-form label {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.zip-inputs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.zip-inputs input {
+  flex: 1;
+  border: 1px solid #039fc8;
+  border-radius: 12px;
+  padding: 10px 15px;
+  font-size: 18px;
+}
+
+.zip-inputs button {
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 25px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: 0.3s;
+}
+.zip-inputs button:hover { background: #028fb5; }
+
+/* ===== NOT SERVED BOX ===== */
+.not-served-box {
+  border: 1px solid #039fc8;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(3,159,200,0.25);
+  margin: 40px 0;
+  padding: 25px;
+  text-align: center;
+}
+.not-served-box img {
+  width: 80px;
+  display: block;
+  margin: 0 auto 10px;
+}
+.not-served-box p {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ===== FORM ===== */
+.contact-form {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.form-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+.form-group input, .form-group textarea {
+  border: 1px solid #039fc8;
+  border-radius: 12px;
+  padding: 10px 15px;
+  font-size: 18px;
+}
+.form-group textarea {
+  height: 120px;
+  resize: none;
+}
+.full-width { grid-column: 1 / -1; }
+
+.submit-btn {
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 40px;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.submit-btn:hover { background: #028fb5; }
+
+/* ===== BOOKING SUMMARY ===== */
+.booking-summary {
+  background: #fff;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  border-radius: 15px;
+  width: 350px;
+  padding: 25px;
+}
+.booking-summary h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.booking-summary p {
+  text-align: center;
+  margin: 15px 0;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* ===== REVEAL ANIMATION ===== */
+:root {
+  --reveal-distance: 20px;
+  --reveal-duration: 0.9s;
+  --reveal-ease: cubic-bezier(.2,.65,.2,1);
+}
+.reveal {
+
+  transform: translateY(var(--reveal-distance));
+  transition:
+    opacity var(--reveal-duration) var(--reveal-ease) var(--d, 0s),
+    transform var(--reveal-duration) var(--reveal-ease) var(--d, 0s);
+}
+.reveal[data-dir="left"] { transform: translateX(20px); }
+.reveal[data-dir="up"] { transform: translateY(20px); }
+.reveal.show {
+  opacity: 1;
+  transform: none;
+}
+.fade-in-onload {
+  opacity: 0;
+  animation: titleIn 1s var(--reveal-ease) 0.2s forwards;
+}
+@keyframes titleIn {
+  to { opacity: 1; transform: none; }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+  .contact-form { flex-direction: column; }
+  .booking-summary { width: 100%; }
+}
+@media (max-width: 600px) {
+  .hero h1 { font-size: 40px; text-align: center; }
+  .zip-section { padding: 40px 5%; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+/* ===== SUBMIT BUTTON (بالمكان الصحيح) ===== */
+.submit-btn {
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 40px;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(3,159,200,0.25);
+
+  /* جديد */
+  margin-top: auto;
+  margin-right: 20px;
+}
+
+.submit-btn:hover {
+  background: #028fb5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(3,159,200,0.35);
+}
+
+.submit-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 6px rgba(3,159,200,0.25);
+}
+/* ===== FORM CONTAINER ===== */
+/* ===== FORM CONTAINER ===== */
+.contact-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+/* الحقول والزر داخل عمود واحد */
+.form-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+/* شبكة الحقول */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 25px;
+}
+
+/* زر الإرسال تحت آخر حقل بمحاذاة اليمين */
+.submit-btn {
+  align-self: flex-end;
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 40px;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(3,159,200,0.25);
+}
+
+.submit-btn:hover {
+  background: #028fb5;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(3,159,200,0.35);
+}
+
+.submit-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 6px rgba(3,159,200,0.25);
+}
+
+/* ===== BOOKING SUMMARY BOX ===== */
+.booking-summary {
+  background: #fff;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  width: 300px;
+  flex-shrink: 0;
+}
+/* ===== RESET عامة للموبايل ===== */
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* خلي كل الأقسام تتمدد بعرض الشاشة */
+section, .zip-section, .contact-form, .form-grid, .form-left {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0 16px; /* مسافة ناعمة من الأطراف */
+  box-sizing: border-box;
+}
+
+/* ===== الميديا كويري للموبايل ===== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+    padding: 0 10px;
+  }
+
+  .zip-section h2 {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .zip-form button {
+    width: 100%;
+  }
+
+  .contact-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .booking-summary {
+    width: 90%;
+    margin-top: 30px;
+  }
+
+  .submit-btn {
+    align-self: center; /* يكون بالنص */
+  }
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* خليه بعرض كامل لحقل الرسالة */
+.form-group.full-width {
+  grid-column: span 2;
+}
+
+textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* الميديا للموبايل */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-group.full-width {
+    grid-column: span 1;
+  }
+}

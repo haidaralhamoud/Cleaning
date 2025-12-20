@@ -1,0 +1,124 @@
+body {
+  font-family: "Inter", sans-serif;
+  background: #fff;
+}
+
+.services-needed {
+  width: 90%;
+  margin: auto;
+  text-align: center;
+}
+
+/* ========== STEPS ========== */
+.steps button {
+  background: #fff;
+  border: 1px solid #00a5c4;
+  color: #00a5c4;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin: 0 5px;
+}
+.steps .active {
+  background: #00a5c4;
+  color: white;
+}
+
+/* ========== TITLE ========== */
+.title {
+  margin: 35px 0 20px;
+}
+.title .icon {
+  font-size: 30px;
+}
+
+/* ========== GRID ========== */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  justify-items: center;
+  margin-top: 10px;
+}
+
+.service-card {
+  width: 260px;
+  padding: 25px 10px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1.5px solid #e7eef0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  cursor: pointer;
+  position: relative;
+  transition: 0.25s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+}
+
+/* ICON */
+.service-card img.service-icon {
+  width: 70px;
+  margin-bottom: 15px;
+}
+
+/* TEXT */
+.service-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.service-card p {
+  font-size: 14px;
+  color: #666;
+}
+
+/* CHECKMARK ICON */
+.checkmark {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e6f9ff;
+  border: 2px solid #00a5c4;
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: 0.2s ease;
+}
+.checkmark img {
+  width: 16px;
+}
+
+/* SELECTED STATE */
+.service-card.selected {
+  border-color: #00a5c4;
+  background: #f2fcff;
+}
+.service-card.selected .checkmark {
+  opacity: 1;
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  width: 70%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.next {
+  background: #009dbe;
+  color: white;
+  padding: 10px 25px;
+  border-radius: 10px;
+  border: none;
+}
+.back {
+  color: #009dbe;
+  font-size: 16px;
+}

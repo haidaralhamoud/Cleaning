@@ -1,3 +1,8 @@
+<<<<<<< HEAD
 <svg width="15" height="39" viewBox="0 0 15 39" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M15 39.0062L0 19.9401L15 0.874023" stroke="#71B247" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+=======
+<svg width="28" height="30" viewBox="0 0 28 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.9004 0.5C21.144 0.5 27.0928 6.94795 27.0928 15C27.0928 23.0521 21.144 29.5 13.9004 29.5C6.65692 29.4998 0.708984 23.052 0.708984 15C0.708985 6.94805 6.65692 0.500164 13.9004 0.5Z" stroke="#898989" stroke-opacity="0.75" stroke-linecap="round" stroke-linejoin="round"/>
+>>>>>>> eeffebdc44f08b9c7896b00bbffa7694d032ab45
 </svg>

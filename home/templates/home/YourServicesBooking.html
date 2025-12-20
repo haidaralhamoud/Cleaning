@@ -1,0 +1,507 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Services Booking</title>
+
+  <link rel="stylesheet" href="{% static 'css/YourServicesBooking.css' %}">
+  <link rel="stylesheet" href="{% static 'css/addonse.css' %}">
+  <style>
+    .popup-content {
+      width: 900px !important;
+      max-width: 90%;
+      border-radius: 18px;
+      padding: 30px;
+    }
+
+    .addons-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      padding: 10px;
+    }
+
+    .addon-card {
+      background: #fff;
+      border-radius: 18px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      position: relative;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+      min-height: 200px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .addon-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .addon-card img {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      margin: 0 auto;
+    }
+
+    .check-box {
+      width: 22px;
+      height: 22px;
+      border: 2px solid #00a3c8;
+      border-radius: 6px;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .check-box.checked {
+      background: #00a3c8;
+    }
+
+    <style>
+.error {
+    border: 2px solid #e74c3c !important;
+    background: #fff6f6;
+}
+</style>
+
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="overlay"></div>
+  <h1>Booking your cleaning</h1>
+</section>
+
+<!-- PROGRESS -->
+<section class="progress">
+  <p>Step 2 of 4</p>
+  <div class="bar"><div class="fill"></div></div>
+</section>
+
+<main class="content">
+
+  <!-- LEFT -->
+  <div class="left">
+    <h2>Your Selected Services</h2>
+    <h3>What can we help with</h3>
+
+    <form method="post">
+      {% csrf_token %}
+
+      {% for service in services %}
+      <div class="service-box">
+        <h5>{{ forloop.counter }}. {{ service.title }}</h5>
+
+        <!-- الأسئلة الأساسية الخاصة بالخدمة -->
+        {% if service.questions %}
+          {% for q_key, question in service.questions.items %}
+          <div class="row">
+            <div class="input-block">
+              <label>{{ question.label }}</label>
+
+              {% if question.type == "select" %}
+                <select name="{{ service.slug }}__{{ q_key }}">
+                  <option value="">Select...</option>
+                  {% for opt in question.options %}
+                    <option value="{{ opt }}">{{ opt }}</option>
+                  {% endfor %}
+                </select>
+
+              {% elif question.type == "number" %}
+                <input type="number" name="{{ service.slug }}__{{ q_key }}">
+
+              {% elif question.type == "textarea" %}
+                <textarea name="{{ service.slug }}__{{ q_key }}"></textarea>
+
+              {% else %}
+                <input type="text" name="{{ service.slug }}__{{ q_key }}">
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- زر add-ons -->
+        <button type="button"
+                class="btn-blue"
+                onclick="openAddonsPopup('{{ service.slug }}')">
+            Add ons
+        </button>
+
+      </div>
+      {% endfor %}
+
+      <!-- هنا يتخزن JSON تبع الـ Add-ons -->
+      <input type="hidden" name="addons_selected" id="addons_json">
+
+      <button type="submit" class="btn-blue" style="margin-top:20px;">Continue</button>
+    </form>
+  </div>
+
+  <!-- RIGHT SUMMARY (مؤقت ثابت) -->
+{% include "home/_booking_summary.html" %}
+
+</main>
+
+<!-- ===== POPUP OVERLAY ===== -->
+<div class="popup-overlay" id="popup" style="display:none;">
+  <div class="popup-content">
+
+    <!-- HEADER -->
+    <div class="popup-header">
+      <h3 id="popupTitle">Add-ons</h3>
+      <button id="closePopup">×</button>
+    </div>
+
+    <!-- BODY -->
+    <div id="popupBody" class="popup-body">
+      <!-- هنا بيركب الجريد أو الفورم -->
+    </div>
+
+    <!-- BUTTONS -->
+    <div class="popup-buttons">
+      <button class="btn-outline" id="cancelPopup">Cancel</button>
+      <button class="btn-filled" id="savePopup">Save & Close</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- =============== JS DATA من Django =============== -->
+<script>
+// جميع الـ Add-ons لكل خدمة
+const SERVICE_ADDONS = {
+    {% for service in services %}
+    "{{ service.slug }}": {
+        {% for addon in service.addons_list.all %}
+        "{{ addon.slug }}": {
+            "label": "{{ addon.title|escapejs }}",
+            "icon": "{% if addon.icon %}{{ addon.icon.url }}{% endif %}",
+            "form": String.raw`{{ addon.form_html|safe }}`
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+};
+
+// الـ Add-ons المحفوظة مسبقًا
+const SAVED_ADDONS = {{ saved_addons|safe }};
+</script>
+
+
+<!-- ================= JS: ADDONS LOGIC ================= -->
+<script>
+let CURRENT_SERVICE = null;
+let CURRENT_ADDON = null;
+
+// نسخة العمل
+let ADDONS_DATA = SAVED_ADDONS || {};
+
+
+// فتح قائمة Add-ons
+function openAddonsPopup(serviceSlug) {
+    CURRENT_SERVICE = serviceSlug;
+    CURRENT_ADDON = null;
+
+    const popup = document.getElementById("popup");
+    const popupTitle = document.getElementById("popupTitle");
+    const popupBody = document.getElementById("popupBody");
+
+    const addons = SERVICE_ADDONS[serviceSlug];
+
+    if (!addons || Object.keys(addons).length === 0) {
+        popupTitle.textContent = "No Add-ons";
+        popupBody.innerHTML = "<p style='padding:20px;'>This service has no add-ons.</p>";
+        popup.style.display = "flex";
+        return;
+    }
+
+    let html = "";
+    for (let key in addons) {
+        const ad = addons[key];
+
+        let isChecked =
+            ADDONS_DATA[serviceSlug] &&
+            ADDONS_DATA[serviceSlug][key];
+
+        html += `
+          <div class="addon-card" onclick="openAddonForm('${serviceSlug}','${key}')">
+            <img src="${ad.icon}" class="addon-icon">
+            <p>${ad.label}</p>
+            <div class="check-box ${isChecked ? 'checked' : ''}"></div>
+          </div>
+        `;
+    }
+
+    popupTitle.textContent = "Add-ons";
+    popupBody.innerHTML = `<div class="addons-grid">${html}</div>`;
+    popup.style.display = "flex";
+}
+
+
+// فتح فورم Add-on
+function openAddonForm(serviceSlug, addonKey) {
+    CURRENT_SERVICE = serviceSlug;
+    CURRENT_ADDON = addonKey;
+
+    const popupTitle = document.getElementById("popupTitle");
+    const popupBody  = document.getElementById("popupBody");
+
+    const addon = SERVICE_ADDONS[serviceSlug][addonKey];
+
+    popupTitle.textContent = addon.label;
+
+    popupBody.innerHTML = `
+      <div class="addon-form-wrapper">
+        ${addon.form}
+      </div>
+      <button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">
+        ← Back to Add-ons
+      </button>
+    `;
+
+    // رجوع البيانات القديمة
+    if (ADDONS_DATA[serviceSlug] && ADDONS_DATA[serviceSlug][addonKey]) {
+        const saved = ADDONS_DATA[serviceSlug][addonKey];
+        const fields = popupBody.querySelectorAll("input, textarea, select");
+
+        fields.forEach(f => {
+            if (saved[f.name] !== undefined) {
+                if (f.type === "radio" || f.type === "checkbox") {
+                    if (saved[f.name] === f.value) f.checked = true;
+                } else {
+                    f.value = saved[f.name];
+                }
+            }
+        });
+    }
+}
+
+
+// زر Save & Close
+document.getElementById("savePopup").onclick = () => {
+
+    const popup = document.getElementById("popup");
+
+    // لو نضغط Save من القائمة الأساسية
+    if (!CURRENT_ADDON) {
+        document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
+        sendAddonsUpdate();
+        popup.style.display = "none";
+        return;
+    }
+
+    // لو نحن داخل Add-on form
+    const popupBody = document.getElementById("popupBody");
+    const fields = popupBody.querySelectorAll("input, textarea, select");
+
+    let data = {};
+    let valid = true;
+    let radioGroups = {};
+
+    fields.forEach(f => {
+        if (!f.name) return;
+
+        if (f.type === "radio" || f.type === "checkbox") {
+            radioGroups[f.name] = radioGroups[f.name] || { any: false };
+
+            if (f.checked) {
+                radioGroups[f.name].any = true;
+                data[f.name] = f.value;
+            }
+        } else {
+            const v = (f.value || "").trim();
+            data[f.name] = v;
+            if (!v) valid = false;
+        }
+    });
+
+    for (let g in radioGroups) {
+        if (!radioGroups[g].any) valid = false;
+    }
+
+    if (!valid) {
+        alert("Please answer all questions for this add-on before saving.");
+        return;
+    }
+
+    ADDONS_DATA[CURRENT_SERVICE] = ADDONS_DATA[CURRENT_SERVICE] || {};
+    ADDONS_DATA[CURRENT_SERVICE][CURRENT_ADDON] = data;
+
+    document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
+
+    sendAddonsUpdate();
+    popup.style.display = "none";
+};
+
+
+// زر X و Cancel
+document.getElementById("closePopup").onclick =
+document.getElementById("cancelPopup").onclick = () => {
+    document.getElementById("popup").style.display = "none";
+};
+
+
+// الضغط على خلفية البوباب
+document.getElementById("popup").onclick = e => {
+    if (e.target.id === "popup") {
+        e.target.style.display = "none";
+    }
+};
+
+
+// عند تحميل الصفحة
+window.addEventListener("load", () => {
+    document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
+});
+</script>
+
+
+
+<!-- =============  API FUNCTIONS (SUMMARY / UPDATE) ============= -->
+<script>
+// تحديث الفاتورة
+function updateSummary(bookingId) {
+    fetch(`/private/api/booking/${bookingId}/price/`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById("sum_services").innerText = "$" + data.services_total;
+            document.getElementById("sum_addons").innerText = "$" + data.addons_total;
+            document.getElementById("sum_total").innerText = "$" + data.final;
+        });
+}
+
+
+// تحديث الإجابات
+function updateAnswer(bookingId, serviceSlug, fieldKey, value) {
+    let fd = new FormData();
+    fd.append("service", serviceSlug);
+    fd.append("field", fieldKey);
+    fd.append("value", value);
+
+    fetch(`/private/api/booking/${bookingId}/update-answer/`, {
+        method: "POST",
+        body: fd
+    })
+    .then(() => updateSummary(bookingId));
+}
+
+
+// ربط الأحداث
+document.querySelectorAll("select, input, textarea").forEach(el => {
+    el.addEventListener("change", function () {
+        if (!this.name.includes("__")) return;
+
+        const [service, field] = this.name.split("__");
+        updateAnswer({{ booking.id }}, service, field, this.value);
+    });
+});
+</script>
+
+
+<!-- =============  SEND ADD-ONS TO BACKEND ============= -->
+<script>
+function sendAddonsUpdate() {
+    const fd = new FormData();
+    fd.append("addons_json", JSON.stringify(ADDONS_DATA));
+
+    fetch(`/private/api/booking/{{ booking.id }}/update-addons/`, {
+        method: "POST",
+        body: fd
+    })
+    .then(() => updateSummary({{ booking.id }}));
+}
+</script>
+
+
+<script>
+function validateMainQuestions() {
+    let valid = true;
+    let firstError = null;
+
+    document.querySelectorAll("[name]").forEach(el => {
+        // فقط أسئلة الخدمات (service__question)
+        if (!el.name.includes("__")) return;
+
+        // تجاهل hidden
+        if (el.type === "hidden") return;
+
+        let value = "";
+
+        if (el.type === "radio" || el.type === "checkbox") {
+            const group = document.querySelectorAll(`[name="${el.name}"]`);
+            const checked = Array.from(group).some(i => i.checked);
+            if (!checked) {
+                valid = false;
+                firstError = firstError || el;
+            }
+        } else {
+            value = (el.value || "").trim();
+            if (!value) {
+                valid = false;
+                firstError = firstError || el;
+            }
+        }
+
+        if (!valid) {
+            el.classList.add("error");
+        } else {
+            el.classList.remove("error");
+        }
+    });
+
+    if (!valid && firstError) {
+        firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    return valid;
+}
+</script>
+<script>
+function validateAddons() {
+    for (let service in ADDONS_DATA) {
+        for (let addon in ADDONS_DATA[service]) {
+            const fields = ADDONS_DATA[service][addon];
+
+            for (let key in fields) {
+                if (!fields[key]) {
+                    alert("Please complete all fields for selected add-ons.");
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+</script>
+
+<script>
+document.querySelector("form").addEventListener("submit", function(e) {
+
+    if (!validateMainQuestions()) {
+        e.preventDefault();
+        alert("Please answer all required service questions before continuing.");
+        return;
+    }
+
+    if (!validateAddons()) {
+        e.preventDefault();
+        return;
+    }
+
+});
+</script>
+
+</body>
+</html>

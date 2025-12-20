@@ -1,0 +1,277 @@
+* {
+  box-sizing: border-box;
+  font-family: "Vesper Libre", serif;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #fff;
+  overflow-x: hidden;
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 60px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background: white;
+}
+.navbar nav a {
+  margin: 0 15px;
+  color: #000;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+  position: relative;
+}
+.navbar nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: #71b247;
+  transition: 0.3s;
+}
+.navbar nav a:hover::after {
+  width: 100%;
+}
+.profile-btn {
+  background: #71b247;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== HERO ===== */
+.hero {
+  background: url('frame-16865527220.png') center/cover no-repeat;
+  height: 55vh;
+  position: relative;
+}
+.overlay {
+  background: rgba(0,0,0,0.4);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-title {
+  color: white;
+  font-size: 3.5rem;
+  animation: fadeInUp 1.5s ease;
+}
+
+/* ===== MAIN CONTENT ===== */
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 60px 80px;
+  animation: fadeIn 1s ease;
+}
+
+.left-section {
+  flex: 1;
+  max-width: 800px;
+}
+.step {
+  font-weight: 700;
+  font-size: 20px;
+  color: #000;
+  margin-bottom: 10px;
+}
+.left-section h2 {
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+label {
+  font-weight: 700;
+  display: block;
+  margin-bottom: 8px;
+}
+.zip-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+.zip-container input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+}
+.btn {
+  background: #039fc8;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.btn:hover {
+  background: #027a9b;
+  transform: scale(1.03);
+}
+
+.notice {
+  background: #fff;
+  border: 1px solid #039fc8;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(3,159,200,0.25);
+  padding: 20px;
+  text-align: center;
+  font-weight: 700;
+  margin: 25px 0;
+}
+
+/* ===== BOOKING METHOD ===== */
+.booking-method {
+  background: #f7f7ff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  padding: 40px;
+}
+.booking-method h3 {
+  text-align: center;
+  font-size: 28px;
+  margin-bottom: 15px;
+}
+.booking-method p {
+  color: #9e9e9e;
+  text-align: center;
+  margin-bottom: 35px;
+}
+.methods-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 25px;
+}
+.method-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+.method-card:hover {
+  transform: translateY(-6px);
+}
+.icon-circle {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: #d0f8ff;
+  margin: 0 auto 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== SUMMARY ===== */
+.summary-card {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  padding: 25px 35px;
+  width: 400px;
+}
+.summary-card h3 {
+  font-size: 26px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.divider {
+  height: 2px;
+  background: rgba(0,169,199,0.4);
+  margin-bottom: 20px;
+}
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 0;
+  font-weight: 700;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+@keyframes fadeInUp {
+  from {opacity: 0; transform: translateY(40px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .content {
+    flex-direction: column;
+    align-items: center;
+  }
+  .summary-card {
+    width: 90%;
+    margin-top: 40px;
+  }
+}
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .navbar nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  .content {
+    padding: 40px 20px;
+  }
+}
+@media (max-width: 480px) {
+  .btn {
+    width: 100%;
+  }
+  .methods-grid {
+    grid-template-columns: 1fr;
+  }
+}
+/* === توسيط العنوان الأساسي بالـ Hero === */
+.hero-title {
+  color: white;
+  font-size: 3.5rem;
+  text-align: center;
+  animation: fadeInUp 1.5s ease;
+}
+
+/* === Popup Style (لـ Send Email) === */
+.methods-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;  /* يخلي الكروت بالنص */
+  gap: 25px;
+}
+.method-card {
+  flex: 1 1 300px; /* حجم متجاوب */
+  max-width: 350px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+  padding: 25px;
+  text-align: center;
+  transition: transform 0.3s;
+}

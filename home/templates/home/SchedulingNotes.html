@@ -1,0 +1,288 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scheduling & Notes</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <link rel="stylesheet" href="{% static 'css/SchedulingNotes.css' %}" />
+  <style>
+     *, *:before, *:after {
+  box-sizing: border-box;
+}
+    .steps {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 25px 0;
+}
+
+.step {
+    padding: 8px 16px;
+    border: 1px solid #00a3c8;
+    border-radius: 18px;
+    color: #00a3c8;
+    font-weight: 600;
+    background: #fff;
+}
+
+.step.active {
+    background: #00a3c8;
+    color: #fff;
+}
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: #f1f5f7;
+    color: #009dbe;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid #d9e4e8;
+    transition: 0.25s ease;
+}
+
+.back-btn:hover {
+    background: #e7f4f7;
+    border-color: #b8d7df;
+    color: #007c96;
+}
+
+.back-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+}
+
+</style>
+</head>
+
+<body>
+<!-- ✅ HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <!-- زر المنيو -->
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="{% url 'home:contact' %}">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
+  </div>
+</header>
+  <main class="container">
+<div class="steps">
+    {% for i in range_total_steps %}
+        <div class="step {% if step == i %}active{% endif %}">
+            Step {{ i }}
+        </div>
+    {% endfor %}
+</div>
+
+
+
+    <form method="POST" id="scheduleForm">
+      {% csrf_token %}
+
+      <input type="hidden" name="start_date" id="start_date_input">
+      <input type="hidden" name="preferred_time" id="preferred_time_input">
+      <input type="hidden" name="days_type" id="days_type_input">
+      <input type="hidden" name="custom_date" id="custom_date_input">
+      <input type="hidden" name="custom_time" id="custom_time_input">
+      <input type="hidden" name="notes" id="notes_input">
+
+      <section class="card scheduling">
+        <h2>📅 Scheduling</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Desired start date</label>
+            <input type="date" id="start-date" name="start_date_tmp">
+          </div>
+
+          <div class="form-group">
+            <label>Preferred time</label>
+            <select id="preferred-time" name="preferred_time_tmp">
+              <option value="">Select...</option>
+              <option>Before office hours</option>
+              <option>During office hours</option>
+              <option>After office hours</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="days">
+          <label>Days of week</label>
+
+          <div class="options">
+            <label><input type="radio" name="days" value="mon-fri"> Mon–Fri</label>
+            <label><input type="radio" name="days" value="weekends"> Weekends</label>
+          </div>
+
+          <div class="custom-wrapper">
+
+            <div class="custom-field">
+              <label><input type="radio" name="days" value="custom-date"> Custom date</label>
+              <input type="date" id="custom-date" name="custom_date_tmp" disabled>
+            </div>
+
+            <div class="custom-field">
+              <label><input type="radio" name="days" value="custom-time"> Custom time</label>
+              <input type="time" id="custom-time" name="custom_time_tmp" disabled>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="card notes">
+        <h2>💬 Notes</h2>
+
+        <textarea id="notes" rows="6" placeholder="Write your notes here..."></textarea>
+
+        <div class="buttons">
+<a onclick="window.history.back();" class="back-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+    </svg>
+    Back
+</a>
+          <button type="submit" class="next">Done</button>
+        </div>
+      </section>
+
+    </form>
+
+  </main>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+<script>
+document.querySelectorAll("input[name='days']").forEach(radio => {
+  radio.addEventListener("change", () => {
+    let value = radio.value;
+
+    document.getElementById("custom-date").disabled = value !== "custom-date";
+    document.getElementById("custom-time").disabled = value !== "custom-time";
+  });
+});
+
+document.getElementById("scheduleForm").addEventListener("submit", function() {
+
+    document.getElementById("start_date_input").value =
+      document.getElementById("start-date").value;
+
+    document.getElementById("preferred_time_input").value =
+      document.getElementById("preferred-time").value;
+
+    let selectedDay = document.querySelector("input[name='days']:checked");
+    document.getElementById("days_type_input").value =
+      selectedDay ? selectedDay.value : "";
+
+    document.getElementById("custom_date_input").value =
+      document.getElementById("custom-date").value || "";
+
+    document.getElementById("custom_time_input").value =
+      document.getElementById("custom-time").value || "";
+
+    document.getElementById("notes_input").value =
+      document.getElementById("notes").value;
+
+});
+</script>
+
+</body>
+</html>
