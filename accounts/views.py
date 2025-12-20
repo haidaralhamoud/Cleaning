@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from .forms import CustomerForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
-
+from django.contrib.auth import logout
+from django.views.decorators.http import require_POST
 def sign_up(request):
     if request.method == "POST":
         form = CustomerForm(request.POST, request.FILES)
@@ -80,3 +81,9 @@ def Service_History_and_Ratings(request):
 def Loyalty_and_Rewards(request):
 
     return render(request , 'accounts/Loyalty_and_Rewards.html',)
+
+
+@require_POST
+def logout_view(request):
+    logout(request)
+    return redirect("home:home")

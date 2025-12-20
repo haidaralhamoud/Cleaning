@@ -11,6 +11,17 @@
     .hero {
         background-image: url("{% static 'images/hero.png' %}");
     }
+    .contact-form {
+    max-width: 720px;
+    margin: 40px auto 0;
+}
+.form-left {
+    background: #fff;
+    padding: 28px;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.06);
+}
+
   </style>
 </head>
 <body>
@@ -23,7 +34,12 @@
 
   <!-- ===== ZIP FORM SECTION ===== -->
   <section class="zip-section">
-    <h2 class="reveal">Enter Your Zip Code</h2>
+    {% if show_not_available %}
+  <h2 class="reveal">We’re Not There Yet 😔</h2>
+{% else %}
+  <h2 class="reveal">Enter Your Zip Code</h2>
+{% endif %}
+
 
     <!-- فورم فحص الـ ZIP -->
     <form method="POST" class="zip-form reveal">
@@ -83,17 +99,7 @@
           </button>
         </div>
 
-        <aside class="booking-summary reveal" data-dir="left">
-          <h3>Booking Summary</h3>
-          <hr />
-          <p>Your Booking Is Empty</p>
-          <div class="summary-row">
-            <span>Time estimate</span><span>0</span>
-          </div>
-          <div class="summary-row">
-            <span>Subtotal</span><span>0$</span>
-          </div>
-        </aside>
+
       </form>
     {% endif %}
 

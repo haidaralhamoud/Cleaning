@@ -34,6 +34,7 @@ LOGOUT_REDIRECT_URL = '/accounts/login/'
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'accounts',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -46,6 +47,36 @@ INSTALLED_APPS = [
     
 ]
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Admin Dashboard",
+    "site_header": "Cleaning Platform",
+    "site_brand": "Control Panel",
+    "welcome_sign": "Welcome Boss 👋",
+    "site_logo": "images/logo.png",  # اختياري
+    "login_logo": None,
+
+    "topmenu_links": [
+        {"name": "Home", "url": "admin:index", "permissions": ["auth.view_user"]},
+    ],
+
+    "icons": {
+        "yourapp.PrivateBooking": "fas fa-calendar-check",
+        "yourapp.PrivateService": "fas fa-broom",
+        "yourapp.PrivateAddon": "fas fa-puzzle-piece",
+        "yourapp.BusinessBooking": "fas fa-briefcase",
+        "yourapp.CallRequest": "fas fa-phone",
+        "yourapp.EmailRequest": "fas fa-envelope",
+        "auth.User": "fas fa-user",
+    },
+
+    "theme": "darkly",  # super فخم
+}
+
+JAZZMIN_SETTINGS["icons"].update({
+    "yourapp.Contact": "fas fa-inbox",
+    "yourapp.CallRequest": "fas fa-phone-volume",
+    "yourapp.EmailRequest": "fas fa-envelope-open-text",
+})
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

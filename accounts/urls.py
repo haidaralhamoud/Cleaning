@@ -16,6 +16,5 @@ urlpatterns = [
     path("Change_Password/", views.Change_Password, name="Change_Password"),
     path("Service_History_and_Ratings/", views.Service_History_and_Ratings, name="Service_History_and_Ratings"),
     path("Loyalty_and_Rewards/", views.Loyalty_and_Rewards, name="Loyalty_and_Rewards"),
-
-    
+    path("logout/", views.logout_view, name="logout"),
 ]

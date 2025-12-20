@@ -401,17 +401,13 @@ def private_zip_step1(request, service_slug):
 
                 if zip_code_value in AVAILABLE_ZIPS:
 
-                    # ⬅️ إنشاء بوكنغ جديد وتخزين الكود
-                    booking = PrivateBooking.objects.create(
-                        zip_code=zip_code_value,
-                        zip_is_available=True,
-                        main_category=service.category.slug,
-                        selected_services=[service.slug],
-                        booking_method="online",
-                    )
+                    # (اختياري) إنشاء booking لاحقاً، مو هون
+                    request.session["zip_code"] = zip_code_value
 
-                    return redirect("home:private_booking_services",
-                                    booking_id=booking.id)
+                    return redirect(
+                        "home:private_zip_available",
+                        service_slug=service.slug
+                    )
 
                 else:
                     show_not_available = True
@@ -640,15 +636,14 @@ def private_cart_continue(request):
     if not cart:
         return redirect("home:all_services_private")
 
-    first_service = PrivateService.objects.get(slug=cart[0])
+    # نختار أول خدمة لتحديد مسار الـ ZIP
+    first_service_slug = cart[0]
 
-    booking = PrivateBooking.objects.create(
-        booking_method="online",
-        main_category=first_service.category.slug,
-        selected_services=cart   # ← كل الخدمات
+    return redirect(
+        "home:private_zip_step1",
+        service_slug=first_service_slug
     )
 
-    return redirect("home:private_booking_services", booking_id=booking.id)
 
 
 def private_cart(request):
