@@ -1,0 +1,231 @@
+:root{
+  --sky: #f1c0cf;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Inter", sans-serif;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+
+  padding: 10px ;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+
+
+
+/* ===== المحتوى الرئيسي ===== */
+.main-content {
+  flex: 1;
+
+  padding: 40px;
+}
+
+.title {
+  font-size: 34px;
+  color: #039fc8;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+.form-section {
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 25px;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: #333;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+  border: 1.5px solid #039fc8;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+  box-shadow: 0 0 6px rgba(3,159,200,0.3);
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ===== Upload Evidence ===== */
+.upload-box {
+  grid-column: 1 / -1;
+}
+
+.upload-zone {
+  border: 2px dashed #039fc8;
+  border-radius: 12px;
+  padding: 25px;
+  text-align: center;
+  background: #f0fafd;
+}
+
+.upload-zone p {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.upload-zone button {
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.upload-zone button:hover {
+  background: #0287ac;
+}
+
+/* ===== Checkbox ===== */
+.confirmation {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.confirmation label {
+  font-size: 14px;
+  color: #333;
+}
+
+/* ===== زر Submit ===== */
+.submit-btn {
+  grid-column: 1 / -1;
+  background: #039fc8;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.submit-btn:hover {
+  background: #0287ac;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-left: 0;
+  }
+
+  .menu-toggle {
+    display: flex;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 600px) {
+  /* ===== زر منيو ليال (>) ===== */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #039fc8;
+  color: #fff;
+  font-size: 28px;
+  font-weight: bold;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 1001;
+}
+  .form-section {
+    grid-template-columns: 1fr;
+  }
+
+  .title {
+    font-size: 28px;
+    text-align: center;
+  }
+
+  .submit-btn {
+    width: 100%;
+  }
+}

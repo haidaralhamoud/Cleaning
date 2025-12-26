@@ -3,14 +3,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Bookings - Hembla</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment & Billing — Customer Profile</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-</head>
+
+  <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
 <body>
 <!-- HEADER -->
 <header class="main-header">
@@ -33,19 +33,16 @@
   </div>
 </header>
 
-  <div class="page">
-
-    <!-- ===== Mobile Header ===== -->
+  <div class="layout">
+    <!-- Mobile header -->
     <div class="mobile-header">
-<!-- Floating Menu Button -->
-<button class="menu-toggle inside-btn" id="menuToggle">
-  <span class="arrow">&#8250;</span>
-</button>
-
- 
+      <button class="menu-toggle floating" id="menuToggle">
+        <span class="arrow">&#8250;</span>
+      </button>
+      <h2 class="mobile-title">Customer Profile</h2>
     </div>
 
-    <!-- ===== Sidebar ===== -->
+    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
@@ -75,83 +72,49 @@
       </nav>
     </aside>
 
-    <!-- ===== Main Content ===== -->
+    <!-- Main -->
     <main class="main">
-      <h1 class="page-title">My Bookings</h1>
-      <p class="subtitle">Your bookings, your history, your peace of mind</p>
+      <h1>Payment & Billing</h1>
 
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab active" data-target="all">All</button>
-        <button class="tab" data-target="upcoming">Upcoming</button>
-        <button class="tab" data-target="ongoing">Ongoing</button>
-        <button class="tab" data-target="completed">Completed</button>
-        <button class="tab" data-target="cancelled">Cancelled</button>
+      <!-- Main 2-column layout -->
+      <div class="page-grid">
+        <!-- Payment methods -->
+        <section class="card payment-methods-card">
+          <div class="card-header">
+            <h2>Payment Methods</h2>
+            <a href="{% url 'accounts:Add_Payment_Method' %}"><button id="addPayment" class="btn-icon"> ＋</button></a>
+          </div>
+          <div id="paymentsList" class="payments-list"></div>
+        </section>
+
+        <!-- Subscription -->
+        <aside class="card subscription-card">
+          <h3>Subscription</h3>
+          <div id="subscriptionContent"></div>
+        </aside>
       </div>
 
-      <!-- Tables -->
-      <div class="tables">
-        <!-- All -->
-        <div class="table-container active" id="all">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer Name</th>
-                <th>Service Type</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>View</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>#12345</td>
-                <td>Sophia Clark</td>
-                <td>House Cleaning</td>
-                <td>July 15, 2025</td>
-                <td>Lorem ipsum dolor sit amet</td>
-                <td><span class="status scheduled">Scheduled</span></td>
-                <td>
-                  <div class="menu-wrap">
-                    <button class="dots">•••</button>
-                    <div class="dropdown">
-                      <a>Reschedule</a>
-                      <a>Cancel</a>
-                      <a>Download Invoice</a>
-                      <a>Add Service</a>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>#12346</td>
-                <td>Ethan Harris</td>
-                <td><a href="../Customer-Profile-service-view/index.html">Deep Cleaning</a></td>
-                <td>July 16, 2025</td>
-                <td>West End</td>
-                <td><span class="status completed">Completed</span></td>
-                <td>
-                  <div class="menu-wrap">
-                    <button class="dots">•••</button>
-                    <div class="dropdown">
-                      <a>Reschedule</a>
-                      <a>Cancel</a>
-                      <a>Download Invoice</a>
-                      <a>Add Service</a>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <!-- Invoice History -->
+      <section class="card invoice-history">
+        <h2>Invoice History</h2>
+        <table id="invoiceTable">
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Payment Method</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- dynamic rows -->
+          </tbody>
+        </table>
+      </section>
     </main>
   </div>
-
-  <div class="overlay" id="overlay"></div>
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -235,62 +198,111 @@
 </footer>
 
 <script>
-const toggleBtn = document.getElementById("menu-toggle");
+const toggleBtn = docume6nt.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
   
 toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+  <script>
+    /* ====== Payment data ====== */
+    const paymentMethods = [
+      { id: 1, provider: "Visa", last4: "4567", expiry: "08/2025", img: "{% static 'images/visa.png'%}", isDefault: true },
+      { id: 2, provider: "Mastercard", last4: "1234", expiry: "08/2025", img: "{% static 'images/mastercard.png'%}", isDefault: false },
+      { id: 3, provider: "Klarna", last4: "", expiry: "", img: "{% static 'images/klarna.png'%}", isDefault: false },
+      { id: 4, provider: "Paypal", last4: "", expiry: "", img: "{% static 'images/paypal.png'%}", isDefault: false },
+      { id: 5, provider: "Swish", last4: "", expiry: "", img: "{% static 'images/swish.png'%}", isDefault: false }
+    ];
 
-  <script src="script.js">
-    // Sidebar toggle
-const toggle = document.getElementById("menuToggle");
-const sidebar = document.querySelector(".sidebar");
-const arrow = toggle.querySelector(".arrow");
+    const subscription = {
+      title: "Weekly Cleaning - 2 hrs $150/session",
+      nextCharge: "July 20, 2025 ($150)",
+      nextService: "July 22, 2025"
+    };
 
-toggle.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
-  arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-});
+    /* ====== Invoice history data ====== */
+    const invoices = [
+      { id: "#12345", date: "July 1, 2025", amount: "$150.00", method: "klarna.png", status: "Paid" },
+      { id: "#12346", date: "July 10, 2025", amount: "$150.00", method: "paypal.png", status: "Paid" },
+      { id: "#12347", date: "July 20, 2025", amount: "$150.00", method: "swish.png", status: "Paid" }
+    ];
 
-// Tabs switching
-const tabs = document.querySelectorAll(".tab");
-const tables = document.querySelectorAll(".table-container");
+    /* ===== Render payment methods ===== */
+    const paymentsListEl = document.getElementById("paymentsList");
+    const subscriptionEl = document.getElementById("subscriptionContent");
+    const invoiceTable = document.querySelector("#invoiceTable tbody");
 
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
+    function renderPayments() {
+      paymentsListEl.innerHTML = "";
+      paymentMethods.forEach(pm => {
+        const card = document.createElement("div");
+        card.className = "payment-row";
+        card.innerHTML = `
+          <div class="payment-left">
+            <img src="${pm.img}" alt="${pm.provider}" class="pm-icon">
+            <div class="pm-text">
+              <div class="pm-title"><strong>${pm.provider}${pm.last4 ? " ••••" + pm.last4 : ""}</strong></div>
+              <div class="pm-sub">${pm.expiry ? "Expires " + pm.expiry : ""}</div>
+            </div>
+          </div>
+          <div class="payment-right">
+            <button class="btn-default ${pm.isDefault ? "state" : ""}" onclick="setDefault(${pm.id})">
+              ${pm.isDefault ? "Default" : "Set as default"}
+            </button>
+            <button class="icon-edit">✎</button>
+          </div>
+        `;
+        paymentsListEl.appendChild(card);
+      });
+    }
 
-    tables.forEach(t => t.classList.remove("active"));
-    document.getElementById(tab.dataset.target).classList.add("active");
-  });
-});
-toggle.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
-  toggle.classList.toggle("rot");
-});
+    function renderSubscription() {
+      subscriptionEl.innerHTML = `
+        <p><strong>${subscription.title}</strong></p>
+        <p>Next charge: ${subscription.nextCharge}</p>
+        <p>Next service: ${subscription.nextService}</p>
+        <div class="sub-actions">
+          <button class="btn-outline">Manage</button>
+          <button class="btn-outline">Cancel</button>
+        </div>
+      `;
+    }
 
-// Dots dropdown
-document.querySelectorAll(".dots").forEach(btn => {
-  btn.addEventListener("click", e => {
-    e.stopPropagation();
-    document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-    btn.closest(".menu-wrap").classList.toggle("show");
-  });
-});
+    function renderInvoices() {
+      invoiceTable.innerHTML = "";
+      invoices.forEach(inv => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${inv.id}</td>
+          <td>${inv.date}</td>
+          <td>${inv.amount}</td>
+          <td><img src="${inv.method}" alt="method" class="method-icon"></td>
+          <td><span class="status paid">${inv.status}</span></td>
+          <td><a href="#">Download</a></td>
+        `;
+        invoiceTable.appendChild(tr);
+      });
+    }
 
-document.addEventListener("click", () => {
-  document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-});
+    function setDefault(id) {
+      paymentMethods.forEach(pm => pm.isDefault = (pm.id === id));
+      renderPayments();
+    }
 
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    toggle.classList.toggle("rot");
-  });
+    renderPayments();
+    renderSubscription();
+    renderInvoices();
 
+    /* ===== Sidebar toggle ===== */
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const arrow = document.querySelector(".menu-toggle .arrow");
 
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+    });
   </script>
 </body>
 </html>

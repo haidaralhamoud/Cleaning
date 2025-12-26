@@ -1,0 +1,370 @@
+:root{
+  --sky: #c0e7f1;
+  --sky-strong:#039fc8;
+  --sky-soft: rgba(3,159,200,0.5);
+  --ink:#000;
+  --muted:#898989;
+  --warn:#ff9500;
+  --success:#71b247;
+  --shadow:0 4px 10px rgba(0,0,0,.25);
+  --card-bg:#fff;
+  --sidebar-w: 300px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family: "Inter", sans-serif;
+  background: var(--sky);
+  color: var(--ink);
+}
+
+/* ===== LAYOUT ===== */
+.layout {
+  display: flex;
+
+  padding: 10px ;
+}
+
+/* Sidebar */
+.sidebar{
+  width:var(--sidebar-w);
+  background:#fff;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+  padding-bottom:30px;
+  position:sticky;
+  top:0;
+  height:fit-content;
+  align-self:flex-start;
+  margin:20px;
+}
+
+.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
+.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
+.name{font:700 20px "Vesper Libre", serif}
+.id{font-size:13px;color:#666}
+.side-nav{padding:10px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
+.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item.active {
+  background: rgba(0,0,0,.05);
+  color: var(--sky-strong);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;500;700&display=swap');
+
+
+
+    /* الزر العائم */
+    .menu-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 45px;
+      height: 45px;
+      background: #039fc8;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1200;
+      display: none;
+    }
+
+    /* المحتوى */
+    .main-content {
+      flex: 1;
+
+      padding: 30px 50px;
+    }
+
+    .header {
+      background: #bfe5f1;
+      text-align: center;
+      padding: 25px 0 10px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+
+    .header h2 {
+      font-family: "VesperLibre-Bold", sans-serif;
+      font-size: 22px;
+      color: rgba(0,0,0,0.7);
+    }
+
+    .header h1 {
+      font-family: "VesperLibre-Bold", sans-serif;
+      font-size: 28px;
+      color: #000;
+      margin: 5px 0;
+    }
+
+    .header p {
+      font-family: "VesperLibre-Medium", sans-serif;
+      font-size: 17px;
+      color: rgba(0,0,0,0.7);
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 25px 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.2);
+    }
+
+    .card h3 {
+      font-family: "VesperLibre-Bold", sans-serif;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 17px;
+    }
+
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #039fc8;
+      border-radius: 10px;
+      font-size: 15px;
+      color: rgba(0,0,0,0.6);
+    }
+
+    .calculate-btn {
+      background: #039fc8;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      padding: 10px 35px;
+      font-weight: 700;
+      cursor: pointer;
+      float: right;
+      transition: background 0.2s;
+    }
+    .calculate-btn:hover {
+      background: #027a99;
+    }
+
+    .invoice-line {
+      display: flex;
+      justify-content: space-between;
+      font-size: 17px;
+      padding: 6px 0;
+    }
+
+    .invoice-line strong {
+      font-family: "VesperLibre-Bold";
+    }
+
+    .positive {
+      color: #71b247;
+    }
+
+    /* الأزرار الأخيرة */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      background: #039fc8;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 40px;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background 0.2s;
+    }
+    .btn:hover {
+      background: #027a99;
+    }
+    .btn.cancel {
+      background: #b0b0b0;
+      color: #000;
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .menu-toggle {
+        display: flex;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 20px;
+      }
+    }
+    .payment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.payment-option {
+  border: 2px solid #71b247;
+  border-radius: 10px;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  background: #fff;
+}
+
+.payment-option img {
+  width: 35px;
+  height: 25px;
+  object-fit: contain;
+}
+
+.payment-option input {
+  accent-color: #71b247;
+}
+
+.payment-option.selected,
+.payment-option:hover {
+  background: #e7f8ec;
+}
+
+
+
+.info h2 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+}
+.info small {
+  color: #999;
+  font-size: 14px;
+}
+
+
+
+/* الزر العائم */
+.menu-toggle {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  width: 45px;
+  height: 45px;
+  background: #039fc8;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 25px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1200;
+  transition: transform 0.3s ease;
+}
+.menu-toggle:hover {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 992px) {
+  .menu-toggle { display: flex; }
+  .sidebar.hidden { transform: translateX(-100%); }
+  .main-content { margin-left: 0; padding: 90px 20px; }
+}
+
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+.avatar {
+  background: #d9d9d9;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+}
+.info h2 {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+}
+.info small {
+  color: #999;
+  font-size: 14px;
+}
+
+.sidebar ul {
+  list-style: none;
+  margin-top: 15px;
+}
+.sidebar ul li {
+  padding: 10px 0;
+  font-size: 17px;
+  color: rgba(0,0,0,0.7);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.sidebar ul li:hover {
+  color: #039fc8;
+  transform: translateX(3px);
+}
+
+/* الزر العائم */
+.menu-toggle {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  width: 45px;
+  height: 45px;
+  background: #039fc8;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 25px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1200;
+  transition: transform 0.3s ease;
+}
+.menu-toggle:hover { transform: rotate(180deg); }
+
+/* موبايل */
+@media (max-width: 992px) {
+  .menu-toggle { display: flex; }
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.active {
+    transform: translateX(0);
+  }
+}
+

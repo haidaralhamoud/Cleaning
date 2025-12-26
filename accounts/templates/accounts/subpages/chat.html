@@ -4,16 +4,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Customer Notes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Profile – Chat</title>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/Customer_Notes.css' %}" />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Vesper+Libre:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/chat.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
-<body>
-<!-- HEADER -->
+
+<body >
+    <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -33,16 +34,16 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-  <div class="layout">
-    <!-- ===== Mobile Header ===== -->
-    <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-      <h2 class="mobile-title">Customer Profile</h2>
-    </div>
+<div class="layout">
+  <!-- ===== المينيو للموبايل ===== -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span>
+    </button>
+    <h2 class="mobile-title">Customer Profile</h2>
+  </div>
 
-    <!-- ===== Sidebar ===== -->
+  <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
@@ -72,88 +73,86 @@
       </nav>
     </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="main">
-      <h1>Customer Notes</h1>
-      <h2>Add or edit notes for this customer</h2>
+  <!-- ===== الصفحة ===== -->
+  <div class="page container">
+    <main class="content">
+      <section class="page-head">
+        <h1>Chat With Provider Assigned</h1>
+        <p class="subline">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
+        <p class="booking-line">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
+      </section>
 
-      <div class="card">
-        <div class="row">
-          <div class="column">
-            <h3>
-              Key Handling Instructions
-              <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
-              </div>
-            </h3>
-            <p>Leave under mat</p>
-          </div>
+      <!-- ===== بطاقة المحادثة ===== -->
+<!-- ===== بطاقة المحادثة ===== -->
+<section class="chat-card">
 
-          <div class="column">
-            <h3>
-              Alarm Code
-              <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
-              </div>
-            </h3>
-            <p>1********9 <i class="fa-solid fa-eye icon view"></i></p>
-          </div>
-        </div>
+  <!-- زر الرجوع -->
+  <button class="back-btn" onclick="history.back()">
+    <span class="back-icon">←</span>
+    <span class="back-text">Back</span>
+  </button>
 
-        <div class="row">
-          <div class="column">
-            <h3>
-              Products & Supplies
-              <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
-              </div>
-            </h3>
-            <p>Customer products</p>
-          </div>
+  <!-- عنوان الطلب -->
+  <h2>Order #12345 · Deep Clean · Today 10AM</h2>
 
-          <div class="column">
-            <h3>
-              Location of cleaning material or tools
-              <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
-              </div>
-            </h3>
-            <p>Under the kitchen sink</p>
-          </div>
-        </div>
+  <!-- سطر فاصل بسيط -->
+  <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;" />
 
-        <div class="row">
-          <div class="column full">
-            <h3>
-              Special Requests
-              <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
-              </div>
-            </h3>
-            <p>Lorem ipsum dolor sit amet, consectetur ,Lorem ipsum dolor sit amet, consectetur</p>
-          </div>
-        </div>
+  <!-- محتوى المحادثة -->
+  <div class="chat-thread">
 
-        <div class="row">
-          <div class="column full">
-            <h3>
-              General Notes
-              <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
-              </div>
-            </h3>
-            <p>Lorem ipsum dolor sit amet, consectetur ,Lorem ipsum dolor sit amet, consectetur</p>
-          </div>
+    <!-- Incoming -->
+    <article class="message message--in">
+      <div class="message__row">
+        <img class="message__avatar" src="{% static 'images/ellipse-18580.png'%}" alt="Customer" />
+        <div class="message__bubble">
+          <p>Hi Sophia, just a reminder about the deep clean in the kitchen and bathroom. Thanks!</p>
         </div>
       </div>
-    </main>
+      <div class="message__meta">
+        <span class="from">Customer</span>
+        <time class="time">10:00 AM</time>
+      </div>
+    </article>
+
+    <!-- Outgoing -->
+    <article class="message message--out">
+      <div class="message__row">
+        <div class="message__bubble">
+          <p>Got it! Make sure to pay extra attention to those areas.</p>
+        </div>
+        <img class="message__avatar" src="{% static 'images/ellipse-18590.png'%}" alt="Sophia Carter" />
+      </div>
+      <div class="message__meta">
+        <time class="time">11:00 AM</time>
+        <span class="from">Sophia Carter</span>
+      </div>
+    </article>
+
   </div>
+
+  <!-- Composer -->
+  <form class="composer" onsubmit="return false" aria-label="Message composer">
+    <label class="upload-btn" for="fileUpload" aria-label="Attach file">
+      <img src="{% static 'images/vector1.svg'%}" alt="Attach file" />
+      <input type="file" id="fileUpload" hidden />
+    </label>
+
+    <label class="composer__field">
+      <input type="text" placeholder="Type a message..." aria-label="Type a message" />
+      <img src="{% static 'images/happy0.png'%}" alt="" class="emoji" />
+    </label>
+
+    <button class="send-btn" type="submit" aria-label="Send message">
+      <span>Send</span>
+      <img src="{% static 'images/paper-plane0.png'%}" alt="" />
+    </button>
+  </form>
+
+</section>
+
+</div>
+</div>
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -235,7 +234,6 @@
     <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
   </div>
 </footer>
-
 <script>
 const toggleBtn = docume6nt.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
@@ -244,20 +242,17 @@ toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+  <!-- ===== JS ===== -->
   <script>
     const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
+    const sidebar = document.getElementById("sidebar");
     const arrow = document.querySelector(".menu-toggle .arrow");
 
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
-      if (sidebar.classList.contains("open")) {
-        arrow.innerHTML = "&#8249;";
-      } else {
-        arrow.innerHTML = "&#8250;";
-      }
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
     });
   </script>
-
+  
 </body>
 </html>

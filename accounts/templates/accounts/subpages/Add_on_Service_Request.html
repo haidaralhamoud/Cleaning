@@ -1,0 +1,278 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add-on Service Request</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/Add_on_Service_Request.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+
+</head>
+<body>
+    <!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+  <div class="layout">
+    <!-- Sidebar -->
+     <!-- زر المينيو يظهر فقط بالموبايل -->
+<div class="mobile-header">
+  <button class="menu-toggle floating" id="menuToggle">
+    <span class="arrow">&#8250;</span> <!-- › -->
+  </button>
+</div>
+
+
+
+  <!-- Sidebar -->
+
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+          {% csrf_token %}
+      </form>
+
+      <nav class="side-nav">
+        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+
+  <!-- المحتوى الرئيسي -->
+  <div class="main-content">
+    <div class="header">
+      <h2>Orders Order #12345</h2>
+      <h1>Order #12345</h1>
+      <p>Customer: Sarah Miller | Provider: Alex Johnson | Status: In Progress | 30/8/2025 - 10:00AM</p>
+    </div>
+
+    <!-- Add-on Service -->
+<div class="card">
+  <h3>Add-on Service Request</h3>
+  <div class="form-row">
+    <div style="flex:1">
+      <label>Type</label>
+      <select>
+        <option>Select a service</option>
+        <option>Cleaning</option>
+        <option>Babysitting</option>
+        <option>Repairs & Maintenance</option>
+      </select>
+    </div>
+    <div style="flex:1">
+      <label>Service</label>
+      <select>
+        <option>Select a service</option>
+      </select>
+    </div>
+    <div style="display:flex; align-items:end;">
+      <button class="calculate-btn">Calculate</button>
+    </div>
+  </div>
+</div>
+
+
+    <!-- Updated Work Order -->
+    <div class="card">
+      <h3>Updated Work Order</h3>
+      <div class="invoice-line"><span>Base Cleaning</span><strong>150.00$</strong></div>
+      <div class="invoice-line"><span>+ Deep Carpet Cleaning (2 rooms)</span><strong class="positive">+80.00$</strong></div>
+      <div class="invoice-line"><span>New Total</span><strong>230.00$</strong></div>
+      <div class="invoice-line"><span>Estimated Time Increase</span><strong class="positive">+1.5 hours</strong></div>
+    </div>
+
+    <!-- Invoice -->
+    <div class="card">
+      <h3>Invoice</h3>
+      <div class="invoice-line"><span>Original Invoice</span><strong>150.00$</strong></div>
+      <div class="invoice-line"><span>Updated Invoice</span><strong>230.00$</strong></div>
+      <div class="invoice-line"><span>Difference</span><strong class="positive">+80.00$</strong></div>
+      <div class="invoice-line"><span>Estimated Time Increase</span><strong>+1.5 hours</strong></div>
+    </div>
+
+    <!-- Payment Method -->
+<div class="card">
+  <h3>Payment Method</h3>
+  <div class="payment-grid">
+    <label class="payment-option selected">
+      <input type="radio" name="pay" checked>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="card">
+      <span>Credit Card</span>
+    </label>
+
+    <label class="payment-option">
+      <input type="radio" name="pay">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="paypal">
+      <span>Paypal</span>
+    </label>
+
+    <label class="payment-option">
+      <input type="radio" name="pay">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/b/b3/Klarna_Logo_black.svg" alt="klarna">
+      <span>Klarna</span>
+    </label>
+
+    <label class="payment-option">
+      <input type="radio" name="pay">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/d/d2/Swish_Logo.svg" alt="swish">
+      <span>Swish</span>
+    </label>
+  </div>
+</div>
+
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="btn cancel">Cancel</button>
+      <button class="btn">Approve Changes</button>
+    </div>
+  </div>
+  </div>
+  <footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = docume6nt.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector(".menu-toggle .arrow");
+
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    // لما تفتح القائمة السهم ينعكس
+    if (sidebar.classList.contains("open")) {
+      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
+    } else {
+      arrow.innerHTML = "&#8250;"; // › سهم لليمين
+    }
+  });
+</script>
+
+
+</body>
+</html>

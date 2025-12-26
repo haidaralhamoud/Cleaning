@@ -3,16 +3,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment & Billing — Customer Profile</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Incident Report</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/Incident_Report_order.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
 <body>
-<!-- HEADER -->
+  <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -32,17 +32,16 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-
   <div class="layout">
-    <!-- Mobile header -->
-    <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-      <h2 class="mobile-title">Customer Profile</h2>
-    </div>
+  <!-- ===== المينيو للموبايل ===== -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span>
+    </button>
 
-    <!-- Sidebar -->
+  </div>
+
+  <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
@@ -72,49 +71,88 @@
       </nav>
     </aside>
 
-    <!-- Main -->
-    <main class="main">
-      <h1>Payment & Billing</h1>
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="main-content">
+    <div class="incident-container">
 
-      <!-- Main 2-column layout -->
-      <div class="page-grid">
-        <!-- Payment methods -->
-        <section class="card payment-methods-card">
-          <div class="card-header">
-            <h2>Payment Methods</h2>
-            <button id="addPayment" class="btn-icon">＋</button>
-          </div>
-          <div id="paymentsList" class="payments-list"></div>
-        </section>
-
-        <!-- Subscription -->
-        <aside class="card subscription-card">
-          <h3>Subscription</h3>
-          <div id="subscriptionContent"></div>
-        </aside>
+      <!-- === BLUE HEADER SECTION === -->
+      <div style="background:#c0e7f1; text-align:center; padding:15px 10px; border-radius:8px 8px 0 0; margin:-35px -40px 30px -40px;">
+        <p style="font-size:14px; color:#222; margin-bottom:5px;">Order: #{{ incident.order }}</p>
+        <h2 style="font-size:20px; font-weight:700; color:#000; margin-bottom:5px;"> Incident #{{ incident.id }}</h2>
+       <p style="font-size:15px; color:#333;">
+           Customer: {{ incident.customer.get_full_name|default:incident.customer.username }} |
+            Provider: {{ incident.involved_person|default:"—" }} |
+          <span style="color:#039fc8; font-weight:600;">
+            Status: {{ incident.get_status_display }}
+          </span>
+        </p>
       </div>
 
-      <!-- Invoice History -->
-      <section class="card invoice-history">
-        <h2>Invoice History</h2>
-        <table id="invoiceTable">
-          <thead>
-            <tr>
-              <th>Invoice #</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Payment Method</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- dynamic rows -->
-          </tbody>
-        </table>
-      </section>
-    </main>
+      <div class="header">
+        <h1>Incident Report #{{ incident.id }}</h1>
+        <p class="submitted">Submitted on {{ incident.created_at|date:"F d, Y" }}</p>
+      </div>
+
+      <div class="status-title">Status</div>
+      <div class="status-value">{{ incident.get_status_display }}</div>
+
+      <div class="status-bar">
+        <div class="status-fill"></div>
+      </div>
+
+      <p>{{ incident.created_at|date:"F d, Y" }}</p>
+
+      <hr>
+
+      <h2>Details</h2>
+      <table class="details-table">
+        <tr><th>Customer</th><td>{{ incident.customer.get_full_name|default:incident.customer.username }}</td></tr>
+        <tr><th>Category</th><td>{{ incident.involved_person|default:"—" }}</td></tr>
+        <tr><th>Severity</th><td>{{ incident.get_severity_display }}</td></tr>
+        <tr><th>Description</th><td>{{ incident.description }}</td></tr>
+      </table>
+
+      <h2>Communications</h2>
+      <div class="comment">
+        <strong>{{ incident.customer }}</strong> — {{ incident.created_at|date:"F d, Y, H:i" }}<br>
+        Incident created by customer.
+      </div>
+
+      <h2>Evidence</h2>
+       {% if incident.evidence %}
+        <div class="evidence-box">
+          📎 <a href="{{ incident.evidence.url }}" target="_blank">View uploaded evidence</a>
+        </div>
+      {% else %}
+        <div class="evidence-box">📷 No evidence uploaded</div>
+      {% endif %}
+
+      <h2>Resolution</h2>
+      <div class="timeline">
+        <div class="timeline-dot"></div>
+        <div class="timeline-step"><div class="circle">✔</div><p>Reported<br><small>{{ incident.created_at|date:"M d" }}</small></p></div>
+        <div class="timeline-step"><div class="circle">•</div><p>Under Review<br><small>—</small></p></div>
+        <div class="timeline-step"><div class="circle">•</div><p>Action Taken<br><small>—</small></p></div>
+        <div class="timeline-step"><div class="circle">•</div><p>Resolved<br><small>—</small></p></div>
+      </div>
+
+   <button class="close-btn" onclick="toggleSatisfaction()">Close Incident</button>
+
+<div id="satisfactionSection" class="satisfaction hidden">
+  <p>Was this resolved to your satisfaction?</p>
+  <div class="response-buttons">
+    <button class="response-btn yes">✓ Yes</button>
+    <button class="response-btn no">✗ No</button>
   </div>
+
+  <h2>Add Comment</h2>
+  <textarea placeholder="Type your comment here..."></textarea>
+  <button class="save-btn" onclick="saveFeedback()">Save</button>
+</div>
+
+    </div>
+  </div>
+</div>
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -198,111 +236,58 @@
 </footer>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
+const toggleBtn = document.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
   
 toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+  <!-- ===== JS ===== -->
+   <script>
+  function saveFeedback() {
+    const comment = document.querySelector('#satisfactionSection textarea').value.trim();
+    const response = document.querySelector('.response-btn.yes.active') ? 'Yes' :
+                     document.querySelector('.response-btn.no.active') ? 'No' : 'Not selected';
+
+    // مؤقتاً منخليها تنبه المستخدم
+    alert(`✅ Your feedback has been saved!\nResponse: ${response}\nComment: ${comment || "No comment"}`);
+
+    // بعد الحفظ، منرجع عالصفحة الرئيسية تبع الـ Incidents
+    window.location.href = "../Customer Profile-service view/index.html";
+  }
+
+  // تفعيل الاختيار بين Yes / No
+  const yesBtn = document.querySelector('.response-btn.yes');
+  const noBtn = document.querySelector('.response-btn.no');
+
+  yesBtn.addEventListener('click', () => {
+    yesBtn.classList.add('active');
+    noBtn.classList.remove('active');
+  });
+
+  noBtn.addEventListener('click', () => {
+    noBtn.classList.add('active');
+    yesBtn.classList.remove('active');
+  });
+</script>
+
   <script>
-    /* ====== Payment data ====== */
-    const paymentMethods = [
-      { id: 1, provider: "Visa", last4: "4567", expiry: "08/2025", img: "{% static 'images/visa.png'%}", isDefault: true },
-      { id: 2, provider: "Mastercard", last4: "1234", expiry: "08/2025", img: "{% static 'images/mastercard.png'%}", isDefault: false },
-      { id: 3, provider: "Klarna", last4: "", expiry: "", img: "{% static 'images/klarna.png'%}", isDefault: false },
-      { id: 4, provider: "Paypal", last4: "", expiry: "", img: "{% static 'images/paypal.png'%}", isDefault: false },
-      { id: 5, provider: "Swish", last4: "", expiry: "", img: "{% static 'images/swish.png'%}", isDefault: false }
-    ];
-
-    const subscription = {
-      title: "Weekly Cleaning - 2 hrs $150/session",
-      nextCharge: "July 20, 2025 ($150)",
-      nextService: "July 22, 2025"
-    };
-
-    /* ====== Invoice history data ====== */
-    const invoices = [
-      { id: "#12345", date: "July 1, 2025", amount: "$150.00", method: "klarna.png", status: "Paid" },
-      { id: "#12346", date: "July 10, 2025", amount: "$150.00", method: "paypal.png", status: "Paid" },
-      { id: "#12347", date: "July 20, 2025", amount: "$150.00", method: "swish.png", status: "Paid" }
-    ];
-
-    /* ===== Render payment methods ===== */
-    const paymentsListEl = document.getElementById("paymentsList");
-    const subscriptionEl = document.getElementById("subscriptionContent");
-    const invoiceTable = document.querySelector("#invoiceTable tbody");
-
-    function renderPayments() {
-      paymentsListEl.innerHTML = "";
-      paymentMethods.forEach(pm => {
-        const card = document.createElement("div");
-        card.className = "payment-row";
-        card.innerHTML = `
-          <div class="payment-left">
-            <img src="${pm.img}" alt="${pm.provider}" class="pm-icon">
-            <div class="pm-text">
-              <div class="pm-title"><strong>${pm.provider}${pm.last4 ? " ••••" + pm.last4 : ""}</strong></div>
-              <div class="pm-sub">${pm.expiry ? "Expires " + pm.expiry : ""}</div>
-            </div>
-          </div>
-          <div class="payment-right">
-            <button class="btn-default ${pm.isDefault ? "state" : ""}" onclick="setDefault(${pm.id})">
-              ${pm.isDefault ? "Default" : "Set as default"}
-            </button>
-            <button class="icon-edit">✎</button>
-          </div>
-        `;
-        paymentsListEl.appendChild(card);
-      });
-    }
-
-    function renderSubscription() {
-      subscriptionEl.innerHTML = `
-        <p><strong>${subscription.title}</strong></p>
-        <p>Next charge: ${subscription.nextCharge}</p>
-        <p>Next service: ${subscription.nextService}</p>
-        <div class="sub-actions">
-          <button class="btn-outline">Manage</button>
-          <button class="btn-outline">Cancel</button>
-        </div>
-      `;
-    }
-
-    function renderInvoices() {
-      invoiceTable.innerHTML = "";
-      invoices.forEach(inv => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${inv.id}</td>
-          <td>${inv.date}</td>
-          <td>${inv.amount}</td>
-          <td><img src="${inv.method}" alt="method" class="method-icon"></td>
-          <td><span class="status paid">${inv.status}</span></td>
-          <td><a href="#">Download</a></td>
-        `;
-        invoiceTable.appendChild(tr);
-      });
-    }
-
-    function setDefault(id) {
-      paymentMethods.forEach(pm => pm.isDefault = (pm.id === id));
-      renderPayments();
-    }
-
-    renderPayments();
-    renderSubscription();
-    renderInvoices();
-
-    /* ===== Sidebar toggle ===== */
     const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
+    const sidebar = document.getElementById("sidebar");
     const arrow = document.querySelector(".menu-toggle .arrow");
 
     toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+      sidebar.classList.toggle("active");
+      arrow.innerHTML = sidebar.classList.contains("active") ? "&#8249;" : "&#8250;";
     });
   </script>
+  <script>
+  function toggleSatisfaction() {
+    const section = document.getElementById('satisfactionSection');
+    section.classList.toggle('open');
+  }
+</script>
+
 </body>
 </html>

@@ -1,0 +1,557 @@
+{% load static %}
+{% load bootstrap4 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Profile View</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+
+<body class="customer-profile-view">
+  <!-- HEADER -->
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <a href="#">SERVICES</a>
+    <a href="#">PRICING</a>
+    <a href="#">CONTACT</a>
+  </nav>
+
+  <div class="profile-btn">
+    <a href="#">My Profile</a>
+  </div>
+</header>
+  <!-- زر المنيو يظهر فقط بالموبايل -->
+  <button class="menu-toggle" id="menuToggle">
+    <span class="arrow">&#8250;</span>
+  </button>
+
+  <!-- Overlay تبع المنيو -->
+  <div class="overlay" id="menuOverlay"></div>
+
+  <!-- Sidebar -->
+
+    <aside class="sidebar">
+      <div class="profile-head">
+        <div class="avatar"></div>
+        <div>
+          <div class="name">Sophia Bennett</div>
+          <div class="id">ID: 123456</div>
+        </div>
+      </div>
+
+      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+          {% csrf_token %}
+      </form>
+
+      <nav class="side-nav">
+        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
+      </nav>
+    </aside>
+
+  <!-- الصفحة الكاملة -->
+  <main class="page">
+    <section class="content">
+      <h1 class="deep-clean-service">Deep Clean Service</h1>
+      <p class="scheduled">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
+      <p class="booking-id">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
+
+      <div class="grid two-cols">
+        <!-- العمود اليساري -->
+        <div class="left-col">
+          <div class="card timeline">
+            <div class="track">
+              <div class="stage done">
+                <span class="dot"></span>
+                <div class="info">
+                  <b>Order Placed <span class="chip">Latest</span></b>
+                  <small>Today 10:00 AM</small>
+                </div>
+              </div>
+              <div class="stage done">
+                <span class="dot"></span>
+                <div class="info"><b>Scheduled</b><small>Today 10:00 AM</small></div>
+              </div>
+              <div class="stage"><span class="dot"></span><div class="info"><b>Provider On the Way</b><small>Today, 11:00 AM</small></div></div>
+              <div class="stage"><span class="dot"></span><div class="info"><b>Check In / Service Started</b><small>Tomorrow 9:00 AM</small></div></div>
+              <div class="stage"><span class="dot"></span><div class="info"><b>Service Paused</b><small>Tomorrow 12:00 PM</small></div></div>
+              <div class="stage"><span class="dot"></span><div class="info"><b>Completed</b><small>Tomorrow 12:00 PM</small></div></div>
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-blue" onclick="openPopup()">Reschedule</button>
+              <button class="btn btn-light">Cancel</button>
+            </div>
+          </div>
+<!-- Popup Overlay -->
+            <div class="popup-overlay" id="reschedulePopup">
+              <div class="popup">
+                <button type="button" class="close-btn" onclick="closePopup()">×</button>
+
+                <div class="header">
+                  <img src="{% static 'images/Remove Calendar Event.png'%}" alt="calendar" class="icon">
+                  <h2>Reschedule Service</h2>
+                </div>
+
+                <p class="subtitle">Tomorrow, 9:00 AM – 12:00 PM</p>
+
+                <label for="newDate" class="label">New Date</label>
+                <div class="input-box">
+                  <div class="custom-select">
+                    <select id="newDate">
+                      <option>Select a New Date</option>
+                      <option>March 5, 2025</option>
+                      <option>March 6, 2025</option>
+                    </select>
+                    <span class="arrow">▼</span>
+                  </div>
+                </div>
+
+                <label for="newTime" class="label">Time</label>
+                <div class="input-box">
+                  <div class="custom-select">
+                    <select id="newTime">
+                      <option>Select a Time</option>
+                      <option>9:00 AM – 12:00 PM</option>
+                      <option>1:00 PM – 4:00 PM</option>
+                    </select>
+                    <span class="arrow">▼</span>
+                  </div>
+                </div>
+
+                <p class="note">
+                  <b>Note:</b> You can reschedule up to 24h before service without extra charge.
+                </p>
+
+                <div class="buttons">
+<button class="primary" type="button" onclick="showRescheduleSuccess()">Confirm Reschedule</button>
+
+
+                  <button class="secondary" type="button" onclick="closePopup()">Cancel</button>
+                </div>
+              </div>
+            </div>
+
+
+<!-- ====== RESCHEDULE CONFIRMATION POPUP ====== -->
+<div class="overlay" id="rescheduleSuccessOverlay"></div>
+
+<div class="popup" id="rescheduleSuccessPopup">
+  <img src="{% static 'images/heck-mark0.png'%}" alt="Check mark" class="check-icon" />
+  <p class="popup-text">
+    Your service has been rescheduled to <br>
+    <strong>July 22, 2025 · 2:00 PM – 4:00 PM.</strong>
+  </p>
+  <button class="close-popup-btn" onclick="closeRescheduleSuccess()">×</button>
+</div>
+
+
+
+          <div class="card checklist">
+            <h3>Checklist</h3>
+            <div class="check-grid">
+              <div class="check-col">
+                <h4>Kitchen</h4>
+                <label><input type="checkbox" checked> Wipe counters & surfaces</label>
+                <label><input type="checkbox" checked> Clean sink & faucet</label>
+                <label><input type="checkbox" checked> Mop floor</label>
+                <label><input type="checkbox" checked> Clean inside fridge (add-on)</label>
+
+                <h4>Bathroom</h4>
+                <label><input type="checkbox" checked> Scrub toilet, sink, shower</label>
+                <label><input type="checkbox" checked> Wipe mirrors & fixtures</label>
+                <label><input type="checkbox" checked> Mop floor</label>
+              </div>
+              <div class="check-col">
+                <h4>Bedrooms</h4>
+                <label><input type="checkbox" checked> Make beds</label>
+                <label><input type="checkbox" checked> Dust surfaces</label>
+                <label><input type="checkbox" checked> Mop/vacuum floors</label>
+
+                <h4>Living Room</h4>
+                <label><input type="checkbox" checked> Dust furniture</label>
+                <label><input type="checkbox" checked> Vacuum carpet</label>
+                <label><input type="checkbox" checked> Wipe glass surfaces</label>
+              </div>
+            </div>
+            <div class="notes-field">
+              <label>Notes</label>
+              <textarea placeholder="Any special instructions?"></textarea>
+              <div class="end-actions">
+                <button class="btn btn-blue">Save</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card notes-card">
+            <h3>Notes</h3>
+            <ul class="notes-list" id="notesList">
+              <li><span class="dot green"></span> Please pay special attention to the kitchen and bathroom areas.</li>
+              <li><span class="dot green"></span> Deep clean requested for these areas.</li>
+              <li><span class="dot green"></span> Verify service completion before leaving.</li>
+            </ul>
+            <button class="fab-plus" id="addNoteBtn" aria-label="Add Note"><a href="../Customer Profile - add Customer Notes/index.html">+</a></button>
+          </div>
+        </div>
+
+        <!-- العمود اليميني -->
+        <div class="right-col">
+          <div class="card provider">
+            <h3>Provider Assigned</h3>
+            <div class="provider-row">
+              <div class="avatar ellipse-1857"></div>
+              <div>
+                <b>Sophia Carter</b>
+                <small>Rating: 4.8 (120 reviews)</small>
+              </div>
+            </div>
+            <button class="btn btn-blue"><a href="{% url 'accounts:chat' %}">Messagea</a></button>
+          </div>
+
+          <div class="card timing">
+            <h3>Time Tracking</h3>
+            <p><span class="muted">Quoted Time:</span> <b>3 hours</b></p>
+            <p><span class="muted">Actual Time:</span> <b>2 hours 45 minutes</b></p>
+          </div>
+
+          <div class="card charges">
+            <h3>Charges</h3>
+            <div class="rows">
+              <div class="row"><span>Base Price</span><span>100.00$</span></div>
+              <div class="row"><span>Add-on: Inside Fridge</span><span>20.00$</span></div>
+              <div class="row"><span>Add-on Inside Oven</span><span>15.00$</span></div>
+              <div class="row"><span>Discount</span><span class="green">-10.00$</span></div>
+              <div class="row"><span>Tax (5%)</span><span>6.25$</span></div>
+              <div class="row"><span>Reward/Loyalty Points</span><span>-5.00$</span></div>
+              <div class="row"><span>Payment Method</span><span>Visa</span></div>
+            </div>
+            <div class="total-row">
+              <span class="blue">Total</span>
+              <span class="blue">$125.00</span>
+            </div>
+          </div>
+
+          <a href="{% url 'accounts:Add_on_Service_Request' %}" class="see-more"><div class="pill request-addon"><b>Request Add-on</b></div></a>
+
+               <!-- ===== MEDIA GALLERY ===== -->
+          <div class="card media-gallery">
+            <div class="media-header">
+              <h3>Media Gallery</h3>
+              <a href="{% url 'accounts:Media' %}" class="see-more">see more →</a>
+            </div>
+
+            <div class="media-carousel">
+              <button class="arrow-btn left">‹</button>
+              <div class="media-track">
+                <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
+                <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
+                <img src="https://via.placeholder.com/130x100?text=Kitchen" alt="Kitchen photo">
+                <img src="https://via.placeholder.com/130x100?text=Bathroom" alt="Bathroom photo">
+              </div>
+              <button class="arrow-btn right">›</button>
+            </div>
+<div class="media-pagination">
+  <span class="media-dot active"></span>
+  <span class="media-dot"></span>
+  <span class="media-dot"></span>
+</div>
+<br>
+            <div class="gallery-actions">
+              <button class="btn btn-blue" id="approveWorkBtn">Approve Work</button>
+           <button class="btn btn-light" id="requestFixBtn">Request Fix</button>
+            </div>
+          </div>
+
+          <div class="card help">
+            <span class="need-help"><img src="{% static 'images/vector27.svg'%}" alt="">Need help?</span>
+            <p>Something not right with your service? Let us know.</p>
+            <div class="actions">
+<a href="{% url 'accounts:Report_Incident' %}" class="report-btn">
+  <img src="{% static 'images/commercial0.png'%}" alt="Report">
+  Report an Incident
+</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== APPROVE WORK POPUP ===== -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup">
+      <button class="close-btn" id="closePopupBtn">×</button>
+      <img class="logo" src="{% static 'images/frame-16865526320.png'%}" alt="Happy Home Logo">
+      <p class="message">
+        <strong>Happy home, happy you 💙</strong><br>
+        Clean, fresh, and ready to enjoy. Until next time!
+      </p>
+      <div class="buttons">
+        <button class="primary">Book Again</button>
+        <button class="secondary">View Receipt</button>
+        <button class="secondary">Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== REQUEST FIX POPUP ===== -->
+  <div class="popup-overlay" id="fixPopupOverlay">
+    <div class="popup">
+      <button class="close-btn" id="closeFixPopupBtn">×</button>
+      <img class="logo" src="{% static 'images/frame-16865526200.svg'%}" alt="Request Fix">
+      <p class="message">
+        <strong>Request Fix 🧹</strong><br>
+        Please describe what needs to be corrected. Our team will review it right away!
+      </p>
+      <textarea placeholder="Describe your issue..." style="width:100%;height:100px;border:1px solid #ccc;border-radius:8px;padding:8px;font-size:15px;resize:none;"></textarea>
+      <div class="buttons" style="margin-top:20px;">
+        <button class="primary">Send Request</button>
+        <button class="secondary" id="cancelFixBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+<footer class="footer">
+  <div class="footer-container">
+    <!-- العمود 1: اللوجو والنص -->
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list. 
+        From cleaning to care, we’re here to make life easier, one home at a time.
+      </p>
+
+      <!-- الصف الإضافي تحت النص -->
+      <div class="bottom-left">
+        <!-- Connect -->
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
+            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
+            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
+            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+          </div>
+        </div>
+
+
+      </div>
+    </div>
+
+    <!-- العمود 2: Support -->
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Address</a></li>
+        <li><a href="#">Working Hours</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+              <!-- App Download -->
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+          </div>
+        </div>
+    </div>
+
+    <!-- العمود 3: Company -->
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Our Story</a></li>
+        <li><a href="#">Feedback</a></li>
+      </ul>
+    </div>
+
+    <!-- العمود 4: Legal / Privacy -->
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms & Conditions</a></li>
+        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="#">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- الخط الفاصل -->
+  <hr class="footer-line">
+
+  <!-- الصف السفلي -->
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+const toggleBtn = docume6nt.getElementById("menu-toggle");
+const navLinks = document.getElementById("nav-links");
+  
+toggleBtn.addEventListener("click", () => {
+  navLinks.classList.toggle("active");
+});
+</script>
+  <!-- ====== JavaScript ====== -->
+  <script>
+    // القائمة الجانبية
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const menuOverlay = document.getElementById("menuOverlay");
+    const arrow = document.querySelector(".menu-toggle .arrow");
+
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      menuOverlay.classList.toggle("show");
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+    });
+
+    menuOverlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      menuOverlay.classList.remove("show");
+      arrow.innerHTML = "&#8250;";
+    });
+
+    // === APPROVE WORK POPUP ===
+    const popupOverlay = document.getElementById("popupOverlay");
+    const approveWorkBtn = document.getElementById("approveWorkBtn");
+    const closePopupBtn = document.getElementById("closePopupBtn");
+
+    approveWorkBtn.addEventListener("click", () => {
+      popupOverlay.classList.add("active");
+    });
+    closePopupBtn.addEventListener("click", () => {
+      popupOverlay.classList.remove("active");
+    });
+    popupOverlay.addEventListener("click", (e) => {
+      if (e.target === popupOverlay) popupOverlay.classList.remove("active");
+    });
+
+    // === REQUEST FIX POPUP ===
+    const fixPopupOverlay = document.getElementById("fixPopupOverlay");
+    const requestFixBtn = document.getElementById("requestFixBtn");
+    const closeFixPopupBtn = document.getElementById("closeFixPopupBtn");
+    const cancelFixBtn = document.getElementById("cancelFixBtn");
+
+    requestFixBtn.addEventListener("click", () => {
+      fixPopupOverlay.classList.add("active");
+    });
+    closeFixPopupBtn.addEventListener("click", () => {
+      fixPopupOverlay.classList.remove("active");
+    });
+    cancelFixBtn.addEventListener("click", () => {
+      fixPopupOverlay.classList.remove("active");
+    });
+    fixPopupOverlay.addEventListener("click", (e) => {
+      if (e.target === fixPopupOverlay) fixPopupOverlay.classList.remove("active");
+    });
+  </script>
+  <script>
+const track = document.querySelector('.media-track');
+const dots = document.querySelectorAll('.media-dot');
+const btnLeft = document.querySelector('.arrow-btn.left');
+const btnRight = document.querySelector('.arrow-btn.right');
+
+let currentIndex = 0;
+const total = dots.length;
+
+function updateCarousel() {
+  const offset = -currentIndex * 140; // عرض الصورة + المسافة
+  track.style.transform = `translateX(${offset}px)`;
+  dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+}
+
+btnRight.addEventListener('click', () => {
+  currentIndex = (currentIndex + 1) % total;
+  updateCarousel();
+});
+btnLeft.addEventListener('click', () => {
+  currentIndex = (currentIndex - 1 + total) % total;
+  updateCarousel();
+});
+dots.forEach((dot, i) => {
+  dot.addEventListener('click', () => {
+    currentIndex = i;
+    updateCarousel();
+  });
+});
+</script>
+<script>
+  // البوب أب الخاص بإعادة الجدولة فقط
+  const reschedulePopup = document.getElementById('reschedulePopup');
+
+  // فتح البوب أب عند الضغط على زر Reschedule
+  function openPopup() {
+    reschedulePopup.classList.add('active');
+  }
+
+  // إغلاق البوب أب عند الضغط على × أو Cancel
+  function closePopup() {
+    reschedulePopup.classList.remove('active');
+  }
+
+  // كمان إذا المستخدم ضغط على الخلفية السودا (خارج المربع)، بيتسكر
+  reschedulePopup.addEventListener('click', (e) => {
+    if (e.target === reschedulePopup) {
+      closePopup();
+    }
+  });
+</script>
+<script>
+  const rescheduleSuccessOverlay = document.getElementById('rescheduleSuccessOverlay');
+  const rescheduleSuccessPopup = document.getElementById('rescheduleSuccessPopup');
+
+  function showRescheduleSuccess() {
+    // أغلقي بوب أب الجدولة أولاً
+    closePopup();
+
+    // بعد لحظة قصيرة افتحي بوب أب النجاح
+    setTimeout(() => {
+      rescheduleSuccessOverlay.classList.add('active');
+      rescheduleSuccessPopup.classList.add('active');
+    }, 250);
+  }
+
+  function closeRescheduleSuccess() {
+    rescheduleSuccessOverlay.classList.remove('active');
+    rescheduleSuccessPopup.classList.remove('active');
+  }
+
+  // كمان الضغط على الخلفية يغلق البوب أب
+  rescheduleSuccessOverlay.addEventListener('click', closeRescheduleSuccess);
+</script>
+
+
+
+</body>
+</html>

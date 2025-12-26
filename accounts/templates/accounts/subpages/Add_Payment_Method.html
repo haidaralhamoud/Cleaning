@@ -3,16 +3,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Incident Overview</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="{% static 'css/incident.css' %}" />
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/Add_Payment_Method.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  
+
+  <title>Document</title>
 </head>
 <body>
-<!-- HEADER -->
+  <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -32,24 +33,23 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-
+  <!-- Overlay -->
   <div class="layout">
-  <!-- زر المنيو (يظهر فقط بالموبايل) -->
-  <button class="menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span>
-  </button>
 
-  <!-- Sidebar -->
+ 
+      <!-- Sidebar -->
+     <!-- زر المينيو يظهر فقط بالموبايل -->
 <div class="mobile-header">
   <button class="menu-toggle floating" id="menuToggle">
     <span class="arrow">&#8250;</span> <!-- › -->
   </button>
-
+  <h2 class="mobile-title">Customer Profile</h2>
 </div>
 
 
 
-    <aside class="sidebar">
+  <!-- ===== Sidebar ===== -->
+        <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
         <div>
@@ -77,63 +77,54 @@
         <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
       </nav>
     </aside>
+    <!-- Main -->
+    <main class="main">
+      <h1 class="title">Payment & Billing</h1>
 
-  <!-- المحتوى الرئيسي -->
-  <div class="main-content">
-    <h1>Incident Overview</h1>
+      <section class="card">
+        <h2>Add Payment Method</h2>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Incident ID</th>
-            <th>Incident Type</th>
-            <th>Reported Date</th>
-            <th>Last Updated</th>
-            <th>Summary</th>
-            <th>View</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>#12345</td>
-            <td>Sophia Clark</td>
-            <td>July 15, 2024</td>
-            <td>July 15, 2024</td>
-            <td>Issue with order #7890</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12346</td>
-            <td>Ethan Harris</td>
-            <td>July 16, 2024</td>
-            <td>July 16, 2024</td>
-            <td>Delivery delay for order #5678</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12347</td>
-            <td>Olivia Turner</td>
-            <td>July 17, 2024</td>
-            <td>July 17, 2024</td>
-            <td>Product return for order #3456</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12348</td>
-            <td>Liam Foster</td>
-            <td>July 18, 2024</td>
-            <td>July 18, 2024</td>
-            <td>Payment issue for order #1234</td>
-            <td><a href="#" class="view-link">View</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        <div class="form-group">
+          <label>Cardholder Name</label>
+          <input type="text" placeholder="Enter cardholder name">
+        </div>
+
+        <div class="form-group">
+          <label>Card Number</label>
+          <input type="text" placeholder="Enter card number">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiration Date</label>
+            <input type="text" placeholder="MM/YY">
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="text" placeholder="Enter CVV">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Card Type</label>
+          <div class="pills">
+            <button type="button" class="pill">Visa</button>
+            <button type="button" class="pill">MasterCard</button>
+            <button type="button" class="pill">American Express</button>
+            <button type="button" class="pill">Discover</button>
+          </div>
+        </div>
+
+        <div class="inline-check">
+          <input id="set-default" type="checkbox" checked>
+          <label for="set-default">Set as default payment method</label>
+        </div>
+
+        <button class="btn" type="button">Save Payment Method</button>
+      </section>
+    </main>
   </div>
-  </div>
-<div class="overlay" id="menuOverlay"></div>
-<footer class="footer">
+  <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
     <div class="footer-col about">
@@ -223,25 +214,25 @@ toggleBtn.addEventListener("click", () => {
   navLinks.classList.toggle("active");
 });
 </script>
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector(".menu-toggle .arrow");
 
- <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const overlay = document.getElementById("menuOverlay");
-    const arrow = document.querySelector(".menu-toggle .arrow");
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    // لما تفتح القائمة السهم ينعكس
+    if (sidebar.classList.contains("open")) {
+      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
+    } else {
+      arrow.innerHTML = "&#8250;"; // › سهم لليمين
+    }
+  });
+</script>
 
-    toggle.addEventListener("click", () => {
-      const open = sidebar.classList.toggle("open");
-      overlay.classList.toggle("show", open);
-      arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
-    });
-
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-      arrow.style.transform = "rotate(0deg)";
-    });
-  </script>
 
 </body>
 </html>
+
+
+

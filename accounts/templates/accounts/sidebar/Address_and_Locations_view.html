@@ -96,41 +96,70 @@
         </div>
       </div>
 
-      <div class="card">
-        <div class="left">
-          <img src="{% static 'images/home-address1.png'%}" class="icon">
-          <h3>Office</h3>
-          <p>📍 123 Maple Street, Apartment 4B, Anytown, CA 91234</p>
-          <p>📅 Next service: Aug 20, 2025, 10:00 AM</p>
-          <p>☎ Layal Hassan · +1 555-123-4567</p>
-          <p>🅿 Guest spot #5 · 🔑 Gate 3, code 1234#</p>
-        </div>
-        <div class="right">
-          <button class="btn btn-default">Set as default</button>
-          <button class="btn btn-gray">View on Map</button>
-          <button class="btn btn-gray">Edit</button>
-          <button class="btn btn-gray">Remove</button>
-        </div>
-      </div>
+{% for location in locations %}
+<div class="card">
 
-      <div class="card">
-        <div class="left">
-          <img src="{% static 'images/home-address2.png '%}" class="icon">
-          <h3>Vacation Home</h3>
-          <p>📍 123 Maple Street, Apartment 4B, Anytown, CA 91234</p>
-          <p>📅 Next service: Aug 20, 2025, 10:00 AM</p>
-          <p>☎ Layal Hassan · +1 555-123-4567</p>
-          <p>🅿 Guest spot #5 · 🔑 Gate 3, code 1234#</p>
-        </div>
-        <div class="right">
-          <button class="btn btn-default">Set as default</button>
-          <button class="btn btn-gray">View on Map</button>
-          <button class="btn btn-gray">Edit</button>
-          <button class="btn btn-gray">Remove</button>
-        </div>
-      </div>
+  <div class="left">
+    <img src="{% static 'images/home2.png'%}" class="icon">
 
-      <button  class="btn btn-add"><a href="../Add Address & Locations/index.html"  class="nav-item">Add Location</a></button>
+    <h3>
+      {{ location.get_address_type_display }}
+
+      {% if location.is_primary %}
+        <img src="{% static 'images/star0.png'%}" class="star">
+        <span class="badge">Active</span>
+      {% endif %}
+    </h3>
+
+    <p>
+      📍 {{ location.street_address }},
+      {{ location.city }},
+      {{ location.region }},
+      {{ location.postal_code }},
+      {{ location.country }}
+    </p>
+
+    {% if location.contact_name %}
+      <p>☎ {{ location.contact_name }} · {{ location.contact_phone }}</p>
+    {% endif %}
+
+    {% if location.parking_notes or location.entry_code %}
+      <p>
+        🅿 {{ location.parking_notes|default:"—" }}
+        · 🔑 {{ location.entry_code|default:"—" }}
+      </p>
+    {% endif %}
+  </div>
+
+  <div class="right">
+    {% if not location.is_primary %}
+      <a href="{% url 'accounts:set_location_primary' location.id %}"
+         class="btn btn-default">
+        Set as default
+      </a>
+    {% endif %}
+
+    <a href="#" class="btn btn-gray"><button class="btn btn-gray">View on Map</button></a>
+
+    <a href="{% url 'accounts:edit_address_and_locations' location.id %}"
+       class="btn btn-gray"><button class="btn btn-gray">Edit</button></a>
+
+    <a href="{% url 'accounts:delete_location' location.id %}"
+       class="btn btn-gray"
+       onclick="return confirm('Delete this location?')"><button class="btn btn-gray" >
+      Remove</button>
+    </a>
+  </div>
+
+</div>
+{% empty %}
+<p style="text-align:center; color:#777">
+  No addresses added yet.
+</p>
+{% endfor %}
+
+
+      <button  class="btn btn-add"><a href="{% url 'accounts:Add_Address_and_Locations' %}"  class="nav-item">Add Location</a></button>
     </main>
   </div>
 

@@ -174,7 +174,7 @@
 
   {% if user.is_authenticated %}
 
-    <a href="#" class="btn-auth">
+    <a href="{% url 'accounts:customer_profile_view' %}" class="btn-auth">
       My Profile
     </a>
 
