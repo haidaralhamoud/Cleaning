@@ -10,7 +10,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/customer_profile_view.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<style>
+.edit-only .form-control {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
 
+.edit-only select.form-control {
+  height: 38px;
+}
+
+.field {
+  margin-bottom: 12px;
+}
+
+
+</style>
 </head>
 <body>
 <!-- HEADER -->
@@ -129,116 +147,273 @@
   </div>
 </article>
 
-     <article class="card basic-info">
+<form method="post" enctype="multipart/form-data">
+{% csrf_token %}
+
+<article class="card basic-info">
+
   <div class="card-header">
     <div class="card-title with-icon">
       <img src="{% static 'images/person0.png'%}" class="tiny-ico">
       <span>Basic Information</span>
     </div>
-    <button class="icon-ghost"><img src="{% static 'images/edit-pencil1.png'%}" alt=""></button>
+    <button class="icon-ghost" type="button" onclick="toggleBasicEdit()">
+      <img src="{% static 'images/edit-pencil1.png'%}" alt="">
+    </button>
   </div>
 
   <div class="info-grid3">
-    <!-- Column 1 -->
+
+    <!-- ================= Column 1 ================= -->
     <div class="col">
       <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon">
+
       <div class="field">
         <div class="label">Email Address</div>
-        <div class="val">{{ customer.email }}</div>
+        <div class="val view-only">{{ customer.email }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.email }}
+        </div>
       </div>
+
       <div class="field">
         <div class="label">Preferred language</div>
-        <div class="val">{{ customer.get_preferred_language_display }}</div>
+        <div class="val view-only">{{ customer.get_preferred_language_display }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.preferred_language }}
+        </div>
       </div>
+
       <div class="field">
         <div class="label">Date of birth</div>
-        <div class="val">{% if customer.date_of_birth %}
-      {{ customer.date_of_birth|date:"d/m/Y" }}
-    {% else %}
-      —
-    {% endif %}
-  </div>
+        <div class="val view-only">
+          {% if customer.date_of_birth %}
+            {{ customer.date_of_birth|date:"d/m/Y" }}
+          {% else %} — {% endif %}
+        </div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.date_of_birth }}
+        </div>
       </div>
     </div>
 
-    <!-- Column 2 -->
+    <!-- ================= Column 2 ================= -->
     <div class="col">
       <div class="field">
         <div class="label">First Name</div>
-        <div class="val">{{ customer.first_name }}</div>
+        <div class="val view-only">{{ customer.first_name }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.first_name }}
+        </div>
       </div>
+
       <div class="field">
-        <div class="label">country code</div>
-        <div class="val">{{ customer.country_code|default:"—" }}</div>
+        <div class="label">Country code</div>
+        <div class="val view-only">{{ customer.country_code|default:"—" }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.country_code }}
+        </div>
       </div>
+
       <div class="field">
         <div class="label">Preferred contact method</div>
-        <div class="val"> {{ customer.get_preferred_contact_method_display|default:"—" }}</div>
+        <div class="val view-only">
+          {{ customer.get_preferred_contact_method_display|default:"—" }}
+        </div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.preferred_contact_method }}
+        </div>
       </div>
+
       <div class="field">
         <div class="label">Gender</div>
-        <div class="val">{{ customer.gender|capfirst|default:"—" }}</div>
+        <div class="val view-only">{{ customer.gender|default:"—"|capfirst }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.gender }}
+        </div>
       </div>
     </div>
 
-    <!-- Column 3 -->
+    <!-- ================= Column 3 ================= -->
     <div class="col">
       <div class="field">
         <div class="label">Last Name</div>
-        <div class="val">{{ customer.last_name }}</div>
+        <div class="val view-only">{{ customer.last_name }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.last_name }}
+        </div>
       </div>
+
       <div class="field">
         <div class="label">Phone number</div>
-        <div class="val">{{ customer.phone }}</div>
+        <div class="val view-only">{{ customer.phone }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.phone }}
+        </div>
       </div>
+
       <div class="field">
         <div class="label">Pronouns</div>
-        <div class="val">{{ customer.pronouns|default:"—" }}</div>
+        <div class="val view-only">{{ customer.pronouns|default:"—" }}</div>
+        <div class="edit-only" style="display:none">
+          {{ basic_form.pronouns }}
+        </div>
       </div>
     </div>
+
   </div>
 
-  <div class="emergency">
-    <div class="em-title">Emergency contact</div>
-    <div class="grid">
-      <div>
-        <div class="label">First Name</div>
-        <div class="val">{{ customer.emergency_first_name|default:"—" }}</div>
+
+  <!-- ================= Emergency Contact (ما بينمس) ================= -->
+<div class="emergency">
+  <div class="em-title">Emergency contact</div>
+
+  <div class="grid">
+
+    <div class="field">
+      <div class="label">First Name</div>
+      <div class="val view-only">
+        {{ customer.emergency_first_name|default:"—" }}
       </div>
-      <div>
-        <div class="label">Last Name</div>
-        <div class="val">{{ customer.emergency_last_name|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="label">Phone number</div>
-        <div class="val">{{ customer.emergency_phone|default:"—" }}</div>
-      </div>
-      <div>
-        <div class="label">Relation</div>
-        <div class="val">{{ customer.emergency_relation|default:"—" }}</div>
+      <div class="edit-only" style="display:none">
+        <input type="text"
+               name="emergency_first_name"
+               class="form-control"
+               value="{{ customer.emergency_first_name }}">
       </div>
     </div>
+
+    <div class="field">
+      <div class="label">Last Name</div>
+      <div class="val view-only">
+        {{ customer.emergency_last_name|default:"—" }}
+      </div>
+      <div class="edit-only" style="display:none">
+        <input type="text"
+               name="emergency_last_name"
+               class="form-control"
+               value="{{ customer.emergency_last_name }}">
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="label">Phone number</div>
+      <div class="val view-only">
+        {{ customer.emergency_phone|default:"—" }}
+      </div>
+      <div class="edit-only" style="display:none">
+        <input type="text"
+               name="emergency_phone"
+               class="form-control"
+               value="{{ customer.emergency_phone }}">
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="label">Relation</div>
+      <div class="val view-only">
+        {{ customer.emergency_relation|default:"—" }}
+      </div>
+      <div class="edit-only" style="display:none">
+        <input type="text"
+               name="emergency_relation"
+               class="form-control"
+               value="{{ customer.emergency_relation }}">
+      </div>
+    </div>
+  <!-- ================= ACTIONS ================= -->
+  <div class="edit-actions" style="display:none; text-align:right; margin-top:15px">
+    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-outline" onclick="toggleBasicEdit()">Cancel</button>
+  </div>
+  </div>
+</div>
+
+</article>
+</form>
+
+
+
+<article class="card">
+  <div class="card-header">
+    <div class="card-title with-icon">
+      <img src="{% static 'images/home-address0.png'%}" class="tiny-ico">
+      <span>Address & Locations</span>
+    </div>
+    <a href="{% url 'accounts:Address_and_Locations_view' %}" class="icon-ghost">
+      <img src="{% static 'images/edit-pencil2.png' %}">
+    </a>
+  </div>
+
+  <div class="stack">
+
+    <!-- Primary Address -->
+    <div class="row-ic">
+      <img src="{% static 'images/star0.png' %}">
+      <div>
+        <div class="row-title">Primary Address</div>
+        <div class="row-text">
+          {% if primary_location %}
+            {{ primary_location.street_address }},
+            {{ primary_location.city }},
+            {{ primary_location.region }},
+            {{ primary_location.postal_code }},
+            {{ primary_location.country }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional Locations -->
+    <div class="row-ic">
+      <img src="{% static 'images/locations1.png' %}">
+      <div>
+        <div class="row-title">Additional Locations</div>
+        <div class="row-text">
+          {% if other_locations %}
+            {{ other_locations|length }} locations saved
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Entry code / Access -->
+    <div class="row-ic">
+      <img src="{% static 'images/access0.png'%}">
+      <div>
+        <div class="row-title">Entry code / Access</div>
+        <div class="row-text">
+          {% if primary_location and primary_location.entry_code %}
+            {{ primary_location.entry_code }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Parking notes -->
+    <div class="row-ic">
+      <img src="{% static 'images/notes0.png'%}">
+      <div>
+        <div class="row-title">Parking notes</div>
+        <div class="row-text">
+          {% if primary_location and primary_location.parking_notes %}
+            {{ primary_location.parking_notes }}
+          {% else %}
+            —
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
   </div>
 </article>
 
-
-
-          <article class="card">
-            <div class="card-header">
-              <div class="card-title with-icon">
-                <img src="{% static 'images/home-address0.png'%}" class="tiny-ico">
-                <span>Address & Locations</span>
-              </div>
-              <button class="icon-ghost"><img src="{% static 'images/edit-pencil2.png' %}"></button>
-            </div>
-
-            <div class="stack">
-              <div class="row-ic"><img src="{% static 'images/star0.png' %}"><div><div class="row-title">Primary Address</div><div class="row-text">{{ customer.primary_address|default:"—" }}</div></div></div>
-              <div class="row-ic"><img src="{% static 'images/locations1.png' %}"><div><div class="row-title">Additional Locations</div><div class="row-text">{{ customer.additional_locations|default:"—" }}</div></div></div>
-              <div class="row-ic"><img src="{% static 'images/access0.png'%}"><div><div class="row-title">Entry code / Access</div><div class="row-text">{{ customer.entry_code|default:"—" }}</div></div></div>
-              <div class="row-ic"><img src="{% static 'images/notes0.png'%}"><div><div class="row-title">Parking notes</div><div class="row-text">{{ customer.parking_notes|default:"—" }}</div></div></div>
-            </div>
-          </article>
         </div>
 
         <div class="right-column">
@@ -372,6 +547,29 @@ toggleBtn.addEventListener("click", () => {
       arrow.innerHTML = "&#8250;"; // › سهم لليمين
     }
   });
+</script>
+
+<script>
+function toggleBasicEdit() {
+
+  const viewFields = document.querySelectorAll('.view-only');
+  const editFields = document.querySelectorAll('.edit-only');
+  const actions = document.querySelector('.edit-actions');
+
+  const isEditing = editFields[0].style.display === 'block';
+
+  viewFields.forEach(el => {
+    el.style.display = isEditing ? 'block' : 'none';
+  });
+
+  editFields.forEach(el => {
+    el.style.display = isEditing ? 'none' : 'block';
+  });
+
+  if (actions) {
+    actions.style.display = isEditing ? 'none' : 'block';
+  }
+}
 </script>
 
 

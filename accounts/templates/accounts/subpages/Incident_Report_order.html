@@ -77,54 +77,63 @@
 
       <!-- === BLUE HEADER SECTION === -->
       <div style="background:#c0e7f1; text-align:center; padding:15px 10px; border-radius:8px 8px 0 0; margin:-35px -40px 30px -40px;">
-        <p style="font-size:14px; color:#222; margin-bottom:5px;">Orders Order #12345</p>
-        <h2 style="font-size:20px; font-weight:700; color:#000; margin-bottom:5px;">Order #12345</h2>
-        <p style="font-size:15px; color:#333;">
-          Customer: Sarah Miller | Provider: Alex Johnson | <span style="color:#039fc8; font-weight:600;">Status: In Progress</span>
+        <p style="font-size:14px; color:#222; margin-bottom:5px;">Order: #{{ incident.order }}</p>
+        <h2 style="font-size:20px; font-weight:700; color:#000; margin-bottom:5px;"> Incident #{{ incident.id }}</h2>
+       <p style="font-size:15px; color:#333;">
+           Customer: {{ incident.customer.get_full_name|default:incident.customer.username }} |
+            Provider: {{ incident.involved_person|default:"—" }} |
+          <span style="color:#039fc8; font-weight:600;">
+            Status: {{ incident.get_status_display }}
+          </span>
         </p>
       </div>
 
       <div class="header">
-        <h1>Incident Report #INC2024-003</h1>
-        <p class="submitted">Submitted on July 15, 2024</p>
+        <h1>Incident Report #{{ incident.id }}</h1>
+        <p class="submitted">Submitted on {{ incident.created_at|date:"F d, Y" }}</p>
       </div>
 
       <div class="status-title">Status</div>
-      <div class="status-value">In Progress</div>
+      <div class="status-value">{{ incident.get_status_display }}</div>
 
       <div class="status-bar">
         <div class="status-fill"></div>
       </div>
 
-      <p>Last updated: July 20, 2024</p>
+      <p>{{ incident.created_at|date:"F d, Y" }}</p>
 
       <hr>
 
       <h2>Details</h2>
       <table class="details-table">
-        <tr><th>Customer</th><td>Sarah Miller</td></tr>
-        <tr><th>Reported By</th><td>Alex Johnson</td></tr>
-        <tr><th>Category</th><td>Cleaning Issue</td></tr>
-        <tr><th>Severity</th><td>Medium</td></tr>
-        <tr><th>Description</th><td>Customer reported dissatisfaction with the recent cleaning session. Minor damages noticed on table surface.</td></tr>
+        <tr><th>Customer</th><td>{{ incident.customer.get_full_name|default:incident.customer.username }}</td></tr>
+        <tr><th>Category</th><td>{{ incident.involved_person|default:"—" }}</td></tr>
+        <tr><th>Severity</th><td>{{ incident.get_severity_display }}</td></tr>
+        <tr><th>Description</th><td>{{ incident.description }}</td></tr>
       </table>
 
       <h2>Communications</h2>
       <div class="comment">
-        <strong>Ethan Bennett</strong> — July 15, 2024, 10:00 AM<br>
-        Initial report submitted by customer.
+        <strong>{{ incident.customer }}</strong> — {{ incident.created_at|date:"F d, Y, H:i" }}<br>
+        Incident created by customer.
       </div>
 
       <h2>Evidence</h2>
-      <div class="evidence-box">📷 No evidence uploaded</div>
+       {% if incident.evidence %}
+        <div class="evidence-box">
+          📎 <a href="{{ incident.evidence.url }}" target="_blank">View uploaded evidence</a>
+        </div>
+      {% else %}
+        <div class="evidence-box">📷 No evidence uploaded</div>
+      {% endif %}
 
       <h2>Resolution</h2>
       <div class="timeline">
         <div class="timeline-dot"></div>
-        <div class="timeline-step"><div class="circle">✔</div><p>Reported<br><small>July 15</small></p></div>
-        <div class="timeline-step"><div class="circle">✔</div><p>Under Review<br><small>July 16</small></p></div>
-        <div class="timeline-step"><div class="circle">✔</div><p>Action Taken<br><small>July 18</small></p></div>
-        <div class="timeline-step"><div class="circle">✔</div><p>Resolved<br><small>July 20</small></p></div>
+        <div class="timeline-step"><div class="circle">✔</div><p>Reported<br><small>{{ incident.created_at|date:"M d" }}</small></p></div>
+        <div class="timeline-step"><div class="circle">•</div><p>Under Review<br><small>—</small></p></div>
+        <div class="timeline-step"><div class="circle">•</div><p>Action Taken<br><small>—</small></p></div>
+        <div class="timeline-step"><div class="circle">•</div><p>Resolved<br><small>—</small></p></div>
       </div>
 
    <button class="close-btn" onclick="toggleSatisfaction()">Close Incident</button>
@@ -227,7 +236,7 @@
 </footer>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
+const toggleBtn = document.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
   
 toggleBtn.addEventListener("click", () => {

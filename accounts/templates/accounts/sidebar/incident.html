@@ -94,40 +94,36 @@
             <th>View</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>#12345</td>
-            <td>Sophia Clark</td>
-            <td>July 15, 2024</td>
-            <td>July 15, 2024</td>
-            <td>Issue with order #7890</td>
-            <td><a href="{% url 'accounts:Incident_Report_order' %}" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12346</td>
-            <td>Ethan Harris</td>
-            <td>July 16, 2024</td>
-            <td>July 16, 2024</td>
-            <td>Delivery delay for order #5678</td>
-            <td><a href="{% url 'accounts:Incident_Report_order' %}" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12347</td>
-            <td>Olivia Turner</td>
-            <td>July 17, 2024</td>
-            <td>July 17, 2024</td>
-            <td>Product return for order #3456</td>
-            <td><a href="{% url 'accounts:Incident_Report_order' %}" class="view-link">View</a></td>
-          </tr>
-          <tr>
-            <td>#12348</td>
-            <td>Liam Foster</td>
-            <td>July 18, 2024</td>
-            <td>July 18, 2024</td>
-            <td>Payment issue for order #1234</td>
-            <td><a href="{% url 'accounts:Incident_Report_order' %}" class="view-link">View</a></td>
-          </tr>
-        </tbody>
+<tbody>
+  {% for incident in incidents %}
+    <tr>
+      <td>#{{ incident.id }}</td>
+
+      <td>{{ incident.incident_type }}</td>
+
+      <td>{{ incident.created_at|date:"F d, Y" }}</td>
+
+      <td>{{ incident.created_at|date:"F d, Y" }}</td>
+
+      <td>
+        Issue with order #{{ incident.order }}
+      </td>
+
+      <td>
+        <a href="{% url 'accounts:Incident_Report_order' incident.id %}" class="view-link">
+          View
+        </a>
+      </td>
+    </tr>
+  {% empty %}
+    <tr>
+      <td colspan="6" style="text-align:center; padding:20px;">
+        No incidents reported yet.
+      </td>
+    </tr>
+  {% endfor %}
+</tbody>
+
       </table>
     </div>
   </div>

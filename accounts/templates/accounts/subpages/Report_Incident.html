@@ -9,6 +9,142 @@
   <link rel="stylesheet" href="{% static 'css/Report_Incident.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ===== Pop-up Submitted ===== */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.popup-content {
+  background: #fff;
+  border-radius: 15px;
+  padding: 40px 30px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+  animation: popupShow 0.4s ease;
+}
+
+.popup-img {
+  width: 120px;
+  margin-bottom: 20px;
+  animation: handshake 1.2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes handshake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-6deg); }
+  50% { transform: rotate(6deg); }
+  75% { transform: rotate(-4deg); }
+}
+
+.popup-content h2 {
+  color: #d93025;
+  font-size: 22px;
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.popup-content p {
+  color: #000;
+  font-weight: 600;
+  margin: 8px 0;
+}
+
+/* === الأزرار === */
+.popup-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+  flex-wrap: wrap;
+}
+
+.btn-outline,
+.btn-filled {
+  padding: 12px 25px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  transition: 0.3s;
+  min-width: 180px;
+}
+
+/* زر الإطار فقط */
+.btn-outline {
+  border: 2px solid #d93025;
+  color: #d93025;
+  background: #fff;
+}
+
+.btn-outline:hover {
+  background: #d93025;
+  color: #fff;
+}
+
+/* زر ممتلئ */
+.btn-filled {
+  background: #d93025;
+  color: #fff;
+  border: none;
+}
+
+.btn-filled:hover {
+  background: #b1241b;
+}
+
+/* حركة ظهور ناعمة */
+@keyframes popupShow {
+  from { transform: scale(0.7); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .popup-content {
+    padding: 25px 20px;
+    width: 80%;
+  }
+
+  .popup-content h2 {
+    font-size: 18px;
+  }
+
+  .popup-buttons button {
+    width: 100%;
+  }
+}
+
+  .popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.popup-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 14px;
+  width: 420px;
+  text-align: center;
+}
+
+</style>
+
 </head>
 <body>
     <!-- HEADER -->
@@ -74,76 +210,102 @@
     </aside>
 
   <!-- المحتوى الرئيسي -->
+ <!-- MAIN CONTENT -->
   <main class="main-content">
     <div class="report-container">
       <h1 class="title">Report Incident</h1>
 
-      <div class="form-section">
+
+      <form method="post" enctype="multipart/form-data" class="form-section">
+        {% csrf_token %}
+
         <div class="input-group">
           <label>Incident Type</label>
-          <select>
-            <option>Select Incident Type</option>
-          </select>
+          {{ form.incident_type }}
         </div>
 
         <div class="input-group">
           <label>Severity</label>
-          <select>
-            <option>Select Severity</option>
-          </select>
+          {{ form.severity }}
         </div>
 
         <div class="input-group">
           <label>Order</label>
-          <select>
-            <option>Select Order</option>
-          </select>
+          {{ form.order }}
         </div>
 
         <div class="input-group">
           <label>Date & Time</label>
-          <input type="datetime-local" />
+          {{ form.incident_datetime }}
         </div>
 
         <div class="input-group">
           <label>Location</label>
-          <input type="text" placeholder="Enter Location" />
+          {{ form.location }}
         </div>
 
         <div class="input-group">
           <label>Involved Person</label>
-          <select>
-            <option>Select Involved Person</option>
-          </select>
+          {{ form.involved_person }}
         </div>
 
         <div class="input-group">
           <label>Preferred Resolution</label>
-          <select>
-            <option>Select Preferred Resolution</option>
-          </select>
+          {{ form.preferred_resolution }}
         </div>
 
         <div class="input-group">
           <label>Description</label>
-          <textarea placeholder="Describe the incident..."></textarea>
+          {{ form.description }}
         </div>
 
         <div class="input-group upload-box">
-          <p>Upload Evidence</p>
-          <div class="upload-zone">
-            <p>📎 Drag and drop or browse</p>
-            <button>Browse Files</button>
-          </div>
+          <label>Upload Evidence</label>
+          {{ form.evidence }}
         </div>
 
         <div class="confirmation">
-          <input type="checkbox" id="confirm" />
-          <label for="confirm">I confirm this report is accurate. False claims may affect account status.</label>
+          {{ form.confirm }}
+          <label for="{{ form.confirm.id_for_label }}">
+            I confirm this report is accurate. False claims may affect account status.
+          </label>
         </div>
 
-        <button class="submit-btn">Submit</button>
-      </div>
+        <button type="submit" class="submit-btn">Submit</button>
+
+      </form>
+      {% if show_popup %}
+<div class="popup-overlay" id="popup">
+  <div class="popup-content">
+    <img src="{% static 'images/check.png' %}" class="popup-img" />
+
+    <h2>Incident Report Submitted</h2>
+
+    <p><strong>Reference ID:</strong> INC-{{ incident.id }}</p>
+
+    <p>
+      <strong>Linked Order:</strong>
+      {{ incident.order }}
+    </p>
+
+    <p>
+      <strong>Status:</strong>
+      {{ incident.get_status_display }}
+    </p>
+
+    <div class="popup-buttons">
+      <a href="{% url 'accounts:my_bookimg' %}" class="btn-outline">
+        Back to Orders
+      </a>
+
+      <a href="{% url 'accounts:incident' %}" class="btn-filled">
+        Track My Incident
+      </a>
+    </div>
+  </div>
+</div>
+{% endif %}
+
     </div>
   </main>
 </div>
@@ -228,6 +390,16 @@
     <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
   </div>
 </footer>
+{% if show_popup %}
+<script>
+  const popup = document.getElementById("popup");
+  popup.addEventListener("click", (e) => {
+    if (e.target === popup) {
+      popup.style.display = "none";
+    }
+  });
+</script>
+{% endif %}
 
 <script>
 const toggleBtn = docume6nt.getElementById("menu-toggle");

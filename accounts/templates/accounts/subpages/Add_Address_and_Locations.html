@@ -72,69 +72,90 @@
       </nav>
     </aside>
     <!-- Main Content -->
-    <main class="content">
-      <h1 class="page-title">Add Address & Locations</h1>
+<main class="content">
+<h1 class="page-title">
+  {% if is_edit %}
+    Edit Address & Location
+  {% else %}
+    Add Address & Location
+  {% endif %}
+</h1>
+  <form method="post" class="address-form">
+    {% csrf_token %}
 
-      <form class="address-form">
-        <div class="form-row">
-          <div class="form-field">
-            <label>Address Type</label>
-            <select></select>
-          </div>
-          <div class="form-field stretch">
-            <label>Street address</label>
-            <input type="text" />
-          </div>
-        </div>
+    <!-- Row 1 -->
+    <div class="form-row">
+      <div class="form-field">
+        <label>Address Type</label>
+        {{ form.address_type }}
+      </div>
 
-        <div class="form-row three">
-          <div class="form-field">
-            <label>City</label>
-            <input type="text" />
-          </div>
-          <div class="form-field">
-            <label>Region</label>
-            <input type="text" />
-          </div>
-          <div class="form-field">
-            <label>Postal code</label>
-            <input type="text" />
-          </div>
-        </div>
+      <div class="form-field stretch">
+        <label>Street address</label>
+        {{ form.street_address }}
+      </div>
+    </div>
 
-        <div class="form-row three">
-          <div class="form-field">
-            <label>Country</label>
-            <select></select>
-          </div>
-          <div class="form-field">
-            <label>Contact at location</label>
-            <input type="text" />
-          </div>
-          <div class="form-field">
-            <label>Phone at location</label>
-            <input type="text" />
-          </div>
-        </div>
+    <!-- Row 2 -->
+    <div class="form-row three">
+      <div class="form-field">
+        <label>City</label>
+        {{ form.city }}
+      </div>
 
-        <div class="form-row">
-          <div class="form-field map-field">
-            <label>Map</label>
-            <div class="map-box"></div>
-          </div>
-          <div class="form-field small">
-            <label>Entry code</label>
-            <input type="text" />
-          </div>
-          <div class="form-field small">
-            <label>Parking notes</label>
-            <input type="text" />
-          </div>
-        </div>
+      <div class="form-field">
+        <label>Region</label>
+        {{ form.region }}
+      </div>
 
-        <button type="submit" class="btn btn-primary save-btn">Save</button>
-      </form>
-    </main>
+      <div class="form-field">
+        <label>Postal code</label>
+        {{ form.postal_code }}
+      </div>
+    </div>
+
+    <!-- Row 3 -->
+    <div class="form-row three">
+      <div class="form-field">
+        <label>Country</label>
+        {{ form.country }}
+      </div>
+
+      <div class="form-field">
+        <label>Contact at location</label>
+        {{ form.contact_name }}
+      </div>
+
+      <div class="form-field">
+        <label>Phone at location</label>
+        {{ form.contact_phone }}
+      </div>
+    </div>
+
+    <!-- Row 4 -->
+    <div class="form-row">
+      <div class="form-field map-field">
+        <label>Map</label>
+        <div class="map-box"></div>
+      </div>
+
+      <div class="form-field small">
+        <label>Entry code</label>
+        {{ form.entry_code }}
+      </div>
+
+      <div class="form-field small">
+        <label>Parking notes</label>
+        {{ form.parking_notes }}
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary save-btn">
+      Save
+    </button>
+  </form>
+</main>
+
   </div>
 <footer class="footer">
   <div class="footer-container">
