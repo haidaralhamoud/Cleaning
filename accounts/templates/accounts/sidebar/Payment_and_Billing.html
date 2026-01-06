@@ -8,9 +8,12 @@
   <title>Payment & Billing — Customer Profile</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-
   <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+</head>
+<style>
+   
+</style>
 <body>
 <!-- HEADER -->
 <header class="main-header">
@@ -33,17 +36,17 @@
   </div>
 </header>
 
-  <div class="layout">
-    <!-- Mobile header -->
-    <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-      <h2 class="mobile-title">Customer Profile</h2>
-    </div>
+<div class="layout">
+  <!-- Mobile header -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span>
+    </button>
+    <h2 class="mobile-title">Customer Profile</h2>
+  </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
+  <!-- ===== Sidebar ===== -->
+        <aside class="sidebar">
       <div class="profile-head">
         <div class="avatar"></div>
         <div>
@@ -72,237 +75,170 @@
       </nav>
     </aside>
 
-    <!-- Main -->
-    <main class="main">
-      <h1>Payment & Billing</h1>
+  <!-- MAIN -->
+  <main class="main">
+    <h1>Payment & Billing</h1>
 
-      <!-- Main 2-column layout -->
-      <div class="page-grid">
-        <!-- Payment methods -->
-        <section class="card payment-methods-card">
-          <div class="card-header">
-            <h2>Payment Methods</h2>
-            <a href="{% url 'accounts:Add_Payment_Method' %}"><button id="addPayment" class="btn-icon"> ＋</button></a>
-          </div>
-          <div id="paymentsList" class="payments-list"></div>
-        </section>
+    <div class="page-grid">
 
-        <!-- Subscription -->
-        <aside class="card subscription-card">
-          <h3>Subscription</h3>
-          <div id="subscriptionContent"></div>
-        </aside>
-      </div>
+      <!-- ✅ Payment methods (Django) -->
+      <section class="card payment-methods-card">
+        <div class="card-header">
+          <h2>Payment Methods</h2>
+          <a href="{% url 'accounts:Add_Payment_Method' %}">
+            <button class="btn-icon">＋</button>
+          </a>
+        </div>
 
-      <!-- Invoice History -->
-      <section class="card invoice-history">
-        <h2>Invoice History</h2>
-        <table id="invoiceTable">
-          <thead>
-            <tr>
-              <th>Invoice #</th>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Payment Method</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- dynamic rows -->
-          </tbody>
-        </table>
+        <div class="payments-list">
+          {% if payment_methods %}
+            {% for pm in payment_methods %}
+              <div class="payment-row">
+                <div class="payment-left">
+
+                  {% if pm.card_type == "visa" %}
+                    <img src="{% static 'images/visa.png' %}" class="pm-icon">
+                  {% elif pm.card_type == "mastercard" %}
+                    <img src="{% static 'images/mastercard.png' %}" class="pm-icon">
+                  {% elif pm.card_type == "amex" %}
+                    <img src="{% static 'images/amex.png' %}" class="pm-icon">
+                  {% elif pm.card_type == "discover" %}
+                    <img src="{% static 'images/discover.png' %}" class="pm-icon">
+                  {% endif %}
+
+                  <div class="pm-text">
+                    <div class="pm-title">
+                      <strong>{{ pm.get_card_type_display }} •••• {{ pm.card_last4 }}</strong>
+                    </div>
+                    <div class="pm-sub">Expires {{ pm.expiry_date }}</div>
+                  </div>
+                </div>
+
+                <div class="payment-right">
+                  {% if pm.is_default %}
+                    <span class="btn-default state">Default</span>
+                  {% else %}
+                    <a href="{% url 'accounts:set_payment_default' pm.id %}" class="btn-default">
+                      Set as default
+                    </a>
+                  {% endif %}
+
+                  <a href="{% url 'accounts:delete_payment_method' pm.id %}"
+                     class="icon-edit"
+                     onclick="return confirm('Delete this payment method?')">
+                    ✕
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p class="muted">No payment methods added yet.</p>
+          {% endif %}
+        </div>
       </section>
-    </main>
-  </div>
+
+      <!-- ❌ Subscription (تركناه كما هو) -->
+      <aside class="card subscription-card">
+        <h3>Subscription</h3>
+        <div id="subscriptionContent"></div>
+      </aside>
+
+    </div>
+
+    <!-- ❌ Invoice History (تركناه كما هو) -->
+    <section class="card invoice-history">
+      <h2>Invoice History</h2>
+      <table id="invoiceTable">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+  </main>
+</div>
+
 <footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
-
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
-
-
-      </div>
-    </div>
-
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
   <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
     <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
   </div>
 </footer>
 
+<!-- JS (تركناه متل ما هو) -->
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
+const toggleBtn = document.getElementById("menu-toggle");
 const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+
+if (toggleBtn) {
+  toggleBtn.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
+  });
+}
+
+const toggle = document.getElementById("menuToggle");
+const sidebar = document.querySelector(".sidebar");
+const arrow = document.querySelector(".menu-toggle .arrow");
+
+if (toggle) {
+  toggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+    arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+  });
+}
 </script>
-  <script>
-    /* ====== Payment data ====== */
-    const paymentMethods = [
-      { id: 1, provider: "Visa", last4: "4567", expiry: "08/2025", img: "{% static 'images/visa.png'%}", isDefault: true },
-      { id: 2, provider: "Mastercard", last4: "1234", expiry: "08/2025", img: "{% static 'images/mastercard.png'%}", isDefault: false },
-      { id: 3, provider: "Klarna", last4: "", expiry: "", img: "{% static 'images/klarna.png'%}", isDefault: false },
-      { id: 4, provider: "Paypal", last4: "", expiry: "", img: "{% static 'images/paypal.png'%}", isDefault: false },
-      { id: 5, provider: "Swish", last4: "", expiry: "", img: "{% static 'images/swish.png'%}", isDefault: false }
-    ];
+<script>
+/* ====== Subscription (mock data) ====== */
+const subscription = {
+  title: "Weekly Cleaning - 2 hrs $150/session",
+  nextCharge: "July 20, 2025 ($150)",
+  nextService: "July 22, 2025"
+};
 
-    const subscription = {
-      title: "Weekly Cleaning - 2 hrs $150/session",
-      nextCharge: "July 20, 2025 ($150)",
-      nextService: "July 22, 2025"
-    };
+const subscriptionEl = document.getElementById("subscriptionContent");
+if (subscriptionEl) {
+  subscriptionEl.innerHTML = `
+    <p><strong>${subscription.title}</strong></p>
+    <p>Next charge: ${subscription.nextCharge}</p>
+    <p>Next service: ${subscription.nextService}</p>
+    <div class="sub-actions">
+      <button class="btn-outline">Manage</button>
+      <button class="btn-outline">Cancel</button>
+    </div>
+  `;
+}
 
-    /* ====== Invoice history data ====== */
-    const invoices = [
-      { id: "#12345", date: "July 1, 2025", amount: "$150.00", method: "klarna.png", status: "Paid" },
-      { id: "#12346", date: "July 10, 2025", amount: "$150.00", method: "paypal.png", status: "Paid" },
-      { id: "#12347", date: "July 20, 2025", amount: "$150.00", method: "swish.png", status: "Paid" }
-    ];
+/* ====== Invoice History (mock data) ====== */
+const invoices = [
+  { id: "#12345", date: "July 1, 2025", amount: "$150.00", method: "{% static 'images/klarna.png' %}", status: "Paid" },
+  { id: "#12346", date: "July 10, 2025", amount: "$150.00", method: "{% static 'images/paypal.png' %}", status: "Paid" },
+  { id: "#12347", date: "July 20, 2025", amount: "$150.00", method: "{% static 'images/swish.png' %}", status: "Paid" }
+];
 
-    /* ===== Render payment methods ===== */
-    const paymentsListEl = document.getElementById("paymentsList");
-    const subscriptionEl = document.getElementById("subscriptionContent");
-    const invoiceTable = document.querySelector("#invoiceTable tbody");
+const invoiceTable = document.querySelector("#invoiceTable tbody");
+if (invoiceTable) {
+  invoiceTable.innerHTML = "";
+  invoices.forEach(inv => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${inv.id}</td>
+      <td>${inv.date}</td>
+      <td>${inv.amount}</td>
+      <td><img src="${inv.method}" class="method-icon"></td>
+      <td><span class="status paid">${inv.status}</span></td>
+      <td><a href="#">Download</a></td>
+    `;
+    invoiceTable.appendChild(tr);
+  });
+}
+</script>
 
-    function renderPayments() {
-      paymentsListEl.innerHTML = "";
-      paymentMethods.forEach(pm => {
-        const card = document.createElement("div");
-        card.className = "payment-row";
-        card.innerHTML = `
-          <div class="payment-left">
-            <img src="${pm.img}" alt="${pm.provider}" class="pm-icon">
-            <div class="pm-text">
-              <div class="pm-title"><strong>${pm.provider}${pm.last4 ? " ••••" + pm.last4 : ""}</strong></div>
-              <div class="pm-sub">${pm.expiry ? "Expires " + pm.expiry : ""}</div>
-            </div>
-          </div>
-          <div class="payment-right">
-            <button class="btn-default ${pm.isDefault ? "state" : ""}" onclick="setDefault(${pm.id})">
-              ${pm.isDefault ? "Default" : "Set as default"}
-            </button>
-            <button class="icon-edit">✎</button>
-          </div>
-        `;
-        paymentsListEl.appendChild(card);
-      });
-    }
-
-    function renderSubscription() {
-      subscriptionEl.innerHTML = `
-        <p><strong>${subscription.title}</strong></p>
-        <p>Next charge: ${subscription.nextCharge}</p>
-        <p>Next service: ${subscription.nextService}</p>
-        <div class="sub-actions">
-          <button class="btn-outline">Manage</button>
-          <button class="btn-outline">Cancel</button>
-        </div>
-      `;
-    }
-
-    function renderInvoices() {
-      invoiceTable.innerHTML = "";
-      invoices.forEach(inv => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${inv.id}</td>
-          <td>${inv.date}</td>
-          <td>${inv.amount}</td>
-          <td><img src="${inv.method}" alt="method" class="method-icon"></td>
-          <td><span class="status paid">${inv.status}</span></td>
-          <td><a href="#">Download</a></td>
-        `;
-        invoiceTable.appendChild(tr);
-      });
-    }
-
-    function setDefault(id) {
-      paymentMethods.forEach(pm => pm.isDefault = (pm.id === id));
-      renderPayments();
-    }
-
-    renderPayments();
-    renderSubscription();
-    renderInvoices();
-
-    /* ===== Sidebar toggle ===== */
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
-
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-    });
-  </script>
 </body>
 </html>

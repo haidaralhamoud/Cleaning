@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm
+from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
-from .models import Customer , CustomerLocation , Incident
+from .models import Customer , CustomerLocation , Incident , CustomerNote , PaymentMethod,CommunicationPreference
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 def sign_up(request):
 
     if request.method == "POST":
@@ -310,31 +312,155 @@ def Service_Preferences(request):
 
 
 def Communication(request):
+    pref, created = CommunicationPreference.objects.get_or_create(
+        user=request.user
+    )
 
-    return render(request , 'accounts/sidebar/Communication.html',) 
+    if request.method == "POST":
+        form = CommunicationPreferenceForm(request.POST, instance=pref)
+        if form.is_valid():
+            form.save()
+            return redirect("accounts:Communication")
+    else:
+        form = CommunicationPreferenceForm(instance=pref)
+
+    return render(request, "accounts/sidebar/Communication.html", {
+        "form": form,
+        "pref": pref,
+    })
 
 
 
 def Customer_Notes(request):
+    # آخر ملاحظة للزبون الحالي (إذا في)
+    notes = CustomerNote.objects.filter(
+        customer=request.user
+    ).order_by("-id").first()
 
-    return render(request , 'accounts/sidebar/Customer_Notes.html',) 
+    context = {
+        "notes": notes
+    }
+    return render(request, "accounts/sidebar/Customer_Notes.html", context)
+
 
 def add_Customer_Notes(request):
+    note, _ = CustomerNote.objects.get_or_create(customer=request.user)
 
-    return render(request , 'accounts/subpages/add_Customer_Notes.html',) 
+    if request.method == "POST":
+        form = CustomerNoteForm(request.POST, instance=note)
+        if form.is_valid():
+            form.save()
+            # بعد الحفظ رجّع لنفس الصفحة أو لأي صفحة بدك
+            return redirect("accounts:Customer_Notes")
+    else:
+        form = CustomerNoteForm(instance=note)
 
+    return render(request , 'accounts/subpages/add_Customer_Notes.html',{"form": form}) 
 
+@login_required
 def Payment_and_Billing(request):
+    customer = request.user.customer
 
-    return render(request , 'accounts/sidebar/Payment_and_Billing.html',) 
+    payment_methods = PaymentMethod.objects.filter(
+        customer=customer
+    ).order_by( "-created_at")
+
+    context = {
+        "payment_methods": payment_methods
+    }
+
+    return render(
+        request,
+        "accounts/sidebar/Payment_and_Billing.html",
+        context
+    )
+
+@login_required
+def set_payment_default(request, pk):
+    customer = request.user.customer
+
+    PaymentMethod.objects.filter(
+        customer=customer,
+        is_default=True
+    ).update(is_default=False)
+
+    payment = get_object_or_404(
+        PaymentMethod,
+        pk=pk,
+        customer=customer
+    )
+    payment.is_default = True
+    payment.save()
+
+    return redirect("accounts:Payment_and_Billing")
+
+@login_required
+def delete_payment_method(request, pk):
+    customer = request.user.customer
+
+    payment = get_object_or_404(
+        PaymentMethod,
+        pk=pk,
+        customer=customer
+    )
+    payment.delete()
+
+    return redirect("accounts:Payment_and_Billing")
 
 def Add_Payment_Method(request):
+    customer = request.user.customer
 
-    return render(request , 'accounts/subpages/Add_Payment_Method.html',) 
+    if request.method == "POST":
+        form = PaymentMethodForm(request.POST)
+
+        if form.is_valid():
+            payment = form.save(commit=False)
+            payment.customer = customer
+
+            # استخراج آخر 4 أرقام فقط
+            card_number = request.POST.get("card_number", "")
+            payment.card_last4 = card_number[-4:] if len(card_number) >= 4 else ""
+
+            # إذا اختارها افتراضية → نلغي الافتراضية عن الباقي
+            if payment.is_default:
+                PaymentMethod.objects.filter(
+                    customer=customer,
+                    is_default=True
+                ).update(is_default=False)
+
+            payment.save()
+            return redirect("accounts:Payment_and_Billing")
+    else:
+        form = PaymentMethodForm()
+
+    return render(
+        request,
+        "accounts/subpages/Add_Payment_Method.html",
+        {"form": form}
+    )
 
 def Change_Password(request):
+    if request.method == "POST":
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # مهم حتى ما يطلع Logout
+            return render(
+                request,
+                "accounts/sidebar/Change_Password.html",
+                {
+                    "form": PasswordChangeForm(request.user),
+                    "show_popup": True,  # ⭐ هون السر
+                }
+            )
+    else:
+        form = PasswordChangeForm(request.user)
 
-    return render(request , 'accounts/sidebar/Change_Password.html',)
+    return render(
+        request,
+        "accounts/sidebar/Change_Password.html",
+        {"form": form}
+    )
 
 def Service_History_and_Ratings(request):
 

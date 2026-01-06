@@ -249,3 +249,84 @@ class CustomerNote(models.Model):
 
     def __str__(self):
         return f"Notes for {self.customer}"
+
+
+# accounts/models.py
+
+class PaymentMethod(models.Model):
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="payment_methods"
+    )
+
+    cardholder_name = models.CharField(max_length=100)
+    card_last4 = models.CharField(max_length=4)
+    expiry_date = models.CharField(max_length=5)  # MM/YY
+
+    CARD_TYPES = [
+        ("visa", "Visa"),
+        ("mastercard", "MasterCard"),
+        ("amex", "American Express"),
+        ("discover", "Discover"),
+    ]
+    card_type = models.CharField(max_length=20, choices=CARD_TYPES)
+
+    is_default = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.card_type.upper()} •••• {self.card_last4}"
+
+
+
+
+class CommunicationPreference(models.Model):
+    FREQUENCY_CHOICES = [
+        ("weekly", "Weekly"),
+        ("monthly", "Monthly"),
+        ("never", "Never"),
+    ]
+
+    TIME_CHOICES = [
+        ("morning", "Morning"),
+        ("afternoon", "Afternoon"),
+        ("evening", "Evening"),
+        ("any", "Any Time"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="communication_preferences"
+    )
+
+    service_reminders = models.BooleanField(default=True)
+    promotions = models.BooleanField(default=True)
+
+    frequency = models.CharField(
+        max_length=10,
+        choices=FREQUENCY_CHOICES,
+        default="weekly"
+    )
+
+    email = models.BooleanField(default=True)
+    sms = models.BooleanField(default=True)
+    phone = models.BooleanField(default=False)
+    push = models.BooleanField(default=True)
+    in_app = models.BooleanField(default=True)
+
+    language = models.CharField(max_length=20, default="English")
+    secondary_language = models.CharField(max_length=20, blank=True, null=True)
+
+    timing = models.CharField(
+        max_length=15,
+        choices=TIME_CHOICES,
+        default="any"
+    )
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Communication Preferences - {self.user}"

@@ -1,5 +1,4 @@
 {% load static %}
-{% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,13 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Communication</title>
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="{% static 'css/Communication.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/Communication.css' %}">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 </head>
+
 <body>
+
 <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
@@ -34,16 +33,7 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-  <!-- ===== Mobile Header ===== -->
-  <div class="mobile-header">
-    <button class="menu-toggle floating" id="menuToggle">
-      <span class="arrow">&#8250;</span>
-    </button>
-    <h2 class="mobile-title">Customer Profile</h2>
-  </div>
-
-  <!-- ===== Layout ===== -->
-  <div class="layout">
+<div class="layout">
 
     <!-- ===== Sidebar ===== -->
     <aside class="sidebar">
@@ -73,93 +63,110 @@
         <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
         <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
       </nav>
-    </aside>
+    </aside>  <!-- نفس السايدبار تبعك بدون تعديل -->
 
-    <!-- ===== Main Content ===== -->
-    <main class="content">
-      <h1 class="page-title">Communication</h1>
 
-      <div class="card">
-        <h2 class="section-title">Notifications</h2>
+  <!-- MAIN -->
+  <main class="content">
+    <h1 class="page-title">Communication</h1>
 
-        <div class="section">
-          <h3>Receive Service Reminders</h3>
-          <p>Includes appointment reminders and schedule updates.</p>
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
+    <form method="post" class="card">
+      {% csrf_token %}
 
-        <div class="section">
-          <h3>Receive Promotions & Offers</h3>
-          <p>Includes discounts and special offers.</p>
-          <label class="switch">
-            <input type="checkbox" checked>
-            <span class="slider"></span>
-          </label>
-        </div>
+      <h2 class="section-title">Notifications</h2>
 
-        <div class="frequency-section">
-          <button class="frequency-btn">Weekly</button>
-          <button class="frequency-btn">Monthly</button>
-          <button class="frequency-btn">Never</button>
-        </div>
-
-        <div class="section">
-          <h3>Preferred communication method</h3>
-          <div class="checkboxes">
-            <label><input type="checkbox"> Email</label>
-            <label><input type="checkbox" checked> SMS/Text Message</label>
-            <label><input type="checkbox" checked> Phone Call</label>
-            <label><input type="checkbox" checked> Push Notification</label>
-            <label><input type="checkbox" checked> In-App Messages</label>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Language Preference for Communication</h3>
-          <div class="language-fields column">
-            <div>
-              <label>Language</label>
-              <select>
-                <option>English</option>
-                <option>Arabic</option>
-                <option>Swedish</option>
-              </select>
-            </div>
-            <div>
-              <label>Alternative option</label>
-              <select>
-                <option>Swedish</option>
-                <option>English</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <h3>Notification Timing</h3>
-          <div class="time-options">
-            <button>Morning (8 AM - 12 PM)</button>
-            <button>Afternoon (12 PM - 4 PM)</button>
-            <button>Evening (4 PM - 8 PM)</button>
-            <button>Any Time</button>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn primary">Save Changes</button>
-          <button class="btn outline">Cancel</button>
-        </div>
-
-        <p class="update-text">
-          You can update your preferences anytime.
-          <span class="red">Last updated: [date]</span>
-        </p>
+      <!-- Service Reminders -->
+      <div class="section">
+        <h3>Receive Service Reminders</h3>
+        <p>Includes appointment reminders and schedule updates.</p>
+        <label class="switch">
+          <input type="checkbox" name="service_reminders" {% if pref.service_reminders %}checked{% endif %}>
+          <span class="slider"></span>
+        </label>
       </div>
-    </main>
-  </div>
+
+      <!-- Promotions -->
+      <div class="section">
+        <h3>Receive Promotions & Offers</h3>
+        <p>Includes discounts and special offers.</p>
+        <label class="switch">
+          <input type="checkbox" name="promotions" {% if pref.promotions %}checked{% endif %}>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Frequency -->
+      <input type="hidden" name="frequency" id="frequencyInput" value="{{ pref.frequency }}">
+
+      <div class="frequency-section">
+        <button type="button" data-value="weekly" class="frequency-btn {% if pref.frequency == 'weekly' %}active{% endif %}">Weekly</button>
+        <button type="button" data-value="monthly" class="frequency-btn {% if pref.frequency == 'monthly' %}active{% endif %}">Monthly</button>
+        <button type="button" data-value="never" class="frequency-btn {% if pref.frequency == 'never' %}active{% endif %}">Never</button>
+      </div>
+
+      <!-- Methods -->
+      <div class="section">
+        <h3>Preferred communication method</h3>
+        <div class="checkboxes">
+          <label><input type="checkbox" name="email" {% if pref.email %}checked{% endif %}> Email</label>
+          <label><input type="checkbox" name="sms" {% if pref.sms %}checked{% endif %}> SMS</label>
+          <label><input type="checkbox" name="phone" {% if pref.phone %}checked{% endif %}> Phone</label>
+          <label><input type="checkbox" name="push" {% if pref.push %}checked{% endif %}> Push</label>
+          <label><input type="checkbox" name="in_app" {% if pref.in_app %}checked{% endif %}> In-App</label>
+        </div>
+      </div>
+
+      <!-- Language -->
+      <div class="section">
+        <h3>Language Preference</h3>
+        <div class="language-fields column">
+          <div>
+            <label>Language</label>
+            <select name="language">
+              <option {% if pref.language == "English" %}selected{% endif %}>English</option>
+              <option {% if pref.language == "Arabic" %}selected{% endif %}>Arabic</option>
+              <option {% if pref.language == "Swedish" %}selected{% endif %}>Swedish</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Alternative option</label>
+            <select name="secondary_language">
+              <option value="">---</option>
+              <option {% if pref.secondary_language == "English" %}selected{% endif %}>English</option>
+              <option {% if pref.secondary_language == "Swedish" %}selected{% endif %}>Swedish</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timing -->
+      <input type="hidden" name="timing" id="timingInput" value="{{ pref.timing }}">
+
+      <div class="section">
+        <h3>Notification Timing</h3>
+        <div class="time-options">
+          <button type="button" data-value="morning" class="{% if pref.timing == 'morning' %}active{% endif %}">Morning</button>
+          <button type="button" data-value="afternoon" class="{% if pref.timing == 'afternoon' %}active{% endif %}">Afternoon</button>
+          <button type="button" data-value="evening" class="{% if pref.timing == 'evening' %}active{% endif %}">Evening</button>
+          <button type="button" data-value="any" class="{% if pref.timing == 'any' %}active{% endif %}">Any Time</button>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="actions">
+        <button type="submit" class="btn primary">Save Changes</button>
+        <a href="{% url 'accounts:customer_profile_view' %}" class="btn outline">Cancel</a>
+      </div>
+
+      <p class="update-text">
+        You can update your preferences anytime.
+        <span class="red">Last updated: {{ pref.updated_at|date:"M d, Y" }}</span>
+      </p>
+
+    </form>
+  </main>
+</div>
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -241,54 +248,24 @@
     <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
   </div>
 </footer>
-
+<!-- JS -->
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+function bindButtons(selector, inputId){
+  const buttons = document.querySelectorAll(selector);
+  const input = document.getElementById(inputId);
+
+  buttons.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      buttons.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      input.value = btn.dataset.value;
+    });
+  });
+}
+
+bindButtons(".frequency-btn", "frequencyInput");
+bindButtons(".time-options button", "timingInput");
 </script>
-  <!-- ===== Scripts ===== -->
-  <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
 
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      if (sidebar.classList.contains("open")) {
-        arrow.innerHTML = "&#8249;";
-      } else {
-        arrow.innerHTML = "&#8250;";
-      }
-    });
-  </script>
-
-  <script>
-    const timeButtons = document.querySelectorAll(".time-options button");
-    timeButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        timeButtons.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-      });
-    });
-  </script>
-
-  <script>
-    function activateButtons(selector) {
-      const buttons = document.querySelectorAll(selector);
-      buttons.forEach(btn => {
-        btn.classList.add("selectable-btn");
-        btn.addEventListener("click", () => {
-          buttons.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-        });
-      });
-    }
-    activateButtons(".time-options button");
-    activateButtons(".frequency-section button");
-  </script>
 </body>
 </html>

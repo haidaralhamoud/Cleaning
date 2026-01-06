@@ -6,22 +6,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Customer Notes</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
 
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <link rel="stylesheet" href="{% static 'css/Customer_Notes.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
   <style>
-    .details-link {
-  background: var(--sky-strong); color: #fff;
-  border: none; border-radius: 10px;
-  padding: 8px 16px; cursor: pointer;
-  font-weight: 600; transition: 0.25s;
+    .details-link{
+      background: var(--sky-strong);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+      padding:10px 18px;
+      cursor:pointer;
+      font-weight:600;
+      transition:.25s;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      text-decoration:none;
+    }
+    .details-link:hover{ background:#028eb3; }
+    .details-link:visited{ color:#fff; }
+    .details-link i{ font-size:14px; }
+
+    /* alarm masking */
+    .alarm-wrap{display:flex;align-items:center;gap:10px}
+    .alarm-text{font-weight:600}
+    .alarm-text.muted{color:#888;font-weight:600}
+    .icon-btn{background:transparent;border:none;cursor:pointer;padding:0}
+    .icon-btn .icon{color:#444}
+    .icon-btn:hover .icon{color:#039fc8}
+
+    /* nice empty state */
+    .empty-state{
+      background:#fff;
+      border-radius:14px;
+      padding:20px;
+      box-shadow:0 4px 12px rgba(0,0,0,.08);
+      margin-top:16px;
+    }
+    .empty-state p{color:#444;margin-top:8px}
+    .actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+    .hidden {
+  display: none;
 }
-.details-link:hover { background: #028eb3; }
+
   </style>
 </head>
+
 <body>
+
 <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
@@ -42,72 +79,103 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-  <div class="layout">
-    <!-- ===== Mobile Header ===== -->
-    <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-      <h2 class="mobile-title">Customer Profile</h2>
+
+<div class="layout">
+  <!-- ===== Mobile Header ===== -->
+  <div class="mobile-header">
+    <button class="menu-toggle floating" id="menuToggle">
+      <span class="arrow">&#8250;</span>
+    </button>
+    <h2 class="mobile-title">Customer Profile</h2>
+  </div>
+
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="profile-head">
+      <div class="avatar"></div>
+      <div>
+        <div class="name">Sophia Bennett</div>
+        <div class="id">ID: 123456</div>
+      </div>
     </div>
 
-    <!-- ===== Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+    <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:none;">
+      {% csrf_token %}
+    </form>
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
+    <nav class="side-nav">
+      <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+      <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+      <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+      <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+      <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+      <a href="{% url 'accounts:Communication' %}" class="nav-item"><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+      <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item"><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+      <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+      <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+      <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+      <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+      <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
+    </nav>
+  </aside>
 
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main">
+    <h1>Customer Notes</h1>
+    <h2>Add or edit notes for this customer</h2>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="main">
-      <h1>Customer Notes</h1>
-      <h2>Add or edit notes for this customer</h2>
-
+    {% if notes %}
       <div class="card">
+
         <div class="row">
           <div class="column">
             <h3>
               Key Handling Instructions
               <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
+                <!-- edit -->
+                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+                  <i class="fa-solid fa-pen icon"></i>
+                </a>
               </div>
             </h3>
-            <p>Leave under mat</p>
+
+            <p>
+              {% if notes.key_handling == "mat" %}
+                Leave under mat
+              {% elif notes.key_handling == "garden" %}
+                Hide in the garden
+              {% elif notes.key_handling == "hand" %}
+                Hand directly
+              {% elif notes.key_handling == "custom" %}
+                {{ notes.key_custom_instructions|default:"Custom" }}
+              {% else %}
+                —
+              {% endif %}
+            </p>
           </div>
 
           <div class="column">
             <h3>
               Alarm Code
               <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
+                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+                  <i class="fa-solid fa-pen icon"></i>
+                </a>
               </div>
             </h3>
-            <p>1********9 <i class="fa-solid fa-eye icon view"></i></p>
+
+            <div class="alarm-wrap">
+              {% if notes.alarm_code %}
+                <span id="alarmMasked" class="alarm-text muted">••••••••</span>
+                <span id="alarmReal" class="alarm-text hidden">{{ notes.alarm_code }}</span>
+                <button type="button" class="icon-btn" id="toggleAlarm" aria-label="Show alarm code">
+                  <i class="fa-solid fa-eye icon view"></i>
+                </button>
+              {% else %}
+                <span class="alarm-text muted">—</span>
+              {% endif %}
+            </div>
+
           </div>
         </div>
 
@@ -116,22 +184,33 @@
             <h3>
               Products & Supplies
               <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
+                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+                  <i class="fa-solid fa-pen icon"></i>
+                </a>
               </div>
             </h3>
-            <p>Customer products</p>
+
+            <p>
+              {% if notes.products_supplies == "company" %}
+                Company products
+              {% elif notes.products_supplies == "customer" %}
+                Customer products
+              {% else %}
+                —
+              {% endif %}
+            </p>
           </div>
 
           <div class="column">
             <h3>
               Location of cleaning material or tools
               <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
+                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+                  <i class="fa-solid fa-pen icon"></i>
+                </a>
               </div>
             </h3>
-            <p>Under the kitchen sink</p>
+            <p>{{ notes.cleaning_material_location|default:"—" }}</p>
           </div>
         </div>
 
@@ -140,11 +219,12 @@
             <h3>
               Special Requests
               <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
+                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+                  <i class="fa-solid fa-pen icon"></i>
+                </a>
               </div>
             </h3>
-            <p>Lorem ipsum dolor sit amet, consectetur ,Lorem ipsum dolor sit amet, consectetur</p>
+            <p>{{ notes.special_requests|default:"—" }}</p>
           </div>
         </div>
 
@@ -153,32 +233,49 @@
             <h3>
               General Notes
               <div class="icons">
-                <i class="fa-solid fa-pen icon"></i>
-                <i class="fa-solid fa-trash icon"></i>
+                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+                  <i class="fa-solid fa-pen icon"></i>
+                </a>
               </div>
             </h3>
-            <p>Lorem ipsum dolor sit amet, consectetur ,Lorem ipsum dolor sit amet, consectetur</p>
+            <p>{{ notes.general_notes|default:"—" }}</p>
           </div>
-          
+        </div>
+
+      </div>
+
+      <div class="actions">
+        <a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
+          <i class="fa-solid fa-pen"></i> Edit Notes
+        </a>
+      </div>
+
+    {% else %}
+      <!-- EMPTY STATE -->
+      <div class="empty-state">
+        <h3>No notes yet</h3>
+        <p>This customer doesn’t have notes. Add notes to help cleaners with access and preferences.</p>
+
+        <div class="actions">
+          <a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
+            <i class="fa-solid fa-plus"></i> Add Notes
+          </a>
         </div>
       </div>
-      <button class="details-link"><a href="{% url 'accounts:add_Customer_Notes' %}"> Add</button></a>
+    {% endif %}
 
-    </main>
-  </div>
+  </main>
+</div>
+
 <footer class="footer">
   <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
     <div class="footer-col about">
       <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
       <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
+        At Hembla, we believe home should be your haven, not your to-do list.
         From cleaning to care, we’re here to make life easier, one home at a time.
       </p>
-
-      <!-- الصف الإضافي تحت النص -->
       <div class="bottom-left">
-        <!-- Connect -->
         <div class="connect">
           <h4>Connect</h4>
           <div class="socials">
@@ -188,12 +285,9 @@
             <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
           </div>
         </div>
-
-
       </div>
     </div>
 
-    <!-- العمود 2: Support -->
     <div class="footer-col support">
       <h4>Support</h4>
       <ul>
@@ -202,17 +296,15 @@
         <li><a href="#">Working Hours</a></li>
         <li><a href="#">FAQ</a></li>
       </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
+      <div class="app-download">
+        <h4>App Download</h4>
+        <div class="apps">
+          <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+          <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
         </div>
+      </div>
     </div>
 
-    <!-- العمود 3: Company -->
     <div class="footer-col company">
       <h4>Company</h4>
       <ul>
@@ -223,7 +315,6 @@
       </ul>
     </div>
 
-    <!-- العمود 4: Legal / Privacy -->
     <div class="footer-col legal">
       <h4>Legal/Privacy</h4>
       <ul>
@@ -235,10 +326,8 @@
     </div>
   </div>
 
-  <!-- الخط الفاصل -->
   <hr class="footer-line">
 
-  <!-- الصف السفلي -->
   <div class="footer-bottom">
     <div class="language-box">
       <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
@@ -249,27 +338,56 @@
 </footer>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+  // fix typo
+  const toggleBtn = document.getElementById("menu-toggle");
+  const navLinks = document.getElementById("nav-links");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => navLinks.classList.toggle("active"));
+  }
 </script>
-  <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
 
+<script>
+  // sidebar toggle
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector(".menu-toggle .arrow");
+
+  if (toggle && sidebar && arrow) {
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
-      if (sidebar.classList.contains("open")) {
-        arrow.innerHTML = "&#8249;";
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+    });
+  }
+</script>
+
+<script>
+  const alarmBtn = document.getElementById("toggleAlarm");
+
+  if (alarmBtn) {
+    alarmBtn.addEventListener("click", () => {
+      const masked = document.getElementById("alarmMasked");
+      const real = document.getElementById("alarmReal");
+      const icon = alarmBtn.querySelector("i");
+
+      const isShowing = !real.classList.contains("hidden");
+
+      if (isShowing) {
+        // اخفاء الرقم
+        real.classList.add("hidden");
+        masked.classList.remove("hidden");
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
       } else {
-        arrow.innerHTML = "&#8250;";
+        // اظهار الرقم
+        real.classList.remove("hidden");
+        masked.classList.add("hidden");
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
       }
     });
-  </script>
+  }
+</script>
+
 
 </body>
 </html>

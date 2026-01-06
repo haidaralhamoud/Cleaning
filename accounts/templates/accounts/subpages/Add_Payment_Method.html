@@ -11,6 +11,14 @@
   
 
   <title>Document</title>
+  <style>
+    .pill.active {
+  background-color: #00a6cf; /* نفس لون الزر */
+  color: #fff;
+  font-weight: 600;
+}
+
+  </style>
 </head>
 <body>
   <!-- HEADER -->
@@ -78,158 +86,148 @@
       </nav>
     </aside>
     <!-- Main -->
-    <main class="main">
-      <h1 class="title">Payment & Billing</h1>
+<main class="main">
+  <section class="card">
+    <h2>Add Payment Method</h2>
 
-      <section class="card">
-        <h2>Add Payment Method</h2>
+    <form method="post">
+      {% csrf_token %}
 
-        <div class="form-group">
-          <label>Cardholder Name</label>
-          <input type="text" placeholder="Enter cardholder name">
-        </div>
-
-        <div class="form-group">
-          <label>Card Number</label>
-          <input type="text" placeholder="Enter card number">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Expiration Date</label>
-            <input type="text" placeholder="MM/YY">
-          </div>
-          <div class="form-group">
-            <label>CVV</label>
-            <input type="text" placeholder="Enter CVV">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>Card Type</label>
-          <div class="pills">
-            <button type="button" class="pill">Visa</button>
-            <button type="button" class="pill">MasterCard</button>
-            <button type="button" class="pill">American Express</button>
-            <button type="button" class="pill">Discover</button>
-          </div>
-        </div>
-
-        <div class="inline-check">
-          <input id="set-default" type="checkbox" checked>
-          <label for="set-default">Set as default payment method</label>
-        </div>
-
-        <button class="btn" type="button">Save Payment Method</button>
-      </section>
-    </main>
-  </div>
-  <footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
-
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
-
-
+      <!-- Cardholder -->
+      <div class="form-group">
+        <label>Cardholder Name</label>
+        {{ form.cardholder_name }}
       </div>
-    </div>
 
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
+      <!-- Card Number -->
+      <div class="form-group">
+        <label>Card Number</label>
+        <input
+          type="text"
+          id="cardNumber"
+          name="card_number"
+          placeholder="1234 5678 9012 3456"
+          maxlength="19"
+          inputmode="numeric"
+          required
+        >
+      </div>
+
+      <!-- Expiry + CVV -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Expiration Date</label>
+          <input
+            type="text"
+            id="expiryDate"
+            name="expiry_date"
+            placeholder="MM/YY"
+            maxlength="5"
+            inputmode="numeric"
+            required
+          >
         </div>
-    </div>
 
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
+        <div class="form-group">
+          <label>CVV</label>
+          <input
+            type="text"
+            id="cvv"
+            name="cvv"
+            placeholder="CVV"
+            maxlength="4"
+            inputmode="numeric"
+            required
+          >
+        </div>
+      </div>
 
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
-  </div>
+      <!-- Card Type -->
+      <input type="hidden" name="card_type" id="cardType" required>
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
+      <div class="form-group">
+        <label>Card Type</label>
+        <div class="pills">
+          <button type="button" class="pill" data-type="visa">Visa</button>
+          <button type="button" class="pill" data-type="mastercard">MasterCard</button>
+          <button type="button" class="pill" data-type="amex">American Express</button>
+          <button type="button" class="pill" data-type="discover">Discover</button>
+        </div>
+      </div>
 
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
+      <!-- Default -->
+      <div class="inline-check">
+        {{ form.is_default }}
+        <label for="{{ form.is_default.id_for_label }}">
+          Set as default payment method
+        </label>
+      </div>
+
+      <button type="submit" class="btn">Save Payment Method</button>
+
+    </form>
+  </section>
+</main>
+</div>
+
+<!-- ================= JS ================= -->
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
+// ===== Card Number formatting + detect type =====
+const cardInput = document.getElementById("cardNumber");
+const cardTypeInput = document.getElementById("cardType");
+const pills = document.querySelectorAll(".pill");
+
+function resetPills() {
+  pills.forEach(p => p.classList.remove("active"));
+}
+
+cardInput.addEventListener("input", function () {
+  let value = this.value.replace(/\D/g, "");
+  this.value = value.replace(/(.{4})/g, "$1 ").trim();
+
+  resetPills();
+
+  if (value.startsWith("4")) {
+    selectType("visa");
+  } else if (value.startsWith("5")) {
+    selectType("mastercard");
+  } else if (value.startsWith("34") || value.startsWith("37")) {
+    selectType("amex");
+  } else if (value.startsWith("6")) {
+    selectType("discover");
+  } else {
+    cardTypeInput.value = "";
+  }
+});
+
+function selectType(type) {
+  cardTypeInput.value = type;
+  document.querySelector(`.pill[data-type="${type}"]`)?.classList.add("active");
+}
+
+// ===== Expiry auto slash =====
+const expiryInput = document.getElementById("expiryDate");
+expiryInput.addEventListener("input", function () {
+  let v = this.value.replace(/\D/g, "");
+  if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2,4);
+  this.value = v;
+});
+
+// ===== CVV numeric only =====
+document.getElementById("cvv").addEventListener("input", function () {
+  this.value = this.value.replace(/\D/g, "");
+});
+
+// ===== Manual pill click =====
+pills.forEach(pill => {
+  pill.addEventListener("click", () => {
+    resetPills();
+    pill.classList.add("active");
+    cardTypeInput.value = pill.dataset.type;
+  });
 });
 </script>
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    // لما تفتح القائمة السهم ينعكس
-    if (sidebar.classList.contains("open")) {
-      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
-    } else {
-      arrow.innerHTML = "&#8250;"; // › سهم لليمين
-    }
-  });
-</script>
-
 
 </body>
 </html>

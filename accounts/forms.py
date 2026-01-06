@@ -1,5 +1,5 @@
 from django import forms
-from .models import Customer, Service, CustomerLocation , Incident
+from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference
 import json
 
 class CustomerForm(forms.ModelForm):
@@ -50,7 +50,6 @@ class CustomerForm(forms.ModelForm):
         return cleaned
 
 
-
 class CustomerBasicInfoForm(forms.ModelForm):
 
     class Meta:
@@ -82,7 +81,6 @@ class CustomerBasicInfoForm(forms.ModelForm):
             "preferred_contact_method": forms.Select(attrs={"class": "form-control"}),
             "preferred_language": forms.Select(attrs={"class": "form-control"}),
         }
-
 
 
 class CustomerLocationForm(forms.ModelForm):
@@ -165,10 +163,48 @@ class IncidentForm(forms.ModelForm):
         }
 
 
+class CustomerNoteForm(forms.ModelForm):
+    class Meta:
+        model = CustomerNote
+        fields = [
+            "key_handling",
+            "key_custom_instructions",
+            "alarm_code",
+            "products_supplies",
+            "cleaning_material_location",
+            "special_requests",
+            "general_notes",
+        ]
+        widgets = {
+            "key_custom_instructions": forms.TextInput(attrs={"placeholder": "Custom instructions"}),
+            "alarm_code": forms.TextInput(attrs={"placeholder": "Enter alarm code"}),
+            "cleaning_material_location": forms.TextInput(attrs={"placeholder": "e.g., Under the kitchen sink"}),
+            "special_requests": forms.Textarea(attrs={"placeholder": "Enter any special requests...", "rows": 4}),
+            "general_notes": forms.Textarea(attrs={"placeholder": "Enter general notes...", "rows": 4}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("key_handling") != "custom":
+            cleaned["key_custom_instructions"] = ""
+        return cleaned
 
 
+class CommunicationPreferenceForm(forms.ModelForm):
+    class Meta:
+        model = CommunicationPreference
+        fields = "__all__"
+        exclude = ["user", "updated_at"]
 
-
+class PaymentMethodForm(forms.ModelForm):
+    class Meta:
+        model = PaymentMethod
+        fields = [
+            "cardholder_name",
+            "expiry_date",
+            "card_type",
+            "is_default",
+        ]
 
 
 
