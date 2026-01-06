@@ -1,5 +1,6 @@
+from django.utils import timezone 
 from django.contrib import admin
-from .models import Contact , Job , Application , BusinessService,BusinessBooking ,BusinessBundle,BusinessAddon, PrivateMainCategory,PrivateService,PrivateBooking,AvailableZipCode,NotAvailableZipRequest,CallRequest,EmailRequest,PrivateAddon,    ServiceQuestionRule, AddonRule, ScheduleRule ,DateSurcharge
+from .models import Contact , Job , Application , BusinessService,BusinessBooking ,BusinessBundle,BusinessAddon, PrivateMainCategory,PrivateService,PrivateBooking,AvailableZipCode,NotAvailableZipRequest,CallRequest,EmailRequest,PrivateAddon,    ServiceQuestionRule, AddonRule, ScheduleRule ,DateSurcharge,BookingStatusHistory , NoShowReport
 from jsoneditor.forms import JSONEditor
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -48,6 +49,7 @@ class ContactAdmin(admin.ModelAdmin):
 # admin.site.register(Service)
 admin.site.register(Job)
 admin.site.register(BusinessService)
+admin.site.register(BookingStatusHistory)
 
 
 @admin.register(BusinessBooking)
@@ -139,6 +141,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
         ("Service", {
             "fields": ("selected_service", "selected_bundle", "path_type"),
         }),
+
         ("Company Info", {
             "fields": (
                 "company_name",
@@ -149,6 +152,22 @@ class BusinessBookingAdmin(admin.ModelAdmin):
                 "phone",
             ),
         }),
+
+        ("Assignment", {
+            "fields": ("provider",),
+        }),
+
+        # ✅ NEW – SCHEDULE
+        ("Schedule", {
+            "fields": (
+                "start_date",
+                "preferred_time",
+                "days_type",
+                "custom_date",
+                "custom_time",
+            ),
+        }),
+
         ("Office Setup", {
             "fields": (
                 "office_size",
@@ -158,6 +177,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
                 "kitchen_cleaning",
             ),
         }),
+
         ("Services & Add-ons", {
             "fields": (
                 "services_needed_pretty",
@@ -165,10 +185,12 @@ class BusinessBookingAdmin(admin.ModelAdmin):
                 "frequency_pretty",
             ),
         }),
+
         ("System", {
             "fields": ("created_at",),
         }),
     )
+
 
     # =========================
     # READONLY LOGIC
@@ -188,6 +210,9 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "frequency",
         )
 
+        editable_fields = ("provider",)  # 👈 مهم
+
+
         if request.GET.get("edit") != "1":
             return tuple(
                 f for f in model_fields if f not in hidden_json_fields
@@ -206,7 +231,32 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
-  
+    
+    def save_model(self, request, obj, form, change):
+        provider_before = None
+        if change:
+            provider_before = BusinessBooking.objects.get(pk=obj.pk).provider
+
+        super().save_model(request, obj, form, change)
+
+        if obj.provider and provider_before != obj.provider:
+            obj.assign_provider(
+                provider=obj.provider,
+                user=request.user
+            )
+
+
+    actions = ["cancel_booking"]
+
+    def cancel_booking(self, request, queryset):
+        for booking in queryset:
+            booking.cancel_by_admin(
+                admin_user=request.user,
+                note="Cancelled from admin"
+            )
+
+    cancel_booking.short_description = "❌ Cancel selected bookings"
+
 admin.site.register(BusinessAddon)
 
 
@@ -593,3 +643,92 @@ class PrivateAddonAdmin(admin.ModelAdmin):
 class DateSurchargeAdmin(admin.ModelAdmin):
     list_display = ("rule_type", "weekday", "date", "amount", "surcharge_type")
     list_filter = ("rule_type", "weekday", "date")
+
+
+
+
+@admin.register(NoShowReport)
+class NoShowReportAdmin(admin.ModelAdmin):
+    list_display = ("booking_type", "booking_id", "provider", "decision", "created_at")
+    list_filter = ("decision", "booking_type")
+    readonly_fields = ("created_at",)
+
+    def save_model(self, request, obj, form, change):
+        previous_decision = None
+
+        if obj.pk:
+            previous_decision = NoShowReport.objects.get(pk=obj.pk).decision
+
+        # حفظ التعديل أولاً
+        super().save_model(request, obj, form, change)
+
+        # إذا تغيّر القرار
+        if previous_decision != obj.decision:
+            booking = self.get_booking(obj)
+
+            if not booking:
+                return
+
+            if obj.decision == "APPROVED":
+                booking.approve_no_show(
+                    admin_user=request.user,
+                    note=obj.reviewed_note or obj.provider_note or "No show approved"
+                )
+
+            elif obj.decision == "REJECTED":
+                booking.reject_no_show(
+                    admin_user=request.user,
+                    note=obj.reviewed_note or "No show rejected"
+                )
+
+            obj.reviewed_by = request.user
+            obj.reviewed_at = timezone.now()
+            obj.save(update_fields=["reviewed_by", "reviewed_at"])
+
+    def get_booking(self, obj):
+        if obj.booking_type == "private":
+            return PrivateBooking.objects.filter(id=obj.booking_id).first()
+        return BusinessBooking.objects.filter(id=obj.booking_id).first()
+
+    list_display = (
+        "booking_type",
+        "booking_id",
+        "provider",
+        "decision",
+        "created_at",
+    )
+    list_filter = ("decision",)
+    actions = ["approve_no_show", "reject_no_show"]
+
+    def approve_no_show(self, request, queryset):
+        for report in queryset:
+
+            if report.booking_type == "private":
+                booking = PrivateBooking.objects.filter(id=report.booking_id).first()
+            else:
+                booking = BusinessBooking.objects.filter(id=report.booking_id).first()
+
+            if not booking:
+                continue
+
+            # 🔴 هذا هو السطر اللي كان ناقصك
+            booking.approve_no_show(
+                admin_user=request.user,
+                note="Customer not available (No Show)"
+            )
+
+            report.decision = "APPROVED"
+            report.reviewed_by = request.user
+            report.reviewed_at = timezone.now()
+            report.save()
+
+    approve_no_show.short_description = "✅ Approve No Show"
+
+    def reject_no_show(self, request, queryset):
+        queryset.update(
+            decision="REJECTED",
+            reviewed_by=request.user,
+            reviewed_at=timezone.now()
+        )
+
+    reject_no_show.short_description = "❌ Reject No Show"

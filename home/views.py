@@ -17,6 +17,7 @@ from datetime import datetime  # فوق
 from .pricing_utils import calculate_booking_price
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
+
 # ================================
 # STATIC PAGES
 # ================================
@@ -119,7 +120,14 @@ def business_services(request):
 
 def business_start_booking(request):
     service = request.GET.get("service")
-    booking = BusinessBooking.objects.create(selected_service=service)
+    booking = BusinessBooking.objects.create(
+    selected_service=service,
+    user=request.user if request.user.is_authenticated else None
+)
+    booking.log_status(
+    user=request.user,
+    note="Order placed"
+)
     return redirect("home:business_company_info", booking_id=booking.id)
 
 
@@ -362,7 +370,9 @@ def business_thank_you(request, booking_id):
         step_number = 7
 
     range_steps = range(1, total_steps + 1)
-
+    if booking.user is None and request.user.is_authenticated:
+        booking.user = request.user
+        booking.save()
     return render(request, "home/business_thank_you.html", {
         "booking": booking,
         "step": step_number,
@@ -454,7 +464,11 @@ def private_booking_checkout(request, booking_id):
         booking.card_cvv = request.POST.get("card_cvv")
         booking.card_name = request.POST.get("card_name")
         booking.accepted_terms = True
+    if booking.user is None and request.user.is_authenticated:
+        booking.user = request.user
+
         booking.save()
+
 
         return redirect("home:thank_you_page")  # صفحة بعد الدفع
     print("ADDONS SELECTED:", booking.addons_selected)
@@ -520,11 +534,11 @@ def private_booking_start(request, service_slug):
     service = get_object_or_404(PrivateService, slug=service_slug)
 
     booking = PrivateBooking.objects.create(
-        booking_method="online",
-        main_category=service.category.slug,   # مثال: "cleaning"
-        selected_services=[service.slug],      # مثال: ["standard-office-cleaning"]
-    )
-
+    booking_method="online",
+    main_category=service.category.slug,
+    selected_services=[service.slug],
+    user=request.user if request.user.is_authenticated else None
+)
     return redirect("home:private_booking_services", booking_id=booking.id)
 
 def private_booking_services(request, booking_id):
