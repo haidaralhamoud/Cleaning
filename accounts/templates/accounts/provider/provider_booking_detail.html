@@ -1,0 +1,227 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Provider — Booking #{{ booking.id }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <style>
+    body {
+      background: #f4f8fb;
+      font-family: Inter, system-ui;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: 0 15px 40px rgba(0,0,0,.08);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .back {
+      text-decoration: none;
+      color: #0d6efd;
+      font-weight: 600;
+    }
+
+    h2 {
+      margin: 14px 0 6px;
+      font-size: 26px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .status-ASSIGNED   { background:#e3e1ff; color:#5a55d6; }
+    .status-ON_THE_WAY { background:#ffe0b2; color:#ef6c00; }
+    .status-STARTED    { background:#cce5ff; color:#0056b3; }
+    .status-PAUSED     { background:#fff3cd; color:#856404; }
+    .status-COMPLETED  { background:#d4edda; color:#155724; }
+    .status-CANCELLED  { background:#f8d7da; color:#721c24; }
+
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .actions button {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      background: #0d6efd;
+      color: #fff;
+      transition: .2s;
+    }
+
+    .actions button.resume {
+      background: #20c997;
+    }
+
+    .actions button.complete {
+      background: #198754;
+    }
+
+    .actions button:disabled {
+      background: #e0e0e0;
+      color: #999;
+      cursor: not-allowed;
+    }
+
+    .timeline {
+      margin-top: 30px;
+    }
+
+    .timeline-item {
+      padding: 14px;
+      border-left: 4px solid #0d6efd;
+      background: #f9fbff;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .timeline-item small {
+      display: block;
+      opacity: .7;
+      margin-top: 4px;
+    }
+
+    .message {
+      background: #eef6ff;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <div class="card">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <a href="{% url 'accounts:provider_bookings' %}" class="back">← Back to bookings</a>
+      <span class="badge status-{{ booking.status }}">
+        {{ booking.get_status_display }}
+      </span>
+    </div>
+
+    <h2>Booking #{{ booking.id }}</h2>
+    <p style="opacity:.7;">Type: {{ booking_type|title }}</p>
+
+    {% for m in messages %}
+      <div class="message">{{ m }}</div>
+    {% endfor %}
+
+    <!-- ACTION BUTTONS -->
+    <div class="actions">
+
+      <!-- ON THE WAY -->
+      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="on_the_way">
+        <button {% if booking.status != "ASSIGNED" %}disabled{% endif %}>On the way</button>
+      </form>
+
+      <!-- START -->
+      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="started">
+        <button {% if booking.status != "ON_THE_WAY" %}disabled{% endif %}>Start</button>
+      </form>
+
+      <!-- PAUSE -->
+      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="paused">
+        <button
+{% if booking.status not in "STARTED RESUMED" %}disabled{% endif %}>
+  Pause
+</button>
+
+      </form>
+
+      <!-- RESUME -->
+      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="resume">
+        <button class="resume"
+ {% if booking.status != "PAUSED" %}disabled{% endif %}
+>
+  Resume
+</button>
+
+      </form>
+
+      <!-- COMPLETE -->
+      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="completed">
+        <button class="complete"
+        {% if booking.status not in "STARTED PAUSED RESUMED" %}disabled{% endif %}>
+        Complete
+      </button>
+
+      </form>
+<!-- REPORT NO SHOW -->
+<form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+  {% csrf_token %}
+  <input type="hidden" name="action" value="report_no_show">
+  <button
+    style="background:#dc3545"
+    {% if booking.status not in "ON_THE_WAY STARTED PAUSED RESUMED" %}
+      disabled
+    {% endif %}
+  >
+    Customer Not Available
+  </button>
+</form>
+
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline">
+      <h3>Timeline</h3>
+      {% for item in timeline %}
+        <div class="timeline-item">
+          <b>{{ item.status }}</b>
+          <small>{{ item.created_at|date:"F d, Y · h:i A" }}</small>
+          {% if item.note %}<small>{{ item.note }}</small>{% endif %}
+        </div>
+      {% empty %}
+        <p style="opacity:.6;">No history yet.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

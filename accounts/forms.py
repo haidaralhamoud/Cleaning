@@ -1,7 +1,8 @@
 from django import forms
 from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference
 import json
-
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
 class CustomerForm(forms.ModelForm):
     
     # Checkbox list للـ Services
@@ -207,5 +208,24 @@ class PaymentMethodForm(forms.ModelForm):
         ]
 
 
+class ProviderProfileForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email"]
+
+        widgets = {
+            "first_name": forms.TextInput(attrs={
+                "class": "input",
+                "placeholder": "First name"
+            }),
+            "last_name": forms.TextInput(attrs={
+                "class": "input",
+                "placeholder": "Last name"
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "input",
+                "placeholder": "Email address"
+            }),
+        }
 
 

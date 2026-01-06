@@ -1,9 +1,10 @@
 from django.urls import include, path
 from . import views
+from django.contrib.auth import views as auth_views
+
 app_name='accounts'
 urlpatterns = [
     path("sign_up/", views.sign_up, name="sign_up"),
-
     # Sidebar
     path("customer_profile_view/", views.customer_profile_view, name="customer_profile_view"),
     path("Address_and_Locations_view/", views.Address_and_Locations_view, name="Address_and_Locations_view"),
@@ -27,11 +28,56 @@ urlpatterns = [
     path("Add_Payment_Method/", views.Add_Payment_Method, name="Add_Payment_Method"),
     path("Add_Address_and_Locations/", views.Add_Address_and_Locations, name="Add_Address_and_Locations"),
     path("Incident_Report_order/<int:incident_id>", views.Incident_Report_order, name="Incident_Report_order"),
-    path("view_service_details/", views.view_service_details, name="view_service_details"),
+    path(
+    "booking/<str:booking_type>/<int:booking_id>/",
+    views.view_service_details,
+    name="view_service_details"
+    ),
     path("chat/", views.chat, name="chat"),
     path("Add_on_Service_Request/", views.Add_on_Service_Request, name="Add_on_Service_Request"),
     path("Media/", views.Media, name="Media"),
     path("Report_Incident/", views.Report_Incident, name="Report_Incident"),
     
     path("logout/", views.logout_view, name="logout"),
+
+    path("provider/bookings/", views.provider_bookings, name="provider_bookings"),
+    path("provider/booking/<str:booking_type>/<int:booking_id>/", views.provider_booking_detail, name="provider_booking_detail"),
+    path("provider/booking/<str:booking_type>/<int:booking_id>/action/", views.provider_booking_action, name="provider_booking_action"),
+    path("provider/profile/", views.provider_profile, name="provider_profile"),
+    # path(
+    # "provider/change-password/",
+    # views.provider_change_password,
+    # name="provider_change_password"
+    # ),
+    path(
+        "provider/change-password/",
+        auth_views.PasswordChangeView.as_view(
+            template_name="accounts/provider/provider_change_password.html",
+            success_url="accounts/provider/profile/"
+        ),
+        name="provider_change_password"
+    ),
+
+    path(
+        "provider/password-changed/",
+        auth_views.PasswordChangeDoneView.as_view(
+            template_name="accounts/provider_password_done.html"
+        ),
+        name="provider_password_done"
+    ),
+
+    path(
+    "booking/<str:booking_type>/<int:booking_id>/cancel/",
+    views.cancel_booking,
+    name="cancel_booking"
+),
+
+path(
+    "booking/<str:booking_type>/<int:booking_id>/reschedule/",
+    views.reschedule_booking,
+    name="reschedule_booking"
+),
+
+
+
 ]

@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Jobs | Hembla</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      background: #f5fbfa;
+      font-family: Inter, system-ui, -apple-system;
+      color: #1f2937;
+    }
+
+    .wrap {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    /* ===== TOP BAR ===== */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 35px;
+    }
+
+    .top-bar h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #0e6f63;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* ===== NOTIFICATION BELL ===== */
+    .bell {
+      position: relative;
+      font-size: 22px;
+      color: #20bfa9;
+      cursor: pointer;
+      animation: pulse 2s infinite;
+    }
+
+    .bell span {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-weight: 700;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    /* ===== AVATAR ===== */
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #20bfa9, #0e6f63);
+      color: white;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+    }
+
+    /* ===== DROPDOWN ===== */
+    .dropdown {
+      position: absolute;
+      top: 52px;
+      right: 0;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+      width: 180px;
+      display: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .dropdown a {
+      display: block;
+      padding: 12px 16px;
+      color: #1f2937;
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .dropdown a:hover {
+      background: #e6f7f4;
+      color: #0e6f63;
+    }
+
+    /* ===== BOOKINGS ===== */
+    .jobs {
+      display: grid;
+      gap: 18px;
+    }
+
+    .job {
+      background: #fff;
+      border-radius: 18px;
+      padding: 18px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      transition: 0.25s;
+    }
+
+    .job:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+    }
+
+    .job-left h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0e6f63;
+    }
+
+    .job-left small {
+      color: #6b7280;
+    }
+
+    .status {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #e6f7f4;
+      color: #0e6f63;
+      font-weight: 800;
+      font-size: 13px;
+      text-transform: uppercase;
+    }
+
+    /* ===== EMPTY ===== */
+    .empty {
+      text-align: center;
+      padding: 80px 20px;
+      color: #6b7280;
+    }
+
+    .empty i {
+      font-size: 48px;
+      color: #20bfa9;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+
+<body>
+
+<audio id="notifSound">
+  <source src="{% static 'sounds/notification.mp3' %}" type="audio/mpeg">
+</audio>
+
+<div class="wrap">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <h2>My Jobs</h2>
+
+    <div class="top-actions">
+
+      <!-- Bell -->
+      <div class="bell" onclick="playSound()">
+        <i class="fa-solid fa-bell"></i>
+        {% if bookings %}
+          <span>{{ bookings|length }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Avatar -->
+      <div class="avatar" onclick="toggleMenu()">
+        {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
+
+        <div class="dropdown" id="menu">
+<a href="{% url 'accounts:provider_profile' %}">My Profile</a>
+          <a href="{% url 'accounts:logout' %}">Logout</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOOKINGS -->
+  {% if bookings %}
+    <div class="jobs">
+      {% for b in bookings %}
+        <a href="{% url 'accounts:provider_booking_detail' b.type b.id %}" class="job">
+          <div class="job-left">
+            <h3>{{ b.title }}</h3>
+            <small>#{{ b.id }} · {{ b.when }}</small>
+          </div>
+          <div class="status">{{ b.status }}</div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty">
+      <i class="fa-solid fa-broom"></i>
+      <p>No assigned jobs yet</p>
+    </div>
+  {% endif %}
+
+</div>
+
+<script>
+  function toggleMenu() {
+    const menu = document.getElementById("menu");
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
+  }
+
+  function playSound() {
+    const audio = document.getElementById("notifSound");
+    audio.play();
+  }
+
+  // Auto play sound once if jobs exist
+  {% if bookings %}
+    window.onload = () => {
+      setTimeout(() => {
+        document.getElementById("notifSound").play();
+      }, 800);
+    }
+  {% endif %}
+</script>
+
+</body>
+</html>

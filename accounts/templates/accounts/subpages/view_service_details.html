@@ -9,6 +9,248 @@
   <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <style>
+    .stage.exception .dot{
+  border-color:#dc3545;
+  background:#fff;
+}
+.stage.exception b{
+  color:#dc3545;
+}
+.timeline-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.btn-reschedule {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reschedule:hover {
+  background: #0b5ed7;
+}
+
+.btn-cancel {
+  background: #e0e0e0;
+  color: #111;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  background: #d6d6d6;
+}
+/* ===== CANCEL POPUP ===== */
+.cancel-popup {
+  max-width: 420px;
+  padding: 24px;
+  border-radius: 18px;
+}
+
+.cancel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cancel-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffe5e5;
+  color: #dc3545;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.cancel-body h4 {
+  margin: 10px 0 4px;
+}
+
+.cancel-body .time {
+  color: #666;
+  font-size: 14px;
+}
+
+.warning {
+  margin: 12px 0;
+  font-size: 14px;
+  color: #777;
+}
+
+.select-box select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  appearance: none;
+  background: #fff;
+}
+
+.cancel-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.confirm-cancel {
+  background: #0d6efd;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-back {
+  background: #e0e0e0;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+
+.input-icon {
+  position: relative;
+}
+
+.input-icon input {
+  width: 100%;
+  padding: 12px 44px 12px 14px;
+  border-radius: 12px;
+  border: 2px solid #1bb1dc;
+  font-size: 15px;
+}
+
+.input-icon .icon {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  color: #1bb1dc;
+  pointer-events: none;
+}
+
+.reschedule-popup {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px 22px 22px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.25);
+  position: relative;
+}
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.header-icon {
+  width: 42px;
+  height: 42px;
+  background: #eaf6fb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-icon img {
+  width: 22px;
+}
+
+.header-text h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.header-text p {
+  font-size: 14px;
+  color: #8b8b8b;
+  margin: 2px 0 0;
+}
+.popup-body label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.popup-body input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 2px solid #00a6d6;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+.popup-body .note {
+  font-size: 13px;
+  color: #8b8b8b;
+  margin: 6px 0 18px;
+  line-height: 1.4;
+}
+.popup-body .buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.primary {
+  flex: 1;
+  background: #00a6d6;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-weight: 700;
+}
+
+.secondary {
+  flex: 1;
+  background: #e0e0e0;
+  border: none;
+  padding: 12px;
+  border-radius: 14px;
+  font-weight: 700;
+}
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #00a6d6;
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+
+
+  </style>
 </head>
 
 <body class="customer-profile-view">
@@ -81,91 +323,179 @@
       <div class="grid two-cols">
         <!-- العمود اليساري -->
         <div class="left-col">
-          <div class="card timeline">
-            <div class="track">
-              <div class="stage done">
-                <span class="dot"></span>
-                <div class="info">
-                  <b>Order Placed <span class="chip">Latest</span></b>
-                  <small>Today 10:00 AM</small>
-                </div>
-              </div>
-              <div class="stage done">
-                <span class="dot"></span>
-                <div class="info"><b>Scheduled</b><small>Today 10:00 AM</small></div>
-              </div>
-              <div class="stage"><span class="dot"></span><div class="info"><b>Provider On the Way</b><small>Today, 11:00 AM</small></div></div>
-              <div class="stage"><span class="dot"></span><div class="info"><b>Check In / Service Started</b><small>Tomorrow 9:00 AM</small></div></div>
-              <div class="stage"><span class="dot"></span><div class="info"><b>Service Paused</b><small>Tomorrow 12:00 PM</small></div></div>
-              <div class="stage"><span class="dot"></span><div class="info"><b>Completed</b><small>Tomorrow 12:00 PM</small></div></div>
-            </div>
+    <div class="card timeline">
+      <div class="track">
 
-            <div class="actions">
-              <button class="btn btn-blue" onclick="openPopup()">Reschedule</button>
-              <button class="btn btn-light">Cancel</button>
-            </div>
+        {% for item in timeline %}
+        <div class="stage
+          {% if item.is_exception %}
+            exception
+          {% elif item.latest %}
+            latest
+          {% elif item.active %}
+            done
+          {% else %}
+            pending
+          {% endif %}
+        ">
+
+          <span class="dot"></span>
+
+          <div class="info">
+            <b>{{ item.label }}</b>
+
+            {% if item.date %}
+              <small>{{ item.date|date:"F d, Y · h:i A" }}</small>
+            {% else %}
+              <small>Pending</small>
+            {% endif %}
+
+            {% if item.note %}
+              <small>{{ item.note }}</small>
+            {% endif %}
           </div>
-<!-- Popup Overlay -->
-            <div class="popup-overlay" id="reschedulePopup">
-              <div class="popup">
-                <button type="button" class="close-btn" onclick="closePopup()">×</button>
 
-                <div class="header">
-                  <img src="{% static 'images/Remove Calendar Event.png'%}" alt="calendar" class="icon">
-                  <h2>Reschedule Service</h2>
-                </div>
+        </div>
+        {% endfor %}
 
-                <p class="subtitle">Tomorrow, 9:00 AM – 12:00 PM</p>
+      </div>
 
-                <label for="newDate" class="label">New Date</label>
-                <div class="input-box">
-                  <div class="custom-select">
-                    <select id="newDate">
-                      <option>Select a New Date</option>
-                      <option>March 5, 2025</option>
-                      <option>March 6, 2025</option>
-                    </select>
-                    <span class="arrow">▼</span>
-                  </div>
-                </div>
+      <!-- ACTION BUTTONS -->
+      <div class="timeline-actions">
 
-                <label for="newTime" class="label">Time</label>
-                <div class="input-box">
-                  <div class="custom-select">
-                    <select id="newTime">
-                      <option>Select a Time</option>
-                      <option>9:00 AM – 12:00 PM</option>
-                      <option>1:00 PM – 4:00 PM</option>
-                    </select>
-                    <span class="arrow">▼</span>
-                  </div>
-                </div>
+        {% if booking.status not in "REFUNDED,CANCELLED_BY_CUSTOMER,NO_SHOW" %}
+          <button class="btn-reschedule" type="button" onclick="openPopup()">
+            Reschedule
+          </button>
 
-                <p class="note">
-                  <b>Note:</b> You can reschedule up to 24h before service without extra charge.
-                </p>
+          <button class="btn-cancel" type="button" onclick="openCancelPopup()">
+            Cancel
+          </button>
+        {% endif %}
 
-                <div class="buttons">
-<button class="primary" type="button" onclick="showRescheduleSuccess()">Confirm Reschedule</button>
+      </div>
+    </div>
 
+<!-- ===== CANCEL BOOKING POPUP ===== -->
+<div class="popup-overlay" id="cancelPopup">
+  <form method="post"
+        action="{% url 'accounts:cancel_booking' booking_type booking.id %}"
+        class="popup cancel-popup">
 
-                  <button class="secondary" type="button" onclick="closePopup()">Cancel</button>
-                </div>
-              </div>
-            </div>
+    {% csrf_token %}
 
+    <div class="cancel-header">
+      <div class="cancel-icon">✕</div>
+      <h2>Cancel Booking</h2>
+    </div>
 
-<!-- ====== RESCHEDULE CONFIRMATION POPUP ====== -->
-<div class="overlay" id="rescheduleSuccessOverlay"></div>
+    <div class="cancel-body">
+      <h4>Deep Clean Service</h4>
+      <p class="time">Tomorrow, 9:00 AM – 12:00 PM</p>
 
-<div class="popup" id="rescheduleSuccessPopup">
-  <img src="{% static 'images/heck-mark0.png'%}" alt="Check mark" class="check-icon" />
-  <p class="popup-text">
-    Your service has been rescheduled to <br>
-    <strong>July 22, 2025 · 2:00 PM – 4:00 PM.</strong>
-  </p>
-  <button class="close-popup-btn" onclick="closeRescheduleSuccess()">×</button>
+      <p class="warning">
+        Cancellations within 12 hours of the service may incur a fee as per our policy.
+      </p>
+
+      <label class="label">Reason for cancellation</label>
+
+      <div class="select-box">
+        <select name="reason" id="cancelReason" required>
+          <option value="" disabled selected>Select a Reason</option>
+          <option value="change_of_plans">Change of plans</option>
+          <option value="mistake">Booked by mistake</option>
+          <option value="other_provider">Found another provider</option>
+          <option value="emergency">Emergency</option>
+        </select>
+      </div>
+
+      <div class="cancel-actions">
+        <!-- CONFIRM -->
+        <button type="submit" class="confirm-cancel">
+          Confirm Cancellation
+        </button>
+
+        <!-- CLOSE -->
+        <button type="button" class="cancel-back" onclick="closeCancelPopup()">
+          Cancel
+        </button>
+      </div>
+    </div>
+
+  </form>
 </div>
+
+
+<!-- ===== RESCHEDULE POPUP ===== -->
+<!-- ===== RESCHEDULE POPUP OVERLAY ===== -->
+<div class="popup-overlay" id="reschedulePopup">
+
+  <form method="post"
+      action="{% url 'accounts:reschedule_booking' booking_type booking.id %}"
+      class="popup reschedule-popup">
+    {% csrf_token %}
+
+    <!-- CLOSE BUTTON -->
+    <button type="button" class="close-btn" onclick="closePopup()">×</button>
+
+    <!-- ===== HEADER ===== -->
+    <div class="popup-header">
+      <div class="header-icon">
+        <img src="{% static 'images/calendar-blue.png' %}" alt="Calendar">
+      </div>
+
+      <div class="header-text">
+        <h2>Reschedule Service</h2>
+        <p>Tomorrow, 9:00 AM – 12:00 PM</p>
+      </div>
+    </div>
+
+    <!-- ===== BODY ===== -->
+    <div class="popup-body">
+
+      <!-- DATE -->
+      <label for="newDate">New Date</label>
+      <input
+        type="date"
+        id="newDate"
+        name="new_date"
+        required
+      >
+
+      <!-- TIME -->
+      <label for="newTime">Time</label>
+      <input
+        type="time"
+        id="newTime"
+        name="new_time"
+        required
+      >
+
+      <!-- NOTE -->
+      <p class="note">
+        Note: You can reschedule up to 24h before service without extra charge
+      </p>
+
+      <!-- ACTIONS -->
+      <div class="buttons">
+        <button type="submit" class="primary">
+          Confirm Reschedule
+        </button>
+
+        <button
+          type="button"
+          class="secondary"
+          onclick="closePopup()">
+          Cancel
+        </button>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+
+
 
 
 
@@ -288,10 +618,10 @@
             <span class="need-help"><img src="{% static 'images/vector27.svg'%}" alt="">Need help?</span>
             <p>Something not right with your service? Let us know.</p>
             <div class="actions">
-<a href="{% url 'accounts:Report_Incident' %}" class="report-btn">
-  <img src="{% static 'images/commercial0.png'%}" alt="Report">
-  Report an Incident
-</a>
+                <a href="{% url 'accounts:Report_Incident' %}" class="report-btn">
+                  <img src="{% static 'images/commercial0.png'%}" alt="Report">
+                  Report an Incident
+                </a>
             </div>
           </div>
         </div>
@@ -551,7 +881,36 @@ dots.forEach((dot, i) => {
   rescheduleSuccessOverlay.addEventListener('click', closeRescheduleSuccess);
 </script>
 
+<script>
+  const cancelPopup = document.getElementById('cancelPopup');
 
+  function openCancelPopup() {
+    cancelPopup.classList.add('active');
+  }
+
+  function closeCancelPopup() {
+    cancelPopup.classList.remove('active');
+  }
+
+  // سكّر إذا كبس برا
+  cancelPopup.addEventListener('click', (e) => {
+    if (e.target === cancelPopup) {
+      closeCancelPopup();
+    }
+  });
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("cancel") === "1") {
+    const popup = document.getElementById("cancelPopup");
+    if (popup) {
+      popup.classList.add("active");
+    }
+  }
+});
+</script>
 
 </body>
 </html>
