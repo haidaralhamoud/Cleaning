@@ -6,10 +6,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Customer Notes | Hembla</title>
+
   <link rel="stylesheet" href="{% static 'css/add_Customer_Notes.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+  <style>
+    /* ====== OPTION BOX RADIO STYLE (keeps your .option design) ====== */
+    .option label{display:flex;gap:12px;align-items:flex-start;cursor:pointer;width:100%}
+    .option input[type="radio"]{margin-top:4px;transform:scale(1.1)}
+    .option.active{border:2px solid #039fc8;background:rgba(3,159,200,.07)}
+    .field-error{color:#d32f2f;font-size:13px;margin-top:6px}
+    .hidden{display:none !important;}
+  </style>
+</head>
+
 <body>
-  <!-- HEADER -->
+<!-- HEADER -->
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -29,125 +41,195 @@
     <a href="#">My Profile</a>
   </div>
 </header>
+
 <div class="layout">
   <!-- ===== Mobile Header ===== -->
   <div class="mobile-header">
     <button class="menu-toggle floating" id="menuToggle">
       <span class="arrow">&#8250;</span>
     </button>
-  
   </div>
 
-
   <!-- ===== Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
+  <aside class="sidebar">
+    <div class="profile-head">
+      <div class="avatar"></div>
+      <div>
+        <div class="name">Sophia Bennett</div>
+        <div class="id">ID: 123456</div>
       </div>
+    </div>
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
+    <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+      {% csrf_token %}
+    </form>
 
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
+    <nav class="side-nav">
+      <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+      <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+      <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+      <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+      <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+      <a href="{% url 'accounts:Communication' %}" class="nav-item"><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+      <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item"><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+      <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+      <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+      <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+      <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+      <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
+    </nav>
+  </aside>
+
   <!-- ===== Main Content ===== -->
   <main class="content">
     <h1>Customer Notes</h1>
     <p class="subtitle">Add or edit notes for this customer</p>
 
     <section class="form-box">
-      <h2>Key Handling Instructions</h2>
+      <form method="post">
+        {% csrf_token %}
 
-      <div class="option active">
-        <input type="radio" name="key" checked>
-        <div>
-          <p class="title">Leave under mat</p>
-          <p class="desc">Leave the key under the doormat.</p>
+        <!-- =============== Key Handling =============== -->
+        <h2>Key Handling Instructions</h2>
+
+        <div class="option {% if form.instance.key_handling == 'mat' or not form.instance.key_handling %}active{% endif %}">
+          <label>
+            <input type="radio" name="key_handling" value="mat"
+              {% if form.instance.key_handling == 'mat' or not form.instance.key_handling %}checked{% endif %}>
+            <div>
+              <p class="title">Leave under mat</p>
+              <p class="desc">Leave the key under the doormat.</p>
+            </div>
+          </label>
         </div>
-      </div>
 
-      <div class="option">
-        <input type="radio" name="key">
-        <div>
-          <p class="title">Hide in the garden</p>
-          <p class="desc">Hide the key in a designated spot in the garden.</p>
+        <div class="option {% if form.instance.key_handling == 'garden' %}active{% endif %}">
+          <label>
+            <input type="radio" name="key_handling" value="garden"
+              {% if form.instance.key_handling == 'garden' %}checked{% endif %}>
+            <div>
+              <p class="title">Hide in the garden</p>
+              <p class="desc">Hide the key in a designated spot in the garden.</p>
+            </div>
+          </label>
         </div>
-      </div>
 
-      <div class="option">
-        <input type="radio" name="key">
-        <div>
-          <p class="title">Hand directly</p>
-          <p class="desc">Hand the key directly to the cleaner.</p>
+        <div class="option {% if form.instance.key_handling == 'hand' %}active{% endif %}">
+          <label>
+            <input type="radio" name="key_handling" value="hand"
+              {% if form.instance.key_handling == 'hand' %}checked{% endif %}>
+            <div>
+              <p class="title">Hand directly</p>
+              <p class="desc">Hand the key directly to the cleaner.</p>
+            </div>
+          </label>
         </div>
-      </div>
 
-      <input type="text" placeholder="Custom instructions">
-      
-      <h2>Alarm Code</h2>
-      <input type="text" placeholder="Enter alarm code">
-     <button class="save-btn">Save Notes</button>
-      <h2>Products & Supplies</h2>
-      <div class="option">
-        <input type="radio" name="products">
-        <div>
-          <p class="title">Company products</p>
-          <p class="desc">We will use our own cleaning supplies.</p>
+        <div class="option {% if form.instance.key_handling == 'custom' %}active{% endif %}">
+          <label>
+            <input type="radio" name="key_handling" value="custom"
+              {% if form.instance.key_handling == 'custom' %}checked{% endif %}>
+            <div>
+              <p class="title">Custom</p>
+              <p class="desc">Write your own instructions.</p>
+            </div>
+          </label>
         </div>
-      </div>
 
-      <div class="option">
-        <input type="radio" name="products" checked>
-        <div>
-          <p class="title">Customer products</p>
-          <p class="desc">The customer will provide the cleaning supplies.</p>
+        <!-- custom instructions -->
+        <input
+          type="text"
+          id="key_custom_instructions"
+          name="key_custom_instructions"
+          placeholder="Custom instructions"
+          value="{{ form.instance.key_custom_instructions|default:'' }}"
+        >
+        {% if form.key_custom_instructions.errors %}
+          <div class="field-error">{{ form.key_custom_instructions.errors|striptags }}</div>
+        {% endif %}
+
+        <!-- =============== Alarm Code =============== -->
+        <h2>Alarm Code</h2>
+        <input
+          type="text"
+          name="alarm_code"
+          placeholder="Enter alarm code"
+          value="{{ form.instance.alarm_code|default:'' }}"
+        >
+        {% if form.alarm_code.errors %}
+          <div class="field-error">{{ form.alarm_code.errors|striptags }}</div>
+        {% endif %}
+
+        <!-- =============== Products & Supplies =============== -->
+        <h2>Products & Supplies</h2>
+
+        <div class="option {% if form.instance.products_supplies == 'company' %}active{% endif %}">
+          <label>
+            <input type="radio" name="products_supplies" value="company"
+              {% if form.instance.products_supplies == 'company' %}checked{% endif %}>
+            <div>
+              <p class="title">Company products</p>
+              <p class="desc">We will use our own cleaning supplies.</p>
+            </div>
+          </label>
         </div>
-      </div>
 
-      <h2>Location of cleaning material or tools</h2>
-      <input type="text" placeholder="e.g., Under the kitchen sink">
+        <div class="option {% if form.instance.products_supplies == 'customer' or not form.instance.products_supplies %}active{% endif %}">
+          <label>
+            <input type="radio" name="products_supplies" value="customer"
+              {% if form.instance.products_supplies == 'customer' or not form.instance.products_supplies %}checked{% endif %}>
+            <div>
+              <p class="title">Customer products</p>
+              <p class="desc">The customer will provide the cleaning supplies.</p>
+            </div>
+          </label>
+        </div>
 
-      <h2>Special Requests</h2>
-      <textarea placeholder="Enter any special requests..."></textarea>
+        {% if form.products_supplies.errors %}
+          <div class="field-error">{{ form.products_supplies.errors|striptags }}</div>
+        {% endif %}
 
-      <h2>General Notes</h2>
-      <textarea placeholder="Enter general notes..."></textarea>
+        <!-- =============== Location of materials =============== -->
+        <h2>Location of cleaning material or tools</h2>
+        <input
+          type="text"
+          name="cleaning_material_location"
+          placeholder="e.g., Under the kitchen sink"
+          value="{{ form.instance.cleaning_material_location|default:'' }}"
+        >
+        {% if form.cleaning_material_location.errors %}
+          <div class="field-error">{{ form.cleaning_material_location.errors|striptags }}</div>
+        {% endif %}
 
-      <button class="save-btn">Save </button>
+        <!-- =============== Special Requests =============== -->
+        <h2>Special Requests</h2>
+        <textarea name="special_requests" placeholder="Enter any special requests...">{{ form.instance.special_requests|default:'' }}</textarea>
+        {% if form.special_requests.errors %}
+          <div class="field-error">{{ form.special_requests.errors|striptags }}</div>
+        {% endif %}
+
+        <!-- =============== General Notes =============== -->
+        <h2>General Notes</h2>
+        <textarea name="general_notes" placeholder="Enter general notes...">{{ form.instance.general_notes|default:'' }}</textarea>
+        {% if form.general_notes.errors %}
+          <div class="field-error">{{ form.general_notes.errors|striptags }}</div>
+        {% endif %}
+
+        <button class="save-btn" type="submit">Save</button>
+      </form>
     </section>
   </main>
 </div>
+
 <footer class="footer">
   <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
     <div class="footer-col about">
       <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
       <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
+        At Hembla, we believe home should be your haven, not your to-do list.
         From cleaning to care, we’re here to make life easier, one home at a time.
       </p>
-
-      <!-- الصف الإضافي تحت النص -->
       <div class="bottom-left">
-        <!-- Connect -->
         <div class="connect">
           <h4>Connect</h4>
           <div class="socials">
@@ -157,12 +239,9 @@
             <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
           </div>
         </div>
-
-
       </div>
     </div>
 
-    <!-- العمود 2: Support -->
     <div class="footer-col support">
       <h4>Support</h4>
       <ul>
@@ -171,17 +250,15 @@
         <li><a href="#">Working Hours</a></li>
         <li><a href="#">FAQ</a></li>
       </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
+      <div class="app-download">
+        <h4>App Download</h4>
+        <div class="apps">
+          <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+          <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
         </div>
+      </div>
     </div>
 
-    <!-- العمود 3: Company -->
     <div class="footer-col company">
       <h4>Company</h4>
       <ul>
@@ -192,7 +269,6 @@
       </ul>
     </div>
 
-    <!-- العمود 4: Legal / Privacy -->
     <div class="footer-col legal">
       <h4>Legal/Privacy</h4>
       <ul>
@@ -204,10 +280,8 @@
     </div>
   </div>
 
-  <!-- الخط الفاصل -->
   <hr class="footer-line">
 
-  <!-- الصف السفلي -->
   <div class="footer-bottom">
     <div class="language-box">
       <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
@@ -218,36 +292,65 @@
 </footer>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+  // Fix typo docume6nt -> document
+  const toggleBtn = document.getElementById("menu-toggle");
+  const navLinks = document.getElementById("nav-links");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => navLinks.classList.toggle("active"));
+  }
 </script>
-  <!-- ===== JS for Menu ===== -->
+
 <script>
+  // sidebar toggle
   const toggle = document.getElementById("menuToggle");
-  const sidebar = document.getElementById("sidebarMenu");
-  const menuOverlay = document.getElementById("menuOverlay");
+  const sidebar = document.querySelector(".sidebar");
   const arrow = document.querySelector(".menu-toggle .arrow");
-
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    menuOverlay.classList.toggle("show");
-    document.body.classList.toggle("menu-open");
-    arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-  });
-
-  // إغلاق المنيو لما يضغط المستخدم على الخلفية
-  menuOverlay.addEventListener("click", () => {
-    sidebar.classList.remove("open");
-    menuOverlay.classList.remove("show");
-    document.body.classList.remove("menu-open");
-    arrow.innerHTML = "&#8250;";
-  });
+  if (toggle && sidebar && arrow) {
+    toggle.addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+    });
+  }
 </script>
 
+<script>
+  // Make option boxes "active" and handle Custom instructions visibility
+  function refreshOptions(groupName) {
+    const radios = document.querySelectorAll(`input[name="${groupName}"]`);
+    radios.forEach(radio => {
+      const option = radio.closest(".option");
+      if (!option) return;
+      option.classList.toggle("active", radio.checked);
+    });
+  }
+
+  function syncCustomKey() {
+    const checked = document.querySelector('input[name="key_handling"]:checked');
+    const customInput = document.getElementById("key_custom_instructions");
+    if (!checked || !customInput) return;
+
+    const isCustom = checked.value === "custom";
+    customInput.classList.toggle("hidden", !isCustom);
+    if (!isCustom) customInput.value = "";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('input[name="key_handling"]').forEach(r => {
+      r.addEventListener("change", () => {
+        refreshOptions("key_handling");
+        syncCustomKey();
+      });
+    });
+
+    document.querySelectorAll('input[name="products_supplies"]').forEach(r => {
+      r.addEventListener("change", () => refreshOptions("products_supplies"));
+    });
+
+    refreshOptions("key_handling");
+    refreshOptions("products_supplies");
+    syncCustomKey();
+  });
+</script>
 
 </body>
 </html>
