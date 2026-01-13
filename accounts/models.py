@@ -251,33 +251,6 @@ class CustomerNote(models.Model):
         return f"Notes for {self.customer}"
 
 
-# accounts/models.py
-
-class PaymentMethod(models.Model):
-    customer = models.ForeignKey(
-        Customer,
-        on_delete=models.CASCADE,
-        related_name="payment_methods"
-    )
-
-    cardholder_name = models.CharField(max_length=100)
-    card_last4 = models.CharField(max_length=4)
-    expiry_date = models.CharField(max_length=5)  # MM/YY
-
-    CARD_TYPES = [
-        ("visa", "Visa"),
-        ("mastercard", "MasterCard"),
-        ("amex", "American Express"),
-        ("discover", "Discover"),
-    ]
-    card_type = models.CharField(max_length=20, choices=CARD_TYPES)
-
-    is_default = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.card_type.upper()} •••• {self.card_last4}"
 
 
 

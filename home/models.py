@@ -404,7 +404,10 @@ class BusinessBooking(BaseBooking):
     office_size = models.CharField(max_length=255, blank=True, null=True)
     num_employees = models.CharField(max_length=255, blank=True, null=True)
     floors = models.CharField(max_length=100, blank=True, null=True)
-
+    status = models.CharField(
+            max_length=20,
+            default="pending"
+        )
     restrooms = models.CharField(
         max_length=10,
         choices=[("1", "1"), ("2", "2"), ("3", "3"), ("4+", "4+")],
@@ -534,7 +537,10 @@ class PrivateBooking(BaseBooking):
         blank=True,
         null=True
     )
-
+    status = models.CharField(
+            max_length=20,
+            default="pending"
+        )
     card_number = models.CharField(max_length=50, blank=True, null=True)
     card_expiry = models.CharField(max_length=10, blank=True, null=True)
     card_cvv = models.CharField(max_length=10, blank=True, null=True)
