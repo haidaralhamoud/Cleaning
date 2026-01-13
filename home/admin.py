@@ -4,8 +4,10 @@ from .models import Contact , Job , Application , BusinessService,BusinessBookin
 from jsoneditor.forms import JSONEditor
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-
-
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from accounts.models import BookingChecklist
+from accounts.models import BookingChecklist   # ✅ استيراد فقط
 # # Register your models here.
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
@@ -52,6 +54,11 @@ admin.site.register(BusinessService)
 admin.site.register(BookingStatusHistory)
 
 
+class BookingChecklistInline(admin.StackedInline):
+    model = BookingChecklist
+    extra = 0
+    can_delete = False
+
 @admin.register(BusinessBooking)
 class BusinessBookingAdmin(admin.ModelAdmin):
     change_form_template = "admin/home/businessbooking/change_form.html"
@@ -61,15 +68,19 @@ class BusinessBookingAdmin(admin.ModelAdmin):
         "company_name",
         "email",
         "phone",
+        "status",
+        "total_price",
+        "refund_amount",
+        "is_refunded",
         "path_type",
         "created_at",
     )
-
+    inlines = [BookingChecklistInline]  
     search_fields = ("company_name", "email", "phone")
     ordering = ("-created_at",)
 
     # =========================
-    # PRETTY JSON (FINAL)
+    # PRETTY JSON
     # =========================
     def pretty_json_colored(self, data):
         if not data:
@@ -77,7 +88,6 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
         html = '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
 
-        # 🟦 LIST (services / addons)
         if isinstance(data, list):
             for item in data:
                 if isinstance(item, dict):
@@ -100,7 +110,6 @@ class BusinessBookingAdmin(admin.ModelAdmin):
                 </span>
                 """
 
-        # 🟩 DICT (frequency)
         elif isinstance(data, dict):
             for key, value in data.items():
                 html += f"""
@@ -119,9 +128,6 @@ class BusinessBookingAdmin(admin.ModelAdmin):
         html += "</div>"
         return mark_safe(html)
 
-    # =========================
-    # PRETTY FIELDS
-    # =========================
     def services_needed_pretty(self, obj):
         return self.pretty_json_colored(obj.services_needed)
     services_needed_pretty.short_description = "Services Needed"
@@ -135,7 +141,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     frequency_pretty.short_description = "Frequency"
 
     # =========================
-    # FIELDSETS
+    # FIELDSETS (مرة وحدة فقط)
     # =========================
     fieldsets = (
         ("Service", {
@@ -157,7 +163,6 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "fields": ("provider",),
         }),
 
-        # ✅ NEW – SCHEDULE
         ("Schedule", {
             "fields": (
                 "start_date",
@@ -186,76 +191,111 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             ),
         }),
 
+        ("Pricing", {
+            "fields": ("total_price",),
+            "classes": ("collapse",),
+        }),
+
+        ("💰 Refund (Admin Only)", {
+            "fields": ("refund_amount", "refund_reason", "is_refunded"),
+            "classes": ("collapse",),
+        }),
+
         ("System", {
-            "fields": ("created_at",),
+            "fields": ("status", "created_at"),
         }),
     )
 
-
     # =========================
-    # READONLY LOGIC
+    # READONLY (مرة وحدة فقط)
     # =========================
     def get_readonly_fields(self, request, obj=None):
+        if not obj:
+            return ()
+
         model_fields = [f.name for f in self.model._meta.fields]
 
-        pretty_fields = (
-            "services_needed_pretty",
-            "addons_pretty",
-            "frequency_pretty",
-        )
+        hidden_json_fields = ("services_needed", "addons", "frequency")
+        pretty_fields = ("services_needed_pretty", "addons_pretty", "frequency_pretty")
 
-        hidden_json_fields = (
-            "services_needed",
-            "addons",
-            "frequency",
-        )
+        # افتراضي: View mode (Read-only)
+        ro = tuple(f for f in model_fields if f not in hidden_json_fields) + pretty_fields
 
-        editable_fields = ("provider",)  # 👈 مهم
-
-
-        if request.GET.get("edit") != "1":
-            return tuple(
-                f for f in model_fields if f not in hidden_json_fields
+        # Edit mode: allow provider + refund fields
+        if request.GET.get("edit") == "1":
+            ro = tuple(
+                f for f in model_fields
+                if f not in hidden_json_fields
+                and f not in ("provider", "refund_amount", "refund_reason", "is_refunded")
             ) + pretty_fields
 
-        return (
-            "created_at",
-            *pretty_fields,
-        )
+        # إذا صار refunded: قفل كل شي
+        if obj.is_refunded:
+            ro = tuple(model_fields) + pretty_fields
 
-    def has_add_permission(self, request):
-        return False
+        return ro
+    def response_change(self, request, obj):
+        if "_cancel_booking" in request.POST:
 
-    def has_change_permission(self, request, obj=None):
-        return True
+            refund_amount = None
 
-    def has_delete_permission(self, request, obj=None):
-        return False
-    
+            # إذا كان Business → خلي الأدمن يكتب المبلغ
+            if obj.total_price > 0:
+                refund_amount = obj.total_price
+            else:
+                # Business بدون سعر (manual)
+                refund_amount = obj.refund_amount or None
+
+            obj.cancel_by_admin(
+                admin_user=request.user,
+                note="Cancelled from admin",
+                refund_amount=refund_amount
+            )
+
+            self.message_user(
+                request,
+                "❌ Booking cancelled & refund applied successfully."
+            )
+            return HttpResponseRedirect(".")
+
+        return super().response_change(request, obj)
+
+    # =========================
+    # SAVE_MODEL (مرة وحدة فقط)
+    #  - assign provider
+    #  - apply refund
+    # =========================
     def save_model(self, request, obj, form, change):
-        provider_before = None
+        old = None
         if change:
-            provider_before = BusinessBooking.objects.get(pk=obj.pk).provider
+            old = BusinessBooking.objects.get(pk=obj.pk)
 
         super().save_model(request, obj, form, change)
 
-        if obj.provider and provider_before != obj.provider:
+        # ✅ الحالة 1: provider تغيّر
+        if obj.provider and old and old.provider != obj.provider:
             obj.assign_provider(
                 provider=obj.provider,
                 user=request.user
             )
 
-
-    actions = ["cancel_booking"]
+        # ✅ الحالة 2: provider موجود لكن الحالة لسه ORDERED
+        elif obj.provider and obj.status == "ORDERED":
+            obj.assign_provider(
+                provider=obj.provider,
+                user=request.user
+            )
 
     def cancel_booking(self, request, queryset):
         for booking in queryset:
-            booking.cancel_by_admin(
-                admin_user=request.user,
-                note="Cancelled from admin"
-            )
-
+            booking.cancel_by_admin(admin_user=request.user, note="Cancelled from admin")
     cancel_booking.short_description = "❌ Cancel selected bookings"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 admin.site.register(BusinessAddon)
 
@@ -335,66 +375,26 @@ from django.utils.safestring import mark_safe
 from .models import PrivateBooking
 
 
-
 @admin.register(PrivateBooking)
 class PrivateBookingAdmin(admin.ModelAdmin):
     change_form_template = "admin/home/privatebooking/change_form.html"
 
-    # =====================================================
-    # LIST VIEW
-    # =====================================================
     list_display = (
         "id",
-        "zip_badge",
-        "booking_method_badge",
-        "schedule_mode_badge",
+        "status",
+        "total_price",
+        "refund_amount",
+        "is_refunded",
         "created_at",
     )
-
+    inlines = [BookingChecklistInline]
     list_filter = ("booking_method", "zip_is_available", "schedule_mode")
     search_fields = ("id", "zip_code")
     ordering = ("-created_at",)
 
-    # =====================================================
-    # BADGES
-    # =====================================================
-    def zip_badge(self, obj):
-        if obj.zip_is_available:
-            return format_html(
-                '<span style="background:#198754;color:white;padding:4px 10px;border-radius:12px;font-size:12px;">✔ Available</span>'
-            )
-        return format_html(
-            '<span style="background:#dc3545;color:white;padding:4px 10px;border-radius:12px;font-size:12px;">✘ Not Available</span>'
-        )
-    zip_badge.short_description = "ZIP"
-
-    def booking_method_badge(self, obj):
-        colors = {
-            "online": "#0d6efd",
-            "call": "#6f42c1",
-            "whatsapp": "#25d366",
-        }
-        color = colors.get(obj.booking_method, "#6c757d")
-        return format_html(
-            '<span style="background:{};color:white;padding:4px 10px;border-radius:12px;font-size:12px;">{}</span>',
-            color,
-            obj.booking_method.upper()
-        )
-    booking_method_badge.short_description = "Method"
-
-    def schedule_mode_badge(self, obj):
-        if obj.schedule_mode == "same":
-            return format_html(
-                '<span style="background:#20c997;color:white;padding:4px 10px;border-radius:12px;font-size:12px;">SAME</span>'
-            )
-        return format_html(
-            '<span style="background:#fd7e14;color:white;padding:4px 10px;border-radius:12px;font-size:12px;">PER SERVICE</span>'
-        )
-    schedule_mode_badge.short_description = "Schedule"
-
-    # =====================================================
-    # PRETTY JSON CORE 🔥
-    # =====================================================
+    # =========================
+    # PRETTY JSON (مثل شغلك)
+    # =========================
     def pretty_json_colored(self, data):
         if not data:
             return mark_safe("<span style='color:#6c757d;'>—</span>")
@@ -409,7 +409,6 @@ class PrivateBookingAdmin(admin.ModelAdmin):
         ">
         """
 
-        # ---------- LIST ----------
         if isinstance(data, list):
             for item in data:
                 html += f"""
@@ -424,12 +423,8 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                     🔹 {item}
                 </div>
                 """
-
-        # ---------- DICT ----------
         elif isinstance(data, dict):
             for key, value in data.items():
-
-                # ===== SERVICE / ADDON GROUP =====
                 html += f"""
                 <div style="
                     background:#ffffff;
@@ -438,24 +433,13 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                     padding:10px;
                     margin-bottom:10px;
                 ">
-                    <div style="
-                        font-weight:700;
-                        color:#6f42c1;
-                        margin-bottom:6px;
-                    ">
+                    <div style="font-weight:700;color:#6f42c1;margin-bottom:6px;">
                         🧹 {key}
                     </div>
                 """
-
-                # ===== ADD-ON OBJECT =====
                 if isinstance(value, dict) and "title" in value:
                     html += f"""
-                    <div style="
-                        background:#f1f3f5;
-                        border-radius:8px;
-                        padding:8px;
-                        margin-left:10px;
-                    ">
+                    <div style="background:#f1f3f5;border-radius:8px;padding:8px;margin-left:10px;">
                         <div style="font-weight:700;">🧺 {value.get('title')}</div>
                         <div style="margin-left:10px;">
                             Quantity: <b>{value.get('quantity', '-')}</b><br>
@@ -464,8 +448,6 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                         </div>
                     </div>
                     """
-
-                # ===== NORMAL KEY/VALUE =====
                 elif isinstance(value, dict):
                     for k, v in value.items():
                         html += f"""
@@ -474,15 +456,11 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                             <span style="color:#212529;">{v}</span>
                         </div>
                         """
-
                 html += "</div>"
 
         html += "</div>"
         return mark_safe(html)
 
-    # =====================================================
-    # PRETTY FIELDS
-    # =====================================================
     def selected_services_pretty(self, obj):
         return self.pretty_json_colored(obj.selected_services)
     selected_services_pretty.short_description = "Selected Services"
@@ -503,24 +481,18 @@ class PrivateBookingAdmin(admin.ModelAdmin):
         return self.pretty_json_colored(obj.special_timing_requests)
     special_timing_requests_pretty.short_description = "Special Timing Requests"
 
-    # =====================================================
-    # FIELDSETS
-    # =====================================================
+    # =========================
+    # FIELDSETS (مرة وحدة)
+    # =========================
     base_fieldsets = (
         ("ZIP Code Check", {"fields": ("zip_code", "zip_is_available")}),
         ("Booking Method", {"fields": ("booking_method", "schedule_mode")}),
 
         ("Category & Services", {
-            "fields": (
-                "main_category",
-                "selected_services_pretty",
-                "service_answers_pretty",
-            )
+            "fields": ("main_category", "selected_services_pretty", "service_answers_pretty")
         }),
 
-        ("Add-ons", {
-            "fields": ("addons_selected_pretty",)
-        }),
+        ("Add-ons", {"fields": ("addons_selected_pretty",)}),
 
         ("Same Schedule (applies to all services)", {
             "fields": (
@@ -533,35 +505,21 @@ class PrivateBookingAdmin(admin.ModelAdmin):
             ),
         }),
 
-        ("Per-Service Scheduling", {
-            "fields": ("service_schedules_pretty",)
-        }),
+        ("Per-Service Scheduling", {"fields": ("service_schedules_pretty",)}),
 
         ("Checkout", {
-            "fields": (
-                "subtotal", "rot_discount", "total_price",
-                "address", "area", "duration_hours",
-            ),
+            "fields": ("subtotal", "rot_discount", "total_price", "address", "area", "duration_hours"),
             "classes": ("collapse",)
         }),
 
-        ("Payment", {
-            "fields": (
-                "payment_method",
-                "card_number", "card_expiry", "card_cvv", "card_name",
-                "accepted_terms",
-            ),
-            "classes": ("collapse",)
+        ("💰 Refund (Admin Only)", {
+            "fields": ("refund_amount", "refund_reason", "is_refunded"),
+            "classes": ("collapse",),
         }),
 
-        ("System Fields", {
-            "fields": ("created_at",),
-        }),
+        ("System Fields", {"fields": ("status", "created_at")}),
     )
 
-    # =====================================================
-    # DYNAMIC FIELDSETS
-    # =====================================================
     def get_fieldsets(self, request, obj=None):
         if not obj:
             return self.base_fieldsets
@@ -575,17 +533,65 @@ class PrivateBookingAdmin(admin.ModelAdmin):
             final_sets.append((title, config))
         return final_sets
 
-    # =====================================================
-    # READ ONLY (VIEW MODE)
-    # =====================================================
+    # =========================
+    # READONLY (مرة وحدة)
+    # =========================
     def get_readonly_fields(self, request, obj=None):
-        return [f.name for f in self.model._meta.fields] + [
+        if not obj:
+            return ()
+
+        model_fields = [f.name for f in self.model._meta.fields]
+        pretty = (
             "selected_services_pretty",
             "service_answers_pretty",
             "addons_selected_pretty",
             "service_schedules_pretty",
             "special_timing_requests_pretty",
-        ]
+        )
+
+        # View mode: readonly
+        ro = tuple(model_fields) + pretty
+
+        # Edit mode: allow refund fields
+        if request.GET.get("edit") == "1":
+            ro = tuple(
+                f for f in model_fields
+                if f not in ("refund_amount", "refund_reason", "is_refunded")
+            ) + pretty
+
+        # إذا refunded: قفل كل شي
+        if obj.is_refunded:
+            ro = tuple(model_fields) + pretty
+
+        return ro
+
+    # =========================
+    # SAVE = APPLY REFUND (مرة وحدة)
+    # =========================
+    def save_model(self, request, obj, form, change):
+        old = None
+        if change:
+            old = BusinessBooking.objects.get(pk=obj.pk)
+
+        super().save_model(request, obj, form, change)
+
+        # ✅ الحالة 1: provider تغيّر
+        if obj.provider and old and old.provider != obj.provider:
+            obj.assign_provider(
+                provider=obj.provider,
+                user=request.user
+            )
+
+        # ✅ الحالة 2: provider موجود لكن الحالة لسه ORDERED
+        elif obj.provider and obj.status == "ORDERED":
+            obj.assign_provider(
+                provider=obj.provider,
+                user=request.user
+            )
+
+    def has_add_permission(self, request):
+        return False
+
 @admin.register(CallRequest)
 class CallRequestAdmin(admin.ModelAdmin):
     list_display = ("full_name", "phone", "email", "preferred_time", "created_at")

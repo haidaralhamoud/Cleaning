@@ -102,11 +102,14 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                 'accounts.context_processors.chat_notifications',
             ],
         },
     },
 ]
-
+TEMPLATES[0]["OPTIONS"]["context_processors"] += [
+    "accounts.context_processors.unread_messages",
+]
 WSGI_APPLICATION = 'PRO.wsgi.application'
 
 

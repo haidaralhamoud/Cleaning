@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 
+
+User = settings.AUTH_USER_MODEL
+
 # خيارات اللغات
 LANGUAGE_CHOICES = [
     ('sw-ar-en', 'Swedish - Arabic - English'),
@@ -253,8 +256,82 @@ class CustomerNote(models.Model):
 
 
 
+class ChatThread(models.Model):
+    booking_type = models.CharField(max_length=20)  # private / business
+    booking_id = models.PositiveIntegerField()
+
+    customer = models.ForeignKey(
+        User, related_name="customer_threads", on_delete=models.CASCADE
+    )
+    provider = models.ForeignKey(
+        User, related_name="provider_threads", on_delete=models.CASCADE
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Chat {self.booking_type} #{self.booking_id}"
 
 
+class ChatMessage(models.Model):
+    thread = models.ForeignKey(ChatThread, related_name="messages", on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField(blank=True)
+    file = models.FileField(
+        upload_to="chat_files/",
+        blank=True,
+        null=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Msg from {self.sender}"
+
+# accounts/models.py
+
+
+class BookingChecklist(models.Model):
+
+    booking_private = models.OneToOneField(
+        "home.PrivateBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="checklist"
+    )
+
+    booking_business = models.OneToOneField(
+        "home.BusinessBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="checklist"
+    )
+
+    # Kitchen
+    kitchen_counters = models.BooleanField(default=False)
+    kitchen_sink = models.BooleanField(default=False)
+    kitchen_floor = models.BooleanField(default=False)
+    kitchen_fridge = models.BooleanField(default=False)
+
+    # Bathroom
+    bathroom_scrub = models.BooleanField(default=False)
+    bathroom_mirrors = models.BooleanField(default=False)
+    bathroom_floor = models.BooleanField(default=False)
+
+    # Bedrooms
+    bedroom_beds = models.BooleanField(default=False)
+    bedroom_dust = models.BooleanField(default=False)
+    bedroom_floor = models.BooleanField(default=False)
+
+    # Living Room
+    living_dust = models.BooleanField(default=False)
+    living_vacuum = models.BooleanField(default=False)
+    living_glass = models.BooleanField(default=False)
+
+    notes = models.TextField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 # accounts/models.py
