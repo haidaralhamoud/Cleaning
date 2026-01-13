@@ -16,11 +16,25 @@
 
 {% block submit_buttons_bottom %}
     {% if request.GET.edit %}
-        <div style="margin-top:20px;">
+        <div style="margin-top:20px; display:flex; gap:10px;">
+
+            <!-- Save -->
             <input type="submit"
                    value="💾 Save"
                    class="btn btn-success default"
                    name="_save">
+
+            <!-- Cancel Booking -->
+            {% if original and not original.is_refunded and original.status not in "COMPLETED,REFUNDED" %}
+                <button type="submit"
+                        name="_cancel_booking"
+                        class="btn btn-danger"
+                        style="background:#dc3545;color:white;">
+                    ❌ Cancel Booking
+                </button>
+            {% endif %}
+
         </div>
     {% endif %}
 {% endblock %}
+

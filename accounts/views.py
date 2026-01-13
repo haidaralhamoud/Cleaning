@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.urls import reverse_lazy
 from django.contrib.auth.forms import PasswordChangeForm
-
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
@@ -11,13 +10,15 @@ from django.contrib.auth.models import User
 from home.models import BookingStatusHistory, BookingTimeline
 from django.contrib import messages
 from home.models import BusinessBooking, PrivateBooking , BookingStatusHistory
-from .models import Customer, CustomerLocation, Incident  
+from .models import Customer, CustomerLocation, Incident  , ChatThread, ChatMessage ,BookingChecklist
 from .forms import (
     CustomerForm,
     CustomerBasicInfoForm,
     CustomerLocationForm,
-    IncidentForm
+    IncidentForm,
+    BookingChecklistForm 
 )
+from django.http import HttpResponse
 
 User = get_user_model()
 from .forms import ProviderProfileForm
@@ -262,18 +263,57 @@ from home.models import PrivateBooking, BusinessBooking, BookingStatusHistory
 @login_required
 def view_service_details(request, booking_type, booking_id):
 
-    # 1) GET BOOKING
+    # ===============================
+    # 1️⃣ GET BOOKING
+    # ===============================
     if booking_type == "private":
-        booking = PrivateBooking.objects.filter(id=booking_id, user=request.user).first()
+        booking = PrivateBooking.objects.filter(
+            id=booking_id,
+            user=request.user
+        ).first()
     elif booking_type == "business":
-        booking = BusinessBooking.objects.filter(id=booking_id, user=request.user).first()
+        booking = BusinessBooking.objects.filter(
+            id=booking_id,
+            user=request.user
+        ).first()
     else:
         raise Http404("Invalid booking type")
 
     if not booking:
         raise Http404("Booking not found")
 
-    # 2) RAW HISTORY
+    # ===============================
+    # 2️⃣ CHECKLIST (ONE TO ONE) - NO AUTO CHECK ✅
+    # ===============================
+    if booking_type == "private":
+        checklist, _ = BookingChecklist.objects.get_or_create(
+            booking_private=booking
+        )
+    else:
+        checklist, _ = BookingChecklist.objects.get_or_create(
+            booking_business=booking
+        )
+
+   # ===============================
+# 💾 SAVE CHECKLIST (ONLY WHEN USER CLICKS SAVE)
+# ===============================
+    if request.method == "POST" and request.POST.get("form_type") == "checklist":
+
+        print("POST RECEIVED ✅")
+        print(request.POST)   # 🔥 هون لازم يكون فيه البيانات
+
+        checklist_form = BookingChecklistForm(request.POST, instance=checklist)
+        if checklist_form.is_valid():
+            checklist_form.save()
+            messages.success(request, "Checklist saved successfully.")
+            return redirect(request.path)
+
+    else:
+        checklist_form = BookingChecklistForm(instance=checklist)
+
+    # ===============================
+    # 3️⃣ HISTORY
+    # ===============================
     history = list(
         BookingStatusHistory.objects.filter(
             booking_type=booking_type,
@@ -281,7 +321,18 @@ def view_service_details(request, booking_type, booking_id):
         ).order_by("created_at")
     )
 
-    # 3) NORMAL FLOW
+    # ===============================
+    # 4️⃣ UI FLAGS
+    # ===============================
+    hide_actions = booking.status in [
+        "CANCELLED_BY_CUSTOMER",
+        "NO_SHOW",
+        "REFUNDED",
+    ]
+
+    # ===============================
+    # 5️⃣ FLOW & EXCEPTIONS
+    # ===============================
     FLOW = [
         ("ORDERED", "Order Placed"),
         ("SCHEDULED", "Confirmed / Scheduled"),
@@ -291,7 +342,6 @@ def view_service_details(request, booking_type, booking_id):
         ("COMPLETED", "Service Completed"),
     ]
 
-    # 4) EXCEPTIONS
     EXCEPTIONS = {
         "CANCELLED_BY_CUSTOMER": "Cancelled by Customer",
         "NO_SHOW": "No Show",
@@ -299,28 +349,38 @@ def view_service_details(request, booking_type, booking_id):
         "REFUNDED": "Refunded",
     }
 
-    # 5) last date & note per status
+    # ===============================
+    # 6️⃣ LAST DATE / NOTE PER STATUS
+    # ===============================
     last_date = {}
     last_note = {}
+
     for h in history:
         last_date[h.status] = h.created_at
         last_note[h.status] = getattr(h, "note", "") or ""
 
     latest_raw = history[-1].status if history else booking.status
 
-    # 6) BUILD NORMAL TIMELINE
+    # ===============================
+    # 7️⃣ BUILD NORMAL FLOW
+    # ===============================
     timeline = []
+    print(request.POST)
+
     for code, label in FLOW:
         timeline.append({
             "code": code,
             "label": label,
             "date": last_date.get(code),
             "note": last_note.get(code),
-            "active": (code in last_date),
+            "active": code in last_date,
             "latest": False,
+            "is_exception": False,
         })
 
-    # 7) ADD LAST EXCEPTION FROM HISTORY (NO_SHOW, CANCELLED, INCIDENT)
+    # ===============================
+    # 8️⃣ ADD EXCEPTION
+    # ===============================
     if latest_raw in EXCEPTIONS and latest_raw != "REFUNDED":
         timeline.append({
             "code": latest_raw,
@@ -332,24 +392,50 @@ def view_service_details(request, booking_type, booking_id):
             "is_exception": True,
         })
 
-    # 8) 🔥 FORCE REFUNDED AS FINAL STAGE
-    if booking.status == "REFUNDED":
+    # ===============================
+    # 9️⃣ FORCE REFUND
+    # ===============================
+    if booking.is_refunded:
+
+        for t in timeline:
+            t["latest"] = False
+
+        refund_note = booking.refund_reason or ""
+        refund_amount_text = ""
+
+        if booking.refund_amount and booking.refund_amount > 0:
+            refund_amount_text = f"Refunded amount: {booking.refund_amount} $"
+
         timeline.append({
             "code": "REFUNDED",
             "label": "Refunded",
             "date": booking.refunded_at,
-            "note": booking.refund_reason,
+            "note": f"{refund_amount_text}\n{refund_note}".strip(),
             "active": True,
             "latest": True,
             "is_exception": True,
         })
-    else:
-        # إذا ما في Refund، حدّد آخر مرحلة كـ latest
-        for t in reversed(timeline):
-            if t["active"]:
-                t["latest"] = True
-                break
 
+    # ===============================
+    # 🔟 CHAT – UNREAD MESSAGES
+    # ===============================
+    try:
+        thread = ChatThread.objects.get(
+            booking_type=booking_type,
+            booking_id=booking.id
+        )
+
+        customer_unread_messages = ChatMessage.objects.filter(
+            thread=thread,
+            is_read=False
+        ).exclude(sender=request.user).count()
+
+    except ChatThread.DoesNotExist:
+        customer_unread_messages = 0
+
+    # ===============================
+    # 1️⃣1️⃣ RENDER
+    # ===============================
     return render(
         request,
         "accounts/subpages/view_service_details.html",
@@ -357,8 +443,12 @@ def view_service_details(request, booking_type, booking_id):
             "booking": booking,
             "booking_type": booking_type,
             "timeline": timeline,
+            "hide_actions": hide_actions,
+            "customer_unread_messages": customer_unread_messages,
+            "checklist_form": checklist_form,
         },
     )
+
 
 @require_POST
 @login_required
@@ -726,3 +816,64 @@ def reschedule_booking(request, booking_type, booking_id):
         booking_id=booking.id
     )
 
+@login_required
+def booking_chat(request, booking_type, booking_id):
+    from .models import ChatThread, ChatMessage
+    from home.models import BusinessBooking, PrivateBooking
+
+    # 1️⃣ get booking
+    if booking_type == "business":
+        booking = get_object_or_404(BusinessBooking, id=booking_id)
+    elif booking_type == "private":
+        booking = get_object_or_404(PrivateBooking, id=booking_id)
+    else:
+        raise Http404()
+
+    # 2️⃣ لازم يكون في provider
+    if not booking.provider:
+        return HttpResponse("Provider not assigned yet", status=400)
+
+    # 3️⃣ get or create thread (صح)
+    thread, _ = ChatThread.objects.get_or_create(
+        booking_type=booking_type,
+        booking_id=booking.id,
+        defaults={
+            "customer": booking.user,
+            "provider": booking.provider,
+        }
+    )
+
+    # 4️⃣ حماية
+    if request.user not in [thread.customer, thread.provider]:
+        raise Http404()
+
+    # 5️⃣ mark messages as read
+    ChatMessage.objects.filter(
+        thread=thread,
+        is_read=False
+    ).exclude(sender=request.user).update(is_read=True)
+
+    messages = thread.messages.order_by("created_at")
+
+    # 6️⃣ send message
+    if request.method == "POST":
+        text = request.POST.get("message", "").strip()
+        file = request.FILES.get("file")
+
+        if text or file:
+            ChatMessage.objects.create(
+                thread=thread,
+                sender=request.user,
+                text=text,
+                file=file
+            )
+
+        return redirect(request.path)
+    EMOJIS = ["😀","😁","😂","🤣","😍","😎","😭","😡","👍","👎","❤️","🔥","🎉"]
+    return render(request, "accounts/chat/chat_base.html", {
+        "thread": thread,
+        "messages": messages,
+        "booking": booking,
+        "booking_type": booking_type,
+        "emojis": EMOJIS,
+    })

@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import Customer, Service
+from .models import Customer, Service , BookingChecklist
 
+from home.models import PrivateBooking, BusinessBooking
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ["label", "key"]
@@ -82,3 +83,5 @@ class CustomerAdmin(admin.ModelAdmin):
         return ", ".join(obj.custom_addons)
 
     formatted_addons.short_description = "Custom Add-ons"
+
+

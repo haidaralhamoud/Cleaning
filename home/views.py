@@ -453,6 +453,7 @@ def private_zip_step1(request, service_slug):
 
 
 
+
 def private_booking_checkout(request, booking_id):
     booking = get_object_or_404(PrivateBooking, id=booking_id)
     services = PrivateService.objects.filter(slug__in=booking.selected_services)

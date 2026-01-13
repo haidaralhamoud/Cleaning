@@ -1,5 +1,6 @@
 from django.urls import include, path
 from . import views
+from .views import booking_chat
 from django.contrib.auth import views as auth_views
 
 app_name='accounts'
@@ -76,6 +77,6 @@ path(
     name="reschedule_booking"
 ),
 
-
+path("chat/<str:booking_type>/<int:booking_id>/", views.booking_chat, name="booking_chat"),
 
 ]

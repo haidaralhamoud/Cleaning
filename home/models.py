@@ -1,8 +1,11 @@
+from decimal import Decimal
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+
+from accounts.models import ChatThread
 User = get_user_model()
 
 # =====================================================================
@@ -11,15 +14,15 @@ User = get_user_model()
 class BaseBooking(models.Model):
 
     STATUS_CHOICES = [
-        # Normal flow
         ("ORDERED", "Order Placed"),
         ("SCHEDULED", "Confirmed / Scheduled"),
+        ("ASSIGNED", "Provider Assigned"),
         ("ON_THE_WAY", "Provider On The Way"),
         ("STARTED", "Check in / Service Started"),
         ("PAUSED", "Service Paused"),
-        ("COMPLETED", "Service Completed"),
-        ("ASSIGNED", "Provider Assigned"),
         ("RESUMED", "Service Resumed"),
+        ("COMPLETED", "Service Completed"),
+
         # Exceptions
         ("CANCELLED_BY_CUSTOMER", "Cancelled by Customer"),
         ("NO_SHOW", "No Show"),
@@ -27,8 +30,16 @@ class BaseBooking(models.Model):
         ("REFUNDED", "Refunded"),
     ]
 
-    status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="ORDERED")
-
+    status = models.CharField(
+        max_length=30,
+        choices=STATUS_CHOICES,
+        default="ORDERED"
+    )
+    total_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     scheduled_at = models.DateTimeField(null=True, blank=True)
 
@@ -36,26 +47,38 @@ class BaseBooking(models.Model):
     started_at = models.DateTimeField(null=True, blank=True)
     paused_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
-    # (اختياري)
-    INCIDENT_STATUS_CHOICES = [
-        ("PENDING_REVIEW", "Pending Review"),
-        ("APPROVED", "Approved"),
-        ("REJECTED", "Rejected"),
-    ]
-    incident_status = models.CharField(
-        max_length=30,
-        choices=INCIDENT_STATUS_CHOICES,
-        default="PENDING_REVIEW",
+
+    # =========================
+    # ✅ REFUND FIELDS (NEW)
+    # =========================
+    is_refunded = models.BooleanField(default=False)
+
+    refund_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00")
+    )
+
+    refund_reason = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
+
+    refunded_at = models.DateTimeField(
+        null=True,
         blank=True
     )
+
     class Meta:
         abstract = True
 
     # =========================
     # INTERNAL LOGGER
     # =========================
-    def _log(self, status, user=None, note=None):
-        # Provider timeline
+    def _log(self, status, note=None):
+        from home.models import BookingTimeline
+
         BookingTimeline.objects.create(
             booking_type="private" if self.__class__.__name__ == "PrivateBooking" else "business",
             booking_id=self.id,
@@ -63,118 +86,6 @@ class BaseBooking(models.Model):
             note=note
         )
 
-        # Customer timeline
-        self.log_status(user=user, note=note or "")
-
-    # =========================
-    # STATUS ACTIONS
-    # =========================
-    def assign_provider(self, provider, user=None):
-        self.provider = provider
-        self.status = "ASSIGNED"
-        self.save()
-        self._log("ASSIGNED", user=user)
-
-    def mark_on_the_way(self, user=None):
-        if self.status != "ASSIGNED":
-            raise ValueError("Invalid transition")
-
-        self.status = "ON_THE_WAY"
-        self.provider_on_way_at = timezone.now()
-        self.save()
-        self._log("ON_THE_WAY", user=user)
-
-    def mark_started(self, user=None):
-        if self.status != "ON_THE_WAY":
-            raise ValueError("Invalid transition")
-
-        self.status = "STARTED"
-        self.started_at = timezone.now()
-        self.save()
-        self._log("STARTED", user=user)
-
-    def mark_paused(self, user=None):
-        if self.status != "STARTED":
-            raise ValueError("Cannot pause now")
-
-        self.status = "PAUSED"
-        self.paused_at = timezone.now()
-        self.save()
-        self._log("PAUSED", user=user)
-
-    def mark_resumed(self, user=None):
-        if self.status != "PAUSED":
-            raise ValueError("Cannot resume")
-
-        self.status = "RESUMED"
-        self.save()
-        self._log("RESUMED", user=user)
-
-    def mark_completed(self, user=None):
-        if self.status not in ["STARTED", "PAUSED", "RESUMED"]:
-            raise ValueError("Cannot complete")
-
-        self.status = "COMPLETED"
-        self.completed_at = timezone.now()
-        self.save()
-        self._log("COMPLETED", user=user)
-
-    def report_no_show(self, provider_user, note=""):
-        from home.models import NoShowReport
-
-        # لا تسمح إذا الحالة مو مناسبة
-        if self.status not in ["ON_THE_WAY", "STARTED", "PAUSED", "RESUMED"]:
-            raise ValueError("No Show can be reported only when service is ongoing")
-
-        # ما تعمل أكثر من Pending
-        existing = NoShowReport.objects.filter(
-            booking_type="private" if self.__class__.__name__ == "PrivateBooking" else "business",
-            booking_id=self.id,
-            decision="PENDING"
-        ).first()
-        if existing:
-            return existing
-
-        report = NoShowReport.objects.create(
-            booking_type="private" if self.__class__.__name__ == "PrivateBooking" else "business",
-            booking_id=self.id,
-            provider=provider_user,
-            provider_note=note
-        )
-
-        # اختياري: سجل ب Timeline تبع المزود فقط (مو العميل)
-        BookingTimeline.objects.create(
-            booking_type=report.booking_type,
-            booking_id=self.id,
-            status="NO_SHOW_REPORTED",
-            note=note
-        )
-
-        return report  
-    
-    def approve_no_show(self, admin_user, note=""):
-        BookingTimeline.objects.create(
-        booking_type="private" if self.__class__.__name__ == "PrivateBooking" else "business",
-        booking_id=self.id,
-        status="NO_SHOW_APPROVED",
-        note=note
-    )
-        self.status = "NO_SHOW"
-        self.save()
-        self.log_status(user=admin_user, note=note or "No Show approved")
-
-    def reject_no_show(self, admin_user, note=""):
-        # ما نغير status
-        BookingTimeline.objects.create(
-            booking_type="private" if self.__class__.__name__ == "PrivateBooking" else "business",
-            booking_id=self.id,
-            status="NO_SHOW_REJECTED",
-            note=note
-        )
-
-    # =========================
-    # CUSTOMER HISTORY
-    # =========================
     def log_status(self, user=None, note=""):
         from home.models import BookingStatusHistory
 
@@ -186,70 +97,161 @@ class BaseBooking(models.Model):
             note=note
         )
 
-    def cancel_by_admin(self, admin_user, note="Cancelled by admin"):
-        self.status = "CANCELLED_BY_CUSTOMER"
+    # =========================
+    # REFUND ACTION (🔥 الأساس)
+    # =========================
+    def refund(self, amount, user=None, reason=""):
+
+        from home.models import BookingStatusHistory
+
+        booking_type = (
+            "private"
+            if self.__class__.__name__ == "PrivateBooking"
+            else "business"
+        )
+
+        if amount <= 0:
+            raise ValueError("Refund amount must be greater than zero")
+
+        # ✅ فقط Private
+        if booking_type == "private" and amount > self.total_price:
+            raise ValueError("Refund amount cannot exceed total price")
+
+        self.is_refunded = True
+        self.refund_amount = amount
+        self.refund_reason = reason
+        self.refunded_at = timezone.now()
+        self.status = "REFUNDED"
         self.save()
-        self.log_status(user=admin_user, note=note)
+
+        BookingStatusHistory.objects.get_or_create(
+            booking_type=booking_type,
+            booking_id=self.id,
+            status="REFUNDED",
+            defaults={
+                "changed_by": user,
+                "note": reason
+            }
+        )
+
+    def mark_on_the_way(self, user=None):
+        if self.status != "ASSIGNED":
+            return
+
+        self.status = "ON_THE_WAY"
+        self.provider_on_way_at = timezone.now()
+        self.save(update_fields=["status", "provider_on_way_at"])
+
+        self.log_status(user=user, note="Provider on the way")
+        self._log(status="ON_THE_WAY", note="Provider on the way")
 
 
-    def cancel_by_customer(self, user, note="Cancelled by customer"):
-        if not self.can_cancel:
-            raise ValueError("Cannot cancel this booking")
+    def mark_started(self, user=None):
+        if self.status != "ON_THE_WAY":
+            return
 
-        self.status = "CANCELLED_BY_CUSTOMER"
-        self.save()
-        self.log_status(user=user, note=note)
+        self.status = "STARTED"
+        self.started_at = timezone.now()
+        self.save(update_fields=["status", "started_at"])
 
+        self.log_status(user=user, note="Service started")
+        self._log(status="STARTED", note="Service started")
 
-    def _hours_to_service(self):
-        if not self.scheduled_at:
-            return None
-        delta = self.scheduled_at - timezone.now()
-        return delta.total_seconds() / 3600
+    def mark_paused(self, user=None):
+        if self.status != "STARTED":
+            return
 
-    @property
-    def is_instant_booking(self):
-        h = self._hours_to_service()
-        return (h is not None) and (h <= 3)
+        self.status = "PAUSED"
+        self.paused_at = timezone.now()
+        self.save(update_fields=["status", "paused_at"])
 
-    @property
-    def can_reschedule(self):
-        # فقط ORDERED / SCHEDULED
-        if self.status not in ["ORDERED", "SCHEDULED"]:
-            return False
+        self.log_status(user=user, note="Service paused")
+        self._log(status="PAUSED", note="Service paused")
 
-        h = self._hours_to_service()
-        if h is None:
-            return True  # إذا ما في موعد لسا، اسمح
+    def mark_resumed(self, user=None):
+        if self.status != "PAUSED":
+            return
 
-        # ممنوع أقل من 12h
-        return h >= 12
+        self.status = "RESUMED"
+        self.save(update_fields=["status"])
 
-    @property
-    def reschedule_free(self):
-        h = self._hours_to_service()
-        if h is None:
-            return True
-        return h >= 24
+        self.log_status(user=user, note="Service resumed")
+        self._log(status="RESUMED", note="Service resumed")
 
-    @property
-    def can_cancel(self):
-        # ممنوع بعد ما يصير on the way / started / paused / completed
-        if self.status not in ["ORDERED", "SCHEDULED"]:
-            return False
+    def mark_completed(self, user=None):
+        if self.status not in ["STARTED", "RESUMED"]:
+            return
 
-        # Instant booking خلال 3 ساعات: ممنوع cancel
-        if self.is_instant_booking:
-            return False
+        self.status = "COMPLETED"
+        self.completed_at = timezone.now()
+        self.save(update_fields=["status", "completed_at"])
 
-        return True
+        self.log_status(user=user, note="Service completed")
+        self._log(status="COMPLETED", note="Service completed")
+    def assign_provider(self, provider, user=None):
+        if self.provider == provider and self.status != "ORDERED":
+            return
 
-    @property
-    def cancel_free(self):
-        h = self._hours_to_service()
-        if h is None:
-            return True
-        return h >= 24
+        self.provider = provider
+        self.status = "ASSIGNED"
+        self.save(update_fields=["provider", "status"])
+
+        # 🔥 إنشاء ChatThread إذا ما موجود
+        ChatThread.objects.get_or_create(
+            booking_type="business",  # أو private
+            booking_id=self.id,
+            defaults={
+                "customer": self.user,
+                "provider": provider,
+            }
+        )
+
+        self.log_status(user=user, note=f"Assigned to provider {provider}")
+        self._log(status="ASSIGNED", note=f"Provider assigned: {provider}")
+
+    def report_no_show(self, provider_user, note=""):
+        from home.models import NoShowReport
+
+        booking_type = (
+            "private"
+            if self.__class__.__name__ == "PrivateBooking"
+            else "business"
+        )
+
+        # لا نسمح بتكرار No Show
+        if self.status in ["NO_SHOW", "REFUNDED", "CANCELLED_BY_CUSTOMER"]:
+            return
+
+        NoShowReport.objects.create(
+            booking_type=booking_type,
+            booking_id=self.id,
+            provider=provider_user,
+            provider_note=note,
+        )
+
+    # =========================
+    # NO SHOW APPROVAL
+    # =========================
+    def approve_no_show(self, admin_user, note="", refund_amount=None):
+        self.status = "NO_SHOW"
+        self.save(update_fields=["status"])
+
+        self.log_status(user=admin_user, note=note or "No Show approved")
+        self._log(status="NO_SHOW_APPROVED", note=note)
+
+        if refund_amount:
+            self.refund(
+                amount=refund_amount,
+                user=admin_user,
+                reason="Refund after No Show"
+            )
+
+    def reject_no_show(self, admin_user, note=""):
+        self._log(
+            status="NO_SHOW_REJECTED",
+            note=note
+        )
+
     # =========================
     # UI HELPERS
     # =========================
@@ -261,13 +263,102 @@ class BaseBooking(models.Model):
             return "ongoing"
         elif self.status == "COMPLETED":
             return "completed"
-        elif self.status in ["CANCELLED", "CANCELLED_BY_CUSTOMER", "NO_SHOW", "INCIDENT_REPORTED", "REFUNDED","CANCELLED_BY_CUSTOMER"]:
+        elif self.status in [
+            "CANCELLED_BY_CUSTOMER",
+            "NO_SHOW",
+            "INCIDENT_REPORTED",
+            "REFUNDED",
+        ]:
             return "cancelled"
         return "upcoming"
 
+    @property 
+    def can_cancel(self): # ممنوع بعد ما يصير on the way / started / paused / completed
+        if self.status not in ["ORDERED", "SCHEDULED"]: 
+            return False # Instant booking خلال 3 ساعات: ممنوع cancel 
+        if self.is_instant_booking: 
+            return False 
+        return True
+    # =========================
+# CANCEL / RESCHEDULE LOGIC (RESTORED)
+# =========================
+    def cancel_by_admin(self, admin_user, note="Cancelled by admin", refund_amount=None):
+
+        self.status = "CANCELLED_BY_CUSTOMER"
+        self.save(update_fields=["status"])
+
+        self.log_status(user=admin_user, note=note)
+        self._log(status="CANCELLED_BY_CUSTOMER", note=note)
+
+        if refund_amount:
+            self.refund(
+                amount=refund_amount,
+                user=admin_user,
+                reason="Refund after admin cancellation"
+            )
+            
+    def cancel_by_customer(self, user, note="Cancelled by customer", refund_amount=None):
+        if not self.can_cancel:
+            raise ValueError("Cannot cancel this booking")
+
+        # 1️⃣ سجل الإلغاء
+        self.status = "CANCELLED_BY_CUSTOMER"
+        self.save(update_fields=["status"])
+
+        self.log_status(user=user, note=note)
+        self._log(status="CANCELLED_BY_CUSTOMER", note=note)
+
+        # 2️⃣ إذا في Refund → نفّذه
+        if refund_amount:
+            self.refund(
+                amount=refund_amount,
+                user=user,
+                reason="Refund after customer cancellation"
+            )
+
+
+    def _hours_to_service(self):
+        if not self.scheduled_at:
+            return None
+
+        delta = self.scheduled_at - timezone.now()
+        return delta.total_seconds() / 3600
+
+
+    @property
+    def is_instant_booking(self):
+        h = self._hours_to_service()
+        return (h is not None) and (h <= 3)
+
+
     @property
     def can_reschedule(self):
-        return self.status in ["ORDERED", "SCHEDULED"]
+        if self.status not in ["ORDERED", "SCHEDULED"]:
+            return False
+
+        h = self._hours_to_service()
+        if h is None:
+            return True
+
+        return h >= 12
+
+
+    @property
+    def reschedule_free(self):
+        h = self._hours_to_service()
+        if h is None:
+            return True
+
+        return h >= 24
+
+
+    @property
+    def cancel_free(self):
+        h = self._hours_to_service()
+        if h is None:
+            return True
+
+        return h >= 24
 
 
 # =====================================================================
@@ -648,15 +739,19 @@ class BookingStatusHistory(models.Model):
     class Meta:
         ordering = ["created_at"]
 
-
 class NoShowReport(models.Model):
+
     DECISION_CHOICES = [
         ("PENDING", "Pending"),
         ("APPROVED", "Approved"),
         ("REJECTED", "Rejected"),
     ]
 
-    booking_type = models.CharField(max_length=10, choices=[("private", "Private"), ("business", "Business")])
+    booking_type = models.CharField(
+        max_length=10,
+        choices=[("private", "Private"), ("business", "Business")]
+    )
+
     booking_id = models.PositiveIntegerField()
 
     provider = models.ForeignKey(
@@ -667,7 +762,12 @@ class NoShowReport(models.Model):
         related_name="no_show_reports_sent"
     )
 
-    decision = models.CharField(max_length=10, choices=DECISION_CHOICES, default="PENDING")
+    decision = models.CharField(
+        max_length=10,
+        choices=DECISION_CHOICES,
+        default="PENDING"
+    )
+
     provider_note = models.TextField(blank=True, null=True)
 
     reviewed_by = models.ForeignKey(
@@ -677,6 +777,7 @@ class NoShowReport(models.Model):
         blank=True,
         related_name="no_show_reports_reviewed"
     )
+
     reviewed_note = models.TextField(blank=True, null=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
 
@@ -685,47 +786,39 @@ class NoShowReport(models.Model):
     class Meta:
         ordering = ["-created_at"]
 
-    # ✅ جديد: جلب الحجز
     def get_booking(self):
         from home.models import PrivateBooking, BusinessBooking
+
         if self.booking_type == "private":
             return PrivateBooking.objects.filter(id=self.booking_id).first()
+
         return BusinessBooking.objects.filter(id=self.booking_id).first()
 
-    # ✅ جديد: تطبيق قرار الأدمن على الحجز
-    def apply_decision_to_booking(self):
+    def apply_decision(self):
         booking = self.get_booking()
         if not booking:
             return
 
-        # Approved => يصير NO_SHOW + ينضاف للتاريخ (Customer timeline)
         if self.decision == "APPROVED":
             booking.approve_no_show(
                 admin_user=self.reviewed_by,
-                note=self.reviewed_note or self.provider_note or "No show approved"
+                note=self.reviewed_note or self.provider_note
             )
 
-        # Rejected => ما نغير status، بس نسجل رفض عند المزود (provider timeline)
         elif self.decision == "REJECTED":
             booking.reject_no_show(
                 admin_user=self.reviewed_by,
-                note=self.reviewed_note or "No show rejected"
+                note=self.reviewed_note
             )
 
     def save(self, *args, **kwargs):
-        is_update = self.pk is not None
         old_decision = None
-
-        if is_update:
-            old_decision = NoShowReport.objects.filter(pk=self.pk).values_list("decision", flat=True).first()
+        if self.pk:
+            old_decision = NoShowReport.objects.get(pk=self.pk).decision
 
         super().save(*args, **kwargs)
 
-        # ✅ طبّق فقط إذا تغير القرار من Pending إلى Approved/Rejected
         if old_decision != self.decision and self.decision in ["APPROVED", "REJECTED"]:
-            # ثبت وقت المراجعة لو مو موجود
-            if not self.reviewed_at:
-                self.reviewed_at = timezone.now()
-                super().save(update_fields=["reviewed_at"])
-
-            self.apply_decision_to_booking()
+            self.reviewed_at = timezone.now()
+            super().save(update_fields=["reviewed_at"])
+            self.apply_decision()

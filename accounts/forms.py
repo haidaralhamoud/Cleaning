@@ -187,3 +187,43 @@ class ProviderProfileForm(forms.ModelForm):
         }
 
 
+
+# accounts/forms.py
+from django import forms
+from .models import BookingChecklist
+
+class BookingChecklistForm(forms.ModelForm):
+    class Meta:
+        model = BookingChecklist
+        fields = [
+            # Kitchen
+            "kitchen_counters",
+            "kitchen_sink",
+            "kitchen_floor",
+            "kitchen_fridge",
+
+            # Bathroom
+            "bathroom_scrub",
+            "bathroom_mirrors",
+            "bathroom_floor",
+
+            # Bedrooms
+            "bedroom_beds",
+            "bedroom_dust",
+            "bedroom_floor",
+
+            # Living Room
+            "living_dust",
+            "living_vacuum",
+            "living_glass",
+
+            # Notes
+            "notes",
+        ]
+        widgets = {
+            "notes": forms.Textarea(attrs={
+                "placeholder": "Any special instructions?",
+                "rows": 3
+            })
+        }
+

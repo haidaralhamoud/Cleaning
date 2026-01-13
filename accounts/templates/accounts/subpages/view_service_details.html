@@ -248,6 +248,44 @@
   cursor: pointer;
 }
 
+.message-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px;
+  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+  color: #fff;
+  border-radius: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(13,110,253,.25);
+  margin-left:50px;
+}
+
+.message-btn .icon {
+  font-size: 18px;
+}
+
+/* 🔴 Badge */
+.msg-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background: #dc3545;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(220,53,69,.4);
+}
+
 
 
   </style>
@@ -362,16 +400,11 @@
 
       <!-- ACTION BUTTONS -->
       <div class="timeline-actions">
+{% if not hide_actions %}
+  <button class="btn-reschedule" type="button" onclick="openPopup()">Reschedule</button>
+  <button class="btn-cancel" type="button" onclick="openCancelPopup()">Cancel</button>
+{% endif %}
 
-        {% if booking.status not in "REFUNDED,CANCELLED_BY_CUSTOMER,NO_SHOW" %}
-          <button class="btn-reschedule" type="button" onclick="openPopup()">
-            Reschedule
-          </button>
-
-          <button class="btn-cancel" type="button" onclick="openCancelPopup()">
-            Cancel
-          </button>
-        {% endif %}
 
       </div>
     </div>
@@ -497,43 +530,130 @@
 
 
 
+<div class="card checklist">
+  <h3>Checklist</h3>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="checklist">
+
+    <div class="check-grid">
+
+      <!-- ===== LEFT COLUMN ===== -->
+      <div class="check-col">
+
+        <!-- Kitchen -->
+        <h4>Kitchen</h4>
+
+        <label>
+          <input type="checkbox" name="kitchen_counters"
+            {% if checklist_form.instance.kitchen_counters %}checked{% endif %}>
+          Wipe counters & surfaces
+        </label>
+
+        <label>
+          <input type="checkbox" name="kitchen_sink"
+            {% if checklist_form.instance.kitchen_sink %}checked{% endif %}>
+          Clean sink & faucet
+        </label>
+
+        <label>
+          <input type="checkbox" name="kitchen_floor"
+            {% if checklist_form.instance.kitchen_floor %}checked{% endif %}>
+          Mop floor
+        </label>
+
+        <label>
+          <input type="checkbox" name="kitchen_fridge"
+            {% if checklist_form.instance.kitchen_fridge %}checked{% endif %}>
+          Clean inside fridge (add-on)
+        </label>
+
+        <!-- Bathroom -->
+        <h4>Bathroom</h4>
+
+        <label>
+          <input type="checkbox" name="bathroom_scrub"
+            {% if checklist_form.instance.bathroom_scrub %}checked{% endif %}>
+          Scrub toilet, sink, shower
+        </label>
+
+        <label>
+          <input type="checkbox" name="bathroom_mirrors"
+            {% if checklist_form.instance.bathroom_mirrors %}checked{% endif %}>
+          Wipe mirrors & fixtures
+        </label>
+
+        <label>
+          <input type="checkbox" name="bathroom_floor"
+            {% if checklist_form.instance.bathroom_floor %}checked{% endif %}>
+          Mop floor
+        </label>
+
+      </div>
+
+      <!-- ===== RIGHT COLUMN ===== -->
+      <div class="check-col">
+
+        <!-- Bedrooms -->
+        <h4>Bedrooms</h4>
+
+        <label>
+          <input type="checkbox" name="bedroom_beds"
+            {% if checklist_form.instance.bedroom_beds %}checked{% endif %}>
+          Make beds
+        </label>
+
+        <label>
+          <input type="checkbox" name="bedroom_dust"
+            {% if checklist_form.instance.bedroom_dust %}checked{% endif %}>
+          Dust surfaces
+        </label>
+
+        <label>
+          <input type="checkbox" name="bedroom_floor"
+            {% if checklist_form.instance.bedroom_floor %}checked{% endif %}>
+          Mop/vacuum floors
+        </label>
+
+        <!-- Living Room -->
+        <h4>Living Room</h4>
+
+        <label>
+          <input type="checkbox" name="living_dust"
+            {% if checklist_form.instance.living_dust %}checked{% endif %}>
+          Dust furniture
+        </label>
+
+        <label>
+          <input type="checkbox" name="living_vacuum"
+            {% if checklist_form.instance.living_vacuum %}checked{% endif %}>
+          Vacuum carpet
+        </label>
+
+        <label>
+          <input type="checkbox" name="living_glass"
+            {% if checklist_form.instance.living_glass %}checked{% endif %}>
+          Wipe glass surfaces
+        </label>
+
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="notes-field">
+      <label>Notes</label>
+      {{ checklist_form.notes }}
+
+      <div class="end-actions">
+        <button type="submit" class="btn btn-blue">Save</button>
+      </div>
+    </div>
+
+  </form>
+</div>
 
 
-          <div class="card checklist">
-            <h3>Checklist</h3>
-            <div class="check-grid">
-              <div class="check-col">
-                <h4>Kitchen</h4>
-                <label><input type="checkbox" checked> Wipe counters & surfaces</label>
-                <label><input type="checkbox" checked> Clean sink & faucet</label>
-                <label><input type="checkbox" checked> Mop floor</label>
-                <label><input type="checkbox" checked> Clean inside fridge (add-on)</label>
-
-                <h4>Bathroom</h4>
-                <label><input type="checkbox" checked> Scrub toilet, sink, shower</label>
-                <label><input type="checkbox" checked> Wipe mirrors & fixtures</label>
-                <label><input type="checkbox" checked> Mop floor</label>
-              </div>
-              <div class="check-col">
-                <h4>Bedrooms</h4>
-                <label><input type="checkbox" checked> Make beds</label>
-                <label><input type="checkbox" checked> Dust surfaces</label>
-                <label><input type="checkbox" checked> Mop/vacuum floors</label>
-
-                <h4>Living Room</h4>
-                <label><input type="checkbox" checked> Dust furniture</label>
-                <label><input type="checkbox" checked> Vacuum carpet</label>
-                <label><input type="checkbox" checked> Wipe glass surfaces</label>
-              </div>
-            </div>
-            <div class="notes-field">
-              <label>Notes</label>
-              <textarea placeholder="Any special instructions?"></textarea>
-              <div class="end-actions">
-                <button class="btn btn-blue">Save</button>
-              </div>
-            </div>
-          </div>
 
           <div class="card notes-card">
             <h3>Notes</h3>
@@ -548,18 +668,46 @@
 
         <!-- العمود اليميني -->
         <div class="right-col">
-          <div class="card provider">
-            <h3>Provider Assigned</h3>
-            <div class="provider-row">
-              <div class="avatar ellipse-1857"></div>
-              <div>
-                <b>Sophia Carter</b>
-                <small>Rating: 4.8 (120 reviews)</small>
-              </div>
-            </div>
-            <button class="btn btn-blue"><a href="{% url 'accounts:chat' %}">Messagea</a></button>
-          </div>
+       <div class="card provider">
+  <h3>Provider Assigned</h3>
 
+  {% if booking.provider %}
+    <div class="provider-row">
+      <div class="avatar ellipse-1857"></div>
+      <div>
+        <b>
+          {{ booking.provider.get_full_name|default:booking.provider.username }}
+        </b>
+
+        {% if booking.provider.profile %}
+          <small>
+            Rating: {{ booking.provider.profile.rating }}
+            ({{ booking.provider.profile.reviews_count }} reviews)
+          </small>
+        {% else %}
+          <small>No rating yet</small>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p style="opacity:.6;">No provider assigned yet</p>
+  {% endif %}
+              <a href="{% url 'accounts:booking_chat' booking_type booking.id %}"
+                class="message-btn">
+
+                <span class="icon">💬</span>
+                <span class="text">Message</span>
+
+                {% if customer_unread_messages > 0 %}
+                  <span class="msg-badge">{{ customer_unread_messages }}</span>
+                {% endif %}
+              </a>
+
+
+
+</div>
+
+ 
           <div class="card timing">
             <h3>Time Tracking</h3>
             <p><span class="muted">Quoted Time:</span> <b>3 hours</b></p>
