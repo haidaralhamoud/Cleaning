@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Customer, Service , BookingChecklist
+from .models import Customer, CustomerPreferences, LoyaltyTier, Promotion, Reward, Service , BookingChecklist
 
 from home.models import PrivateBooking, BusinessBooking
 @admin.register(Service)
@@ -85,3 +85,87 @@ class CustomerAdmin(admin.ModelAdmin):
     formatted_addons.short_description = "Custom Add-ons"
 
 
+
+@admin.register(LoyaltyTier)
+class LoyaltyTierAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "min_points",
+        "max_points",
+        "is_active",
+        "order",
+    )
+
+    list_editable = (
+        "order",
+        "is_active",
+    )
+
+    search_fields = ("name",)
+    ordering = ("order",)
+
+
+
+@admin.register(Reward)
+class RewardAdmin(admin.ModelAdmin):
+    list_display = ("title", "points_required", "is_active")
+    list_editable = ("points_required", "is_active")
+
+
+
+
+@admin.register(Promotion)
+class PromotionAdmin(admin.ModelAdmin):
+    list_display = (
+        "title",
+        "points_multiplier",
+        "start_date",
+        "end_date",
+        "is_active",
+    )
+    list_filter = ("is_active",)
+    search_fields = ("title",)    
+
+
+
+
+
+@admin.register(CustomerPreferences)
+class CustomerPreferencesAdmin(admin.ModelAdmin):
+    list_display = (
+        "customer",
+        "frequency",
+        "updated_at",
+    )
+
+    search_fields = (
+        "customer__first_name",
+        "customer__last_name",
+        "customer__email",
+    )
+
+    readonly_fields = ("updated_at",)
+
+    fieldsets = (
+        ("Customer", {
+            "fields": ("customer",)
+        }),
+        ("Cleaning Preferences", {
+            "fields": ("cleaning_types", "priorities")
+        }),
+        ("Products", {
+            "fields": ("preferred_products", "excluded_products")
+        }),
+        ("Scheduling", {
+            "fields": ("frequency",)
+        }),
+        ("Lifestyle & Add-ons", {
+            "fields": ("lifestyle_addons",)
+        }),
+        ("Assembly & Renovations", {
+            "fields": ("assembly_services",)
+        }),
+        ("System", {
+            "fields": ("updated_at",)
+        }),
+    )    

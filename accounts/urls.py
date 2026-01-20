@@ -1,6 +1,8 @@
 from django.urls import include, path
+
+from accounts.views_admin import finalize_booking
 from . import views
-from .views import booking_chat
+from .views import booking_chat, redeem_reward
 from django.contrib.auth import views as auth_views
 from .views_admin import finalize_booking
 
@@ -82,6 +84,19 @@ path(
 
 path("chat/<str:booking_type>/<int:booking_id>/", views.booking_chat, name="booking_chat"),
 
+
+path(
+    "admin/bookings/<str:booking_type>/<int:booking_id>/finalize/",
+    finalize_booking,
+    name="finalize_booking"
+),
+
+
+    path(
+        "loyalty/redeem/<int:reward_id>/",
+        views.redeem_reward,
+        name="redeem_reward"
+    ),
 ]
 path(
     "admin/bookings/<str:booking_type>/<int:booking_id>/finalize/",

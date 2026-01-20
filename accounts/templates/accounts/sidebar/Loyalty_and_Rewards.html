@@ -11,6 +11,127 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Loyalty_and_Rewards.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <style>
+    .tier.active{
+  outline: 3px solid #0ea5e9;
+  transform: translateY(-2px);
+}
+.tier {
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  border: 2px solid transparent;
+  transition: all .25s ease;
+}
+
+/* ===== BRONZE ===== */
+.tier.bronze {
+  background: #FFF4E6;
+  border-color: #E6A15A;
+  color: #8A4B12;
+}
+
+/* ===== SILVER ===== */
+.tier.silver {
+  background: #F5F6F8;
+  border-color: #C7CBD1;
+  color: #4B5563;
+}
+
+/* ===== GOLD ===== */
+.tier.gold {
+  background: #FFF9DB;
+  border-color: #F0C75E;
+  color: #8B6B00;
+}
+
+/* ===== ACTIVE ===== */
+.tier.active {
+  box-shadow: 0 0 0 3px rgba(0,0,0,.08);
+  transform: scale(1.03);
+}
+.tier.active::after {
+  content: "✓ Your level";
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ===== PROMOTION CARD ===== */
+.promo {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff, #f3fbff);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 12px 30px rgba(0, 160, 200, 0.18);
+  border: 2px solid #00b4d8;
+  overflow: hidden;
+  animation: promoGlow 2.5s infinite ease-in-out;
+}
+
+/* subtle glow animation */
+@keyframes promoGlow {
+  0% { box-shadow: 0 0 0 rgba(0,180,216,0.4); }
+  50% { box-shadow: 0 0 25px rgba(0,180,216,0.55); }
+  100% { box-shadow: 0 0 0 rgba(0,180,216,0.4); }
+}
+
+/* ===== BADGE ===== */
+.promo::before {
+  content: "🔥 Limited Offer";
+  position: absolute;
+  top: 14px;
+  left: -40px;
+  background: linear-gradient(135deg, #ff9800, #ff5722);
+  color: #fff;
+  padding: 6px 45px;
+  font-size: 13px;
+  font-weight: 700;
+  transform: rotate(-45deg);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* ===== IMAGE ===== */
+.promo img {
+  width: 100%;
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+
+/* ===== TITLE ===== */
+.promo h5 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 10px 0 6px;
+}
+
+/* ===== DESCRIPTION ===== */
+.promo p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+/* ===== CTA BUTTON ===== */
+.promo .btn {
+  width: 100%;
+  background: linear-gradient(135deg, #00b4d8, #0077b6);
+  color: #fff;
+  font-weight: 800;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 16px;
+  border: none;
+  transition: all 0.25s ease;
+}
+
+.promo .btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0, 180, 216, 0.5);
+}
+
+  </style>
 </head>
 <body>
 <!-- HEADER -->
@@ -48,8 +169,10 @@
       <div class="profile-head">
         <div class="avatar"></div>
         <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
+          <div class="name">
+            {{ request.user.get_full_name|default:request.user.username }}
+          </div>
+          <div class="id">ID: {{ request.user.id }}</div>
         </div>
       </div>
 
@@ -80,88 +203,122 @@
       <section class="card fade-in" style="animation-delay:.05s">
         <div class="banner-sky"></div>
 
-        <!-- Points Balance -->
-        <div class="points-box">
-          <div class="points-text">
-            <small>Points Balance</small>
-            <strong>1,250</strong>
-            <span>You're only 250 pts away from Gold Tier 🎉</span>
-          </div>
-          <div class="tier-pill">
-            <img src="{% static 'images/medal-second-place0.png' %}" alt="">
-            <b>Silver Member</b>
-          </div>
-        </div>
+<!-- Points Balance -->
+<div class="points-box">
+  <div class="points-text">
+    <small>Points Balance</small>
+    <strong>{{ points_balance }}</strong>
+
+    {% if next_tier_name %}
+      <span>You're only {{ next_tier_points }} pts away from {{ next_tier_name }} Tier 🎉</span>
+    {% else %}
+      <span>You're at the highest tier 🎉</span>
+    {% endif %}
+  </div>
+
+  <div class="tier-pill">
+{% if current_tier %}
+  <div class="tier-pill">
+    <b>{{ current_tier.name }} Member</b>
+  </div>
+{% endif %}
+  </div>
+</div>
 
         <!-- Tiers -->
         <h3 class="section-title">Tiers &amp; Status</h3>
         <div class="tiers">
-          <div class="tier bronze">
-            <h4>Bronze</h4>
-            <p>(0–999 pts)</p>
-            <p>Earn 5 pts per $1</p>
-          </div>
-          <div class="tier silver">
-            <h4>Silver</h4>
-            <p>(1,000–2,999 pts)</p>
-            <p>Priority booking, 10% off add-ons</p>
-          </div>
-          <div class="tier gold">
-            <h4>Gold</h4>
-            <p>(+ 3,000 pts)</p>
-            <p>15% off all services, free birthday cleaning</p>
-          </div>
+          {% for tier in tiers %}
+            <div class="tier {{ tier.color }} {% if current_tier and tier.id == current_tier.id %}active{% endif %}">
+              <h4>{{ tier.name }}</h4>
+
+              {% if tier.max_points %}
+                <p>({{ tier.min_points }}–{{ tier.max_points }} pts)</p>
+              {% else %}
+                <p>(+ {{ tier.min_points }} pts)</p>
+              {% endif %}
+
+              <p>{{ tier.benefits }}</p>
+            </div>
+          {% endfor %}
         </div>
+
+
 
         <!-- Milestones -->
-        <h3 class="section-title">Milestone Tracker</h3>
-        <div class="milestones">
-          <div class="milestone">
-            <div class="row">
-              <b>Book 5 cleanings</b>
-              <small>3/5</small>
-            </div>
-            <div class="progress"><span class="fill" data-pct="60"></span></div>
-            <div class="hint">Book 2 more to unlock a Free Add-on!</div>
-          </div>
+            <h3 class="section-title">Milestone Tracker</h3>
+            <div class="milestones">
 
-          <div class="milestone">
-            <div class="row">
-              <b>Refer 3 friends</b>
-              <small>1/3</small>
+              <!-- Book 5 cleanings -->
+              <div class="milestone">
+                <div class="row">
+                  <b>Book {{ book_5_target }} cleanings</b>
+                  <small>{{ book_5_done }}/{{ book_5_target }}</small>
+                </div>
+                <div class="progress">
+                  <span class="fill" data-pct="{{ book_5_percent }}"></span>
+                </div>
+
+                {% if book_5_done < book_5_target %}
+                  <div class="hint">
+                    Book {{ book_5_target|add:"-"|add:book_5_done }} more to unlock a Free Add-on!
+                  </div>
+                {% else %}
+                  <div class="hint success">🎉 Milestone completed!</div>
+                {% endif %}
+              </div>
+
+              <!-- Refer 3 friends -->
+              <div class="milestone">
+                <div class="row">
+                  <b>Refer {{ refer_target }} friends</b>
+                  <small>{{ refer_done }}/{{ refer_target }}</small>
+                </div>
+                <div class="progress">
+                  <span class="fill" data-pct="{{ refer_percent }}"></span>
+                </div>
+
+                {% if refer_done < refer_target %}
+                  <div class="hint">
+                    Invite {{ refer_target|add:"-"|add:refer_done }} more friends to unlock a Free Service!
+                  </div>
+                {% else %}
+                  <div class="hint success">🎉 Referral reward unlocked!</div>
+                {% endif %}
+              </div>
+
             </div>
-            <div class="progress"><span class="fill" data-pct="33"></span></div>
-            <div class="hint">Next reward: Free Service</div>
-          </div>
-        </div>
+
 
         <!-- Rewards -->
         <h3 class="section-title">Available Rewards</h3>
         <div class="rewards">
-          <div class="reward">
-            <div class="sub" style="color:var(--sky-strong)">1,000 points</div>
-            <h5>50% Off Deep Cleaning</h5>
-            <div class="desc">Get a deep cleaning service at half the price.</div>
-            <button class="btn">Redeem Now</button>
-          </div>
+          {% for r in rewards %}
+            <div class="reward {% if not r.can_redeem %}locked{% endif %}">
+              <div class="sub"
+                  style="{% if r.can_redeem %}color:var(--sky-strong){% endif %}">
+                {{ r.points_required }} points
+              </div>
 
-          <div class="reward locked">
-            <div class="sub">2,000 points</div>
-            <h5>Free Standard Cleaning</h5>
-            <div class="desc">Enjoy a complimentary standard cleaning service.</div>
-            <button class="btn lock">
-              <img src="{% static 'images/lock0.png' %}" alt=""> Earn 750 more points
-            </button>
-          </div>
+              <h5>{{ r.title }}</h5>
+              <div class="desc">{{ r.description }}</div>
 
-          <div class="reward locked">
-            <div class="sub">1,500 points</div>
-            <h5>Free Babysitting Hour</h5>
-            <div class="desc">Get a free hour of babysitting from our trusted partners.</div>
-            <button class="btn lock">
-              <img src="{% static 'images/lock1.png' %}" alt=""> Earn 250 more points
-            </button>
-          </div>
+              {% if r.can_redeem %}
+                <form method="post" action="{% url 'accounts:redeem_reward' r.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">
+                      Redeem Now
+                    </button>
+                  </form>
+              {% else %}
+                <button class="btn lock" disabled>
+                  <img src="{% static 'images/lock0.png' %}" alt="">
+                  Earn {{ r.missing_points }} more points
+                </button>
+              {% endif %}
+            </div>
+          {% endfor %}
+
         </div>
 
         <!-- Refer -->
@@ -181,34 +338,45 @@
         <div class="grid-2">
           <div class="activity">
             <h3 class="section-title" style="margin-top:0">Available Rewards</h3>
-            <div class="item">
-              <div><b>Booking Completed</b></div>
-              <small>July 15, 2025</small>
-              <div class="pts green">+100 pts</div>
-            </div>
-            <div class="item">
-              <div><b>Review Completed</b></div>
-              <small>July 10, 2025</small>
-              <div class="pts green">+25 pts</div>
-            </div>
-            <div class="item">
-              <div><b>Redeemed: 50% Deep Cleaning</b></div>
-              <small>July 1, 2025</small>
-              <div class="pts red">-1,000 pts</div>
-            </div>
+
+            {% for t in transactions %}
+              <div class="item">
+                <div><b>{{ t.reason|default:"Points Update" }}</b></div>
+                <small>{{ t.created_at|date:"F d, Y" }}</small>
+                <div class="pts {% if t.amount > 0 %}green{% else %}red{% endif %}">
+                  {% if t.amount > 0 %}+{% endif %}{{ t.amount }} pts
+                </div>
+              </div>
+            {% empty %}
+              <div class="item">
+                <div><b>No Activity Yet</b></div>
+                <small>—</small>
+                <div class="pts">0 pts</div>
+              </div>
+            {% endfor %}
           </div>
 
-          <div class="promo">
-            <h3 class="section-title" style="margin-top:0">Promotions</h3>
-            <img src="{% static 'images/frame-16865525830.png' %}" alt="promotion">
-            <h5>Double Points Weekend</h5>
-            <p>Earn double points on all bookings this weekend</p>
-            <button class="btn">Book Now</button>
-          </div>
+            {% if promotion %}
+        <div class="promo">
+          <h3 class="section-title" style="margin-top:0">Promotions</h3>
+
+          <img src="{{ promotion.image.url }}" alt="promotion">
+
+          <h5>{{ promotion.title }}</h5>
+          <p>{{ promotion.description }}</p>
+
+          <button class="btn">
+            🚀 Book Now & Earn x{{ promotion.points_multiplier }} Points
+          </button>
+        </div>
+
+            {% endif %}
+
         </div>
       </section>
     </main>
   </div>
+
 <footer class="footer">
   <div class="footer-container">
     <!-- العمود 1: اللوجو والنص -->
@@ -231,8 +399,6 @@
             <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
           </div>
         </div>
-
-
       </div>
     </div>
 
