@@ -66,7 +66,8 @@ class Customer(models.Model):
         ],
         blank=True
     )
-
+    # ⭐ Referral Discount
+    has_referral_discount = models.BooleanField(default=False)
     # Address fields (original)
     country = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
@@ -413,3 +414,215 @@ class CommunicationPreference(models.Model):
 
     def __str__(self):
         return f"Communication Preferences - {self.user}"
+    
+
+
+class BookingNote(models.Model):
+    booking_type = models.CharField(max_length=10)  # private / business
+    booking_id = models.PositiveIntegerField()
+
+    text = models.TextField()
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Note for {self.booking_type} #{self.booking_id}"
+
+
+
+class PointsTransaction(models.Model):
+
+    REASON_CHOICES = [
+        ("BOOKING", "Booking"),
+        ("ADJUSTMENT", "Adjustment"),
+        ("REWARD", "Reward"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="points_transactions"
+    )
+
+    amount = models.IntegerField()  # + أو -
+    reason = models.CharField(max_length=20, choices=REASON_CHOICES)
+
+    booking_type = models.CharField(
+        max_length=10,
+        choices=[("private", "Private"), ("business", "Business")],
+        null=True,
+        blank=True
+    )
+    booking_id = models.PositiveIntegerField(null=True, blank=True)
+
+    note = models.CharField(max_length=255, blank=True)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="points_created"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} | {self.amount} pts"
+    
+
+
+
+class Referral(models.Model):
+    referrer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="referrals_made"
+    )
+
+    referred_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="referred_by",
+        null=True,
+        blank=True
+    )
+
+    code = models.CharField(max_length=20, unique=True)
+
+    is_completed = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.referrer} → {self.referred_user or 'Pending'}"
+
+
+class LoyaltyTier(models.Model):
+    name = models.CharField(max_length=50)
+
+    min_points = models.PositiveIntegerField()
+    max_points = models.PositiveIntegerField(null=True, blank=True)
+
+    description = models.CharField(max_length=255)
+    benefits = models.TextField()
+
+    color = models.CharField(
+        max_length=20,
+        default="bronze",
+        help_text="bronze / silver / gold"
+    )
+
+    is_active = models.BooleanField(default=True)
+    order = models.PositiveIntegerField(default=0)
+
+
+class Reward(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+
+    points_required = models.PositiveIntegerField()
+
+    is_active = models.BooleanField(default=True)
+
+    # مستقبلاً (optional)
+    # discount_percent = models.PositiveIntegerField(null=True, blank=True)
+    # free_service = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["points_required"]
+
+    def __str__(self):
+        return f"{self.title} ({self.points_required} pts)"
+
+
+
+class Promotion(models.Model):
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+
+    image = models.ImageField(
+        upload_to="promotions/",
+        blank=True,
+        null=True
+    )
+
+    # مثال: 2 = Double points
+    points_multiplier = models.PositiveIntegerField(
+        default=1,
+        help_text="1 = normal, 2 = double points, 3 = triple..."
+    )
+
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+
+    is_active = models.BooleanField(default=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-start_date"]
+
+    def __str__(self):
+        return f"{self.title} (x{self.points_multiplier})"
+
+    def is_current(self):
+        from django.utils import timezone
+        now = timezone.now()
+        return (
+            self.is_active
+            and self.start_date <= now <= self.end_date
+        )
+
+# accounts/models.py
+
+class CustomerPreferences(models.Model):
+    customer = models.OneToOneField(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="preferences"
+    )
+
+    # ===== Cleaning Types =====
+    cleaning_types = models.JSONField(default=list, blank=True)
+    # example: ["standard", "deep", "move_out"]
+
+    # ===== Products =====
+    preferred_products = models.JSONField(default=list, blank=True)
+    excluded_products = models.JSONField(default=list, blank=True)
+
+    # ===== Frequency =====
+    frequency = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True
+    )  # weekly / bi-weekly / monthly / on-demand
+
+    # ===== Priorities =====
+    priorities = models.JSONField(default=list, blank=True)
+    # ["kitchen", "bathroom"]
+
+    # ===== Lifestyle & Add-ons =====
+    lifestyle_addons = models.JSONField(default=list, blank=True)
+
+    # ===== Assembly & Renovations =====
+    assembly_services = models.JSONField(default=list, blank=True)
+
+    # ===== Meta =====
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Preferences for {self.customer}"

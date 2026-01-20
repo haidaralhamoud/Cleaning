@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import render, redirect , get_object_or_404
 from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm
 from django.contrib.auth.models import User
@@ -10,7 +11,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from .models import Customer , CustomerLocation , Incident , CustomerNote , PaymentMethod,CommunicationPreference
+from .models import Customer , CustomerLocation, CustomerPreferences , Incident , CustomerNote, LoyaltyTier , PaymentMethod,CommunicationPreference ,BookingNote, PointsTransaction, Promotion, Referral, Reward
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LoginView
@@ -35,6 +36,8 @@ from .forms import ProviderProfileForm
 # SIGN UP
 # ======================================================
 def sign_up(request):
+    ref_code = request.GET.get("ref")
+
     if request.method == "POST":
         form = CustomerForm(request.POST, request.FILES)
 
@@ -42,14 +45,14 @@ def sign_up(request):
             email = form.cleaned_data["email"]
             password = form.cleaned_data["password"]
 
-            # 1️⃣ إنشاء User (Django User)
+            # 1️⃣ إنشاء User
             user = User.objects.create_user(
                 username=email,
                 email=email,
                 password=password,
             )
 
-            # 2️⃣ إنشاء Customer وربطه
+            # 2️⃣ إنشاء Customer
             customer = form.save(commit=False)
             customer.user = user
             customer.primary_address = (
@@ -60,6 +63,20 @@ def sign_up(request):
             )
             customer.save()
             form.save_m2m()
+
+            # 3️⃣ REFERRAL LOGIC
+            if ref_code:
+                referral = Referral.objects.filter(
+                    code=ref_code,
+                    referred_user__isnull=True
+                ).first()
+
+                if referral:
+                    referral.referred_user = user
+                    referral.save()
+
+                    user.has_referral_discount = True
+                    user.save()
 
             return redirect("login")
     else:
@@ -442,6 +459,82 @@ def view_service_details(request, booking_type, booking_id):
     except ChatThread.DoesNotExist:
         customer_unread_messages = 0
 
+
+    # ===============================
+    # 📝 BOOKING NOTES
+    # ===============================
+    notes = BookingNote.objects.filter(
+        booking_type=booking_type,
+        booking_id=booking.id
+    )
+
+
+
+    # ===============================
+    # ➕ ADD NOTE
+    # ===============================
+    if request.method == "POST" and request.POST.get("form_type") == "note":
+        note_text = request.POST.get("note_text", "").strip()
+
+        if note_text:
+            BookingNote.objects.create(
+                booking_type=booking_type,
+                booking_id=booking.id,
+                text=note_text,
+                created_by=request.user
+            )
+
+        return redirect(request.path)
+
+
+    quoted_time = booking.format_minutes(
+        booking.quoted_duration_minutes
+    )
+
+    actual_time = booking.format_timedelta(
+        booking.actual_duration
+    )
+
+
+    
+    actual_duration = None
+
+    started = BookingStatusHistory.objects.filter(
+        booking_type=booking_type,
+        booking_id=booking.id,
+        status="STARTED"
+    ).order_by("created_at").first()
+
+    completed = BookingStatusHistory.objects.filter(
+        booking_type=booking_type,
+        booking_id=booking.id,
+        status="COMPLETED"
+    ).order_by("created_at").first()
+
+    if started and completed:
+        delta = completed.created_at - started.created_at
+        total_minutes = int(delta.total_seconds() // 60)
+
+        hours = total_minutes // 60
+        minutes = total_minutes % 60
+
+        actual_duration = f"{hours} hours {minutes} minutes"
+
+
+        started = BookingStatusHistory.objects.filter(
+        booking_type=booking_type,
+        booking_id=booking.id,
+        status="STARTED"
+    ).order_by("created_at").first()
+
+    completed = BookingStatusHistory.objects.filter(
+        booking_type=booking_type,
+        booking_id=booking.id,
+        status="COMPLETED"
+    ).order_by("created_at").first()
+
+    start_time = started.created_at if started else None
+    end_time = completed.created_at if completed else None
     # ===============================
     # 1️⃣1️⃣ RENDER
     # ===============================
@@ -455,8 +548,15 @@ def view_service_details(request, booking_type, booking_id):
             "hide_actions": hide_actions,
             "customer_unread_messages": customer_unread_messages,
             "checklist_form": checklist_form,
+            "notes": notes,   # 🔥
+            "quoted_time": quoted_time,
+            "actual_time": actual_time,
+            "actual_duration": actual_duration,
+            "start_time": start_time,
+            "end_time": end_time,
         },
     )
+
 
 
 @require_POST
@@ -575,9 +675,107 @@ def chat(request):
     return render(request, "accounts/subpages/chat.html")
 
 
-def Service_Preferences(request):
-    return render(request, "accounts/sidebar/Service_Preferences.html")
+CLEANING_CHOICES = [
+    ("Standard Clean", "Standard Clean"),
+    ("Deep Clean", "Deep Clean"),
+    ("Move-in/Move-out", "Move-in/Move-out"),
+    ("Event/Party (before & after)", "Event/Party (before & after)"),
+    ("Airbnb/Short-stay", "Airbnb/Short-stay"),
+    ("Emergency/Urgent", "Emergency/Urgent"),
+]
 
+
+
+@login_required
+def Service_Preferences(request):
+    customer = request.user.customer
+    prefs, _ = CustomerPreferences.objects.get_or_create(customer=customer)
+
+    # =====================================
+    # 🔹 AJAX SAVE (Save صغير لكل حقل)
+    # =====================================
+    if request.method == "POST" and request.headers.get("Content-Type") == "application/json":
+        data = json.loads(request.body)
+
+        field = data.get("field")
+        value = data.get("value", "").strip()
+
+        if field == "preferred_products":
+            if value and value not in prefs.preferred_products:
+                prefs.preferred_products.append(value)
+
+        elif field == "frequency":
+            prefs.frequency = value or None
+
+        elif field == "priorities":
+            if value and value not in prefs.priorities:
+                prefs.priorities.append(value)
+
+        elif field == "cleaning_types":
+            if value and value not in prefs.cleaning_types:
+                prefs.cleaning_types.append(value)
+
+        elif field == "lifestyle_addons":
+            if value and value not in prefs.lifestyle_addons:
+                prefs.lifestyle_addons.append(value)
+
+        elif field == "assembly_services":
+            if value and value not in prefs.assembly_services:
+                prefs.assembly_services.append(value)
+
+        prefs.save()
+        return JsonResponse({"status": "ok"})
+
+    # =====================================
+    # 🔹 SAVE الكبير (يحفظ كل الصفحة)
+    # =====================================
+    if request.method == "POST":
+
+        if "cleaning_types" in request.POST:
+            prefs.cleaning_types = request.POST.getlist("cleaning_types")
+
+        if "preferred_products" in request.POST:
+            prefs.preferred_products = request.POST.getlist("preferred_products")
+
+        if "excluded_products" in request.POST:
+            prefs.excluded_products = request.POST.getlist("excluded_products")
+
+        if "frequency" in request.POST:
+            prefs.frequency = request.POST.get("frequency") or None
+
+        if "priorities" in request.POST:
+            prefs.priorities = request.POST.getlist("priorities")
+
+        if "lifestyle_addons" in request.POST:
+            prefs.lifestyle_addons = request.POST.getlist("lifestyle_addons")
+
+        if "assembly_services" in request.POST:
+            prefs.assembly_services = request.POST.getlist("assembly_services")
+
+        prefs.save()
+        return redirect("accounts:Service_Preferences")
+
+    # =====================================
+    # 🔹 CONTEXT (للعرض + Summary)
+    # =====================================
+    context = {
+        "prefs": prefs,
+
+        "selected_cleaning": prefs.cleaning_types or [],
+        "selected_products": prefs.preferred_products or [],
+        "excluded_products": prefs.excluded_products or [],
+        "selected_frequency": prefs.frequency or "",
+
+        "selected_priorities": prefs.priorities or [],
+        "selected_lifestyle": prefs.lifestyle_addons or [],
+        "selected_assembly": prefs.assembly_services or [],
+
+        "customer_name": f"{customer.first_name} {customer.last_name}".strip(),
+        "customer_id": customer.id,
+        "pref_id": prefs.id,
+    }
+
+    return render(request, "accounts/sidebar/Service_Preferences.html", context)
 
 def Communication(request):
     pref, created = CommunicationPreference.objects.get_or_create(
@@ -744,9 +942,160 @@ def Service_History_and_Ratings(request):
     return render(request, "accounts/sidebar/Service_History_and_Ratings.html")
 
 
-def Loyalty_and_Rewards(request):
-    return render(request, "accounts/sidebar/Loyalty_and_Rewards.html")
+from django.contrib.auth.decorators import login_required
+from accounts.models import (
+    PointsTransaction,
+    Referral,
+    LoyaltyTier,
+)
+from home.models import PrivateBooking, BusinessBooking
 
+
+@login_required
+def Loyalty_and_Rewards(request):
+
+    # ==================================================
+    # POINTS
+    # ==================================================
+    transactions = PointsTransaction.objects.filter(
+        user=request.user
+    ).order_by("-created_at")
+
+    points_balance = sum(t.amount for t in transactions)
+
+    # ==================================================
+    # TIERS (FROM DATABASE)
+    # ==================================================
+    tiers = LoyaltyTier.objects.filter(is_active=True).order_by("order")
+
+    current_tier = None
+    next_tier = None
+    next_tier_points = 0
+
+    for tier in tiers:
+        if tier.max_points is not None:
+            if tier.min_points <= points_balance <= tier.max_points:
+                current_tier = tier
+                break
+        else:
+            if points_balance >= tier.min_points:
+                current_tier = tier
+                break
+
+    if current_tier:
+        next_tier = tiers.filter(order__gt=current_tier.order).first()
+        if next_tier:
+            next_tier_points = max(
+                0,
+                next_tier.min_points - points_balance
+            )
+
+    # ==================================================
+    # MILESTONE 1: BOOK 5 CLEANINGS
+    # ==================================================
+    completed_private = PrivateBooking.objects.filter(
+        user=request.user,
+        status="COMPLETED"
+    ).count()
+
+    completed_business = BusinessBooking.objects.filter(
+        user=request.user,
+        status="COMPLETED"
+    ).count()
+
+    total_completed_bookings = completed_private + completed_business
+
+    book_5_target = 5
+    book_5_done = min(total_completed_bookings, book_5_target)
+    book_5_percent = int((book_5_done / book_5_target) * 100)
+
+    # ==================================================
+    # MILESTONE 2: REFER 3 FRIENDS
+    # ==================================================
+    refer_target = 3
+
+    refer_done = Referral.objects.filter(
+        referrer=request.user,
+        is_completed=True
+    ).count()
+
+    refer_done = min(refer_done, refer_target)
+    refer_percent = int((refer_done / refer_target) * 100)
+
+    # ==================================================
+    # REWARDS (STATIC FOR NOW)
+    # ==================================================
+
+    rewards_qs = Reward.objects.filter(is_active=True)
+
+    rewards = []
+    for r in rewards_qs:
+        rewards.append({
+            "id": r.id,
+            "title": r.title,
+            "description": r.description,
+            "points_required": r.points_required,
+            "can_redeem": points_balance >= r.points_required,
+            "missing_points": max(0, r.points_required - points_balance),
+        })
+
+    promotion = Promotion.objects.filter(
+        is_active=True,
+        start_date__lte=timezone.now(),
+        end_date__gte=timezone.now()
+    ).first()
+    # ==================================================
+    # RENDER
+    # ==================================================
+    return render(
+        request,
+        "accounts/sidebar/Loyalty_and_Rewards.html",
+        {
+            "points_balance": points_balance,
+            "transactions": transactions[:10],
+
+            # tiers
+            "tiers": tiers,
+            "current_tier": current_tier,
+            "next_tier": next_tier,
+            "next_tier_points": next_tier_points,
+
+            # milestones
+            "book_5_done": book_5_done,
+            "book_5_target": book_5_target,
+            "book_5_percent": book_5_percent,
+
+            "refer_done": refer_done,
+            "refer_target": refer_target,
+            "refer_percent": refer_percent,
+
+            # rewards
+            "rewards": rewards,  # ✅ هون
+
+            "promotion": promotion,
+        }
+    )
+
+@login_required
+def redeem_reward(request, reward_id):
+    reward = get_object_or_404(Reward, id=reward_id, is_active=True)
+
+    user = request.user
+    balance = sum(t.amount for t in user.points_transactions.all())
+
+    if balance < reward.points_required:
+        messages.error(request, "Not enough points")
+        return redirect("accounts:Loyalty_and_Rewards")
+
+    PointsTransaction.objects.create(
+        user=user,
+        amount=-reward.points_required,
+        reason="REWARD",
+        note=f"Redeemed reward: {reward.title}"
+    )
+
+    messages.success(request, "Reward redeemed successfully 🎉")
+    return redirect("accounts:Loyalty_and_Rewards")
 
 # ======================================================
 # LOGOUT
@@ -809,13 +1158,38 @@ def provider_booking_detail(request, booking_type, booking_id):
     timeline = BookingStatusHistory.objects.filter(
         booking_type=booking_type,
         booking_id=booking.id
-    )
+    ).order_by("created_at")
 
-    return render(request, "accounts/provider/provider_booking_detail.html", {
-        "booking": booking,
-        "booking_type": booking_type,
-        "timeline": timeline
-    })
+    # =========================
+    # 🔔 unread messages count
+    # =========================
+    from accounts.models import ChatThread, ChatMessage
+
+    unread_messages_count = 0
+    try:
+        thread = ChatThread.objects.get(
+            booking_type=booking_type,
+            booking_id=booking.id
+        )
+
+        unread_messages_count = ChatMessage.objects.filter(
+            thread=thread,
+            is_read=False
+        ).exclude(sender=request.user).count()
+
+    except ChatThread.DoesNotExist:
+        pass
+
+    return render(
+        request,
+        "accounts/provider/provider_booking_detail.html",
+        {
+            "booking": booking,
+            "booking_type": booking_type,
+            "timeline": timeline,
+            "unread_messages_count": unread_messages_count,  # 🔥 مهم
+        }
+    )
 
 
 

@@ -1,5 +1,6 @@
 {% load static %}
 {% load bootstrap4 %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,11 +10,100 @@
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="{% static 'css/Service_Preferences.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
+  <style>
+    .btn-primary {
+    background: linear-gradient(135deg, #35b46c, #2fa360);
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(53,180,108,0.35);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(53,180,108,0.45);
+}
+.custom-field button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.custom-field input:focus + button {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* ===== Custom input + save ===== */
+.custom-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* input */
+.custom-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid #cfe7df;
+  font-size: 14px;
+  transition: border 0.25s ease, box-shadow 0.25s ease;
+}
+
+.custom-input:focus {
+  outline: none;
+  border-color: #38b87c;
+  box-shadow: 0 0 0 3px rgba(56,184,124,0.15);
+}
+
+/* save button */
+.btn-mini-save {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #38b87c, #2fa56c);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(56,184,124,0.35);
+}
+
+/* hover */
+.btn-mini-save:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(56,184,124,0.45);
+}
+
+/* active */
+.btn-mini-save:active {
+  transform: scale(0.97);
+}
+
+/* disabled (بعد الحفظ) */
+.btn-mini-save.saved {
+  background: #e7f6ee;
+  color: #2fa56c;
+  box-shadow: none;
+  cursor: default;
+}
+
+  </style>
 </head>
+
 <body>
+
 <!-- HEADER -->
 <header class="main-header">
   <div class="logo">
@@ -34,50 +124,67 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-  <!-- ===== Mobile Header ===== -->
-  <div class="mobile-header">
-    <button class="menu-toggle floating" id="menuToggle">
-      <span class="arrow">&#8250;</span> <!-- › -->
-    </button>
 
-  </div>
+<!-- ===== Mobile Header ===== -->
+<div class="mobile-header">
+  <button class="menu-toggle floating" id="menuToggle">
+    <span class="arrow">&#8250;</span>
+  </button>
+</div>
 
-  <!-- ===== Layout ===== -->
-  <div class="layout">
+<!-- ===== Layout ===== -->
+<div class="layout">
 
-    <!-- ===== Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="profile-head">
+      <div class="avatar"></div>
+      <div>
+        <!-- ديناميكي -->
+        <div class="name">{% if customer_name %}{{ customer_name }}{% else %}Sophia Bennett{% endif %}</div>
+        <div class="id">ID: {% if customer_id %}{{ customer_id }}{% else %}123456{% endif %}</div>
       </div>
+    </div>
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
+    <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:none;">
+      {% csrf_token %}
+    </form>
 
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
+    <nav class="side-nav">
+      <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+      <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+      <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+      <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
 
-    <!-- ===== Main Content ===== -->
-    <main class="main">
-      <h1 class="page-title">Customize Your Cleaning Preferences</h1>
+      <!-- انت هون -->
+      <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item active"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+
+      <a href="{% url 'accounts:Communication' %}" class="nav-item"><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+      <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item"><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+      <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+      <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+      <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+      <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+
+      <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+        <img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main">
+
+    <h1 class="page-title">Customize Your Cleaning Preferences</h1>
+
+    <!-- ===== FORM: حفظ ضربة وحدة ===== -->
+    <form method="post" action="">
+      {% csrf_token %}
+
+      <!-- إذا بدك تربطها بكائن preferences موجود -->
+      {% if pref_id %}
+        <input type="hidden" name="pref_id" value="{{ pref_id }}">
+      {% endif %}
 
       <!-- ===== Summary Box ===== -->
       <div class="summary-card">
@@ -90,116 +197,484 @@
         </div>
 
         <div class="summary-grid">
+
           <div class="column">
             <h4>Tasks</h4>
-            <p>5 selected ,</p>
+            <p>
+              {% if selected_cleaning %}
+                {{ selected_cleaning|length }} selected ,
+              {% else %}
+                0 selected ,
+              {% endif %}
+            </p>
+
             <div class="tags">
-              <span class="tag blue">Dusting</span>
-              <span class="tag green">Kitchen-only</span>
-              <span class="tag yellow">Window cleaning</span>
-              <span class="tag sky">Fridge/Oven</span>
-              <span class="tag red">Carpet cleaning</span>
+              {% for item in selected_cleaning %}
+                <span class="tag blue">{{ item }}</span>
+              {% empty %}
+                <span class="tag sky">No tasks selected</span>
+              {% endfor %}
             </div>
-            <p><strong>Product:</strong> 2 Preferred , 1 excluded</p>
-            <p><strong>Frequency:</strong> Bi-weekly</p>
+
+            <p>
+              <strong>Product:</strong>
+              {% if selected_products %}{{ selected_products|length }} selected{% else %}0 selected{% endif %}
+              {% if excluded_products %}, {{ excluded_products|length }} excluded{% endif %}
+            </p>
+
+            <p>
+              <strong>Frequency:</strong>
+              {% if selected_frequency %}{{ selected_frequency }}{% else %}—{% endif %}
+            </p>
           </div>
 
           <div class="column">
             <h4>Priorities</h4>
             <div class="tags">
-              <span class="tag sky">Kitchen</span>
-              <span class="tag green">Living Room</span>
-              <span class="tag yellow">Bathroom</span>
+              {% for p in selected_priorities %}
+                <span class="tag green">{{ p }}</span>
+              {% empty %}
+                <span class="tag yellow">No priorities</span>
+              {% endfor %}
             </div>
-            <p><strong>Lifestyle & Add-ons Tab:</strong> 2 selected</p>
-            <p><strong>Assembly & Renovations:</strong> 1 selected</p>
+
+            <p>
+              <strong>Lifestyle & Add-ons Tab:</strong>
+              {% if selected_lifestyle %}{{ selected_lifestyle|length }} selected{% else %}0 selected{% endif %}
+            </p>
+
+            <p>
+              <strong>Assembly & Renovations:</strong>
+              {% if selected_assembly %}{{ selected_assembly|length }} selected{% else %}0 selected{% endif %}
+            </p>
           </div>
+
         </div>
       </div>
 
       <!-- ===== Cards Grid ===== -->
       <div class="cards-grid">
 
-        <div class="card">
-          <div class="card-header"><img src="{% static 'images/text-file0.png' %}"><h3>Cleaning</h3></div>
-          <label><input type="checkbox" name="clean" /> Standard Clean</label>
-          <label><input type="checkbox" name="clean" /> Deep Clean</label>
-          <label><input type="checkbox" name="clean" /> Move-in/Move-out</label>
-          <label><input type="checkbox" name="clean" /> Event/Party (before & after)</label>
-          <label><input type="checkbox" name="clean" /> Airbnb/Short-stay</label>
-          <label><input type="checkbox" name="clean" /> Emergency/Urgent</label>
+        <!-- Cleaning -->
+<div class="card">
+  <div class="card-header">
+    <img src="{% static 'images/text-file0.png' %}" alt="">
+    <h3>Cleaning</h3>
+  </div>
+
+  <label>
+    <input type="checkbox"
+           name="cleaning_types"
+           value="standard"
+           {% if "standard" in prefs.cleaning_types %}checked{% endif %}>
+    Standard Clean
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="cleaning_types"
+           value="deep"
+           {% if "deep" in prefs.cleaning_types %}checked{% endif %}>
+    Deep Clean
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="cleaning_types"
+           value="move"
+           {% if "move" in prefs.cleaning_types %}checked{% endif %}>
+    Move-in / Move-out
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="cleaning_types"
+           value="event"
+           {% if "event" in prefs.cleaning_types %}checked{% endif %}>
+    Event / Party (before & after)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="cleaning_types"
+           value="airbnb"
+           {% if "airbnb" in prefs.cleaning_types %}checked{% endif %}>
+    Airbnb / Short-stay
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="cleaning_types"
+           value="urgent"
+           {% if "urgent" in prefs.cleaning_types %}checked{% endif %}>
+    Emergency / Urgent
+  </label>
+</div>
+
+
+        <!-- Products -->
+<div class="card">
+  <div class="card-header">
+    <img src="{% static 'images/product0.png' %}" alt="">
+    <h3>Products</h3>
+  </div>
+
+  <label>
+    <input type="checkbox"
+           name="preferred_products"
+           value="eco"
+           {% if "eco" in prefs.preferred_products %}checked{% endif %}>
+    Eco-friendly
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="preferred_products"
+           value="standard"
+           {% if "standard" in prefs.preferred_products %}checked{% endif %}>
+    Standard
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="preferred_products"
+           value="fragrance_free"
+           {% if "fragrance_free" in prefs.preferred_products %}checked{% endif %}>
+    Fragrance-free
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="preferred_products"
+           value="disinfectant"
+           {% if "disinfectant" in prefs.preferred_products %}checked{% endif %}>
+    Disinfectant / Anti-bacterial
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="preferred_products"
+           value="customer_provided"
+           {% if "customer_provided" in prefs.preferred_products %}checked{% endif %}>
+    Customer-provided
+  </label>
+
+<div class="custom-field">
+  <input type="text"
+         class="custom-input"
+         name="products_custom"
+         placeholder="Customer provided products"
+         value="{{ products_custom|default:'' }}">
+
+  <button type="submit"
+          name="save_custom"
+          value="products"
+          class="btn-mini-save">
+    Save
+  </button>
+</div>
+
         </div>
 
-        <div class="card">
-          <div class="card-header"><img src="{% static 'images/product0.png' %}"><h3>Products</h3></div>
-          <label><input type="checkbox" name="prod" /> Eco-friendly</label>
-          <label><input type="checkbox" name="prod" /> Standard</label>
-          <label><input type="checkbox" name="prod" /> Fragrance-free</label>
-          <label><input type="checkbox" name="prod" /> Disinfectant / Anti-bacterial</label>
-          <label><input type="checkbox" name="prod" /> Customer-provided</label>
-          <input type="text" class="custom-input" placeholder="">
+
+        <!-- Frequency (اختيار واحد غالباً) -->
+<div class="card">
+  <div class="card-header">
+    <h3>⏰ Frequency</h3>
+  </div>
+
+  <label>
+    <input type="radio"
+           name="frequency"
+           value="weekly"
+           {% if prefs.frequency == "weekly" %}checked{% endif %}>
+    Weekly
+  </label>
+
+  <label>
+    <input type="radio"
+           name="frequency"
+           value="bi_weekly"
+           {% if prefs.frequency == "bi_weekly" %}checked{% endif %}>
+    Bi-Weekly
+  </label>
+
+  <label>
+    <input type="radio"
+           name="frequency"
+           value="monthly"
+           {% if prefs.frequency == "monthly" %}checked{% endif %}>
+    Monthly
+  </label>
+
+  <label>
+    <input type="radio"
+           name="frequency"
+           value="one_time"
+           {% if prefs.frequency == "one_time" %}checked{% endif %}>
+    One-Time
+  </label>
+
+  <label>
+    <input type="radio"
+           name="frequency"
+           value="on_demand"
+           {% if prefs.frequency == "on_demand" %}checked{% endif %}>
+    On-Demand (urgent within 3h)
+  </label>
+
+<div class="custom-field">
+  <input type="text"
+         class="custom-input"
+         name="frequency_custom"
+         placeholder="Custom frequency details"
+         value="{{ frequency_custom|default:'' }}">
+
+  <button type="submit"
+          name="save_custom"
+          value="frequency"
+          class="btn-mini-save">
+    Save
+  </button>
+</div>
+
+
         </div>
 
-        <div class="card">
-          <div class="card-header"><h3>⏰ Frequency</h3></div>
-          <label><input type="checkbox" name="freq" /> Weekly</label>
-          <label><input type="checkbox" name="freq" /> Bi-Weekly</label>
-          <label><input type="checkbox" name="freq" /> Monthly</label>
-          <label><input type="checkbox" name="freq" /> One-Time</label>
-          <label><input type="checkbox" name="freq" /> On-Demand (urgent within 3h)</label>
-          <input type="text" class="custom-input" placeholder="">
+
+        <!-- Priorities -->
+<div class="card">
+  <div class="card-header">
+    <img src="{% static 'images/scrum0.png' %}" alt="">
+    <h3>Priorities</h3>
+  </div>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="kitchen"
+           {% if "kitchen" in prefs.priorities %}checked{% endif %}>
+    Kitchen
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="living_room"
+           {% if "living_room" in prefs.priorities %}checked{% endif %}>
+    Living Room
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="bedrooms"
+           {% if "bedrooms" in prefs.priorities %}checked{% endif %}>
+    Bedrooms
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="bathrooms"
+           {% if "bathrooms" in prefs.priorities %}checked{% endif %}>
+    Bathrooms
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="balcony_garden"
+           {% if "balcony_garden" in prefs.priorities %}checked{% endif %}>
+    Balcony / Garden
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="office"
+           {% if "office" in prefs.priorities %}checked{% endif %}>
+    Office
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="priorities"
+           value="storage"
+           {% if "storage" in prefs.priorities %}checked{% endif %}>
+    Storage
+  </label>
+
+<div class="custom-field">
+  <input type="text"
+         class="custom-input"
+         name="priorities_custom"
+         placeholder="Custom priority notes"
+         value="{{ priorities_custom|default:'' }}">
+
+  <button type="submit"
+          name="save_custom"
+          value="priorities"
+          class="btn-mini-save">
+    Save
+  </button>
+</div>
+
+
         </div>
 
-        <div class="card">
-          <div class="card-header"><img src="{% static 'images/scrum0.png' %}"><h3>Priorities</h3></div>
-          <label><input type="checkbox" name="prio" /> Kitchen</label>
-          <label><input type="checkbox" name="prio" /> Living Room</label>
-          <label><input type="checkbox" name="prio" /> Bedrooms</label>
-          <label><input type="checkbox" name="prio" /> Bathrooms</label>
-          <label><input type="checkbox" name="prio" /> Balcony / Garden</label>
-          <label><input type="checkbox" name="prio" /> Office</label>
-          <label><input type="checkbox" name="prio" /> Storage</label>
-          <input type="text" class="custom-input" placeholder="">
-        </div>
 
-        <div class="card">
-          <div class="card-header"><h3>🌿 Lifestyle & Add-ons Tab</h3></div>
-          <label><input type="checkbox" name="life" /> Event staffing (setup, serving, after-cleaning)</label>
-          <label><input type="checkbox" name="life" /> Errand services (package pickup, deliveries, groceries)</label>
-          <label><input type="checkbox" name="life" /> Elderly assistance (non-medical)</label>
-          <label><input type="checkbox" name="life" /> Pet care (feeding, walking, sitting)</label>
-          <label><input type="checkbox" name="life" /> Plant care (watering, replanting)</label>
-          <label><input type="checkbox" name="life" /> Decluttering & organizing assistance</label>
-          <label><input type="checkbox" name="life" /> House sitting (vacation care)</label>
-          <label><input type="checkbox" name="life" /> Babysitting (child care, hourly)</label>
-          <label><input type="checkbox" name="life" /> Housemaid per hour (help beyond cleaning)</label>
-        </div>
+        <!-- Lifestyle -->
+<div class="card">
+  <div class="card-header">
+    <h3>🌿 Lifestyle & Add-ons Tab</h3>
+  </div>
 
-        <div class="card">
-          <div class="card-header"><h3>🧰 Assembly & Renovations</h3></div>
-          <label><input type="checkbox" name="assem" /> IKEA & furniture assembly</label>
-          <label><input type="checkbox" name="assem" /> Minor renovations (painting, flooring, repairs)</label>
-          <label><input type="checkbox" name="assem" /> Mounting (TVs, shelves, artwork)</label>
-          <label><input type="checkbox" name="assem" /> Light repairs (doors, seals, curtain rods)</label>
-          <label><input type="checkbox" name="assem" /> Large renovation project</label>
-        </div>
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="event_staffing"
+           {% if "event_staffing" in prefs.lifestyle_addons %}checked{% endif %}>
+    Event staffing (setup, serving, after-cleaning)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="errand_services"
+           {% if "errand_services" in prefs.lifestyle_addons %}checked{% endif %}>
+    Errand services (package pickup, deliveries, groceries)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="elderly_assistance"
+           {% if "elderly_assistance" in prefs.lifestyle_addons %}checked{% endif %}>
+    Elderly assistance (non-medical)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="pet_care"
+           {% if "pet_care" in prefs.lifestyle_addons %}checked{% endif %}>
+    Pet care (feeding, walking, sitting)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="plant_care"
+           {% if "plant_care" in prefs.lifestyle_addons %}checked{% endif %}>
+    Plant care (watering, replanting)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="decluttering"
+           {% if "decluttering" in prefs.lifestyle_addons %}checked{% endif %}>
+    Decluttering & organizing assistance
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="house_sitting"
+           {% if "house_sitting" in prefs.lifestyle_addons %}checked{% endif %}>
+    House sitting (vacation care)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="babysitting"
+           {% if "babysitting" in prefs.lifestyle_addons %}checked{% endif %}>
+    Babysitting (child care, hourly)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="lifestyle_addons"
+           value="housemaid_hourly"
+           {% if "housemaid_hourly" in prefs.lifestyle_addons %}checked{% endif %}>
+    Housemaid per hour (general help beyond cleaning, flexible tasks)
+  </label>
+</div>
+
+
+        <!-- Assembly -->
+<div class="card">
+  <div class="card-header">
+    <h3>🧰 Assembly & Renovations</h3>
+  </div>
+
+  <label>
+    <input type="checkbox"
+           name="assembly_services"
+           value="ikea_furniture"
+           {% if "ikea_furniture" in prefs.assembly_services %}checked{% endif %}>
+    IKEA & furniture assembly
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="assembly_services"
+           value="minor_renovations"
+           {% if "minor_renovations" in prefs.assembly_services %}checked{% endif %}>
+    Minor renovations (painting, flooring, repairs)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="assembly_services"
+           value="mounting"
+           {% if "mounting" in prefs.assembly_services %}checked{% endif %}>
+    Mounting (TVs, shelves, artwork)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="assembly_services"
+           value="light_repairs"
+           {% if "light_repairs" in prefs.assembly_services %}checked{% endif %}>
+    Light repairs (doors, seals, curtain rods)
+  </label>
+
+  <label>
+    <input type="checkbox"
+           name="assembly_services"
+           value="large_renovation"
+           {% if "large_renovation" in prefs.assembly_services %}checked{% endif %}>
+    Large renovation project
+  </label>
+</div>
+
 
       </div>
-    </main>
-  </div>
+
+      <!-- زر حفظ -->
+      <div style="margin-top:14px;">
+        <button type="submit" class="btn btn-primary">Save Preferences</button>
+      </div>
+
+    </form>
+  </main>
+</div>
+
+<!-- FOOTER -->
 <footer class="footer">
   <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
+
     <div class="footer-col about">
       <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
       <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
+        At Hembla, we believe home should be your haven, not your to-do list.
         From cleaning to care, we’re here to make life easier, one home at a time.
       </p>
 
-      <!-- الصف الإضافي تحت النص -->
       <div class="bottom-left">
-        <!-- Connect -->
         <div class="connect">
           <h4>Connect</h4>
           <div class="socials">
@@ -209,12 +684,9 @@
             <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
           </div>
         </div>
-
-
       </div>
     </div>
 
-    <!-- العمود 2: Support -->
     <div class="footer-col support">
       <h4>Support</h4>
       <ul>
@@ -223,17 +695,16 @@
         <li><a href="#">Working Hours</a></li>
         <li><a href="#">FAQ</a></li>
       </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
+
+      <div class="app-download">
+        <h4>App Download</h4>
+        <div class="apps">
+          <img src="{% static 'images/mobile0.png'%}" alt="mobile">
+          <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
         </div>
+      </div>
     </div>
 
-    <!-- العمود 3: Company -->
     <div class="footer-col company">
       <h4>Company</h4>
       <ul>
@@ -244,7 +715,6 @@
       </ul>
     </div>
 
-    <!-- العمود 4: Legal / Privacy -->
     <div class="footer-col legal">
       <h4>Legal/Privacy</h4>
       <ul>
@@ -254,12 +724,11 @@
         <li><a href="#">Accessibility Statement</a></li>
       </ul>
     </div>
+
   </div>
 
-  <!-- الخط الفاصل -->
   <hr class="footer-line">
 
-  <!-- الصف السفلي -->
   <div class="footer-bottom">
     <div class="language-box">
       <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
@@ -269,29 +738,61 @@
   </div>
 </footer>
 
+<!-- JS: Header menu -->
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-</script>
-  <!-- ===== Script (Menu Toggle) ===== -->
-  <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
+  const toggleBtn = document.getElementById("menu-toggle");
+  const navLinks = document.getElementById("nav-links");
 
+  if (toggleBtn && navLinks) {
+    toggleBtn.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+    });
+  }
+</script>
+
+<!-- JS: Sidebar -->
+<script>
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const arrow = document.querySelector("#menuToggle .arrow");
+
+  if (toggle && sidebar && arrow) {
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
-      if (sidebar.classList.contains("open")) {
-        arrow.innerHTML = "&#8249;"; // ‹ left
-      } else {
-        arrow.innerHTML = "&#8250;"; // › right
-      }
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
     });
-  </script>
+  }
+</script>
+<script>
+function saveCustomField(fieldName, inputId) {
+    const input = document.getElementById(inputId);
+    const value = input.value.trim();
+
+    if (!value) {
+        alert("Please enter a value first");
+        return;
+    }
+
+    fetch("{% url 'accounts:Service_Preferences' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            field: fieldName,
+            value: value
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === "ok") {
+            input.classList.add("saved");
+            setTimeout(() => input.classList.remove("saved"), 1500);
+        }
+    });
+}
+</script>
 
 </body>
 </html>

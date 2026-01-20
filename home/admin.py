@@ -1,3 +1,4 @@
+from django import forms
 from django.utils import timezone 
 from django.contrib import admin
 from .models import Contact , Job , Application , BusinessService,BusinessBooking ,BusinessBundle,BusinessAddon, PrivateMainCategory,PrivateService,PrivateBooking,AvailableZipCode,NotAvailableZipRequest,CallRequest,EmailRequest,PrivateAddon,    ServiceQuestionRule, AddonRule, ScheduleRule ,DateSurcharge,BookingStatusHistory , NoShowReport
@@ -9,6 +10,9 @@ from django.http import HttpResponseRedirect
 from accounts.models import BookingChecklist
 from accounts.models import BookingChecklist   # ✅ استيراد فقط
 # # Register your models here.
+# أعلى الملف
+from accounts.models import PointsTransaction
+
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
     list_display = (
@@ -167,10 +171,11 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "fields": (
                 "start_date",
                 "preferred_time",
+                "quoted_duration_minutes",  # ⏱ هنا
                 "days_type",
                 "custom_date",
                 "custom_time",
-            ),
+                    ),
         }),
 
         ("Office Setup", {
@@ -201,9 +206,12 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "classes": ("collapse",),
         }),
 
+
         ("System", {
             "fields": ("status", "created_at"),
         }),
+
+
     )
 
     # =========================
@@ -218,22 +226,36 @@ class BusinessBookingAdmin(admin.ModelAdmin):
         hidden_json_fields = ("services_needed", "addons", "frequency")
         pretty_fields = ("services_needed_pretty", "addons_pretty", "frequency_pretty")
 
-        # افتراضي: View mode (Read-only)
-        ro = tuple(f for f in model_fields if f not in hidden_json_fields) + pretty_fields
+        # 🔒 VIEW MODE: كلشي Read-only
+        if request.GET.get("edit") != "1":
+            return tuple(model_fields) + pretty_fields
 
-        # Edit mode: allow provider + refund fields
-        if request.GET.get("edit") == "1":
-            ro = tuple(
-                f for f in model_fields
-                if f not in hidden_json_fields
-                and f not in ("provider", "refund_amount", "refund_reason", "is_refunded")
-            ) + pretty_fields
+        # ✏️ EDIT MODE: شو بدنا نفتح؟
+        editable_fields = (
+            # Assignment
+            "provider",
 
-        # إذا صار refunded: قفل كل شي
-        if obj.is_refunded:
-            ro = tuple(model_fields) + pretty_fields
+            # Schedule
+            "start_date",
+            "preferred_time",
+            "days_type",
+            "custom_date",
+            "custom_time",
+            "quoted_duration_minutes",
 
-        return ro
+            # Pricing / refund
+            "refund_amount",
+            "refund_reason",
+            "is_refunded",
+        )
+
+        # كل الحقول ما عدا editable = Read-only
+        return tuple(
+            f for f in model_fields
+            if f not in editable_fields
+            and f not in hidden_json_fields
+        ) + pretty_fields
+
     def response_change(self, request, obj):
         if "_cancel_booking" in request.POST:
 
@@ -260,32 +282,15 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
         return super().response_change(request, obj)
 
+
+
+
     # =========================
     # SAVE_MODEL (مرة وحدة فقط)
     #  - assign provider
     #  - apply refund
     # =========================
-    def save_model(self, request, obj, form, change):
-        old = None
-        if change:
-            old = BusinessBooking.objects.get(pk=obj.pk)
-
-        super().save_model(request, obj, form, change)
-
-        # ✅ الحالة 1: provider تغيّر
-        if obj.provider and old and old.provider != obj.provider:
-            obj.assign_provider(
-                provider=obj.provider,
-                user=request.user
-            )
-
-        # ✅ الحالة 2: provider موجود لكن الحالة لسه ORDERED
-        elif obj.provider and obj.status == "ORDERED":
-            obj.assign_provider(
-                provider=obj.provider,
-                user=request.user
-            )
-
+  
     def cancel_booking(self, request, queryset):
         for booking in queryset:
             booking.cancel_by_admin(admin_user=request.user, note="Cancelled from admin")
@@ -296,6 +301,59 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+    def save_model(self, request, obj, form, change):
+        old = None
+        if change:
+            old = BusinessBooking.objects.get(pk=obj.pk)
+
+        super().save_model(request, obj, form, change)
+
+        # =========================
+        # PROVIDER ASSIGN LOGIC
+        # =========================
+        if obj.provider and old and old.provider != obj.provider:
+            obj.assign_provider(
+                provider=obj.provider,
+                user=request.user
+            )
+        elif obj.provider and obj.status == "ORDERED":
+            obj.assign_provider(
+                provider=obj.provider,
+                user=request.user
+            )
+
+        # =========================
+        # ⭐ LOYALTY POINTS
+        # =========================
+        admin_points = form.cleaned_data.get("admin_points")
+
+        if admin_points and admin_points != 0 and obj.user:
+            PointsTransaction.objects.create(
+                user=obj.user,
+                amount=admin_points,
+                reason=f"Admin adjustment – Business Booking #{obj.id}"
+            )
+
+            self.message_user(
+                request,
+                f"✅ {admin_points} loyalty points applied.",
+                messages.SUCCESS
+            )
+
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+
+        form.base_fields["admin_points"] = forms.IntegerField(
+            required=False,
+            label="⭐ Loyalty Points (Admin)",
+            help_text="Add or deduct points (use negative number to deduct)"
+        )
+        return form
+
+
 
 admin.site.register(BusinessAddon)
 

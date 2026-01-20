@@ -48,6 +48,11 @@ class BaseBooking(models.Model):
     paused_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
 
+    quoted_duration_minutes = models.PositiveIntegerField(
+        default=0,
+        help_text="Expected service duration in minutes"
+    )
+
     # =========================
     # ✅ REFUND FIELDS (NEW)
     # =========================
@@ -73,6 +78,24 @@ class BaseBooking(models.Model):
     class Meta:
         abstract = True
 
+    # =========================
+    # LOYALTY (ADMIN CONTROLLED)
+    # =========================
+    points_awarded = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Points decided by admin after completion"
+    )
+
+    points_note = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    points_processed = models.BooleanField(
+        default=False,
+        help_text="Prevent double points processing"
+    )
     # =========================
     # INTERNAL LOGGER
     # =========================
@@ -188,6 +211,75 @@ class BaseBooking(models.Model):
 
         self.log_status(user=user, note="Service completed")
         self._log(status="COMPLETED", note="Service completed")
+
+        # ==================================================
+        # ⭐ LOYALTY POINTS (ONLY ONCE)
+        # ==================================================
+        if not self.points_processed and self.user:
+
+            from accounts.models import PointsTransaction, Referral, Customer
+            from accounts.models import Promotion
+            from django.utils import timezone
+
+            base_points = int(self.total_price * 5)
+
+            promo = Promotion.objects.filter(
+                is_active=True,
+                start_date__lte=timezone.now(),
+                end_date__gte=timezone.now()
+            ).first()
+
+            multiplier = promo.points_multiplier if promo else 1
+            points = base_points * multiplier
+
+            if points > 0:
+                PointsTransaction.objects.create(
+                    user=self.user,
+                    amount=points,
+                    reason="BOOKING",
+                    booking_type="private" if self.__class__.__name__ == "PrivateBooking" else "business",
+                    booking_id=self.id,
+                    note=f"Completed booking #{self.id}",
+                    created_by=user
+                )
+
+            # ==================================================
+            # 🤝 REFERRAL LOGIC
+            # ==================================================
+            referral = Referral.objects.filter(
+                referred_user=self.user,
+                is_completed=False
+            ).first()
+
+            if referral:
+                # 🎁 500 نقطة للـ referrer
+                PointsTransaction.objects.create(
+                    user=referral.referrer,
+                    amount=500,
+                    reason="REWARD",
+                    note=f"Referral reward – User {self.user.id}",
+                    created_by=user
+                )
+
+                # 🎯 تفعيل خصم 10% للمستخدم المحال
+                customer = Customer.objects.filter(user=self.user).first()
+                if customer:
+                    customer.has_referral_discount = True
+                    customer.save(update_fields=["has_referral_discount"])
+
+                referral.is_completed = True
+                referral.save(update_fields=["is_completed"])
+
+            # 🔒 منع التكرار
+            self.points_processed = True
+            self.points_awarded = points
+            self.points_note = "Auto awarded on completion"
+            self.save(update_fields=[
+                "points_processed",
+                "points_awarded",
+                "points_note"
+            ])
+
     def assign_provider(self, provider, user=None):
         if self.provider == provider and self.status != "ORDERED":
             return
@@ -360,6 +452,27 @@ class BaseBooking(models.Model):
 
         return h >= 24
 
+    @property
+    def actual_duration(self):
+        if not self.started_at or not self.completed_at:
+            return None
+        return self.completed_at - self.started_at
+    
+    def format_minutes(self, minutes):
+        if not minutes:
+            return "—"
+        h = minutes // 60
+        m = minutes % 60
+        if m == 0:
+            return f"{h} hours"
+        return f"{h} hours {m} minutes"
+
+    def format_timedelta(self, td):
+        if not td:
+            return "—"
+        total_minutes = int(td.total_seconds() // 60)
+        return self.format_minutes(total_minutes)
+
 
 # =====================================================================
 # CONTACT / JOBS
@@ -495,10 +608,7 @@ class BusinessBooking(BaseBooking):
     office_size = models.CharField(max_length=255, blank=True, null=True)
     num_employees = models.CharField(max_length=255, blank=True, null=True)
     floors = models.CharField(max_length=100, blank=True, null=True)
-    status = models.CharField(
-            max_length=20,
-            default="pending"
-        )
+
     restrooms = models.CharField(
         max_length=10,
         choices=[("1", "1"), ("2", "2"), ("3", "3"), ("4+", "4+")],
@@ -533,6 +643,22 @@ class BusinessBooking(BaseBooking):
 
     def __str__(self):
         return f"Booking #{self.id}"
+    
+    def save_model(self, request, obj, form, change):
+        provider_before = None
+
+        if obj.pk:
+            provider_before = BusinessBooking.objects.get(pk=obj.pk).provider
+
+        super().save_model(request, obj, form, change)
+
+        # 🔥 إذا تعيّن provider لأول مرة → ASSIGNED
+        if obj.provider and provider_before != obj.provider:
+            if obj.status == "ORDERED":
+                obj.assign_provider(
+                    provider=obj.provider,
+                    user=request.user
+                )
 
 
 # =====================================================================
@@ -628,10 +754,7 @@ class PrivateBooking(BaseBooking):
         blank=True,
         null=True
     )
-    status = models.CharField(
-            max_length=20,
-            default="pending"
-        )
+
     card_number = models.CharField(max_length=50, blank=True, null=True)
     card_expiry = models.CharField(max_length=10, blank=True, null=True)
     card_cvv = models.CharField(max_length=10, blank=True, null=True)
@@ -828,3 +951,8 @@ class NoShowReport(models.Model):
             self.reviewed_at = timezone.now()
             super().save(update_fields=["reviewed_at"])
             self.apply_decision()
+
+
+
+
+            
