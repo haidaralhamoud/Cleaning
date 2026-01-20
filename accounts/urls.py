@@ -2,6 +2,7 @@ from django.urls import include, path
 from . import views
 from .views import booking_chat
 from django.contrib.auth import views as auth_views
+from .views_admin import finalize_booking
 
 app_name='accounts'
 urlpatterns = [
@@ -82,3 +83,8 @@ path(
 path("chat/<str:booking_type>/<int:booking_id>/", views.booking_chat, name="booking_chat"),
 
 ]
+path(
+    "admin/bookings/<str:booking_type>/<int:booking_id>/finalize/",
+    finalize_booking,
+    name="finalize_booking"
+),

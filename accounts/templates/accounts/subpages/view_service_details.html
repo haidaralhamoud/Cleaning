@@ -10,6 +10,62 @@
   <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <style>
+    .notes-card {
+  position: relative;
+  padding: 22px;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 15px 40px rgba(0,0,0,.08);
+}
+
+.notes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notes-list li {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #666;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background: #4CAF50;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+.add-note {
+  display: none;
+  margin-bottom: 16px;
+}
+
+.add-note textarea {
+  width: 100%;
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.fab-plus {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 52px;
+  height: 52px;
+  background: #00bcd4;
+  color: #fff;
+  font-size: 28px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 52px;
+  cursor: pointer;
+}
+
     .stage.exception .dot{
   border-color:#dc3545;
   background:#fff;
@@ -655,16 +711,36 @@
 
 
 
-          <div class="card notes-card">
-            <h3>Notes</h3>
-            <ul class="notes-list" id="notesList">
-              <li><span class="dot green"></span> Please pay special attention to the kitchen and bathroom areas.</li>
-              <li><span class="dot green"></span> Deep clean requested for these areas.</li>
-              <li><span class="dot green"></span> Verify service completion before leaving.</li>
-            </ul>
-            <button class="fab-plus" id="addNoteBtn" aria-label="Add Note"><a href="../Customer Profile - add Customer Notes/index.html">+</a></button>
-          </div>
-        </div>
+<div class="card notes-card">
+  <h3>Notes</h3>
+
+  <div class="add-note" id="addNoteBox">
+    <textarea id="noteInput" rows="3"
+      placeholder="Write a note for this booking..."></textarea>
+
+    <div class="add-note-actions">
+      <button class="btn btn-cancel" onclick="cancelNote()">Cancel</button>
+      <button class="btn btn-save" onclick="saveNote()">Add</button>
+    </div>
+  </div>
+
+  <ul class="notes-list" id="notesList">
+    {% for note in notes %}
+      <li>
+        <span class="dot"></span>
+        <span>{{ note.text }}</span>
+      </li>
+    {% empty %}
+      <li style="color:#999">No notes yet</li>
+    {% endfor %}
+  </ul>
+
+  <div class="fab-plus" onclick="openNoteBox()">+</div>
+</div>
+
+<input type="hidden" id="bookingId" value="{{ booking.id }}">
+<input type="hidden" id="bookingType" value="{{ booking_type }}">
+
 
         <!-- العمود اليميني -->
         <div class="right-col">
@@ -891,6 +967,58 @@
     <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
   </div>
 </footer>
+<script>
+const noteBox = document.getElementById("addNoteBox");
+const noteInput = document.getElementById("noteInput");
+const notesList = document.getElementById("notesList");
+
+const bookingId = document.getElementById("bookingId").value;
+const bookingType = document.getElementById("bookingType").value;
+
+function openNoteBox() {
+  noteBox.style.display = "block";
+  noteInput.focus();
+}
+
+function cancelNote() {
+  noteInput.value = "";
+  noteBox.style.display = "none";
+}
+
+function saveNote() {
+  const text = noteInput.value.trim();
+  if (!text) return;
+
+  fetch("/booking/add-note/", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken"),
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `text=${encodeURIComponent(text)}&booking_id=${bookingId}&booking_type=${bookingType}`
+  })
+  .then(res => res.json())
+  .then(data => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="dot"></span><span>${data.text}</span>`;
+    notesList.appendChild(li);
+
+    noteInput.value = "";
+    noteBox.style.display = "none";
+  });
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  document.cookie.split(";").forEach(c => {
+    c = c.trim();
+    if (c.startsWith(name + "=")) {
+      cookieValue = decodeURIComponent(c.substring(name.length + 1));
+    }
+  });
+  return cookieValue;
+}
+</script>
 
 <script>
 const toggleBtn = docume6nt.getElementById("menu-toggle");

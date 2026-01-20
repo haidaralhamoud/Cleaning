@@ -280,6 +280,25 @@ class BaseBooking(models.Model):
             return False 
         return True
     # =========================
+    # =========================
+    # LOYALTY (ADMIN CONTROLLED)
+    # =========================
+    points_awarded = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="Points decided by admin after completion"
+    )
+
+    points_note = models.CharField(
+        max_length=255,
+        blank=True
+    )
+
+    points_processed = models.BooleanField(
+        default=False,
+        help_text="Prevent double points processing"
+    )
+
 # CANCEL / RESCHEDULE LOGIC (RESTORED)
 # =========================
     def cancel_by_admin(self, admin_user, note="Cancelled by admin", refund_amount=None):
@@ -828,3 +847,34 @@ class NoShowReport(models.Model):
             self.reviewed_at = timezone.now()
             super().save(update_fields=["reviewed_at"])
             self.apply_decision()
+
+
+
+
+# home/models.py
+
+
+class BookingNote(models.Model):
+    private_booking = models.ForeignKey(
+        "PrivateBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="note"
+    )
+    business_booking = models.ForeignKey(
+        "BusinessBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="note"
+    )
+
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return self.text[:40]
