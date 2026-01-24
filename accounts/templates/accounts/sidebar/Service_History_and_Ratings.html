@@ -1,264 +1,375 @@
 {% load static %}
-{% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
   <title>Service History & Ratings</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/Service_History_and_Ratings.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}"></head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/Service_History_and_Ratings.css' %}">
+
+  <style>
+    .card { background:#fff; border-radius:16px; padding:30px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
+    .summary-grid { display:grid; grid-template-columns:220px 1fr; gap:30px; }
+    .big-score { font-size:48px; font-weight:700; }
+    .stars { color:#f6b100; font-size:20px; }
+    .star-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+    .star-bar { flex:1; height:8px; background:#eee; border-radius:8px; overflow:hidden; }
+    .star-fill { height:100%; background:#12a3c7; }
+    .metric-row { display:flex; align-items:center; gap:10px; margin:8px 0; }
+    .metric-row .bar { flex:1; height:8px; background:#eee; border-radius:8px; overflow:hidden; }
+    .metric-row .fill { height:100%; background:#12a3c7; }
+    .btn { background:#12a3c7; color:#fff; padding:10px 20px; border-radius:20px; border:none; cursor:pointer; }
+    .past-item { display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #eee; }
+    .actions { display:flex; gap:10px; }
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(2px);
+      display: none;
+    }
+
+    .popup.show, .popup-overlay.show { display:block; }
+    .close { float:right; cursor:pointer; font-size:20px; }
+    .popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(.95);
+  background: #fff;
+  padding: 28px;
+  border-radius: 18px;
+  width: 380px;
+  display: none;
+  box-shadow: 0 25px 60px rgba(0,0,0,.25);
+  animation: popupIn .25s ease forwards;
+}
+
+@keyframes popupIn {
+  from { opacity:0; transform:translate(-50%,-45%) scale(.9); }
+  to { opacity:1; transform:translate(-50%,-50%) scale(1); }
+}
+
+.popup h3 {
+  margin-bottom: 15px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.popup input,
+.popup textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.popup input:focus,
+.popup textarea:focus {
+  outline: none;
+  border-color: #12a3c7;
+  box-shadow: 0 0 0 2px rgba(18,163,199,.15);
+}
+
+.popup textarea {
+  resize: none;
+  min-height: 80px;
+}
+
+.close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  cursor: pointer;
+  font-size: 22px;
+  color: #888;
+}
+
+.close:hover {
+  color: #000;
+}
+.filters-bar {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 25px 0;
+}
+
+.filter-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+}
+
+.filter-box .icon {
+  font-size: 16px;
+  opacity: .6;
+}
+
+.filter-box input,
+.filter-box select {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+  min-width: 140px;
+}
+
+.filter-box.search input {
+  min-width: 220px;
+}
+
+.apply-btn {
+  background: #12a3c7;
+  color: #fff;
+  border: none;
+  border-radius: 22px;
+  padding: 11px 26px;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(18,163,199,.35);
+  transition: .2s ease;
+}
+
+.apply-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(18,163,199,.45);
+}
+
+  </style>
+</head>
 
 <body>
-  <!-- HEADER -->
+
 <header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
+  <div class="logo">Hembla</div>
+  <nav>
+    <a href="/">HOME</a>
+    <a href="#">ABOUT</a>
     <a href="#">SERVICES</a>
     <a href="#">PRICING</a>
     <a href="#">CONTACT</a>
   </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
+  <a class="btn" href="#">My Profile</a>
 </header>
-  <div class="layout">
-    <!-- ===== Mobile Header ===== -->
-    <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
 
-    </div>
+<main class="content">
 
-    <!-- ===== Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
+<h1>Service History & Ratings</h1>
+<form method="get" class="filters-bar">
+
+  <!-- 🔍 Search -->
+  <div class="filter-box search">
+    <span class="icon">🔍</span>
+    <input
+      type="text"
+      name="q"
+      placeholder="Search service history"
+      value="{{ request.GET.q|default:'' }}"
+    >
+  </div>
+
+  <!-- 📅 Date From -->
+  <div class="filter-box">
+    <span class="icon">📅</span>
+    <input
+      type="date"
+      name="from"
+      value="{{ request.GET.from|default:'' }}"
+    >
+  </div>
+
+  <!-- 📅 Date To -->
+  <div class="filter-box">
+    <span class="icon">📅</span>
+    <input
+      type="date"
+      name="to"
+      value="{{ request.GET.to|default:'' }}"
+    >
+  </div>
+
+  <!-- 🧹 Service -->
+  <div class="filter-box">
+    <span class="icon">🧹</span>
+    <select name="service">
+      <option value="">All Services</option>
+      {% for s in service_types %}
+        <option value="{{ s }}" {% if s == selected_service %}selected{% endif %}>
+          {{ s }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- 👤 Provider -->
+  <div class="filter-box">
+    <span class="icon">👤</span>
+    <select name="provider">
+      <option value="">All Providers</option>
+      {% for p in providers %}
+        <option value="{{ p.id }}" {% if request.GET.provider == p.id|stringformat:"s" %}selected{% endif %}>
+          {{ p.get_full_name|default:p.username }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <!-- ✅ Apply -->
+  <button class="apply-btn" type="submit">Apply</button>
+
+</form>
+
+
+<div class="card">
+
+<h2>{{ selected_service }}</h2>
+
+<div class="summary-grid">
+
+  <div>
+    <div class="big-score">{{ summary.avg_overall|floatformat:1 }}</div>
+    <div class="stars">★★★★★</div>
+    <div>{{ summary.total }} reviews</div>
+  </div>
+
+  <div>
+    {% for row in star_distribution %}
+    <div class="star-row">
+      <span>{{ row.star }}</span>
+      <div class="star-bar">
+        <div class="star-fill" style="width:{{ row.percent }}%"></div>
       </div>
-
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
-
-    <!-- ===== Main Content ===== -->
-    <main class="content">
-      <h1 class="page-title">Service History & Ratings</h1>
-
-      <div class="card">
-        <div class="search-row">
-          <img class="search" src="{% static 'images/search0.png' %}" alt="Search" />
-          <input type="text" placeholder="Search service history" class="search-input"/>
-        </div>
-
-        <div class="filters">
-          <button class="chip"><img src="{% static 'images/calendar0.png' %}" alt=""><span>Date Range</span></button>
-          <button class="chip"><span>Service Type</span><img src="{% static 'images/vector1.svg' %}" alt=""></button>
-          <button class="chip"><span>Provider</span><img src="{% static 'images/conversion0.png' %}" alt=""></button>
-        </div>
-
-        <div class="summary-grid">
-          <div class="left-summary">
-            <div class="big-score">4.8</div>
-            <div class="stars">
-              <img src="{% static 'images/star0.svg' %}"><img src="{% static 'images/star1.svg' %}"><img src="{% static 'images/star2.svg' %}"><img src="{% static 'images/star3.svg' %}"><img src="{% static 'images/star4.svg' %}">
-            </div>
-            <div class="reviews-count">12 reviews</div>
-          </div>
-
-          <div class="right-summary">
-            <h4>Category Averages</h4>
-            <div class="metric-row"><span>Punctuality</span><div class="bar"><span class="fill" data-width="90"></span></div><span>4.5</span></div>
-            <div class="metric-row"><span>Quality</span><div class="bar"><span class="fill" data-width="96"></span></div><span>4.8</span></div>
-            <div class="metric-row"><span>Professionalism</span><div class="bar"><span class="fill" data-width="98"></span></div><span>4.9</span></div>
-            <div class="metric-row"><span>Value</span><div class="bar"><span class="fill" data-width="86"></span></div><span>4.3</span></div>
-          </div>
-        </div>
-
-        <h4 class="past-title">Past Services</h4>
-        <ul class="past-list">
-          <li class="past-item">
-            <div>
-              <h5>Deep Cleaning</h5>
-              <p>Feedback: Excellent service, very thorough.</p>
-              <span class="date">July 15, 2024</span>
-            </div>
-            <button class="details-link">View Details</button>
-          </li>
-          <li class="past-item">
-            <div>
-              <h5>Standard Cleaning</h5>
-              <p>Feedback: Good job, but missed a spot.</p>
-              <span class="date">June 20, 2024</span>
-            </div>
-            <button class="details-link">View Details</button>
-          </li>
-        </ul>
-      </div>
-    </main>
+      <span>{{ row.percent }}%</span>
+    </div>
+    {% endfor %}
   </div>
 
-  <!-- Popup -->
-  <div class="popup-overlay" id="popupOverlay"></div>
-  <div class="popup" id="popup">
-    <button class="close-popup" id="closePopup">&times;</button>
-    <h2>Service Details</h2>
-    <p><strong>Service Type:</strong> Deep Cleaning</p>
-    <p><strong>Date:</strong> July 15, 2024</p>
-    <p><strong>Provider:</strong> Emily Watson</p>
-    <p><strong>Rating:</strong> ⭐⭐⭐⭐⭐</p>
-    <p><strong>Feedback:</strong> Excellent service, very thorough and professional.</p>
-  </div>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
+</div>
 
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
+<hr>
 
+<h4>Category Averages</h4>
 
-      </div>
-    </div>
+<div class="metric-row">
+  <span>Punctuality</span>
+  <div class="bar"><div class="fill" style="width:{{ summary.avg_punctuality|floatformat:0 }}0%"></div></div>
+  <span>{{ summary.avg_punctuality|floatformat:1 }}</span>
+</div>
 
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
+<div class="metric-row">
+  <span>Quality</span>
+  <div class="bar"><div class="fill" style="width:{{ summary.avg_quality|floatformat:0 }}0%"></div></div>
+  <span>{{ summary.avg_quality|floatformat:1 }}</span>
+</div>
 
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
+<div class="metric-row">
+  <span>Professionalism</span>
+  <div class="bar"><div class="fill" style="width:{{ summary.avg_professionalism|floatformat:0 }}0%"></div></div>
+  <span>{{ summary.avg_professionalism|floatformat:1 }}</span>
+</div>
 
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
+<div class="metric-row">
+  <span>Value</span>
+  <div class="bar"><div class="fill" style="width:{{ summary.avg_value|floatformat:0 }}0%"></div></div>
+  <span>{{ summary.avg_value|floatformat:1 }}</span>
+</div>
+
+{% if can_leave_rating %}
+  <button class="btn" onclick="openRating()">Leave Feedback</button>
+{% endif %}
+
+<hr>
+
+<h3>Past Services</h3>
+
+{% for s in past_services %}
+<div class="past-item">
+  <div>
+    <strong>{{ s.service_title }}</strong><br>
+    {{ s.date }}<br>
+    {% if s.comment %}
+      <small><b>Comment:</b> {{ s.comment }}</small>
+    {% endif %}
   </div>
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  <div class="actions">
+    <a class="btn" href="{% url 'accounts:view_service_details' s.booking_type s.booking_id %}">View Details</a>
+    {% if s.can_leave_comment %}
+      <button class="btn" onclick="openComment('{{ s.booking_type }}','{{ s.booking_id }}')">Leave Comment</button>
+    {% endif %}
   </div>
-</footer>
+</div>
+{% endfor %}
+
+</div>
+</main>
+
+<!-- ================= RATING POPUP ================= -->
+<div class="popup-overlay" id="overlay"></div>
+
+<div class="popup" id="ratingPopup">
+  <span class="close" onclick="closeAll()">×</span>
+  <h3>Leave Feedback</h3>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="rating">
+    <input type="hidden" name="booking_type" value="{{ past_services.0.booking_type }}">
+    <input type="hidden" name="booking_id" value="{{ past_services.0.booking_id }}">
+
+    <input type="number" name="overall_rating" min="1" max="5" placeholder="Overall" required>
+    <input type="number" name="punctuality" min="1" max="5" placeholder="Punctuality" required>
+    <input type="number" name="quality" min="1" max="5" placeholder="Quality" required>
+    <input type="number" name="professionalism" min="1" max="5" placeholder="Professionalism" required>
+    <input type="number" name="value" min="1" max="5" placeholder="Value" required>
+    <textarea name="feedback" placeholder="Optional feedback"></textarea>
+
+    <button class="btn" type="submit">Save</button>
+  </form>
+</div>
+
+<!-- ================= COMMENT POPUP ================= -->
+<div class="popup" id="commentPopup">
+  <span class="close" onclick="closeAll()">×</span>
+  <h3>Leave Comment</h3>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="comment">
+    <input type="hidden" name="booking_type" id="c_type">
+    <input type="hidden" name="booking_id" id="c_id">
+
+    <textarea name="text" required></textarea>
+    <button class="btn" type="submit">Save</button>
+  </form>
+</div>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+function openRating(){
+  document.getElementById("ratingPopup").classList.add("show");
+  document.getElementById("overlay").classList.add("show");
+}
+function openComment(type,id){
+  document.getElementById("c_type").value = type;
+  document.getElementById("c_id").value = id;
+  document.getElementById("commentPopup").classList.add("show");
+  document.getElementById("overlay").classList.add("show");
+}
+function closeAll(){
+  document.querySelectorAll(".popup").forEach(p=>p.classList.remove("show"));
+  document.getElementById("overlay").classList.remove("show");
+}
 </script>
-  <script>
-    // Popup logic
-    const popup = document.getElementById("popup");
-    const overlay = document.getElementById("popupOverlay");
-    const closePopup = document.getElementById("closePopup");
-    const detailButtons = document.querySelectorAll(".details-link");
-
-    detailButtons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        popup.classList.add("show");
-        overlay.classList.add("show");
-      });
-    });
-
-    [closePopup, overlay].forEach(el => el.addEventListener("click", () => {
-      popup.classList.remove("show");
-      overlay.classList.remove("show");
-    }));
-
-    // Sidebar toggle
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
-
-    sidebar.classList.remove("open");
-    arrow.innerHTML = "&#8250;";
-
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-    });
-  </script>
+<script>
+document.getElementById("overlay").addEventListener("click", closeAll);
+</script>
 </body>
 </html>

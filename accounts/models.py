@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.utils import timezone
 
 
 User = settings.AUTH_USER_MODEL
@@ -626,3 +627,138 @@ class CustomerPreferences(models.Model):
 
     def __str__(self):
         return f"Preferences for {self.customer}"
+
+
+class DiscountCode(models.Model):
+    code = models.CharField(max_length=20, unique=True)
+
+    percent = models.PositiveIntegerField(
+        help_text="مثال: 10 = 10%"
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="discount_codes",
+        null=True,
+        blank=True
+    )
+
+    # 🧠 التحكم بالاستخدام
+    max_uses = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="اتركه فارغ = استخدام غير محدود"
+    )
+    used_count = models.PositiveIntegerField(default=0)
+
+    is_used = models.BooleanField(default=False)
+
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self, user=None):
+        from django.utils import timezone
+
+        if self.is_used:
+            return False
+
+        if self.expires_at and self.expires_at < timezone.now():
+            return False
+
+        # 🔒 تحقق من عدد الاستخدامات
+        if self.max_uses is not None and self.used_count >= self.max_uses:
+            return False
+
+        # (اختياري) ربطه بمستخدم محدد
+        if user and self.user_id and self.user != user:
+            return False
+
+        return True
+
+    def validate(self, user=None):
+        from django.utils import timezone
+
+        if self.is_used:
+            return False, "This discount code has already been used."
+
+        if self.expires_at and self.expires_at < timezone.now():
+            return False, "This discount code has expired."
+
+        if self.max_uses is not None and self.used_count >= self.max_uses:
+            return False, "This discount code is no longer available."
+
+        if user and self.user_id and self.user != user:
+            return False, "This discount code is not assigned to your account."
+
+        return True, None
+
+
+
+# accounts/models.py
+from django.db import models
+from django.conf import settings
+
+class ServiceReview(models.Model):
+    BOOKING_TYPE_CHOICES = [
+        ("private", "Private"),
+        ("business", "Business"),
+    ]
+
+    booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES)
+    booking_id = models.PositiveIntegerField()
+
+    # لتجميع تقييمات نفس "نوع الخدمة"
+    service_title = models.CharField(max_length=255)   # مثل "Deep Cleaning"
+    service_slug = models.CharField(max_length=255, blank=True, null=True)  # optional
+
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="service_reviews"
+    )
+
+    provider = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="received_service_reviews"
+    )
+
+    # Overall 1..5
+    overall_rating = models.PositiveSmallIntegerField()
+
+    # 4 categories 1..5
+    punctuality = models.PositiveSmallIntegerField()
+    quality = models.PositiveSmallIntegerField()
+    professionalism = models.PositiveSmallIntegerField()
+    value = models.PositiveSmallIntegerField()
+
+    feedback = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["customer", "booking_type", "booking_id"],
+                name="unique_review_per_booking_per_customer"
+            )
+        ]
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.service_title} | {self.overall_rating}★"
+
+
+class ServiceComment(models.Model):
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    booking_type = models.CharField(max_length=20)
+    booking_id = models.PositiveIntegerField()
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("customer", "booking_type", "booking_id")
