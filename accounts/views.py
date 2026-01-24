@@ -954,7 +954,6 @@ from accounts.models import (
 from home.models import PrivateBooking, BusinessBooking
 
 
-@login_required
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render

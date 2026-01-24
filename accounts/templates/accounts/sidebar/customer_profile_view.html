@@ -3,15 +3,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Customer Profile Overview</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customer Profile Overview</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/customer_profile_view.css' %}" />
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_profile_view.css' %}">
+
 <style>
-.edit-only .form-control {
+  .edit-only .form-control {
   width: 100%;
   padding: 8px 10px;
   border-radius: 6px;
@@ -26,19 +27,142 @@
 .field {
   margin-bottom: 12px;
 }
+/* ================= BASIC ================= */
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
 
+.sidebar {
+  width: 300px;
+  background: #fff;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 991px) {
+
+  .main-header {
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+  }
+
+  .profile-btn {
+    display: none;
+  }
+
+  .layout {
+    flex-direction: column;
+  }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    position: fixed;
+    top: 0px;
+    margin-top: 71px;
+    left: -50px;
+    width: 300px;
+    height: 90vh;
+    background: #fff;
+    z-index: 1000;
+
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  /* ===== OVERLAY ===== */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 999;
+    display: none;
+  }
+
+  .sidebar.open ~ .sidebar-overlay {
+    display: block;
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    padding: 16px;
+  }
+
+  .cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .left-column,
+  .right-column {
+    width: 100%;
+  }
+
+  /* ===== NAV LINKS (اختياري – dropdown) ===== */
+  .nav-links {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 0;
+    z-index: 1050;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+}
+
+/* ===== SCROLLBAR ===== */
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: #ccebf3;
+  border-radius: 10px;
+}
+@media (max-width: 991px) {
+  body {
+    padding-top: 0 !important;
+  }
+
+  .content {
+    margin-top: 0 !important;
+  }
+}
 
 </style>
 </head>
+
 <body>
-<!-- HEADER -->
+
+<!-- ================= HEADER ================= -->
 <header class="main-header">
+
+
+  
+  <!-- زر السايدبار -->
+  <button class="menu-toggle profile-toggle" id="sidebarToggle">👤</button>
+
   <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
+    <img src="{% static 'images/logo.png' %}">
   </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
+  <!-- زر النافبار -->
+  <button class="menu-toggle" id="navToggle">☰</button>
   <nav class="nav-links" id="nav-links">
     <a href="{% url 'home:home' %}">HOME</a>
     <a href="{% url 'home:about' %}">ABOUT</a>
@@ -51,52 +175,44 @@
     <a href="#">My Profile</a>
   </div>
 </header>
-  <div class="layout">
-    <!-- Sidebar -->
-     <!-- زر المينيو يظهر فقط بالموبايل -->
-<div class="mobile-header">
-  <button class="menu-toggle floating" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- › -->
-  </button>
-  <h2 class="mobile-title">Customer Profile</h2>
-</div>
 
+<!-- ================= LAYOUT ================= -->
+<div class="layout">
 
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar" id="sidebar">
 
-    <aside class="sidebar">
-<div class="profile-head">
-  <div class="avatar">
-    {% if customer.profile_photo %}
-      <img src="" alt="">
-    {% endif %}
-  </div>
-  <div>
+    <div class="profile-head">
+      <div class="avatar"></div>
+      <div>
     <div class="name">{{ customer.first_name }} {{ customer.last_name }}</div>
     <div class="id">ID: {{ customer.id }}</div>
-  </div>
-</div>
+      </div>
+    </div>
 
+     <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:none;">
+      {% csrf_token %}
+    </form>
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
+    <nav class="side-nav">
+      <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
+      <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
+      <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
+      <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
+      <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
+      <a href="{% url 'accounts:Communication' %}" class="nav-item"><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
+      <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item"><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
+      <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
+      <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
+      <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
+      <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
+      <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
+    </nav>
+</aside>
 
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
+<!-- ================= CONTENT ================= -->
     <!-- Main -->
     <main class="content">
       <h1 class="page-title">Customer Profile Overview</h1>
@@ -524,54 +640,53 @@
   </div>
 </footer>
 
+<!-- ================= JS ================= -->
 <script>
-const toggleBtn = document.getElementById("menu-toggle");
+/* ===== NAVBAR ===== */
+const navToggle = document.getElementById("navToggle");
 const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
+
+/* ===== SIDEBAR ===== */
+const sidebarToggle = document.getElementById("sidebarToggle");
+const sidebar = document.getElementById("sidebar");
+const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+/* فتح / إغلاق Navbar */
+navToggle.addEventListener("click", () => {
   navLinks.classList.toggle("active");
+
+  // سكّر السايدبار إذا كان مفتوح
+  sidebar.classList.remove("open");
+});
+
+/* فتح / إغلاق Sidebar */
+sidebarToggle.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+
+  // سكّر النافبار إذا كان مفتوح
+  navLinks.classList.remove("active");
+});
+
+/* إغلاق السايدبار عند الضغط خارجها */
+sidebarOverlay.addEventListener("click", () => {
+  sidebar.classList.remove("open");
 });
 </script>
 
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    // لما تفتح القائمة السهم ينعكس
-    if (sidebar.classList.contains("open")) {
-      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
-    } else {
-      arrow.innerHTML = "&#8250;"; // › سهم لليمين
-    }
-  });
-</script>
 
 <script>
 function toggleBasicEdit() {
-
   const viewFields = document.querySelectorAll('.view-only');
   const editFields = document.querySelectorAll('.edit-only');
   const actions = document.querySelector('.edit-actions');
 
-  const isEditing = editFields[0].style.display === 'block';
+  const editing = editFields[0].style.display === 'block';
 
-  viewFields.forEach(el => {
-    el.style.display = isEditing ? 'block' : 'none';
-  });
-
-  editFields.forEach(el => {
-    el.style.display = isEditing ? 'none' : 'block';
-  });
-
-  if (actions) {
-    actions.style.display = isEditing ? 'none' : 'block';
-  }
+  viewFields.forEach(el => el.style.display = editing ? 'block' : 'none');
+  editFields.forEach(el => el.style.display = editing ? 'none' : 'block');
+  if (actions) actions.style.display = editing ? 'none' : 'block';
 }
 </script>
-
 
 </body>
 </html>

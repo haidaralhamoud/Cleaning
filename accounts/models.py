@@ -438,49 +438,7 @@ class BookingNote(models.Model):
 
 
 
-class PointsTransaction(models.Model):
 
-    REASON_CHOICES = [
-        ("BOOKING", "Booking"),
-        ("ADJUSTMENT", "Adjustment"),
-        ("REWARD", "Reward"),
-    ]
-
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="points_transactions"
-    )
-
-    amount = models.IntegerField()  # + أو -
-    reason = models.CharField(max_length=20, choices=REASON_CHOICES)
-
-    booking_type = models.CharField(
-        max_length=10,
-        choices=[("private", "Private"), ("business", "Business")],
-        null=True,
-        blank=True
-    )
-    booking_id = models.PositiveIntegerField(null=True, blank=True)
-
-    note = models.CharField(max_length=255, blank=True)
-
-    created_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="points_created"
-    )
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return f"{self.user} | {self.amount} pts"
-    
 
 
 
@@ -628,6 +586,7 @@ class CustomerPreferences(models.Model):
         return f"Preferences for {self.customer}"
 
 
+
 class PointsTransaction(models.Model):
 
     REASON_CHOICES = [
@@ -670,4 +629,4 @@ class PointsTransaction(models.Model):
 
     def __str__(self):
         return f"{self.user} | {self.amount} pts"
-
+    
