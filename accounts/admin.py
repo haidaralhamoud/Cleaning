@@ -169,3 +169,14 @@ class CustomerPreferencesAdmin(admin.ModelAdmin):
             "fields": ("updated_at",)
         }),
     )    
+
+
+
+from django.contrib import admin
+from .models import DiscountCode
+
+@admin.register(DiscountCode)
+class DiscountCodeAdmin(admin.ModelAdmin):
+    list_display = ("code", "percent", "user", "is_used", "expires_at", "created_at")
+    list_filter = ("is_used", "percent")
+    search_fields = ("code", "user__username", "user__email")

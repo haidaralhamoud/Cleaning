@@ -1,6 +1,10 @@
 from django.utils import timezone
+from typing import Counter
+from django.db.models import Q
+from django.utils.dateparse import parse_date
+
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm
+from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm, ServiceCommentForm, ServiceReviewForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
@@ -13,7 +17,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from .models import Customer , CustomerLocation, CustomerPreferences , Incident , CustomerNote, LoyaltyTier , PaymentMethod,CommunicationPreference ,BookingNote, PointsTransaction, Promotion, Referral, Reward
+from .models import Customer , CustomerLocation, CustomerPreferences , Incident , CustomerNote, LoyaltyTier , PaymentMethod,CommunicationPreference ,BookingNote, PointsTransaction, Promotion, Referral, Reward, ServiceComment, ServiceReview
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LoginView
@@ -31,7 +35,7 @@ from .forms import (
     BookingChecklistForm 
 )
 from django.http import HttpResponse
-
+from django.db.models import Avg, Count
 User = get_user_model()
 from .forms import ProviderProfileForm
 # ======================================================
@@ -941,8 +945,237 @@ def Change_Password(request):
     return render(request, "accounts/sidebar/Change_Password.html")
 
 
+@login_required
 def Service_History_and_Ratings(request):
-    return render(request, "accounts/sidebar/Service_History_and_Ratings.html")
+    user = request.user
+
+    # ======================================================
+    # 1) Past Services (COMPLETED only)
+    # ======================================================
+    private_done = PrivateBooking.objects.filter(user=user, status="COMPLETED")
+    business_done = BusinessBooking.objects.filter(user=user, status="COMPLETED")
+
+    past_services = []
+
+    for b in private_done:
+        service_title = ", ".join(b.selected_services or []) or "Private Service"
+        past_services.append({
+            "booking_type": "private",
+            "booking_id": b.id,
+            "service_title": service_title,
+            "provider": b.provider,
+            "date": b.completed_at or b.created_at,
+        })
+
+    for b in business_done:
+        service_title = (
+            b.selected_service
+            or (b.selected_bundle.title if b.selected_bundle else "Business Service")
+        )
+        past_services.append({
+            "booking_type": "business",
+            "booking_id": b.id,
+            "service_title": service_title,
+            "provider": b.provider,
+            "date": b.completed_at or b.created_at,
+        })
+
+    past_services.sort(
+        key=lambda x: (x["date"] is None, x["date"]),
+        reverse=True
+    )
+
+    # ======================================================
+    # 2) FILTERS (GET)
+    # ======================================================
+    q = request.GET.get("q")
+    service_filter = request.GET.get("service")
+    provider_filter = request.GET.get("provider")
+    date_from = request.GET.get("from")
+    date_to = request.GET.get("to")
+
+    filtered = []
+
+    for s in past_services:
+
+        if q and q.lower() not in s["service_title"].lower():
+            continue
+
+        if service_filter and s["service_title"] != service_filter:
+            continue
+
+        if provider_filter and s["provider"]:
+            if str(s["provider"].id) != provider_filter:
+                continue
+
+        if date_from:
+            if not s["date"] or s["date"].date() < parse_date(date_from):
+                continue
+
+        if date_to:
+            if not s["date"] or s["date"].date() > parse_date(date_to):
+                continue
+
+        filtered.append(s)
+
+    past_services = filtered
+
+    # ======================================================
+    # 3) Selected Service
+    # ======================================================
+    selected_service = service_filter
+    if not selected_service and past_services:
+        selected_service = past_services[0]["service_title"]
+
+    # ======================================================
+    # 4) Reviews (all customers for selected service)
+    # ======================================================
+    reviews_qs = (
+        ServiceReview.objects.filter(service_title=selected_service)
+        if selected_service else ServiceReview.objects.none()
+    )
+
+    summary = reviews_qs.aggregate(
+        avg_overall=Avg("overall_rating"),
+        avg_punctuality=Avg("punctuality"),
+        avg_quality=Avg("quality"),
+        avg_professionalism=Avg("professionalism"),
+        avg_value=Avg("value"),
+        total=Count("id"),
+    )
+
+    # ======================================================
+    # 5) Star Distribution
+    # ======================================================
+    total_reviews = summary["total"] or 0
+    star_distribution = []
+
+    for star in [5, 4, 3, 2, 1]:
+        count = reviews_qs.filter(overall_rating=star).count()
+        percent = int((count / total_reviews) * 100) if total_reviews else 0
+        star_distribution.append({
+            "star": star,
+            "percent": percent,
+        })
+
+    # ======================================================
+    # 6) Can Leave Rating? (ONE per booking)
+    # ======================================================
+    can_leave_rating = False
+    rating_booking = None
+
+    for s in past_services:
+        exists = ServiceReview.objects.filter(
+            customer=user,
+            booking_type=s["booking_type"],
+            booking_id=s["booking_id"]
+        ).exists()
+
+        if not exists:
+            can_leave_rating = True
+            rating_booking = s
+            break
+
+    # ======================================================
+    # 7) Comments
+    # ======================================================
+    for item in past_services:
+        comment = ServiceComment.objects.filter(
+            customer=user,
+            booking_type=item["booking_type"],
+            booking_id=item["booking_id"]
+        ).first()
+
+        item["comment"] = comment.text if comment else ""
+        item["can_leave_comment"] = comment is None
+
+    # ======================================================
+    # 8) POST HANDLING
+    # ======================================================
+    if request.method == "POST":
+
+        # ---------- RATING ----------
+        if request.POST.get("form_type") == "rating":
+
+            booking_type = request.POST.get("booking_type")
+            booking_id = request.POST.get("booking_id")
+
+            if not booking_type or not booking_id:
+                messages.error(request, "Invalid rating target.")
+                return redirect(request.path)
+
+            if ServiceReview.objects.filter(
+                customer=user,
+                booking_type=booking_type,
+                booking_id=booking_id
+            ).exists():
+                messages.error(request, "You already rated this service.")
+                return redirect(request.path)
+
+            form = ServiceReviewForm(request.POST)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.customer = user
+                review.booking_type = booking_type
+                review.booking_id = booking_id
+                review.service_title = selected_service
+                review.save()
+
+                messages.success(request, "Your rating has been saved ⭐")
+                return redirect(request.path)
+
+        # ---------- COMMENT ----------
+        elif request.POST.get("form_type") == "comment":
+
+            form = ServiceCommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.customer = user
+                comment.booking_type = request.POST.get("booking_type")
+                comment.booking_id = request.POST.get("booking_id")
+                comment.save()
+
+                messages.success(request, "Your comment has been saved 💬")
+                return redirect(request.path)
+
+    # ======================================================
+    # 9) Filter dropdown data
+    # ======================================================
+    service_types = sorted(set(
+        s["service_title"] for s in past_services
+    ))
+
+    providers = User.objects.filter(
+        id__in=[
+            s["provider"].id for s in past_services if s["provider"]
+        ]
+    ).distinct()
+
+    # ======================================================
+    # 10) Context
+    # ======================================================
+    context = {
+        "past_services": past_services,
+        "selected_service": selected_service,
+        "summary": summary,
+        "star_distribution": star_distribution,
+        "reviews": reviews_qs[:50],
+
+        "can_leave_rating": can_leave_rating,
+        "rating_booking": rating_booking,
+
+        "rating_form": ServiceReviewForm(),
+        "comment_form": ServiceCommentForm(),
+
+        "service_types": service_types,
+        "providers": providers,
+    }
+
+    return render(
+        request,
+        "accounts/sidebar/Service_History_and_Ratings.html",
+        context
+    )
 
 
 from django.contrib.auth.decorators import login_required
@@ -952,6 +1185,7 @@ from accounts.models import (
     LoyaltyTier,
 )
 from home.models import PrivateBooking, BusinessBooking
+
 
 
 

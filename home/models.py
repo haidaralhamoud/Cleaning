@@ -4,8 +4,9 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from django.utils import timezone
 
-from accounts.models import ChatThread
+from accounts.models import ChatThread, DiscountCode
 User = get_user_model()
 
 # =====================================================================
@@ -219,7 +220,6 @@ class BaseBooking(models.Model):
 
             from accounts.models import PointsTransaction, Referral, Customer
             from accounts.models import Promotion
-            from django.utils import timezone
 
             base_points = int(self.total_price * 5)
 
@@ -660,6 +660,13 @@ class BusinessBooking(BaseBooking):
 
     path_type = models.CharField(max_length=20, default="bundle")
 
+
+    discount_code = models.ForeignKey(
+        DiscountCode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     def __str__(self):
         return f"Booking #{self.id}"
     
@@ -781,6 +788,13 @@ class PrivateBooking(BaseBooking):
 
     accepted_terms = models.BooleanField(default=False)
 
+
+    discount_code = models.ForeignKey(
+        DiscountCode,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     def __str__(self):
         return f"PrivateBooking #{self.id}"
 

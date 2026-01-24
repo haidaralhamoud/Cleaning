@@ -1,5 +1,5 @@
 from django import forms
-from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference
+from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference, ServiceComment, ServiceReview
 import json
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -269,3 +269,40 @@ class BookingChecklistForm(forms.ModelForm):
             })
         }
 
+class ServiceReviewForm(forms.ModelForm):
+    class Meta:
+        model = ServiceReview
+        fields = [
+            "overall_rating",
+            "punctuality",
+            "quality",
+            "professionalism",
+            "value",
+            "feedback",
+        ]
+
+    def clean(self):
+        cleaned = super().clean()
+        for f in [
+            "overall_rating",
+            "punctuality",
+            "quality",
+            "professionalism",
+            "value",
+        ]:
+            v = cleaned.get(f)
+            if v is None or v < 1 or v > 5:
+                self.add_error(f, "Rating must be between 1 and 5.")
+        return cleaned
+
+
+class ServiceCommentForm(forms.ModelForm):
+    class Meta:
+        model = ServiceComment
+        fields = ["text"]
+
+    def clean_text(self):
+        text = self.cleaned_data.get("text", "").strip()
+        if not text:
+            raise forms.ValidationError("Comment cannot be empty.")
+        return text

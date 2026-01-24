@@ -1,4 +1,8 @@
 from decimal import Decimal
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+
+from accounts.models import DiscountCode
 from .pricing_utils import calculate_booking_price
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import (
@@ -453,32 +457,94 @@ def private_zip_step1(request, service_slug):
         "not_available_form": not_available_form,
     })
 
-
-
-
+@login_required
 def private_booking_checkout(request, booking_id):
     booking = get_object_or_404(PrivateBooking, id=booking_id)
     services = PrivateService.objects.filter(slug__in=booking.selected_services)
 
-    if request.method == "POST":
-        booking.payment_method = request.POST.get("payment_method")
-        booking.card_number = request.POST.get("card_number")
-        booking.card_expiry = request.POST.get("card_expiry")
-        booking.card_cvv = request.POST.get("card_cvv")
-        booking.card_name = request.POST.get("card_name")
-        booking.accepted_terms = True
-    if booking.user is None and request.user.is_authenticated:
+    # ربط المستخدم
+    if booking.user is None:
         booking.user = request.user
+        booking.save(update_fields=["user"])
 
-        booking.save()
+    # ==========================
+    # 🧮 PREVIEW CALCULATION
+    # ==========================
+    discount_preview_amount = Decimal("0.00")
+    final_preview_price = booking.total_price
 
+    if booking.discount_code:
+        is_valid, _ = booking.discount_code.validate(user=request.user)
+        if is_valid:
+            discount_preview_amount = (
+                booking.total_price * Decimal(booking.discount_code.percent) / Decimal(100)
+            )
+            final_preview_price = booking.total_price - discount_preview_amount
 
-        return redirect("home:thank_you_page")  # صفحة بعد الدفع
-    print("ADDONS SELECTED:", booking.addons_selected)
+    # ==========================
+    # 📨 POST
+    # ==========================
+    if request.method == "POST":
+        form_type = request.POST.get("form_type")
 
+        # 🎟 APPLY DISCOUNT (Preview only)
+        if form_type == "discount":
+            code_input = (request.POST.get("discount_code") or "").strip()
+            dc = DiscountCode.objects.filter(code__iexact=code_input).first()
+
+            if not dc:
+                messages.error(request, "Invalid discount code.")
+            else:
+                is_valid, reason = dc.validate(user=request.user)
+                if not is_valid:
+                    messages.error(request, reason)
+                else:
+                    booking.discount_code = dc
+                    booking.save(update_fields=["discount_code"])
+                    messages.success(request, "Discount code applied successfully ✅")
+
+            return redirect("home:private_booking_checkout", booking_id=booking.id)
+
+        # 💳 CONFIRM PAYMENT
+        elif form_type == "payment":
+            booking.payment_method = request.POST.get("payment_method")
+            booking.card_number = request.POST.get("card_number")
+            booking.card_expiry = request.POST.get("card_expiry")
+            booking.card_cvv = request.POST.get("card_cvv")
+            booking.card_name = request.POST.get("card_name")
+            booking.accepted_terms = True
+
+            if booking.discount_code:
+                dc = booking.discount_code
+                is_valid, _ = dc.validate(user=request.user)
+
+                if is_valid:
+                    discount_amount = (
+                        booking.total_price * Decimal(dc.percent) / Decimal(100)
+                    )
+                    booking.total_price -= discount_amount
+
+                    dc.used_count += 1
+                    if dc.max_uses is not None and dc.used_count >= dc.max_uses:
+                        dc.is_used = True
+
+                    dc.save(update_fields=["used_count", "is_used"])
+
+                booking.discount_code = None
+
+            booking.save()
+            return redirect("home:thank_you_page")
+
+        elif form_type == "remove_discount":
+            booking.discount_code = None
+            booking.save(update_fields=["discount_code"])
+            messages.info(request, "Discount code removed.")
+            return redirect("home:private_booking_checkout", booking_id=booking.id)
     return render(request, "home/checkout.html", {
         "booking": booking,
         "services": services,
+        "discount_preview_amount": discount_preview_amount,
+        "final_preview_price": final_preview_price,
     })
 
 def private_zip_available(request, service_slug):
