@@ -138,4 +138,7 @@ path(
     name="private_booking_checkout"
 ),
 
+path("booking/add-note/", views.add_booking_note, name="add_booking_note"),
+
+
 ]

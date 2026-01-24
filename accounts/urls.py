@@ -4,6 +4,7 @@ from accounts.views_admin import finalize_booking
 from . import views
 from .views import booking_chat, redeem_reward
 from django.contrib.auth import views as auth_views
+from .views_admin import finalize_booking
 
 app_name='accounts'
 urlpatterns = [
@@ -97,3 +98,8 @@ path(
         name="redeem_reward"
     ),
 ]
+path(
+    "admin/bookings/<str:booking_type>/<int:booking_id>/finalize/",
+    finalize_booking,
+    name="finalize_booking"
+),

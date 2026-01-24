@@ -8,8 +8,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import (
     ContactForm, ApplicationForm, BusinessCompanyInfoForm, OfficeSetupForm , ZipCheckForm, NotAvailableZipForm,CallRequestForm
 )
+from django.views.decorators.http import require_POST
+
 from .models import (
-    Job, Application, BusinessBooking, BusinessService,DateSurcharge,PrivateAddon,
+    Job, Application,BookingNote, BusinessBooking, BusinessService,DateSurcharge,PrivateAddon,
     BusinessBundle, BusinessAddon ,PrivateService, AvailableZipCode,PrivateBooking,CallRequest,EmailRequest,PrivateMainCategory
 
 )
@@ -981,4 +983,33 @@ def private_update_addons_api(request, booking_id):
 
 
 
+@require_POST
+def add_booking_note(request):
+    booking_type = request.POST.get("booking_type")
+    booking_id = request.POST.get("booking_id")
+    text = request.POST.get("text", "").strip()
 
+    if not text:
+        return JsonResponse({"error": "Empty note"}, status=400)
+
+    if booking_type == "private":
+        booking = PrivateBooking.objects.get(id=booking_id)
+        note = BookingNote.objects.create(
+            private_booking=booking,
+            text=text
+        )
+
+    elif booking_type == "business":
+        booking = BusinessBooking.objects.get(id=booking_id)
+        note = BookingNote.objects.create(
+            business_booking=booking,
+            text=text
+        )
+    else:
+        return JsonResponse({"error": "Invalid type"}, status=400)
+
+    return JsonResponse({
+        "id": note.id,
+        "text": note.text,
+        "created_at": note.created_at.strftime("%Y-%m-%d %H:%M")
+    })

@@ -8,6 +8,8 @@ from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import logout
+from accounts.models import PointsTransaction
+
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
@@ -548,6 +550,7 @@ def view_service_details(request, booking_type, booking_id):
         {
             "booking": booking,
             "booking_type": booking_type,
+            "note": booking.note.all(),
             "timeline": timeline,
             "hide_actions": hide_actions,
             "customer_unread_messages": customer_unread_messages,
@@ -1185,6 +1188,12 @@ from home.models import PrivateBooking, BusinessBooking
 
 
 @login_required
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from accounts.models import PointsTransaction
+
+@login_required
 def Loyalty_and_Rewards(request):
 
     # ==================================================
@@ -1329,6 +1338,70 @@ def redeem_reward(request, reward_id):
 
     messages.success(request, "Reward redeemed successfully 🎉")
     return redirect("accounts:Loyalty_and_Rewards")
+
+    transactions = PointsTransaction.objects.filter(
+        user=request.user
+    ).order_by("-created_at")
+
+    points_balance = sum(t.amount for t in transactions)
+
+    # =========================
+    # TIER LOGIC (SIMPLE)
+    # =========================
+    if points_balance >= 3000:
+        current_tier = "Gold"
+        next_tier_name = None
+        next_tier_points = 0
+    elif points_balance >= 1000:
+        current_tier = "Silver"
+        next_tier_name = "Gold"
+        next_tier_points = 3000 - points_balance
+    else:
+        current_tier = "Bronze"
+        next_tier_name = "Silver"
+        next_tier_points = 1000 - points_balance
+
+    # =========================
+    # REWARDS (STATIC FOR NOW)
+    # =========================
+    rewards = [
+        {
+            "title": "50% Off Deep Cleaning",
+            "description": "Get a deep cleaning service at half price.",
+            "points_required": 1000,
+            "can_redeem": points_balance >= 1000,
+            "missing_points": max(0, 1000 - points_balance),
+        },
+        {
+            "title": "Free Standard Cleaning",
+            "description": "Enjoy a complimentary standard cleaning.",
+            "points_required": 2000,
+            "can_redeem": points_balance >= 2000,
+            "missing_points": max(0, 2000 - points_balance),
+        },
+        {
+            "title": "Free Babysitting Hour",
+            "description": "One free babysitting hour from our partners.",
+            "points_required": 1500,
+            "can_redeem": points_balance >= 1500,
+            "missing_points": max(0, 1500 - points_balance),
+        },
+    ]
+
+    return render(
+        request,
+        "accounts/sidebar/Loyalty_and_Rewards.html",
+        {
+            "points_balance": points_balance,
+            "transactions": transactions[:10],
+            "current_tier": current_tier,
+            "next_tier_name": next_tier_name,
+            "next_tier_points": next_tier_points,
+            "rewards": rewards,
+        }
+    )
+
+
 
 # ======================================================
 # LOGOUT

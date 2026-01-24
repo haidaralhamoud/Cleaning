@@ -236,10 +236,15 @@
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="paused">
-        <button
-{% if booking.status not in "STARTED RESUMED" %}disabled{% endif %}>
+<button
+  {% if booking.status != "STARTED" and booking.status != "RESUMED" %}
+    disabled
+  {% endif %}
+>
   Pause
 </button>
+
+
 
       </form>
 
@@ -259,24 +264,29 @@
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="completed">
-        <button class="complete"
-        {% if booking.status not in "STARTED PAUSED RESUMED" %}disabled{% endif %}>
-        Complete
-      </button>
+<button class="complete"
+  {% if booking.status != "STARTED" and booking.status != "PAUSED" and booking.status != "RESUMED" %}
+    disabled
+  {% endif %}
+>
+  Complete
+</button>
+
 
       </form>
 <!-- REPORT NO SHOW -->
 <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
   {% csrf_token %}
   <input type="hidden" name="action" value="report_no_show">
-  <button
-    style="background:#dc3545"
-    {% if booking.status not in "ON_THE_WAY STARTED PAUSED RESUMED" %}
-      disabled
-    {% endif %}
-  >
-    Customer Not Available
-  </button>
+<button style="background:#dc3545"
+  {% if booking.status != "ON_THE_WAY" and booking.status != "STARTED" and booking.status != "PAUSED" and booking.status != "RESUMED" %}
+    disabled
+  {% endif %}
+>
+  Customer Not Available
+</button>
+
+
 </form>
 
     </div>
