@@ -13,7 +13,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family: "Inter", sans-serif;
+  font-family: "Vesper Libre", serif;
   background: var(--sky);
   color: var(--ink);
 }
@@ -54,7 +54,7 @@ body{
 /* ===== Main ===== */
 .content{flex:1;padding:40px}
 .page-title{text-align:center;font-size:28px;font-weight:700;margin-bottom:25px}
-.card{background:#fff;border-radius:12px;padding:30px;max-width:600px;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.card{background:#fff;border-radius:12px;padding:30px;max-width:860px;margin:0 auto;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
 .section-title{font-size:18px;font-weight:700;margin-bottom:20px}
 
 /* Sections */
@@ -93,11 +93,66 @@ input:checked+.slider:before{transform:translateX(22px)}
 
 /* Buttons */
 .actions{display:flex;justify-content:center;gap:10px;margin-top:20px}
-.btn{padding:10px 20px;border-radius:10px;font-weight:600;cursor:pointer}
-.btn.primary{background:#039fc8;color:#fff;border:none}
-.btn.outline{background:#fff;color:#039fc8;border:1px solid #039fc8}
+.btn{padding:12px 26px;border-radius:999px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:transform .2s ease,box-shadow .2s ease,background .2s ease,color .2s ease,border-color .2s ease}
+.btn{ text-decoration: none; }
+.btn.primary{background:#039fc8;color:#fff;border:none;box-shadow:0 10px 22px rgba(3,159,200,.25)}
+.btn.primary:hover{background:#028eb3;transform:translateY(-1px)}
+.btn.outline{background:#fff;color:#039fc8;border:1.5px solid #039fc8}
+.btn.outline:hover{background:rgba(3,159,200,.08);transform:translateY(-1px)}
 .update-text{text-align:center;font-size:13px;margin-top:20px}
 .red{color:red}
+
+/* Notifications list */
+.notifications-card {
+  margin-bottom: 18px;
+}
+
+.notification-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #e6eef3;
+  background: #fafcfd;
+}
+
+.notification-item.unread {
+  border-color: #b8e8f5;
+  background: #f3fbfe;
+}
+
+.notification-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.notification-body {
+  font-size: 13px;
+  color: #666;
+}
+
+.notification-meta {
+  font-size: 12px;
+  color: #888;
+  white-space: nowrap;
+}
+
+.notification-empty {
+  font-size: 13px;
+  color: #888;
+  padding: 6px 2px;
+}
 
 /* ===== Mobile Header & Floating Button ===== */
 .mobile-header{display:none;background:#fff;padding:10px 16px;box-shadow:var(--shadow);align-items:center;justify-content:center;position:sticky;top:0;z-index:90}

@@ -7,6 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Booking | Hembla</title>
 
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+
   <!-- ترتيب الستيلات: الأساسي، بعدين البوب أب -->
   <link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
   <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
@@ -95,6 +98,13 @@
   </style>
 </head>
 <body>
+{% include "home/includes/main_header.html" %}
+  <div class="confetti" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
 
   <section class="hero">
     <div class="overlay">
@@ -118,7 +128,7 @@
         <div class="methods-grid">
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/booking0.png' %}"></div>
+            <div class="icon-circle"><img src="{% static 'images/icon-calendar.svg' %}" alt="Calendar icon"></div>
             <h4>Book Online Now</h4>
             <p>Choose your service, pick a date...</p>
 <a href="{% url 'home:private_booking_start' service.slug %}" class="btn">
@@ -128,13 +138,13 @@
           </div>
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/incoming-call0.png' %}"></div>
+            <div class="icon-circle"><img src="{% static 'images/icon-phone.svg' %}" alt="Phone icon"></div>
             <h4>Schedule a Call</h4>
             <button class="btn" onclick="openCallPopup()">Request a Call</button>
           </div>
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/booking1.png' %}"></div>
+            <div class="icon-circle"><img src="{% static 'images/icon-email.svg' %}" alt="Email icon"></div>
             <h4>Send an Email</h4>
             <button class="btn" onclick="openEmailPopup()">Send Email</button>
           </div>
@@ -156,7 +166,7 @@
   <!-- ===== POPUP REQUEST A CALL ===== -->
   <div id="call-overlay" class="call-overlay">
     <div class="popup">
-      <img src="{% static 'images/close-window0.png' %}" class="close-btn" onclick="closeCallPopup()">
+      <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
 
       <h2>Request a Call</h2>
       <p class="subtitle">Let’s find the best time to call you!</p>
@@ -177,7 +187,7 @@
         <label>Preferred Time</label>
         <div class="input-with-icon">
           <input type="datetime-local" name="preferred_time" required>
-          <img src="{% static 'images/calendar0.png' %}" class="calendar-icon">
+          <img src="{% static 'images/icon-calendar-line.svg' %}" class="calendar-icon" alt="Calendar">
         </div>
 
         <label>Message (Optional)</label>
@@ -194,10 +204,10 @@
   <!-- ===== POPUP SEND EMAIL ===== -->
   <div id="email-overlay" class="email-overlay">
     <div class="popup">
-      <img src="{% static 'images/close-window0.png' %}" class="close-btn" onclick="closeEmailPopup()">
+      <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeEmailPopup()" alt="Close">
 
       <div class="popup-header">
-        <img src="{% static 'images/send0.png' %}" class="send-icon">
+        <img src="{% static 'images/icon-mail.svg' %}" class="send-icon" alt="Email">
         <h2>Send Email</h2>
       </div>
 
@@ -219,8 +229,12 @@
 
         <label>Attachment (Optional)</label>
         <div class="attachment-box">
-          <input type="file" name="attachment">
-          <img src="{% static 'images/upload-to-cloud0.png' %}" class="upload-icon">
+          <input type="file" name="attachment" id="emailAttachment">
+          <label for="emailAttachment" class="file-pill">
+            <span class="file-btn">Choose File</span>
+            <span class="file-name" id="fileName">No file chosen</span>
+            <img src="{% static 'images/icon-upload.svg' %}" class="upload-icon" alt="Upload">
+          </label>
         </div>
 
         <button type="submit" class="send-btn">Send Email</button>
@@ -243,6 +257,20 @@
       document.getElementById("email-overlay").classList.remove("show");
     }
   </script>
+  <script>
+    const fileInput = document.getElementById("emailAttachment");
+    const fileName = document.getElementById("fileName");
 
+    if (fileInput && fileName) {
+      fileInput.addEventListener("change", () => {
+        fileName.textContent = fileInput.files.length
+          ? fileInput.files[0].name
+          : "No file chosen";
+      });
+    }
+  </script>
+
+  <script src="{% static 'js/main_header.js' %}"></script>
+{% include "home/includes/footer.html" %}
 </body>
 </html>

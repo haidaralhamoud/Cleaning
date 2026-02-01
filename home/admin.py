@@ -1,7 +1,38 @@
 from django import forms
 from django.utils import timezone 
-from django.contrib import admin
-from .models import Contact , Job , Application , BusinessService,BusinessBooking ,BusinessBundle,BusinessAddon, PrivateMainCategory,PrivateService,PrivateBooking,AvailableZipCode,NotAvailableZipRequest,CallRequest,EmailRequest,PrivateAddon,    ServiceQuestionRule, AddonRule, ScheduleRule ,DateSurcharge,BookingStatusHistory , NoShowReport
+from django import forms
+from django.contrib import admin, messages
+from django.shortcuts import redirect
+from django.urls import path
+from django import forms
+from .models import (
+    Contact,
+    Job,
+    Application,
+    BusinessService,
+    BusinessBooking,
+    BusinessBundle,
+    BusinessAddon,
+    PrivateMainCategory,
+    PrivateService,
+    PrivateBooking,
+    AvailableZipCode,
+    NotAvailableZipRequest,
+    CallRequest,
+    EmailRequest,
+    PrivateAddon,
+    ServiceQuestionRule,
+    AddonRule,
+    ScheduleRule,
+    DateSurcharge,
+    BookingStatusHistory,
+    NoShowReport,
+    ServiceCard,
+    ServicePricing,
+    ServiceEstimate,
+    ServiceEcoPromise,
+    ServiceEcoPoint,
+)
 from jsoneditor.forms import JSONEditor
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -371,10 +402,76 @@ class ApplicationAdmin(admin.ModelAdmin):
     application_type.short_description = "Type"
 
 
+class BusinessBundleAdminForm(forms.ModelForm):
+    what_included_text = forms.CharField(
+        required=False,
+        label="What's included (one per line)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="Enter one item per line.",
+    )
+    why_choose_text = forms.CharField(
+        required=False,
+        label="Why choose this bundle (one per line)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="Enter one item per line.",
+    )
+    addons_text = forms.CharField(
+        required=False,
+        label="Popular add-ons (one per line)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="Enter one item per line.",
+    )
+
+    class Meta:
+        model = BusinessBundle
+        fields = (
+            "title",
+            "slug",
+            "discount",
+            "short_description",
+            "target_audience",
+            "what_included_text",
+            "why_choose_text",
+            "addons_text",
+            "notes",
+            "image",
+        )
+
+    def _lines_to_list(self, value):
+        if not value:
+            return []
+        return [line.strip() for line in value.splitlines() if line.strip()]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["what_included_text"].initial = "\n".join(
+                self.instance.what_included or []
+            )
+            self.fields["why_choose_text"].initial = "\n".join(
+                self.instance.why_choose or []
+            )
+            self.fields["addons_text"].initial = "\n".join(self.instance.addons or [])
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.what_included = self._lines_to_list(
+            self.cleaned_data.get("what_included_text")
+        )
+        instance.why_choose = self._lines_to_list(
+            self.cleaned_data.get("why_choose_text")
+        )
+        instance.addons = self._lines_to_list(self.cleaned_data.get("addons_text"))
+        if commit:
+            instance.save()
+        return instance
+
+
 @admin.register(BusinessBundle)
 class BundleAdmin(admin.ModelAdmin):
-    list_display = ("title", "discount")  
+    list_display = ("title", "discount")
     prepopulated_fields = {"slug": ("title",)}
+    form = BusinessBundleAdminForm
 
 
 
@@ -398,9 +495,53 @@ class PrivateAddonInline(admin.StackedInline):
     model = PrivateAddon
     extra = 1
     fields = ("title", "slug", "icon", "price", "price_per_unit", "form_html")
+
+
 class ServiceQuestionRuleInline(admin.TabularInline):
     model = ServiceQuestionRule
     extra = 1
+
+
+class ServiceCardInline(admin.StackedInline):
+    model = ServiceCard
+    extra = 0
+    fields = ("title", "icon", "body", "order")
+
+
+class ServicePricingInline(admin.StackedInline):
+    model = ServicePricing
+    extra = 0
+    fields = (
+        "title",
+        "card_title",
+        "subtitle",
+        "price_label",
+        "price_value",
+        "price_note",
+        "description",
+        "cta_text",
+        "cta_url",
+    )
+
+
+class ServiceEstimateInline(admin.StackedInline):
+    model = ServiceEstimate
+    extra = 0
+    fields = ("title", "property_label", "bedrooms_label", "cta_text", "note")
+
+
+class ServiceEcoPromiseInline(admin.StackedInline):
+    model = ServiceEcoPromise
+    extra = 0
+    fields = ("title", "subtitle", "cta_text")
+
+
+class ServiceEcoPointInline(admin.TabularInline):
+    model = ServiceEcoPoint
+    extra = 0
+    fields = ("title", "body", "icon", "order")
+
+
 
 
 @admin.register(ScheduleRule)
@@ -414,14 +555,62 @@ class PrivateServiceAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     fieldsets = (
         ("Basic Info", {
-            "fields": ("category", "title", "slug", "price", "description", "recommended", "image")
+            "fields": (
+                "category",
+                "title",
+                "slug",
+                "price",
+                "description",
+                "recommended",
+                "image",
+            )
+        }),
+        ("Hero / Introduction", {
+            "fields": (
+                "hero_image",
+                "hero_subtitle",
+                "intro_text",
+                "starting_price",
+                "hero_cta_text",
+                "hero_cta_url",
+            ),
+            "classes": ("collapse",),
         }),
         ("Questions (JSON)", {
             "fields": ("questions",),
             "classes": ("collapse",)
         }),
     )
-    inlines = [PrivateAddonInline, ServiceQuestionRuleInline]
+    inlines = [
+        PrivateAddonInline,
+        ServiceQuestionRuleInline,
+        ServiceCardInline,
+        ServicePricingInline,
+        ServiceEstimateInline,
+        ServiceEcoPromiseInline,
+    ]
+
+
+@admin.register(ServiceCard)
+class ServiceCardAdmin(admin.ModelAdmin):
+    list_display = ("service", "title", "order")
+
+
+@admin.register(ServiceEcoPromise)
+class ServiceEcoPromiseAdmin(admin.ModelAdmin):
+    list_display = ("service", "title")
+    inlines = [ServiceEcoPointInline]
+
+
+@admin.register(ServicePricing)
+class ServicePricingAdmin(admin.ModelAdmin):
+    list_display = ("service", "title", "price_value")
+
+
+@admin.register(ServiceEstimate)
+class ServiceEstimateAdmin(admin.ModelAdmin):
+    list_display = ("service", "title")
+
 
 # ================================
 # 3. PRIVATE BOOKING
@@ -705,8 +894,84 @@ class PrivateAddonAdmin(admin.ModelAdmin):
 
 @admin.register(DateSurcharge)
 class DateSurchargeAdmin(admin.ModelAdmin):
+    class DateSurchargeForm(forms.ModelForm):
+        WEEKDAY_CHOICES = [
+            ("Mon", "Monday"),
+            ("Tue", "Tuesday"),
+            ("Wed", "Wednesday"),
+            ("Thu", "Thursday"),
+            ("Fri", "Friday"),
+            ("Sat", "Saturday"),
+            ("Sun", "Sunday"),
+        ]
+
+        weekday = forms.ChoiceField(choices=[("", "---------")] + WEEKDAY_CHOICES, required=False)
+
+        class Meta:
+            model = DateSurcharge
+            fields = "__all__"
+
+        def clean(self):
+            cleaned = super().clean()
+            rule_type = cleaned.get("rule_type")
+            weekday = cleaned.get("weekday")
+            date = cleaned.get("date")
+
+            if rule_type == "weekday":
+                if not weekday:
+                    self.add_error("weekday", "Please choose a weekday.")
+                cleaned["date"] = None
+            elif rule_type == "date":
+                if not date:
+                    self.add_error("date", "Please select a date.")
+                cleaned["weekday"] = None
+
+            return cleaned
+
+    form = DateSurchargeForm
     list_display = ("rule_type", "weekday", "date", "amount", "surcharge_type")
     list_filter = ("rule_type", "weekday", "date")
+    change_form_template = "admin/home/datesurcharge/change_form.html"
+
+    class Media:
+        js = ("admin/date_surcharge.js",)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path(
+                "quick-weekend/",
+                self.admin_site.admin_view(self.quick_weekend),
+                name="home_datesurcharge_quick_weekend",
+            ),
+        ]
+        return custom + urls
+
+    def quick_weekend(self, request):
+        if not self.has_add_permission(request):
+            messages.error(request, "You do not have permission to add surcharges.")
+            return redirect("..")
+
+        amount_raw = request.GET.get("amount", "10")
+        surcharge_type = request.GET.get("type", "percent")
+        try:
+            amount = float(amount_raw)
+        except ValueError:
+            amount = 10
+
+        for weekday in ("Sat", "Sun"):
+            obj, created = DateSurcharge.objects.get_or_create(
+                rule_type="weekday",
+                weekday=weekday,
+                defaults={"amount": amount, "surcharge_type": surcharge_type},
+            )
+            if not created:
+                obj.amount = amount
+                obj.surcharge_type = surcharge_type
+                obj.save(update_fields=["amount", "surcharge_type"])
+
+        messages.success(request, "Weekend surcharges updated for Saturday and Sunday.")
+        return redirect("..")
 
 
 

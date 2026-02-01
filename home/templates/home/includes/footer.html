@@ -1,0 +1,84 @@
+﻿{% load static %}
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-col about">
+      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
+      <p>
+        At Hembla, we believe home should be your haven, not your to-do list.
+        From cleaning to care, we're here to make life easier, one home at a time.
+      </p>
+
+      <div class="bottom-left">
+        <div class="connect">
+          <h4>Connect</h4>
+          <div class="socials">
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+              <img src="{% static 'images/facebook0.png' %}" alt="facebook">
+            </a>
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
+              <img src="{% static 'images/instagram-circle0.png' %}" alt="instagram">
+            </a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noopener noreferrer">
+              <img src="{% static 'images/linked-in-circled0.png' %}" alt="linkedin">
+            </a>
+            <a href="https://wa.me/" target="_blank" rel="noopener noreferrer">
+              <img src="{% static 'images/whats-app0.png' %}" alt="whatsapp">
+            </a>
+          </div>
+        </div>
+
+        <div class="app-download">
+          <h4>App Download</h4>
+          <div class="apps">
+            <a href="https://play.google.com" target="_blank" rel="noopener noreferrer">
+              <img src="{% static 'images/mobile0.png' %}" alt="mobile">
+            </a>
+            <a href="https://apps.apple.com" target="_blank" rel="noopener noreferrer">
+              <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png' %}" alt="app store">
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-col support">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="{% url 'home:contact' %}">Contact Us</a></li>
+        <li><a href="{% url 'home:contact' %}">Address</a></li>
+        <li><a href="{% url 'home:contact' %}">Working Hours</a></li>
+        <li><a href="{% url 'home:faq' %}">FAQ</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col company">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="{% url 'home:about' %}">About Us</a></li>
+        <li><a href="{% url 'home:careers_home' %}">Careers</a></li>
+        <li><a href="{% url 'home:about' %}">Our Story</a></li>
+        <li><a href="{% url 'home:feedback_request' %}">Feedback</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col legal">
+      <h4>Legal/Privacy</h4>
+      <ul>
+        <li><a href="{% url 'home:Privacy_Policy' %}">Privacy Policy</a></li>
+        <li><a href="{% url 'home:T_C' %}">Terms &amp; Conditions</a></li>
+        <li><a href="{% url 'home:Cookies_Policy' %}">Cookie Policy</a></li>
+        <li><a href="{% url 'home:Accessibility_Statement' %}">Accessibility Statement</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="footer-line">
+
+  <div class="footer-bottom">
+    <div class="language-box">
+      <img src="{% static 'images/earth-globe0.png' %}" alt="earth" class="earth-icon">
+      <span>Language</span>
+    </div>
+    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+  </div>
+</footer>

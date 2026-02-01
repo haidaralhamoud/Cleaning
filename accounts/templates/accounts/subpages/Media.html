@@ -5,40 +5,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Customer Profile · Media Gallery</title>
+  <title>Customer Profile - Media Gallery</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Media.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 </head>
 
 <body>
 
     <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
   <div class="layout">
 
     <!-- ===== MOBILE HEADER ===== -->
     <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
+      <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
         <span class="arrow">&#8250;</span>
       </button>
 
@@ -46,85 +30,146 @@
 
    <!-- Sidebar -->
 
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+    {% include "accounts/includes/customer_sidebar.html" %}
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="content">
       <h1 class="page-title">Media Gallery</h1>
 
+      {% if booking %}
+      <div class="media-actions">
+        <a class="back-link" href="{% url 'accounts:view_service_details' booking_type booking.id %}">
+          <span class="back-ico">&lsaquo;</span>
+          Back to Service Details
+        </a>
+      </div>
+      {% endif %}
+
       <div class="service-meta">
-        <div class="service-name">Deep Clean Service</div>
-        <div class="date">July 15, 2024, 10:00 AM</div>
+        <div class="service-name">
+          {% if booking %}
+            {{ booking_type|title }} Booking #{{ booking.id }}
+          {% else %}
+            Media Gallery
+          {% endif %}
+        </div>
+        <div class="date">
+          {% if booking and booking.created_at %}
+            {{ booking.created_at|date:"F d, Y" }}
+          {% else %}
+            &mdash;
+          {% endif %}
+        </div>
         <p class="info-text">Uploaded media is visible only to you and your assigned provider</p>
       </div>
+      {% if not booking %}
+        <p class="info-text">Open this page from a booking to upload media.</p>
+      {% endif %}
 
       <!-- ===== BEFORE ===== -->
       <div class="card media-section">
         <div class="section-header"><h3>Before</h3></div>
         <div class="slider">
-          <button class="nav prev">‹</button>
+          <button class="nav prev">&lsaquo;</button>
           <div class="track">
-            <img src="{% static 'images/frame-16865526140.svg' %}" alt="">
-            <img src="{% static 'images/frame-16865526150.svg' %}" alt="">
-            <img src="{% static 'images/frame-16865526160.svg' %}" alt="">
+            {% for media in media_by_phase.before %}
+              <div class="media-item">
+                <img src="{{ media.file.url }}" alt="Before photo">
+                <form method="post" class="delete-media-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="media_id" value="{{ media.id }}">
+                  <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+                </form>
+              </div>
+            {% empty %}
+              <img src="{% static 'images/frame-16865526140.svg' %}" alt="">
+            {% endfor %}
           </div>
-          <button class="nav next">›</button>
+          <button class="nav next">&rsaquo;</button>
         </div>
+        {% if booking %}
+          <form method="post" enctype="multipart/form-data" class="add-media-form">
+            {% csrf_token %}
+            <input type="hidden" name="phase" value="before">
+            <label class="file-pill">
+              <input type="file" name="file" accept="image/*" required>
+              <span>Choose file</span>
+            </label>
+            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
+          </form>
+        {% endif %}
       </div>
 
       <!-- ===== DURING ===== -->
       <div class="card media-section">
         <div class="section-header"><h3>During</h3></div>
         <div class="slider">
-          <button class="nav prev">‹</button>
+          <button class="nav prev">&lsaquo;</button>
           <div class="track">
-            <img src="{% static 'images/frame-16865526141.svg' %}" alt="">
-            <img src="{% static 'images/frame-16865526151.svg' %}" alt="">
-            <img src="{% static 'images/frame-16865526161.svg' %}" alt="">
+            {% for media in media_by_phase.during %}
+              <div class="media-item">
+                <img src="{{ media.file.url }}" alt="During photo">
+                <form method="post" class="delete-media-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="media_id" value="{{ media.id }}">
+                  <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+                </form>
+              </div>
+            {% empty %}
+              <img src="{% static 'images/frame-16865526141.svg' %}" alt="">
+            {% endfor %}
           </div>
-          <button class="nav next">›</button>
+          <button class="nav next">&rsaquo;</button>
         </div>
+        {% if booking %}
+          <form method="post" enctype="multipart/form-data" class="add-media-form">
+            {% csrf_token %}
+            <input type="hidden" name="phase" value="during">
+            <label class="file-pill">
+              <input type="file" name="file" accept="image/*" required>
+              <span>Choose file</span>
+            </label>
+            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
+          </form>
+        {% endif %}
       </div>
 
       <!-- ===== AFTER ===== -->
       <div class="card media-section">
         <div class="section-header"><h3>After</h3></div>
         <div class="slider">
-          <button class="nav prev">‹</button>
+          <button class="nav prev">&lsaquo;</button>
           <div class="track">
-            <img src="{% static 'images/frame-16865526142.svg' %}" alt="">
-            <img src="{% static 'images/frame-16865526152.svg' %}" alt="">
-            <img src="{% static 'images/frame-16865526162.svg' %}" alt="">
+            {% for media in media_by_phase.after %}
+              <div class="media-item">
+                <img src="{{ media.file.url }}" alt="After photo">
+                <form method="post" class="delete-media-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="media_id" value="{{ media.id }}">
+                  <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+                </form>
+              </div>
+            {% empty %}
+              <img src="{% static 'images/frame-16865526142.svg' %}" alt="">
+            {% endfor %}
           </div>
-          <button class="nav next">›</button>
+          <button class="nav next">&rsaquo;</button>
         </div>
+        {% if booking %}
+          <form method="post" enctype="multipart/form-data" class="add-media-form">
+            {% csrf_token %}
+            <input type="hidden" name="phase" value="after">
+            <label class="file-pill">
+              <input type="file" name="file" accept="image/*" required>
+              <span>Choose file</span>
+            </label>
+            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
+          </form>
+        {% endif %}
       </div>
 
       <!-- ===== ISSUES ===== -->
@@ -134,112 +179,98 @@
           <button class="btn btn-primary">Report Issues</button>
         </div>
         <div class="issues-grid">
-          <img src="{% static 'images/frame-16865526200.svg' %}" alt="Issue 1">
-          <div class="add-box"><button><span class="add-media">+ Add Media</span></button></div>
+          {% for media in media_by_phase.issue %}
+            <div class="media-item">
+              <img src="{{ media.file.url }}" alt="Issue">
+              <form method="post" class="delete-media-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="media_id" value="{{ media.id }}">
+                <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+              </form>
+            </div>
+          {% empty %}
+            <img src="{% static 'images/frame-16865526200.svg' %}" alt="Issue 1">
+          {% endfor %}
         </div>
+        {% if booking %}
+          <form method="post" enctype="multipart/form-data" class="add-media-form">
+            {% csrf_token %}
+            <input type="hidden" name="phase" value="issue">
+            <label class="file-pill">
+              <input type="file" name="file" accept="image/*" required>
+              <span>Choose file</span>
+            </label>
+            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
+          </form>
+        {% endif %}
       </div>
 
     </main>
   </div>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
+{% include "home/includes/footer.html" %}
 
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
-
-
-      </div>
-    </div>
-
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
+<div class="image-lightbox" id="imageLightbox">
+  <div class="lightbox-content">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <img id="lightboxImage" alt="Media preview">
   </div>
+</div>
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
+<div class="overlay customer-menu-overlay" id="menuOverlay"></div>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-</script>
-  <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
-
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+(function () {
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.getElementById("menuOverlay");
+  const arrow = document.querySelector(".customer-menu-toggle .arrow");
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener("click", () => {
+    const open = sidebar.classList.toggle("open");
+    if (overlay) overlay.classList.toggle("show", open);
+    if (arrow) arrow.innerHTML = open &lsaquo; "&#8249;" : "&#8250;";
+  });
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+      if (arrow) arrow.innerHTML = "&#8250;";
     });
-  </script>
+  }
+})();
+</script>
+<script>
+(function () {
+  const lightbox = document.getElementById("imageLightbox");
+  const lightboxImg = document.getElementById("lightboxImage");
+  const lightboxClose = document.getElementById("lightboxClose");
+
+  document.querySelectorAll(".media-section .track img, .issues-grid img").forEach(img => {
+    img.addEventListener("click", () => {
+      if (!lightbox || !lightboxImg) return;
+      lightboxImg.src = img.src;
+      lightbox.classList.add("show");
+    });
+  });
+
+  function closeLightbox() {
+    if (!lightbox) return;
+    lightbox.classList.remove("show");
+    if (lightboxImg) lightboxImg.src = "";
+  }
+
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", closeLightbox);
+  }
+
+  if (lightbox) {
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+  }
+})();
+</script>
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

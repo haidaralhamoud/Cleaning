@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ hero.title }} | Home Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/service_detail.css' %}" />
+</head>
+
+<body class="service-detail-page">
+  {% include "home/includes/main_header.html" %}
+
+  <main class="service-detail">
+    <section class="hero" style="background-image: url('{{ hero.image_url }}');">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>{{ hero.title }}</h1>
+        <p class="hero-subtitle">{{ hero.subtitle }}</p>
+        <a href="{{ hero.cta_url }}" class="hero-cta">{{ hero.cta_text }}</a>
+      </div>
+    </section>
+
+    <section class="content">
+      <p class="service-intro">{{ intro_text }}</p>
+
+      <div class="checklist-header">
+        <span class="check-icon">&#10003;</span>
+        <h2>{{ checklist_title }}</h2>
+      </div>
+
+      <div class="checklist-grid">
+        {% for card in checklist_cards %}
+          <article class="checklist-card">
+            <div class="card-title">
+              <span class="card-icon">{{ card.icon|safe }}</span>
+              <h3>{{ card.title }}</h3>
+            </div>
+            <ul>
+              {% for item in card.items %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </article>
+        {% endfor %}
+      </div>
+
+      <section class="pricing-section">
+        <h2>{{ pricing.title }}</h2>
+        <p class="pricing-subtitle">{{ pricing.subtitle }}</p>
+        <div class="pricing-card">
+          <p class="pricing-card-title">{{ pricing.card_title }}</p>
+          <p class="pricing-label">{{ pricing.price_label }}</p>
+          <div class="pricing-value">{{ pricing.price_value }}</div>
+          <p class="pricing-note">{{ pricing.price_note }}</p>
+          <p class="pricing-description">{{ pricing.description }}</p>
+          <a href="{{ pricing.cta_url }}" class="primary-btn">{{ pricing.cta_text }}</a>
+        </div>
+      </section>
+
+      <section class="estimate-section">
+        <h2>Get a Quick Estimate</h2>
+        <div class="estimate-form">
+          <div class="field">
+            <label>Property Size (m2)</label>
+            <input type="text" placeholder="" />
+          </div>
+          <div class="field">
+            <label>Number of Bedrooms</label>
+            <input type="text" placeholder="" />
+          </div>
+          <button type="button" class="primary-btn">Calculate Estimate</button>
+          <p class="estimate-note">This is an estimate only. Final price may vary based on property condition.</p>
+        </div>
+      </section>
+
+      <section class="eco-section">
+        <h2>{{ eco.title }}</h2>
+        <p class="eco-subtitle">{{ eco.subtitle }}</p>
+        <div class="eco-grid">
+          {% for point in eco.points %}
+            <article class="eco-item">
+              <div class="eco-item-header">
+                <span class="eco-icon">{{ point.icon }}</span>
+                <h3>{{ point.title }}</h3>
+              </div>
+              <p>{{ point.body }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      <div class="add-to-cart">
+        <a class="primary-btn add-to-cart-btn" href="{% url 'home:private_cart_add' service.slug %}">
+          {{ eco.cta_text }}
+        </a>
+      </div>
+
+      <section class="contact-section">
+        <h2>Have a question?</h2>
+        <p class="contact-subtitle">Fill out the form below and we'll get back to you as soon as possible.</p>
+        <form class="contact-form" method="post" action="{% url 'home:service_contact_submit' %}">
+          {% csrf_token %}
+          <input type="hidden" name="service_slug" value="{{ service.slug }}">
+          <div class="contact-grid">
+            <div class="field">
+              <label>First Name</label>
+              <input type="text" name="first_name" />
+            </div>
+            <div class="field">
+              <label>Last Name</label>
+              <input type="text" name="last_name" />
+            </div>
+            <div class="field">
+              <label>Person Number</label>
+              <input type="text" name="person_number" />
+            </div>
+            <div class="field">
+              <label>Email</label>
+              <input type="email" name="email" />
+            </div>
+            <div class="field">
+              <label>Phone Number</label>
+              <input type="text" name="phone" />
+            </div>
+          </div>
+          <div class="field full">
+            <label>Message</label>
+            <textarea name="message" rows="5"></textarea>
+          </div>
+          <button type="submit" class="primary-btn">Send Message</button>
+        </form>
+      </section>
+    </section>
+  </main>
+  <script src="{% static 'js/main_header.js' %}"></script>
+</body>
+</html>

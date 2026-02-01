@@ -1,0 +1,13 @@
+﻿{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+  {% if has_add_permission %}
+    <li>
+      <a href="{% url 'admin:home_datesurcharge_quick_weekend' %}?amount=10&type=percent" class="addlink">
+        Quick add: Sat+Sun +10%
+      </a>
+    </li>
+  {% endif %}
+{% endblock %}

@@ -1,124 +1,164 @@
+:root {
+  --brand: #00a3c8;
+  --brand-dark: #008aa8;
+  --accent: #71b247;
+  --ink-900: #0f172a;
+  --ink-700: #334155;
+  --ink-500: #64748b;
+  --border: #dbe7ef;
+  --surface: #ffffff;
+  --shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+}
+
 body {
   font-family: "Inter", sans-serif;
-  background: #fff;
+  background: radial-gradient(circle at top left, #f4fbff 0%, #ffffff 45%, #f0f7fb 100%);
+  color: var(--ink-900);
+  margin: 0;
 }
 
 .services-needed {
-  width: 90%;
-  margin: auto;
+  width: min(1200px, 92%);
+  margin: 0 auto 80px;
   text-align: center;
 }
 
-/* ========== STEPS ========== */
-.steps button {
-  background: #fff;
-  border: 1px solid #00a5c4;
-  color: #00a5c4;
-  padding: 6px 16px;
-  border-radius: 20px;
-  margin: 0 5px;
-}
-.steps .active {
-  background: #00a5c4;
-  color: white;
+.title {
+  margin: 30px 0 24px;
 }
 
-/* ========== TITLE ========== */
-.title {
-  margin: 35px 0 20px;
-}
 .title .icon {
   font-size: 30px;
+  display: inline-flex;
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #e2eef5;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+  color: var(--brand);
 }
 
-/* ========== GRID ========== */
+.title h2 {
+  font-family: "Vesper Libre", serif;
+  font-size: 30px;
+  margin: 12px 0 0;
+}
+
 .services-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 26px;
   justify-items: center;
   margin-top: 10px;
 }
 
 .service-card {
-  width: 260px;
-  padding: 25px 10px;
-  background: #fff;
-  border-radius: 12px;
-  border: 1.5px solid #e7eef0;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  width: 100%;
+  max-width: 300px;
+  padding: 26px 20px 24px;
+  background: var(--surface);
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow);
   cursor: pointer;
   position: relative;
   transition: 0.25s ease;
+  text-align: center;
 }
 
 .service-card:hover {
   transform: translateY(-4px);
+  border-color: rgba(0, 163, 200, 0.4);
 }
 
-/* ICON */
 .service-card img.service-icon {
-  width: 70px;
-  margin-bottom: 15px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  margin-bottom: 14px;
 }
 
-/* TEXT */
 .service-card h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 5px;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 6px 0 6px;
+  color: var(--ink-900);
 }
+
 .service-card p {
   font-size: 14px;
-  color: #666;
+  color: var(--ink-500);
+  line-height: 1.5;
+  margin: 0;
 }
 
-/* CHECKMARK ICON */
 .checkmark {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: #e6f9ff;
-  border: 2px solid #00a5c4;
+  background: rgba(0, 163, 200, 0.12);
+  border: 2px solid rgba(0, 163, 200, 0.4);
   position: absolute;
-  right: 15px;
-  top: 15px;
+  right: 16px;
+  top: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
+  transform: scale(0.9);
   transition: 0.2s ease;
 }
-.checkmark img {
-  width: 16px;
-}
 
-/* SELECTED STATE */
-.service-card.selected {
-  border-color: #00a5c4;
-  background: #f2fcff;
-}
-.service-card.selected .checkmark {
-  opacity: 1;
-}
-
-/* Buttons */
-.buttons {
-  margin-top: 40px;
-  display: flex;
-  justify-content: space-between;
-  width: 70%;
-  margin-left: auto;
-  margin-right: auto;
-}
-.next {
-  background: #009dbe;
-  color: white;
-  padding: 10px 25px;
-  border-radius: 10px;
-  border: none;
-}
-.back {
-  color: #009dbe;
+.checkmark::after {
+  content: "\2713";
   font-size: 16px;
+  color: var(--brand);
+  font-weight: 700;
+}
+
+.selected-pill {
+  position: absolute;
+  left: 16px;
+  top: 16px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 999px;
+  background: rgba(113, 178, 71, 0.15);
+  color: var(--accent);
+  border: 1px solid rgba(113, 178, 71, 0.4);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: 0.2s ease;
+}
+
+.service-card.selected {
+  border-color: var(--brand);
+  background: #f0fbff;
+  box-shadow: 0 24px 50px rgba(0, 163, 200, 0.18);
+}
+
+.service-card.selected .checkmark,
+.service-card.selected .selected-pill {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (max-width: 1000px) {
+  .services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card {
+    max-width: 100%;
+  }
 }

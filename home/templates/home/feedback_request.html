@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback | Hembla</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/feedback_request.css' %}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  {% include "home/includes/main_header.html" %}
+
+  <main class="feedback-page">
+    <section class="feedback-shell">
+      <header class="feedback-head">
+        <h1>Feedback</h1>
+        <p>Share your feedback or request a new service.</p>
+      </header>
+
+      <div class="feedback-card">
+        <p class="intro">
+          We want to hear from you. Tell us about your experience, suggest improvements,
+          or request a new service. If it's something we don't currently offer, we can explore it.
+        </p>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="field-group">
+            <label for="id_customer_name">Your Name</label>
+            {{ form.customer_name }}
+          </div>
+          <div class="field-group">
+            <label for="id_feedback_text">Your Feedback</label>
+            {{ form.feedback_text }}
+          </div>
+          <div class="field-group">
+            <label>Rating</label>
+            <div class="rating-stars" role="radiogroup" aria-label="Rating">
+              {% with current=form.rating.value|default:"5" %}
+                {% for i in "54321"|make_list %}
+                  <input
+                    type="radio"
+                    id="rating{{ i }}"
+                    name="rating"
+                    value="{{ i }}"
+                    {% if current == i %}checked{% endif %}
+                  >
+                  <label for="rating{{ i }}" title="{{ i }} stars"></label>
+                {% endfor %}
+              {% endwith %}
+            </div>
+          </div>
+
+          <div class="divider">
+            <span>OR</span>
+          </div>
+
+          <div class="request-block">
+            <h2>Need a service we don't have?</h2>
+            <div class="field-group">
+              <label for="id_service_type">Service Type</label>
+              {{ form.service_type }}
+            </div>
+            <div class="field-group">
+              <label for="id_request_details">Describe Your Request</label>
+              {{ form.request_details }}
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Send Feedback / Request Service</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  {% include "home/includes/footer.html" %}
+  <script src="{% static 'js/main_header.js' %}"></script>
+</body>
+</html>

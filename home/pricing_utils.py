@@ -2,11 +2,10 @@ from decimal import Decimal
 from .models import (
     PrivateService,
     PrivateAddon,
-    ServiceQuestionRule,
-    AddonRule,
     ScheduleRule,
     PrivateBooking,
-    DateSurcharge
+    DateSurcharge,
+    RotSetting,
 )
 from datetime import datetime
 
@@ -54,11 +53,49 @@ def apply_date_surcharge(booking, base_price):
 def apply_percentage(base, percent):
     return base * (Decimal(percent) / Decimal("100"))
 
+def _coerce_decimal(value):
+    try:
+        return Decimal(str(value))
+    except Exception:
+        return Decimal("0.00")
+
+def _normalize_answers(value):
+    if value is None or value == "":
+        return []
+    if isinstance(value, list):
+        return value
+    return [value]
+
+def _options_price(options, answers):
+    total = Decimal("0.00")
+    if not options:
+        return total
+    answer_set = set(str(a) for a in _normalize_answers(answers))
+    for opt in options:
+        if isinstance(opt, dict):
+            value_key = str(opt.get("value") or opt.get("label") or "")
+            if value_key and value_key in answer_set:
+                total += _coerce_decimal(opt.get("price", 0))
+    return total
+
+def _options_duration(options, answers):
+    total = Decimal("0.00")
+    if not options:
+        return total
+    answer_set = set(str(a) for a in _normalize_answers(answers))
+    for opt in options:
+        if isinstance(opt, dict):
+            value_key = str(opt.get("value") or opt.get("label") or "")
+            if value_key and value_key in answer_set:
+                total += _coerce_decimal(opt.get("duration", 0))
+    return total
+
 
 def calculate_booking_price(booking):
 
     services_total = Decimal("0.00")
     addons_total = Decimal("0.00")
+    duration_minutes = Decimal("0.00")
 
     selected_slugs = booking.selected_services or []
     services = PrivateService.objects.filter(slug__in=selected_slugs)
@@ -70,9 +107,15 @@ def calculate_booking_price(booking):
         price = service.price
         answers = (booking.service_answers or {}).get(service.slug, {})
 
-        for rule in service.pricing_rules.all():
-            if answers.get(rule.question_key) == rule.answer_value:
-                price += rule.price_change
+        questions = service.questions or {}
+        for q_key, q_info in questions.items():
+            if not q_info:
+                continue
+            options = q_info.get("options") or []
+            if not options:
+                continue
+            price += _options_price(options, answers.get(q_key))
+            duration_minutes += _options_duration(options, answers.get(q_key))
 
         services_total += price
 
@@ -91,15 +134,20 @@ def calculate_booking_price(booking):
 
             price = addon.price
 
+            questions = addon.questions or {}
+            for q_key, q_info in questions.items():
+                if not q_info:
+                    continue
+                options = q_info.get("options") or []
+                if not options:
+                    continue
+                price += _options_price(options, fields.get(q_key))
+                duration_minutes += _options_duration(options, fields.get(q_key))
+
             if addon.price_per_unit > 0:
                 for _, val in fields.items():
                     if str(val).isdigit():
                         price += addon.price_per_unit * int(val)
-
-            # addon rules
-            for rule in addon.pricing_rules.all():
-                if fields.get(rule.question_key) == rule.answer_value:
-                    price += rule.price_change
 
             addons_total += price
 
@@ -121,13 +169,6 @@ def calculate_booking_price(booking):
             
 
 
-        # time window
-        if booking.appointment_time_window:
-            tw = booking.appointment_time_window.strip()
-            rule = ScheduleRule.objects.filter(key="time_window", value=tw).first()
-            if rule:
-                schedule_extra += apply_percentage(subtotal, rule.price_change)
-
         # frequency
         if booking.frequency_type:
             freq = booking.frequency_type.strip()
@@ -146,12 +187,6 @@ def calculate_booking_price(booking):
         sched = booking.service_schedules or {}
         for svc, data in sched.items():
 
-            tw = data.get("time_window")
-            if tw:
-                rule = ScheduleRule.objects.filter(key="time_window", value=tw).first()
-                if rule:
-                    schedule_extra += apply_percentage(subtotal, rule.price_change)
-
             freq = data.get("frequency")
             if freq:
                 rule = ScheduleRule.objects.filter(key="frequency_type", value=freq).first()
@@ -166,17 +201,30 @@ def calculate_booking_price(booking):
     # --------------------------
     # 4) FINAL TOTAL
     # --------------------------
-    # تطبيق زيادة التاريخ
     final_with_date = apply_date_surcharge(booking, subtotal)
-
-    # total = subtotal + schedule_extra + فرق الزيادة من التاريخ
+    date_surcharge = final_with_date - subtotal
     final = final_with_date + schedule_extra
 
+    rot_setting = RotSetting.objects.order_by("-updated_at").first()
+    rot_percent = _coerce_decimal(rot_setting.amount) if rot_setting else Decimal("0.00")
+    if rot_percent < 0:
+        rot_percent = Decimal("0.00")
+    rot_amount = final * (rot_percent / Decimal("100"))
+    if rot_amount > final:
+        rot_amount = final
+
+    duration_seconds = int(duration_minutes * Decimal("60")) if duration_minutes else 0
+    duration_hours = float(duration_minutes) / 60 if duration_minutes else 0.0
     return {
         "services_total": float(services_total),
         "addons_total": float(addons_total),
         "subtotal": float(subtotal),
         "schedule_extra": float(schedule_extra),
-        "rot": 0.0,
-        "final": float(final),
+        "date_surcharge": float(date_surcharge),
+        "rot": float(rot_amount),
+        "rot_percent": float(rot_percent),
+        "final": float(final - rot_amount),
+        "duration_minutes": float(duration_minutes),
+        "duration_hours": float(duration_hours),
+        "duration_seconds": duration_seconds,
     }

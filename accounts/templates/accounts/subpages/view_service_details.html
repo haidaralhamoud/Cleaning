@@ -9,536 +9,40 @@
   <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <style>
-    .notes-card {
-  position: relative;
-  padding: 22px;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 15px 40px rgba(0,0,0,.08);
-}
-
-.notes-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.notes-list li {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 12px;
-  color: #666;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  background: #4CAF50;
-  border-radius: 50%;
-  margin-top: 6px;
-}
-
-.add-note {
-  display: none;
-  margin-bottom: 16px;
-}
-
-.add-note textarea {
-  width: 100%;
-  border-radius: 12px;
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-
-.fab-plus {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  width: 52px;
-  height: 52px;
-  background: #00bcd4;
-  color: #fff;
-  font-size: 28px;
-  border-radius: 50%;
-  text-align: center;
-  line-height: 52px;
-  cursor: pointer;
-}
-
-    .stage.exception .dot{
-  border-color:#dc3545;
-  background:#fff;
-}
-.stage.exception b{
-  color:#dc3545;
-}
-.timeline-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.btn-reschedule {
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-reschedule:hover {
-  background: #0b5ed7;
-}
-
-.btn-cancel {
-  background: #e0e0e0;
-  color: #111;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-cancel:hover {
-  background: #d6d6d6;
-}
-/* ===== CANCEL POPUP ===== */
-.cancel-popup {
-  max-width: 420px;
-  padding: 24px;
-  border-radius: 18px;
-}
-
-.cancel-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.cancel-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #ffe5e5;
-  color: #dc3545;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-}
-
-.cancel-body h4 {
-  margin: 10px 0 4px;
-}
-
-.cancel-body .time {
-  color: #666;
-  font-size: 14px;
-}
-
-.warning {
-  margin: 12px 0;
-  font-size: 14px;
-  color: #777;
-}
-
-.select-box select {
-  width: 100%;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  appearance: none;
-  background: #fff;
-}
-
-.cancel-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.confirm-cancel {
-  background: #0d6efd;
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cancel-back {
-  background: #e0e0e0;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-
-
-.input-icon {
-  position: relative;
-}
-
-.input-icon input {
-  width: 100%;
-  padding: 12px 44px 12px 14px;
-  border-radius: 12px;
-  border: 2px solid #1bb1dc;
-  font-size: 15px;
-}
-
-.input-icon .icon {
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 18px;
-  color: #1bb1dc;
-  pointer-events: none;
-}
-
-.reschedule-popup {
-  width: 100%;
-  max-width: 420px;
-  background: #fff;
-  border-radius: 18px;
-  padding: 26px 22px 22px;
-  box-shadow: 0 25px 60px rgba(0,0,0,.25);
-  position: relative;
-}
-.popup-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.header-icon {
-  width: 42px;
-  height: 42px;
-  background: #eaf6fb;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.header-icon img {
-  width: 22px;
-}
-
-.header-text h2 {
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.header-text p {
-  font-size: 14px;
-  color: #8b8b8b;
-  margin: 2px 0 0;
-}
-.popup-body label {
-  display: block;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.popup-body input {
-  width: 100%;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 2px solid #00a6d6;
-  font-size: 14px;
-  margin-bottom: 14px;
-}
-.popup-body .note {
-  font-size: 13px;
-  color: #8b8b8b;
-  margin: 6px 0 18px;
-  line-height: 1.4;
-}
-.popup-body .buttons {
-  display: flex;
-  gap: 12px;
-}
-
-.primary {
-  flex: 1;
-  background: #00a6d6;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  border-radius: 14px;
-  font-weight: 700;
-}
-
-.secondary {
-  flex: 1;
-  background: #e0e0e0;
-  border: none;
-  padding: 12px;
-  border-radius: 14px;
-  font-weight: 700;
-}
-.close-btn {
-  position: absolute;
-  top: 12px;
-  right: 14px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: #00a6d6;
-  color: #fff;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.message-btn {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 5px;
-  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-  color: #fff;
-  border-radius: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  box-shadow: 0 8px 20px rgba(13,110,253,.25);
-  margin-left:50px;
-}
-
-.message-btn .icon {
-  font-size: 18px;
-}
-
-/* 🔴 Badge */
-.msg-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  background: #dc3545;
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(220,53,69,.4);
-}
-
-.notes-card {
-  position: relative;
-  padding-bottom: 80px; /* 🔥 مساحة مخصصة لزر + */
-}
-
-.notes-list {
-  list-style: none;
-  padding: 0;
-}
-
-.notes-list li {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.dot.green {
-  width: 8px;
-  height: 8px;
-  background: #4caf50;
-  border-radius: 50%;
-  margin-right: 10px;
-}
-
-.note-time {
-  margin-left: auto;
-  font-size: 12px;
-  color: #999;
-}
-
-.fab-plus {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-
-  background: linear-gradient(135deg, #00a3e0, #0077b6);
-  color: #fff;
-
-  font-size: 28px;
-  line-height: 0;
-  font-weight: 300;
-
-  border: none;
-  cursor: pointer;
-
-  box-shadow: 0 6px 18px rgba(0, 163, 224, 0.4);
-  transition: transform .15s ease, box-shadow .15s ease;
-}
-
-.fab-plus:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(0, 163, 224, 0.5);
-}
-
-.fab-plus:active {
-  transform: scale(.95);
-}
-
-
-.note-form {
-  margin-top: 16px;
-}
-
-.note-form textarea {
-  width: 100%;
-  min-height: 90px;
-
-  padding: 12px 14px;
-  border-radius: 12px;
-
-  border: 1px solid #d0d7de;
-  font-size: 14px;
-  resize: vertical;
-
-  outline: none;
-  transition: border-color .15s ease, box-shadow .15s ease;
-}
-
-.note-form textarea:focus {
-  border-color: #00a3e0;
-  box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.15);
-}
-
-.note-form button {
-  margin-top: 10px;
-
-  padding: 8px 18px;
-  border-radius: 10px;
-
-  background: #00a3e0;
-  color: #fff;
-  font-weight: 600;
-  font-size: 14px;
-
-  border: none;
-  cursor: pointer;
-  transition: background .15s ease, transform .1s ease;
-}
-
-.note-form button:hover {
-  background: #0077b6;
-}
-
-.note-form button:active {
-  transform: scale(.97);
-}
-.notes-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-
-  padding: 8px 0;
-  font-size: 14px;
-}
-
-.note-time {
-  margin-left: auto;
-  font-size: 11px;
-  color: #999;
-  white-space: nowrap;
-}
-
-
-
-  </style>
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 </head>
 
 <body class="customer-profile-view">
-  <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
   <!-- زر المنيو يظهر فقط بالموبايل -->
-  <button class="menu-toggle" id="menuToggle">
+  <button class="menu-toggle customer-menu-toggle" id="menuToggle">
     <span class="arrow">&#8250;</span>
   </button>
 
   <!-- Overlay تبع المنيو -->
-  <div class="overlay" id="menuOverlay"></div>
+  <div class="overlay customer-menu-overlay" id="menuOverlay"></div>
 
   <!-- Sidebar -->
 
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+    {% include "accounts/includes/customer_sidebar.html" with customer=booking.customer %}
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
 
   <!-- الصفحة الكاملة -->
   <main class="page">
     <section class="content">
-      <h1 class="deep-clean-service">Deep Clean Service</h1>
-      <p class="scheduled">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
-      <p class="booking-id">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
+      <h1 class="deep-clean-service">{{ service_title }}</h1>
+      <p class="scheduled">
+        Scheduled for
+        {% if booking_date %}{{ booking_date|date:"F d, Y" }}{% else %}-{% endif %}
+        {% if booking_time %} | {{ booking_time }}{% endif %}
+        {% if location_text %} | location: {{ location_text }}{% endif %}
+      </p>
+      <p class="booking-id">
+        Booking ID: #{{ booking.id }} |
+        Payment method: {{ payment_method|default:"-" }} |
+        Order type: {{ order_type_label }}
+      </p>
 
       <div class="grid two-cols">
         <!-- العمود اليساري -->
@@ -715,7 +219,7 @@
 <div class="card checklist">
   <h3>Checklist</h3>
 
-  <form method="post">
+  <form method="post" id="checklistForm">
     {% csrf_token %}
     <input type="hidden" name="form_type" value="checklist">
 
@@ -873,33 +377,6 @@
 
 
         </div>
-<div class="card notes-card">
-  <h3>Notes</h3>
-
-  <div class="add-note" id="addNoteBox">
-    <textarea id="noteInput" rows="3"
-      placeholder="Write a note for this booking..."></textarea>
-
-    <div class="add-note-actions">
-      <button class="btn btn-cancel" onclick="cancelNote()">Cancel</button>
-      <button class="btn btn-save" onclick="saveNote()">Add</button>
-    </div>
-  </div>
-
-  <ul class="notes-list" id="notesList">
-    {% for note in notes %}
-      <li>
-        <span class="dot"></span>
-        <span>{{ note.text }}</span>
-      </li>
-    {% empty %}
-      <li style="color:#999">No notes yet</li>
-    {% endfor %}
-  </ul>
-
-  <div class="fab-plus" onclick="openNoteBox()">+</div>
-</div>
-
 <input type="hidden" id="bookingId" value="{{ booking.id }}">
 <input type="hidden" id="bookingType" value="{{ booking_type }}">
 
@@ -930,16 +407,24 @@
   {% else %}
     <p style="opacity:.6;">No provider assigned yet</p>
   {% endif %}
-              <a href="{% url 'accounts:booking_chat' booking_type booking.id %}"
-                class="message-btn">
+              <div class="provider-actions">
+                <a href="{% url 'accounts:booking_chat' booking_type booking.id %}"
+                  class="message-btn">
 
-                <span class="icon">💬</span>
-                <span class="text">Message</span>
+                  <span class="icon">💬</span>
+                  <span class="text">Message</span>
 
-                {% if customer_unread_messages > 0 %}
-                  <span class="msg-badge">{{ customer_unread_messages }}</span>
+                  {% if customer_unread_messages > 0 %}
+                    <span class="msg-badge">{{ customer_unread_messages }}</span>
+                  {% endif %}
+                </a>
+
+                {% if can_rate %}
+                  <button type="button" class="rate-btn" onclick="openReviewPopup()">Rate</button>
+                {% elif has_review %}
+                  <span class="rated-tag">Rated</span>
                 {% endif %}
-              </a>
+              </div>
 
 
 
@@ -949,60 +434,71 @@
                 <div class="card timing">
                   <h3>Time Tracking</h3>
                   <p><span class="muted">Quoted Time:</span> <b>{{ quoted_time }}</b></p>
-             <p>
-              <span class="muted">Actual Time:</span>
-              <b id="actualTime">—</b>
-            </p>
-            {% if start_time %}
-  <div id="timeData"
-       data-start="{{ start_time|date:'c' }}"
-       {% if end_time %}
-       data-end="{{ end_time|date:'c' }}"
-       {% endif %}>
-  </div>
-{% endif %}
-    {% if actual_duration %}
-      {{ actual_duration }}
-    {% else %}
-      —
-    {% endif %}
-  </b>
-</p>
+                  <p>
+                    <span class="muted">Actual Time:</span>
+                    <b id="actualTime">
+                      {% if actual_duration %}
+                        {{ actual_duration }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </b>
+                  </p>
+                  {% if start_time %}
+                    <div id="timeData"
+                         data-start="{{ start_time|date:'c' }}"
+                         data-quoted="{{ quoted_seconds }}"
+                         {% if end_time %}
+                         data-end="{{ end_time|date:'c' }}"
+                         {% endif %}>
+                    </div>
+                  {% endif %}
                 </div>
 
           <div class="card charges">
             <h3>Charges</h3>
             <div class="rows">
-              <div class="row"><span>Base Price</span><span>100.00$</span></div>
-              <div class="row"><span>Add-on: Inside Fridge</span><span>20.00$</span></div>
-              <div class="row"><span>Add-on Inside Oven</span><span>15.00$</span></div>
-              <div class="row"><span>Discount</span><span class="green">-10.00$</span></div>
-              <div class="row"><span>Tax (5%)</span><span>6.25$</span></div>
-              <div class="row"><span>Reward/Loyalty Points</span><span>-5.00$</span></div>
-              <div class="row"><span>Payment Method</span><span>Visa</span></div>
+              {% if booking.subtotal %}
+                <div class="row"><span>Subtotal</span><span id="chargeSubtotal">{{ booking.subtotal }}$</span></div>
+              {% endif %}
+              {% if booking.rot_discount %}
+                <div class="row"><span>Discount</span><span class="green" id="chargeDiscount">-{{ booking.rot_discount }}$</span></div>
+              {% endif %}
+              <div class="row"><span>Total</span><span id="chargeTotal">{{ booking.total_price }}$</span></div>
+              <div class="row"><span>Payment Method</span><span>{{ payment_method|default:"-" }}</span></div>
             </div>
             <div class="total-row">
               <span class="blue">Total</span>
-              <span class="blue">$125.00</span>
+              <span class="blue" id="chargeTotalBottom">${{ booking.total_price }}</span>
             </div>
           </div>
 
+          {% if booking_type == "private" %}
+          <button type="button" class="pill request-addon" id="openAddonsPopup"><b>Request Add-on</b></button>
+          {% else %}
           <a href="{% url 'accounts:Add_on_Service_Request' %}" class="see-more"><div class="pill request-addon"><b>Request Add-on</b></div></a>
+          {% endif %}
 
                <!-- ===== MEDIA GALLERY ===== -->
           <div class="card media-gallery">
             <div class="media-header">
               <h3>Media Gallery</h3>
-              <a href="{% url 'accounts:Media' %}" class="see-more">see more →</a>
+              <a href="{% url 'accounts:Media' %}?booking_type={{ booking_type }}&booking_id={{ booking.id }}" class="see-more">see more →</a>
             </div>
 
             <div class="media-carousel">
               <button class="arrow-btn left">‹</button>
               <div class="media-track">
-                <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
-                <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
-                <img src="https://via.placeholder.com/130x100?text=Kitchen" alt="Kitchen photo">
-                <img src="https://via.placeholder.com/130x100?text=Bathroom" alt="Bathroom photo">
+                {% if media_items %}
+                  {% for media in media_items %}
+                    <img src="{{ media.file.url }}" alt="{{ media.phase }} photo">
+                  {% endfor %}
+                {% else %}
+                  <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
+                  <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
+                  <img src="https://via.placeholder.com/130x100?text=Kitchen" alt="Kitchen photo">
+                  <img src="https://via.placeholder.com/130x100?text=Bathroom" alt="Bathroom photo">
+                {% endif %}
               </div>
               <button class="arrow-btn right">›</button>
             </div>
@@ -1016,6 +512,17 @@
               <button class="btn btn-blue" id="approveWorkBtn">Approve Work</button>
            <button class="btn btn-light" id="requestFixBtn">Request Fix</button>
             </div>
+            {% if latest_request_fix %}
+              <div class="request-fix-status">
+                Request Fix Status:
+                <span class="status-badge status-{{ latest_request_fix.status|lower }}">
+                  {{ latest_request_fix.get_status_display }}
+                </span>
+                <span class="status-time">
+                  • {{ latest_request_fix.created_at|date:"M d, Y H:i" }}
+                </span>
+              </div>
+            {% endif %}
           </div>
 
           <div class="card help">
@@ -1033,120 +540,185 @@
     </section>
   </main>
 
-  <!-- ===== APPROVE WORK POPUP ===== -->
+  {% if can_rate %}
+  <!-- ===== REVIEW POPUP ===== -->
+  <div class="popup-overlay" id="reviewPopup">
+    <form method="post" class="popup review-popup">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="rating">
+      <input type="hidden" name="booking_type" value="{{ booking_type }}">
+      <input type="hidden" name="booking_id" value="{{ booking.id }}">
+
+      <button type="button" class="close-btn" onclick="closeReviewPopup()">x</button>
+      <h3>Rate Provider</h3>
+
+      {% if rating_form.errors %}
+        <div class="form-errors">Please check the ratings and try again.</div>
+      {% endif %}
+
+      <div class="review-grid">
+        <div>
+          <label>Overall</label>
+          <div class="star-rating">
+            <input type="radio" id="overall-5" name="overall_rating" value="5" required>
+            <label for="overall-5">★</label>
+            <input type="radio" id="overall-4" name="overall_rating" value="4">
+            <label for="overall-4">★</label>
+            <input type="radio" id="overall-3" name="overall_rating" value="3">
+            <label for="overall-3">★</label>
+            <input type="radio" id="overall-2" name="overall_rating" value="2">
+            <label for="overall-2">★</label>
+            <input type="radio" id="overall-1" name="overall_rating" value="1">
+            <label for="overall-1">★</label>
+          </div>
+        </div>
+        <div>
+          <label>Punctuality</label>
+          <div class="star-rating">
+            <input type="radio" id="punctuality-5" name="punctuality" value="5" required>
+            <label for="punctuality-5">★</label>
+            <input type="radio" id="punctuality-4" name="punctuality" value="4">
+            <label for="punctuality-4">★</label>
+            <input type="radio" id="punctuality-3" name="punctuality" value="3">
+            <label for="punctuality-3">★</label>
+            <input type="radio" id="punctuality-2" name="punctuality" value="2">
+            <label for="punctuality-2">★</label>
+            <input type="radio" id="punctuality-1" name="punctuality" value="1">
+            <label for="punctuality-1">★</label>
+          </div>
+        </div>
+        <div>
+          <label>Quality</label>
+          <div class="star-rating">
+            <input type="radio" id="quality-5" name="quality" value="5" required>
+            <label for="quality-5">★</label>
+            <input type="radio" id="quality-4" name="quality" value="4">
+            <label for="quality-4">★</label>
+            <input type="radio" id="quality-3" name="quality" value="3">
+            <label for="quality-3">★</label>
+            <input type="radio" id="quality-2" name="quality" value="2">
+            <label for="quality-2">★</label>
+            <input type="radio" id="quality-1" name="quality" value="1">
+            <label for="quality-1">★</label>
+          </div>
+        </div>
+        <div>
+          <label>Professionalism</label>
+          <div class="star-rating">
+            <input type="radio" id="professionalism-5" name="professionalism" value="5" required>
+            <label for="professionalism-5">★</label>
+            <input type="radio" id="professionalism-4" name="professionalism" value="4">
+            <label for="professionalism-4">★</label>
+            <input type="radio" id="professionalism-3" name="professionalism" value="3">
+            <label for="professionalism-3">★</label>
+            <input type="radio" id="professionalism-2" name="professionalism" value="2">
+            <label for="professionalism-2">★</label>
+            <input type="radio" id="professionalism-1" name="professionalism" value="1">
+            <label for="professionalism-1">★</label>
+          </div>
+        </div>
+        <div>
+          <label>Value</label>
+          <div class="star-rating">
+            <input type="radio" id="value-5" name="value" value="5" required>
+            <label for="value-5">★</label>
+            <input type="radio" id="value-4" name="value" value="4">
+            <label for="value-4">★</label>
+            <input type="radio" id="value-3" name="value" value="3">
+            <label for="value-3">★</label>
+            <input type="radio" id="value-2" name="value" value="2">
+            <label for="value-2">★</label>
+            <input type="radio" id="value-1" name="value" value="1">
+            <label for="value-1">★</label>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label>Feedback</label>
+        <textarea name="feedback" placeholder="Optional note"></textarea>
+      </div>
+
+      <div class="review-actions">
+        <button type="submit" class="primary">Submit Rating</button>
+        <button type="button" class="secondary" onclick="closeReviewPopup()">Cancel</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+    <!-- ===== APPROVE WORK POPUP ===== -->
   <div class="popup-overlay" id="popupOverlay">
-    <div class="popup">
-      <button class="close-btn" id="closePopupBtn">×</button>
+    <div class="popup approve-popup">
+      <button class="close-btn" id="closePopupBtn">?</button>
       <img class="logo" src="{% static 'images/frame-16865526320.png'%}" alt="Happy Home Logo">
       <p class="message">
-        <strong>Happy home, happy you 💙</strong><br>
+        <strong>Happy home, happy you ??</strong><br>
         Clean, fresh, and ready to enjoy. Until next time!
       </p>
       <div class="buttons">
-        <button class="primary">Book Again</button>
-        <button class="secondary">View Receipt</button>
-        <button class="secondary">Home</button>
+        {% if booking_type == "private" %}
+          <a class="primary" href="{% url 'home:all_services_private' %}">Book Again</a>
+        {% else %}
+          <a class="primary" href="{% url 'home:business_all_services' %}">Book Again</a>
+        {% endif %}
+        <a class="secondary" href="{% url 'accounts:Payment_and_Billing' %}">View Receipt</a>
+        <a class="secondary" href="{% url 'home:home' %}">Home</a>
       </div>
     </div>
   </div>
 
-  <!-- ===== REQUEST FIX POPUP ===== -->
+    <!-- ===== REQUEST FIX POPUP ===== -->
   <div class="popup-overlay" id="fixPopupOverlay">
-    <div class="popup">
-      <button class="close-btn" id="closeFixPopupBtn">×</button>
-      <img class="logo" src="{% static 'images/frame-16865526200.svg'%}" alt="Request Fix">
+    <form class="popup request-fix-popup" id="requestFixForm" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="request_fix">
+      <button class="close-btn" id="closeFixPopupBtn">?</button>
+      <div class="upload-zone" id="requestFixUpload">
+        <input type="file" id="requestFixFiles" name="files" accept="image/*" multiple>
+        <div class="upload-icon">
+          <img src="{% static 'images/frame-16865526200.svg'%}" alt="Upload">
+        </div>
+        <div class="upload-text">
+          <strong>Add photos (optional)</strong>
+          <span>PNG, JPG up to 10MB</span>
+        </div>
+      </div>
+      <div class="upload-previews" id="requestFixPreviews"></div>
       <p class="message">
-        <strong>Request Fix 🧹</strong><br>
+        <strong>Request Fix ??</strong><br>
         Please describe what needs to be corrected. Our team will review it right away!
       </p>
-      <textarea placeholder="Describe your issue..." style="width:100%;height:100px;border:1px solid #ccc;border-radius:8px;padding:8px;font-size:15px;resize:none;"></textarea>
+      <textarea name="message" placeholder="Describe your issue..." required></textarea>
       <div class="buttons" style="margin-top:20px;">
-        <button class="primary">Send Request</button>
-        <button class="secondary" id="cancelFixBtn">Cancel</button>
+        <button class="primary" type="submit">Send Request</button>
+        <button class="secondary" type="button" id="cancelFixBtn">Cancel</button>
+      </div>
+    </form>
+  </div>
+
+
+
+  <!-- ===== ADD-ONS POPUP ===== -->
+  <div class="popup-overlay" id="addonsPopupOverlay">
+    <div class="popup addons-popup">
+      <button class="close-btn" id="closeAddonsPopup">?</button>
+      <h3 class="addons-title">Available Add-ons</h3>
+      <div class="addons-body">
+        <div id="addonsList"></div>
+        <div id="addonFormPane" class="addon-form-pane"></div>
+      </div>
+      <div class="buttons addons-actions">
+        <button class="secondary" type="button" id="cancelAddonsPopup">Cancel</button>
+        <button class="primary" type="button" id="saveAddonsPopup">Save Add-ons</button>
       </div>
     </div>
   </div>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
+{% include "home/includes/footer.html" %}
 
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
-
-
-      </div>
-    </div>
-
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
+<div class="page-save" id="pageSave">
+  <button type="submit" form="checklistForm" class="save-float-btn">Save</button>
+</div>
 <script>
 const noteBox = document.getElementById("addNoteBox");
 const noteInput = document.getElementById("noteInput");
@@ -1199,15 +771,38 @@ function getCookie(name) {
   return cookieValue;
 }
 </script>
+<script>
+(function () {
+  const saveBar = document.getElementById("pageSave");
+  if (!saveBar) return;
+  function toggleSaveBar() {
+    const nearBottom = window.innerHeight + window.scrollY >= document.body.offsetHeight - 220;
+    saveBar.classList.toggle("show", nearBottom);
+  }
+  window.addEventListener("scroll", toggleSaveBar);
+  toggleSaveBar();
+})();
+</script>
 
 <script>
-const toggleBtn = docume6nt.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
+(function () {
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.querySelector(".customer-menu-overlay");
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener("click", () => {
+    const open = sidebar.classList.toggle("open");
+    if (overlay) overlay.classList.toggle("show", open);
+  });
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+    });
+  }
+})();
 </script>
+<script src="{% static 'js/main_header.js' %}"></script>
   <!-- ====== JavaScript ====== -->
   <script>
     // القائمة الجانبية
@@ -1260,6 +855,47 @@ toggleBtn.addEventListener("click", () => {
     });
     fixPopupOverlay.addEventListener("click", (e) => {
       if (e.target === fixPopupOverlay) fixPopupOverlay.classList.remove("active");
+    });
+
+    const fixUpload = document.getElementById("requestFixUpload");
+    const fixFiles = document.getElementById("requestFixFiles");
+    const fixPreviews = document.getElementById("requestFixPreviews");
+
+    function clearFixUploads() {
+      if (fixFiles) fixFiles.value = "";
+      if (fixPreviews) fixPreviews.innerHTML = "";
+    }
+
+    if (fixUpload && fixFiles) {
+      fixUpload.addEventListener("click", () => {
+        fixFiles.click();
+      });
+    }
+
+    if (fixFiles && fixPreviews) {
+      fixFiles.addEventListener("change", () => {
+        fixPreviews.innerHTML = "";
+        Array.from(fixFiles.files).forEach((file) => {
+          if (!file.type.startsWith("image/")) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const wrap = document.createElement("div");
+            wrap.className = "upload-preview";
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.alt = file.name;
+            wrap.appendChild(img);
+            fixPreviews.appendChild(wrap);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+
+    closeFixPopupBtn.addEventListener("click", clearFixUploads);
+    cancelFixBtn.addEventListener("click", clearFixUploads);
+    fixPopupOverlay.addEventListener("click", (e) => {
+      if (e.target === fixPopupOverlay) clearFixUploads();
     });
   </script>
   <script>
@@ -1375,6 +1011,28 @@ function toggleNoteForm() {
 </script>
 
 <script>
+function openReviewPopup() {
+  const popup = document.getElementById("reviewPopup");
+  if (popup) {
+    popup.classList.add("active");
+  }
+}
+
+function closeReviewPopup() {
+  const popup = document.getElementById("reviewPopup");
+  if (popup) {
+    popup.classList.remove("active");
+  }
+}
+
+{% if rating_form.errors %}
+document.addEventListener("DOMContentLoaded", () => {
+  openReviewPopup();
+});
+{% endif %}
+</script>
+
+<script>
 function formatDuration(seconds) {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
@@ -1394,13 +1052,19 @@ const output = document.getElementById("actualTime");
 if (container) {
   const start = new Date(container.dataset.start);
   const end = container.dataset.end ? new Date(container.dataset.end) : null;
+  const quotedSeconds = parseInt(container.dataset.quoted || "0", 10);
 
   function updateTime() {
     const now = end ? end : new Date();
     const diff = Math.floor((now - start) / 1000);
 
     if (diff >= 0) {
-      output.innerText = formatDuration(diff);
+      if (!end && quotedSeconds > 0) {
+        const remaining = Math.max(quotedSeconds - diff, 0);
+        output.innerText = formatDuration(remaining);
+      } else {
+        output.innerText = formatDuration(diff);
+      }
     }
   }
 
@@ -1412,5 +1076,240 @@ if (container) {
 }
 </script>
 
+
+<script>
+const AVAILABLE_ADDONS = {{ available_addons_json|safe }};
+const SAVED_ADDONS = {{ saved_addons_json|safe }};
+let ADDONS_DATA = SAVED_ADDONS || {};
+let CURRENT_SERVICE = null;
+let CURRENT_ADDON = null;
+
+const addonsOverlay = document.getElementById("addonsPopupOverlay");
+const addonsList = document.getElementById("addonsList");
+const addonFormPane = document.getElementById("addonFormPane");
+const openAddonsBtn = document.getElementById("openAddonsPopup");
+const closeAddonsBtn = document.getElementById("closeAddonsPopup");
+const cancelAddonsBtn = document.getElementById("cancelAddonsPopup");
+const saveAddonsBtn = document.getElementById("saveAddonsPopup");
+
+function openAddonsPopup() {
+  if (!addonsOverlay) return;
+  renderAddonsList();
+  addonsOverlay.classList.add("active");
+}
+
+function closeAddonsPopup() {
+  if (!addonsOverlay) return;
+  addonsOverlay.classList.remove("active");
+  CURRENT_ADDON = null;
+  addonFormPane.innerHTML = "";
+}
+
+function renderAddonsList() {
+  if (!addonsList) return;
+  CURRENT_ADDON = null;
+  addonFormPane.innerHTML = "";
+
+  let html = "";
+  const serviceSlugs = Object.keys(AVAILABLE_ADDONS || {});
+  if (!serviceSlugs.length) {
+    addonsList.innerHTML = "<p class='addons-empty'>No additional add-ons available.</p>";
+    return;
+  }
+
+  serviceSlugs.forEach((svc) => {
+    const svcData = AVAILABLE_ADDONS[svc];
+    const addons = svcData.addons || {};
+    const addonKeys = Object.keys(addons);
+
+    let sectionHtml = "";
+    addonKeys.forEach((key) => {
+      const already = ADDONS_DATA[svc] && ADDONS_DATA[svc][key];
+      if (already) return;
+      const ad = addons[key];
+      sectionHtml += `
+        <button type="button" class="addon-card" data-service="${svc}" data-addon="${key}">
+          <div class="addon-icon-wrap">
+            ${ad.icon ? `<img src="${ad.icon}" alt="">` : `<span class="addon-icon-fallback">+</span>`}
+          </div>
+          <div class="addon-info">
+            <div class="addon-title">${ad.label}</div>
+            <div class="addon-price">$${Number(ad.price || 0).toFixed(2)}</div>
+          </div>
+        </button>
+      `;
+    });
+
+    if (sectionHtml) {
+      html += `<div class="addons-group"><div class="addons-group-title">${svcData.title || svc}</div>`;
+      html += `<div class="addons-grid">${sectionHtml}</div></div>`;
+    }
+  });
+
+  addonsList.innerHTML = html || "<p class='addons-empty'>No additional add-ons available.</p>";
+  addonsList.querySelectorAll(".addon-card").forEach((card) => {
+    card.addEventListener("click", () => {
+      const svc = card.dataset.service;
+      const addon = card.dataset.addon;
+      openAddonForm(svc, addon);
+    });
+  });
+}
+
+function openAddonForm(serviceSlug, addonKey) {
+  CURRENT_SERVICE = serviceSlug;
+  CURRENT_ADDON = addonKey;
+  const addon = AVAILABLE_ADDONS?.[serviceSlug]?.addons?.[addonKey];
+  if (!addon) return;
+
+  addonFormPane.innerHTML = `
+    <div class="addon-form-head">${addon.label}</div>
+    <div class="addon-form-body">
+      ${addon.form || ""}
+    </div>
+    <button type="button" class="btn-back" id="backToAddons">? Back to list</button>
+  `;
+
+  if (window.initCustomSelects) {
+    window.initCustomSelects();
+  }
+
+  const backBtn = document.getElementById("backToAddons");
+  if (backBtn) backBtn.addEventListener("click", renderAddonsList);
+
+  if (ADDONS_DATA[serviceSlug] && ADDONS_DATA[serviceSlug][addonKey]) {
+    const saved = ADDONS_DATA[serviceSlug][addonKey];
+    const fields = addonFormPane.querySelectorAll("input, textarea, select");
+    fields.forEach((f) => {
+      if (saved[f.name] !== undefined) {
+        if (f.type === "radio" || f.type === "checkbox") {
+          if (Array.isArray(saved[f.name])) {
+            if (saved[f.name].includes(f.value)) f.checked = true;
+          } else if (saved[f.name] === f.value) {
+            f.checked = true;
+          }
+        } else {
+          f.value = saved[f.name];
+        }
+      }
+    });
+  }
+}
+
+function collectAddonFormData() {
+  const fields = addonFormPane.querySelectorAll("input, textarea, select");
+  let data = {};
+  let valid = true;
+  let radioGroups = {};
+
+  fields.forEach((f) => {
+    if (!f.name) return;
+
+    if (f.type === "radio") {
+      radioGroups[f.name] = radioGroups[f.name] || { any: false };
+      if (f.checked) {
+        radioGroups[f.name].any = true;
+        data[f.name] = f.value;
+      }
+    } else if (f.type === "checkbox") {
+      radioGroups[f.name] = radioGroups[f.name] || { any: false };
+      if (f.checked) {
+        radioGroups[f.name].any = true;
+        data[f.name] = data[f.name] || [];
+        data[f.name].push(f.value);
+      }
+    } else {
+      const v = (f.value || "").trim();
+      data[f.name] = v;
+      if (!v) valid = false;
+    }
+  });
+
+  for (let g in radioGroups) {
+    if (!radioGroups[g].any) valid = false;
+  }
+
+  return { data, valid };
+}
+
+function updateCharges(pricing) {
+  if (!pricing) return;
+  const rows = document.querySelector(".card.charges .rows");
+  let subtotalEl = document.getElementById("chargeSubtotal");
+  let discountEl = document.getElementById("chargeDiscount");
+  let totalEl = document.getElementById("chargeTotal");
+  const totalBottomEl = document.getElementById("chargeTotalBottom");
+
+  if (!subtotalEl && rows) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span>Subtotal</span><span id="chargeSubtotal"></span>`;
+    rows.insertBefore(row, rows.firstChild);
+    subtotalEl = row.querySelector("#chargeSubtotal");
+  }
+
+  if (!discountEl && rows) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<span>Discount</span><span class="green" id="chargeDiscount"></span>`;
+    const totalRow = rows.querySelector("#chargeTotal")?.parentElement || null;
+    if (totalRow) {
+      rows.insertBefore(row, totalRow);
+    } else {
+      rows.appendChild(row);
+    }
+    discountEl = row.querySelector("#chargeDiscount");
+  }
+
+  if (subtotalEl) subtotalEl.textContent = `$${Number(pricing.subtotal || 0).toFixed(2)}`;
+  if (discountEl) discountEl.textContent = `-$${Number(pricing.rot || 0).toFixed(2)}`;
+  if (totalEl) totalEl.textContent = `$${Number(pricing.final || 0).toFixed(2)}`;
+  if (totalBottomEl) totalBottomEl.textContent = `$${Number(pricing.final || 0).toFixed(2)}`;
+}
+
+function sendAddonsUpdate() {
+  const fd = new FormData();
+  fd.append("addons_json", JSON.stringify(ADDONS_DATA));
+  fetch(`/private/api/booking/{{ booking.id }}/update-addons/`, {
+    method: "POST",
+    body: fd,
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data && data.pricing) updateCharges(data.pricing);
+    });
+}
+
+if (openAddonsBtn) {
+  openAddonsBtn.addEventListener("click", openAddonsPopup);
+}
+if (closeAddonsBtn) closeAddonsBtn.addEventListener("click", closeAddonsPopup);
+if (cancelAddonsBtn) cancelAddonsBtn.addEventListener("click", closeAddonsPopup);
+if (addonsOverlay) {
+  addonsOverlay.addEventListener("click", (e) => {
+    if (e.target === addonsOverlay) closeAddonsPopup();
+  });
+}
+
+if (saveAddonsBtn) {
+  saveAddonsBtn.addEventListener("click", () => {
+    if (!CURRENT_ADDON) {
+      closeAddonsPopup();
+      return;
+    }
+
+    const { data, valid } = collectAddonFormData();
+    if (!valid) {
+      alert("Please answer all questions for this add-on before saving.");
+      return;
+    }
+
+    ADDONS_DATA[CURRENT_SERVICE] = ADDONS_DATA[CURRENT_SERVICE] || {};
+    ADDONS_DATA[CURRENT_SERVICE][CURRENT_ADDON] = data;
+    sendAddonsUpdate();
+    renderAddonsList();
+  });
+}
+</script>
 </body>
 </html>

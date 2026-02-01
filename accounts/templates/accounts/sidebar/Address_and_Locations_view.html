@@ -9,35 +9,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Address_and_Locations_view.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 
 </head>
 <body>
 <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
 
    <div class="layout"> 
     <!-- Sidebar -->
      <!-- زر المينيو يظهر فقط بالموبايل -->
 <div class="mobile-header">
-  <button class="menu-toggle floating" id="menuToggle">
+  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
     <span class="arrow">&#8250;</span> <!-- › -->
   </button>
   <h2 class="mobile-title">Customer Profile</h2>
@@ -45,56 +29,14 @@
 
 
 
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+    {% include "accounts/includes/customer_sidebar.html" %}
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
 
     <!-- Main content -->
     <main class="main">
       <h1>Address & Locations</h1>
       <h2>My addresses</h2>
 
-      <div class="card">
-        <div class="left">
-          <img src="{% static 'images/home2.png'%}" class="icon">
-          <h3>Home <img src="{% static 'images/star0.png'%}" class="star"> <span class="badge">Active</span></h3>
-          <p>📍 123 Maple Street, Apartment 4B, Anytown, CA 91234</p>
-          <p>📅 Next service: Aug 20, 2025, 10:00 AM</p>
-          <p>☎ Layal Hassan · +1 555-123-4567</p>
-          <p>🅿 Guest spot #5 · 🔑 Gate 3, code 1234#</p>
-        </div>
-        <div class="right">
-          <button class="btn btn-default">Set as default</button>
-          <button class="btn btn-gray">View on Map</button>
-          <button class="btn btn-gray">Edit</button>
-          <button class="btn btn-gray">Remove</button>
-        </div>
-      </div>
 
 {% for location in locations %}
 <div class="card">
@@ -139,47 +81,54 @@
       </a>
     {% endif %}
 
-    <a href="#" class="btn btn-gray"><button class="btn btn-gray">View on Map</button></a>
+    <a href="#" class="btn btn-ghost">View on Map</a>
 
     <a href="{% url 'accounts:edit_address_and_locations' location.id %}"
-       class="btn btn-gray"><button class="btn btn-gray">Edit</button></a>
+       class="btn btn-ghost">Edit</a>
 
     <a href="{% url 'accounts:delete_location' location.id %}"
-       class="btn btn-gray"
-       onclick="return confirm('Delete this location?')"><button class="btn btn-gray" >
-      Remove</button>
+       class="btn btn-danger"
+       onclick="return confirm('Delete this location?')">
+      Remove
     </a>
   </div>
 
 </div>
 {% empty %}
-<p style="text-align:center; color:#777">
+<p class="empty-state">
   No addresses added yet.
 </p>
 {% endfor %}
 
 
-      <button  class="btn btn-add"><a href="{% url 'accounts:Add_Address_and_Locations' %}"  class="nav-item">Add Location</a></button>
+      <a href="{% url 'accounts:Add_Address_and_Locations' %}" class="btn btn-add">Add Location</a>
     </main>
   </div>
 
+<div class="overlay customer-menu-overlay" id="menuOverlay"></div>
+
 <script>
+(function () {
   const toggle = document.getElementById("menuToggle");
   const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-
+  const overlay = document.getElementById("menuOverlay");
+  const arrow = document.querySelector(".customer-menu-toggle .arrow");
+  if (!toggle || !sidebar) return;
   toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    // لما تفتح القائمة السهم ينعكس
-    if (sidebar.classList.contains("open")) {
-      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
-    } else {
-      arrow.innerHTML = "&#8250;"; // › سهم لليمين
-    }
+    const open = sidebar.classList.toggle("open");
+    if (overlay) overlay.classList.toggle("show", open);
+    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
   });
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+      if (arrow) arrow.innerHTML = "&#8250;";
+    });
+  }
+})();
 </script>
-
-
-
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+

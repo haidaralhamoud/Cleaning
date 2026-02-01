@@ -13,7 +13,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family: "Inter", sans-serif;
+  font-family: "Vesper Libre", serif;
   background: var(--sky);
   color: var(--ink);
 }
@@ -77,6 +77,9 @@ body{
   box-shadow: var(--shadow);
   padding: 25px 30px;
   margin-bottom: 25px;
+  max-width: 960px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .row {
@@ -120,15 +123,62 @@ body{
 
 .icon {
   color: var(--sky-strong);
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
-  transition: transform .2s, opacity .2s;
+  transition: transform .2s, opacity .2s, background .2s, color .2s, box-shadow .2s;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #eaf7fb;
+  border: 1px solid #cfeaf2;
+  box-shadow: 0 6px 14px rgba(3, 159, 200, 0.12);
 }
 
 .icon:hover {
-  transform: scale(1.15);
-  opacity: .8;
+  transform: translateY(-1px);
+  background: #dff3fa;
+  color: #028eb3;
 }
+
+.details-link{
+  background: var(--sky-strong);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+  padding:10px 18px;
+  cursor:pointer;
+  font-weight:600;
+  transition:.25s;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  text-decoration:none;
+}
+.details-link:hover{ background:#028eb3; }
+.details-link:visited{ color:#fff; }
+.details-link i{ font-size:14px; }
+
+.alarm-wrap{display:flex;align-items:center;gap:10px}
+.alarm-text{font-weight:600}
+.alarm-text.muted{color:#888;font-weight:600}
+.icon-btn{background:transparent;border:none;cursor:pointer;padding:0}
+.icon-btn .icon{color:#444}
+.icon-btn:hover .icon{color:#039fc8}
+
+.empty-state{
+  background:#fff;
+  border-radius:14px;
+  padding:20px;
+  box-shadow:0 4px 12px rgba(0,0,0,.08);
+  margin-top:16px;
+  max-width: 720px;
+}
+.empty-state p{color:#444;margin-top:8px}
+.actions{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap}
+.hidden{display:none}
 
 
 /* ===== MOBILE HEADER ===== */
@@ -214,4 +264,14 @@ body{
   .column {
     min-width: 100%;
   }
+}
+
+@media (max-width: 560px) {
+  .main h1 { font-size: 24px; }
+  .main h2 { font-size: 18px; }
+  .card {
+    width: 100%;
+    max-width: none;
+  }
+  .row { gap: 16px; }
 }

@@ -7,378 +7,136 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add-Ons</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   <link rel="stylesheet" href="{% static 'css/business_addons.css' %}">
-
-  <style>
-
-
-     *, *:before, *:after {
-    box-sizing: border-box;
-    }
-    .addon-card {
-        border: 1px solid #eee;
-        padding: 20px;
-        border-radius: 12px;
-        cursor: pointer;
-        background: #fff;
-        transition: 0.2s;
-        position: relative;
-    }
-    .addon-card.selected {
-        border-color: #00a3c8;
-        background: #f2fcff;
-    }
-    .checkmark-box {
-        width: 22px;
-        height: 22px;
-        border: 2px solid #aaa;
-        border-radius: 6px;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: 0.2s;
-    }
-    .addon-card.selected .checkmark-box {
-        border-color: #00a3c8;
-        background: #00a3c8;
-    }
-    .checkmark-box svg {
-        width: 14px;
-        height: 14px;
-        stroke: white;
-        display: none;
-    }
-    .addon-card.selected .checkmark-box svg {
-        display: block;
-    }
-
-    /* OTHER TEXT FIELD */
-    .other-text {
-        margin-top: 12px;
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-       
-        border-radius: 10px;
-    }
-    .steps {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 25px 0;
-}
-
-.step {
-    padding: 8px 16px;
-    border: 1px solid #00a3c8;
-    border-radius: 18px;
-    color: #00a3c8;
-    font-weight: 600;
-    background: #fff;
-}
-
-.step.active {
-    background: #00a3c8;
-    color: #fff;
-}
-
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 18px;
-    background: #f1f5f7;
-    color: #009dbe;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    border: 2px solid #d9e4e8;
-    transition: 0.25s ease;
-}
-
-.back-btn:hover {
-    background: #e7f4f7;
-    border-color: #b8d7df;
-    color: #007c96;
-}
-
-.back-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: currentColor;
-}
-.confirm-btn {
-    width: 420px;              /* 🔥 عرض مناسب */
-    margin: 30px auto 0 auto;  /* 🔥 توسيط كامل */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.confirm-btn button {
-    background: #009dbe;
-    color: #fff;
-    padding: 12px 26px;
-    border: none;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: 0.25s ease;
-}
-
-.confirm-btn button:hover {
-    background: #007b99;
-}
-
-  </style>
-
+  <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
 
 <body>
-<!-- ✅ HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
+  {% include "home/includes/main_header.html" %}
 
-  <!-- زر المنيو -->
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="{% url 'home:contact' %}">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
-  </div>
-</header>
-<main class="container">
-
-  <!-- Steps -->
-<div class="steps">
-    {% for i in range_total_steps %}
+  <main class="container">
+    <div class="steps">
+      {% for i in range_total_steps %}
         <div class="step {% if step == i %}active{% endif %}">
-            Step {{ i }}
+          Step {{ i }}
         </div>
-    {% endfor %}
-</div>
-
-
-
-
-
-  <!-- Title -->
-  <section class="section-title">
-    <h2>➕ Add-Ons</h2>
-    <p>💡 Think of add-ons as the “extras that businesses often forget, but really need.”</p>
-  </section>
-
-  <form method="POST" id="addonsForm">
-    {% csrf_token %}
-    <input type="hidden" name="selected_addons" id="selectedAddonsInput">
-
-    <!-- Add-ons grid -->
-    <section class="addons-grid">
-
-      {% for a in addons %}
-      <div class="addon-card" data-id="{{ a.id }}" data-title="{{ a.title }}">
-
-        <!-- Checkmark -->
-        <div class="checkmark-box">
-          <svg viewBox="0 0 24 24"><path fill="none" stroke-width="3" d="M4 12l6 6L20 6"/></svg>
-        </div>
-
-        <div class="addon-content">
-          <h3>{{ a.emoji }} {{ a.title }}</h3>
-          <p>{{ a.description }}</p>
-        </div>
-
-      </div>
       {% endfor %}
+    </div>
 
-      <!-- OTHER CARD -->
-      <div class="addon-card" data-id="other" data-title="Other">
-
-        <div class="checkmark-box">
-          <svg viewBox="0 0 24 24"><path fill="none" stroke-width="3" d="M4 12l6 6L20 6"/></svg>
-        </div>
-
-        <div class="addon-content">
-          <h3>✏️ Other</h3>
-          <p>(eco-products only, extra fridge cleaning, locker room service...)</p>
-
-          <textarea id="otherInput" class="other-text" placeholder="Write your custom add-on here..."></textarea>
-        </div>
-
-      </div>
-
+    <section class="section-title">
+      <h2><span class="title-icon" aria-hidden="true">&#10133;</span> Add-Ons</h2>
+      <p>Think of add-ons as the extras that businesses often forget, but really need.</p>
     </section>
 
-    <!-- Confirm -->
-<div class="confirm-btn">
+    <form method="POST" id="addonsForm">
+      {% csrf_token %}
+      <input type="hidden" name="selected_addons" id="selectedAddonsInput">
 
-    <a onclick="window.history.back();" class="back-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back
-    </a>
+      <section class="addons-grid">
+        {% for a in addons %}
+          <div class="addon-card" data-id="{{ a.id }}" data-title="{{ a.title }}">
+            <div class="checkmark-box"></div>
+            <div class="addon-content">
+              <h3><span class="addon-emoji">{{ a.emoji }}</span>{{ a.title }}</h3>
+              <p>{{ a.description }}</p>
+            </div>
+          </div>
+        {% endfor %}
 
-    <button type="submit">Confirm Add-ons</button>
-
-</div>
-
-
-  </form>
-</main>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
-
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+        <div class="addon-card other-card" data-id="other" data-title="Other">
+          <div class="checkmark-box"></div>
+          <div class="addon-content">
+            <h3><span class="addon-emoji">&#9998;</span>Other</h3>
+            <p>(eco-products only, extra fridge cleaning, locker room service...)</p>
+            <textarea id="otherInput" class="other-text" placeholder="Write your custom add-on here..."></textarea>
           </div>
         </div>
+      </section>
 
-
+      <div class="confirm-btn">
+        <a onclick="window.history.back();" class="back-btn">
+          <span class="back-icon">&larr;</span>
+          Back
+        </a>
+        <button type="submit" class="next-btn">
+          Confirm Add-ons
+          <span class="next-icon">&rarr;</span>
+        </button>
       </div>
-    </div>
+    </form>
+  </main>
 
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
 
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
+  {% include "home/includes/footer.html" %}
 
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
-  </div>
+  <script>
+    let selected = [];
+    const cards = document.querySelectorAll(".addon-card");
+    const otherInput = document.getElementById("otherInput");
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
+    const syncSelected = () => {
+      document.getElementById("selectedAddonsInput").value = JSON.stringify(selected);
+    };
 
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
-<script>
-let selected = [];
-const cards = document.querySelectorAll(".addon-card");
-const otherInput = document.getElementById("otherInput");
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const id = card.dataset.id;
+        const title = card.dataset.title;
 
-cards.forEach(card => {
+        card.classList.toggle("selected");
 
-  card.addEventListener("click", () => {
-
-    const id = card.dataset.id;
-    const title = card.dataset.title;
-
-    card.classList.toggle("selected");
-
-    if (card.classList.contains("selected")) {
-
-        if (id === "other") {
+        if (card.classList.contains("selected")) {
+          if (id === "other") {
             selected.push({
-                id: "other",
-                title: "Other",
-                value: otherInput.value
+              id: "other",
+              title: "Other",
+              value: otherInput.value
             });
+          } else {
+            selected.push({
+              id: id,
+              title: title
+            });
+          }
         } else {
-            selected.push({
-                id: id,
-                title: title
-            });
+          selected = selected.filter((x) => x.id !== id);
         }
 
-    } else {
-        selected = selected.filter(x => x.id !== id);
-    }
-
-    document.getElementById("selectedAddonsInput").value = JSON.stringify(selected);
-  });
-
-});
-
-// Update OTHER live
-if (otherInput) {
-    otherInput.addEventListener("input", () => {
-        let found = selected.find(x => x.id === "other");
-        if (found) {
-            found.value = otherInput.value;
-        }
-        document.getElementById("selectedAddonsInput").value = JSON.stringify(selected);
+        syncSelected();
+      });
     });
-}
-</script>
 
+    if (otherInput) {
+      otherInput.addEventListener("input", () => {
+        const otherCard = document.querySelector('.addon-card[data-id="other"]');
+        if (!otherCard.classList.contains("selected")) {
+          otherCard.classList.add("selected");
+          selected = selected.filter((x) => x.id !== "other");
+          selected.push({
+            id: "other",
+            title: "Other",
+            value: otherInput.value
+          });
+        } else {
+          const found = selected.find((x) => x.id === "other");
+          if (found) {
+            found.value = otherInput.value;
+          }
+        }
+        syncSelected();
+      });
+    }
+  </script>
+
+  <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -11,190 +11,26 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Loyalty_and_Rewards.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <style>
-    .tier.active{
-  outline: 3px solid #0ea5e9;
-  transform: translateY(-2px);
-}
-.tier {
-  border-radius: 14px;
-  padding: 18px;
-  text-align: center;
-  border: 2px solid transparent;
-  transition: all .25s ease;
-}
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 
-/* ===== BRONZE ===== */
-.tier.bronze {
-  background: #FFF4E6;
-  border-color: #E6A15A;
-  color: #8A4B12;
-}
-
-/* ===== SILVER ===== */
-.tier.silver {
-  background: #F5F6F8;
-  border-color: #C7CBD1;
-  color: #4B5563;
-}
-
-/* ===== GOLD ===== */
-.tier.gold {
-  background: #FFF9DB;
-  border-color: #F0C75E;
-  color: #8B6B00;
-}
-
-/* ===== ACTIVE ===== */
-.tier.active {
-  box-shadow: 0 0 0 3px rgba(0,0,0,.08);
-  transform: scale(1.03);
-}
-.tier.active::after {
-  content: "✓ Your level";
-  display: block;
-  margin-top: 8px;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-/* ===== PROMOTION CARD ===== */
-.promo {
-  position: relative;
-  background: linear-gradient(135deg, #ffffff, #f3fbff);
-  border-radius: 18px;
-  padding: 18px;
-  box-shadow: 0 12px 30px rgba(0, 160, 200, 0.18);
-  border: 2px solid #00b4d8;
-  overflow: hidden;
-  animation: promoGlow 2.5s infinite ease-in-out;
-}
-
-/* subtle glow animation */
-@keyframes promoGlow {
-  0% { box-shadow: 0 0 0 rgba(0,180,216,0.4); }
-  50% { box-shadow: 0 0 25px rgba(0,180,216,0.55); }
-  100% { box-shadow: 0 0 0 rgba(0,180,216,0.4); }
-}
-
-/* ===== BADGE ===== */
-.promo::before {
-  content: "🔥 Limited Offer";
-  position: absolute;
-  top: 14px;
-  left: -40px;
-  background: linear-gradient(135deg, #ff9800, #ff5722);
-  color: #fff;
-  padding: 6px 45px;
-  font-size: 13px;
-  font-weight: 700;
-  transform: rotate(-45deg);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-}
-
-/* ===== IMAGE ===== */
-.promo img {
-  width: 100%;
-  border-radius: 14px;
-  margin-bottom: 14px;
-}
-
-/* ===== TITLE ===== */
-.promo h5 {
-  font-size: 20px;
-  font-weight: 800;
-  margin: 10px 0 6px;
-}
-
-/* ===== DESCRIPTION ===== */
-.promo p {
-  color: #555;
-  font-size: 14px;
-  margin-bottom: 14px;
-}
-
-/* ===== CTA BUTTON ===== */
-.promo .btn {
-  width: 100%;
-  background: linear-gradient(135deg, #00b4d8, #0077b6);
-  color: #fff;
-  font-weight: 800;
-  border-radius: 14px;
-  padding: 14px;
-  font-size: 16px;
-  border: none;
-  transition: all 0.25s ease;
-}
-
-.promo .btn:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 25px rgba(0, 180, 216, 0.5);
-}
-
-  </style>
 </head>
 <body>
 <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
   <div class="layout">
 
     <!-- ===== Mobile Header ===== -->
     <div class="mobile-header">
-      <button class="menu-toggle floating" id="menuToggle">
+      <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
         <span class="arrow">&#8250;</span>
       </button>
       <h2 class="mobile-title">Customer Profile</h2>
     </div>
 
     <!-- ===== Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">
-            {{ request.user.get_full_name|default:request.user.username }}
-          </div>
-          <div class="id">ID: {{ request.user.id }}</div>
-        </div>
-      </div>
+    {% include "accounts/includes/customer_sidebar.html" %}
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
 
     <!-- ===== Main Content ===== -->
     <main class="main">
@@ -209,19 +45,17 @@
     <small>Points Balance</small>
     <strong>{{ points_balance }}</strong>
 
-    {% if next_tier_name %}
-      <span>You're only {{ next_tier_points }} pts away from {{ next_tier_name }} Tier 🎉</span>
+    {% if next_tier %}
+      <span>You're only {{ next_tier_points }} pts away from {{ next_tier.name }} Tier ًںژ‰</span>
     {% else %}
-      <span>You're at the highest tier 🎉</span>
+      <span>You're at the highest tier ًںژ‰</span>
     {% endif %}
   </div>
 
   <div class="tier-pill">
-{% if current_tier %}
-  <div class="tier-pill">
-    <b>{{ current_tier.name }} Member</b>
-  </div>
-{% endif %}
+    {% if current_tier %}
+      <b>{{ current_tier.name }} Member</b>
+    {% endif %}
   </div>
 </div>
 
@@ -233,7 +67,7 @@
               <h4>{{ tier.name }}</h4>
 
               {% if tier.max_points %}
-                <p>({{ tier.min_points }}–{{ tier.max_points }} pts)</p>
+                <p>({{ tier.min_points }}â€“{{ tier.max_points }} pts)</p>
               {% else %}
                 <p>(+ {{ tier.min_points }} pts)</p>
               {% endif %}
@@ -264,7 +98,7 @@
                     Book {{ book_5_target|add:"-"|add:book_5_done }} more to unlock a Free Add-on!
                   </div>
                 {% else %}
-                  <div class="hint success">🎉 Milestone completed!</div>
+                  <div class="hint success">ًںژ‰ Milestone completed!</div>
                 {% endif %}
               </div>
 
@@ -283,7 +117,7 @@
                     Invite {{ refer_target|add:"-"|add:refer_done }} more friends to unlock a Free Service!
                   </div>
                 {% else %}
-                  <div class="hint success">🎉 Referral reward unlocked!</div>
+                  <div class="hint success">ًںژ‰ Referral reward unlocked!</div>
                 {% endif %}
               </div>
 
@@ -325,7 +159,7 @@
         <div class="refer">
           <b>Refer a Friend &amp; Earn Big!</b>
           <div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">
-            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> — your friend gets 10% off their first booking.
+            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> â€” your friend gets 10% off their first booking.
           </div>
           <div class="share-row">
             <a class="share wa" href="#"><img src="{% static 'images/whats-app0.png' %}" alt="">WhatsApp</a>
@@ -350,7 +184,7 @@
             {% empty %}
               <div class="item">
                 <div><b>No Activity Yet</b></div>
-                <small>—</small>
+                <small>â€”</small>
                 <div class="pts">0 pts</div>
               </div>
             {% endfor %}
@@ -360,13 +194,15 @@
         <div class="promo">
           <h3 class="section-title" style="margin-top:0">Promotions</h3>
 
-          <img src="{{ promotion.image.url }}" alt="promotion">
+          {% if promotion.image %}
+            <img src="{{ promotion.image.url }}" alt="promotion">
+          {% endif %}
 
           <h5>{{ promotion.title }}</h5>
           <p>{{ promotion.description }}</p>
 
           <button class="btn">
-            🚀 Book Now & Earn x{{ promotion.points_multiplier }} Points
+            ًںڑ€ Book Now & Earn x{{ promotion.points_multiplier }} Points
           </button>
         </div>
 
@@ -377,94 +213,9 @@
     </main>
   </div>
 
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
+{% include "home/includes/footer.html" %}
 
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
-
-<script>
-const toggleBtn = document.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-</script>
+<script src="{% static 'js/main_header.js' %}"></script>
   <script>
     window.addEventListener('load', ()=>{
       document.querySelectorAll('.progress .fill').forEach(el=>{
@@ -485,3 +236,4 @@ toggleBtn.addEventListener("click", () => {
 
 </body>
 </html>
+

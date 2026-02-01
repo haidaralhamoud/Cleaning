@@ -1,109 +1,54 @@
 from django.contrib import admin
-from .models import Customer, CustomerPreferences, LoyaltyTier, Promotion, Reward, Service , BookingChecklist
+from django.utils.html import format_html
 
-from home.models import PrivateBooking, BusinessBooking
+from .models import (
+    Customer,
+    CustomerPreferences,
+    LoyaltyTier,
+    Promotion,
+    ProviderProfile,
+    ProviderRatingSummary,
+    Reward,
+    Service,
+    BookingChecklist,
+    DiscountCode,
+)
+
+# =========================
+# SERVICE
+# =========================
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ["label", "key"]
+    list_display = ("label", "key")
 
 
+# =========================
+# CUSTOMER
+# =========================
 @admin.register(Customer)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ["first_name", "last_name", "email", "phone"]
-    search_fields = ["first_name", "last_name", "email", "phone"]
-    list_filter = ["preferred_language", "gender"]
-
-    readonly_fields = ("formatted_addons",)
-
-    fieldsets = (
-        ("Basic Information", {
-            "fields": (
-                "user",
-                "first_name", "last_name",
-                "email", "phone",
-                "personal_identity_number",
-                "profile_photo",
-                "gender", "pronouns",
-                "date_of_birth",
-            )
-        }),
-
-        ("Contact Preferences", {
-            "fields": (
-                "country_code",
-                "preferred_contact_method",
-                "preferred_language",
-            )
-        }),
-
-        ("Address", {
-            "fields": (
-                "country", "city",
-                "postal_code", "house_num",
-                "full_address",
-            )
-        }),
-
-        ("Address & Locations", {
-            "fields": (
-                "primary_address",
-                "additional_locations",
-                "entry_code",
-                "parking_notes",
-            )
-        }),
-
-        ("Emergency Contact", {
-            "fields": (
-                "emergency_first_name",
-                "emergency_last_name",
-                "emergency_phone",
-                "emergency_relation",
-            )
-        }),
-
-        ("Services", {
-            "fields": (
-                "desired_services",
-                "formatted_addons",
-            )
-        }),
-
-        ("Other", {
-            "fields": (
-                "optional_note",
-                "accepted_terms",
-            )
-        }),
-    )
-
-    def formatted_addons(self, obj):
-        if not obj.custom_addons:
-            return "— No Add-ons —"
-        return ", ".join(obj.custom_addons)
-
-    formatted_addons.short_description = "Custom Add-ons"
+    list_display = ("first_name", "last_name", "email", "phone")
+    search_fields = ("first_name", "last_name", "email", "phone")
+    list_filter = ("preferred_language", "gender")
 
 
+# =========================
+# CUSTOMER PREFERENCES
+# =========================
+@admin.register(CustomerPreferences)
+class CustomerPreferencesAdmin(admin.ModelAdmin):
+    list_display = ("customer", "frequency", "updated_at")
+    readonly_fields = ("updated_at",)
 
+
+# =========================
+# LOYALTY / REWARDS
+# =========================
 @admin.register(LoyaltyTier)
 class LoyaltyTierAdmin(admin.ModelAdmin):
-    list_display = (
-        "name",
-        "min_points",
-        "max_points",
-        "is_active",
-        "order",
-    )
-
-    list_editable = (
-        "order",
-        "is_active",
-    )
-
-    search_fields = ("name",)
+    list_display = ("name", "min_points", "max_points", "is_active", "order")
+    list_editable = ("order", "is_active")
     ordering = ("order",)
-
 
 
 @admin.register(Reward)
@@ -112,71 +57,58 @@ class RewardAdmin(admin.ModelAdmin):
     list_editable = ("points_required", "is_active")
 
 
-
-
+# =========================
+# PROMOTIONS
+# =========================
 @admin.register(Promotion)
 class PromotionAdmin(admin.ModelAdmin):
-    list_display = (
-        "title",
-        "points_multiplier",
-        "start_date",
-        "end_date",
-        "is_active",
-    )
+    list_display = ("title", "points_multiplier", "start_date", "end_date", "is_active")
     list_filter = ("is_active",)
-    search_fields = ("title",)    
 
 
-
-
-
-@admin.register(CustomerPreferences)
-class CustomerPreferencesAdmin(admin.ModelAdmin):
-    list_display = (
-        "customer",
-        "frequency",
-        "updated_at",
-    )
-
-    search_fields = (
-        "customer__first_name",
-        "customer__last_name",
-        "customer__email",
-    )
-
-    readonly_fields = ("updated_at",)
-
-    fieldsets = (
-        ("Customer", {
-            "fields": ("customer",)
-        }),
-        ("Cleaning Preferences", {
-            "fields": ("cleaning_types", "priorities")
-        }),
-        ("Products", {
-            "fields": ("preferred_products", "excluded_products")
-        }),
-        ("Scheduling", {
-            "fields": ("frequency",)
-        }),
-        ("Lifestyle & Add-ons", {
-            "fields": ("lifestyle_addons",)
-        }),
-        ("Assembly & Renovations", {
-            "fields": ("assembly_services",)
-        }),
-        ("System", {
-            "fields": ("updated_at",)
-        }),
-    )    
-
-
-
-from django.contrib import admin
-from .models import DiscountCode
-
+# =========================
+# DISCOUNT CODES
+# =========================
 @admin.register(DiscountCode)
 class DiscountCodeAdmin(admin.ModelAdmin):
     list_display = ("code", "percent", "user", "is_used", "expires_at", "created_at")
-    list_filter = ("is_used", "percent")
     search_fields = ("code", "user__username", "user__email")
+    list_filter = ("is_used", "percent")
+
+
+# =========================
+# PROVIDER PROFILE
+# =========================
+@admin.register(ProviderProfile)
+class ProviderProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "is_active", "has_photo")
+    list_filter = ("is_active",)
+    search_fields = ("user__username", "user__email")
+    readonly_fields = ("preview_photo",)
+
+    def has_photo(self, obj):
+        return bool(obj.photo)
+
+    has_photo.boolean = True
+    has_photo.short_description = "Photo"
+
+    def preview_photo(self, obj):
+        if obj.photo:
+            return format_html(
+                '<img src="{}" style="height:150px;border-radius:10px;" />',
+                obj.photo.url
+            )
+        return "No photo"
+
+    preview_photo.short_description = "Photo Preview"
+
+
+# =========================
+# PROVIDER RATING SUMMARY
+# =========================
+@admin.register(ProviderRatingSummary)
+class ProviderRatingSummaryAdmin(admin.ModelAdmin):
+    list_display = ("provider", "avg_rating", "total_reviews", "updated_at")
+    ordering = ("-avg_rating",)
+    readonly_fields = ("updated_at",)
+    search_fields = ("provider__username", "provider__email")

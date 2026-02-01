@@ -8,6 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About Us - Hembla</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   <link rel="stylesheet" href="{% static 'css/about.css' %}">
 
   <style>
@@ -31,9 +32,9 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 50px;
+      gap: 40px;
       max-width: 1200px;
-      margin: 100px auto;
+      margin: 80px auto 70px;
       padding: 0 20px;
       flex-wrap: wrap;
     }
@@ -72,7 +73,7 @@
     /* ====== SECTION 2: WHAT GUIDES US ====== */
     .guides-section {
       background: #fff;
-      padding: 100px 0;
+      padding: 80px 0 70px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -81,7 +82,7 @@
     .section-title {
       font-size: 28px;
       font-weight: 700;
-      margin-bottom: 60px;
+      margin-bottom: 40px;
       text-align: center;
     }
 
@@ -89,7 +90,7 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      gap: 60px;
+      gap: 40px;
       max-width: 1200px;
       width: 90%;
       flex-wrap: wrap;
@@ -106,7 +107,7 @@
     .guides-content {
       display: flex;
       flex-direction: column;
-      gap: 40px;
+      gap: 32px;
       max-width: 600px;
     }
 
@@ -139,13 +140,38 @@
       background: rgba(3, 159, 200, 0.05);
       border-radius: 15px;
       max-width: 1200px;
-      margin: 80px auto;
-      padding: 50px 40px;
+      margin: 70px auto;
+      padding: 44px 36px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 50px;
+      gap: 36px;
       flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 18px 40px rgba(3, 159, 200, 0.10);
+    }
+    .future-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(420px 220px at 10% 0%, rgba(3,159,200,0.16), transparent 60%),
+        radial-gradient(360px 200px at 90% 100%, rgba(3,159,200,0.12), transparent 60%);
+      pointer-events: none;
+    }
+    .future-section::after {
+      content: "";
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      border: 1px solid rgba(3,159,200,0.2);
+      background: rgba(255,255,255,0.45);
+      transform: rotate(12deg);
+      pointer-events: none;
     }
 
     .future-text {
@@ -157,6 +183,16 @@
       font-size: 22px;
       font-weight: 700;
       margin-bottom: 20px;
+      position: relative;
+    }
+    .future-text h3::after {
+      content: "";
+      display: block;
+      width: 56px;
+      height: 3px;
+      margin-top: 10px;
+      background: #039fc8;
+      border-radius: 999px;
     }
 
     .future-text p {
@@ -173,20 +209,32 @@
       font-size: 20px;
       font-weight: 700;
       display: inline-block;
+      box-shadow: 0 12px 26px rgba(3,159,200,0.28);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 30px rgba(3,159,200,0.35);
     }
 
     .future-image img {
       width: 100%;
       max-width: 550px;
       border-radius: 15px;
-      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 16px 30px rgba(0,0,0,0.18);
       object-fit: cover;
+      transform: translateZ(0);
+      transition: transform .3s ease, box-shadow .3s ease;
+    }
+    .future-image img:hover {
+      transform: translateY(-6px) scale(1.01);
+      box-shadow: 0 22px 34px rgba(0,0,0,0.22);
     }
 
     /* ====== SECTION 4: OUR GOALS ====== */
     .goals-section {
       text-align: center;
-      padding: 100px 20px;
+      padding: 80px 20px 90px;
       background: #fff;
     }
 
@@ -198,7 +246,7 @@
 
     .goals-section p {
       max-width: 900px;
-      margin: 0 auto 60px auto;
+      margin: 0 auto 40px auto;
       font-size: 18px;
       color: rgba(0, 0, 0, 0.8);
       line-height: 1.6;
@@ -208,16 +256,21 @@
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      gap: 40px;
+      gap: 30px;
       flex-wrap: wrap;
     }
 
     .goal-box {
       border-radius: 20px;
-      padding: 40px 20px;
+      padding: 32px 20px;
       width: 340px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
       position: relative;
+      transition: box-shadow .25s ease, transform .25s ease;
+    }
+    .goal-box:hover {
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+      transform: translateY(-4px);
     }
 
     .goal-box .icon-bg {
@@ -252,8 +305,8 @@
     .circle-row {
       display: flex;
       justify-content: center;
-      gap: 60px;
-      margin-top: 80px;
+      gap: 40px;
+      margin-top: 60px;
       flex-wrap: wrap;
     }
 
@@ -262,6 +315,14 @@
       height: 200px;
       border-radius: 50%;
       object-fit: cover;
+      animation: waveFloat 3.5s ease-in-out infinite;
+    }
+    .circle-row img:nth-child(2) { animation-delay: .6s; }
+    .circle-row img:nth-child(3) { animation-delay: 1.2s; }
+
+    @keyframes waveFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
     }
 
     /* ====== RESPONSIVE ====== */
@@ -278,6 +339,14 @@
       .future-text {
         text-align: center;
       }
+      .future-text h3,
+      .future-text p {
+        text-align: center;
+      }
+      .future-text h3::after {
+        margin-left: auto;
+        margin-right: auto;
+      }
 
       .guides-content {
         align-items: center;
@@ -290,6 +359,20 @@
 
       .guide-item img {
         margin-bottom: 10px;
+      }
+      .guide-item h4,
+      .guide-item p {
+        text-align: center;
+      }
+      .guides-section {
+        padding: 70px 0 60px;
+      }
+      .goals-section {
+        padding: 70px 20px 80px;
+      }
+      .circle-row {
+        margin-top: 50px;
+        gap: 28px;
       }
     }
   </style>
@@ -328,26 +411,7 @@
 
 <body>
   <!-- ✅ HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <!-- زر المنيو -->
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
 
 <!-- ============================================================================================= -->
 
@@ -384,7 +448,7 @@
         to call again and again.
       </p>
         <div class="guide-item">
-          <img src="{% static 'images/vector1.svg'%}" alt="icon" />
+          <img src="{% static 'images/guide-precision.svg'%}" alt="precision icon" />
           <div>
             <h4>Do it right, every time.</h4>
             <p>We remember your preferences, your routines, and that little thing you mentioned last time.</p>
@@ -392,7 +456,7 @@
         </div>
 
         <div class="guide-item">
-          <img src="{% static 'images/vector2.svg'%}" alt="icon" />
+          <img src="{% static 'images/guide-personal.svg'%}" alt="personal icon" />
           <div>
             <h4>Make it personal.</h4>
             <p>We remember your preferences, your routines, and that little thing you mentioned last time.</p>
@@ -400,7 +464,7 @@
         </div>
 
         <div class="guide-item">
-          <img src="{% static 'images/vector3.svg'%}" alt="icon" />
+          <img src="{% static 'images/guide-care.svg'%}" alt="care icon" />
           <div>
             <h4>Care for the bigger picture.</h4>
             <p>Eco-friendly choices, fair treatment of our team, and services that fit into your life, not the other way around.</p>
@@ -476,95 +540,9 @@
 
 <!-- ============================================================================================= -->
 
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/chat-gpt-image-aug-5-2025-12-17-37-pm-11.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
-
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
+{% include "home/includes/footer.html" %}
 
 
-      </div>
-    </div>
-
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
-
-<script>
-const toggleBtn = document.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-</script>
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

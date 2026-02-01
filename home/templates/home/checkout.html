@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,58 +7,15 @@
   <title>Checkout | Hembla</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
-  <style>
-.discount-box {
-  margin: 20px 0;
-  padding: 15px;
-  background: #f4fbff;
-  border: 1px dashed #1aa3d9;
-  border-radius: 10px;
-}
-
-.discount-box h4 {
-  margin-bottom: 8px;
-}
-
-.discount-box form {
-  display: flex;
-  gap: 10px;
-}
-
-.discount-box input {
-  flex: 1;
-  padding: 10px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.apply-btn {
-  background: #0aa6d6;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.discount-box .error {
-  color: #c0392b;
-  margin-top: 8px;
-}
-
-.discount-box .success {
-  color: #27ae60;
-  margin-top: 8px;
-}
-
-  </style>
 </head>
 
 <body>
+{% include "home/includes/main_header.html" %}
 <div class="checkout-container">
 
-  <!-- HEADER -->
   <header>
     <h1>Checkout</h1>
     <p class="subtitle">
@@ -66,243 +23,249 @@
     </p>
   </header>
 
-  <!-- ⭐ SELECTED SERVICES -->
-  <section class="card">
-    <div class="card-header">
-      <h2>Selected Services</h2>
-      <a href="{% url 'home:private_booking_services' booking.id %}" class="edit-btn">✏️ Edit</a>
-    </div>
-
-    <hr>
-
-    {% for s in services %}
-    <div class="service">
-      <div>
-        <h3>{{ s.title }}</h3>
-        <p>{{ s.category.title }}</p>
-      </div>
-      <span>+{{ s.price }}$</span>
-    </div>
-    {% endfor %}
-
-{% for service_slug, addons in booking.addons_selected.items %}
-  {% for addon_slug, addon in addons.items %}
-    <div class="service">
-      <div>
-        <h3>{{ addon.title }}</h3>
-        <p>Quantity: {{ addon.quantity }}</p>
-      </div>
-      <span>+{{ addon.price }}$</span>
-    </div>
-  {% endfor %}
-{% endfor %}
-
-{% if messages %}
-  <div style="margin-bottom:15px;">
-    {% for message in messages %}
-      <div
-        style="
-          padding:12px;
-          border-radius:8px;
-          margin-bottom:8px;
-          font-weight:600;
-          {% if message.tags == 'error' %}
-            background:#fdecea; color:#c0392b;
-          {% elif message.tags == 'success' %}
-            background:#e8fff1; color:#27ae60;
-          {% else %}
-            background:#eef5ff; color:#2c3e50;
-          {% endif %}
-        "
-      >
-        {{ message }}
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
-
-
-<!-- ⭐ DISCOUNT CODE -->
-<!-- ⭐ DISCOUNT CODE -->
-<div class="discount-box">
-  <h4>Discount Code</h4>
-
-  {% if booking.discount_code %}
-    <div class="success">
-      ✅ Applied code: <b>{{ booking.discount_code.code }}</b>
-    </div>
-
-    <form method="POST" style="margin-top:10px;">
-      {% csrf_token %}
-      <input type="hidden" name="form_type" value="remove_discount">
-      <button type="submit" class="apply-btn" style="background:#bbb;">
-        Remove code
-      </button>
-    </form>
-
-  {% else %}
-    <form method="POST">
-      {% csrf_token %}
-      <input type="hidden" name="form_type" value="discount">
-
-      <input type="text" name="discount_code" placeholder="Enter code">
-      <button type="submit" class="apply-btn">Apply</button>
-    </form>
-  {% endif %}
-</div>
-
-
-<div class="summary">
-  <div>
-    <p>Subtotal</p>
-    <span>{{ booking.subtotal }}$</span>
-  </div>
-
-  <div>
-    <p>ROT</p>
-    <span>-{{ booking.rot_discount }}$</span>
-  </div>
-
-  {% if booking.discount_code %}
-    <div style="
-      background:#e8fff1;
-      border-left:4px solid #27ae60;
-      padding:10px;
-      margin:10px 0;
-      border-radius:6px;
-    ">
-      🎉 You saved <b>{{ discount_preview_amount|floatformat:2 }}$</b>
-      with this code!
-    </div>
-  {% endif %}
-
-  <div class="final">
-    <p>Final Sum</p>
-    <span>
-      {% if booking.discount_code %}
-        {{ final_preview_price|floatformat:2 }}$
-      {% else %}
-        {{ booking.total_price }}$
-      {% endif %}
-    </span>
-  </div>
-</div>
-
-
-    <div class="note">
-      💡 This price includes your ROT deduction. You only pay the reduced amount.
-    </div>
-  </section>
-
-  <!-- ⭐ BOOKING SUMMARY -->
-  <section class="card">
-    <div class="card-header">
-      <h2>Booking Summary</h2>
-    </div>
-
-    <hr>
-
-    <!-- DATE & TIME -->
-    <div class="summary-item">
-      <div>
-        <h4>Service Date & Time</h4>
-
-        {% if booking.schedule_mode == "same" %}
-          <p>
-            Date: {{ booking.appointment_date }}<br>
-            Time: {{ booking.appointment_time_window }}<br>
-            Frequency: {{ booking.frequency_type }}
-          </p>
-        {% else %}
-          <p>
-            Separate schedules per service
-          </p>
-        {% endif %}
-      </div>
-
-      <a href="{% url 'home:private_booking_schedule' booking.id %}" class="edit-btn">✏️ Edit</a>
-    </div>
-
-    <!-- ADDRESS -->
-    <div class="summary-item">
-      <div>
-        <h4>Location / Address</h4>
-        <p>{{ booking.address }}</p>
-      </div>
-      <a href="#" class="edit-btn">✏️ Edit</a>
-    </div>
-
-    <!-- DURATION -->
-    <div class="summary-item">
-      <div>
-        <h4>Duration</h4>
-        <p>{{ booking.duration_hours }} hours</p>
-      </div>
-    </div>
-
-    <!-- AREA -->
-    <div class="summary-item">
-      <div>
-        <h4>Service Area</h4>
-        <p>{{ booking.area }}</p>
-      </div>
-    </div>
-
-  </section>
-
-  <!-- ⭐ PAYMENT -->
-  <section class="card">
-    <div class="card-header">
-      <h2>Payment Method</h2>
-    </div>
-    <hr>
-
-    <form method="POST">
-      {% csrf_token %}
-
-      <div class="payment-options">
-        <label><input type="radio" name="payment_method" value="card" checked> 💳 Credit Card</label>
-        <label><input type="radio" name="payment_method" value="paypal"> 🅿️ Paypal</label>
-        <label><input type="radio" name="payment_method" value="klarna"> Klarna</label>
-        <label><input type="radio" name="payment_method" value="swish"> Swish</label>
-      </div>
-
-      <div class="payment-inputs">
-        <input type="text" name="card_number" placeholder="Card Number">
-        <div class="input-row">
-          <input class="inputrow" name="card_expiry" type="text" placeholder="MM/YY">
-          <input class="inputrow" name="card_cvv" type="text" placeholder="CVV">
+  <div class="checkout-grid">
+    <div class="checkout-main">
+      <section class="card services-card">
+        <div class="card-header">
+          <h2>Selected Services</h2>
+          <a href="{% url 'home:private_booking_services' booking.id %}" class="edit-btn">Edit</a>
         </div>
-        <input type="text" name="card_name" placeholder="Name on Card">
+        <hr>
+
+        <div class="service-list">
+          {% for s in services %}
+          <div class="service">
+            <div>
+              <h3>{{ s.title }}</h3>
+              <p>{{ s.category.title }}</p>
+            </div>
+            <span>+{{ s.price }}$</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% if messages %}
+          <div class="flash-stack">
+            {% for message in messages %}
+              <div class="flash {{ message.tags|default:'info' }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="card discount-card">
+        <div class="card-header">
+          <h2>Discount Code</h2>
+        </div>
+        <hr>
+
+        {% if booking.discount_code %}
+          <div class="discount-status success">
+            Applied code: <b>{{ booking.discount_code.code }}</b>
+          </div>
+
+          <form method="POST" class="discount-form">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="remove_discount">
+            <button type="submit" class="apply-btn muted">Remove code</button>
+          </form>
+        {% else %}
+          <form method="POST" class="discount-form">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="discount">
+            <input type="text" name="discount_code" placeholder="Enter discount code">
+            <button type="submit" class="apply-btn">Apply</button>
+          </form>
+        {% endif %}
+
+        {% if booking.discount_code %}
+          <div class="discount-saved">
+            You saved <b>{{ discount_preview_amount|floatformat:2 }}$</b> with this code.
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="card booking-card">
+        <div class="card-header">
+          <h2>Booking Summary</h2>
+        </div>
+        <hr>
+
+        <div class="summary-grid">
+          <div class="summary-card">
+            <div class="summary-card-head">
+              <h4>Service Date & Time</h4>
+              <a href="{% url 'home:private_booking_schedule' booking.id %}" class="edit-btn">Edit</a>
+            </div>
+            {% if booking.schedule_mode == "same" %}
+              <p class="summary-detail">Date: {{ booking.appointment_date|default:"Not set" }}</p>
+              <p class="summary-detail">Time: {{ booking.appointment_time_window|default:"Not set" }}</p>
+              <p class="summary-detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>
+            {% else %}
+              <p class="summary-detail">Separate schedules per service</p>
+            {% endif %}
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-card-head">
+              <h4>Location / Address</h4>
+              <a href="#" class="edit-btn">Edit</a>
+            </div>
+            <p class="summary-detail">{{ display_address }}</p>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-card-head">
+              <h4>Duration</h4>
+            </div>
+            <p class="summary-detail">{{ display_duration }}</p>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-card-head">
+              <h4>Service Area</h4>
+            </div>
+            <p class="summary-detail">{{ display_area }}</p>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="invoice-inline">
+          <div class="invoice-box">
+            <div class="invoice-head">
+              <h4>Invoice Summary</h4>
+              <span class="invoice-pill">Live</span>
+            </div>
+          <div class="summary-line">
+            <span>Services</span>
+            <span>{{ services_total|floatformat:2 }}$</span>
+          </div>
+          <div class="summary-line">
+            <span>Add-ons</span>
+            <span>{{ addons_total|floatformat:2 }}$</span>
+          </div>
+          <div class="summary-line">
+            <span>Schedule</span>
+            <span>{{ schedule_extra|floatformat:2 }}$</span>
+          </div>
+          {% if date_surcharge and date_surcharge != 0 %}
+            <div class="summary-line">
+              <span>Date surcharge</span>
+              <span>{{ date_surcharge|floatformat:2 }}$</span>
+            </div>
+          {% endif %}
+          <div class="summary-line">
+            <span>Subtotal</span>
+            <span>{{ subtotal|floatformat:2 }}$</span>
+          </div>
+
+          <div class="summary-line">
+            <span>ROT Deduction ({{ rot_percent|default:"0" }}%)</span>
+            <span>-{{ rot_value|floatformat:2 }}$</span>
+          </div>
+
+          {% if booking.discount_code %}
+            <div class="summary-line discount-line">
+              <span>Discount</span>
+              <span>-{{ discount_preview_amount|floatformat:2 }}$</span>
+            </div>
+          {% endif %}
+
+          <div class="summary-total">
+            <span>Total</span>
+            <span>{{ final_preview_price|floatformat:2 }}$</span>
+          </div>
+          <p class="note">This price includes your ROT deduction.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card payment-card">
+        <div class="card-header">
+          <h2>Payment Method</h2>
+        </div>
+        <hr>
+
+        <form method="POST" id="paymentForm">
+          {% csrf_token %}
+          <input type="hidden" name="form_type" value="payment">
+
+          <div class="payment-options">
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="card" checked>
+              <span class="payment-label">Credit Card</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="paypal">
+              <span class="payment-label">PayPal</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="klarna">
+              <span class="payment-label">Klarna</span>
+            </label>
+            <label class="payment-option">
+              <input type="radio" name="payment_method" value="swish">
+              <span class="payment-label">Swish</span>
+            </label>
+          </div>
+
+          <div class="payment-inputs">
+            <input type="text" name="card_number" placeholder="Card Number">
+            <div class="input-row">
+              <input class="inputrow" name="card_expiry" type="text" placeholder="MM/YY">
+              <input class="inputrow" name="card_cvv" type="text" placeholder="CVV">
+            </div>
+            <input type="text" name="card_name" placeholder="Name on Card">
+          </div>
+
+          <div class="terms">
+            <label class="agree">
+              <input type="checkbox" id="agreeTerms" required>
+              I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>.
+            </label>
+          </div>
+
+          <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
+        </form>
+      </section>
+
+      <section class="checkout-bottom">
+        <h2>Cancellation Policy</h2>
+        <ul>
+          <li>Free cancellation up to 24 hours before start time.</li>
+          <li>Same-day bookings are non-refundable once confirmed.</li>
+        </ul>
+      </section>
+    </div>
+
+    <aside class="card invoice-card">
+      <div class="card-header">
+        <h2>Helpful Tips</h2>
       </div>
-
-      <button class="save">Save Payment Method</button>
-    </form>
-
-  </section>
-
-  <!-- ⭐ FINAL CONFIRM -->
-  <section class="checkout-bottom">
-    <h2>Cancellation Policy</h2>
-    <ul>
-      <li>Free cancellation up to 24 hours before start time.</li>
-      <li>Same-day bookings are non-refundable once confirmed.</li>
-    </ul>
-
-    <label class="agree">
-      <input type="checkbox"> I agree to the
-      <a href="#">terms and conditions</a> and
-      <a href="#">privacy policy</a>.
-    </label>
-
-<form method="POST">
-  {% csrf_token %}
-  <input type="hidden" name="form_type" value="payment">
-
-  <button class="confirm">Confirm Payment</button>
-</form>
-  </section>
+      <hr>
+      <p class="summary-note">Review your booking details and invoice in the summary card above.</p>
+      <p class="summary-note">ROT and discount changes will update the total immediately.</p>
+    </aside>
+  </div>
 
 </div>
+{% include "home/includes/footer.html" %}
+
+<script>
+  (function () {
+    var checkbox = document.getElementById("agreeTerms");
+    var button = document.getElementById("confirmPayment");
+    if (!checkbox || !button) return;
+    var toggle = function () {
+      button.disabled = !checkbox.checked;
+    };
+    checkbox.addEventListener("change", toggle);
+    toggle();
+  })();
+</script>
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

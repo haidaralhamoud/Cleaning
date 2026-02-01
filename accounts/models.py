@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
+import uuid
 
 
 User = settings.AUTH_USER_MODEL
@@ -367,6 +368,111 @@ class PaymentMethod(models.Model):
 
 
 
+def _invoice_number():
+    return f"INV-{timezone.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+
+
+class Invoice(models.Model):
+    STATUS_CHOICES = [
+        ("PAID", "Paid"),
+        ("PENDING", "Pending"),
+        ("FAILED", "Failed"),
+        ("REFUNDED", "Refunded"),
+    ]
+    BOOKING_TYPE_CHOICES = [
+        ("private", "Private"),
+        ("business", "Business"),
+    ]
+
+    customer = models.ForeignKey(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="invoices",
+    )
+    invoice_number = models.CharField(max_length=32, unique=True, default=_invoice_number)
+    booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, blank=True)
+    booking_id = models.PositiveIntegerField(null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    currency = models.CharField(max_length=5, default="USD")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
+    payment_method = models.ForeignKey(
+        PaymentMethod,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="invoices",
+    )
+    issued_at = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateField(null=True, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    note = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["-issued_at"]
+
+    def __str__(self):
+        return f"{self.invoice_number} ({self.customer})"
+
+
+class Subscription(models.Model):
+    STATUS_CHOICES = [
+        ("active", "Active"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    customer = models.OneToOneField(
+        Customer,
+        on_delete=models.CASCADE,
+        related_name="subscription"
+    )
+
+    plan_name = models.CharField(max_length=120, default="Weekly Cleaning")
+    duration_hours = models.PositiveSmallIntegerField(default=2)
+    price_per_session = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        default=0
+    )
+    frequency = models.CharField(
+        max_length=20,
+        default="weekly"
+    )
+
+    next_billing_date = models.DateField(null=True, blank=True)
+    next_service_date = models.DateField(null=True, blank=True)
+
+    skip_next_service = models.BooleanField(default=False)
+    is_paused = models.BooleanField(default=False)
+    pause_until = models.DateField(null=True, blank=True)
+    resume_on = models.DateField(null=True, blank=True)
+
+    payment_method = models.ForeignKey(
+        "PaymentMethod",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="subscriptions"
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default="active"
+    )
+    cancellation_reason = models.CharField(max_length=255, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def display_title(self):
+        price = f"{self.price_per_session:.0f}" if self.price_per_session else "0"
+        return f"{self.plan_name} - {self.duration_hours} hrs ${price}/session"
+
+    def __str__(self):
+        return f"{self.customer} | {self.plan_name}"
+
+
+
 class CommunicationPreference(models.Model):
     FREQUENCY_CHOICES = [
         ("weekly", "Weekly"),
@@ -580,11 +686,84 @@ class CustomerPreferences(models.Model):
     # ===== Assembly & Renovations =====
     assembly_services = models.JSONField(default=list, blank=True)
 
+    # ===== Custom Notes =====
+    products_custom = models.CharField(max_length=255, blank=True, null=True)
+    frequency_custom = models.CharField(max_length=255, blank=True, null=True)
+    priorities_custom = models.CharField(max_length=255, blank=True, null=True)
+
     # ===== Meta =====
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Preferences for {self.customer}"
+
+
+class BookingRequestFix(models.Model):
+    BOOKING_TYPE_CHOICES = [
+        ("private", "Private"),
+        ("business", "Business"),
+    ]
+
+    STATUS_CHOICES = [
+        ("OPEN", "Open"),
+        ("IN_REVIEW", "In Review"),
+        ("RESOLVED", "Resolved"),
+    ]
+
+    booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES)
+    booking_id = models.PositiveIntegerField()
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="OPEN")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"RequestFix #{self.id} ({self.booking_type}:{self.booking_id})"
+
+
+class BookingRequestFixAttachment(models.Model):
+    request_fix = models.ForeignKey(
+        BookingRequestFix,
+        related_name="attachments",
+        on_delete=models.CASCADE,
+    )
+    file = models.ImageField(upload_to="request_fixes/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"RequestFixAttachment #{self.id}"
+
+
+class CustomerNotification(models.Model):
+    NOTIFICATION_TYPES = [
+        ("request_fix", "Request Fix"),
+        ("approve_work", "Approve Work"),
+        ("incident", "Incident"),
+        ("general", "General"),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=120)
+    body = models.TextField(blank=True)
+    notification_type = models.CharField(
+        max_length=20,
+        choices=NOTIFICATION_TYPES,
+        default="general",
+    )
+    booking_type = models.CharField(max_length=10, blank=True)
+    booking_id = models.PositiveIntegerField(null=True, blank=True)
+    request_fix = models.ForeignKey(
+        BookingRequestFix,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="notifications",
+    )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.title} ({self.user})"
 
 
 
@@ -704,67 +883,181 @@ class DiscountCode(models.Model):
 from django.db import models
 from django.conf import settings
 
+# ======================================================
+# ⭐ Service Review (Rating)
+# ======================================================
 class ServiceReview(models.Model):
     BOOKING_TYPE_CHOICES = [
         ("private", "Private"),
         ("business", "Business"),
     ]
 
-    booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES)
+    # ---- Booking Reference ----
+    booking_type = models.CharField(
+        max_length=10,
+        choices=BOOKING_TYPE_CHOICES
+    )
     booking_id = models.PositiveIntegerField()
 
-    # لتجميع تقييمات نفس "نوع الخدمة"
-    service_title = models.CharField(max_length=255)   # مثل "Deep Cleaning"
-    service_slug = models.CharField(max_length=255, blank=True, null=True)  # optional
+    # ---- Service Info ----
+    service_title = models.CharField(
+        max_length=255,
+        help_text="Service name (e.g. Deep Cleaning)"
+    )
+    service_slug = models.SlugField(
+        max_length=255,
+        blank=True,
+        null=True
+    )
 
+    # ---- Relations ----
     customer = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.CASCADE,
         related_name="service_reviews"
     )
 
     provider = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+        User,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name="received_service_reviews"
     )
 
-    # Overall 1..5
+    # ---- Ratings (1..5) ----
     overall_rating = models.PositiveSmallIntegerField()
-
-    # 4 categories 1..5
     punctuality = models.PositiveSmallIntegerField()
     quality = models.PositiveSmallIntegerField()
     professionalism = models.PositiveSmallIntegerField()
     value = models.PositiveSmallIntegerField()
 
-    feedback = models.TextField(blank=True)
+    # ---- Optional Feedback ----
+    feedback = models.TextField(
+        blank=True
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
+    highlights = models.JSONField(
+        default=list,
+        blank=True,
+        help_text="['On time', 'Friendly', 'Very thorough']"
+    )
     class Meta:
+        ordering = ["-created_at"]
         constraints = [
             models.UniqueConstraint(
                 fields=["customer", "booking_type", "booking_id"],
                 name="unique_review_per_booking_per_customer"
             )
         ]
-        ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.service_title} | {self.overall_rating}★"
 
+    @property
+    def average_score(self):
+        return round(
+            (
+                self.punctuality +
+                self.quality +
+                self.professionalism +
+                self.value
+            ) / 4,
+            1
+        )
 
+
+# ======================================================
+# 💬 Service Comment (Text Only)
+# ======================================================
 class ServiceComment(models.Model):
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
-    booking_type = models.CharField(max_length=20)
+
+    customer = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="service_comments"
+    )
+
+    booking_type = models.CharField(
+        max_length=20
+    )
     booking_id = models.PositiveIntegerField()
+
     text = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
         unique_together = ("customer", "booking_type", "booking_id")
+        ordering = ["-created_at"]
 
-    
+    def __str__(self):
+        return f"Comment by {self.customer} on {self.booking_type} #{self.booking_id}"
+
+
+
+# accounts/models.py
+
+class ProviderProfile(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="provider_profile"
+    )
+
+    photo = models.ImageField(
+        upload_to="providers/",
+        blank=True,
+        null=True
+    )
+
+    bio = models.TextField(blank=True)
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Provider Profile - {self.user}"
+
+
+class ProviderRatingSummary(models.Model):
+    provider = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="rating_summary"
+    )
+
+    avg_rating = models.FloatField(default=0)
+    total_reviews = models.PositiveIntegerField(default=0)
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class ProviderAdminMessage(models.Model):
+    provider = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="admin_messages",
+    )
+    title = models.CharField(max_length=120)
+    body = models.TextField(blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="provider_admin_messages_created",
+    )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.title} -> {self.provider}"

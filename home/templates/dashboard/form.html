@@ -1,0 +1,591 @@
+{% extends "dashboard/base.html" %}
+{% load dashboard_extras %}
+{% block title %}{{ item.label }}{% endblock %}
+{% block page_title %}{{ item.label }}{% endblock %}
+{% block content %}
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="mb-3">{% if mode == "edit" %}Edit{% else %}Add{% endif %} {{ item.label|slice:":-1" }}</h5>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if item.slug == "date-surcharges" %}
+          <div class="mb-3">
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-sm btn-outline-primary"
+                 href="{% url 'home:dashboard_date_surcharge_quick_weekend' %}?amount=10&type=percent">
+                Quick add: Sat + Sun +10%
+              </a>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-ds-prefill="Sat">
+                Prefill Saturday +10%
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-ds-prefill="Sun">
+                Prefill Sunday +10%
+              </button>
+            </div>
+            <div class="form-text">You can still add specific dates using “Date” rule type.</div>
+          </div>
+        {% endif %}
+        {% if item.slug == "schedule-rules" %}
+          <div class="mb-3">
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="weekly">
+                Weekly -15%
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="biweekly">
+                Every 2 weeks -10%
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="monthly">
+                Monthly -5%
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-sr-prefill="Sat">
+                Saturday +10%
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary" data-sr-prefill="Sun">
+                Sunday +10%
+              </button>
+            </div>
+            <div class="form-text">
+              Use Rule type to decide if the value is a frequency or a day.
+            </div>
+          </div>
+        {% endif %}
+        <div class="row">
+          {% for field in form %}
+            {% if item.slug == "private-addons" and field.name == "price_per_unit" %}
+              <div class="d-none">{{ field }}</div>
+            {% elif field.name == "questions" %}
+              {% if item.slug == "private-services" or item.slug == "private-addons" %}
+              <div class="col-12 mb-3">
+                <label class="form-label">Questions</label>
+                <div class="qs-builder" data-questions-builder data-field-id="{{ field.id_for_label }}">
+                  <div class="qs-toolbar">
+                    <div class="qs-title">Build questions without JSON</div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" data-q-add>
+                      <i class="fa-solid fa-plus"></i> Add Question
+                    </button>
+                  </div>
+                  <div class="qs-list" data-q-list></div>
+                  <div class="form-text">
+                    Add the question, select a type, and (if needed) add options with a price for each answer.
+                  </div>
+                  <div class="qs-warning text-danger small d-none" data-q-warning></div>
+                </div>
+                <div class="d-none">{{ field }}</div>
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+              {% else %}
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.help_text %}
+                    <div class="form-text">{{ field.help_text }}</div>
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <div class="text-danger small">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% if emoji_datalist %}
+          <datalist id="emoji-options">
+            {% for e in emoji_datalist %}
+              <option value="{{ e }}"></option>
+            {% endfor %}
+          </datalist>
+        {% endif %}
+        {% if item.slug == "service-cards" or item.slug == "service-content" %}
+          <div id="serviceCardIconPicker" class="mt-2 d-flex flex-wrap gap-2"></div>
+        {% endif %}
+        {# Removed auto-generated preview: builder + saved form_html is enough #}
+        {% if json_readonly %}
+          <div class="mt-3 json-read">
+            <h6>Details (read-only)</h6>
+            {% for key, value in json_readonly.items %}
+              <div class="mb-3 json-block">
+                <div class="json-title">
+                  {% if key == "selected_services" %}Selected services
+                  {% elif key == "service_answers" %}Service answers
+                  {% elif key == "addons_selected" %}Add-ons selected
+                  {% elif key == "service_schedules" %}Service schedules
+                  {% elif key == "day_work_best" %}Preferred days
+                  {% elif key == "pricing_details" %}Pricing details
+                  {% else %}{{ key|capfirst }}
+                  {% endif %}
+                </div>
+                <div class="json-card">
+                  {% include "dashboard/json_readable.html" with value=value %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if item.slug == "private-services" and object %}
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Private Add-ons for this Service</h6>
+              <a class="btn btn-sm btn-outline-primary"
+                 href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ object.pk }}">
+                <i class="fa-solid fa-plus"></i> Add Add-on
+              </a>
+            </div>
+            {% if addons_for_service and addons_for_service|length %}
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Slug</th>
+                      <th>Price</th>
+                      <th>Price / Unit</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for addon in addons_for_service %}
+                      <tr>
+                        <td>{{ addon.title }}</td>
+                        <td>{{ addon.slug }}</td>
+                        <td>{{ addon.price }}</td>
+                        <td>{{ addon.price_per_unit }}</td>
+                        <td class="text-end">
+                          <a class="btn btn-sm btn-outline-secondary"
+                             href="{% url 'home:dashboard_model_edit' 'private-addons' addon.pk %}">
+                            Edit
+                          </a>
+                          <a class="btn btn-sm btn-outline-danger"
+                             href="{% url 'home:dashboard_model_delete' 'private-addons' addon.pk %}">
+                            Delete
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-muted small">No add-ons yet for this service.</div>
+            {% endif %}
+          </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary" type="submit">Save</button>
+          <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if item.slug == "service-cards" or item.slug == "service-content" %}
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const iconInput = document.querySelector('input[name="icon"]');
+      const picker = document.getElementById("serviceCardIconPicker");
+      if (!iconInput || !picker) return;
+
+      iconInput.readOnly = true;
+
+      const icons = [
+        "✅","✔️","⭐","✨","⚠️","❗","❌","ℹ️","🧹","🧽",
+        "🧼","🧴","🧺","🧤","🪣","🪟","🚿","🧴","🛁","🏠"
+      ];
+
+      const setActive = (value) => {
+        iconInput.value = value;
+        picker.querySelectorAll("button").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.value === value);
+        });
+      };
+
+      icons.forEach((name) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn-outline-primary btn-sm d-inline-flex align-items-center justify-content-center";
+        btn.style.width = "42px";
+        btn.style.height = "42px";
+        btn.dataset.value = name;
+        btn.textContent = name;
+        btn.addEventListener("click", () => setActive(name));
+        picker.appendChild(btn);
+      });
+
+      if (iconInput.value) {
+        setActive(iconInput.value.trim());
+      }
+    });
+  </script>
+  {% endif %}
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const builder = document.querySelector("[data-questions-builder]");
+      if (!builder) return;
+
+      const textarea = document.getElementById(builder.dataset.fieldId);
+      const list = builder.querySelector("[data-q-list]");
+      const addBtn = builder.querySelector("[data-q-add]");
+      const warning = builder.querySelector("[data-q-warning]");
+      const form = builder.closest("form");
+
+      const TYPE_OPTIONS = [
+        { value: "select", label: "Select (single)" },
+        { value: "multiselect", label: "Select (multiple)" },
+        { value: "radio", label: "Radio" },
+        { value: "checkbox", label: "Checkbox" },
+        { value: "text", label: "Text" },
+        { value: "textarea", label: "Textarea" },
+        { value: "number", label: "Number" },
+        { value: "date", label: "Date" },
+        { value: "time", label: "Time" },
+        { value: "yes_no", label: "Yes / No" }
+      ];
+
+      const TYPES_WITH_OPTIONS = new Set(["select", "multiselect", "radio", "checkbox", "yes_no"]);
+
+      const escapeHtml = (value) =>
+        String(value || "").replace(/[&<>"']/g, (m) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          "\"": "&quot;",
+          "'": "&#039;"
+        }[m]));
+
+      const nextKey = () => {
+        let i = 1;
+        while (list.querySelector(`[data-q-key][value="q${i}"]`)) {
+          i += 1;
+        }
+        return `q${i}`;
+      };
+
+      const buildOptions = (opts = []) => opts;
+
+      const addOptionRow = (card, data = {}) => {
+        const listEl = card.querySelector("[data-q-options-list]");
+        const row = document.createElement("div");
+        row.className = "qs-option-row";
+        const label = data.label || "";
+        const price = data.price !== undefined && data.price !== null ? data.price : "";
+        const duration = data.duration !== undefined && data.duration !== null ? data.duration : "";
+        row.innerHTML = `
+          <input type="text" class="form-control" placeholder="Option label" data-q-opt-label value="${escapeHtml(label)}">
+          <input type="number" step="0.01" class="form-control" placeholder="Price" data-q-opt-price value="${escapeHtml(price)}">
+          <input type="number" step="1" min="0" class="form-control" placeholder="Duration (min)" data-q-opt-duration value="${escapeHtml(duration)}">
+          <button type="button" class="btn btn-sm btn-outline-danger" data-q-opt-remove>
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+        row.querySelector("[data-q-opt-remove]").addEventListener("click", () => {
+          row.remove();
+          syncToTextarea();
+        });
+        row.querySelectorAll("input").forEach((el) => {
+          el.addEventListener("input", syncToTextarea);
+        });
+        listEl.appendChild(row);
+      };
+
+      const addQuestion = (data = {}) => {
+        const key = data.key || nextKey();
+        const label = data.label || "";
+        const type = data.type || "select";
+        const options = Array.isArray(data.options) ? data.options : [];
+
+        const wrapper = document.createElement("div");
+        wrapper.className = "qs-card";
+        wrapper.innerHTML = `
+          <div class="qs-card-head">
+            <div class="qs-card-title">Question</div>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-q-remove>
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div class="qs-grid">
+            <div>
+              <label class="form-label">Question key</label>
+              <input type="text" class="form-control" data-q-key value="${escapeHtml(key)}" placeholder="q1" />
+            </div>
+            <div>
+              <label class="form-label">Type</label>
+              <select class="form-select" data-q-type>
+                ${TYPE_OPTIONS.map(opt =>
+                  `<option value="${opt.value}" ${opt.value === type ? "selected" : ""}>${opt.label}</option>`
+                ).join("")}
+              </select>
+            </div>
+          </div>
+          <div class="mt-2">
+            <label class="form-label">Label</label>
+            <input type="text" class="form-control" data-q-label value="${escapeHtml(label)}" />
+          </div>
+          <div class="mt-2" data-q-options-wrap>
+            <div class="qs-options-head">
+              <label class="form-label mb-0">Options + Price + Duration</label>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-q-add-option>
+                <i class="fa-solid fa-plus"></i> Add Option
+              </button>
+            </div>
+            <div class="qs-options-list" data-q-options-list></div>
+            <div class="form-text">Each option can have its own price change.</div>
+          </div>
+        `;
+
+        list.appendChild(wrapper);
+        toggleOptions(wrapper);
+        bindCardEvents(wrapper);
+        const addOptBtn = wrapper.querySelector("[data-q-add-option]");
+        addOptBtn.addEventListener("click", () => {
+          addOptionRow(wrapper);
+          syncToTextarea();
+        });
+        buildOptions(options).forEach((opt) => {
+          if (opt && typeof opt === "object") {
+            addOptionRow(wrapper, {
+              label: opt.label || "",
+              price: opt.price ?? "",
+              duration: opt.duration ?? "",
+            });
+          } else {
+            addOptionRow(wrapper, { label: opt });
+          }
+        });
+        if (!options.length && type === "yes_no") {
+          addOptionRow(wrapper, { label: "Yes", price: "", duration: "" });
+          addOptionRow(wrapper, { label: "No", price: "", duration: "" });
+        }
+        syncToTextarea();
+      };
+
+      const toggleOptions = (card) => {
+        const type = card.querySelector("[data-q-type]").value;
+        const wrap = card.querySelector("[data-q-options-wrap]");
+        wrap.classList.toggle("d-none", !TYPES_WITH_OPTIONS.has(type));
+        if (type === "yes_no") {
+          const listEl = card.querySelector("[data-q-options-list]");
+          if (!listEl.querySelector("[data-q-opt-label]")) {
+            addOptionRow(card, { label: "Yes", price: "" });
+            addOptionRow(card, { label: "No", price: "" });
+          }
+        }
+      };
+
+      const bindCardEvents = (card) => {
+        card.querySelector("[data-q-remove]").addEventListener("click", () => {
+          card.remove();
+          syncToTextarea();
+        });
+        card.querySelectorAll("input, textarea, select").forEach((el) => {
+          el.addEventListener("input", syncToTextarea);
+          el.addEventListener("change", () => {
+            if (el.matches("[data-q-type]")) {
+              toggleOptions(card);
+            }
+            syncToTextarea();
+          });
+        });
+      };
+
+      const syncToTextarea = () => {
+        const data = {};
+        list.querySelectorAll(".qs-card").forEach((card) => {
+          const key = card.querySelector("[data-q-key]").value.trim();
+          if (!key) return;
+          const label = card.querySelector("[data-q-label]").value.trim();
+          const type = card.querySelector("[data-q-type]").value;
+          const entry = { label, type };
+          if (TYPES_WITH_OPTIONS.has(type)) {
+            const optionRows = card.querySelectorAll("[data-q-options-list] .qs-option-row");
+            const options = [];
+            optionRows.forEach((row) => {
+              const optLabel = row.querySelector("[data-q-opt-label]").value.trim();
+              const optPriceRaw = row.querySelector("[data-q-opt-price]").value.trim();
+              const optDurationRaw = row.querySelector("[data-q-opt-duration]").value.trim();
+              if (!optLabel) return;
+              const opt = { label: optLabel };
+              if (optPriceRaw !== "") {
+                const parsed = Number(optPriceRaw);
+                opt.price = Number.isFinite(parsed) ? parsed : 0;
+              } else {
+                opt.price = 0;
+              }
+              if (optDurationRaw !== "") {
+                const parsedDuration = Number(optDurationRaw);
+                opt.duration = Number.isFinite(parsedDuration) ? parsedDuration : 0;
+              } else {
+                opt.duration = 0;
+              }
+              options.push(opt);
+            });
+            if (options.length) {
+              entry.options = options;
+            } else {
+              entry.options = [];
+            }
+          }
+          data[key] = entry;
+        });
+        textarea.value = Object.keys(data).length ? JSON.stringify(data, null, 2) : "";
+      };
+
+      const validate = () => {
+        warning.classList.add("d-none");
+        warning.textContent = "";
+        const cards = list.querySelectorAll(".qs-card");
+        const keys = new Set();
+        for (const card of cards) {
+          const key = card.querySelector("[data-q-key]").value.trim();
+          const label = card.querySelector("[data-q-label]").value.trim();
+          if (!key || !label) {
+            warning.textContent = "Each question needs a key and label.";
+            warning.classList.remove("d-none");
+            return false;
+          }
+          if (keys.has(key)) {
+            warning.textContent = "Question keys must be unique.";
+            warning.classList.remove("d-none");
+            return false;
+          }
+          keys.add(key);
+        }
+        return true;
+      };
+
+      const loadInitial = () => {
+        const raw = textarea.value.trim();
+        if (!raw) return;
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === "object") {
+            Object.entries(parsed).forEach(([key, value]) => {
+              addQuestion({
+                key,
+                label: value && value.label ? value.label : "",
+                type: value && value.type ? value.type : "select",
+                options: value && Array.isArray(value.options) ? value.options : []
+              });
+            });
+          }
+        } catch (err) {
+          warning.textContent = "Existing JSON is invalid. Please re-save questions.";
+          warning.classList.remove("d-none");
+        }
+      };
+
+      addBtn.addEventListener("click", () => addQuestion());
+      loadInitial();
+
+      form.addEventListener("submit", (e) => {
+        syncToTextarea();
+        if (!validate()) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const ruleType = document.getElementById("id_rule_type");
+      if (!ruleType) return;
+
+      const weekday = document.getElementById("id_weekday");
+      const date = document.getElementById("id_date");
+      const amount = document.getElementById("id_amount");
+      const surchargeType = document.getElementById("id_surcharge_type");
+
+      const rowFor = (el) => el ? el.closest(".col-md-6") || el.closest(".col-12") || el.parentElement : null;
+      const weekdayRow = rowFor(weekday);
+      const dateRow = rowFor(date);
+
+      const toggleFields = () => {
+        const showWeekday = ruleType.value === "weekday";
+        const showDate = ruleType.value === "date";
+        if (weekdayRow) weekdayRow.style.display = showWeekday ? "" : "none";
+        if (dateRow) dateRow.style.display = showDate ? "" : "none";
+      };
+
+      toggleFields();
+      ruleType.addEventListener("change", toggleFields);
+
+      document.querySelectorAll("[data-ds-prefill]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const day = btn.getAttribute("data-ds-prefill");
+          if (ruleType) ruleType.value = "weekday";
+          if (weekday) weekday.value = day;
+          if (surchargeType) surchargeType.value = "percent";
+          if (amount && !amount.value) amount.value = "10";
+          toggleFields();
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const keyEl = document.getElementById("id_key");
+      const valueEl = document.getElementById("id_value");
+      if (!keyEl || !valueEl) return;
+
+      const optionsByKey = {
+        frequency_type: ["weekly", "biweekly", "monthly"],
+        day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      };
+
+      let datalist = document.getElementById("scheduleRuleValues");
+      if (!datalist) {
+        datalist = document.createElement("datalist");
+        datalist.id = "scheduleRuleValues";
+        valueEl.setAttribute("list", datalist.id);
+        valueEl.after(datalist);
+      }
+
+      const updateDatalist = () => {
+        const key = keyEl.value;
+        const values = optionsByKey[key] || [];
+        datalist.innerHTML = values.map((v) => `<option value="${v}"></option>`).join("");
+        if (key === "frequency_type") {
+          valueEl.placeholder = "weekly / biweekly / monthly";
+        } else if (key === "day") {
+          valueEl.placeholder = "Mon, Tue, Wed...";
+        } else {
+          valueEl.placeholder = "Type a value";
+        }
+      };
+
+      updateDatalist();
+      keyEl.addEventListener("change", updateDatalist);
+
+      const priceEl = document.getElementById("id_price_change");
+      document.querySelectorAll("[data-sr-prefill]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const val = btn.getAttribute("data-sr-prefill");
+          if (["weekly", "biweekly", "monthly"].includes(val)) {
+            keyEl.value = "frequency_type";
+          } else {
+            keyEl.value = "day";
+          }
+          updateDatalist();
+          valueEl.value = val;
+          if (priceEl && !priceEl.value) {
+            if (val === "weekly") priceEl.value = "-15";
+            if (val === "biweekly") priceEl.value = "-10";
+            if (val === "monthly") priceEl.value = "-5";
+            if (val === "Sat" || val === "Sun") priceEl.value = "10";
+          }
+        });
+      });
+    });
+  </script>
+{% endblock %}

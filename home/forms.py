@@ -1,5 +1,5 @@
 from django import forms
-from .models import Contact ,Application, Job , BusinessBooking,NotAvailableZipRequest,CallRequest,EmailRequest
+from .models import Contact ,Application, Job , BusinessBooking,NotAvailableZipRequest,CallRequest,EmailRequest, FeedbackRequest
 
 class ContactForm(forms.ModelForm):
     class Meta:
@@ -253,3 +253,26 @@ class EmailRequestForm(forms.ModelForm):
     class Meta:
         model = EmailRequest
         fields = ["email_from", "subject", "message", "attachment"]        
+
+
+class FeedbackRequestForm(forms.ModelForm):
+    class Meta:
+        model = FeedbackRequest
+        fields = ["customer_name", "feedback_text", "rating", "service_type", "request_details"]
+        widgets = {
+            "customer_name": forms.TextInput(attrs={
+                "placeholder": "Your name",
+            }),
+            "feedback_text": forms.Textarea(attrs={
+                "placeholder": "Share your experience, suggestions, or feedback...",
+                "rows": 5,
+            }),
+            "rating": forms.Select(),
+            "service_type": forms.TextInput(attrs={
+                "placeholder": "Service type",
+            }),
+            "request_details": forms.Textarea(attrs={
+                "placeholder": "Describe your request",
+                "rows": 4,
+            }),
+        }

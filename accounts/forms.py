@@ -20,6 +20,12 @@ class CustomerForm(forms.ModelForm):
     custom_addons = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     accepted_terms = forms.BooleanField()
+
+    region = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))
+    contact_name = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))
+    contact_phone = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))
+    entry_code = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))
+    parking_notes = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))
     
     class Meta:
         model = Customer
@@ -28,7 +34,7 @@ class CustomerForm(forms.ModelForm):
             "phone", "email", "country", "city",
             "postal_code", "house_num", "full_address",
             "desired_services", "custom_addons", "optional_note",
-            "preferred_language", "profile_photo", "password"
+            "preferred_language", "profile_photo", "password", "accepted_terms"
         ]
 
     def clean(self):
@@ -56,6 +62,7 @@ class CustomerBasicInfoForm(forms.ModelForm):
     class Meta:
         model = Customer
         fields = [
+            "profile_photo",
             "first_name",
             "last_name",
             "email",
@@ -69,6 +76,7 @@ class CustomerBasicInfoForm(forms.ModelForm):
         ]
 
         widgets = {
+            "profile_photo": forms.FileInput(attrs={"class": "form-control file-input"}),
             "first_name": forms.TextInput(attrs={"class": "form-control"}),
             "last_name": forms.TextInput(attrs={"class": "form-control"}),
             "email": forms.EmailInput(attrs={"class": "form-control"}),

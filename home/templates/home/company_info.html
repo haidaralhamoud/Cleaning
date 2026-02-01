@@ -7,92 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Company Info | Hembla</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 
   <link rel="stylesheet" href="{% static 'css/company_info.css' %}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    *, *:before, *:after {
-  box-sizing: border-box;
-}
-
-.steps {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 25px 0;
-}
-
-.step {
-    padding: 8px 16px;
-    border: 1px solid #00a3c8;
-    border-radius: 18px;
-    color: #00a3c8;
-    font-weight: 600;
-    background: #fff;
-}
-
-.step.active {
-    background: #00a3c8;
-    color: #fff;
-}
-
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 18px;
-    background: #f1f5f7;
-    color: #009dbe;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    border: 2px solid #d9e4e8;
-    transition: 0.25s ease;
-}
-
-.back-btn:hover {
-    background: #e7f4f7;
-    border-color: #b8d7df;
-    color: #007c96;
-}
-
-.back-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: currentColor;
-}
-.form-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 25px;
-}
-
-
-  </style>
 </head>
 <body>
 <!-- ✅ HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <!-- زر المنيو -->
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="{% url 'home:contact' %}">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
 
   <div class="container">
 <div class="steps">
@@ -145,19 +67,24 @@
     {{ form.phone }}
   </div>
 <div class="form-actions">
+  <div class="action-left">
     <a onclick="window.history.back();" class="back-btn">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Back
+      <span class="back-icon">←</span>
+      Back
     </a>
-
-    <button type="submit" class="next-btn">Next</button>
+  </div>
+  <div class="action-right">
+    <button type="submit" class="next-btn">
+      Next
+      <span class="next-icon">→</span>
+    </button>
+  </div>
 </div>
 
 </form>
 
   </div>
 
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

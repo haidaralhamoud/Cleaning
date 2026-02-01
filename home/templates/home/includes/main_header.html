@@ -1,0 +1,64 @@
+{% load static %}
+<header class="main-header">
+  <div class="logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo">
+  </div>
+
+  <div class="menu-toggle" id="menu-toggle">☰</div>
+
+  <nav class="nav-links" id="nav-links">
+    <a href="{% url 'home:home' %}">HOME</a>
+    <a href="{% url 'home:about' %}">ABOUT</a>
+    <div class="nav-dropdown">
+      <a href="#" class="dropdown-toggle">SERVICES ▾</a>
+      <div class="dropdown-menu">
+        <a href="{% url 'home:business_all_services' %}">Business Services</a>
+        <a href="{% url 'home:all_services_private' %}">Private Services</a>
+      </div>
+    </div>
+    <a href="{% url 'home:contact' %}">CONTACT</a>
+    <a href="{% url 'home:feedback_request' %}" class="nav-feedback">
+      FEEDBACK
+      <span class="nav-dot" aria-hidden="true"></span>
+    </a>
+  </nav>
+
+  <a href="{% url 'home:private_cart' %}" class="cart-link">
+    <span class="cart-icon">🛒</span>
+    <span>Cart</span>
+    <span class="cart-count" id="cartCount" data-url="{% url 'home:private_cart_count' %}">0</span>
+  </a>
+
+  <div class="auth-buttons">
+    {% if user.is_authenticated %}
+      {% if user.is_superuser %}
+        <a href="{% url 'home:dashboard_home' %}" class="btn-auth">
+          Admin Dashboard
+        </a>
+      {% elif user.is_staff %}
+        <a href="{% url 'accounts:provider_inbox' %}" class="btn-auth" style="position:relative;">
+          Messages
+          {% if provider_unread_messages %}
+            <span class="pill-badge" style="position:absolute;top:-6px;right:-6px;">
+              {{ provider_unread_messages }}
+            </span>
+          {% endif %}
+        </a>
+        <a href="{% url 'accounts:provider_profile' %}" class="btn-auth">
+          My Profile
+        </a>
+      {% else %}
+        <a href="{% url 'accounts:customer_profile_view' %}" class="btn-auth">
+          My Profile
+        </a>
+      {% endif %}
+      <form method="POST" action="{% url 'accounts:logout' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="btn-auth logout">Log out</button>
+      </form>
+    {% else %}
+      <a href="{% url 'accounts:sign_up' %}" class="btn-auth outline">Sign Up</a>
+      <a href="{% url 'login' %}" class="btn-auth">Sign In</a>
+    {% endif %}
+  </div>
+</header>

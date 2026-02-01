@@ -28,7 +28,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = '/accounts/customer_profile_view'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Application definition
@@ -109,6 +109,7 @@ TEMPLATES = [
 ]
 TEMPLATES[0]["OPTIONS"]["context_processors"] += [
     "accounts.context_processors.unread_messages",
+    "accounts.context_processors.sidebar_customer",
 ]
 WSGI_APPLICATION = 'PRO.wsgi.application'
 

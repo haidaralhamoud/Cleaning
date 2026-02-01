@@ -6,263 +6,84 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Available Services</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   <link rel="stylesheet" href="{% static 'css/business_services_needed.css' %}">
-<style>
-     *, *:before, *:after {
-    box-sizing: border-box;
-    }
-    
-    .steps {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    margin: 25px 0;
-}
-
-.step {
-    padding: 8px 16px;
-    border: 1px solid #00a3c8;
-    border-radius: 18px;
-    color: #00a3c8;
-    font-weight: 600;
-    background: #fff;
-}
-
-.step.active {
-    background: #00a3c8;
-    color: #fff;
-}
-.back-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 18px;
-    background: #f1f5f7;
-    color: #009dbe;
-    border-radius: 8px;
-    font-weight: 600;
-    text-decoration: none;
-    border: 2px solid #d9e4e8;
-    transition: 0.25s ease;
-}
-
-.back-btn:hover {
-    background: #e7f4f7;
-    border-color: #b8d7df;
-    color: #007c96;
-}
-
-.back-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke: currentColor;
-}
-.next-btn {
-  display: block;
-  background-color: #039fc8;
-  color: #fff;
-  font-family: "Vesper Libre", serif;
-  font-size: 18px;
-  font-weight: 700;
-  border: none;
-  border-radius: 12px;
-  padding: 12px 25px;
-  margin-left: auto;
-  cursor: pointer;
-  transition: 0.3s;
-}
-
-</style>
+  <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
 
 <body>
-<!-- ✅ HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
+  <!-- Header -->
+  {% include "home/includes/main_header.html" %}
 
-  <!-- زر المنيو -->
-  <div class="menu-toggle" id="menu-toggle">☰</div>
+  <br>
+  <br>
+  <br>
+  <br>
 
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="{% url 'home:contact' %}">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
-  </div>
-</header>
-
-<br>
-<br>
-<br>
-<br>
-<div class="services-needed">
-<div class="steps">
-    {% for i in range_total_steps %}
+  <div class="services-needed">
+    <div class="steps">
+      {% for i in range_total_steps %}
         <div class="step {% if step == i %}active{% endif %}">
-            Step {{ i }}
+          Step {{ i }}
         </div>
-    {% endfor %}
-</div>
+      {% endfor %}
+    </div>
 
+    <div class="title">
+      <span class="icon" aria-hidden="true">&#129532;</span>
+      <h2>Available Services</h2>
+    </div>
 
-  <!-- Title -->
-  <div class="title">
-    <span class="icon">🧹</span>
-    <h2>Available services</h2>
-  </div>
-
-  <!-- Grid -->
-  <div class="services-grid">
-
-{% for s in services %}
-<div class="service-card" 
-     data-id="{{ s.id }}" 
-     data-name="{{ s.title }}">
-
-  <!-- Checkmark -->
-  <div class="checkmark"></div>
-
-  <!-- Icon -->
-  <img class="service-icon" src="{{ s.icon.url }}" alt="{{ s.title }}">
-
-  <h3>{{ s.title }}</h3>
-  <p>{{ s.description_service_aviable }}</p>
-</div>
-{% endfor %}
-
-  </div>
-
-
-
-  <!-- Buttons -->
-  <div class="form-actions buttons">
-<a onclick="window.history.back();" class="back-btn">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-    Back
-</a>
-    <form method="POST" id="servicesForm">
-    {% csrf_token %}
-    <input type="hidden" name="selected_services" id="selectedServicesInput">
-    <button type="submit" class="next-btn">Continue</button>
-</form>
-
-  </div>
-
-</div>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
-
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
+    <div class="services-grid">
+      {% for s in services %}
+        <div class="service-card" data-id="{{ s.id }}" data-name="{{ s.title }}">
+          <div class="checkmark"></div>
+          <span class="selected-pill">Selected</span>
+          <img class="service-icon" src="{{ s.icon.url }}" alt="{{ s.title }}">
+          <h3>{{ s.title }}</h3>
+          <p>{{ s.description_service_aviable }}</p>
         </div>
-
-
-      </div>
+      {% endfor %}
     </div>
 
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
+    <div class="form-actions buttons">
+      <a onclick="window.history.back();" class="back-btn">
+        <span class="back-icon">&larr;</span>
+        Back
+      </a>
+      <form method="POST" id="servicesForm">
+        {% csrf_token %}
+        <input type="hidden" name="selected_services" id="selectedServicesInput">
+        <button type="submit" class="next-btn">
+          Continue
+          <span class="next-icon">&rarr;</span>
+        </button>
+      </form>
     </div>
   </div>
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
+  {% include "home/includes/footer.html" %}
 
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
-<script>
-const cards = document.querySelectorAll('.service-card');
-let selected = [];
+  <script>
+    const cards = document.querySelectorAll('.service-card');
+    let selected = [];
 
-cards.forEach(card => {
-    
-    card.addEventListener('click', () => {
-
-        const serviceName = card.dataset.name;  
-
+    cards.forEach((card) => {
+      card.addEventListener('click', () => {
+        const serviceName = card.dataset.name;
         card.classList.toggle('selected');
 
         if (card.classList.contains('selected')) {
-            selected.push(serviceName);
+          selected.push(serviceName);
         } else {
-            selected = selected.filter(s => s !== serviceName);
+          selected = selected.filter((s) => s !== serviceName);
         }
 
         document.getElementById('selectedServicesInput').value = JSON.stringify(selected);
+      });
     });
-});
+  </script>
 
-</script>
-
+  <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

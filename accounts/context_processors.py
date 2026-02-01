@@ -1,4 +1,4 @@
-from accounts.models import ChatMessage
+from accounts.models import ChatMessage, Customer
 
 
 def chat_notifications(request):
@@ -37,4 +37,16 @@ def unread_messages(request):
 
     return {
         "unread_messages_count": count
+    }
+
+def sidebar_customer(request):
+    if not request.user.is_authenticated:
+        return {}
+
+    customer = Customer.objects.filter(user=request.user).first()
+    if not customer:
+        return {}
+
+    return {
+        "sidebar_customer": customer,
     }

@@ -7,102 +7,78 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hembla - All Services</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   <link rel="stylesheet" href="{% static 'css/AllServicesPrivate.css' %}">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-<style>
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.cart-box {
-    position: relative;
-    font-size: 25px;
-    color: #000;
-    text-decoration: none;
-}
-
-.cart-box span {
-    background: #00a3c8;
-    color: #fff;
-    padding: 2px 7px;
-    border-radius: 50%;
-    font-size: 12px;
-    position: absolute;
-    top: -10px;
-    right: -10px;
-}
-
-
-</style>
 </head>
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="header-right">
-
-      <!-- 🔥 سلة المشتريات -->
-      <a href="/private/cart/" class="cart-box">
-          🛒
-          <span id="cart-count">
-              {{ request.session.private_cart|length|default:0 }}
-          </span>
-      </a>
-
-      <a href="#" class="profile-btn">My Profile</a>
-
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
 
 <body>
 
 <main class="services-section">
 
     <div class="section-header">
-      <h1>All Services</h1>
-      <div class="filter">
-        <img src="{% static 'images/filter0.png' %}" alt="Filter">
+      <div>
+        <h1>All Services</h1>
+        <p class="section-subtitle">Search by name, description, or focus on recommended services.</p>
       </div>
+      <div class="header-actions">
+        <a href="{% url 'home:private_cart' %}" class="cart-box" aria-label="View cart">
+          <span class="cart-icon">🛒</span>
+          <span id="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="search-field">
+        <input type="text" id="serviceSearch" placeholder="Search by name or description">
+      </div>
+      <div class="filter-pills">
+        <button type="button" class="filter-pill active" data-filter="all">All</button>
+        <button type="button" class="filter-pill" data-filter="recommended">Recommended</button>
+        <button type="button" class="filter-pill" data-filter="clear" id="clearFilters">Clear</button>
+      </div>
+      <div class="results-count" id="resultsCount">0 services</div>
     </div>
 
     <hr />
 
-    <div class="services-list">
+    <div class="services-list" id="servicesList">
 
       {% for service in services %}
-      <div class="service-card fade-in">
+      <div class="service-card fade-in"
+           data-title="{{ service.title|lower|escape }}"
+           data-description="{{ service.description|lower|escape }}"
+           data-recommended="{% if service.recommended %}true{% else %}false{% endif %}">
 
-        <img src="{{ service.image.url }}" alt="{{ service.title }}">
+        {% if service.image %}
+          <img src="{{ service.image.url }}" alt="{{ service.title }}">
+        {% else %}
+          <div class="service-image placeholder">{{ service.title|first }}</div>
+        {% endif %}
 
         <div class="service-info">
-          <h2>{{ service.title }}</h2>
+          <div class="title-row">
+            <h2>
+              <a class="service-title-link" href="{% url 'accounts:service_detail' service.slug %}">
+                {{ service.title }}
+              </a>
+            </h2>
+            {% if service.recommended %}
+              <span class="rec-badge">Recommended</span>
+            {% endif %}
+          </div>
           <p>{{ service.description }}</p>
 
           {% if service.recommended %}
-            <span>Recommended: {{ service.recommended }}</span>
+            <span class="rec-note">{{ service.recommended }}</span>
           {% endif %}
         </div>
 
         <div class="service-actions">
-<button class="btn-cart" onclick="addToCart('{{ service.slug }}')">
-    Add to Cart
-</button>
-
-<a href="{% url 'home:private_zip_step1' service.slug %}" class="btn-book">Book Now</a>
-
+          <button class="btn-cart" onclick="addToCart('{{ service.slug }}')">Add to Cart</button>
+          <a href="{% url 'home:private_zip_step1' service.slug %}" class="btn-book">Book Now</a>
         </div>
 
       </div>
@@ -122,8 +98,6 @@ function addToCart(slug) {
         });
 }
 
-</script>
-<script>
 function refreshCartCount() {
     fetch("/private/cart/count/")
         .then(r => r.json())
@@ -135,9 +109,54 @@ function refreshCartCount() {
         .catch(err => console.log("Cart Refresh Error:", err));
 }
 
-// 🔄 يحدث العدد كل 2 ثانية
 setInterval(refreshCartCount, 2000);
-</script>
 
+const searchInput = document.getElementById("serviceSearch");
+const resultsCount = document.getElementById("resultsCount");
+const filterPills = document.querySelectorAll(".filter-pill");
+const cards = Array.from(document.querySelectorAll(".service-card"));
+
+function applyFilters() {
+    const query = (searchInput?.value || "").trim().toLowerCase();
+    const activePill = document.querySelector(".filter-pill.active");
+    const activeFilter = activePill ? activePill.dataset.filter : "all";
+
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        const title = card.dataset.title || "";
+        const desc = card.dataset.description || "";
+        const isRecommended = card.dataset.recommended === "true";
+
+        const matchesQuery = !query || title.includes(query) || desc.includes(query);
+        const matchesRecommended = activeFilter !== "recommended" || isRecommended;
+
+        const shouldShow = matchesQuery && matchesRecommended;
+        card.style.display = shouldShow ? "" : "none";
+        if (shouldShow) visibleCount += 1;
+    });
+
+    if (resultsCount) {
+        resultsCount.textContent = `${visibleCount} service${visibleCount === 1 ? "" : "s"}`;
+    }
+}
+
+filterPills.forEach(pill => {
+    pill.addEventListener("click", () => {
+        if (pill.dataset.filter === "clear") {
+            filterPills.forEach(p => p.classList.remove("active"));
+            document.querySelector('[data-filter="all"]')?.classList.add("active");
+            if (searchInput) searchInput.value = "";
+        } else {
+            filterPills.forEach(p => p.classList.remove("active"));
+            pill.classList.add("active");
+        }
+        applyFilters();
+    });
+});
+
+searchInput?.addEventListener("input", () => applyFilters());
+document.addEventListener("DOMContentLoaded", applyFilters);
+</script>
 </body>
 </html>

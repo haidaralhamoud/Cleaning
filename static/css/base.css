@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;600;700&display=swap");
+
 /* ====== HEADER BASE ====== */
 .main-header {
   width: 100%;
@@ -29,7 +31,7 @@
 .nav-links a {
   text-decoration: none;
   color: #000;
-  font-family: "Inter-Bold", sans-serif;
+  font-family: "Vesper Libre", serif;
   font-size: 18px;
   font-weight: 700;
   transition: color 0.3s ease;
@@ -44,7 +46,7 @@
   color: #fff;
   padding: 10px 20px;
   border-radius: 25px;
-  font-family: "Inter-Bold", sans-serif;
+  font-family: "Vesper Libre", serif;
   font-size: 16px;
   white-space: nowrap;
 }
@@ -93,6 +95,7 @@
 
 body {
   padding-top: 85px; /* كان 90، خففناه شوي */
+  font-family: "Vesper Libre", serif;
 }
 
 /* ====== موبايل فقط (تصفير ارتفاع الهيدر تقريبا) ====== */
@@ -117,7 +120,7 @@ body {
   background: #fff;
   border-top: 3px solid #71b247;
   padding: 60px 6% 20px;
-  font-family: "Inter", sans-serif;
+  font-family: "Vesper Libre", serif;
 }
 
 /* شبكة الأعمدة */
@@ -389,4 +392,115 @@ body {
   .language-box {
     margin: 0 auto;
   }
+}
+
+/* Footer override: keep App Download in normal flow */
+.app-download {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+/* ===== Custom Select (Global) ===== */
+.custom-select {
+  position: relative;
+  width: 100%;
+}
+
+.custom-select select {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.custom-select-toggle {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #dbe7ef;
+  background: #fff;
+  font-size: 15px;
+  font-family: "Inter", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.custom-select.open .custom-select-toggle {
+  border-color: #00a3c8;
+  box-shadow: 0 0 0 4px rgba(0, 163, 200, 0.15);
+}
+
+.custom-select-arrow {
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(45deg);
+}
+
+.custom-select.open .custom-select-arrow {
+  transform: rotate(-135deg);
+}
+
+.custom-select-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+  padding: 8px;
+  display: none;
+  z-index: 20;
+}
+
+.custom-select.open .custom-select-menu {
+  display: grid;
+  gap: 6px;
+}
+
+.custom-select-group {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  padding: 6px 10px 2px;
+}
+
+.custom-select-option {
+  width: 100%;
+  text-align: left;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #f5f8fb;
+  color: #0f172a;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.custom-select-option:hover {
+  border-color: rgba(0, 163, 200, 0.4);
+  color: #00a3c8;
+  background: #edf7fb;
+}
+
+.custom-select-option.is-selected {
+  border-color: #00a3c8;
+  background: #e7f7fc;
+  color: #008aa8;
+}
+
+.custom-select-option.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }

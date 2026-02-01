@@ -321,6 +321,22 @@ class BaseBooking(models.Model):
             provider_note=note,
         )
 
+        # log for admin visibility without changing booking status
+        from home.models import BookingStatusHistory, BookingTimeline
+        BookingStatusHistory.objects.create(
+            booking_type=booking_type,
+            booking_id=self.id,
+            status="NO_SHOW_REPORTED",
+            changed_by=provider_user,
+            note=note or "No show reported by provider"
+        )
+        BookingTimeline.objects.create(
+            booking_type=booking_type,
+            booking_id=self.id,
+            status="NO_SHOW_REPORTED",
+            note=note or "No show reported by provider"
+        )
+
     # =========================
     # NO SHOW APPROVAL
     # =========================
@@ -711,11 +727,112 @@ class PrivateService(models.Model):
     recommended = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to="private/services/", blank=True, null=True)
     slug = models.SlugField(unique=True)
+    hero_image = models.ImageField(upload_to="private/hero/", blank=True, null=True)
+    hero_subtitle = models.CharField(max_length=255, blank=True)
+    hero_cta_text = models.CharField(max_length=60, blank=True)
+    hero_cta_url = models.URLField(blank=True)
+    intro_text = models.TextField(blank=True)
+    starting_price = models.CharField(max_length=50, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     questions = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return self.title
+
+
+class ServicePricing(models.Model):
+    service = models.OneToOneField(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="pricing"
+    )
+    title = models.CharField(max_length=120, default="Transparent Pricing")
+    card_title = models.CharField(max_length=120, blank=True)
+    subtitle = models.TextField(blank=True)
+    price_label = models.CharField(max_length=80, blank=True)
+    price_value = models.CharField(max_length=80, blank=True)
+    price_note = models.CharField(max_length=120, blank=True)
+    description = models.TextField(blank=True)
+    cta_text = models.CharField(max_length=50, blank=True)
+    cta_url = models.URLField(blank=True)
+
+    def __str__(self):
+        return f"{self.service.title} pricing"
+
+
+class ServiceEstimate(models.Model):
+    service = models.OneToOneField(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="estimate"
+    )
+    title = models.CharField(max_length=120, default="Get a Quick Estimate")
+    property_label = models.CharField(max_length=120, default="Property Size (m²)")
+    bedrooms_label = models.CharField(max_length=120, default="Number of Bedrooms")
+    cta_text = models.CharField(max_length=50, default="Calculate Estimate")
+    note = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.service.title} estimate"
+
+
+class ServiceEcoPromise(models.Model):
+    service = models.OneToOneField(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="eco_promise"
+    )
+    title = models.CharField(max_length=140, default="Our Eco-Friendly Promise")
+    subtitle = models.TextField(blank=True)
+    cta_text = models.CharField(max_length=50, default="Add To Cart")
+
+    def __str__(self):
+        return f"{self.service.title} eco promise"
+
+
+class ServiceEcoPoint(models.Model):
+    promise = models.ForeignKey(
+        ServiceEcoPromise,
+        on_delete=models.CASCADE,
+        related_name="points"
+    )
+    title = models.CharField(max_length=140)
+    body = models.TextField()
+    icon = models.CharField(max_length=30, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return self.title
+
+
+class ServiceCard(models.Model):
+    service = models.ForeignKey(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="cards"
+    )
+    title = models.CharField(max_length=150)
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Example: bi-check-circle, bi-exclamation-circle"
+    )
+    body = models.TextField(
+        help_text="One bullet per line"
+    )
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.service.title} - {self.title}"
+
+    def items(self):
+        return [line.strip() for line in self.body.splitlines() if line.strip()]
 
 
 class PrivateBooking(BaseBooking):
@@ -838,6 +955,33 @@ class EmailRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class FeedbackRequest(models.Model):
+    RATING_CHOICES = [
+        (1, "1"),
+        (2, "2"),
+        (3, "3"),
+        (4, "4"),
+        (5, "5"),
+    ]
+
+    customer_name = models.CharField(max_length=100, blank=True)
+    feedback_text = models.TextField()
+    rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, default=5)
+    service_type = models.CharField(max_length=100, blank=True)
+    request_details = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class BookingFormDocument(models.Model):
+    title = models.CharField(max_length=255)
+    content = models.TextField()
+    source_file = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
 class PrivateAddon(models.Model):
     service = models.ForeignKey(PrivateService, on_delete=models.CASCADE, related_name="addons_list")
     title = models.CharField(max_length=255)
@@ -846,6 +990,92 @@ class PrivateAddon(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     form_html = models.TextField(blank=True, null=True)
+    questions = models.JSONField(blank=True, null=True)
+
+    def build_form_html_from_questions(self):
+        questions = self.questions or {}
+        rows = []
+        for key, q in questions.items():
+            if not q:
+                continue
+            label = q.get("label", "")
+            q_type = (q.get("type") or "text").strip()
+            options = q.get("options") or []
+
+            def opt_value(opt):
+                if isinstance(opt, dict):
+                    return opt.get("label", "")
+                return str(opt)
+
+            def opt_display(opt):
+                if isinstance(opt, dict):
+                    base = opt.get("label", "")
+                    duration = opt.get("duration", 0)
+                    if duration:
+                        return f"{base} ({duration} min)"
+                    return base
+                return str(opt)
+
+            if q_type == "select":
+                opts = ["<option value=\"\">Select...</option>"] + [
+                    f"<option value=\"{opt_value(o)}\">{opt_display(o)}</option>" for o in options
+                ]
+                field_html = f"""
+<label>{label}</label>
+<select name="{key}">{''.join(opts)}</select>
+"""
+            elif q_type == "multiselect":
+                opts = [
+                    f"<option value=\"{opt_value(o)}\">{opt_display(o)}</option>" for o in options
+                ]
+                field_html = f"""
+<label>{label}</label>
+<select name="{key}" multiple>{''.join(opts)}</select>
+"""
+            elif q_type == "radio":
+                items = []
+                for o in options:
+                    v = opt_value(o)
+                    items.append(
+                        f"""<label class="option-item"><input type="radio" name="{key}" value="{v}"><span>{opt_display(o)}</span></label>"""
+                    )
+                field_html = f"""
+<label>{label}</label>
+<div class="option-group">{''.join(items)}</div>
+"""
+            elif q_type == "checkbox":
+                items = []
+                for o in options:
+                    v = opt_value(o)
+                    items.append(
+                        f"""<label class="option-item"><input type="checkbox" name="{key}" value="{v}"><span>{opt_display(o)}</span></label>"""
+                    )
+                field_html = f"""
+<label>{label}</label>
+<div class="option-group">{''.join(items)}</div>
+"""
+            elif q_type == "textarea":
+                field_html = f"""
+<label>{label}</label>
+<textarea name="{key}"></textarea>
+"""
+            elif q_type == "number":
+                field_html = f"""
+<label>{label}</label>
+<input type="number" name="{key}">
+"""
+            else:
+                field_html = f"""
+<label>{label}</label>
+<input type="text" name="{key}">
+"""
+            rows.append(f"""<div class="addon-field">{field_html}</div>""")
+        return "".join(rows)
+
+    def save(self, *args, **kwargs):
+        if self.questions:
+            self.form_html = self.build_form_html_from_questions()
+        super().save(*args, **kwargs)
 
 
 class ServiceQuestionRule(models.Model):
@@ -866,6 +1096,14 @@ class ScheduleRule(models.Model):
     key = models.CharField(max_length=100)
     value = models.CharField(max_length=100)
     price_change = models.DecimalField(max_digits=10, decimal_places=2)
+
+class RotSetting(models.Model):
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"ROT {self.amount}"
 
 
 class DateSurcharge(models.Model):
@@ -1020,3 +1258,45 @@ class BookingNote(models.Model):
 
     def __str__(self):
         return self.text[:40]
+
+
+class BookingMedia(models.Model):
+    PHASE_CHOICES = [
+        ("before", "Before"),
+        ("during", "During"),
+        ("after", "After"),
+        ("issue", "Issue"),
+    ]
+
+    booking_type = models.CharField(
+        max_length=10,
+        choices=[("private", "Private"), ("business", "Business")]
+    )
+    booking_id = models.PositiveIntegerField()
+
+    phase = models.CharField(
+        max_length=10,
+        choices=PHASE_CHOICES,
+        default="before"
+    )
+    file = models.ImageField(upload_to="booking_media/")
+
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="booking_media"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.booking_type} #{self.booking_id} {self.phase}"
+
+    def get_booking(self):
+        if self.booking_type == "private":
+            return PrivateBooking.objects.filter(id=self.booking_id).first()
+        return BusinessBooking.objects.filter(id=self.booking_id).first()

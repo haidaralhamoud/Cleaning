@@ -7,24 +7,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
 
   <style>
-    body {
-      background: #f4f8fb;
-      font-family: Inter, system-ui;
-    }
-
     .container {
-      max-width: 900px;
+      max-width: 980px;
       margin: 40px auto;
       padding: 0 16px;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 20px;
-      padding: 26px;
-      box-shadow: 0 15px 40px rgba(0,0,0,.08);
     }
 
     .top-bar {
@@ -37,8 +27,8 @@
 
     .back {
       text-decoration: none;
-      color: #0d6efd;
-      font-weight: 600;
+      color: var(--brand-dark);
+      font-weight: 700;
     }
 
     h2 {
@@ -55,12 +45,12 @@
       text-transform: uppercase;
     }
 
-    .status-ASSIGNED   { background:#e3e1ff; color:#5a55d6; }
-    .status-ON_THE_WAY { background:#ffe0b2; color:#ef6c00; }
-    .status-STARTED    { background:#cce5ff; color:#0056b3; }
-    .status-PAUSED     { background:#fff3cd; color:#856404; }
-    .status-COMPLETED  { background:#d4edda; color:#155724; }
-    .status-CANCELLED  { background:#f8d7da; color:#721c24; }
+    .status-ASSIGNED   { background:#e6f7fb; color:#0b6b88; }
+    .status-ON_THE_WAY { background:#fff3e6; color:#b45309; }
+    .status-STARTED    { background:#e6f1ff; color:#1d4ed8; }
+    .status-PAUSED     { background:#fff7db; color:#a16207; }
+    .status-COMPLETED  { background:#e9f7ed; color:#0f7a3f; }
+    .status-CANCELLED  { background:#ffe8e8; color:#b91c1c; }
 
     .actions {
       display: grid;
@@ -73,19 +63,19 @@
       padding: 12px;
       border-radius: 12px;
       border: none;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      background: #0d6efd;
+      background: var(--brand);
       color: #fff;
       transition: .2s;
     }
 
     .actions button.resume {
-      background: #20c997;
+      background: #00a3c8;
     }
 
     .actions button.complete {
-      background: #198754;
+      background: #71b247;
     }
 
     .actions button:disabled {
@@ -100,8 +90,8 @@
 
     .timeline-item {
       padding: 14px;
-      border-left: 4px solid #0d6efd;
-      background: #f9fbff;
+      border-left: 4px solid var(--brand);
+      background: #f7fbff;
       border-radius: 12px;
       margin-bottom: 12px;
     }
@@ -113,30 +103,31 @@
     }
 
     .message {
-      background: #eef6ff;
+      background: #f1fbff;
       padding: 12px;
       border-radius: 12px;
       margin-bottom: 14px;
       font-size: 14px;
+      border: 1px solid #e6f1f6;
     }
-    .chat-btn {
+.chat-btn {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0d6efd, #3b82f6);
+  background: linear-gradient(135deg, #00a3c8, #71b247);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   text-decoration: none;
-  box-shadow: 0 6px 18px rgba(13,110,253,.35);
+  box-shadow: 0 6px 18px rgba(0,163,200,.35);
   transition: transform .15s ease, box-shadow .15s ease;
 }
 
 .chat-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 26px rgba(13,110,253,.45);
+  box-shadow: 0 10px 26px rgba(0,163,200,.45);
 }
 
 .chat-btn:active {
@@ -178,9 +169,10 @@
   </style>
 </head>
 
-<body>
+<body class="provider-portal">
+{% include "home/includes/main_header.html" %}
 <div class="container">
-  <div class="card">
+  <div class="provider-card">
 
     <!-- TOP BAR -->
 <div class="top-bar">
@@ -209,34 +201,83 @@
 </div>
 
     <h2>Booking #{{ booking.id }}</h2>
-    <p style="opacity:.7;">Type: {{ booking_type|title }}</p>
+    <p class="muted" style="font-weight:600;">Type: {{ booking_type|title }}</p>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Service</div>
+        <div class="summary-value">
+          {% if booking_type == "private" %}
+            {{ booking.selected_services.0|default:"Private Service" }}
+          {% else %}
+            {% if booking.selected_service %}
+              {{ booking.selected_service }}
+            {% elif booking.selected_bundle %}
+              {{ booking.selected_bundle.title }}
+            {% else %}
+              Business Service
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Customer</div>
+        <div class="summary-value">
+          {% if booking_type == "private" %}
+            {{ booking.user.get_full_name|default:booking.user.username|default:"-" }}
+          {% else %}
+            {{ booking.contact_person|default:booking.company_name|default:"-" }}
+          {% endif %}
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">When</div>
+        <div class="summary-value">
+          {% if booking_type == "private" %}
+            {{ booking.appointment_date|date:"M d, Y"|default:"-" }}
+          {% else %}
+            {{ booking.start_date|date:"M d, Y"|default:"-" }}
+          {% endif %}
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Location</div>
+        <div class="summary-value">
+          {% if booking_type == "private" %}
+            {{ booking.address|default:booking.area|default:"-" }}
+          {% else %}
+            {{ booking.office_address|default:"-" }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
 
     {% for m in messages %}
       <div class="message">{{ m }}</div>
     {% endfor %}
 
     <!-- ACTION BUTTONS -->
-    <div class="actions">
+    <div class="action-grid">
 
       <!-- ON THE WAY -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="on_the_way">
-        <button {% if booking.status != "ASSIGNED" %}disabled{% endif %}>On the way</button>
+        <button class="action-btn" {% if booking.status != "ASSIGNED" %}disabled{% endif %}>On the way</button>
       </form>
 
       <!-- START -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="started">
-        <button {% if booking.status != "ON_THE_WAY" %}disabled{% endif %}>Start</button>
+        <button class="action-btn" {% if booking.status != "ON_THE_WAY" %}disabled{% endif %}>Start</button>
       </form>
 
       <!-- PAUSE -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="paused">
-<button
+<button class="action-btn"
   {% if booking.status != "STARTED" and booking.status != "RESUMED" %}
     disabled
   {% endif %}
@@ -252,7 +293,7 @@
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="resume">
-        <button class="resume"
+        <button class="action-btn resume"
  {% if booking.status != "PAUSED" %}disabled{% endif %}
 >
   Resume
@@ -264,7 +305,7 @@
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="completed">
-<button class="complete"
+<button class="action-btn complete"
   {% if booking.status != "STARTED" and booking.status != "PAUSED" and booking.status != "RESUMED" %}
     disabled
   {% endif %}
@@ -278,7 +319,7 @@
 <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
   {% csrf_token %}
   <input type="hidden" name="action" value="report_no_show">
-<button style="background:#dc3545"
+<button class="action-btn danger"
   {% if booking.status != "ON_THE_WAY" and booking.status != "STARTED" and booking.status != "PAUSED" and booking.status != "RESUMED" %}
     disabled
   {% endif %}
@@ -307,5 +348,6 @@
 
   </div>
 </div>
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

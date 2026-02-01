@@ -7,33 +7,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <style>
-    body {
-      background: #f5fbfa;
-      font-family: Inter, system-ui, -apple-system;
-      color: #1f2937;
-    }
-
-    .wrap {
-      max-width: 1000px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-
     /* ===== TOP BAR ===== */
     .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 35px;
+      margin-bottom: 28px;
     }
 
     .top-bar h2 {
       font-size: 28px;
       font-weight: 800;
-      color: #0e6f63;
+      color: var(--ink-900);
     }
 
     .top-actions {
@@ -46,9 +36,9 @@
     .bell {
       position: relative;
       font-size: 22px;
-      color: #20bfa9;
+      color: var(--brand);
       cursor: pointer;
-      animation: pulse 2s infinite;
+      animation: pulse 2.4s infinite;
     }
 
     .bell span {
@@ -65,7 +55,7 @@
 
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.15); }
+      40% { transform: scale(1.12); }
       100% { transform: scale(1); }
     }
 
@@ -74,7 +64,7 @@
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #20bfa9, #0e6f63);
+      background: linear-gradient(135deg, #00a3c8, #71b247);
       color: white;
       font-weight: 800;
       display: flex;
@@ -82,7 +72,7 @@
       justify-content: center;
       cursor: pointer;
       position: relative;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+      box-shadow: 0 8px 18px rgba(0,163,200,0.18);
     }
 
     /* ===== DROPDOWN ===== */
@@ -109,8 +99,8 @@
     }
 
     .dropdown a:hover {
-      background: #e6f7f4;
-      color: #0e6f63;
+      background: #eef7fb;
+      color: var(--brand-dark);
     }
 
     /* ===== BOOKINGS ===== */
@@ -119,29 +109,13 @@
       gap: 18px;
     }
 
-    .job {
-      background: #fff;
-      border-radius: 18px;
-      padding: 18px 22px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      text-decoration: none;
-      color: inherit;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
-      transition: 0.25s;
-    }
-
-    .job:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(0,0,0,0.1);
-    }
+    .job { }
 
     .job-left h3 {
       margin: 0;
       font-size: 18px;
       font-weight: 800;
-      color: #0e6f63;
+      color: var(--ink-900);
     }
 
     .job-left small {
@@ -151,8 +125,8 @@
     .status {
       padding: 8px 16px;
       border-radius: 999px;
-      background: #e6f7f4;
-      color: #0e6f63;
+      background: #e6f7fb;
+      color: var(--brand-dark);
       font-weight: 800;
       font-size: 13px;
       text-transform: uppercase;
@@ -167,23 +141,27 @@
 
     .empty i {
       font-size: 48px;
-      color: #20bfa9;
+      color: var(--brand);
       margin-bottom: 16px;
     }
   </style>
 </head>
 
-<body>
+<body class="provider-portal">
+{% include "home/includes/main_header.html" %}
 
 <audio id="notifSound">
   <source src="{% static 'sounds/notification.mp3' %}" type="audio/mpeg">
 </audio>
 
-<div class="wrap">
+<div class="provider-wrap">
 
   <!-- TOP BAR -->
-  <div class="top-bar">
-    <h2>My Jobs</h2>
+  <div class="provider-topbar">
+    <div>
+      <h2>My Orders</h2>
+      <div class="provider-subtitle">All jobs assigned to you</div>
+    </div>
 
     <div class="top-actions">
 
@@ -212,19 +190,19 @@
   {% if bookings %}
     <div class="jobs">
       {% for b in bookings %}
-        <a href="{% url 'accounts:provider_booking_detail' b.type b.id %}" class="job">
-          <div class="job-left">
-            <h3>{{ b.title }}</h3>
-            <small>#{{ b.id }} · {{ b.when }}</small>
+        <a href="{% url 'accounts:provider_booking_detail' b.type b.id %}" class="list-item">
+          <div class="meta">
+            <div class="thread-title">{{ b.title }}</div>
+            <div class="thread-sub">#{{ b.id }} ?? {{ b.when|date:"M d, Y" }}</div>
           </div>
-          <div class="status">{{ b.status }}</div>
+          <div class="status-pill status-{{ b.status }}">{{ b.status }}</div>
         </a>
       {% endfor %}
     </div>
   {% else %}
     <div class="empty">
       <i class="fa-solid fa-broom"></i>
-      <p>No assigned jobs yet</p>
+      <p>No assigned orders yet</p>
     </div>
   {% endif %}
 
@@ -250,6 +228,7 @@
     }
   {% endif %}
 </script>
+<script src="{% static 'js/main_header.js' %}"></script>
 
 </body>
 </html>

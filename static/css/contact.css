@@ -1,475 +1,294 @@
+/* ===== Base ===== */
+:root{
+  --teal:#039fc8;
+  --teal-dark:#0283a9;
+  --ink:#111;
+  --muted:rgba(0,0,0,0.6);
+  --border:rgba(137,137,137,0.75);
+  --shadow:0 4px 15px rgba(0,0,0,0.25);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:"Inter",sans-serif;
+  color:var(--ink);
+}
+
 input.hembla-field,
 textarea.hembla-field,
-select.hembla-field {
-    all: unset;
-    box-sizing: border-box;
+select.hembla-field{
+  all:unset;
+  box-sizing:border-box;
 }
 
-body {
-  margin: 0;
-  font-family: "Inter", sans-serif;
-}
-
-.contact-wrapper {
-  background: linear-gradient(
+/* ===== Layout ===== */
+.contact-wrapper{
+  background:linear-gradient(
     180deg,
-    rgba(3, 159, 200, 1) 0%,
-    rgba(3, 159, 200, 0.75) 35%,
-    rgba(3, 159, 200, 0.5) 63%,
-    rgba(3, 159, 200, 0.25) 100%
+    rgba(3,159,200,1) 0%,
+    rgba(3,159,200,0.75) 35%,
+    rgba(3,159,200,0.5) 63%,
+    rgba(3,159,200,0.25) 100%
   );
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:60px 0;
 }
 
-.contact-section {
-  width: 90%;
-  max-width: 1200px;
-  background: transparent;
-  color: #fff;
+.contact-section{
+  width:90%;
+  max-width:1200px;
+  color:#fff;
 }
 
-.contact-title {
-  font-family: "VesperLibre-Bold", serif;
-  font-size: 40px;
-  margin-bottom: 10px;
+.contact-title{
+  font-family:"VesperLibre-Bold",serif;
+  font-size:40px;
+  margin-bottom:10px;
+}
+.contact-subtitle{
+  font-size:20px;
+  margin-bottom:40px;
+  font-weight:600;
 }
 
-.contact-subtitle {
-  font-size: 20px;
-  margin-bottom: 40px;
-  font-weight: 600;
+.contact-content{
+  display:flex;
+  gap:40px;
+  align-items:flex-start;
 }
 
-.contact-content {
-  display: flex;
-  gap: 40px;
-  align-items: flex-start;
+.contact-form,
+.contact-info{
+  background:#fff;
+  color:#000;
+  border-radius:15px;
+  box-shadow:var(--shadow);
+}
+.contact-form{
+  padding:40px;
+  flex:2;
+}
+.contact-info{
+  padding:30px 40px;
+  flex:1;
 }
 
-.contact-form {
-  background: #fff;
-  color: #000;
-  border-radius: 15px;
-  padding: 40px;
-  flex: 2;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+/* ===== Info ===== */
+.contact-info h2{
+  font-family:"VesperLibre-Bold",serif;
+  font-size:24px;
+  margin-bottom:20px;
+}
+.contact-info p{
+  font-family:"VesperLibre-Medium",serif;
+  color:var(--muted);
+  font-size:16px;
+  margin:10px 0;
+}
+.contact-info i,
+.contact-info svg{
+  color:var(--teal);
+  margin-right:8px;
 }
 
-.contact-info {
-  background: #fff;
-  color: #000;
-  border-radius: 15px;
-  padding: 30px 40px;
-  flex: 1;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+/* ===== Form ===== */
+.form-row{
+  display:flex;
+  gap:20px;
+  margin-bottom:20px;
 }
-
-.contact-info h2 {
-  font-family: "VesperLibre-Bold", serif;
-  font-size: 24px;
-  margin-bottom: 20px;
+.form-group{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  margin-bottom:18px;
 }
-
-.contact-info p {
-  font-family: "VesperLibre-Medium", serif;
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 16px;
-  margin-bottom: 12px;
+label{
+  font-family:"VesperLibre-Bold",serif;
+  font-size:18px;
+  margin-bottom:6px;
 }
-
-.form-row {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.form-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  font-family: "VesperLibre-Bold", serif;
-  font-size: 18px;
-  margin-bottom: 6px;
-}
-
-label span {
-  color: red;
-}
+label span{color:red}
 
 input,
 textarea,
-select {
-  border: 1px solid rgba(137, 137, 137, 0.75);
-  border-radius: 10px;
-  padding: 15px;
-  font-size: 16px;
-  color: rgba(137, 137, 137, 0.75);
+select{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:15px;
+  font-size:16px;
+  color:rgba(137,137,137,0.85);
+  background:#fff;
+}
+textarea{resize:none; height:150px}
+
+.file-box .file-drop{
+  border:1px dashed var(--border);
+  border-radius:10px;
+  padding:25px;
+  text-align:center;
+  color:rgba(137,137,137,0.75);
 }
 
-textarea {
-  resize: none;
-  height: 150px;
+.agreement{
+  margin:25px 0;
+  font-size:16px;
+}
+.agreement a{
+  color:var(--teal);
+  text-decoration:none;
+  font-weight:700;
 }
 
-.file-box .file-drop {
-  border: 1px dashed rgba(137, 137, 137, 0.75);
-  border-radius: 10px;
-  padding: 25px;
-  text-align: center;
-  color: rgba(137, 137, 137, 0.75);
+.send-btn{
+  background:var(--teal);
+  color:#fff;
+  border:none;
+  border-radius:15px;
+  padding:18px 40px;
+  font-size:20px;
+  cursor:pointer;
+  font-weight:700;
+  transition:0.3s ease;
+}
+.send-btn:hover{background:var(--teal-dark)}
+
+/* ===== File upload helper ===== */
+.file-upload{
+  border:1px dashed #aaa;
+  border-radius:10px;
+  padding:25px;
+  text-align:center;
+  color:#777;
+  font-size:14px;
+  position:relative;
+  background-color:#fff;
+  box-sizing:border-box;
+}
+.file-upload::before{
+  content:"";
+  display:block;
+  width:48px;
+  height:48px;
+  background:url("upload-to-cloud0.png") no-repeat center;
+  background-size:contain;
+  margin:0 auto 10px;
+  opacity:0.8;
+}
+.file-upload:hover::before{
+  opacity:1;
+  transform:scale(1.05);
+  transition:0.2s ease;
 }
 
-.agreement {
-  margin: 25px 0;
-  font-size: 16px;
+/* ===== Force styling (fields rendered by Django) ===== */
+.hembla-field{
+  border:2px solid #c9c9c9 !important;
+  padding:12px 15px !important;
+  background-color:#fff !important;
+  color:#333 !important;
+  border-radius:10px !important;
+  font-size:16px !important;
+  width:100% !important;
+}
+.hembla-field:focus{
+  border-color:#007bff !important;
+  box-shadow:0 0 6px rgba(0,123,255,0.4) !important;
+  outline:none !important;
 }
 
-.agreement a {
-  color: #039fc8;
-  text-decoration: none;
-  font-weight: bold;
+/* ===== Modal ===== */
+.thankyou-popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:999;
+  animation:fadeIn 0.4s ease forwards;
 }
-
-.send-btn {
-  background: #039fc8;
-  color: #fff;
-  border: none;
-  border-radius: 15px;
-  padding: 18px 40px;
-  font-size: 20px;
-  cursor: pointer;
-  font-weight: 700;
-  transition: 0.3s ease;
-}
-
-.send-btn:hover {
-  background: #0283a9;
-}
-
-@media (max-width: 992px) {
-  .contact-content {
-    flex-direction: column;
-  }
-  .contact-info {
-    width: 100%;
-  }
-}
-
-/* ✅ إصلاح الخلفية بالأجهزة الصغيرة */
-@media (max-width: 768px) {
-  .contact-wrapper {
-    background: linear-gradient(
-      180deg,
-      rgba(3, 159, 200, 1) 0%,
-      rgba(3, 159, 200, 0.75) 35%,
-      rgba(3, 159, 200, 0.5) 63%,
-      rgba(3, 159, 200, 0.25) 100%
-    );
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    padding: 40px 15px; /* مسافة من الجوانب للموبايل */
-  }
-
-  .contact-content {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .contact-form, .contact-info {
-    width: 100%;
-    max-width: 500px;
-  }
-
-  .contact-title,
-  .contact-subtitle {
-    text-align: center;
-  }
-}
-/* ✅ تحسين توزيع الحقول على الموبايل */
-@media (max-width: 768px) {
-  .form-row {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .form-group {
-    width: 100%;
-  }
-
-  input,
-  textarea,
-  select {
-    width: 100%;
-    font-size: 16px;
-  }
-
-  .file-box .file-drop {
-    font-size: 14px;
-    padding: 20px;
-  }
-
-  .contact-form {
-    padding: 25px 20px;
-  }
-}
-/* ✅ ضبط تمركز الفورم والحقول داخل الإطار على الموبايل */
-@media (max-width: 768px) {
-  .contact-section {
-    width: 100%;
-    padding: 0 15px; /* يضيف مسافة من الطرفين */
-    box-sizing: border-box;
-  }
-
-  .contact-form {
-    width: 100%;
-    max-width: 420px; /* يمنع الفورم من التمدد أكتر من اللزوم */
-    margin: 0 auto; /* يوسّطه أفقياً */
-    padding: 25px 20px;
-    border-radius: 15px;
-    box-sizing: border-box;
-  }
-
-  .form-group,
-  input,
-  textarea,
-  select {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .agreement {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .agreement input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #039fc8;
-  }
-
-  .agreement label {
-    font-size: 14px;
-    line-height: 1.4;
-  }
-/* ✅ تنسيق قسم معلومات التواصل */
-.contact-info {
-  background: #fff;
-  padding: 25px 30px; /* نفس المسافات يمين ويسار */
-  border-radius: 15px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25); /* نفس الظل تبع الفورم */
-  margin-top: 25px; /* مسافة حلوة فوقه */
-  box-sizing: border-box;
-}
-
-.contact-info p {
-  margin: 10px 0;
-}
-
-.contact-info i,
-.contact-info svg {
-  color: #039fc8; /* لون الأيقونات أزرق متناسق */
-  margin-right: 8px;
-}
-
-}
-
-/* ✅ أيقونة رفع الملفات داخل مربع الرفع */
-.file-upload {
-  border: 1px dashed #aaa;
-  border-radius: 10px;
-  padding: 25px;
-  text-align: center;
-  color: #777;
-  font-size: 14px;
-  position: relative;
-  background-color: #fff;
-  box-sizing: border-box;
-}
-
-.file-upload::before {
-  content: "";
-  display: block;
-  width: 48px;
-  height: 48px;
-  background: url("upload-to-cloud0.png") no-repeat center;
-  background-size: contain;
-  margin: 0 auto 10px; /* المسافة بين الأيقونة والنص */
-  opacity: 0.8;
-}
-
-.file-upload:hover::before {
-  opacity: 1;
-  transform: scale(1.05);
-  transition: 0.2s ease;
-}
-
-/* ✅ ضبط المسافات بين الحقول (Laptop + Mobile) */
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 18px; /* المسافة بين كل حقل والتاني */
-}
-
-/* ✅ مسافات أوسع قليلاً بين الأقسام الكبيرة */
-textarea,
-select {
-  margin-bottom: 22px;
-}
-
-/* ✅ ضبط المسافات على الشاشات الصغيرة */
-@media (max-width: 768px) {
-  .form-group {
-    margin-bottom: 16px; /* شوي أصغر للموبايل ليوصل توازن بصري */
-  }
-
-  textarea,
-  select {
-    margin-bottom: 20px;
-  }
-
-  .send-btn {
-    margin-top: 10px;
-  }
-}
-
-/* FORCE styling */
-.hembla-field {
-    border: 2px solid #c9c9c9 !important;
-    padding: 12px 15px !important;
-    background-color: #fff !important;
-    color: #333 !important;
-    border-radius: 10px !important;
-    font-size: 16px !important;
-    width: 100% !important;
-}
-
-/* focus */
-.hembla-field:focus {
-    border-color: #007bff !important;
-    box-shadow: 0 0 6px rgba(0,123,255,0.4) !important;
-    outline: none !important;
-}
-
-
-/* === الخلفية الشفافة للمودال === */
-.thankyou-popup {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-  animation: fadeIn 0.4s ease forwards;
-}
-
-/* === الإطار الأبيض للمحتوى === */
-.popup-content {
-  background: linear-gradient(
+.popup-content{
+  background:linear-gradient(
     180deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.85) 50%,
-    rgba(255, 255, 255, 0.7) 100%
+    rgba(255,255,255,1) 0%,
+    rgba(255,255,255,0.85) 50%,
+    rgba(255,255,255,0.7) 100%
   );
-  border-radius: 20px;
-  padding: 60px 50px;
-  width: 600px;
-  max-width: 90%;
-  text-align: center;
-  position: relative;
-  animation: slideUp 0.5s ease forwards;
-  box-shadow: 0px 6px 25px rgba(0,0,0,0.25);
+  border-radius:20px;
+  padding:60px 50px;
+  width:600px;
+  max-width:90%;
+  text-align:center;
+  position:relative;
+  animation:slideUp 0.5s ease forwards;
+  box-shadow:0 6px 25px rgba(0,0,0,0.25);
+}
+.popup-icon{width:80px; height:80px; margin-bottom:30px}
+.popup-title{color:var(--teal); font-size:22px; font-weight:700; margin-bottom:15px}
+.popup-text{color:#000; font-size:18px; line-height:1.7; font-weight:600; margin-bottom:10px}
+.popup-buttons{
+  display:flex;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:15px;
+  margin-top:40px;
+}
+.btn{
+  padding:14px 40px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:17px;
+  font-weight:700;
+  transition:0.3s ease;
+}
+.btn-green{background-color:#71b247; color:#fff}
+.btn-green:hover{background-color:#5a9437; transform:translateY(-2px)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ===== Responsive ===== */
+@media (max-width: 992px){
+  .contact-content{flex-direction:column}
+  .contact-info{width:100%}
 }
 
-/* === أيقونة النجاح === */
-.popup-icon {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 30px;
-}
-
-/* === العنوان الرئيسي === */
-.popup-title {
-  color: #039fc8;
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 15px;
-}
-
-/* === الفقرات === */
-.popup-text {
-  color: #000;
-  font-size: 18px;
-  line-height: 1.7;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-
-/* === الأزرار === */
-.popup-buttons {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 40px;
-}
-
-.btn {
-  padding: 14px 40px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 17px;
-  font-weight: 700;
-  transition: 0.3s ease;
-}
-
-.btn-green {
-  background-color: #71b247;
-  color: #fff;
-}
-
-.btn-green:hover {
-  background-color: #5a9437;
-  transform: translateY(-2px);
-}
-
-/* === الأنيميشن === */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from { transform: translateY(40px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-/* === RESPONSIVE === */
-@media (max-width: 768px) {
-  .popup-content {
-    padding: 40px 25px;
+@media (max-width: 768px){
+  .contact-wrapper{padding:40px 15px}
+  .contact-content{align-items:center}
+  .contact-form,
+  .contact-info{
+    width:100%;
+    max-width:500px;
   }
-  .popup-title {
-    font-size: 20px;
+  .contact-title,
+  .contact-subtitle{ text-align:center }
+  .form-row{flex-direction:column; gap:10px}
+  .contact-section{width:100%; padding:0 15px}
+  .contact-form{max-width:420px; margin:0 auto; padding:25px 20px}
+  .agreement{
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:8px;
+    margin-top:10px;
   }
-  .popup-text {
-    font-size: 16px;
+  .agreement input[type="checkbox"]{
+    width:18px;
+    height:18px;
+    accent-color:var(--teal);
   }
-  .btn {
-    width: 100%;
-    font-size: 16px;
-  }
+  .agreement label{font-size:14px; line-height:1.4}
+  .file-box .file-drop{font-size:14px; padding:20px}
+  .send-btn{margin-top:10px}
+  .popup-content{padding:40px 25px}
+  .popup-title{font-size:20px}
+  .popup-text{font-size:16px}
+  .btn{width:100%; font-size:16px}
 }

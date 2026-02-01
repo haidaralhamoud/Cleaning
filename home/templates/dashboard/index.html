@@ -1,0 +1,119 @@
+{% extends "dashboard/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block content %}
+  <section class="dash-hero">
+    <div class="dash-hero-text">
+      <div class="dash-kicker">Admin Control Center</div>
+      <h1 class="dash-hero-title">System Overview</h1>
+      <p class="dash-hero-sub">
+        Monitor bookings, customer activity, and provider operations in real time.
+      </p>
+      <div class="dash-hero-stats">
+        <div class="dash-stat">
+          <span>New bookings (24h)</span>
+          <b>{{ dashboard_new_bookings }}</b>
+        </div>
+        <div class="dash-stat">
+          <span>Incidents reported</span>
+          <b>{{ dashboard_new_incidents }}</b>
+        </div>
+        <div class="dash-stat">
+          <span>New customers</span>
+          <b>{{ dashboard_new_customers }}</b>
+        </div>
+        <div class="dash-stat">
+          <span>Pending no-shows</span>
+          <b>{{ dashboard_pending_no_show }}</b>
+        </div>
+      </div>
+      <div class="dash-quick">
+        {% for item in items|slice:":4" %}
+          <a class="dash-quick-btn" href="{% url 'home:dashboard_model_list' item.slug %}">
+            <i class="{{ item.icon }}"></i>
+            <span>{{ item.label }}</span>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="dash-hero-card">
+      <div class="dash-hero-card-title">Live System Pulse</div>
+      <div class="dash-hero-card-sub">Last 24 hours activity</div>
+      <div class="dash-hero-meter">
+        <div class="dash-hero-meter-bar" style="width:{{ dashboard_notif_meter|default:0 }}%"></div>
+      </div>
+      <div class="dash-hero-card-grid">
+        <div>
+          <span>New reviews</span>
+          <b>{{ dashboard_new_reviews }}</b>
+        </div>
+        <div>
+          <span>Provider signups</span>
+          <b>{{ dashboard_new_providers }}</b>
+        </div>
+        <div>
+          <span>Messages</span>
+          <b>{{ dashboard_new_messages }}</b>
+        </div>
+        <div>
+          <span>Open fixes</span>
+          <b>{{ dashboard_open_fixes }}</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="dash-grid">
+    <section>
+      <div class="dash-section-head">
+        <div>
+          <h2>Overview Cards</h2>
+          <p>Quick access to every dashboard module.</p>
+        </div>
+        <span class="dash-section-pill">All Modules</span>
+      </div>
+      <div class="dash-cards">
+        {% for card in cards %}
+          <a class="dash-card text-decoration-none" href="{% url 'home:dashboard_model_list' card.slug %}">
+            <div>
+              <div class="label">{{ card.label }}</div>
+              <div class="count">{{ card.count }}</div>
+              {% if card.alert_count %}
+                <span class="dash-alert">{{ card.alert_count }}</span>
+              {% endif %}
+            </div>
+            <i class="{{ card.icon }}"></i>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+
+    <aside class="dash-activity">
+      <div class="dash-section-head">
+        <div>
+          <h2>Live Activity</h2>
+          <p>Latest actions across the system.</p>
+        </div>
+        <span class="dash-section-pill">Auto refresh</span>
+      </div>
+      <div class="dash-activity-list">
+        {% if dashboard_notif_items %}
+          {% for n in dashboard_notif_items %}
+            <div class="dash-activity-item">
+              <div class="dash-activity-icon">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <div>
+                <div class="dash-activity-title">{{ n.title }}</div>
+                <div class="dash-activity-note">{{ n.detail }}</div>
+              </div>
+              <div class="dash-activity-time">{{ n.time|date:"M d, h:i A" }}</div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="dash-activity-empty">No recent activity in the last 24 hours.</div>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+{% endblock %}

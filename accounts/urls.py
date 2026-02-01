@@ -26,6 +26,7 @@ urlpatterns = [
     path("Change_Password/", views.Change_Password, name="Change_Password"),
     path("Service_History_and_Ratings/", views.Service_History_and_Ratings, name="Service_History_and_Ratings"),
     path("Loyalty_and_Rewards/", views.Loyalty_and_Rewards, name="Loyalty_and_Rewards"),
+    path("subscription/manage/", views.manage_subscription, name="manage_subscription"),
     
     # Subpages
     path("add_Customer_Notes/", views.add_Customer_Notes, name="add_Customer_Notes"),
@@ -41,10 +42,12 @@ urlpatterns = [
     path("Add_on_Service_Request/", views.Add_on_Service_Request, name="Add_on_Service_Request"),
     path("Media/", views.Media, name="Media"),
     path("Report_Incident/", views.Report_Incident, name="Report_Incident"),
+    path("services/<slug:slug>/", views.service_detail, name="service_detail"),
     
     path("logout/", views.logout_view, name="logout"),
 
     path("provider/bookings/", views.provider_bookings, name="provider_bookings"),
+    path("provider/messages/", views.provider_inbox, name="provider_inbox"),
     path("provider/booking/<str:booking_type>/<int:booking_id>/", views.provider_booking_detail, name="provider_booking_detail"),
     path("provider/booking/<str:booking_type>/<int:booking_id>/action/", views.provider_booking_action, name="provider_booking_action"),
     path("provider/profile/", views.provider_profile, name="provider_profile"),

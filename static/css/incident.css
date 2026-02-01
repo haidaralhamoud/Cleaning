@@ -91,6 +91,88 @@ th {
   font-weight: 600;
 }
 
+.view-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: var(--sky-strong);
+  color: #fff;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 18px rgba(3, 159, 200, 0.3);
+}
+
+.view-link:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(3, 159, 200, 0.35);
+}
+
+.incident-cards {
+  display: none;
+  margin-top: 20px;
+}
+
+.incident-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid rgba(3, 159, 200, 0.15);
+  box-shadow: 0 5px 20px rgba(3, 159, 200, 0.1);
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.incident-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.incident-id {
+  font-weight: 600;
+  color: #333;
+}
+
+.incident-status-pill {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(3, 159, 200, 0.15);
+  color: var(--sky-strong);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.incident-card h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #111;
+}
+
+.incident-meta,
+.incident-summary {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+}
+
+.incident-card-actions {
+  margin-top: 5px;
+}
+
+.incident-card-empty {
+  color: var(--muted);
+  text-align: center;
+  background: #fff;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px dashed rgba(3, 159, 200, 0.3);
+}
+
 /* ===== زر القائمة (Mobile Toggle) ===== */
 .menu-toggle {
   position: fixed;
@@ -169,5 +251,23 @@ th {
 
   .main-content {
     padding: 90px 20px 40px;
+  }
+
+  .table-wrapper {
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .table-wrapper table {
+    display: none;
+  }
+
+  .incident-cards {
+    display: block;
+  }
+
+  .incident-card {
+    max-width: 100%;
   }
 }

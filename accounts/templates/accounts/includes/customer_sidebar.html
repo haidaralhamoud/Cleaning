@@ -1,0 +1,90 @@
+{% load static %}
+{% with sidebar_customer=customer|default:sidebar_customer %}
+<aside class="sidebar customer-sidebar" id="sidebar">
+  <div class="sidebar-inner">
+  <div class="profile-head">
+    <div class="avatar">
+      {% if sidebar_customer and sidebar_customer.profile_photo %}
+        <img src="{{ sidebar_customer.profile_photo.url }}" alt="Profile photo">
+      {% else %}
+        <img src="{% static 'images/ellipse-270.png' %}" alt="Profile photo">
+      {% endif %}
+    </div>
+    <div>
+      <div class="name">
+        {% if sidebar_customer %}
+          {% if sidebar_customer.first_name or sidebar_customer.last_name %}
+            {{ sidebar_customer.first_name }} {{ sidebar_customer.last_name }}
+          {% elif sidebar_customer.email %}
+            {{ sidebar_customer.email }}
+          {% else %}
+            {{ request.user.get_full_name|default:request.user.username }}
+          {% endif %}
+        {% else %}
+          {{ request.user.get_full_name|default:request.user.username }}
+        {% endif %}
+      </div>
+      <div class="id">ID: {% if sidebar_customer %}{{ sidebar_customer.id }}{% else %}{{ request.user.id }}{% endif %}</div>
+    </div>
+  </div>
+
+  <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
+    {% csrf_token %}
+  </form>
+
+  {% with current=request.resolver_match.url_name %}
+  <nav class="side-nav">
+    <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item{% if current == 'customer_profile_view' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/home2.png' %}" alt=""></span>
+      <span>Overview</span>
+    </a>
+    <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item{% if current == 'Address_and_Locations_view' or current == 'Add_Address_and_Locations' or current == 'edit_address_and_locations' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/locations1.png' %}" alt=""></span>
+      <span>Address & Locations</span>
+    </a>
+    <a href="{% url 'accounts:my_bookimg' %}" class="nav-item{% if current == 'my_bookimg' or current == 'view_service_details' or current == 'Add_on_Service_Request' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/booking0.png' %}" alt=""></span>
+      <span>My Bookings</span>
+    </a>
+    <a href="{% url 'accounts:incident' %}" class="nav-item{% if current == 'incident' or current == 'Report_Incident' or current == 'Incident_Report_order' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/cancel0.png' %}" alt=""></span>
+      <span>Incidents</span>
+    </a>
+    <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item{% if current == 'Service_Preferences' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/settings0.png' %}" alt=""></span>
+      <span>Service Preferences</span>
+    </a>
+    <a href="{% url 'accounts:Communication' %}" class="nav-item{% if current == 'Communication' or current == 'chat' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/communication1.png' %}" alt=""></span>
+      <span>Communication</span>
+    </a>
+    <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item{% if current == 'Customer_Notes' or current == 'add_Customer_Notes' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/notes0.png' %}" alt=""></span>
+      <span>Customer Notes</span>
+    </a>
+    <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item{% if current == 'Payment_and_Billing' or current == 'Add_Payment_Method' or current == 'set_payment_default' or current == 'delete_payment_method' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/magnetic-card0.png' %}" alt=""></span>
+      <span>Payment & Billing</span>
+    </a>
+    <a href="{% url 'accounts:Change_Password' %}" class="nav-item{% if current == 'Change_Password' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/security-lock0.png' %}" alt=""></span>
+      <span>Change Password</span>
+    </a>
+    <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item{% if current == 'Service_History_and_Ratings' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/satisfaction0.png' %}" alt=""></span>
+      <span>Service History & Ratings</span>
+    </a>
+    <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item{% if current == 'Loyalty_and_Rewards' %} active{% endif %}">
+      <span class="nav-ico"><img src="{% static 'images/medal-second-place0.png' %}" alt=""></span>
+      <span>Loyalty & Rewards</span>
+    </a>
+    <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+      <span class="nav-ico"><img src="{% static 'images/logout-rounded0.png' %}" alt=""></span>
+      <span>Logout</span>
+    </a>
+  </nav>
+  {% endwith %}
+  </div>
+</aside>
+<script src="{% static 'js/customer_sidebar.js' %}"></script>
+{% endwith %}

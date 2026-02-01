@@ -6,322 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Booking Schedule</title>
 
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 <link rel="stylesheet" href="{% static 'css/Private_scheduale.css' %}">
 
-<style>
-  body{
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:#f7f9fc;
-  }
-
-  /* ====== توزيع الصفحة يمين/يسار ====== */
-  .container {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 25px;
-      max-width: 1250px;
-      margin: 0 auto;
-      padding: 20px;
-  }
-
-  .left {
-      flex: 1;
-      min-width: 650px;
-  }
-
-  .right {
-      width: 350px;
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px;
-      border: 1px solid #e6eff8;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-      position: sticky;
-      top: 20px;
-      height: fit-content;
-  }
-
-  /* ====== summary ====== */
-  .summary-item{
-      display:flex;
-      justify-content:space-between;
-      margin:8px 0;
-      font-size:.95rem;
-  }
-  .summary-item.total{
-      font-size:1.25rem;
-      font-weight:700;
-      color:#00a3c8;
-  }
-  .line{
-      border-bottom:1px solid #eee;
-      margin:10px 0;
-  }
-
-  .checkout-wrapper{
-      display:flex;
-      justify-content:flex-end;
-      margin-top:18px;
-  }
-
-  /* ====== اختيار نوع الـ Schedule (نفس الكل / لكل خدمة) ====== */
-  .mode-row{
-      display:flex;
-      gap:15px;
-      margin:25px auto 30px;
-      flex-wrap:wrap;
-      max-width:700px;
-      justify-content:center;
-  }
-  .mode-card{
-      flex:1 1 230px;
-      border:1px solid #d4e5f0;
-      border-radius:14px;
-      padding:14px 16px;
-      cursor:pointer;
-      background:#f8fbff;
-      transition:.2s;
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-  }
-  .mode-card small{
-      color:#666;
-      font-size:.8rem;
-  }
-  .mode-card span.badge{
-      align-self:flex-start;
-      font-size:.7rem;
-      padding:2px 8px;
-      border-radius:999px;
-      background:#e3f7fb;
-      color:#0089a8;
-      margin-top:4px;
-  }
-  .mode-card.selected{
-      border-color:#00a3c8;
-      box-shadow:0 0 0 2px rgba(0,163,200,0.15);
-      background:#ffffff;
-  }
-  .mode-title{
-      font-weight:600;
-  }
-
-  /* ====== منطقة الجدولة حسب كل خدمة ====== */
-  .per-service-area{
-      margin-top:20px;
-  }
-  .service-acc{
-      background:#ffffff;
-      border-radius:16px;
-      border:1px solid #dde6f2;
-      margin-bottom:12px;
-      overflow:hidden;
-      transition:.2s;
-  }
-  .service-acc.open{
-      box-shadow:0 8px 16px rgba(0,0,0,0.05);
-      border-color:#00a3c8;
-  }
-  .acc-header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 16px;
-      cursor:pointer;
-      gap:12px;
-  }
-  .acc-main-info{
-      display:flex;
-      align-items:center;
-      gap:10px;
-  }
-  .acc-main-info img{
-      width:40px;
-      height:40px;
-      border-radius:12px;
-      object-fit:cover;
-  }
-  .acc-name{
-      font-weight:600;
-      font-size:.98rem;
-  }
-  .acc-cat{
-      font-size:.8rem;
-      color:#777;
-  }
-  .acc-toggle-btn{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      border:none;
-      background:#e6f6fb;
-      color:#0089a8;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:.8rem;
-      font-weight:600;
-  }
-  .acc-arrow{
-      display:inline-block;
-      transition:.2s;
-  }
-  .service-acc.open .acc-arrow{
-      transform:rotate(180deg);
-  }
-  .acc-body{
-      max-height:0;
-      overflow:hidden;
-      transition:max-height .25s ease;
-      border-top:1px solid #eef3fb;
-      background:#fcfeff;
-  }
-  .acc-inner{
-      padding:14px 16px 18px;
-  }
-
-  .svc-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:16px;
-      margin-bottom:14px;
-  }
-  .svc-col{
-      flex:1 1 240px;
-  }
-  .svc-label{
-      display:block;
-      font-size:.85rem;
-      font-weight:600;
-      margin-bottom:4px;
-  }
-  .svc-input,
-  .svc-select,
-  .svc-textarea{
-      width:100%;
-      border-radius:10px;
-      border:1px solid #d4e5f0;
-      padding:8px 10px;
-      font-size:.88rem;
-      outline:none;
-      transition:.2s;
-      background:#ffffff;
-  }
-  .svc-input:focus,
-  .svc-select:focus,
-  .svc-textarea:focus{
-      border-color:#00a3c8;
-      box-shadow:0 0 0 2px rgba(0,163,200,0.15);
-  }
-  .svc-textarea{
-      min-height:70px;
-      resize:vertical;
-  }
-
-  .svc-days{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:4px;
-  }
-  .svc-day-pill{
-      border-radius:999px;
-      border:1px solid #d4e5f0;
-      padding:4px 10px;
-      font-size:.78rem;
-      display:flex;
-      align-items:center;
-      gap:4px;
-      background:#ffffff;
-      cursor:pointer;
-  }
-  .svc-day-pill input{
-      accent-color:#00a3c8;
-  }
-
-  .svc-end-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      align-items:center;
-      margin-top:4px;
-  }
-
-  /* ====== شكل اليوم + الزيادة تحته ====== */
-  .day{
-      position:relative;
-      text-align:center;
-      padding-top:6px;
-      padding-bottom:2px;
-      font-size:0.9rem;
-      cursor:pointer;
-  }
-  .day.selected{
-      background:#00a3c8;
-      color:#fff;
-      border-radius:999px;
-  }
-  .surcharge-tag{
-      font-size:0.6rem;
-      margin-top:2px;
-      font-weight:600;
-      line-height:1;
-  }
-
-
-.day-check input {
-    transform: scale(1.2);
-    
-
-}
-
-.weekend-tag {
-    margin-left: auto;
-    color: #d9534f;
-    font-weight: 700;
-    font-size: 0.9rem;
-
-}
-.day-check {
-    display: flex;
-    align-items: center;
-    justify-content: center;   /* 🔥 يخلي الاسم بالنص */
-    gap: 6px;
-    padding: 10px 20px;
-    border: 2px solid #00a3c8;
-    border-radius: 30px;
-    margin-bottom: 12px;
-    width: 240px; /* 🔥 عرض ثابت ليصير الصفين متساويين */
-    font-weight: 700;
-    width:300px ;
-    font-size: 1rem;
-    background: white;
-    position: relative;  /* مهم للـ +20% */
-}
-
-.day-check input {
-    position: absolute;
-    left: 15px;  /* 🔥 checkbox يصير دائماً اليسار */
-    transform: scale(1.15);
-}
-
-.weekend-tag {
-    position: absolute;
-    right: 15px;   /* 🔥 +20% على اليمين */
-    color: #d9534f;
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.input-error {
-    border: 2px solid #e74c3c !important;
-    background: #fff6f6;
-}
-
-</style>
 </head>
 <body>
+{% include "home/includes/main_header.html" %}
 
 <form method="post" id="scheduleForm" action="{% url 'home:private_booking_schedule' booking.id %}">
   {% csrf_token %}
@@ -349,7 +40,7 @@
 
       <!-- اختيار نوع الـ schedule -->
       {% if services|length > 1 %}
-        <p style="margin:8px 0 6px;font-weight:600;">How would you like to schedule your services?</p>
+        <p class="mode-caption">How would you like to schedule your services?</p>
 
         <div class="mode-row">
             <div class="mode-card" data-mode="same">
@@ -369,9 +60,9 @@
       {% endif %}
 
       <!-- 🟦 نفس الـ Schedule لكل الخدمات -->
-      <div id="sameScheduleArea" style="display:none;">
+      <div id="sameScheduleArea" class="hidden">
 
-        <p style="margin-bottom: 10px;">Schedule for all services:</p>
+        <p class="section-caption">Schedule for all services:</p>
 
         <div class="q-row">
           <!-- Calendar -->
@@ -413,15 +104,15 @@
           <div class="freq-col">
             <h3>Q1. How often would you like this service?</h3>
   <div class="freq-btn" data-freq="weekly">
-      Weekly <span class="save-tag">(save up to 15%)</span>
+      Weekly <span class="save-tag"></span>
   </div>
 
   <div class="freq-btn" data-freq="biweekly">
-      Every 2 weeks <span class="save-tag">(save up to 10%)</span>
+      Every 2 weeks <span class="save-tag"></span>
   </div>
 
   <div class="freq-btn" data-freq="monthly">
-      Monthly <span class="save-tag">(save up to 5%)</span>
+      Monthly <span class="save-tag"></span>
   </div>
 
           </div>
@@ -452,13 +143,11 @@
     </label>
 
     <label class="day-check weekend">
-        <input type="checkbox" data-day="Sat"/> Saturday 
-        <span class="weekend-tag">+20%</span>
+        <input type="checkbox" data-day="Sat"/> Saturday
     </label>
 
     <label class="day-check weekend">
-        <input type="checkbox" data-day="Sun"/> Sunday 
-        <span class="weekend-tag">+20%</span>
+        <input type="checkbox" data-day="Sun"/> Sunday
     </label>
 
 </div>
@@ -473,13 +162,13 @@
             <div class="end-btn" id="noBtn">No, ongoing until further notice</div>
             <div class="end-btn" id="yesBtn">Yes</div>
           </div>
-          <input type="date" id="endDate" style="display:none;">
+          <input type="date" id="endDate" class="hidden">
         </div>
       </div>
 
       <!-- 🟣 Schedule منفصل لكل خدمة -->
-      <div id="perServiceArea" class="per-service-area" style="display:none;">
-        <h3 style="margin-bottom:10px;">Set a dedicated schedule for each service</h3>
+      <div id="perServiceArea" class="per-service-area hidden">
+        <h3 class="section-subtitle">Set a dedicated schedule for each service</h3>
 
         {% for s in services %}
         <div class="service-acc" data-service="{{ s.slug }}">
@@ -549,7 +238,7 @@
                 <div class="svc-col">
                   <label class="svc-label">End Date (optional)</label>
                   <div class="svc-end-row">
-                    <span style="font-size:.8rem;color:#666;">Leave empty for ongoing booking.</span>
+                    <span class="muted-note">Leave empty for ongoing booking.</span>
                     <input type="date" class="svc-input svc-end-date">
                   </div>
                 </div>
@@ -569,17 +258,8 @@
       </div>
 
       <!-- زر المتابعة في اليسار -->
-      <div style="margin-top: 25px;">
-        <button type="submit" class="checkout-btn" style="
-          width: 100%;
-          padding: 14px;
-          border-radius: 12px;
-          font-size: 1.05rem;
-          background: #00a3c8;
-          color: white;
-          border: none;
-          cursor: pointer;
-        ">
+      <div class="primary-action">
+        <button type="submit" class="checkout-btn checkout-primary">
           Continue →
         </button>
       </div>
@@ -599,6 +279,11 @@
         <div class="summary-item">
             <span>Add-ons</span>
             <span id="sum_addons">$0</span>
+        </div>
+
+        <div class="summary-item">
+            <span>Schedule</span>
+            <span id="sum_schedule">$0</span>
         </div>
 
         <div class="summary-item">
@@ -624,12 +309,130 @@
 
 
 {{ date_rules|json_script:"dateRules" }}
+{{ schedule_rules|json_script:"scheduleRules" }}
 <script>
-const DATE_RULES = JSON.parse(document.getElementById("dateRules").textContent); 
+let DATE_RULES = JSON.parse(document.getElementById("dateRules").textContent);
+if (typeof DATE_RULES === "string") {
+  try {
+    DATE_RULES = JSON.parse(DATE_RULES);
+  } catch (err) {
+    DATE_RULES = [];
+  }
+}
+if (!Array.isArray(DATE_RULES)) {
+  DATE_RULES = [];
+}
+</script>
+<script>
+let SCHEDULE_RULES = JSON.parse(document.getElementById("scheduleRules").textContent);
+if (typeof SCHEDULE_RULES === "string") {
+  try {
+    SCHEDULE_RULES = JSON.parse(SCHEDULE_RULES);
+  } catch (err) {
+    SCHEDULE_RULES = [];
+  }
+}
+if (!Array.isArray(SCHEDULE_RULES)) {
+  SCHEDULE_RULES = [];
+}
+
+const frequencyRuleMap = new Map();
+const dayRuleMap = new Map();
+SCHEDULE_RULES.forEach((rule) => {
+  if (!rule) return;
+  if (rule.key === "frequency_type" && rule.value) {
+    frequencyRuleMap.set(rule.value, Number(rule.price_change));
+  }
+  if (rule.key === "day" && rule.value) {
+    dayRuleMap.set(rule.value, Number(rule.price_change));
+  }
+});
+
+function updateFrequencyLabels() {
+  document.querySelectorAll(".freq-btn").forEach((btn) => {
+    const freq = btn.getAttribute("data-freq");
+    const tag = btn.querySelector(".save-tag");
+    if (!tag) return;
+    const amount = frequencyRuleMap.get(freq);
+    if (amount === undefined || Number.isNaN(amount)) {
+      tag.textContent = "";
+      return;
+    }
+    const absVal = Math.abs(amount);
+    if (amount < 0) {
+      tag.textContent = `(save up to ${absVal}%)`;
+    } else {
+      tag.textContent = `(+${absVal}%)`;
+    }
+  });
+}
+
+function updateDayLabels() {
+  const checks = document.querySelectorAll(".day-check input[data-day]");
+  checks.forEach((input) => {
+    const code = input.getAttribute("data-day");
+    const amount = dayRuleMap.get(code);
+    const wrapper = input.closest(".day-check");
+    if (!wrapper) return;
+    let tag = wrapper.querySelector(".weekend-tag");
+    if (amount === undefined || Number.isNaN(amount)) {
+      if (tag) tag.remove();
+      return;
+    }
+    if (!tag) {
+      tag = document.createElement("span");
+      tag.className = "weekend-tag";
+      wrapper.appendChild(tag);
+    }
+    const absVal = Math.abs(amount);
+    tag.textContent = amount < 0 ? `-${absVal}%` : `+${absVal}%`;
+  });
+}
+
 </script>
 <script>
 /* ---------- Helpers ---------- */
 function pad(n){return n<10? "0"+n : n;}
+function toDateKey(dateObj){
+  const y = dateObj.getFullYear();
+  const m = pad(dateObj.getMonth() + 1);
+  const d = pad(dateObj.getDate());
+  return `${y}-${m}-${d}`;
+}
+function ruleAmount(rule){
+  const amount = Number(rule.amount ?? 0);
+  if (Number.isNaN(amount)) return 0;
+  return amount;
+}
+function formatSurcharge(rule){
+  const amount = ruleAmount(rule);
+  if (!amount) return "";
+  if (rule.surcharge_type === "fixed") {
+    return `+$${amount.toFixed(2)}`;
+  }
+  return `+${amount}%`;
+}
+
+const WEEKDAY_CODES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+const weekdayRules = new Map();
+const dateRules = new Map();
+DATE_RULES.forEach((rule) => {
+  if (!rule) return;
+  if (rule.rule_type === "weekday" && rule.weekday) {
+    weekdayRules.set(rule.weekday, rule);
+  }
+  if (rule.rule_type === "date" && rule.date) {
+    const key = String(rule.date).slice(0, 10);
+    dateRules.set(key, rule);
+  }
+});
+
+function getRuleForDate(dateObj){
+  const key = toDateKey(dateObj);
+  if (dateRules.has(key)) return dateRules.get(key);
+  const weekday = WEEKDAY_CODES[dateObj.getDay()];
+  return weekdayRules.get(weekday) || null;
+}
 
 /* ---------- Elements & State ---------- */
 const inputDate    = document.getElementById("appointment_date");
@@ -681,6 +484,10 @@ modeCards.forEach(card => {
   });
 });
 
+/* ---------- Schedule Rules (frequency + days) ---------- */
+updateFrequencyLabels();
+updateDayLabels();
+
 /* ---------- Calendar (same mode) مع الزيادات ---------- */
 function renderCalendar(month, year){
   if (!calendarDays || !monthTitle) return;
@@ -707,13 +514,12 @@ function renderCalendar(month, year){
     const jsDate = new Date(year, month, d);
     const weekday = jsDate.getDay(); // 0=Sun, 6=Sat
 
-    let surcharge = 0;
-
-    if (weekday === 0 || weekday === 6) {
-      surcharge = 10;
+    const rule = getRuleForDate(jsDate);
+    const surchargeLabel = rule ? formatSurcharge(rule) : "";
+    if (surchargeLabel) {
       const badge = document.createElement("div");
       badge.className = "day-surcharge";
-      badge.textContent = `+${surcharge}%`;
+      badge.textContent = surchargeLabel;
       cell.appendChild(badge);
       cell.classList.add("weekend");
     }
@@ -735,7 +541,7 @@ cell.addEventListener("click", () => {
     inputDate.value = dateStr;
 
     // 4) تحديد اليوم (Sat / Sun / Mon ...)
-    const weekdayCode = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][weekday];
+    const weekdayCode = WEEKDAY_CODES[weekday];
     document.getElementById("day_work_best").value = JSON.stringify([weekdayCode]);
 
     // 5) إعادة حساب السعر فوراً
@@ -874,6 +680,9 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
       ? "end_on"
       : "no_end";
 
+    const endInput = document.getElementById("End_Date");
+    if (endInput) endInput.value = endVal || "";
+
     const payload = {
       special_request: specialText,
       days: days,
@@ -1005,6 +814,9 @@ function updateScheduleSummary() {
 
             document.getElementById("sum_addons").textContent =
                 "$" + Number(data.addons_total).toFixed(2);
+
+            document.getElementById("sum_schedule").textContent =
+                "$" + Number(data.schedule_extra).toFixed(2);
 
             document.getElementById("sum_rot").textContent =
                 "$" + Number(data.rot).toFixed(2);
@@ -1140,5 +952,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
     // ⬇️ خليه يكمل كود التخزين تبعك طبيعي
 });
 </script>
+<script src="{% static 'js/main_header.js' %}"></script>
+{% include "home/includes/footer.html" %}
 </body>
 </html>

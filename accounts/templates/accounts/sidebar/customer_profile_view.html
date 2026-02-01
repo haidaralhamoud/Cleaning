@@ -9,23 +9,107 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 <link rel="stylesheet" href="{% static 'css/customer_profile_view.css' %}">
 
 <style>
-  .edit-only .form-control {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 14px;
+/* ===== DROPDOWN ===== */
+.nav-dropdown {
+  position: relative;
 }
 
-.edit-only select.form-control {
-  height: 38px;
+.dropdown-toggle {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.field {
-  margin-bottom: 12px;
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #fff;
+  min-width: 190px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all .25s ease;
+  z-index: 999;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 18px;
+  color: #222;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.dropdown-menu a:hover {
+  background: #f2f7fa;
+  color: #00a3c8;
+}
+
+.nav-dropdown:hover .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-auth {
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  background: #00a3c8;
+  color: #fff;
+  transition: .25s ease;
+  font-size: 0.9rem;
+}
+
+.auth-buttons button.btn-auth {
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.btn-auth:hover {
+  background: #0089a8;
+  color: #fff;
+}
+
+.btn-auth.outline {
+  background: transparent;
+  color: #00a3c8;
+  border: 2px solid #00a3c8;
+}
+
+.btn-auth.outline:hover {
+  background: #00a3c8;
+  color: #fff;
+}
+
+.btn-auth.logout {
+  background: #ff4f4f;
+}
+
+.btn-auth.logout:hover {
+  background: #e63e3e;
+}
+
+.nav-links .auth-buttons {
+  display: none;
 }
 /* ================= BASIC ================= */
 .layout {
@@ -52,25 +136,28 @@
   }
 
   .layout {
-    flex-direction: column;
+    flex-direction: row;
+    min-height: 100vh;
+    padding: 0;
   }
 
   /* ===== SIDEBAR ===== */
   .sidebar {
     position: fixed;
-    top: 0px;
-    margin-top: 71px;
-    left: -50px;
-    width: 300px;
-    height: 90vh;
+    top: 70px;
+    left: 0;
+    width: 280px;
+    height: calc(100vh - 70px);
+    margin: 0;
     background: #fff;
-    z-index: 1000;
+    z-index: 2000;
 
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    border-radius: 0 18px 18px 0;
   }
 
   .sidebar.open {
@@ -82,7 +169,7 @@
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.35);
-    z-index: 999;
+    z-index: 1500;
     display: none;
   }
 
@@ -92,7 +179,9 @@
 
   /* ===== CONTENT ===== */
   .content {
-    padding: 16px;
+    margin: 0;
+    padding: 16px 16px 20px;
+    padding-top: 16px;
   }
 
   .cards-container {
@@ -106,7 +195,7 @@
     width: 100%;
   }
 
-  /* ===== NAV LINKS (اختياري – dropdown) ===== */
+  /* ===== NAV LINKS (اختSارS - dropdown) ===== */
   .nav-links {
     position: fixed;
     top: 70px;
@@ -124,6 +213,62 @@
 
   .nav-links.active {
     display: flex;
+  }
+
+  .auth-buttons {
+    display: none;
+  }
+
+  .nav-links .auth-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 6px 0;
+  }
+
+  .nav-links a,
+  .nav-links .btn-auth,
+  .nav-links .auth-buttons button.btn-auth {
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    padding: 0;
+  }
+
+  .nav-links .auth-buttons .btn-auth,
+  .nav-links .auth-buttons .btn-auth.outline,
+  .nav-links .auth-buttons .btn-auth.logout {
+    background: transparent;
+    border: none;
+    color: inherit;
+  }
+
+  .nav-dropdown {
+    width: 100%;
+    text-align: center;
+  }
+
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    box-shadow: none;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    display: none;
+    padding: 0;
+  }
+
+  .nav-dropdown.open .dropdown-menu {
+    display: block;
+  }
+
+  .dropdown-menu a {
+    padding: 8px 0;
   }
 }
 
@@ -151,66 +296,22 @@
 <body>
 
 <!-- ================= HEADER ================= -->
-<header class="main-header">
-
-
-  
-  <!-- زر السايدبار -->
-  <button class="menu-toggle profile-toggle" id="sidebarToggle">👤</button>
-
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}">
-  </div>
-  <!-- زر النافبار -->
-  <button class="menu-toggle" id="navToggle">☰</button>
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
+<div class="mobile-header">
+  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+    <span class="arrow">&#8250;</span>
+  </button>
+  <h2 class="mobile-title">Customer Profile</h2>
+</div>
 
 <!-- ================= LAYOUT ================= -->
 <div class="layout">
 
 <!-- ================= SIDEBAR ================= -->
-<aside class="sidebar" id="sidebar">
+{% include "accounts/includes/customer_sidebar.html" %}
 
-    <div class="profile-head">
-      <div class="avatar"></div>
-      <div>
-    <div class="name">{{ customer.first_name }} {{ customer.last_name }}</div>
-    <div class="id">ID: {{ customer.id }}</div>
-      </div>
-    </div>
 
-     <form id="logout-form" method="post" action="{% url 'logout' %}" style="display:none;">
-      {% csrf_token %}
-    </form>
-
-    <nav class="side-nav">
-      <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-      <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-      <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-      <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-      <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-      <a href="{% url 'accounts:Communication' %}" class="nav-item"><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-      <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item"><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-      <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-      <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-      <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-      <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-      <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-    </nav>
-</aside>
-
-<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="sidebar-overlay customer-menu-overlay" id="sidebarOverlay"></div>
 
 <!-- ================= CONTENT ================= -->
     <!-- Main -->
@@ -231,35 +332,36 @@
   <p class="muted subtitle">Active and scheduled services.</p>
 
   <div class="order-block">
-    <div class="order-line">
-      <div class="order-info">
-        <div class="order-name">Weekly House Cleaning</div>
-        <div class="order-id">Order ID: #SO-987654</div>
-        <div class="order-date">
-          <img src="{% static 'images/calendar1.png'%}" alt="">
-          <span>Next Service: Oct 23, 2024</span>
+    {% if ongoing_orders %}
+      {% for order in ongoing_orders %}
+        <div class="order-line">
+          <div class="order-info">
+            <div class="order-name">{{ order.title }}</div>
+            <div class="order-id">Order ID: #{{ order.order_code }}</div>
+            <div class="order-date">
+              <img src="{% static 'images/calendar1.png'%}" alt="">
+              <span>
+                {{ order.date_label }}:
+                {% if order.when %}{{ order.when|date:"M d, Y" }}{% else %}-{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="order-actions">
+            <span class="pill {{ order.status_class }}">{{ order.status_label }}</span>
+            <a href="{% url 'accounts:view_service_details' order.type order.id %}">
+              <button class="btn btn-outline">View Details</button>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="order-line">
+        <div class="order-info">
+          <div class="order-name">No active orders right now</div>
+          <div class="order-id">Once you book a service, it will appear هنا.</div>
         </div>
       </div>
-      <div class="order-actions">
-        <span class="pill pill-info">In Progress</span>
-        <button class="btn btn-outline">View Details</button>
-      </div>
-    </div>
-
-    <div class="order-line">
-      <div class="order-info">
-        <div class="order-name">Deep Carpet Cleaning</div>
-        <div class="order-id">Order ID: #SO-987655</div>
-        <div class="order-date">
-          <img src="{% static 'images/calendar1.png'%}" alt="">
-          <span>Scheduled: Oct 28, 2024</span>
-        </div>
-      </div>
-      <div class="order-actions">
-        <span class="pill pill-warn">Scheduled</span>
-        <button class="btn btn-outline">View Details</button>
-      </div>
-    </div>
+    {% endif %}
   </div>
 </article>
 
@@ -282,7 +384,22 @@
 
     <!-- ================= Column 1 ================= -->
     <div class="col">
-      <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon">
+      {% if customer.profile_photo %}
+        <img src="{{ customer.profile_photo.url }}" alt="profile" class="profile-icon profile-photo">
+      {% else %}
+        <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon profile-photo">
+      {% endif %}
+
+      <div class="field">
+        <div class="label">Profile photo</div>
+        <div class="val view-only">Tap edit to update</div>
+        <div class="edit-only" style="display:none">
+          <label class="photo-upload">
+            <span>Change photo</span>
+            {{ basic_form.profile_photo }}
+          </label>
+        </div>
+      </div>
 
       <div class="field">
         <div class="label">Email Address</div>
@@ -305,7 +422,7 @@
         <div class="val view-only">
           {% if customer.date_of_birth %}
             {{ customer.date_of_birth|date:"d/m/Y" }}
-          {% else %} — {% endif %}
+          {% else %} - {% endif %}
         </div>
         <div class="edit-only" style="display:none">
           {{ basic_form.date_of_birth }}
@@ -325,7 +442,7 @@
 
       <div class="field">
         <div class="label">Country code</div>
-        <div class="val view-only">{{ customer.country_code|default:"—" }}</div>
+        <div class="val view-only">{{ customer.country_code|default:"-" }}</div>
         <div class="edit-only" style="display:none">
           {{ basic_form.country_code }}
         </div>
@@ -334,7 +451,7 @@
       <div class="field">
         <div class="label">Preferred contact method</div>
         <div class="val view-only">
-          {{ customer.get_preferred_contact_method_display|default:"—" }}
+          {{ customer.get_preferred_contact_method_display|default:"-" }}
         </div>
         <div class="edit-only" style="display:none">
           {{ basic_form.preferred_contact_method }}
@@ -343,7 +460,7 @@
 
       <div class="field">
         <div class="label">Gender</div>
-        <div class="val view-only">{{ customer.gender|default:"—"|capfirst }}</div>
+        <div class="val view-only">{{ customer.gender|default:"-"|capfirst }}</div>
         <div class="edit-only" style="display:none">
           {{ basic_form.gender }}
         </div>
@@ -370,7 +487,7 @@
 
       <div class="field">
         <div class="label">Pronouns</div>
-        <div class="val view-only">{{ customer.pronouns|default:"—" }}</div>
+        <div class="val view-only">{{ customer.pronouns|default:"-" }}</div>
         <div class="edit-only" style="display:none">
           {{ basic_form.pronouns }}
         </div>
@@ -380,7 +497,7 @@
   </div>
 
 
-  <!-- ================= Emergency Contact (ما بينمس) ================= -->
+  <!-- ================= Emergency Contact ( ) ================= -->
 <div class="emergency">
   <div class="em-title">Emergency contact</div>
 
@@ -389,7 +506,7 @@
     <div class="field">
       <div class="label">First Name</div>
       <div class="val view-only">
-        {{ customer.emergency_first_name|default:"—" }}
+        {{ customer.emergency_first_name|default:"-" }}
       </div>
       <div class="edit-only" style="display:none">
         <input type="text"
@@ -402,7 +519,7 @@
     <div class="field">
       <div class="label">Last Name</div>
       <div class="val view-only">
-        {{ customer.emergency_last_name|default:"—" }}
+        {{ customer.emergency_last_name|default:"-" }}
       </div>
       <div class="edit-only" style="display:none">
         <input type="text"
@@ -415,7 +532,7 @@
     <div class="field">
       <div class="label">Phone number</div>
       <div class="val view-only">
-        {{ customer.emergency_phone|default:"—" }}
+        {{ customer.emergency_phone|default:"-" }}
       </div>
       <div class="edit-only" style="display:none">
         <input type="text"
@@ -428,7 +545,7 @@
     <div class="field">
       <div class="label">Relation</div>
       <div class="val view-only">
-        {{ customer.emergency_relation|default:"—" }}
+        {{ customer.emergency_relation|default:"-" }}
       </div>
       <div class="edit-only" style="display:none">
         <input type="text"
@@ -476,7 +593,7 @@
             {{ primary_location.postal_code }},
             {{ primary_location.country }}
           {% else %}
-            —
+            -
           {% endif %}
         </div>
       </div>
@@ -491,7 +608,7 @@
           {% if other_locations %}
             {{ other_locations|length }} locations saved
           {% else %}
-            —
+            -
           {% endif %}
         </div>
       </div>
@@ -506,7 +623,7 @@
           {% if primary_location and primary_location.entry_code %}
             {{ primary_location.entry_code }}
           {% else %}
-            —
+            -
           {% endif %}
         </div>
       </div>
@@ -521,7 +638,7 @@
           {% if primary_location and primary_location.parking_notes %}
             {{ primary_location.parking_notes }}
           {% else %}
-            —
+            -
           {% endif %}
         </div>
       </div>
@@ -543,8 +660,14 @@
           <article class="card side">
             <div class="side-head"><img src="{% static 'images/subscription0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil3.png'%}"></button></div>
             <h3 class="side-title">Subscription</h3>
-            <p class="side-text">you are on the Bi-Weekly Bliss plan</p>
-            <button class="btn btn-primary full">Manage Subscription</button>
+            <p class="side-text">
+              {% if subscription.status == "cancelled" %}
+                Subscription cancelled
+              {% else %}
+                {{ subscription.display_title }}
+              {% endif %}
+            </p>
+            <button class="btn btn-primary full" id="openSubscriptionModal" {% if subscription.status == "cancelled" %}disabled{% endif %}>Manage Subscription</button>
           </article>
 
           <article class="card side">
@@ -558,121 +681,135 @@
     </main>
   </div>
 
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
+<!-- ================= SUBSCRIPTION MODALS ================= -->
+<div class="modal-backdrop" id="subscriptionBackdrop"></div>
 
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
-          </div>
-        </div>
-
-
+<div class="modal-sheet" id="subscriptionModal">
+  <div class="modal-head">
+    <h3>Manage Subscription</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">×</button>
+  </div>
+  <div class="modal-body">
+    <div class="sub-summary">
+      <div class="sub-title">{{ subscription.display_title }}</div>
+      <div class="sub-meta">
+        <span>Next Billing Date: {{ subscription.next_billing_date|date:"M d, Y" }}</span>
+        <span>Next Service Date: {{ subscription.next_service_date|date:"M d, Y" }}</span>
       </div>
     </div>
 
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
+    <form id="subscriptionForm">
+      {% csrf_token %}
+      <div class="form-row">
+        <label class="switch-line">
+          <input type="checkbox" name="skip_next_service" {% if subscription.skip_next_service %}checked{% endif %}>
+          <span>Skip Next Service</span>
+        </label>
+      </div>
+
+      <div class="form-row">
+        <label class="check-line">
+          <input type="checkbox" name="pause_subscription" id="pauseToggle" {% if subscription.is_paused %}checked{% endif %}>
+          <span>Pause Subscription</span>
+        </label>
+        <div class="inline-grid" id="pauseFields">
+          <div>
+            <label>Pause until</label>
+            <input type="date" name="pause_until" value="{{ subscription.pause_until|date:'Y-m-d' }}" class="form-control">
+          </div>
+          <div>
+            <label>Resume on</label>
+            <input type="date" name="resume_on" value="{{ subscription.resume_on|date:'Y-m-d' }}" class="form-control">
           </div>
         </div>
-    </div>
+      </div>
 
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
+      <div class="form-row">
+        <label>Change Payment Method</label>
+        <select name="payment_method" class="form-control">
+          <option value="">Select a card</option>
+          {% for pm in payment_methods %}
+            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>
+              {{ pm.get_card_type_display }} •••• {{ pm.card_last4 }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
 
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
+      <button type="button" class="link-danger" id="openCancelModal">Cancel Subscription</button>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="reviewChangesBtn">Save Changes</button>
+        <button type="button" class="btn btn-outline" data-close="subscriptionModal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-sheet modal-compact" id="reviewModal">
+  <div class="modal-head">
+    <h3>Review Changes</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="reviewModal">×</button>
+  </div>
+  <div class="modal-body">
+    <ul class="review-list" id="reviewList"></ul>
+    <p class="review-note">These changes will affect your upcoming billing and service schedule.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" id="confirmChangesBtn">Confirm Changes</button>
+      <button type="button" class="btn btn-outline" data-close="reviewModal">Cancel</button>
     </div>
   </div>
+</div>
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
-
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+<div class="modal-sheet modal-compact" id="cancelModal">
+  <div class="modal-head">
+    <h3>Cancel subscription</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="cancelModal">×</button>
   </div>
-</footer>
+  <div class="modal-body">
+    <p class="muted">Your service will end after the next billing cycle.</p>
+    <label>Why are you cancelling?</label>
+    <select id="cancelReason" class="form-control">
+      <option value="">Select a reason</option>
+      <option value="Too expensive">Too expensive</option>
+      <option value="Not needed">Not needed</option>
+      <option value="Moving">Moving</option>
+      <option value="Other">Other</option>
+    </select>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" data-close="cancelModal">Keep Subscription</button>
+      <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm Cancel</button>
+    </div>
+  </div>
+</div>
 
-<!-- ================= JS ================= -->
-<script>
-/* ===== NAVBAR ===== */
-const navToggle = document.getElementById("navToggle");
-const navLinks = document.getElementById("nav-links");
+<div class="modal-sheet modal-compact" id="savedModal">
+  <div class="modal-head">
+    <h3>Changes Saved</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="savedModal">×</button>
+  </div>
+  <div class="modal-body">
+    <p>Your subscription has been updated successfully.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" data-close="savedModal">Back to Profile</button>
+    </div>
+  </div>
+</div>
 
-/* ===== SIDEBAR ===== */
-const sidebarToggle = document.getElementById("sidebarToggle");
-const sidebar = document.getElementById("sidebar");
-const sidebarOverlay = document.getElementById("sidebarOverlay");
+<div class="modal-sheet modal-compact" id="cancelledModal">
+  <div class="modal-head">
+    <h3>Subscription Canceled</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="cancelledModal">×</button>
+  </div>
+  <div class="modal-body">
+    <p>No further services will be scheduled. You can resubscribe anytime.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" data-close="cancelledModal">Back to Profile</button>
+    </div>
+  </div>
+</div>
 
-/* فتح / إغلاق Navbar */
-navToggle.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-
-  // سكّر السايدبار إذا كان مفتوح
-  sidebar.classList.remove("open");
-});
-
-/* فتح / إغلاق Sidebar */
-sidebarToggle.addEventListener("click", () => {
-  sidebar.classList.toggle("open");
-
-  // سكّر النافبار إذا كان مفتوح
-  navLinks.classList.remove("active");
-});
-
-/* إغلاق السايدبار عند الضغط خارجها */
-sidebarOverlay.addEventListener("click", () => {
-  sidebar.classList.remove("open");
-});
-</script>
-
+{% include "home/includes/footer.html" %}
 
 <script>
 function toggleBasicEdit() {
@@ -688,5 +825,140 @@ function toggleBasicEdit() {
 }
 </script>
 
+<script>
+(function () {
+  const backdrop = document.getElementById("subscriptionBackdrop");
+  const mainModal = document.getElementById("subscriptionModal");
+  const reviewModal = document.getElementById("reviewModal");
+  const cancelModal = document.getElementById("cancelModal");
+  const savedModal = document.getElementById("savedModal");
+  const cancelledModal = document.getElementById("cancelledModal");
+
+  const openBtn = document.getElementById("openSubscriptionModal");
+  const reviewBtn = document.getElementById("reviewChangesBtn");
+  const confirmBtn = document.getElementById("confirmChangesBtn");
+  const cancelBtn = document.getElementById("openCancelModal");
+  const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+
+  const pauseToggle = document.getElementById("pauseToggle");
+  const pauseFields = document.getElementById("pauseFields");
+  const reviewList = document.getElementById("reviewList");
+  const cancelReason = document.getElementById("cancelReason");
+  const form = document.getElementById("subscriptionForm");
+
+  function openModal(modal) {
+    if (!modal || !backdrop) return;
+    backdrop.classList.add("show");
+    modal.classList.add("show");
+  }
+
+  function closeModal(modal) {
+    if (!modal || !backdrop) return;
+    modal.classList.remove("show");
+    if (![mainModal, reviewModal, cancelModal, savedModal, cancelledModal].some(m => m && m.classList.contains("show"))) {
+      backdrop.classList.remove("show");
+    }
+  }
+
+  if (openBtn) {
+    openBtn.addEventListener("click", () => openModal(mainModal));
+  }
+
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const target = document.getElementById(e.currentTarget.dataset.close);
+      closeModal(target);
+    });
+  });
+
+  if (backdrop) {
+    backdrop.addEventListener("click", () => {
+      [mainModal, reviewModal, cancelModal, savedModal, cancelledModal].forEach(closeModal);
+    });
+  }
+
+  function syncPauseFields() {
+    if (!pauseFields) return;
+    pauseFields.classList.toggle("show", pauseToggle && pauseToggle.checked);
+  }
+  if (pauseToggle) {
+    pauseToggle.addEventListener("change", syncPauseFields);
+    syncPauseFields();
+  }
+
+  if (reviewBtn) {
+    reviewBtn.addEventListener("click", () => {
+      if (!reviewList || !form) return;
+      reviewList.innerHTML = "";
+      const data = new FormData(form);
+      const items = [];
+      if (data.get("skip_next_service") === "on") items.push("Skip next service");
+      if (data.get("pause_subscription") === "on") {
+        items.push(`Pause until ${data.get("pause_until") || "-"}`);
+        items.push(`Resume on ${data.get("resume_on") || "-"}`);
+      }
+      const pm = form.querySelector("select[name='payment_method']");
+      if (pm && pm.value) items.push(`Payment method: ${pm.options[pm.selectedIndex].text}`);
+      if (!items.length) items.push("No changes selected");
+      items.forEach(text => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        reviewList.appendChild(li);
+      });
+      openModal(reviewModal);
+    });
+  }
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return "";
+  }
+
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", async () => {
+      if (!form) return;
+      const data = new FormData(form);
+      data.append("action", "save");
+      const res = await fetch("{% url 'accounts:manage_subscription' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+        body: data,
+      });
+      if (res.ok) {
+        closeModal(reviewModal);
+        closeModal(mainModal);
+        openModal(savedModal);
+      }
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => openModal(cancelModal));
+  }
+
+  if (confirmCancelBtn) {
+    confirmCancelBtn.addEventListener("click", async () => {
+      const data = new FormData();
+      data.append("action", "cancel");
+      data.append("cancel_reason", cancelReason ? cancelReason.value : "");
+      const res = await fetch("{% url 'accounts:manage_subscription' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+        body: data,
+      });
+      if (res.ok) {
+        closeModal(cancelModal);
+        closeModal(mainModal);
+        openModal(cancelledModal);
+      }
+    });
+  }
+})();
+</script>
+
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+

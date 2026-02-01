@@ -8,39 +8,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{% static 'css/Add_Payment_Method.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   
 
-  <title>Document</title>
-  <style>
-    .pill.active {
-  background-color: #00a6cf; /* نفس لون الزر */
-  color: #fff;
-  font-weight: 600;
-}
-
-  </style>
+  <title>Add Payment Method</title>
+  
 </head>
 <body>
   <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
   <!-- Overlay -->
   <div class="layout">
 
@@ -48,7 +25,7 @@
       <!-- Sidebar -->
      <!-- زر المينيو يظهر فقط بالموبايل -->
 <div class="mobile-header">
-  <button class="menu-toggle floating" id="menuToggle">
+  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
     <span class="arrow">&#8250;</span> <!-- › -->
   </button>
   <h2 class="mobile-title">Customer Profile</h2>
@@ -57,34 +34,8 @@
 
 
   <!-- ===== Sidebar ===== -->
-        <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+        {% include "accounts/includes/customer_sidebar.html" %}
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
     <!-- Main -->
 <main class="main">
   <section class="card">
@@ -92,53 +43,73 @@
 
     <form method="post">
       {% csrf_token %}
+      {% if form.errors %}
+        <div class="form-errors">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <div class="error">{{ error }}</div>
+            {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+            <div class="error">{{ error }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       <!-- Cardholder -->
       <div class="form-group">
         <label>Cardholder Name</label>
-        {{ form.cardholder_name }}
+        <div class="input-wrap icon-user">
+          {{ form.cardholder_name }}
+        </div>
       </div>
 
       <!-- Card Number -->
       <div class="form-group">
         <label>Card Number</label>
-        <input
-          type="text"
-          id="cardNumber"
-          name="card_number"
-          placeholder="1234 5678 9012 3456"
-          maxlength="19"
-          inputmode="numeric"
-          required
-        >
+        <div class="input-wrap icon-card">
+          <input
+            type="text"
+            id="cardNumber"
+            name="card_number"
+            placeholder="1234 5678 9012 3456"
+            maxlength="19"
+            inputmode="numeric"
+            required
+          >
+        </div>
       </div>
 
       <!-- Expiry + CVV -->
       <div class="form-row">
         <div class="form-group">
           <label>Expiration Date</label>
-          <input
-            type="text"
-            id="expiryDate"
-            name="expiry_date"
-            placeholder="MM/YY"
-            maxlength="5"
-            inputmode="numeric"
-            required
-          >
+          <div class="input-wrap icon-calendar">
+            <input
+              type="text"
+              id="expiryDate"
+              name="expiry_date"
+              placeholder="MM/YY"
+              maxlength="5"
+              inputmode="numeric"
+              required
+            >
+          </div>
         </div>
 
         <div class="form-group">
           <label>CVV</label>
-          <input
-            type="text"
-            id="cvv"
-            name="cvv"
-            placeholder="CVV"
-            maxlength="4"
-            inputmode="numeric"
-            required
-          >
+          <div class="input-wrap icon-lock">
+            <input
+              type="text"
+              id="cvv"
+              name="cvv"
+              placeholder="CVV"
+              maxlength="4"
+              inputmode="numeric"
+              required
+            >
+          </div>
         </div>
       </div>
 
@@ -148,10 +119,22 @@
       <div class="form-group">
         <label>Card Type</label>
         <div class="pills">
-          <button type="button" class="pill" data-type="visa">Visa</button>
-          <button type="button" class="pill" data-type="mastercard">MasterCard</button>
-          <button type="button" class="pill" data-type="amex">American Express</button>
-          <button type="button" class="pill" data-type="discover">Discover</button>
+          <button type="button" class="pill" data-type="visa">
+            <img src="{% static 'images/visa.png' %}" alt="Visa">
+            <span>Visa</span>
+          </button>
+          <button type="button" class="pill" data-type="mastercard">
+            <img src="{% static 'images/mastercard.png' %}" alt="MasterCard">
+            <span>MasterCard</span>
+          </button>
+          <button type="button" class="pill" data-type="amex">
+            <img src="{% static 'images/amex.svg' %}" alt="American Express">
+            <span>American Express</span>
+          </button>
+          <button type="button" class="pill" data-type="discover">
+            <img src="{% static 'images/discover.png' %}" alt="Discover">
+            <span>Discover</span>
+          </button>
         </div>
       </div>
 
@@ -229,6 +212,25 @@ pills.forEach(pill => {
 });
 </script>
 
+<script>
+(function () {
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.querySelector(".customer-menu-overlay");
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener("click", () => {
+    const open = sidebar.classList.toggle("open");
+    if (overlay) overlay.classList.toggle("show", open);
+  });
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+    });
+  }
+})();
+</script>
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
 

@@ -1,0 +1,74 @@
+{% extends "dashboard/base.html" %}
+{% load dashboard_extras %}
+{% block title %}{{ item.label }}{% endblock %}
+{% block page_title %}{{ item.label }}{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <form class="d-flex gap-2" method="get">
+      <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
+      <button class="btn btn-outline-primary" type="submit">Search</button>
+    </form>
+    <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}">
+      <i class="fa-solid fa-plus"></i> Add
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          {% for field in display_fields %}
+            <th>{{ field|title }}</th>
+          {% endfor %}
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for obj in objects %}
+          <tr>
+            {% for field in display_fields %}
+              <td>{{ obj|attr:field }}</td>
+            {% endfor %}
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' item.slug obj.pk %}">Edit</a>
+              {% if item.slug == "provider-profiles" %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_create' 'provider-messages' %}?provider_id={{ obj.user.id }}">Contact</a>
+              {% endif %}
+              {% if item.slug == "private-services" %}
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ obj.pk }}">Cards</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}?service_id={{ obj.pk }}">Pricing</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}?service_id={{ obj.pk }}">Estimate</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-eco' %}?service_id={{ obj.pk }}">Eco</a>
+              {% endif %}
+              <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="10" class="text-center py-4">No records yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if objects.paginator.num_pages > 1 %}
+    <nav class="mt-3">
+      <ul class="pagination">
+        {% if objects.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ objects.previous_page_number }}&q={{ query }}">Prev</a>
+          </li>
+        {% endif %}
+        {% for p in objects.paginator.page_range %}
+          <li class="page-item {% if objects.number == p %}active{% endif %}">
+            <a class="page-link" href="?page={{ p }}&q={{ query }}">{{ p }}</a>
+          </li>
+        {% endfor %}
+        {% if objects.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ objects.next_page_number }}&q={{ query }}">Next</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+{% endblock %}

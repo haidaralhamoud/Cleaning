@@ -9,285 +9,230 @@
   <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Incident_Report_order.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 </head>
 
 <body>
-  <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+  {% include "home/includes/main_header.html" %}
   <div class="layout">
-  <!-- ===== المينيو للموبايل ===== -->
-  <div class="mobile-header">
-    <button class="menu-toggle floating" id="menuToggle">
-      <span class="arrow">&#8250;</span>
-    </button>
-
-  </div>
-
-  <!-- ===== Sidebar ===== -->
-    <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
-
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
-
-  <!-- ===== MAIN CONTENT ===== -->
-  <div class="main-content">
-    <div class="incident-container">
-
-      <!-- === BLUE HEADER SECTION === -->
-      <div style="background:#c0e7f1; text-align:center; padding:15px 10px; border-radius:8px 8px 0 0; margin:-35px -40px 30px -40px;">
-        <p style="font-size:14px; color:#222; margin-bottom:5px;">Order: #{{ incident.order }}</p>
-        <h2 style="font-size:20px; font-weight:700; color:#000; margin-bottom:5px;"> Incident #{{ incident.id }}</h2>
-       <p style="font-size:15px; color:#333;">
-           Customer: {{ incident.customer.get_full_name|default:incident.customer.username }} |
-            Provider: {{ incident.involved_person|default:"—" }} |
-          <span style="color:#039fc8; font-weight:600;">
-            Status: {{ incident.get_status_display }}
-          </span>
-        </p>
-      </div>
-
-      <div class="header">
-        <h1>Incident Report #{{ incident.id }}</h1>
-        <p class="submitted">Submitted on {{ incident.created_at|date:"F d, Y" }}</p>
-      </div>
-
-      <div class="status-title">Status</div>
-      <div class="status-value">{{ incident.get_status_display }}</div>
-
-      <div class="status-bar">
-        <div class="status-fill"></div>
-      </div>
-
-      <p>{{ incident.created_at|date:"F d, Y" }}</p>
-
-      <hr>
-
-      <h2>Details</h2>
-      <table class="details-table">
-        <tr><th>Customer</th><td>{{ incident.customer.get_full_name|default:incident.customer.username }}</td></tr>
-        <tr><th>Category</th><td>{{ incident.involved_person|default:"—" }}</td></tr>
-        <tr><th>Severity</th><td>{{ incident.get_severity_display }}</td></tr>
-        <tr><th>Description</th><td>{{ incident.description }}</td></tr>
-      </table>
-
-      <h2>Communications</h2>
-      <div class="comment">
-        <strong>{{ incident.customer }}</strong> — {{ incident.created_at|date:"F d, Y, H:i" }}<br>
-        Incident created by customer.
-      </div>
-
-      <h2>Evidence</h2>
-       {% if incident.evidence %}
-        <div class="evidence-box">
-          📎 <a href="{{ incident.evidence.url }}" target="_blank">View uploaded evidence</a>
-        </div>
-      {% else %}
-        <div class="evidence-box">📷 No evidence uploaded</div>
-      {% endif %}
-
-      <h2>Resolution</h2>
-      <div class="timeline">
-        <div class="timeline-dot"></div>
-        <div class="timeline-step"><div class="circle">✔</div><p>Reported<br><small>{{ incident.created_at|date:"M d" }}</small></p></div>
-        <div class="timeline-step"><div class="circle">•</div><p>Under Review<br><small>—</small></p></div>
-        <div class="timeline-step"><div class="circle">•</div><p>Action Taken<br><small>—</small></p></div>
-        <div class="timeline-step"><div class="circle">•</div><p>Resolved<br><small>—</small></p></div>
-      </div>
-
-   <button class="close-btn" onclick="toggleSatisfaction()">Close Incident</button>
-
-<div id="satisfactionSection" class="satisfaction hidden">
-  <p>Was this resolved to your satisfaction?</p>
-  <div class="response-buttons">
-    <button class="response-btn yes">✓ Yes</button>
-    <button class="response-btn no">✗ No</button>
-  </div>
-
-  <h2>Add Comment</h2>
-  <textarea placeholder="Type your comment here..."></textarea>
-  <button class="save-btn" onclick="saveFeedback()">Save</button>
-</div>
-
+    <div class="mobile-header">
+      <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+        <span class="arrow">&#8250;</span>
+      </button>
     </div>
-  </div>
-</div>
-<footer class="footer">
-  <div class="footer-container">
-    <!-- العمود 1: اللوجو والنص -->
-    <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla Logo" class="footer-logo">
-      <p>
-        At Hembla, we believe home should be your haven, not your to-do list. 
-        From cleaning to care, we’re here to make life easier, one home at a time.
-      </p>
 
-      <!-- الصف الإضافي تحت النص -->
-      <div class="bottom-left">
-        <!-- Connect -->
-        <div class="connect">
-          <h4>Connect</h4>
-          <div class="socials">
-            <img src="{% static 'images/facebook0.png'%}" alt="facebook">
-            <img src="{% static 'images/instagram-circle0.png'%}" alt="instagram">
-            <img src="{% static 'images/linked-in-circled0.png'%}" alt="linkedin">
-            <img src="{% static 'images/whats-app0.png'%}" alt="whatsapp">
+    {% include "accounts/includes/customer_sidebar.html" %}
+
+    <div class="main-content">
+      <div class="incident-container">
+        <section class="incident-hero">
+          <p class="incident-order">Order: #{{ incident.order }}</p>
+          <div class="incident-hero-row">
+            <h2>Incident #{{ incident.id }}</h2>
+            <span class="status-pill">{{ incident.get_status_display }}</span>
+          </div>
+          <p class="incident-hero-meta">
+            Customer: {{ incident.customer.get_full_name|default:incident.customer.username }}
+            {% if incident.involved_person %}| Provider: {{ incident.involved_person }}{% endif %}
+          </p>
+        </section>
+
+        <div class="status-panel">
+          <div class="status-chip">
+            <p class="status-label">Status</p>
+            <p class="status-value">{{ incident.get_status_display }}</p>
+          </div>
+          <div class="status-chip">
+            <p class="status-label">Submitted</p>
+            <p class="status-value">{{ incident.created_at|date:"F d, Y" }}</p>
+          </div>
+          <div class="status-chip">
+            <p class="status-label">Severity</p>
+            <p class="status-value">{{ incident.get_severity_display }}</p>
           </div>
         </div>
 
+        <div class="detail-stack">
+          <section class="card detail-card">
+            <header>
+              <h3>Details</h3>
+              <p class="card-subtitle">What we logged from your report</p>
+            </header>
+            <div class="detail-grid">
+              <div class="detail-item">
+                <span>Incident Type</span>
+                <strong>{{ incident.incident_type }}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Date &amp; Time</span>
+                <strong>{{ incident.incident_datetime|date:"F d, Y H:i" }}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Location</span>
+                <strong>{{ incident.location }}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Provider / Involved</span>
+                <strong>{{ incident.involved_person|default:"-" }}</strong>
+              </div>
+              <div class="detail-item">
+                <span>Preferred Resolution</span>
+                <strong>{{ incident.preferred_resolution|default:"—" }}</strong>
+              </div>
+            </div>
+            <div class="detail-description">
+              <h4>Description</h4>
+              <p>{{ incident.description }}</p>
+            </div>
+          </section>
 
+          <section class="card communication-card">
+            <header>
+              <h3>Communications</h3>
+            </header>
+            <p class="communication-message">
+              <strong>{{ incident.customer.get_full_name|default:incident.customer.username }}</strong> &mdash; {{ incident.created_at|date:"F d, Y, H:i" }}
+            </p>
+            <p>Incident created by customer.</p>
+          </section>
+
+          <section class="card evidence-card">
+            <header>
+              <h3>Evidence</h3>
+            </header>
+            {% if incident.evidence %}
+              <div class="evidence-box">
+                <span class="evidence-icon">DOC</span>
+                <a href="{{ incident.evidence.url }}" target="_blank">View uploaded evidence</a>
+              </div>
+            {% else %}
+              <div class="evidence-box muted">No evidence uploaded</div>
+            {% endif %}
+          </section>
+          <div class="resolution-grid">
+            <section class="card resolution-card">
+              <header>
+                <h3>Resolution Timeline</h3>
+              </header>
+              <div class="timeline">
+                <div class="timeline-step complete">
+                  <span class="circle">1</span>
+                  <div class="content">
+                    <p>Reported</p>
+                    <small>{{ incident.created_at|date:"M d" }}</small>
+                  </div>
+                </div>
+                <div class="timeline-step pending">
+                  <span class="circle">2</span>
+                  <div class="content">
+                    <p>Under Review</p>
+                    <small>&mdash;</small>
+                  </div>
+                </div>
+                <div class="timeline-step pending">
+                  <span class="circle">3</span>
+                  <div class="content">
+                    <p>Action Taken</p>
+                    <small>&mdash;</small>
+                  </div>
+                </div>
+                <div class="timeline-step pending">
+                  <span class="circle">4</span>
+                  <div class="content">
+                    <p>Resolved</p>
+                    <small>&mdash;</small>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="card satisfaction-card">
+              <div class="satisfaction-header">
+                <div>
+                  <h3>Resolution Feedback</h3>
+                  <p class="card-subtitle">Let us know how it went</p>
+                </div>
+                <button class="close-btn" onclick="toggleSatisfaction()">Close Incident</button>
+              </div>
+              <div id="satisfactionSection" class="satisfaction hidden">
+                <p>Was this resolved to your satisfaction?</p>
+                <div class="response-buttons">
+                  <button class="response-btn yes">Yes</button>
+                  <button class="response-btn no">No</button>
+                </div>
+                <h4>Add Comment</h4>
+                <textarea placeholder="Type your comment here..."></textarea>
+                <button class="save-btn" onclick="saveFeedback()">Save</button>
+              </div>
+            </section>
+          </div>
+
+
+        </div>
       </div>
     </div>
-
-    <!-- العمود 2: Support -->
-    <div class="footer-col support">
-      <h4>Support</h4>
-      <ul>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">Address</a></li>
-        <li><a href="#">Working Hours</a></li>
-        <li><a href="#">FAQ</a></li>
-      </ul>
-              <!-- App Download -->
-        <div class="app-download">
-          <h4>App Download</h4>
-          <div class="apps">
-            <img src="{% static 'images/mobile0.png'%}" alt="mobile">
-            <img src="{% static 'images/chat-gpt-image-sep-15-2025-05-50-28-pm-10.png'%}" alt="app store">
-          </div>
-        </div>
-    </div>
-
-    <!-- العمود 3: Company -->
-    <div class="footer-col company">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Our Story</a></li>
-        <li><a href="#">Feedback</a></li>
-      </ul>
-    </div>
-
-    <!-- العمود 4: Legal / Privacy -->
-    <div class="footer-col legal">
-      <h4>Legal/Privacy</h4>
-      <ul>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Terms & Conditions</a></li>
-        <li><a href="#">Cookie Policy</a></li>
-        <li><a href="#">Accessibility Statement</a></li>
-      </ul>
-    </div>
   </div>
+  <div class="overlay customer-menu-overlay" id="menuOverlay"></div>
+  {% include "home/includes/footer.html" %}
 
-  <!-- الخط الفاصل -->
-  <hr class="footer-line">
+  <script>
+    function saveFeedback() {
+      const comment = document.querySelector('#satisfactionSection textarea').value.trim();
+      const response = document.querySelector('.response-btn.yes.active') ? 'Yes' :
+                       document.querySelector('.response-btn.no.active') ? 'No' : 'Not selected';
+      alert(`Your feedback has been saved!
+Response: ${response}
+Comment: ${comment || "No comment"}`);
+      window.location.href = "../Customer Profile-service view/index.html";
+    }
 
-  <!-- الصف السفلي -->
-  <div class="footer-bottom">
-    <div class="language-box">
-      <img src="{% static 'images/earth-globe0.png'%}" alt="earth" class="earth-icon">
-      <span>Language</span>
-    </div>
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
-  </div>
-</footer>
+    const yesBtn = document.querySelector('.response-btn.yes');
+    const noBtn = document.querySelector('.response-btn.no');
+    if (yesBtn && noBtn) {
+      yesBtn.addEventListener('click', () => {
+        yesBtn.classList.add('active');
+        noBtn.classList.remove('active');
+      });
+      noBtn.addEventListener('click', () => {
+        noBtn.classList.add('active');
+        yesBtn.classList.remove('active');
+      });
+    }
+  </script>
 
-<script>
-const toggleBtn = document.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-  
-toggleBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-</script>
-  <!-- ===== JS ===== -->
-   <script>
-  function saveFeedback() {
-    const comment = document.querySelector('#satisfactionSection textarea').value.trim();
-    const response = document.querySelector('.response-btn.yes.active') ? 'Yes' :
-                     document.querySelector('.response-btn.no.active') ? 'No' : 'Not selected';
-
-    // مؤقتاً منخليها تنبه المستخدم
-    alert(`✅ Your feedback has been saved!\nResponse: ${response}\nComment: ${comment || "No comment"}`);
-
-    // بعد الحفظ، منرجع عالصفحة الرئيسية تبع الـ Incidents
-    window.location.href = "../Customer Profile-service view/index.html";
-  }
-
-  // تفعيل الاختيار بين Yes / No
-  const yesBtn = document.querySelector('.response-btn.yes');
-  const noBtn = document.querySelector('.response-btn.no');
-
-  yesBtn.addEventListener('click', () => {
-    yesBtn.classList.add('active');
-    noBtn.classList.remove('active');
-  });
-
-  noBtn.addEventListener('click', () => {
-    noBtn.classList.add('active');
-    yesBtn.classList.remove('active');
-  });
-</script>
+  <script>
+    function toggleSatisfaction() {
+      const section = document.getElementById('satisfactionSection');
+      if (section) {
+        section.classList.toggle('open');
+      }
+    }
+  </script>
 
   <script>
     const toggle = document.getElementById("menuToggle");
-    const sidebar = document.getElementById("sidebar");
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("menuOverlay");
     const arrow = document.querySelector(".menu-toggle .arrow");
-
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("active");
-      arrow.innerHTML = sidebar.classList.contains("active") ? "&#8249;" : "&#8250;";
-    });
+    if (toggle && sidebar) {
+      toggle.addEventListener("click", () => {
+        const open = sidebar.classList.toggle("open");
+        if (overlay) overlay.classList.toggle("show", open);
+        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
+      });
+    }
+    if (overlay) {
+      overlay.addEventListener("click", () => {
+        if (sidebar) {
+          sidebar.classList.remove("open");
+        }
+        overlay.classList.remove("show");
+        if (arrow) arrow.style.transform = "rotate(0deg)";
+      });
+    }
   </script>
-  <script>
-  function toggleSatisfaction() {
-    const section = document.getElementById('satisfactionSection');
-    section.classList.toggle('open');
-  }
-</script>
-
+  <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+

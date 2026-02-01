@@ -12,6 +12,16 @@
         <span id="sum_addons">${{ pricing.addons_total|default:"0" }}</span>
     </div>
 
+    <div class="item">
+        <span>Duration</span>
+        <span id="sum_duration">00:00:00</span>
+    </div>
+
+    <div class="item">
+        <span>ROT Deduction ({{ pricing.rot_percent|default:"0" }}%)</span>
+        <span id="sum_rot">-${{ pricing.rot|default:"0" }}</span>
+    </div>
+
     <hr>
 
     <div class="item total">

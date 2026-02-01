@@ -1,375 +1,232 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Service History & Ratings</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Service History & Ratings</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/Service_History_and_Ratings.css' %}">
-
-  <style>
-    .card { background:#fff; border-radius:16px; padding:30px; box-shadow:0 10px 30px rgba(0,0,0,.08); }
-    .summary-grid { display:grid; grid-template-columns:220px 1fr; gap:30px; }
-    .big-score { font-size:48px; font-weight:700; }
-    .stars { color:#f6b100; font-size:20px; }
-    .star-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-    .star-bar { flex:1; height:8px; background:#eee; border-radius:8px; overflow:hidden; }
-    .star-fill { height:100%; background:#12a3c7; }
-    .metric-row { display:flex; align-items:center; gap:10px; margin:8px 0; }
-    .metric-row .bar { flex:1; height:8px; background:#eee; border-radius:8px; overflow:hidden; }
-    .metric-row .fill { height:100%; background:#12a3c7; }
-    .btn { background:#12a3c7; color:#fff; padding:10px 20px; border-radius:20px; border:none; cursor:pointer; }
-    .past-item { display:flex; justify-content:space-between; padding:15px 0; border-bottom:1px solid #eee; }
-    .actions { display:flex; gap:10px; }
-    .popup-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      backdrop-filter: blur(2px);
-      display: none;
-    }
-
-    .popup.show, .popup-overlay.show { display:block; }
-    .close { float:right; cursor:pointer; font-size:20px; }
-    .popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(.95);
-  background: #fff;
-  padding: 28px;
-  border-radius: 18px;
-  width: 380px;
-  display: none;
-  box-shadow: 0 25px 60px rgba(0,0,0,.25);
-  animation: popupIn .25s ease forwards;
-}
-
-@keyframes popupIn {
-  from { opacity:0; transform:translate(-50%,-45%) scale(.9); }
-  to { opacity:1; transform:translate(-50%,-50%) scale(1); }
-}
-
-.popup h3 {
-  margin-bottom: 15px;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.popup input,
-.popup textarea {
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 12px;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-}
-
-.popup input:focus,
-.popup textarea:focus {
-  outline: none;
-  border-color: #12a3c7;
-  box-shadow: 0 0 0 2px rgba(18,163,199,.15);
-}
-
-.popup textarea {
-  resize: none;
-  min-height: 80px;
-}
-
-.close {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  cursor: pointer;
-  font-size: 22px;
-  color: #888;
-}
-
-.close:hover {
-  color: #000;
-}
-.filters-bar {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 25px 0;
-}
-
-.filter-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  padding: 10px 14px;
-  border-radius: 14px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.08);
-}
-
-.filter-box .icon {
-  font-size: 16px;
-  opacity: .6;
-}
-
-.filter-box input,
-.filter-box select {
-  border: none;
-  outline: none;
-  font-size: 14px;
-  background: transparent;
-  min-width: 140px;
-}
-
-.filter-box.search input {
-  min-width: 220px;
-}
-
-.apply-btn {
-  background: #12a3c7;
-  color: #fff;
-  border: none;
-  border-radius: 22px;
-  padding: 11px 26px;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(18,163,199,.35);
-  transition: .2s ease;
-}
-
-.apply-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 25px rgba(18,163,199,.45);
-}
-
-  </style>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/Service_History_and_Ratings.css' %}">
 </head>
 
 <body>
+{% include "home/includes/main_header.html" %}
+<div class="mobile-header">
+  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+    <span class="arrow">&#8250;</span>
+  </button>
+</div>
+<div class="layout">
+  {% include "accounts/includes/customer_sidebar.html" %}
+  <main class="content">
 
-<header class="main-header">
-  <div class="logo">Hembla</div>
-  <nav>
-    <a href="/">HOME</a>
-    <a href="#">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-  <a class="btn" href="#">My Profile</a>
-</header>
-
-<main class="content">
-
-<h1>Service History & Ratings</h1>
-<form method="get" class="filters-bar">
-
-  <!-- 🔍 Search -->
-  <div class="filter-box search">
-    <span class="icon">🔍</span>
-    <input
-      type="text"
-      name="q"
-      placeholder="Search service history"
-      value="{{ request.GET.q|default:'' }}"
-    >
+<!-- HEADER -->
+<div class="page-header">
+  <div class="page-kicker">Your Customer Dashboard</div>
+  <h1 class="page-title">Service History & Ratings</h1>
+  <div class="page-chips">
+    <span class="chip">Trusted pros</span>
+    <span class="chip">Verified feedback</span>
+    <span class="chip">Smart insights</span>
   </div>
+</div>
 
-  <!-- 📅 Date From -->
-  <div class="filter-box">
-    <span class="icon">📅</span>
-    <input
-      type="date"
-      name="from"
-      value="{{ request.GET.from|default:'' }}"
-    >
+<!-- FILTERS -->
+<div class="filters-wrapper">
+<form class="filters-bar fade-up" method="get">
+  <div class="filters-row">
+    <div class="filter-item">
+      <input type="text" name="q" placeholder="Search service" value="{{ request.GET.q }}">
+    </div>
+    <div class="filter-item">
+      <input type="date" name="from" value="{{ request.GET.from }}">
+    </div>
+    <div class="filter-item">
+      <input type="date" name="to" value="{{ request.GET.to }}">
+    </div>
+    <div class="filter-item is-select">
+      <select name="service">
+        <option value="">All Services</option>
+        {% for s in service_types %}
+          <option value="{{ s }}" {% if s == selected_service %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-item is-select">
+      <select name="provider">
+        <option value="">All Providers</option>
+        {% for p in providers %}
+          <option value="{{ p.id }}">{{ p.get_full_name|default:p.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
   </div>
-
-  <!-- 📅 Date To -->
-  <div class="filter-box">
-    <span class="icon">📅</span>
-    <input
-      type="date"
-      name="to"
-      value="{{ request.GET.to|default:'' }}"
-    >
+  <div class="filters-actions">
+    <button class="filter-btn">Apply</button>
   </div>
-
-  <!-- 🧹 Service -->
-  <div class="filter-box">
-    <span class="icon">🧹</span>
-    <select name="service">
-      <option value="">All Services</option>
-      {% for s in service_types %}
-        <option value="{{ s }}" {% if s == selected_service %}selected{% endif %}>
-          {{ s }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <!-- 👤 Provider -->
-  <div class="filter-box">
-    <span class="icon">👤</span>
-    <select name="provider">
-      <option value="">All Providers</option>
-      {% for p in providers %}
-        <option value="{{ p.id }}" {% if request.GET.provider == p.id|stringformat:"s" %}selected{% endif %}>
-          {{ p.get_full_name|default:p.username }}
-        </option>
-      {% endfor %}
-    </select>
-  </div>
-
-  <!-- ✅ Apply -->
-  <button class="apply-btn" type="submit">Apply</button>
-
 </form>
+</div>
 
+<div class="dashboard">
 
-<div class="card">
+<div class="page-sub">
+Manage your service feedback, highlight the best pros, and keep track of everything you have rated.
+</div>
 
-<h2>{{ selected_service }}</h2>
+<!-- DASHBOARD -->
+<div class="grid">
+  <div class="card card--glow fade-up">
+    <b>Your Overall Experience</b>
+    <div class="overall-score">{{ summary.avg_overall|floatformat:1|default:"0.0" }}</div>
+    <div class="stars" style="--rating: {{ summary.avg_overall|floatformat:1|default:'0.0' }};">
+      <div class="stars-back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <div class="stars-front">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+    </div>
+    <small>{{ summary.total }} reviews</small>
 
-<div class="summary-grid">
-
-  <div>
-    <div class="big-score">{{ summary.avg_overall|floatformat:1 }}</div>
-    <div class="stars">★★★★★</div>
-    <div>{{ summary.total }} reviews</div>
-  </div>
-
-  <div>
     {% for row in star_distribution %}
     <div class="star-row">
       <span>{{ row.star }}</span>
-      <div class="star-bar">
-        <div class="star-fill" style="width:{{ row.percent }}%"></div>
-      </div>
-      <span>{{ row.percent }}%</span>
+      <div class="progress"><div style="width:{{ row.percent }}%"></div></div>
     </div>
     {% endfor %}
   </div>
 
+  <div class="card card--metrics fade-up">
+    <b>Category Performance</b>
+
+    <div class="metric">
+      <b>Punctuality</b>
+      <div class="progress"><div style="width:{{ summary.avg_punctuality|floatformat:0 }}0%"></div></div>
+      {{ summary.avg_punctuality|floatformat:1 }}
+    </div>
+
+    <div class="metric">
+      <b>Professionalism</b>
+      <div class="progress"><div style="width:{{ summary.avg_professionalism|floatformat:0 }}0%"></div></div>
+      {{ summary.avg_professionalism|floatformat:1 }}
+    </div>
+
+    <div class="metric">
+      <b>Quality</b>
+      <div class="progress"><div style="width:{{ summary.avg_quality|floatformat:0 }}0%"></div></div>
+      {{ summary.avg_quality|floatformat:1 }}
+    </div>
+
+    <div class="metric">
+      <b>Value</b>
+      <div class="progress"><div style="width:{{ summary.avg_value|floatformat:0 }}0%"></div></div>
+      {{ summary.avg_value|floatformat:1 }}
+    </div>
+  </div>
 </div>
 
-<hr>
+<!-- TOP RATED PROVIDERS -->
+<div class="top-rated fade-up">
+  <div class="top-rated-header">
+    <span class="top-rated-icon">&#127942;</span>
+    <h3>Top Rated Providers</h3>
+  </div>
 
-<h4>Category Averages</h4>
+  <div class="top-rated-grid">
+    {% for p in top_providers %}
+    <div class="top-rated-card rank-{{ forloop.counter }}">
 
-<div class="metric-row">
-  <span>Punctuality</span>
-  <div class="bar"><div class="fill" style="width:{{ summary.avg_punctuality|floatformat:0 }}0%"></div></div>
-  <span>{{ summary.avg_punctuality|floatformat:1 }}</span>
+      <!-- avatar -->
+      <div class="top-rated-row">
+        <img
+          src="{% if p.provider_profile.photo %}
+                 {{ p.provider_profile.photo.url }}
+               {% else %}
+                 {% static 'images/avatar.png' %}
+               {% endif %}"
+          class="top-rated-avatar"
+        >
+
+        <div>
+          <b>
+              {{ p.get_full_name|default:p.username }}
+          </b>
+          <div class="top-rated-meta">
+            &#9733; {{ p.avg_rating|floatformat:1 }} &middot; {{ p.total_reviews }} reviews
+          </div>
+        </div>
+      </div>
+
+      <!-- quote -->
+      <p class="top-rated-quote">
+        &ldquo;Highly rated professional with consistent service quality.&rdquo;
+      </p>
+
+    </div>
+    {% empty %}
+      <p>No rated providers yet.</p>
+    {% endfor %}
+  </div>
 </div>
 
-<div class="metric-row">
-  <span>Quality</span>
-  <div class="bar"><div class="fill" style="width:{{ summary.avg_quality|floatformat:0 }}0%"></div></div>
-  <span>{{ summary.avg_quality|floatformat:1 }}</span>
-</div>
 
-<div class="metric-row">
-  <span>Professionalism</span>
-  <div class="bar"><div class="fill" style="width:{{ summary.avg_professionalism|floatformat:0 }}0%"></div></div>
-  <span>{{ summary.avg_professionalism|floatformat:1 }}</span>
-</div>
-
-<div class="metric-row">
-  <span>Value</span>
-  <div class="bar"><div class="fill" style="width:{{ summary.avg_value|floatformat:0 }}0%"></div></div>
-  <span>{{ summary.avg_value|floatformat:1 }}</span>
-</div>
-
-{% if can_leave_rating %}
-  <button class="btn" onclick="openRating()">Leave Feedback</button>
-{% endif %}
-
-<hr>
-
+<!-- PAST SERVICES -->
+<div class="past fade-up">
 <h3>Past Services</h3>
 
 {% for s in past_services %}
-<div class="past-item">
+<div class="service-item">
   <div>
-    <strong>{{ s.service_title }}</strong><br>
-    {{ s.date }}<br>
-    {% if s.comment %}
-      <small><b>Comment:</b> {{ s.comment }}</small>
-    {% endif %}
+    <b>{{ s.service_title }}
+      {% if not s.can_leave_comment %}
+        <span class="tag reviewed">REVIEWED</span>
+      {% else %}
+        <span class="tag not-reviewed">NOT REVIEWED</span>
+      {% endif %}
+    </b>
+    <div class="page-sub">
+      {{ s.date|date:"F d, Y" }} &middot;
+      {{ s.provider.get_full_name|default:s.provider.username }}
+    </div>
   </div>
 
-  <div class="actions">
-    <a class="btn" href="{% url 'accounts:view_service_details' s.booking_type s.booking_id %}">View Details</a>
+  <div>
+    <a href="{% url 'accounts:view_service_details' s.booking_type s.booking_id %}" class="btn btn-outline">View</a>
     {% if s.can_leave_comment %}
-      <button class="btn" onclick="openComment('{{ s.booking_type }}','{{ s.booking_id }}')">Leave Comment</button>
+      <button class="btn btn-primary">Rate</button>
     {% endif %}
   </div>
 </div>
+{% empty %}
+<p>No past services found.</p>
 {% endfor %}
+</div>
 
 </div>
+
 </main>
-
-<!-- ================= RATING POPUP ================= -->
-<div class="popup-overlay" id="overlay"></div>
-
-<div class="popup" id="ratingPopup">
-  <span class="close" onclick="closeAll()">×</span>
-  <h3>Leave Feedback</h3>
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="form_type" value="rating">
-    <input type="hidden" name="booking_type" value="{{ past_services.0.booking_type }}">
-    <input type="hidden" name="booking_id" value="{{ past_services.0.booking_id }}">
-
-    <input type="number" name="overall_rating" min="1" max="5" placeholder="Overall" required>
-    <input type="number" name="punctuality" min="1" max="5" placeholder="Punctuality" required>
-    <input type="number" name="quality" min="1" max="5" placeholder="Quality" required>
-    <input type="number" name="professionalism" min="1" max="5" placeholder="Professionalism" required>
-    <input type="number" name="value" min="1" max="5" placeholder="Value" required>
-    <textarea name="feedback" placeholder="Optional feedback"></textarea>
-
-    <button class="btn" type="submit">Save</button>
-  </form>
 </div>
-
-<!-- ================= COMMENT POPUP ================= -->
-<div class="popup" id="commentPopup">
-  <span class="close" onclick="closeAll()">×</span>
-  <h3>Leave Comment</h3>
-  <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="form_type" value="comment">
-    <input type="hidden" name="booking_type" id="c_type">
-    <input type="hidden" name="booking_id" id="c_id">
-
-    <textarea name="text" required></textarea>
-    <button class="btn" type="submit">Save</button>
-  </form>
-</div>
+<div class="overlay customer-menu-overlay" id="menuOverlay"></div>
 
 <script>
-function openRating(){
-  document.getElementById("ratingPopup").classList.add("show");
-  document.getElementById("overlay").classList.add("show");
-}
-function openComment(type,id){
-  document.getElementById("c_type").value = type;
-  document.getElementById("c_id").value = id;
-  document.getElementById("commentPopup").classList.add("show");
-  document.getElementById("overlay").classList.add("show");
-}
-function closeAll(){
-  document.querySelectorAll(".popup").forEach(p=>p.classList.remove("show"));
-  document.getElementById("overlay").classList.remove("show");
-}
+  (function () {
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("menuOverlay");
+    if (!toggle || !sidebar) return;
+    toggle.addEventListener("click", () => {
+      const open = sidebar.classList.toggle("open");
+      if (overlay) overlay.classList.toggle("show", open);
+    });
+    if (overlay) {
+      overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("show");
+      });
+    }
+  })();
 </script>
-<script>
-document.getElementById("overlay").addEventListener("click", closeAll);
-</script>
+<script src="{% static 'js/main_header.js' %}"></script>
+
 </body>
 </html>

@@ -5,8 +5,20 @@
   font-family: "Inter", sans-serif;
 }
 
+:root {
+  --brand: #039fc8;
+  --brand-strong: #028bb0;
+  --accent: #71b247;
+  --text: #0a0a0a;
+  --muted: rgba(10, 10, 10, 0.7);
+  --border: rgba(137, 137, 137, 0.65);
+  --surface: #ffffff;
+  --soft: #f4fbfe;
+}
+
 body {
-  background: #fff;
+  background: linear-gradient(140deg, #eff9ff 0%, #ffffff 45%, #f7fbff 100%);
+  color: var(--text);
 }
 
 /* ===== HEADER ===== */
@@ -37,7 +49,7 @@ body {
 }
 
 .menu a:hover {
-  color: #71b247;
+  color: var(--accent);
 }
 
 .buttons {
@@ -54,36 +66,63 @@ body {
 }
 
 .signup {
-  background: #71b247;
+  background: var(--accent);
   color: #fff;
 }
 
 .signin {
   background: #fff;
-  color: #71b247;
-  border: 1px solid #71b247;
+  color: var(--accent);
+  border: 1px solid var(--accent);
 }
 
 /* ===== SIGN UP FORM ===== */
 .signup-container {
   display: flex;
   justify-content: center;
-  padding: 3rem 1rem;
+  padding: 3.5rem 1rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.signup-container::before,
+.signup-container::after {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(3, 159, 200, 0.18), transparent 60%);
+  pointer-events: none;
+}
+
+.signup-container::before {
+  top: -160px;
+  left: -120px;
+}
+
+.signup-container::after {
+  bottom: -200px;
+  right: -140px;
 }
 
 .signup-box {
-  background: #fff;
+  background: var(--surface);
   width: 90%;
   max-width: 900px;
-  border-radius: 15px;
-  box-shadow: 0px 4px 15px rgba(3, 159, 200, 0.8);
-  padding: 2rem 3rem;
+  border-radius: 18px;
+  border: 1px solid rgba(3, 159, 200, 0.1);
+  box-shadow: 0 18px 45px rgba(3, 159, 200, 0.18);
+  padding: 2.4rem 3rem 2.8rem;
+  position: relative;
+  z-index: 1;
 }
 
 .add-icon {
   display: block;
   margin: 0 auto 1rem auto;
   width: 100px;
+  filter: drop-shadow(0 8px 16px rgba(3, 159, 200, 0.18));
 }
 
 .title {
@@ -94,7 +133,7 @@ body {
 
 .subtitle {
   text-align: center;
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--muted);
   font-size: 16px;
   margin-bottom: 2rem;
 }
@@ -113,20 +152,32 @@ label {
 }
 
 .req {
-  color: red;
+  color: #e53935;
 }
 
 input,
-textarea {
+textarea,
+select {
   width: 100%;
-  padding: 12px;
-  border: 1px solid rgba(137, 137, 137, 0.75);
+  padding: 12px 14px;
+  border: 1px solid var(--border);
   border-radius: 10px;
   font-size: 15px;
+  background: #fff;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(3, 159, 200, 0.8);
+  box-shadow: 0 0 0 3px rgba(3, 159, 200, 0.2), 0 10px 24px rgba(3, 159, 200, 0.18);
+  outline: none;
+  transform: translateY(-1px);
 }
 
 textarea {
-  min-height: 100px;
+  min-height: 110px;
   resize: vertical;
 }
 
@@ -153,9 +204,24 @@ textarea {
 .checkbox-group {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem 2rem;
+  gap: 0.8rem 1.6rem;
   margin-bottom: 1rem;
-  color: rgba(137, 137, 137, 0.8);
+  color: rgba(10, 10, 10, 0.8);
+}
+
+.checkbox-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
 }
 
 .section-title {
@@ -182,33 +248,140 @@ textarea {
 .blue {
   background: rgba(3, 159, 200, 0.5);
 }
+
 .green {
   background: rgba(100, 255, 0, 0.5);
 }
+
 .orange {
   background: rgba(255, 149, 0, 0.5);
 }
 
+/* Add-ons */
+.addons-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.addons-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addons-inline label {
+  font-weight: 700;
+}
+
+.addons-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.addons-field input {
+  flex: 1;
+}
+
+.add-btn {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 16px rgba(3, 159, 200, 0.2);
+}
+
+.add-btn:hover {
+  background: var(--brand-strong);
+  transform: translateY(-1px);
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.tag {
+  color: #0a0a0a;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 5px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #e6f7fb;
+  border: 1px solid rgba(3, 159, 200, 0.35);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  animation: fadeIn 0.2s ease;
+}
+
+.tag:nth-child(3n + 1) {
+  background: #e6f7fb;
+  border-color: rgba(3, 159, 200, 0.35);
+}
+
+.tag:nth-child(3n + 2) {
+  background: #e7f6ea;
+  border-color: rgba(113, 178, 71, 0.35);
+}
+
+.tag:nth-child(3n) {
+  background: #fff3e4;
+  border-color: rgba(255, 149, 0, 0.35);
+}
+
+.tag-close {
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--brand);
+  font-weight: bold;
+}
+
 /* Buttons */
 .btn-submit {
-  background: #039fc8;
+  background: linear-gradient(135deg, #08b3dd 0%, #039fc8 50%, #038bb1 100%);
   color: #fff;
   font-weight: 700;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 15px;
   width: 100%;
   font-size: 18px;
   cursor: pointer;
   margin-top: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 12px 28px rgba(3, 159, 200, 0.28);
 }
 
 .btn-submit:hover {
-  background: #028eb3;
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
 }
 
 .checkbox-agree {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-top: 1rem;
+}
+
+.checkbox-agree input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
 }
 
 .login-text {
@@ -218,19 +391,55 @@ textarea {
 }
 
 .login-text a {
-  color: #039fc8;
+  color: var(--brand);
   text-decoration: none;
   font-weight: 700;
+}
+
+/* Password toggle */
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  color: var(--brand);
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: var(--brand-strong);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .signup-box {
     width: 95%;
-    max-width: 95%;  /* ✅ حتى ياخد كل الشاشة */
+    max-width: 95%;
     margin: 20px auto;
     padding: 20px;
-    box-shadow: 0px 3px 12px rgba(3, 159, 200, 0.4);
+    box-shadow: 0 10px 24px rgba(3, 159, 200, 0.2);
   }
 
   .form-row {
@@ -250,381 +459,34 @@ textarea {
     font-size: 16px;
     padding: 12px;
   }
+
+  .checkbox-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    padding-left: 6px;
+  }
+
+  .addons-field {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .add-btn {
+    width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
   .title {
     font-size: 22px;
   }
+
   .subtitle {
     font-size: 14px;
   }
+
   label {
     font-size: 14px;
   }
-}
-
-.checkbox-agree {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 1rem;
-}
-
-.checkbox-agree input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-}
-
-/* ===== TAG INPUT ===== */
-.tag-input {
-  border: 1px solid rgba(137, 137, 137, 0.75);
-  border-radius: 10px;
-  padding: 8px 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tag-input input {
-  border: none;
-  outline: none;
-  font-size: 15px;
-  padding: 5px;
-}
-
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tag {
-  color: #000;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-}
-
-.tag-close {
-  font-size: 14px;
-  cursor: pointer;
-  color: #fff;
-  font-weight: bold;
-}
-
-/* --- Special Add-Ons Inline --- */
-.addons-inline {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.addons-inline label {
-  font-weight: 700;
-  font-family: "Inter-Bold", sans-serif;
-}
-
-.addons-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(137,137,137,0.75);
-  border-radius: 10px;
-  padding: 5px 8px;
-}
-
-.addons-field input {
-  border: none;
-  outline: none;
-  font-size: 15px;
-  flex: 1;
-  padding: 5px;
-}
-
-.add-btn {
-  background: #039fc8;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 5px 12px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s ease;
-}
-
-.add-btn:hover {
-  background: #028bb0;
-}
-
-.tags-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.tag {
-  color: #000;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 5px 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-  animation: fadeIn 0.2s ease;
-}
-
-.tag-close {
-  font-size: 14px;
-  cursor: pointer;
-  color: #fff;
-  font-weight: bold;
-}
-
-/* Tag fade-in effect */
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-
-/* ✅ ترتيب الـ Desired Services عالموبايل */
-/* ✅ توسيط الـ checkboxes والنصوص عالموبايل */
-@media (max-width: 768px) {
- 
-  .addons-field {
-    display: flex;
-    justify-content: center; /* ✅ يحط الحقل والزر بالنص */
-    align-items: center;
-    gap: 8px;
-  }
-
-  .addons-field input {
-    flex: none;
-    width: 60%;
-  }
-
-  .add-btn {
-    padding: 8px 18px;
-  }
-
-  .section-title {
-    text-align: left;
-  }
-  /* ✅ ترتيب مثالي للـ checkboxes والنصوص */
-.checkbox-group {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;   /* ✅ يسار */
-  justify-content: flex-start;
-  gap: 14px;
-  padding-left: 20px;        /* شوي مسافة من طرف الفريم */
-}
-
-.checkbox-group label {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;                  /* مسافة صغيرة بين التشييك والنص */
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.checkbox-group input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #039fc8;     /* لون التشييك */
-} 
-  .addons-inline {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  /* نحافظ على نفس حجم التشييك */
-  .addons-inline input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-  }
-
-  /* نرجّع الحقل تحت */
-  .addons-field {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* ✅ ضبط موقع checkbox مع عنوان Special Add-Ons */
-.addons-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  font-weight: 700;
-}
-
-.addons-title input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-/* تنسيق الحقل والزر تحت العنوان */
-.addons-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.addons-field input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid rgba(137, 137, 137, 0.75);
-  border-radius: 10px;
-}
-
-.addons-field .add-btn {
-  background: #039fc8;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 600;
- }
-
-/* ✅ وضع التشييك بجانب العنوان فقط على الموبايل */
-@media (max-width: 768px) {
-  .addons-inline {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .addons-inline input[type="checkbox"] {
-    width: 18px;
-    height: 18px;
-  }
-
-  .addons-inline label {
-    font-weight: 700;
-  }
-
-  .addons-field {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-}
-
-
-}
-
-/* ✅ ترتيب Special Add-Ons بشكل أنيق على الموبايل */
-.addons-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.addons-inline {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.addons-inline input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-}
-
-.addons-inline label {
-  font-weight: 700;
-}
-
-.addons-field {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.addons-field input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid rgba(137, 137, 137, 0.75);
-  border-radius: 10px;
-}
-
-.addons-field .add-btn {
-  background: #039fc8;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-/* 🌿 موبايل فقط */
-@media (max-width: 768px) {
-  .addons-wrapper {
-    align-items: flex-start;
-  }
-
-  .addons-field {
-    width: 100%;
-  }
-
-  .addons-field input {
-    width: 100%;
-  }
-}
-/* 🔹 إزالة الإطار الرمادي الخارجي حول حقل Add-Ons */
-.addons-field {
-  border: none !important;
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
-/* 👁️ أيقونة عرض/إخفاء كلمة السر */
-.password-field {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-field input {
-  width: 100%;
-  padding-right: 40px; /* مساحة للأيقونة */
-}
-
-.toggle-password {
-  position: absolute;
-  right: 12px;
-  color: #039fc8;
-  font-size: 18px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.toggle-password:hover {
-  color: #028bb0;
 }

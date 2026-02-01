@@ -1,300 +1,177 @@
-:root{
-  --sky: #c0e7f1;
-  --sky-strong:#039fc8;
-  --sky-soft: rgba(3,159,200,0.5);
-  --ink:#000;
-  --muted:#898989;
-  --warn:#ff9500;
-  --success:#71b247;
-  --shadow:0 4px 10px rgba(0,0,0,.25);
-  --card-bg:#fff;
-  --sidebar-w: 300px;
+﻿:root{
+  --bg:#edf4f8;
+  --bg-2:#e9f7f4;
+  --card:#ffffff;
+  --primary:#00a3c8;
+  --primary-dark:#008fb0;
+  --accent:#f59e0b;
+  --accent-2:#fb7185;
+  --ink:#0f172a;
+  --muted:#64748b;
+  --border:#e2e8f0;
+  --shadow:0 18px 40px rgba(15,23,42,.12);
+  --radius:18px;
+  --sidebar-w:300px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family: "Inter", sans-serif;
-  background: var(--sky);
-  color: var(--ink);
+  font-family:"Inter",system-ui,sans-serif;
+  background:
+    radial-gradient(900px 500px at 10% -10%, rgba(10,167,167,.16), transparent 60%),
+    radial-gradient(900px 500px at 90% 0%, rgba(14,165,164,.12), transparent 55%),
+    linear-gradient(180deg, var(--bg), var(--bg-2));
+  color:var(--ink);
 }
 
 /* ===== LAYOUT ===== */
-.layout {
-  display: flex;
+.layout{display:flex;gap:20px;padding:20px;align-items:flex-start}
+.main{flex:1;min-width:0;padding:10px 6px}
+.main h1{font-family:"Vesper Libre",serif;font-size:34px;margin-bottom:18px}
 
-  padding: 10px ;
-}
-
-/* Sidebar */
-.sidebar{
-  width:var(--sidebar-w);
-  background:#fff;
-  border-radius:15px;
-  box-shadow:var(--shadow);
-  padding-bottom:30px;
-  position:sticky;
-  top:0;
-  height:fit-content;
-  align-self:flex-start;
-  margin:20px;
+/* ===== CARD ===== */
+.card{
+  background:var(--card);border-radius:22px;box-shadow:var(--shadow);
+  padding:20px 24px;margin-bottom:22px;border:1px solid rgba(10,167,167,.12)
 }
 
-.profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
-.avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
-.name{font:700 20px "Vesper Libre", serif}
-.id{font-size:13px;color:#666}
-.side-nav{padding:10px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
-.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
-.nav-item.active {
-  background: rgba(0,0,0,.05);
-  color: var(--sky-strong);
-}
+/* ===== GRID ===== */
+.page-grid{display:grid;grid-template-columns:2fr 1fr;gap:20px;align-items:start}
 
-/* ===== Main ===== */
-.main {
-  flex: 1;
-  padding: 25px 30px;
+/* ===== PAYMENT METHODS ===== */
+.payment-methods-card .card-header{display:flex;justify-content:space-between;align-items:center}
+.payment-methods-card .card-header h2{font-family:"Vesper Libre",serif;font-size:22px}
+.btn-icon{
+  background:var(--primary);color:#fff;border:none;border-radius:50%;width:36px;height:36px;
+  font-size:22px;line-height:1;cursor:pointer;transition:.2s ease;box-shadow:0 10px 20px rgba(10,167,167,.25)
 }
-.main h1 {
-  font-family: "Vesper Libre", serif;
-  font-size: 30px;
-  margin-bottom: 20px;
-}
+.btn-icon:hover{background:var(--primary-dark);transform:translateY(-1px)}
 
-/* ===== Cards ===== */
-.card {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 20px 25px;
-  margin-bottom: 25px;
+.payments-list{display:grid;gap:12px;margin-top:10px}
+.payment-row{
+  background:linear-gradient(135deg,#f8fbff,#ffffff);
+  border:1px solid rgba(0,163,200,.18);border-radius:16px;
+  padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  box-shadow:0 10px 20px rgba(15,23,42,.06)
 }
+.payment-left{display:flex;align-items:center;gap:12px}
+.pm-icon{width:44px;height:28px;object-fit:contain}
+.pm-text .pm-title{font-weight:700}
+.pm-text .pm-title strong{letter-spacing:1px}
+.pm-sub{color:var(--muted);font-size:13px}
+.payment-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn-default{
+  background:var(--primary);color:#fff;border:none;border-radius:999px;padding:8px 16px;
+  font-weight:800;cursor:pointer;transition:.2s ease;text-decoration:none
+}
+.btn-default.state{
+  background:#fff;border:1px solid var(--primary);color:var(--primary)
+}
+.btn-default:hover{background:var(--primary-dark)}
+.icon-edit{
+  width:36px;height:36px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#fff5f5;border:1px solid #fecaca;font-size:20px;
+  cursor:pointer;color:#64748b;transition:.2s ease
+}
+.icon-edit{color:#ef4444}
+.icon-edit:hover{background:#fee2e2;color:#dc2626;border-color:#fecaca}
 
-/* Payment Methods Layout */
-.page-grid {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 25px;
-  align-items: start;
+/* ===== SUBSCRIPTION ===== */
+.subscription-card h3{font-family:"Vesper Libre",serif;font-size:22px;margin-bottom:8px}
+.subscription-card p{margin:4px 0;color:#334155}
+.sub-actions{display:flex;gap:10px;margin-top:12px}
+.btn-outline{
+  border:1px solid var(--primary);background:#fff;color:var(--primary);border-radius:10px;
+  padding:6px 14px;font-weight:700;cursor:pointer;transition:.2s ease
 }
+.btn-outline:hover{background:var(--primary);color:#fff}
 
-/* Payment Methods */
-.payment-methods-card .card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.payment-methods-card .card-header h2 {
-  font-family: "Vesper Libre", serif;
-  font-size: 22px;
-}
-.btn-icon {
-  background: var(--success);
-  color: #fff;
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  font-size: 20px;
-  cursor: pointer;
-  transition: 0.25s;
-}
-.btn-icon:hover { background: #5a9f37; }
+/* ===== INVOICES ===== */
+.invoice-history h2{font-family:"Vesper Libre",serif;margin-bottom:12px}
+.invoice-history table{width:100%;border-collapse:collapse}
+.invoice-history th,.invoice-history td{text-align:left;padding:12px;border-bottom:1px solid #e5e7eb}
+.invoice-history th{background:#f9fbff}
+.method-icon{width:30px;height:auto}
+.status{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.status.paid{background:#dcfce7;color:#166534}
+.status.pending{background:#fef9c3;color:#854d0e}
+.status.failed{background:#fee2e2;color:#991b1b}
+.status.refunded{background:#e0e7ff;color:#3730a3}
+.invoice-history a{color:var(--primary);text-decoration:none;font-weight:700}
 
-.payment-row {
-  background: #fdfdfd;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px 14px;
-  margin: 10px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* ===== Subscription Modals ===== */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(10,25,35,.45);
+  opacity:0;pointer-events:none;transition:opacity .25s ease;z-index:2000
 }
-.pm-icon {
-  width: 38px;
-  height: 24px;
-  object-fit: contain;
-  margin-right: 10px;
+.modal-backdrop.show{opacity:1;pointer-events:auto}
+.modal-sheet{
+  position:fixed;top:50%;left:50%;width:min(520px,92vw);
+  transform:translate(-50%,-50%) scale(.98);
+  background:#fff;border-radius:18px;padding:18px 20px 20px;
+  box-shadow:0 26px 60px rgba(15,23,42,.2);
+  border:1px solid rgba(10,167,167,.2);opacity:0;pointer-events:none;
+  transition:.25s ease;z-index:2001
 }
-.payment-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.modal-sheet.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.modal-sheet.modal-compact{width:min(420px,92vw)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.modal-head h3{font-family:"Vesper Libre",serif;font-size:22px;font-weight:700}
+.modal-close{
+  width:38px;height:38px;border-radius:50%;
+  font-size:22px;line-height:1;border:1px solid #e2e8f0;
+  background:#fff;cursor:pointer;transition:.2s ease
 }
-.pm-text .pm-title {
-  font-weight: 600;
+.modal-close:hover{background:#f8fafc}
+.modal-body{display:grid;gap:14px}
+.sub-summary{
+  background:linear-gradient(135deg,#f3feff,#e9fbfb);
+  border:1px solid rgba(10,167,167,.18);
+  border-radius:16px;padding:14px 16px
 }
-.pm-sub {
-  color: #888;
-  font-size: 13px;
+.sub-title{font-weight:700;color:var(--ink)}
+.sub-meta{margin-top:6px;display:grid;gap:4px;color:#6b7280;font-size:13px}
+.form-row{display:grid;gap:8px}
+.modal-sheet .form-control{
+  width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(10,167,167,.25);
+  font-size:14px;background:#fff;transition:.2s ease;box-shadow:inset 0 1px 2px rgba(15,23,42,.08)
 }
-.payment-right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
+.modal-sheet .form-control:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(10,167,167,.2)
 }
-.btn-default {
-  background: var(--success);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.btn-default.state {
-  background: transparent;
-  border: 1px solid var(--success);
-  color: var(--success);
-}
-.btn-default:hover {
-  background: #5aa53e;
-  color: #fff;
-}
-.icon-edit {
-  background: none;
-  border: none;
-  font-size: 18px;
-  cursor: pointer;
-  color: #555;
-}
+.inline-grid{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.inline-grid.show{display:grid}
+.check-line,.switch-line{display:inline-flex;align-items:center;gap:10px;font-weight:700;color:#334155}
+.check-line input,.switch-line input{width:18px;height:18px}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:4px}
+.link-danger{border:none;background:none;color:#d32f2f;font-weight:700;cursor:pointer;padding:0}
+.btn-danger{background:#e53935;color:#fff;border:none;border-radius:12px;padding:8px 16px;font-weight:700;cursor:pointer}
+.modal-actions .btn{height:42px;border-radius:12px;padding:0 18px}
+.modal-actions .btn-outline{border-color:var(--primary);color:var(--primary)}
+.modal-actions .btn-primary{background:var(--primary);border:none;color:#fff}
+.modal-actions .btn-primary:hover{background:var(--primary-dark)}
+.review-list{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.review-list li{padding-left:18px;position:relative;color:#334155;font-size:14px}
+.review-list li::before{content:"•";color:var(--primary);position:absolute;left:0}
+.review-note{font-size:13px;color:#6b7280}
 
-/* Subscription */
-.subscription-card h3 {
-  font-family: "Vesper Libre", serif;
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-.subscription-card p {
-  margin: 4px 0;
-  color: #333;
-}
-.sub-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-}
-.btn-outline {
-  border: 1px solid var(--sky-strong);
-  background: #fff;
-  color: var(--sky-strong);
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s;
-}
-.btn-outline:hover {
-  background: var(--sky-strong);
-  color: #fff;
-}
+/* ===== MOBILE ===== */
+.mobile-header{display:none;background:#fff;padding:10px 16px;box-shadow:var(--shadow);align-items:center;justify-content:center;position:sticky;top:0;z-index:90}
+.menu-toggle.floating{position:fixed;top:14px;left:14px;width:44px;height:44px;background:var(--primary);border:none;border-radius:50%;display:none;align-items:center;justify-content:center;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.25);z-index:200}
+.menu-toggle.floating:hover{background:var(--primary-dark)}
 
-/* ===== Invoice History ===== */
-.invoice-history h2 {
-  font-family: "Vesper Libre", serif;
-  margin-bottom: 15px;
+@media (max-width: 1100px){
+  .layout{flex-direction:column;padding-top:80px}
+  .page-grid{grid-template-columns:1fr}
 }
-.invoice-history table {
-  width: 100%;
-  border-collapse: collapse;
+@media (max-width: 920px){
+  .mobile-header{display:flex}
+  .menu-toggle.floating{display:flex}
+  .sidebar{position:fixed;top:55px;left:-320px;width:260px;height:100vh;background:#fff;box-shadow:var(--shadow);border-radius:0 12px 12px 0;padding:20px 10px;transition:left .3s ease;z-index:99}
+  .sidebar.open{left:0}
 }
-.invoice-history th, .invoice-history td {
-  text-align: left;
-  padding: 12px;
-  border-bottom: 1px solid #ddd;
-}
-.invoice-history th {
-  background: #f9f9f9;
-}
-.invoice-history td img.method-icon {
-  width: 30px;
-  height: auto;
-}
-.status.paid {
-  background: #d8f3dc;
-  color: #2a7b2e;
-  padding: 4px 10px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 600;
-}
-.invoice-history a {
-  color: var(--sky-strong);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-/* ===== Mobile Header ===== */
-.mobile-header {
-  display: none;
-  background: #fff;
-  padding: 10px 16px;
-  box-shadow: var(--shadow);
-  align-items: center;
-  justify-content: center;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-}
-.mobile-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: #000;
-  text-align: center;
-  margin: 0;
-}
-
-/* ===== Floating Menu Button ===== */
-.menu-toggle.floating {
-  position: fixed;
-  top: 14px;
-  left: 14px;
-  width: 44px;
-  height: 44px;
-  background: var(--sky-strong);
-  border: none;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  font-size: 26px;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-  z-index: 200;
-  transition: background 0.3s, transform 0.3s;
-}
-.menu-toggle.floating:hover {
-  background: #028eb3;
-  transform: scale(1.08);
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 1100px) {
-  .layout { flex-direction: column; }
-  .sidebar { width: 100%; order: 2; }
-  .main { order: 1; }
-}
-@media (max-width: 920px) {
-  .mobile-header { display: flex; }
-  .menu-toggle.floating { display: flex; }
-
-  .sidebar {
-    position: fixed;
-    top: 55px;
-    left: -320px;
-    width: 260px;
-    height: 100vh;
-    background: #fff;
-    box-shadow: var(--shadow);
-    border-radius: 0 12px 12px 0;
-    padding: 20px 10px;
-    transition: left 0.3s ease;
-    z-index: 99;
-  }
-  .sidebar.open { left: 0; }
-  .page-grid { grid-template-columns: 1fr; }
+@media (max-width: 560px){
+  .inline-grid{grid-template-columns:1fr}
+  .modal-actions{flex-direction:column;align-items:stretch}
 }

@@ -1,79 +1,37 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment & Billing — Customer Profile</title>
+  <title>Payment & Billing â€” Customer Profile</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 </head>
 <style>
    
 </style>
 <body>
 <!-- HEADER -->
-<header class="main-header">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
-  </div>
-
-  <div class="menu-toggle" id="menu-toggle">☰</div>
-
-  <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}">HOME</a>
-    <a href="{% url 'home:about' %}">ABOUT</a>
-    <a href="#">SERVICES</a>
-    <a href="#">PRICING</a>
-    <a href="#">CONTACT</a>
-  </nav>
-
-  <div class="profile-btn">
-    <a href="#">My Profile</a>
-  </div>
-</header>
+{% include "home/includes/main_header.html" %}
 
 <div class="layout">
   <!-- Mobile header -->
   <div class="mobile-header">
-    <button class="menu-toggle floating" id="menuToggle">
+    <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
       <span class="arrow">&#8250;</span>
     </button>
     <h2 class="mobile-title">Customer Profile</h2>
   </div>
 
   <!-- ===== Sidebar ===== -->
-        <aside class="sidebar">
-      <div class="profile-head">
-        <div class="avatar"></div>
-        <div>
-          <div class="name">Sophia Bennett</div>
-          <div class="id">ID: 123456</div>
-        </div>
-      </div>
+        {% include "accounts/includes/customer_sidebar.html" %}
 
-      <form id="logout-form" method="post" action="{% url 'logout' %}" style="display: none;">
-          {% csrf_token %}
-      </form>
-
-      <nav class="side-nav">
-        <a href="{% url 'accounts:customer_profile_view' %}" class="nav-item active"><img src="{% static 'images/user-location0.png' %}" class="ico"><span>Overview</span></a>
-        <a href="{% url 'accounts:Address_and_Locations_view' %}" class="nav-item"><img src="{% static 'images/user-location1.png' %}" class="ico"><span>Address & Locations</span></a>
-        <a href="{% url 'accounts:my_bookimg' %}" class="nav-item"><img src="{% static 'images/event-accepted0.png'%}" class="ico"><span>My Bookings</span></a>
-        <a href="{% url 'accounts:incident' %}" class="nav-item"><img src="{% static 'images/user-location1.png'%}" class="ico"><span>Incidents</span></a>
-        <a href="{% url 'accounts:Service_Preferences' %}" class="nav-item"><img src="{% static 'images/settings0.png'%}" class="ico"><span>Service Preferences</span></a>
-        <a href="{% url 'accounts:Communication' %}" class="nav-item" ><img src="{% static 'images/communication0.png'%}" class="ico"><span>Communication</span></a>
-        <a href="{% url 'accounts:Customer_Notes' %}" class="nav-item" ><img src="{% static 'images/list-view0.png'%}" class="ico"><span>Customer Notes</span></a>
-        <a href="{% url 'accounts:Payment_and_Billing' %}" class="nav-item"><img src="{% static 'images/magnetic-card0.png'%}" class="ico"><span>Payment & Billing</span></a>
-        <a href="{% url 'accounts:Change_Password' %}" class="nav-item"><img src="{% static 'images/person1.png'%}" class="ico"><span>Change Password</span></a>
-        <a href="{% url 'accounts:Service_History_and_Ratings' %}" class="nav-item"><img src="{% static 'images/vector2.svg'%}" class="ico"><span>Service History & Ratings</span></a>
-        <a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="nav-item"><img src="{% static 'images/prize0.png'%}" class="ico"><span>Loyalty & Rewards</span></a>
-        <a href="#" class="nav-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"><img src="{% static 'images/logout-rounded0.png' %}" class="ico"><span>Logout</span></a>
-      </nav>
-    </aside>
 
   <!-- MAIN -->
   <main class="main">
@@ -81,12 +39,12 @@
 
     <div class="page-grid">
 
-      <!-- ✅ Payment methods (Django) -->
+      <!-- âœ… Payment methods (Django) -->
       <section class="card payment-methods-card">
         <div class="card-header">
           <h2>Payment Methods</h2>
           <a href="{% url 'accounts:Add_Payment_Method' %}">
-            <button class="btn-icon">＋</button>
+            <button class="btn-icon" aria-label="Add payment method">+</button>
           </a>
         </div>
 
@@ -108,7 +66,7 @@
 
                   <div class="pm-text">
                     <div class="pm-title">
-                      <strong>{{ pm.get_card_type_display }} •••• {{ pm.card_last4 }}</strong>
+                      <strong>{{ pm.get_card_type_display }} &#9733;&#9733;&#9733;&#9733; {{ pm.card_last4 }}</strong>
                     </div>
                     <div class="pm-sub">Expires {{ pm.expiry_date }}</div>
                   </div>
@@ -125,8 +83,9 @@
 
                   <a href="{% url 'accounts:delete_payment_method' pm.id %}"
                      class="icon-edit"
+                     aria-label="Delete payment method"
                      onclick="return confirm('Delete this payment method?')">
-                    ✕
+                    &times;
                   </a>
                 </div>
               </div>
@@ -137,15 +96,26 @@
         </div>
       </section>
 
-      <!-- ❌ Subscription (تركناه كما هو) -->
+      <!-- â‌Œ Subscription (طھط±ظƒظ†ط§ظ‡ ظƒظ…ط§ ظ‡ظˆ) -->
       <aside class="card subscription-card">
         <h3>Subscription</h3>
-        <div id="subscriptionContent"></div>
+        <div class="sub-box">
+          {% if subscription.status == "cancelled" %}
+            <p class="muted">Subscription cancelled.</p>
+          {% else %}
+            <p><strong>{{ subscription.display_title }}</strong></p>
+            <p>Next charge: {{ subscription.next_billing_date|date:"M d, Y" }}</p>
+            <p>Next service: {{ subscription.next_service_date|date:"M d, Y" }}</p>
+          {% endif %}
+          <div class="sub-actions">
+            <button class="btn-outline" id="openSubscriptionModal" {% if subscription.status == "cancelled" %}disabled{% endif %}>Manage</button>
+          </div>
+        </div>
       </aside>
 
     </div>
 
-    <!-- ❌ Invoice History (تركناه كما هو) -->
+    <!-- â‌Œ Invoice History -->
     <section class="card invoice-history">
       <h2>Invoice History</h2>
       <table id="invoiceTable">
@@ -159,86 +129,319 @@
             <th></th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody>
+          {% if invoices %}
+            {% for inv in invoices %}
+              <tr>
+                <td>{{ inv.invoice_number }}</td>
+                <td>{{ inv.issued_at|date:"M d, Y" }}</td>
+                <td>{{ inv.amount }} {{ inv.currency }}</td>
+                <td>
+                  {% if inv.payment_method %}
+                    {{ inv.payment_method.get_card_type_display }} &#9733;&#9733;&#9733;&#9733; {{ inv.payment_method.card_last4 }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="status {{ inv.status|lower }}">{{ inv.get_status_display }}</span>
+                </td>
+                <td><a href="#" class="muted">Download</a></td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="muted">No invoices yet.</td>
+            </tr>
+          {% endif %}
+        </tbody>
       </table>
     </section>
 
   </main>
 </div>
 
-<footer class="footer">
-  <div class="footer-bottom">
-    <p>© 2025 Hembla Cleaning Services. All rights reserved.</p>
+{% include "home/includes/footer.html" %}
+
+<!-- Subscription Modals -->
+<div class="modal-backdrop" id="subscriptionBackdrop"></div>
+
+<div class="modal-sheet" id="subscriptionModal">
+  <div class="modal-head">
+    <h3>Manage Subscription</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">×</button>
   </div>
-</footer>
-
-<!-- JS (تركناه متل ما هو) -->
-<script>
-const toggleBtn = document.getElementById("menu-toggle");
-const navLinks = document.getElementById("nav-links");
-
-if (toggleBtn) {
-  toggleBtn.addEventListener("click", () => {
-    navLinks.classList.toggle("active");
-  });
-}
-
-const toggle = document.getElementById("menuToggle");
-const sidebar = document.querySelector(".sidebar");
-const arrow = document.querySelector(".menu-toggle .arrow");
-
-if (toggle) {
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-  });
-}
-</script>
-<script>
-/* ====== Subscription (mock data) ====== */
-const subscription = {
-  title: "Weekly Cleaning - 2 hrs $150/session",
-  nextCharge: "July 20, 2025 ($150)",
-  nextService: "July 22, 2025"
-};
-
-const subscriptionEl = document.getElementById("subscriptionContent");
-if (subscriptionEl) {
-  subscriptionEl.innerHTML = `
-    <p><strong>${subscription.title}</strong></p>
-    <p>Next charge: ${subscription.nextCharge}</p>
-    <p>Next service: ${subscription.nextService}</p>
-    <div class="sub-actions">
-      <button class="btn-outline">Manage</button>
-      <button class="btn-outline">Cancel</button>
+  <div class="modal-body">
+    <div class="sub-summary">
+      <div class="sub-title">{{ subscription.display_title }}</div>
+      <div class="sub-meta">
+        <span>Next Billing Date: {{ subscription.next_billing_date|date:"M d, Y" }}</span>
+        <span>Next Service Date: {{ subscription.next_service_date|date:"M d, Y" }}</span>
+      </div>
     </div>
-  `;
-}
 
-/* ====== Invoice History (mock data) ====== */
-const invoices = [
-  { id: "#12345", date: "July 1, 2025", amount: "$150.00", method: "{% static 'images/klarna.png' %}", status: "Paid" },
-  { id: "#12346", date: "July 10, 2025", amount: "$150.00", method: "{% static 'images/paypal.png' %}", status: "Paid" },
-  { id: "#12347", date: "July 20, 2025", amount: "$150.00", method: "{% static 'images/swish.png' %}", status: "Paid" }
-];
+    <form id="subscriptionForm">
+      {% csrf_token %}
+      <div class="form-row">
+        <label class="switch-line">
+          <input type="checkbox" name="skip_next_service" {% if subscription.skip_next_service %}checked{% endif %}>
+          <span>Skip Next Service</span>
+        </label>
+      </div>
 
-const invoiceTable = document.querySelector("#invoiceTable tbody");
-if (invoiceTable) {
-  invoiceTable.innerHTML = "";
-  invoices.forEach(inv => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${inv.id}</td>
-      <td>${inv.date}</td>
-      <td>${inv.amount}</td>
-      <td><img src="${inv.method}" class="method-icon"></td>
-      <td><span class="status paid">${inv.status}</span></td>
-      <td><a href="#">Download</a></td>
-    `;
-    invoiceTable.appendChild(tr);
+      <div class="form-row">
+        <label class="check-line">
+          <input type="checkbox" name="pause_subscription" id="pauseToggle" {% if subscription.is_paused %}checked{% endif %}>
+          <span>Pause Subscription</span>
+        </label>
+        <div class="inline-grid" id="pauseFields">
+          <div>
+            <label>Pause until</label>
+            <input type="date" name="pause_until" value="{{ subscription.pause_until|date:'Y-m-d' }}" class="form-control">
+          </div>
+          <div>
+            <label>Resume on</label>
+            <input type="date" name="resume_on" value="{{ subscription.resume_on|date:'Y-m-d' }}" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Change Payment Method</label>
+        <select name="payment_method" class="form-control">
+          <option value="">Select a card</option>
+          {% for pm in payment_methods %}
+            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>
+              {{ pm.get_card_type_display }} •••• {{ pm.card_last4 }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="button" class="link-danger" id="openCancelModal">Cancel Subscription</button>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="reviewChangesBtn">Save Changes</button>
+        <button type="button" class="btn btn-outline" data-close="subscriptionModal">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-sheet modal-compact" id="reviewModal">
+  <div class="modal-head">
+    <h3>Review Changes</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="reviewModal">×</button>
+  </div>
+  <div class="modal-body">
+    <ul class="review-list" id="reviewList"></ul>
+    <p class="review-note">These changes will affect your upcoming billing and service schedule.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" id="confirmChangesBtn">Confirm Changes</button>
+      <button type="button" class="btn btn-outline" data-close="reviewModal">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-sheet modal-compact" id="cancelModal">
+  <div class="modal-head">
+    <h3>Cancel subscription</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="cancelModal">×</button>
+  </div>
+  <div class="modal-body">
+    <p class="muted">Your service will end after the next billing cycle.</p>
+    <label>Why are you cancelling?</label>
+    <select id="cancelReason" class="form-control">
+      <option value="">Select a reason</option>
+      <option value="Too expensive">Too expensive</option>
+      <option value="Not needed">Not needed</option>
+      <option value="Moving">Moving</option>
+      <option value="Other">Other</option>
+    </select>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" data-close="cancelModal">Keep Subscription</button>
+      <button type="button" class="btn btn-danger" id="confirmCancelBtn">Confirm Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-sheet modal-compact" id="savedModal">
+  <div class="modal-head">
+    <h3>Changes Saved</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="savedModal">×</button>
+  </div>
+  <div class="modal-body">
+    <p>Your subscription has been updated successfully.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" data-close="savedModal">Back</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-sheet modal-compact" id="cancelledModal">
+  <div class="modal-head">
+    <h3>Subscription Canceled</h3>
+    <button class="icon-ghost modal-close" type="button" data-close="cancelledModal">×</button>
+  </div>
+  <div class="modal-body">
+    <p>No further services will be scheduled. You can resubscribe anytime.</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-primary" data-close="cancelledModal">Back</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const toggle = document.getElementById("menuToggle");
+  const sidebar = document.querySelector(".sidebar");
+  const overlay = document.querySelector(".customer-menu-overlay");
+  if (!toggle || !sidebar) return;
+  toggle.addEventListener("click", () => {
+    const open = sidebar.classList.toggle("open");
+    if (overlay) overlay.classList.toggle("show", open);
   });
-}
+  if (overlay) {
+    overlay.addEventListener("click", () => {
+      sidebar.classList.remove("open");
+      overlay.classList.remove("show");
+    });
+  }
+})();
 </script>
+<script>
+(function () {
+  const backdrop = document.getElementById("subscriptionBackdrop");
+  const mainModal = document.getElementById("subscriptionModal");
+  const reviewModal = document.getElementById("reviewModal");
+  const cancelModal = document.getElementById("cancelModal");
+  const savedModal = document.getElementById("savedModal");
+  const cancelledModal = document.getElementById("cancelledModal");
 
+  const openBtn = document.getElementById("openSubscriptionModal");
+  const reviewBtn = document.getElementById("reviewChangesBtn");
+  const confirmBtn = document.getElementById("confirmChangesBtn");
+  const cancelBtn = document.getElementById("openCancelModal");
+  const confirmCancelBtn = document.getElementById("confirmCancelBtn");
+
+  const pauseToggle = document.getElementById("pauseToggle");
+  const pauseFields = document.getElementById("pauseFields");
+  const reviewList = document.getElementById("reviewList");
+  const cancelReason = document.getElementById("cancelReason");
+  const form = document.getElementById("subscriptionForm");
+
+  function openModal(modal) {
+    if (!modal || !backdrop) return;
+    backdrop.classList.add("show");
+    modal.classList.add("show");
+  }
+
+  function closeModal(modal) {
+    if (!modal || !backdrop) return;
+    modal.classList.remove("show");
+    if (![mainModal, reviewModal, cancelModal, savedModal, cancelledModal].some(m => m && m.classList.contains("show"))) {
+      backdrop.classList.remove("show");
+    }
+  }
+
+  if (openBtn) {
+    openBtn.addEventListener("click", () => openModal(mainModal));
+  }
+
+  document.querySelectorAll("[data-close]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const target = document.getElementById(e.currentTarget.dataset.close);
+      closeModal(target);
+    });
+  });
+
+  if (backdrop) {
+    backdrop.addEventListener("click", () => {
+      [mainModal, reviewModal, cancelModal, savedModal, cancelledModal].forEach(closeModal);
+    });
+  }
+
+  function syncPauseFields() {
+    if (!pauseFields) return;
+    pauseFields.classList.toggle("show", pauseToggle && pauseToggle.checked);
+  }
+  if (pauseToggle) {
+    pauseToggle.addEventListener("change", syncPauseFields);
+    syncPauseFields();
+  }
+
+  if (reviewBtn) {
+    reviewBtn.addEventListener("click", () => {
+      if (!reviewList || !form) return;
+      reviewList.innerHTML = "";
+      const data = new FormData(form);
+      const items = [];
+      if (data.get("skip_next_service") === "on") items.push("Skip next service");
+      if (data.get("pause_subscription") === "on") {
+        items.push(`Pause until ${data.get("pause_until") || "-"}`);
+        items.push(`Resume on ${data.get("resume_on") || "-"}`);
+      }
+      const pm = form.querySelector("select[name='payment_method']");
+      if (pm && pm.value) items.push(`Payment method: ${pm.options[pm.selectedIndex].text}`);
+      if (!items.length) items.push("No changes selected");
+      items.forEach(text => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        reviewList.appendChild(li);
+      });
+      openModal(reviewModal);
+    });
+  }
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return "";
+  }
+
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", async () => {
+      if (!form) return;
+      const data = new FormData(form);
+      data.append("action", "save");
+      const res = await fetch("{% url 'accounts:manage_subscription' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+        body: data,
+      });
+      if (res.ok) {
+        closeModal(reviewModal);
+        closeModal(mainModal);
+        openModal(savedModal);
+      }
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => openModal(cancelModal));
+  }
+
+  if (confirmCancelBtn) {
+    confirmCancelBtn.addEventListener("click", async () => {
+      const data = new FormData();
+      data.append("action", "cancel");
+      data.append("cancel_reason", cancelReason ? cancelReason.value : "");
+      const res = await fetch("{% url 'accounts:manage_subscription' %}", {
+        method: "POST",
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+        body: data,
+      });
+      if (res.ok) {
+        closeModal(cancelModal);
+        closeModal(mainModal);
+        openModal(cancelledModal);
+      }
+    });
+  }
+})();
+</script>
+<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+

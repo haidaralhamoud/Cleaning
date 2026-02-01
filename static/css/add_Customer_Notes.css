@@ -13,7 +13,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family: "Inter", sans-serif;
+  font-family: "Vesper Libre", serif;
   background: var(--sky);
   color: var(--ink);
 }
@@ -95,10 +95,17 @@ h1 {
   align-items: center;
   margin-bottom: 10px;
   background: #f9feff;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
 }
 
 .option.active {
   background: #e6faff;
+}
+
+.option:hover {
+  border-color: #028eb3;
+  box-shadow: 0 8px 18px rgba(3,159,200,0.12);
+  transform: translateY(-1px);
 }
 
 .option p.title {
@@ -117,6 +124,14 @@ input[type="text"], textarea {
   padding: 12px 14px;
   margin-bottom: 20px;
   font-size: 15px;
+  box-shadow: 0 10px 22px rgba(3,159,200,0.18);
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+input[type="text"]:focus, textarea:focus {
+  outline: none;
+  border-color: #028eb3;
+  box-shadow: 0 0 0 3px rgba(3,159,200,0.18), 0 10px 22px rgba(3,159,200,0.2);
 }
 
 textarea {
@@ -134,11 +149,19 @@ textarea {
   float: right;
   transition: 0.3s;
   cursor: pointer;
+  box-shadow: 0 10px 22px rgba(3,159,200,0.25);
 }
 
 .save-btn:hover {
   background: #0282a3;
 }
+
+/* ====== OPTION BOX RADIO STYLE ====== */
+.option label{display:flex;gap:12px;align-items:flex-start;cursor:pointer;width:100%}
+.option input[type="radio"]{margin-top:4px;transform:scale(1.1)}
+.option.active{border:2px solid #039fc8;background:rgba(3,159,200,.07)}
+.field-error{color:#d32f2f;font-size:13px;margin-top:6px}
+.hidden{display:none !important;}
 
 /* ===== Floating Arrow Button (Mobile) ===== */
 .menu-toggle {

@@ -1,19 +1,33 @@
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from datetime import timedelta
 
 from accounts.models import DiscountCode
 from .pricing_utils import calculate_booking_price
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import (
-    ContactForm, ApplicationForm, BusinessCompanyInfoForm, OfficeSetupForm , ZipCheckForm, NotAvailableZipForm,CallRequestForm
+    ContactForm, ApplicationForm, BusinessCompanyInfoForm, OfficeSetupForm , ZipCheckForm, NotAvailableZipForm,CallRequestForm, FeedbackRequestForm
 )
 from django.views.decorators.http import require_POST
 
 from .models import (
-    Job, Application,BookingNote, BusinessBooking, BusinessService,DateSurcharge,PrivateAddon,
-    BusinessBundle, BusinessAddon ,PrivateService, AvailableZipCode,PrivateBooking,CallRequest,EmailRequest,PrivateMainCategory
-
+    Job, Application, BookingNote, BusinessBooking, BusinessService, DateSurcharge, PrivateAddon,
+    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, CallRequest,
+    EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
+    Contact,
+    ScheduleRule,
+)
+from accounts.models import (
+    Customer,
+    BookingRequestFix,
+    CustomerNotification,
+    CustomerNote,
+    Incident,
+    ServiceReview,
+    ProviderProfile,
+    ProviderAdminMessage,
+    ChatMessage,
 )
 from django.http import JsonResponse
 import json
@@ -23,12 +37,21 @@ from datetime import datetime  # فوق
 from .pricing_utils import calculate_booking_price
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
+from django.contrib.auth.decorators import user_passes_test
+from django import forms
+from django.forms import modelform_factory
+from django.db.models import Q, JSONField
+from django.core.paginator import Paginator
+from django.utils.safestring import mark_safe
+
+from .dashboard import get_dashboard_items, get_item_by_slug
 
 # ================================
 # STATIC PAGES
 # ================================
 def home(request):
-    return render(request, "home/home.html")
+    feedbacks = list(FeedbackRequest.objects.order_by("-created_at"))
+    return render(request, "home/home.html", {"feedbacks": feedbacks})
 
 def about(request):
     return render(request, "home/about.html")
@@ -47,6 +70,771 @@ def Accessibility_Statement(request):
 
 def T_C(request):
     return render(request, "home/T&C.html")
+
+
+def feedback_request(request):
+    form = FeedbackRequestForm()
+    if request.method == "POST":
+        form = FeedbackRequestForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Thank you! We received your message.")
+            return redirect("home:feedback_request")
+    return render(request, "home/feedback_request.html", {"form": form})
+
+
+@require_POST
+def service_contact_submit(request):
+    service_slug = (request.POST.get("service_slug") or "").strip()
+    first_name = (request.POST.get("first_name") or "").strip()
+    last_name = (request.POST.get("last_name") or "").strip()
+    email = (request.POST.get("email") or "").strip()
+    person_number = (request.POST.get("person_number") or "").strip()
+    phone = (request.POST.get("phone") or "").strip()
+    message = (request.POST.get("message") or "").strip()
+
+    if service_slug:
+        message = f"[Service: {service_slug}]\n{message}"
+
+    Contact.objects.create(
+        first_name=first_name or "Guest",
+        last_name=last_name or "",
+        email=email or "no-reply@example.com",
+        country_code=person_number or "+1",
+        phone=phone or "",
+        message=message or "",
+        inquiry_type="general",
+        preferred_method="email",
+    )
+
+    if service_slug:
+        return redirect("accounts:service_detail", slug=service_slug)
+    return redirect("home:home")
+
+
+def _staff_required(user):
+    return user.is_authenticated and user.is_staff
+
+
+def _dashboard_notifications():
+    now = timezone.now()
+    since = now - timedelta(days=1)
+
+    new_private = PrivateBooking.objects.filter(created_at__gte=since).count()
+    new_business = BusinessBooking.objects.filter(created_at__gte=since).count()
+    new_contacts = Contact.objects.filter(created_at__gte=since).count()
+    new_incidents = Incident.objects.filter(created_at__gte=since).count()
+    new_reviews = ServiceReview.objects.filter(created_at__gte=since).count()
+    new_messages = ChatMessage.objects.filter(created_at__gte=since).count()
+    new_customers = Customer.objects.filter(user__date_joined__gte=since).count()
+    new_providers = ProviderProfile.objects.filter(user__date_joined__gte=since).count()
+    pending_no_show = NoShowReport.objects.filter(decision="PENDING").count()
+    open_request_fixes = BookingRequestFix.objects.filter(status="OPEN").count()
+    updated_customer_notes = CustomerNote.objects.filter(updated_at__gte=since).count()
+
+    recent_status = list(
+        BookingStatusHistory.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_fixes = list(
+        BookingRequestFix.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_contacts = list(
+        Contact.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_customer_notes = list(
+        CustomerNote.objects.filter(updated_at__gte=since)
+        .select_related("customer")
+        .order_by("-updated_at")[:6]
+    )
+    recent_incidents = list(
+        Incident.objects.filter(created_at__gte=since)
+        .select_related("customer")
+        .order_by("-created_at")[:6]
+    )
+    recent_reviews = list(
+        ServiceReview.objects.filter(created_at__gte=since)
+        .select_related("customer")
+        .order_by("-created_at")[:6]
+    )
+    recent_messages = list(
+        ChatMessage.objects.filter(created_at__gte=since)
+        .select_related("sender", "thread")
+        .order_by("-created_at")[:6]
+    )
+
+    items = []
+    for r in recent_status:
+        items.append({
+            "title": f"{r.booking_type.title()} #{r.booking_id}",
+            "detail": r.note or r.status,
+            "time": r.created_at,
+            "url": f"/dashboard/{r.booking_type}-bookings/",
+        })
+    for fix in recent_fixes:
+        items.append({
+            "title": f"Request Fix #{fix.id}",
+            "detail": f"{fix.booking_type.title()} booking #{fix.booking_id}",
+            "time": fix.created_at,
+            "url": "/dashboard/request-fixes/",
+        })
+    for contact in recent_contacts:
+        items.append({
+            "title": f"Contact: {contact.first_name} {contact.last_name}".strip(),
+            "detail": contact.inquiry_type or "Contact form",
+            "time": contact.created_at,
+            "url": "/dashboard/contacts/",
+        })
+    for note in recent_customer_notes:
+        items.append({
+            "title": "Customer Notes Updated",
+            "detail": getattr(note.customer, "email", "") or str(note.customer),
+            "time": note.updated_at,
+            "url": "/dashboard/customer-notes/",
+        })
+    for inc in recent_incidents:
+        items.append({
+            "title": f"Incident #{inc.id}",
+            "detail": getattr(inc.customer, "email", "") or str(inc.customer),
+            "time": inc.created_at,
+            "url": "/dashboard/incidents/",
+        })
+    for rev in recent_reviews:
+        items.append({
+            "title": f"New Review: {rev.service_title}",
+            "detail": getattr(rev.customer, "email", "") or str(rev.customer),
+            "time": rev.created_at,
+            "url": "/dashboard/service-reviews/",
+        })
+    for msg in recent_messages:
+        detail = f"{msg.thread.booking_type.title()} #{msg.thread.booking_id}"
+        items.append({
+            "title": f"New Message from {msg.sender}",
+            "detail": detail,
+            "time": msg.created_at,
+            "url": "",
+        })
+    items = sorted(items, key=lambda i: i["time"], reverse=True)[:6]
+
+    total = (
+        new_private
+        + new_business
+        + new_contacts
+        + new_incidents
+        + new_reviews
+        + new_messages
+        + new_customers
+        + new_providers
+        + pending_no_show
+        + open_request_fixes
+        + updated_customer_notes
+    )
+    return {
+        "dashboard_notif_count": total,
+        "dashboard_notif_items": items,
+        "dashboard_new_bookings": new_private + new_business,
+        "dashboard_pending_no_show": pending_no_show,
+        "dashboard_open_fixes": open_request_fixes,
+        "dashboard_notif_meter": min(total, 100),
+        "dashboard_new_customers": new_customers,
+        "dashboard_new_providers": new_providers,
+        "dashboard_new_incidents": new_incidents,
+        "dashboard_new_reviews": new_reviews,
+        "dashboard_new_messages": new_messages,
+    }
+
+
+@user_passes_test(_staff_required)
+def dashboard_notifications_api(request):
+    data = _dashboard_notifications()
+    return JsonResponse({
+        "count": data["dashboard_notif_count"],
+        "new_bookings": data["dashboard_new_bookings"],
+        "pending_no_show": data["dashboard_pending_no_show"],
+        "new_customers": data.get("dashboard_new_customers", 0),
+        "new_incidents": data.get("dashboard_new_incidents", 0),
+        "new_reviews": data.get("dashboard_new_reviews", 0),
+        "new_messages": data.get("dashboard_new_messages", 0),
+        "items": [
+            {
+                "title": i["title"],
+                "detail": i["detail"],
+                "time": i["time"].strftime("%b %d, %I:%M %p"),
+                "url": i.get("url", ""),
+            }
+            for i in data["dashboard_notif_items"]
+        ],
+    })
+
+
+@user_passes_test(_staff_required)
+def dashboard_home(request):
+    items = get_dashboard_items()
+    cards = []
+    now = timezone.now()
+    for item in items:
+        try:
+            count = item.model.objects.count()
+        except Exception:
+            count = 0
+        alert_count = 0
+        if item.model == PrivateBooking:
+            alert_count = PrivateBooking.objects.filter(created_at__gte=now - timedelta(days=1)).count()
+        elif item.model == BusinessBooking:
+            alert_count = BusinessBooking.objects.filter(created_at__gte=now - timedelta(days=1)).count()
+        elif item.model == NoShowReport:
+            alert_count = NoShowReport.objects.filter(decision="PENDING").count()
+        cards.append({
+            "slug": item.slug,
+            "label": item.label,
+            "icon": item.icon,
+            "count": count,
+            "alert_count": alert_count,
+        })
+    context = {"cards": cards, "items": items}
+    context.update(_dashboard_notifications())
+    return render(request, "dashboard/index.html", context)
+
+
+def _model_fields(model):
+    fields = []
+    for f in model._meta.fields:
+        if f.auto_created:
+            continue
+        fields.append(f.name)
+    return fields
+
+
+JSON_EDIT_MODELS = {PrivateService, PrivateAddon}
+JSON_EDIT_FIELDS = {
+    PrivateService: {"questions"},
+    PrivateAddon: {"questions"},
+}
+
+
+class BusinessBundleDashboardForm(forms.ModelForm):
+    what_included_text = forms.CharField(
+        required=False,
+        label="What's included (one per line)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="Enter one item per line.",
+    )
+    why_choose_text = forms.CharField(
+        required=False,
+        label="Why choose this bundle (one per line)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="Enter one item per line.",
+    )
+    addons_text = forms.CharField(
+        required=False,
+        label="Popular add-ons (one per line)",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="Enter one item per line.",
+    )
+
+    class Meta:
+        model = BusinessBundle
+        fields = (
+            "title",
+            "slug",
+            "discount",
+            "short_description",
+            "target_audience",
+            "what_included_text",
+            "why_choose_text",
+            "addons_text",
+            "notes",
+            "image",
+        )
+
+    def _lines_to_list(self, value):
+        if not value:
+            return []
+        return [line.strip() for line in value.splitlines() if line.strip()]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["what_included_text"].initial = "\n".join(
+                self.instance.what_included or []
+            )
+            self.fields["why_choose_text"].initial = "\n".join(
+                self.instance.why_choose or []
+            )
+            self.fields["addons_text"].initial = "\n".join(self.instance.addons or [])
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.what_included = self._lines_to_list(
+            self.cleaned_data.get("what_included_text")
+        )
+        instance.why_choose = self._lines_to_list(
+            self.cleaned_data.get("why_choose_text")
+        )
+        instance.addons = self._lines_to_list(self.cleaned_data.get("addons_text"))
+        if commit:
+            instance.save()
+        return instance
+
+
+class BusinessBookingDashboardForm(forms.ModelForm):
+    services_needed_text = forms.CharField(
+        required=False,
+        label="Services needed (one per line)",
+        widget=forms.Textarea(attrs={"rows": 4}),
+        help_text="Enter one service per line.",
+    )
+    addons_text = forms.CharField(
+        required=False,
+        label="Add-ons (one per line)",
+        widget=forms.Textarea(attrs={"rows": 4}),
+        help_text="Enter one add-on per line.",
+    )
+    frequency_type = forms.ChoiceField(
+        required=False,
+        label="Frequency type",
+        choices=[
+            ("", "Select frequency"),
+            ("daily", "Daily"),
+            ("times_per_week", "Times per week"),
+            ("weekly", "Weekly"),
+            ("monthly", "Monthly"),
+            ("ondemand", "On-demand"),
+            ("yearly", "Yearly"),
+        ],
+    )
+    frequency_times = forms.IntegerField(
+        required=False,
+        min_value=1,
+        max_value=7,
+        label="Times per week (if applicable)",
+    )
+
+    class Meta:
+        model = BusinessBooking
+        fields = "__all__"
+
+    def _lines_to_list(self, value):
+        if not value:
+            return []
+        return [line.strip() for line in value.splitlines() if line.strip()]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            services = self.instance.services_needed or []
+            addons = self.instance.addons or []
+            if isinstance(services, (list, tuple)):
+                self.fields["services_needed_text"].initial = "\n".join(map(str, services))
+            else:
+                self.fields["services_needed_text"].initial = str(services)
+            if isinstance(addons, (list, tuple)):
+                self.fields["addons_text"].initial = "\n".join(map(str, addons))
+            else:
+                self.fields["addons_text"].initial = str(addons)
+
+            freq = self.instance.frequency or {}
+            if isinstance(freq, dict):
+                freq_type = freq.get("type") or ""
+                if freq_type == "times_per_week":
+                    self.fields["frequency_type"].initial = "times_per_week"
+                    self.fields["frequency_times"].initial = freq.get("value") or ""
+                else:
+                    self.fields["frequency_type"].initial = freq_type
+            else:
+                self.fields["frequency_type"].initial = ""
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.services_needed = self._lines_to_list(
+            self.cleaned_data.get("services_needed_text")
+        )
+        instance.addons = self._lines_to_list(self.cleaned_data.get("addons_text"))
+
+        freq_type = self.cleaned_data.get("frequency_type") or ""
+        if freq_type == "times_per_week":
+            value = self.cleaned_data.get("frequency_times") or 1
+            instance.frequency = {"type": "times_per_week", "value": value}
+        elif freq_type:
+            instance.frequency = {"type": freq_type}
+        else:
+            instance.frequency = None
+
+        if commit:
+            instance.save()
+        return instance
+
+
+EMOJI_OPTIONS = [
+    "🧹", "🧽", "🧼", "🧴", "🧺", "🧻", "🧤", "🪣", "🪟", "🧯",
+    "🧪", "🧫", "🧷", "🪤", "🧰", "🪛", "🔧", "🧲", "🚽", "🚿",
+    "🛁", "🧊", "🧺", "🧴", "🧹", "🧼", "🪟"
+]
+
+
+class BusinessAddonDashboardForm(forms.ModelForm):
+    emoji = forms.CharField(
+        required=False,
+        label="Emoji",
+        help_text="Pick an emoji from the list or type your own. Tip: press Windows + . to open the emoji picker.",
+        widget=forms.TextInput(attrs={
+            "list": "emoji-options",
+            "placeholder": "Pick an emoji",
+        }),
+    )
+
+    class Meta:
+        model = BusinessAddon
+        fields = "__all__"
+
+
+class DateSurchargeDashboardForm(forms.ModelForm):
+    WEEKDAY_CHOICES = [
+        ("Mon", "Monday"),
+        ("Tue", "Tuesday"),
+        ("Wed", "Wednesday"),
+        ("Thu", "Thursday"),
+        ("Fri", "Friday"),
+        ("Sat", "Saturday"),
+        ("Sun", "Sunday"),
+    ]
+
+    weekday = forms.ChoiceField(choices=[("", "---------")] + WEEKDAY_CHOICES, required=False)
+
+    class Meta:
+        model = DateSurcharge
+        fields = "__all__"
+
+    def clean(self):
+        cleaned = super().clean()
+        rule_type = cleaned.get("rule_type")
+        weekday = cleaned.get("weekday")
+        date = cleaned.get("date")
+
+        if rule_type == "weekday":
+            if not weekday:
+                self.add_error("weekday", "Please choose a weekday.")
+            cleaned["date"] = None
+        elif rule_type == "date":
+            if not date:
+                self.add_error("date", "Please select a date.")
+            cleaned["weekday"] = None
+
+        return cleaned
+
+
+class ScheduleRuleDashboardForm(forms.ModelForm):
+    KEY_CHOICES = [
+        ("frequency_type", "Frequency"),
+        ("day", "Day of week"),
+    ]
+
+    key = forms.ChoiceField(choices=[("", "---------")] + KEY_CHOICES)
+
+    class Meta:
+        model = ScheduleRule
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["key"].label = "Rule type"
+        self.fields["value"].label = "Rule value"
+        self.fields["price_change"].label = "Price change (%)"
+        self.fields["value"].widget.attrs.update({
+            "list": "scheduleRuleValues",
+            "placeholder": "Pick a value (or type a custom one)",
+        })
+        self.fields["price_change"].help_text = "Use negative for discounts (e.g. -15). Positive adds a surcharge."
+
+
+def _exclude_fields_for_form(model):
+    excluded = []
+    for f in model._meta.fields:
+        if f.auto_created:
+            excluded.append(f.name)
+        if isinstance(f, JSONField) and model not in JSON_EDIT_MODELS:
+            excluded.append(f.name)
+        if isinstance(f, JSONField) and model in JSON_EDIT_MODELS:
+            allowed = JSON_EDIT_FIELDS.get(model, set())
+            if allowed and f.name not in allowed:
+                excluded.append(f.name)
+        if getattr(f, "auto_now", False) or getattr(f, "auto_now_add", False):
+            excluded.append(f.name)
+    if model.__name__ == "PrivateAddon" and f.name == "form_html":
+        excluded.append(f.name)
+    return list(dict.fromkeys(excluded))
+
+
+def _json_readonly(obj, exclude_fields=()):
+    data = {}
+    for f in obj._meta.fields:
+        if isinstance(f, JSONField):
+            if f.name in exclude_fields:
+                continue
+            data[f.name] = getattr(obj, f.name)
+    return data
+
+
+def _json_formfield_callback(model, db_field, **kwargs):
+    if isinstance(db_field, JSONField):
+        if model in JSON_EDIT_MODELS and db_field.name in JSON_EDIT_FIELDS.get(model, set()):
+            return forms.JSONField(
+                label=db_field.verbose_name,
+                required=not db_field.blank,
+                widget=forms.Textarea(attrs={
+                    "rows": 8,
+                    "placeholder": (
+                        "{\"q1\": {\"label\": \"Question?\", \"type\": \"select\", "
+                        "\"options\": [\"Option 1\", \"Option 2\"]}}"
+                    ),
+                }),
+                help_text=(
+                    "Paste valid JSON. Example keys: label, type, options."
+                ),
+            )
+        return forms.JSONField(
+            label=db_field.verbose_name,
+            required=not db_field.blank,
+            widget=forms.Textarea(attrs={"rows": 6}),
+        )
+    return db_field.formfield(**kwargs)
+
+
+def _bootstrap_form(form):
+    for name, field in form.fields.items():
+        widget = field.widget
+        base_class = widget.attrs.get("class", "")
+        input_type = getattr(widget, "input_type", "")
+        if input_type in ("checkbox", "radio"):
+            widget.attrs["class"] = f"{base_class} form-check-input".strip()
+        elif widget.__class__.__name__ in ("Select", "SelectMultiple"):
+            widget.attrs["class"] = f"{base_class} form-select".strip()
+        else:
+            widget.attrs["class"] = f"{base_class} form-control".strip()
+    return form
+
+
+@user_passes_test(_staff_required)
+def dashboard_model_list(request, model):
+    item = get_item_by_slug(model)
+    if not item:
+        return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+
+    qs = item.model.objects.all()
+    service_id = request.GET.get("service_id")
+    if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "ServiceEcoPromise"}:
+        qs = qs.filter(service_id=service_id)
+    q = request.GET.get("q", "").strip()
+    if q:
+        text_fields = [
+            f.name for f in item.model._meta.fields
+            if f.get_internal_type() in ("CharField", "TextField", "EmailField")
+        ]
+        query = Q()
+        for name in text_fields:
+            query |= Q(**{f"{name}__icontains": q})
+        qs = qs.filter(query)
+
+    paginator = Paginator(qs, 12)
+    page = paginator.get_page(request.GET.get("page"))
+
+    display_fields = _model_fields(item.model)[:5]
+
+    context = {
+        "items": get_dashboard_items(),
+        "item": item,
+        "objects": page,
+        "display_fields": display_fields,
+        "query": q,
+    }
+    context.update(_dashboard_notifications())
+    return render(request, "dashboard/list.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_model_create(request, model):
+    item = get_item_by_slug(model)
+    if not item:
+        return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+
+    if item.model == BusinessBundle:
+        Form = BusinessBundleDashboardForm
+    elif item.model == BusinessBooking:
+        Form = modelform_factory(
+            item.model,
+            form=BusinessBookingDashboardForm,
+            exclude=_exclude_fields_for_form(item.model),
+        )
+    elif item.model == BusinessAddon:
+        Form = BusinessAddonDashboardForm
+    elif item.model == DateSurcharge:
+        Form = DateSurchargeDashboardForm
+    elif item.model == ScheduleRule:
+        Form = ScheduleRuleDashboardForm
+    else:
+        Form = modelform_factory(
+            item.model,
+            exclude=_exclude_fields_for_form(item.model),
+            formfield_callback=lambda db_field, **kwargs: _json_formfield_callback(item.model, db_field, **kwargs),
+        )
+    if request.method == "POST":
+        form = Form(request.POST, request.FILES)
+        form = _bootstrap_form(form)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
+                obj.created_by = request.user
+            obj.save()
+            return redirect("home:dashboard_model_list", model=item.slug)
+    else:
+        initial = {}
+        if item.model == PrivateAddon:
+            service_id = request.GET.get("service_id")
+            if service_id:
+                initial["service"] = service_id
+        if item.model == ProviderAdminMessage:
+            provider_id = request.GET.get("provider_id")
+            if provider_id:
+                initial["provider"] = provider_id
+        form = _bootstrap_form(Form(initial=initial))
+
+    context = {
+        "items": get_dashboard_items(),
+        "item": item,
+        "form": form,
+        "mode": "create",
+        "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
+    }
+    context.update(_dashboard_notifications())
+    return render(request, "dashboard/form.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_model_edit(request, model, pk):
+    item = get_item_by_slug(model)
+    if not item:
+        return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+
+    obj = get_object_or_404(item.model, pk=pk)
+    prev_status = None
+    if item.model.__name__ == "BookingRequestFix":
+        prev_status = getattr(obj, "status", None)
+    if item.model == BusinessBundle:
+        Form = BusinessBundleDashboardForm
+    elif item.model == BusinessBooking:
+        Form = modelform_factory(
+            item.model,
+            form=BusinessBookingDashboardForm,
+            exclude=_exclude_fields_for_form(item.model),
+        )
+    elif item.model == BusinessAddon:
+        Form = BusinessAddonDashboardForm
+    elif item.model == DateSurcharge:
+        Form = DateSurchargeDashboardForm
+    elif item.model == ScheduleRule:
+        Form = ScheduleRuleDashboardForm
+    else:
+        Form = modelform_factory(
+            item.model,
+            exclude=_exclude_fields_for_form(item.model),
+            formfield_callback=lambda db_field, **kwargs: _json_formfield_callback(item.model, db_field, **kwargs),
+        )
+    if request.method == "POST":
+        form = Form(request.POST, request.FILES, instance=obj)
+        form = _bootstrap_form(form)
+        if form.is_valid():
+            obj = form.save()
+            if item.model.__name__ == "BookingRequestFix":
+                new_status = getattr(obj, "status", None)
+                if prev_status and new_status and new_status != prev_status:
+                    CustomerNotification.objects.create(
+                        user=obj.customer,
+                        title="Request Fix Updated",
+                        body=f"Your request fix for booking #{obj.booking_id} is now {new_status.replace('_', ' ').title()}.",
+                        notification_type="request_fix",
+                        booking_type=obj.booking_type,
+                        booking_id=obj.booking_id,
+                        request_fix=obj,
+                    )
+            return redirect("home:dashboard_model_list", model=item.slug)
+    else:
+        form = _bootstrap_form(Form(instance=obj))
+
+    addon_form_preview = None
+    addons_for_service = None
+    if item.model.__name__ == "PrivateAddon" and obj.form_html:
+        addon_form_preview = mark_safe(obj.form_html)
+    if item.model == PrivateService:
+        addons_for_service = PrivateAddon.objects.filter(service=obj).order_by("title")
+
+    json_readonly = None
+    if item.model not in {BusinessBundle, BusinessBooking}:
+        json_readonly = _json_readonly(
+            obj,
+            exclude_fields=JSON_EDIT_FIELDS.get(item.model, set())
+        )
+
+    context = {
+        "items": get_dashboard_items(),
+        "item": item,
+        "form": form,
+        "mode": "edit",
+        "object": obj,
+        "json_readonly": json_readonly,
+        "addon_form_preview": addon_form_preview,
+        "addons_for_service": addons_for_service,
+        "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
+    }
+    context.update(_dashboard_notifications())
+    return render(request, "dashboard/form.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_model_delete(request, model, pk):
+    item = get_item_by_slug(model)
+    if not item:
+        return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+
+    obj = get_object_or_404(item.model, pk=pk)
+    if request.method == "POST":
+        obj.delete()
+        return redirect("home:dashboard_model_list", model=item.slug)
+
+    context = {
+        "items": get_dashboard_items(),
+        "item": item,
+        "object": obj,
+    }
+    context.update(_dashboard_notifications())
+    return render(request, "dashboard/confirm_delete.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_date_surcharge_quick_weekend(request):
+    amount_raw = request.GET.get("amount", "10")
+    surcharge_type = request.GET.get("type", "percent")
+    if surcharge_type not in {"percent", "fixed"}:
+        surcharge_type = "percent"
+
+    try:
+        amount = float(amount_raw)
+    except ValueError:
+        amount = 10
+
+    for weekday in ("Sat", "Sun"):
+        obj, created = DateSurcharge.objects.get_or_create(
+            rule_type="weekday",
+            weekday=weekday,
+            defaults={"amount": amount, "surcharge_type": surcharge_type},
+        )
+        if not created:
+            obj.amount = amount
+            obj.surcharge_type = surcharge_type
+            obj.save(update_fields=["amount", "surcharge_type"])
+
+    return redirect("home:dashboard_model_list", model="date-surcharges")
 
 
 # ================================
@@ -120,43 +908,93 @@ def all_services_business(request):
 # BOOKING START
 # ================================
 def business_services(request):
-    booking = BusinessBooking.objects.create()
-    return redirect("home:business_company_info", booking_id=booking.id)
+    request.session["business_booking_draft"] = {}
+    request.session.modified = True
+    return redirect("home:business_company_info", booking_id=0)
 
 
 def business_start_booking(request):
     service = request.GET.get("service")
-    booking = BusinessBooking.objects.create(
-    selected_service=service,
-    user=request.user if request.user.is_authenticated else None
-)
-    booking.log_status(
-    user=request.user,
-    note="Order placed"
-)
-    return redirect("home:business_company_info", booking_id=booking.id)
+    request.session["business_booking_draft"] = {
+        "selected_service": service,
+        "path_type": "bundle",
+    }
+    request.session.modified = True
+    return redirect("home:business_company_info", booking_id=0)
+
+
+def _get_business_draft(request):
+    return request.session.get("business_booking_draft", {})
+
+
+def _update_business_draft(request, updates):
+    data = _get_business_draft(request)
+    data.update(updates)
+    request.session["business_booking_draft"] = data
+    request.session.modified = True
+
+
+def _draft_booking_from_session(request):
+    data = _get_business_draft(request)
+    booking = BusinessBooking()
+    booking.id = 0
+    for field in (
+        "selected_service",
+        "company_name",
+        "contact_person",
+        "role",
+        "office_address",
+        "email",
+        "phone",
+        "office_size",
+        "num_employees",
+        "floors",
+        "restrooms",
+        "kitchen_cleaning",
+        "services_needed",
+        "addons",
+        "frequency",
+        "start_date",
+        "preferred_time",
+        "days_type",
+        "custom_date",
+        "custom_time",
+        "notes",
+        "path_type",
+    ):
+        if field in data:
+            setattr(booking, field, data.get(field))
+    bundle_id = data.get("selected_bundle_id")
+    if bundle_id:
+        booking.selected_bundle_id = bundle_id
+    return booking
 
 
 # ================================
 # STEP 1 — COMPANY INFO
 # ================================
 def business_company_info(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        request.session["business_booking_draft"] = {}
+        request.session.modified = True
+        return redirect("home:business_company_info", booking_id=0)
+
+    booking = _draft_booking_from_session(request)
 
     if booking.path_type not in ["bundle", "custom"]:
-        booking.path_type = "bundle"
-        booking.save()
+        _update_business_draft(request, {"path_type": "bundle"})
 
-    total_steps = 6 if booking.path_type == "bundle" else 7
+    total_steps = 7
     range_steps = range(1, total_steps + 1)
 
     if request.method == "POST":
-        form = BusinessCompanyInfoForm(request.POST, instance=booking)
+        form = BusinessCompanyInfoForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("home:business_office_setup", booking_id=booking.id)
+            _update_business_draft(request, form.cleaned_data)
+            return redirect("home:business_office_setup", booking_id=0)
     else:
-        form = BusinessCompanyInfoForm(instance=booking)
+        form = BusinessCompanyInfoForm(initial=draft)
 
     return render(request, "home/company_info.html", {
         "booking": booking,
@@ -164,6 +1002,7 @@ def business_company_info(request, booking_id):
         "step": 1,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 
@@ -171,18 +1010,22 @@ def business_company_info(request, booking_id):
 # STEP 2 — OFFICE SETUP
 # ================================
 def business_office_setup(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        return redirect("home:business_company_info", booking_id=0)
 
-    total_steps = 6 if booking.path_type == "bundle" else 7
+    booking = _draft_booking_from_session(request)
+
+    total_steps = 7
     range_steps = range(1, total_steps + 1)
 
     if request.method == "POST":
-        form = OfficeSetupForm(request.POST, instance=booking)
+        form = OfficeSetupForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect("home:business_bundles", booking_id=booking.id)
+            _update_business_draft(request, form.cleaned_data)
+            return redirect("home:business_bundles", booking_id=0)
     else:
-        form = OfficeSetupForm(instance=booking)
+        form = OfficeSetupForm(initial=draft)
 
     return render(request, "home/business_office_setup.html", {
         "booking": booking,
@@ -190,6 +1033,7 @@ def business_office_setup(request, booking_id):
         "step": 2,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 
@@ -197,21 +1041,23 @@ def business_office_setup(request, booking_id):
 # STEP 3 — BUNDLES (BUNDLE PATH)
 # ================================
 def business_bundles(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        return redirect("home:business_company_info", booking_id=0)
 
-    booking.path_type = "bundle"
-    booking.save()
+    booking = _draft_booking_from_session(request)
 
-    total_steps = 6
+    _update_business_draft(request, {"path_type": "bundle"})
+
+    total_steps = 7
     range_steps = range(1, total_steps + 1)
     bundles = BusinessBundle.objects.all()
 
     if request.method == "POST":
         bundle_id = request.POST.get("bundle_id")
-        selected = get_object_or_404(BusinessBundle, id=bundle_id)
-        booking.selected_bundle = selected
-        booking.save()
-        return redirect("home:business_frequency", booking_id=booking.id)
+        if bundle_id:
+            _update_business_draft(request, {"selected_bundle_id": int(bundle_id)})
+        return redirect("home:business_frequency", booking_id=0)
 
     return render(request, "home/business_bundles.html", {
         "booking": booking,
@@ -219,6 +1065,7 @@ def business_bundles(request, booking_id):
         "step": 3,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 
@@ -226,10 +1073,13 @@ def business_bundles(request, booking_id):
 # STEP 3 CUSTOM — SERVICES NEEDED
 # ================================
 def business_services_needed(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        return redirect("home:business_company_info", booking_id=0)
 
-    booking.path_type = "custom"
-    booking.save()
+    booking = _draft_booking_from_session(request)
+
+    _update_business_draft(request, {"path_type": "custom"})
 
     total_steps = 7
     range_steps = range(1, total_steps + 1)
@@ -237,9 +1087,8 @@ def business_services_needed(request, booking_id):
     if request.method == "POST":
         selected_services = request.POST.get("selected_services")
         if selected_services:
-            booking.services_needed = json.loads(selected_services)
-            booking.save()
-        return redirect("home:business_addons", booking_id=booking.id)
+            _update_business_draft(request, {"services_needed": json.loads(selected_services)})
+        return redirect("home:business_addons", booking_id=0)
 
     return render(request, "home/business_services_needed.html", {
         "booking": booking,
@@ -247,6 +1096,7 @@ def business_services_needed(request, booking_id):
         "step": 4,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 
@@ -254,7 +1104,11 @@ def business_services_needed(request, booking_id):
 # STEP 4 — ADDONS (CUSTOM PATH)
 # ================================
 def business_addons(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        return redirect("home:business_company_info", booking_id=0)
+
+    booking = _draft_booking_from_session(request)
 
     total_steps = 7
     range_steps = range(1, total_steps + 1)
@@ -271,10 +1125,9 @@ def business_addons(request, booking_id):
             except json.JSONDecodeError:
                 selected_addons = []
 
-        booking.addons = selected_addons
-        booking.save()
+        _update_business_draft(request, {"addons": selected_addons})
 
-        return redirect("home:business_frequency", booking_id=booking.id)
+        return redirect("home:business_frequency", booking_id=0)
 
     return render(request, "home/business_addons.html", {
         "booking": booking,
@@ -282,35 +1135,40 @@ def business_addons(request, booking_id):
         "step": 5,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 # ================================
 # STEP 4 OR 5 — FREQUENCY
 # ================================
 def business_frequency(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        return redirect("home:business_company_info", booking_id=0)
+
+    booking = _draft_booking_from_session(request)
 
     if booking.path_type == "bundle":
-        total_steps = 5
         step_number = 4
     else:
-        total_steps = 7
         step_number = 6
+
+    total_steps = 7
 
     range_steps = range(1, total_steps + 1)
 
     if request.method == "POST":
         freq_raw = request.POST.get("frequency_data")
         if freq_raw:
-            booking.frequency = json.loads(freq_raw)
-            booking.save()
-        return redirect("home:business_scheduling", booking_id=booking.id)
+            _update_business_draft(request, {"frequency": json.loads(freq_raw)})
+        return redirect("home:business_scheduling", booking_id=0)
 
     return render(request, "home/business_frequency.html", {
         "booking": booking,
         "step": step_number,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 
@@ -318,14 +1176,18 @@ def business_frequency(request, booking_id):
 # STEP 5 OR 6 — SCHEDULING
 # ================================
 def business_scheduling(request, booking_id):
-    booking = get_object_or_404(BusinessBooking, id=booking_id)
+    draft = _get_business_draft(request)
+    if not draft and booking_id != 0:
+        return redirect("home:business_company_info", booking_id=0)
+
+    booking = _draft_booking_from_session(request)
 
     if booking.path_type == "bundle":
-        total_steps = 5
         step_number = 5
     else:
-        total_steps = 7
         step_number = 7
+
+    total_steps = 7
 
     range_steps = range(1, total_steps + 1)
 
@@ -345,21 +1207,57 @@ def business_scheduling(request, booking_id):
                 "error": "Please select a start date and preferred time."
             })
 
-        booking.start_date = start_date
-        booking.preferred_time = preferred_time
-        booking.days_type = request.POST.get("days_type")
-        booking.custom_date = request.POST.get("custom_date") or None
-        booking.custom_time = request.POST.get("custom_time") or None
-        booking.notes = request.POST.get("notes")
-        booking.save()
+        _update_business_draft(request, {
+            "start_date": start_date,
+            "preferred_time": preferred_time,
+            "days_type": request.POST.get("days_type"),
+            "custom_date": request.POST.get("custom_date") or None,
+            "custom_time": request.POST.get("custom_time") or None,
+            "notes": request.POST.get("notes"),
+        })
 
-        return redirect("home:business_thank_you", booking_id=booking.id)
+        draft = _get_business_draft(request)
+        created = BusinessBooking(
+            selected_service=draft.get("selected_service"),
+            company_name=draft.get("company_name"),
+            contact_person=draft.get("contact_person"),
+            role=draft.get("role"),
+            office_address=draft.get("office_address"),
+            email=draft.get("email"),
+            phone=draft.get("phone"),
+            office_size=draft.get("office_size"),
+            num_employees=draft.get("num_employees"),
+            floors=draft.get("floors"),
+            restrooms=draft.get("restrooms"),
+            kitchen_cleaning=bool(draft.get("kitchen_cleaning")),
+            services_needed=draft.get("services_needed"),
+            addons=draft.get("addons"),
+            frequency=draft.get("frequency"),
+            start_date=draft.get("start_date"),
+            preferred_time=draft.get("preferred_time"),
+            days_type=draft.get("days_type"),
+            custom_date=draft.get("custom_date"),
+            custom_time=draft.get("custom_time"),
+            notes=draft.get("notes"),
+            path_type=draft.get("path_type") or "bundle",
+            user=request.user if request.user.is_authenticated else None,
+        )
+        selected_bundle_id = draft.get("selected_bundle_id")
+        if selected_bundle_id:
+            created.selected_bundle_id = selected_bundle_id
+
+        created.save()
+        created.log_status(user=request.user, note="Order placed")
+        request.session.pop("business_booking_draft", None)
+
+        return redirect("home:business_thank_you", booking_id=created.id)
 
     return render(request, "home/SchedulingNotes.html", {
         "booking": booking,
         "step": step_number,
         "total_steps": total_steps,
         "range_total_steps": range_steps,
+        "booking_id": 0,
     })
 
 # ================================
@@ -369,11 +1267,11 @@ def business_thank_you(request, booking_id):
     booking = get_object_or_404(BusinessBooking, id=booking_id)
 
     if booking.path_type == "bundle":
-        total_steps = 6
         step_number = 6
     else:
-        total_steps = 7
         step_number = 7
+
+    total_steps = 7
 
     range_steps = range(1, total_steps + 1)
     if booking.user is None and request.user.is_authenticated:
@@ -462,6 +1360,53 @@ def private_booking_checkout(request, booking_id):
     booking = get_object_or_404(PrivateBooking, id=booking_id)
     services = PrivateService.objects.filter(slug__in=booking.selected_services)
 
+    pricing = calculate_booking_price(booking)
+    services_total = Decimal(str(pricing["services_total"]))
+    addons_total = Decimal(str(pricing["addons_total"]))
+    schedule_extra = Decimal(str(pricing["schedule_extra"]))
+    subtotal = Decimal(str(pricing["subtotal"]))
+    base_total = Decimal(str(pricing["final"]))
+    date_surcharge = Decimal(str(pricing.get("date_surcharge", 0) or 0))
+    duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
+
+    rot_value = Decimal(str(pricing.get("rot", 0) or 0))
+    rot_percent = pricing.get("rot_percent", 0) or 0
+    if rot_value < 0:
+        rot_value = Decimal("0.00")
+    final_after_rot = base_total
+
+    if booking.subtotal != subtotal or booking.total_price != final_after_rot or booking.rot_discount != rot_value:
+        booking.subtotal = subtotal
+        booking.total_price = final_after_rot
+        booking.rot_discount = rot_value
+        booking.save(update_fields=["subtotal", "total_price", "rot_discount"])
+
+    customer = None
+    if request.user.is_authenticated:
+        customer = Customer.objects.filter(user=request.user).first()
+
+    display_address = None
+    if customer:
+        display_address = customer.primary_address or customer.full_address
+    if not display_address:
+        display_address = "Not provided"
+
+    display_area = booking.area
+    if not display_area and customer:
+        display_area = customer.city
+    if not display_area:
+        display_area = "Not provided"
+
+    if booking.duration_hours:
+        display_duration = booking.duration_hours
+    elif duration_seconds > 0:
+        hours = duration_seconds // 3600
+        minutes = (duration_seconds % 3600) // 60
+        seconds = duration_seconds % 60
+        display_duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    else:
+        display_duration = "To be confirmed"
+
     # ربط المستخدم
     if booking.user is None:
         booking.user = request.user
@@ -471,15 +1416,19 @@ def private_booking_checkout(request, booking_id):
     # 🧮 PREVIEW CALCULATION
     # ==========================
     discount_preview_amount = Decimal("0.00")
-    final_preview_price = booking.total_price
+    final_preview_price = final_after_rot
 
     if booking.discount_code:
-        is_valid, _ = booking.discount_code.validate(user=request.user)
+        is_valid, reason = booking.discount_code.validate(user=request.user)
         if is_valid:
             discount_preview_amount = (
-                booking.total_price * Decimal(booking.discount_code.percent) / Decimal(100)
+                final_after_rot * Decimal(booking.discount_code.percent) / Decimal(100)
             )
-            final_preview_price = booking.total_price - discount_preview_amount
+            final_preview_price = final_after_rot - discount_preview_amount
+        else:
+            booking.discount_code = None
+            booking.save(update_fields=["discount_code"])
+            messages.warning(request, reason or "Discount code is not valid anymore.")
 
     # ==========================
     # 📨 POST
@@ -514,24 +1463,30 @@ def private_booking_checkout(request, booking_id):
             booking.card_name = request.POST.get("card_name")
             booking.accepted_terms = True
 
+            fresh_pricing = calculate_booking_price(booking)
+            final_amount = Decimal(str(fresh_pricing["final"]))
+            discount_amount = Decimal("0.00")
+
             if booking.discount_code:
                 dc = booking.discount_code
-                is_valid, _ = dc.validate(user=request.user)
+                is_valid, reason = dc.validate(user=request.user)
+                if not is_valid:
+                    messages.error(request, reason or "Discount code is not valid.")
+                    return redirect("home:private_booking_checkout", booking_id=booking.id)
 
-                if is_valid:
-                    discount_amount = (
-                        booking.total_price * Decimal(dc.percent) / Decimal(100)
-                    )
-                    booking.total_price -= discount_amount
+                discount_amount = final_amount * Decimal(dc.percent) / Decimal(100)
+                final_amount -= discount_amount
 
-                    dc.used_count += 1
-                    if dc.max_uses is not None and dc.used_count >= dc.max_uses:
-                        dc.is_used = True
-
-                    dc.save(update_fields=["used_count", "is_used"])
+                dc.used_count += 1
+                if dc.max_uses is not None and dc.used_count >= dc.max_uses:
+                    dc.is_used = True
+                dc.save(update_fields=["used_count", "is_used"])
 
                 booking.discount_code = None
 
+            booking.total_price = final_amount
+            booking.rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
+            booking.subtotal = Decimal(str(fresh_pricing.get("subtotal", 0) or 0))
             booking.save()
             return redirect("home:thank_you_page")
 
@@ -545,6 +1500,18 @@ def private_booking_checkout(request, booking_id):
         "services": services,
         "discount_preview_amount": discount_preview_amount,
         "final_preview_price": final_preview_price,
+        "pricing": pricing,
+        "services_total": services_total,
+        "addons_total": addons_total,
+        "schedule_extra": schedule_extra,
+        "date_surcharge": date_surcharge,
+        "subtotal": subtotal,
+        "base_total": base_total,
+        "rot_value": rot_value,
+        "display_address": display_address,
+        "display_area": display_area,
+        "display_duration": display_duration,
+        "rot_percent": rot_percent,
     })
 
 def private_zip_available(request, service_slug):
@@ -581,6 +1548,9 @@ def private_zip_available(request, service_slug):
         "call_success": call_success,
         "email_success": email_success,
     })
+
+def private_thank_you(request):
+    return render(request, "home/thank_you_page.html")
 
 def submit_call_request(request):
     if request.method == "POST":
@@ -635,7 +1605,11 @@ def private_booking_services(request, booking_id):
             if service.questions:
                 for q_key, q_info in service.questions.items():
                     field_name = f"{s_key}__{q_key}"
-                    service_answers[s_key][q_key] = request.POST.get(field_name, "")
+                    q_type = (q_info or {}).get("type")
+                    if q_type in ("multiselect", "checkbox"):
+                        service_answers[s_key][q_key] = request.POST.getlist(field_name)
+                    else:
+                        service_answers[s_key][q_key] = request.POST.get(field_name, "")
 
         booking.service_answers = service_answers
 
@@ -706,11 +1680,12 @@ def private_booking_services(request, booking_id):
         return redirect("home:private_booking_schedule", booking_id=booking.id)
 
     # GET
+    pricing = calculate_booking_price(booking)
     return render(request, "home/YourServicesBooking.html", {
         "booking": booking,
         "services": services,
         "saved_addons": json.dumps(booking.addons_selected or {}),
-        "pricing": booking.pricing_details or {},
+        "pricing": pricing,
     })
 
 def private_cart_continue(request):
@@ -761,11 +1736,15 @@ def private_cart_add(request, slug):
         cart.append(slug)
 
     request.session["private_cart"] = cart
+    request.session.modified = True
 
-    return JsonResponse({
-        "status": "ok",
-        "count": len(cart)
-    })
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return JsonResponse({
+            "status": "ok",
+            "count": len(cart)
+        })
+
+    return redirect("home:private_cart")
 
 
 def private_cart_count(request):
@@ -774,6 +1753,12 @@ def private_cart_count(request):
 
 def private_booking_schedule(request, booking_id):
     booking = get_object_or_404(PrivateBooking, id=booking_id)
+
+    if not booking.selected_services:
+        cart = request.session.get("private_cart", [])
+        if cart:
+            booking.selected_services = cart
+            booking.save(update_fields=["selected_services"])
 
     services = PrivateService.objects.filter(slug__in=booking.selected_services)
 
@@ -784,6 +1769,10 @@ def private_booking_schedule(request, booking_id):
         "rule_type", "weekday", "date", "surcharge_type", "amount"
     ))
     date_rules_json = json.dumps(raw_rules, cls=DjangoJSONEncoder)
+    schedule_rules_json = json.dumps(
+        list(ScheduleRule.objects.values("key", "value", "price_change")),
+        cls=DjangoJSONEncoder,
+    )
 
     # -----------------------------
     # 2) POST – تخزين البيانات
@@ -867,6 +1856,7 @@ def private_booking_schedule(request, booking_id):
         "booking": booking,
         "services": services,
         "date_rules": date_rules_json,
+        "schedule_rules": schedule_rules_json,
         "pricing": calculate_booking_price(booking),
     })
 
@@ -874,6 +1864,12 @@ def private_booking_schedule(request, booking_id):
 def private_price_api(request, booking_id):
 
     booking = get_object_or_404(PrivateBooking, id=booking_id)
+
+    if not booking.selected_services:
+        cart = request.session.get("private_cart", [])
+        if cart:
+            booking.selected_services = cart
+            booking.save(update_fields=["selected_services"])
 
     # --------------------------
     # 1) جدولة: same أو per_service
@@ -898,9 +1894,11 @@ def private_price_api(request, booking_id):
         booking.frequency_type = freq
 
     days = request.GET.get("days")
+    days_list = None
     if days:
         try:
-            booking.day_work_best = json.loads(days)
+            days_list = json.loads(days)
+            booking.day_work_best = days_list
         except:
             booking.day_work_best = []
 
@@ -918,7 +1916,7 @@ def private_price_api(request, booking_id):
     # نحسب مباشرة
     # ----- NEW: قراءة weekday القادمة من التقويم -----
     weekday = request.GET.get("weekday")
-    if weekday:
+    if (days_list is None or days_list == []) and weekday:
         try:
             booking.day_work_best = json.loads(weekday)
         except:
@@ -934,6 +1932,8 @@ def private_price_api(request, booking_id):
         "schedule_extra": pricing["schedule_extra"],
         "rot": pricing["rot"],
         "final": pricing["final"],
+        "duration_hours": pricing.get("duration_hours", 0),
+        "duration_seconds": pricing.get("duration_seconds", 0),
     })
 
 
@@ -951,12 +1951,27 @@ def private_update_answer_api(request, booking_id):
     if not field or not service_slug:
         return JsonResponse({"error": "Missing data"}, status=400)
 
+    parsed_value = value
+    if value:
+        trimmed = value.strip()
+        if trimmed.startswith("[") or trimmed.startswith("{"):
+            try:
+                parsed_value = json.loads(trimmed)
+            except json.JSONDecodeError:
+                parsed_value = value
+
     answers = booking.service_answers or {}
     answers.setdefault(service_slug, {})
-    answers[service_slug][field] = value
+    answers[service_slug][field] = parsed_value
 
     booking.service_answers = answers
-    booking.save()
+    pricing = calculate_booking_price(booking)
+    duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
+    hours = duration_seconds // 3600
+    minutes = (duration_seconds % 3600) // 60
+    seconds = duration_seconds % 60
+    booking.duration_hours = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    booking.save(update_fields=["service_answers", "duration_hours"])
 
     return JsonResponse({"success": True})
 
@@ -977,9 +1992,29 @@ def private_update_addons_api(request, booking_id):
         addons = {}
 
     booking.addons_selected = addons
-    booking.save()
+    pricing = calculate_booking_price(booking)
+    duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
+    hours = duration_seconds // 3600
+    minutes = (duration_seconds % 3600) // 60
+    seconds = duration_seconds % 60
+    booking.duration_hours = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    booking.subtotal = pricing.get("subtotal", 0) or 0
+    booking.total_price = pricing.get("final", 0) or 0
+    booking.rot_discount = pricing.get("rot", 0) or 0
+    booking.pricing_details = pricing
+    booking.save(update_fields=["addons_selected", "duration_hours", "subtotal", "total_price", "rot_discount", "pricing_details"])
 
-    return JsonResponse({"success": True})    
+    return JsonResponse({
+        "success": True,
+        "pricing": {
+            "services_total": pricing.get("services_total", 0),
+            "addons_total": pricing.get("addons_total", 0),
+            "subtotal": pricing.get("subtotal", 0),
+            "rot": pricing.get("rot", 0),
+            "final": pricing.get("final", 0),
+            "duration_seconds": pricing.get("duration_seconds", 0),
+        },
+    })
 
 
 

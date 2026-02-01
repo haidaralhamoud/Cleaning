@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Dashboard{% endblock %} | Hembla</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+  <div class="dash-layout">
+    <aside class="dash-sidebar">
+      <div class="dash-brand">
+        <img src="{% static 'images/logo.png' %}" alt="Hembla">
+        <span>Admin Dashboard</span>
+      </div>
+      <nav class="dash-nav">
+        <a href="{% url 'home:dashboard_home' %}" class="dash-link">
+          <i class="fa-solid fa-grid-2"></i> Overview
+        </a>
+        {% for item in items %}
+          <a href="{% url 'home:dashboard_model_list' item.slug %}" class="dash-link">
+            <i class="{{ item.icon }}"></i> {{ item.label }}
+          </a>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <main class="dash-main">
+      <header class="dash-topbar">
+        <div class="dash-title">
+          {% block page_title %}Dashboard{% endblock %}
+        </div>
+        <div class="dash-actions">
+          <div class="dash-bell">
+            <button class="dash-bell-btn" id="dashNotifBtn" type="button" aria-haspopup="true" aria-expanded="false">
+              <i class="fa-regular fa-bell"></i>
+              {% if dashboard_notif_count %}
+                <span class="dash-bell-badge" id="dashNotifBadge">{{ dashboard_notif_count }}</span>
+              {% endif %}
+            </button>
+            <div class="dash-bell-menu" id="dashNotifMenu" aria-hidden="true">
+              <div class="dash-bell-head">Notifications</div>
+              <div class="dash-bell-summary">
+                <span>New bookings (24h): <b id="dashNotifNew">{{ dashboard_new_bookings }}</b></span>
+                <span>Pending no-shows: <b id="dashNotifNoShow">{{ dashboard_pending_no_show }}</b></span>
+                <span>New customers: <b id="dashNotifCustomers">{{ dashboard_new_customers }}</b></span>
+                <span>Incidents reported: <b id="dashNotifIncidents">{{ dashboard_new_incidents }}</b></span>
+              </div>
+              <div class="dash-bell-list" id="dashNotifList">
+                {% if dashboard_notif_items %}
+                  {% for n in dashboard_notif_items %}
+                    <a class="dash-bell-item dash-bell-link" href="{% if n.url %}{{ n.url }}{% else %}#{% endif %}">
+                      <div class="dash-bell-title">{{ n.title }}</div>
+                      <div class="dash-bell-note">{{ n.detail }}</div>
+                      <div class="dash-bell-time">{{ n.time|date:"M d, h:i A" }}</div>
+                    </a>
+                  {% endfor %}
+                {% else %}
+                  <div class="dash-bell-empty">No new activity.</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <a class="btn btn-light" href="{% url 'home:home' %}">Home</a>
+          <a class="btn btn-outline-primary" href="{% url 'admin:index' %}">Django Admin</a>
+        </div>
+      </header>
+
+      <section class="dash-content">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+  <script>
+    const notifBtn = document.getElementById("dashNotifBtn");
+    const notifMenu = document.getElementById("dashNotifMenu");
+    if (notifBtn && notifMenu) {
+      notifBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const open = notifMenu.classList.toggle("open");
+        notifBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        notifMenu.setAttribute("aria-hidden", open ? "false" : "true");
+      });
+      document.addEventListener("click", () => {
+        notifMenu.classList.remove("open");
+        notifBtn.setAttribute("aria-expanded", "false");
+        notifMenu.setAttribute("aria-hidden", "true");
+      });
+    }
+
+    async function refreshDashboardNotifications() {
+      try {
+        const res = await fetch("{% url 'home:dashboard_notifications_api' %}", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const badge = document.getElementById("dashNotifBadge");
+        if (data.count && data.count > 0) {
+          if (badge) {
+            badge.textContent = data.count;
+          } else {
+            const b = document.createElement("span");
+            b.className = "dash-bell-badge";
+            b.id = "dashNotifBadge";
+            b.textContent = data.count;
+            notifBtn.appendChild(b);
+          }
+        } else if (badge) {
+          badge.remove();
+        }
+
+        const newEl = document.getElementById("dashNotifNew");
+        const noShowEl = document.getElementById("dashNotifNoShow");
+        const customersEl = document.getElementById("dashNotifCustomers");
+        const incidentsEl = document.getElementById("dashNotifIncidents");
+        if (newEl) newEl.textContent = data.new_bookings ?? 0;
+        if (noShowEl) noShowEl.textContent = data.pending_no_show ?? 0;
+        if (customersEl) customersEl.textContent = data.new_customers ?? 0;
+        if (incidentsEl) incidentsEl.textContent = data.new_incidents ?? 0;
+
+        const list = document.getElementById("dashNotifList");
+        if (list) {
+          list.innerHTML = "";
+          if (data.items && data.items.length) {
+            data.items.forEach((item) => {
+              const wrap = document.createElement("a");
+              wrap.className = "dash-bell-item dash-bell-link";
+              wrap.href = item.url || "#";
+              wrap.innerHTML = `
+                <div class="dash-bell-title">${item.title}</div>
+                <div class="dash-bell-note">${item.detail}</div>
+                <div class="dash-bell-time">${item.time}</div>
+              `;
+              list.appendChild(wrap);
+            });
+          } else {
+            const empty = document.createElement("div");
+            empty.className = "dash-bell-empty";
+            empty.textContent = "No new activity.";
+            list.appendChild(empty);
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    refreshDashboardNotifications();
+    setInterval(refreshDashboardNotifications, 15000);
+  </script>
+</body>
+</html>
