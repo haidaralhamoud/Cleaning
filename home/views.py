@@ -586,7 +586,7 @@ def _json_formfield_callback(model, db_field, **kwargs):
                 widget=forms.Textarea(attrs={
                     "rows": 8,
                     "placeholder": (
-                        "{\"q1\": {\"label\": \"Question?\", \"type\": \"select\", "
+                        "{\"q1\": {\"label\": \"Question\", \"type\": \"select\", "
                         "\"options\": [\"Option 1\", \"Option 2\"]}}"
                     ),
                 }),
@@ -1340,7 +1340,7 @@ def private_zip_step1(request, service_slug):
 
                 messages.success(
                     request,
-                    "Thank you! We’ll contact you as soon as we expand to your area."
+                    "Thank you! We'll contact you as soon as we expand to your area."
                 )
                 return redirect("home:private_zip_step1",
                                 service_slug=service_slug)

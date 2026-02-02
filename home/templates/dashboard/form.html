@@ -12,7 +12,7 @@
           <div class="mb-3">
             <div class="d-flex flex-wrap gap-2">
               <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'home:dashboard_date_surcharge_quick_weekend' %}?amount=10&type=percent">
+                 href="{% url 'home:dashboard_date_surcharge_quick_weekend' %}amount=10&type=percent">
                 Quick add: Sat + Sun +10%
               </a>
               <button type="button" class="btn btn-sm btn-outline-secondary" data-ds-prefill="Sat">
@@ -139,7 +139,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0">Private Add-ons for this Service</h6>
               <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ object.pk }}">
+                 href="{% url 'home:dashboard_model_create' 'private-addons' %}service_id={{ object.pk }}">
                 <i class="fa-solid fa-plus"></i> Add Add-on
               </a>
             </div>
@@ -279,8 +279,8 @@
         const row = document.createElement("div");
         row.className = "qs-option-row";
         const label = data.label || "";
-        const price = data.price !== undefined && data.price !== null ? data.price : "";
-        const duration = data.duration !== undefined && data.duration !== null ? data.duration : "";
+        const price = data.price !== undefined && data.price !== null  data.price : "";
+        const duration = data.duration !== undefined && data.duration !== null  data.duration : "";
         row.innerHTML = `
           <input type="text" class="form-control" placeholder="Option label" data-q-opt-label value="${escapeHtml(label)}">
           <input type="number" step="0.01" class="form-control" placeholder="Price" data-q-opt-price value="${escapeHtml(price)}">
@@ -303,7 +303,7 @@
         const key = data.key || nextKey();
         const label = data.label || "";
         const type = data.type || "select";
-        const options = Array.isArray(data.options) ? data.options : [];
+        const options = Array.isArray(data.options)  data.options : [];
 
         const wrapper = document.createElement("div");
         wrapper.className = "qs-card";
@@ -323,7 +323,7 @@
               <label class="form-label">Type</label>
               <select class="form-select" data-q-type>
                 ${TYPE_OPTIONS.map(opt =>
-                  `<option value="${opt.value}" ${opt.value === type ? "selected" : ""}>${opt.label}</option>`
+                  `<option value="${opt.value}" ${opt.value === type  "selected" : ""}>${opt.label}</option>`
                 ).join("")}
               </select>
             </div>
@@ -356,8 +356,8 @@
           if (opt && typeof opt === "object") {
             addOptionRow(wrapper, {
               label: opt.label || "",
-              price: opt.price ?? "",
-              duration: opt.duration ?? "",
+              price: opt.price  "",
+              duration: opt.duration  "",
             });
           } else {
             addOptionRow(wrapper, { label: opt });
@@ -418,13 +418,13 @@
               const opt = { label: optLabel };
               if (optPriceRaw !== "") {
                 const parsed = Number(optPriceRaw);
-                opt.price = Number.isFinite(parsed) ? parsed : 0;
+                opt.price = Number.isFinite(parsed)  parsed : 0;
               } else {
                 opt.price = 0;
               }
               if (optDurationRaw !== "") {
                 const parsedDuration = Number(optDurationRaw);
-                opt.duration = Number.isFinite(parsedDuration) ? parsedDuration : 0;
+                opt.duration = Number.isFinite(parsedDuration)  parsedDuration : 0;
               } else {
                 opt.duration = 0;
               }
@@ -438,7 +438,7 @@
           }
           data[key] = entry;
         });
-        textarea.value = Object.keys(data).length ? JSON.stringify(data, null, 2) : "";
+        textarea.value = Object.keys(data).length  JSON.stringify(data, null, 2) : "";
       };
 
       const validate = () => {
@@ -473,9 +473,9 @@
             Object.entries(parsed).forEach(([key, value]) => {
               addQuestion({
                 key,
-                label: value && value.label ? value.label : "",
-                type: value && value.type ? value.type : "select",
-                options: value && Array.isArray(value.options) ? value.options : []
+                label: value && value.label  value.label : "",
+                type: value && value.type  value.type : "select",
+                options: value && Array.isArray(value.options)  value.options : []
               });
             });
           }
@@ -506,15 +506,15 @@
       const amount = document.getElementById("id_amount");
       const surchargeType = document.getElementById("id_surcharge_type");
 
-      const rowFor = (el) => el ? el.closest(".col-md-6") || el.closest(".col-12") || el.parentElement : null;
+      const rowFor = (el) => el  el.closest(".col-md-6") || el.closest(".col-12") || el.parentElement : null;
       const weekdayRow = rowFor(weekday);
       const dateRow = rowFor(date);
 
       const toggleFields = () => {
         const showWeekday = ruleType.value === "weekday";
         const showDate = ruleType.value === "date";
-        if (weekdayRow) weekdayRow.style.display = showWeekday ? "" : "none";
-        if (dateRow) dateRow.style.display = showDate ? "" : "none";
+        if (weekdayRow) weekdayRow.style.display = showWeekday  "" : "none";
+        if (dateRow) dateRow.style.display = showDate  "" : "none";
       };
 
       toggleFields();

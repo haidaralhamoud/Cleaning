@@ -295,7 +295,7 @@ function openAddonsPopup(serviceSlug) {
           <div class="addon-card" onclick="openAddonForm('${serviceSlug}','${key}')">
             <img src="${ad.icon}" class="addon-icon">
             <p>${ad.label}</p>
-            <div class="check-box ${isChecked ? 'checked' : ''}"></div>
+            <div class="check-box ${isChecked  'checked' : ''}"></div>
           </div>
         `;
     }
@@ -505,7 +505,7 @@ document.querySelectorAll("select, input, textarea").forEach(el => {
 
         if (this.type === "radio") {
             const checked = document.querySelector(`[name="${this.name}"]:checked`);
-            updateAnswer({{ booking.id }}, service, field, checked ? checked.value : "");
+            updateAnswer({{ booking.id }}, service, field, checked  checked.value : "");
             return;
         }
 
@@ -630,17 +630,17 @@ document.querySelectorAll(".svc-toggle").forEach(btn => {
         const box = btn.closest(".service-box");
         if (!box) return;
         const isOpen = box.classList.toggle("open");
-        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        btn.setAttribute("aria-expanded", isOpen  "true" : "false");
     });
 });
 document.querySelectorAll(".service-head").forEach(head => {
     head.addEventListener("click", (e) => {
         if (e.target.closest(".svc-toggle")) return;
         const box = head.closest(".service-box");
-        const btn = box?.querySelector(".svc-toggle");
+        const btn = box.querySelector(".svc-toggle");
         if (!box || !btn) return;
         const isOpen = box.classList.toggle("open");
-        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        btn.setAttribute("aria-expanded", isOpen  "true" : "false");
     });
 });
 </script>
@@ -656,7 +656,7 @@ function setupCustomSelects(root = document) {
         const trigger = document.createElement("button");
         trigger.type = "button";
         trigger.className = "custom-trigger";
-        trigger.textContent = select.options[select.selectedIndex]?.text || "Select...";
+        trigger.textContent = select.options[select.selectedIndex].text || "Select...";
 
         const list = document.createElement("div");
         list.className = "custom-options";

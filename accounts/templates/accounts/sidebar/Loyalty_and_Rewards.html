@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Loyalty & Rewards</title>
   
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Loyalty_and_Rewards.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -67,7 +67,7 @@
               <h4>{{ tier.name }}</h4>
 
               {% if tier.max_points %}
-                <p>({{ tier.min_points }}â€“{{ tier.max_points }} pts)</p>
+                <p>({{ tier.min_points }}'{{ tier.max_points }} pts)</p>
               {% else %}
                 <p>(+ {{ tier.min_points }} pts)</p>
               {% endif %}
@@ -159,7 +159,7 @@
         <div class="refer">
           <b>Refer a Friend &amp; Earn Big!</b>
           <div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">
-            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> â€” your friend gets 10% off their first booking.
+            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> ' your friend gets 10% off their first booking.
           </div>
           <div class="share-row">
             <a class="share wa" href="#"><img src="{% static 'images/whats-app0.png' %}" alt="">WhatsApp</a>
@@ -184,7 +184,7 @@
             {% empty %}
               <div class="item">
                 <div><b>No Activity Yet</b></div>
-                <small>â€”</small>
+                <small>'</small>
                 <div class="pts">0 pts</div>
               </div>
             {% endfor %}
@@ -230,7 +230,7 @@
 
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
     });
   </script>
 

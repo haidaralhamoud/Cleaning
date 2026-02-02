@@ -5,9 +5,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment & Billing â€” Customer Profile</title>
+  <title>Payment & Billing ' Customer Profile</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -39,7 +39,7 @@
 
     <div class="page-grid">
 
-      <!-- âœ… Payment methods (Django) -->
+      <!-- ' Payment methods (Django) -->
       <section class="card payment-methods-card">
         <div class="card-header">
           <h2>Payment Methods</h2>
@@ -84,7 +84,7 @@
                   <a href="{% url 'accounts:delete_payment_method' pm.id %}"
                      class="icon-edit"
                      aria-label="Delete payment method"
-                     onclick="return confirm('Delete this payment method?')">
+                     onclick="return confirm('Delete this payment method')">
                     &times;
                   </a>
                 </div>
@@ -96,7 +96,7 @@
         </div>
       </section>
 
-      <!-- â‌Œ Subscription (طھط±ظƒظ†ط§ظ‡ ظƒظ…ط§ ظ‡ظˆ) -->
+      <!-- ' Subscription (طھط±ظƒظ†ط§ظ‡ ظƒظ…ط§ ظ‡ظˆ) -->
       <aside class="card subscription-card">
         <h3>Subscription</h3>
         <div class="sub-box">
@@ -115,7 +115,7 @@
 
     </div>
 
-    <!-- â‌Œ Invoice History -->
+    <!-- ' Invoice History -->
     <section class="card invoice-history">
       <h2>Invoice History</h2>
       <table id="invoiceTable">
@@ -250,7 +250,7 @@
   </div>
   <div class="modal-body">
     <p class="muted">Your service will end after the next billing cycle.</p>
-    <label>Why are you cancelling?</label>
+    <label>Why are you cancelling</label>
     <select id="cancelReason" class="form-control">
       <option value="">Select a reason</option>
       <option value="Too expensive">Too expensive</option>
@@ -426,7 +426,7 @@
     confirmCancelBtn.addEventListener("click", async () => {
       const data = new FormData();
       data.append("action", "cancel");
-      data.append("cancel_reason", cancelReason ? cancelReason.value : "");
+      data.append("cancel_reason", cancelReason  cancelReason.value : "");
       const res = await fetch("{% url 'accounts:manage_subscription' %}", {
         method: "POST",
         headers: { "X-CSRFToken": getCookie("csrftoken") },

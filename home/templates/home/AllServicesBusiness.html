@@ -49,7 +49,7 @@
     </div>
 
     <!-- زر بدء المسار -->
-<a href="{% url 'home:business_start_booking' %}?service={{ s.title }}" 
+<a href="{% url 'home:business_start_booking' %}service={{ s.title }}" 
    class="quote-btn">
   Request Quote
 </a>
@@ -110,7 +110,7 @@
       cards.forEach((card) => {
         const title = card.dataset.title || "";
         const desc = card.dataset.desc || "";
-        card.style.display = (title.includes(q) || desc.includes(q)) ? "" : "none";
+        card.style.display = (title.includes(q) || desc.includes(q))  "" : "none";
       });
       closeModal();
     });

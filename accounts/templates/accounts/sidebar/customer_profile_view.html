@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Customer Profile Overview</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
@@ -768,7 +768,7 @@
   </div>
   <div class="modal-body">
     <p class="muted">Your service will end after the next billing cycle.</p>
-    <label>Why are you cancelling?</label>
+    <label>Why are you cancelling</label>
     <select id="cancelReason" class="form-control">
       <option value="">Select a reason</option>
       <option value="Too expensive">Too expensive</option>
@@ -819,9 +819,9 @@ function toggleBasicEdit() {
 
   const editing = editFields[0].style.display === 'block';
 
-  viewFields.forEach(el => el.style.display = editing ? 'block' : 'none');
-  editFields.forEach(el => el.style.display = editing ? 'none' : 'block');
-  if (actions) actions.style.display = editing ? 'none' : 'block';
+  viewFields.forEach(el => el.style.display = editing  'block' : 'none');
+  editFields.forEach(el => el.style.display = editing  'none' : 'block');
+  if (actions) actions.style.display = editing  'none' : 'block';
 }
 </script>
 
@@ -942,7 +942,7 @@ function toggleBasicEdit() {
     confirmCancelBtn.addEventListener("click", async () => {
       const data = new FormData();
       data.append("action", "cancel");
-      data.append("cancel_reason", cancelReason ? cancelReason.value : "");
+      data.append("cancel_reason", cancelReason  cancelReason.value : "");
       const res = await fetch("{% url 'accounts:manage_subscription' %}", {
         method: "POST",
         headers: { "X-CSRFToken": getCookie("csrftoken") },

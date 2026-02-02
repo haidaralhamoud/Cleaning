@@ -1,15 +1,15 @@
-{% load static %}
+﻿{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hembla - All Services</title>
+  <title>Hembla experten - All Services</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
   <link rel="stylesheet" href="{% static 'css/AllServicesPrivate.css' %}">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Inter:wght@500;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
 </head>
 {% include "home/includes/main_header.html" %}
 
@@ -24,7 +24,7 @@
       </div>
       <div class="header-actions">
         <a href="{% url 'home:private_cart' %}" class="cart-box" aria-label="View cart">
-          <span class="cart-icon">🛒</span>
+          <span class="cart-icon">ًں›'</span>
           <span id="cart-count">0</span>
         </a>
       </div>
@@ -117,9 +117,9 @@ const filterPills = document.querySelectorAll(".filter-pill");
 const cards = Array.from(document.querySelectorAll(".service-card"));
 
 function applyFilters() {
-    const query = (searchInput?.value || "").trim().toLowerCase();
+    const query = (searchInput.value || "").trim().toLowerCase();
     const activePill = document.querySelector(".filter-pill.active");
-    const activeFilter = activePill ? activePill.dataset.filter : "all";
+    const activeFilter = activePill  activePill.dataset.filter : "all";
 
     let visibleCount = 0;
 
@@ -132,12 +132,12 @@ function applyFilters() {
         const matchesRecommended = activeFilter !== "recommended" || isRecommended;
 
         const shouldShow = matchesQuery && matchesRecommended;
-        card.style.display = shouldShow ? "" : "none";
+        card.style.display = shouldShow  "" : "none";
         if (shouldShow) visibleCount += 1;
     });
 
     if (resultsCount) {
-        resultsCount.textContent = `${visibleCount} service${visibleCount === 1 ? "" : "s"}`;
+        resultsCount.textContent = `${visibleCount} service${visibleCount === 1  "" : "s"}`;
     }
 }
 
@@ -145,7 +145,7 @@ filterPills.forEach(pill => {
     pill.addEventListener("click", () => {
         if (pill.dataset.filter === "clear") {
             filterPills.forEach(p => p.classList.remove("active"));
-            document.querySelector('[data-filter="all"]')?.classList.add("active");
+            document.querySelector('[data-filter="all"]').classList.add("active");
             if (searchInput) searchInput.value = "";
         } else {
             filterPills.forEach(p => p.classList.remove("active"));
@@ -155,8 +155,11 @@ filterPills.forEach(pill => {
     });
 });
 
-searchInput?.addEventListener("input", () => applyFilters());
+searchInput.addEventListener("input", () => applyFilters());
 document.addEventListener("DOMContentLoaded", applyFilters);
 </script>
 </body>
 </html>
+
+
+

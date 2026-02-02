@@ -19,7 +19,7 @@ document.addEventListener(
       sidebar.classList.toggle("open", open);
       overlay.classList.toggle("show", open);
       if (arrow) {
-        arrow.innerHTML = open ? "&#8249;" : "&#8250;";
+        arrow.innerHTML = open  "&#8249;" : "&#8250;";
       }
     };
 

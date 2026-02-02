@@ -11,11 +11,11 @@
 
     if (weekday) {
       var weekdayRow = weekday.closest('.form-row') || weekday.closest('.form-group') || weekday.parentElement;
-      if (weekdayRow) weekdayRow.style.display = showWeekday ? '' : 'none';
+      if (weekdayRow) weekdayRow.style.display = showWeekday  '' : 'none';
     }
     if (date) {
       var dateRow = date.closest('.form-row') || date.closest('.form-group') || date.parentElement;
-      if (dateRow) dateRow.style.display = showDate ? '' : 'none';
+      if (dateRow) dateRow.style.display = showDate  '' : 'none';
     }
   }
 

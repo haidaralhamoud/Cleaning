@@ -272,7 +272,7 @@ class BookingChecklistForm(forms.ModelForm):
         ]
         widgets = {
             "notes": forms.Textarea(attrs={
-                "placeholder": "Any special instructions?",
+                "placeholder": "Any special instructions",
                 "rows": 3
             })
         }

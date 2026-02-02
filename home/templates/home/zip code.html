@@ -1,10 +1,10 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Booking | Hembla</title>
+  <title>Booking | Hembla experten</title>
   <link rel="stylesheet" href="{% static 'css/zip_code.css' %}">
 
   <style>
@@ -35,13 +35,13 @@
   <!-- ===== ZIP FORM SECTION ===== -->
   <section class="zip-section">
     {% if show_not_available %}
-  <h2 class="reveal">We’re Not There Yet 😔</h2>
+  <h2 class="reveal">We're Not There Yet ًںک”</h2>
 {% else %}
   <h2 class="reveal">Enter Your Zip Code</h2>
 {% endif %}
 
 
-    <!-- فورم فحص الـ ZIP -->
+    <!-- ظپظˆط±ظ… ظپط­طµ ط§ظ„ظ€ ZIP -->
     <form method="POST" class="zip-form reveal">
       {% csrf_token %}
       <label>Zip Code</label>
@@ -51,17 +51,17 @@
       </div>
     </form>
 
-    <!-- يظهر فقط إذا المنطقة غير متاحة -->
+    <!-- ظٹط¸ظ‡ط± ظپظ‚ط· ط¥ط°ط§ ط§ظ„ظ…ظ†ط·ظ‚ط© ط؛ظٹط± ظ…طھط§ط­ط© -->
     {% if show_not_available %}
       <div class="not-served-box reveal" data-dir="up">
         <img src="{% static 'images/sad0.png' %}" alt="sad" />
         <p>
-          We don’t serve your area yet. Please leave your phone number and email so we can
+          We don't serve your area yet. Please leave your phone number and email so we can
           assess the possibility of serving your location and notify you as soon as we expand.
         </p>
       </div>
 
-      <!-- فورم تخزين بيانات الزبون + الـ ZIP -->
+      <!-- ظپظˆط±ظ… طھط®ط²ظٹظ† ط¨ظٹط§ظ†ط§طھ ط§ظ„ط²ط¨ظˆظ† + ط§ظ„ظ€ ZIP -->
       <form method="POST" class="contact-form">
         {% csrf_token %}
         <div class="form-left">
@@ -105,7 +105,7 @@
 
   </section>
 
-  <!-- لو حابب ترجع سكربت الأنيميشن بتحطّه هون -->
+  <!-- ظ„ظˆ ط­ط§ط¨ط¨ طھط±ط¬ط¹ ط³ظƒط±ط¨طھ ط§ظ„ط£ظ†ظٹظ…ظٹط´ظ† ط¨طھط­ط·ظ'ظ‡ ظ‡ظˆظ† -->
      <!-- ===== SCROLL REVEAL SCRIPT ===== -->
   <script>
   (function () {
@@ -131,5 +131,8 @@
 
 </body>
 </html>
+
+
+
 
 

@@ -1,9 +1,9 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Messages | Hembla</title>
+  <title>Messages | Hembla experten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -88,11 +88,11 @@
         <a class="list-item" href="{% url 'accounts:booking_chat' t.booking_type t.booking_id %}">
           <div class="thread-meta">
             <div class="thread-title">
-              {{ t.title }} · #{{ t.booking_id }}
+              {{ t.title }} آ· #{{ t.booking_id }}
             </div>
             <div class="thread-sub">
-              {{ t.customer_name }} · {{ t.booking_type|title }}
-              {% if t.when %} · {{ t.when }}{% endif %}
+              {{ t.customer_name }} آ· {{ t.booking_type|title }}
+              {% if t.when %} آ· {{ t.when }}{% endif %}
             </div>
             <div class="preview">
               {% if t.last_text %}
@@ -125,3 +125,6 @@
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+
+
+

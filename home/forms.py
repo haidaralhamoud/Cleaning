@@ -30,7 +30,7 @@ class ApplicationForm(forms.ModelForm):
         fields = ["full_name", "email", "phone", "job", "message", "cv", "area", "availability"]
 
         widgets = {
-            "message": forms.Textarea(attrs={"placeholder": "Why are you interested?"}),
+            "message": forms.Textarea(attrs={"placeholder": "Why are you interested"}),
             "full_name": forms.TextInput(attrs={"placeholder": "Full Name"}),
             "email": forms.EmailInput(attrs={"placeholder": "Email"}),
             "phone": forms.TextInput(attrs={"placeholder": "Phone Number"}),
@@ -52,7 +52,7 @@ class ApplicationForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "hembla-field", "placeholder": "Email"}),
             "phone": forms.TextInput(attrs={"class": "hembla-field", "placeholder": "Phone Number"}),
             "job": forms.Select(attrs={"class": "hembla-field"}),
-            "message": forms.Textarea(attrs={"class": "hembla-field", "placeholder": "Why are you interested?"}),
+            "message": forms.Textarea(attrs={"class": "hembla-field", "placeholder": "Why are you interested"}),
             "cv": forms.ClearableFileInput(attrs={"class": "hembla-field"}),
 
             # 🔥 هدول كانوا بدون ستايل — نرجعهم
@@ -75,7 +75,7 @@ class ApplicationForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "hembla-field", "placeholder": "Email"}),
             "phone": forms.TextInput(attrs={"class": "hembla-field", "placeholder": "Phone Number"}),
             "job": forms.Select(attrs={"class": "hembla-field"}),
-            "message": forms.Textarea(attrs={"class": "hembla-field", "placeholder": "Why are you interested?"}),
+            "message": forms.Textarea(attrs={"class": "hembla-field", "placeholder": "Why are you interested"}),
             "cv": forms.ClearableFileInput(attrs={"class": "hembla-field"}),
             "area": forms.TextInput(attrs={"class": "hembla-field", "placeholder": "Preferred Role / Area of Interest"}),
             "availability": forms.TextInput(attrs={"class": "hembla-field", "placeholder": "Availability"}),

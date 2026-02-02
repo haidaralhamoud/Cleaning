@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch(url)
         .then((res) => res.json())
         .then((data) => {
-          cartCount.textContent = data.count ?? 0;
+          cartCount.textContent = data.count  0;
         })
         .catch(() => {});
     }
@@ -80,7 +80,7 @@ const initCustomSelects = () => {
       });
 
       const currentOption = select.options[select.selectedIndex];
-      label.textContent = currentOption ? currentOption.textContent.trim() : "Select...";
+      label.textContent = currentOption  currentOption.textContent.trim() : "Select...";
     };
 
     const buildOption = (option, selectedValue) => {

@@ -40,12 +40,12 @@
 
       <!-- اختيار نوع الـ schedule -->
       {% if services|length > 1 %}
-        <p class="mode-caption">How would you like to schedule your services?</p>
+        <p class="mode-caption">How would you like to schedule your services</p>
 
         <div class="mode-row">
             <div class="mode-card" data-mode="same">
               <div class="mode-title">Use the same schedule for all services</div>
-              <small>We’ll apply this date, time window and frequency to every service in your cart.</small>
+              <small>We'll apply this date, time window and frequency to every service in your cart.</small>
               <span class="badge">Fast &amp; easy</span>
             </div>
             <div class="mode-card" data-mode="per_service">
@@ -102,7 +102,7 @@
         <h2>Schedule &amp; Frequency</h2>
         <div class="freq-row">
           <div class="freq-col">
-            <h3>Q1. How often would you like this service?</h3>
+            <h3>Q1. How often would you like this service</h3>
   <div class="freq-btn" data-freq="weekly">
       Weekly <span class="save-tag"></span>
   </div>
@@ -118,7 +118,7 @@
           </div>
 
           <div class="freq-col">
-<h3>Q2. Which day(s) work best for you?</h3>
+<h3>Q2. Which day(s) work best for you</h3>
 
 <div class="days-grid2" id="weekDays">
 
@@ -247,7 +247,7 @@
               <div class="svc-row">
                 <div class="svc-col">
                   <label class="svc-label">Special Timing Requests (optional)</label>
-                  <textarea class="svc-textarea svc-notes" placeholder="Anything we should know for this service?"></textarea>
+                  <textarea class="svc-textarea svc-notes" placeholder="Anything we should know for this service"></textarea>
                 </div>
               </div>
 
@@ -385,14 +385,14 @@ function updateDayLabels() {
       wrapper.appendChild(tag);
     }
     const absVal = Math.abs(amount);
-    tag.textContent = amount < 0 ? `-${absVal}%` : `+${absVal}%`;
+    tag.textContent = amount < 0  `-${absVal}%` : `+${absVal}%`;
   });
 }
 
 </script>
 <script>
 /* ---------- Helpers ---------- */
-function pad(n){return n<10? "0"+n : n;}
+function pad(n){return n<10 "0"+n : n;}
 function toDateKey(dateObj){
   const y = dateObj.getFullYear();
   const m = pad(dateObj.getMonth() + 1);
@@ -400,7 +400,7 @@ function toDateKey(dateObj){
   return `${y}-${m}-${d}`;
 }
 function ruleAmount(rule){
-  const amount = Number(rule.amount ?? 0);
+  const amount = Number(rule.amount  0);
   if (Number.isNaN(amount)) return 0;
   return amount;
 }
@@ -515,7 +515,7 @@ function renderCalendar(month, year){
     const weekday = jsDate.getDay(); // 0=Sun, 6=Sat
 
     const rule = getRuleForDate(jsDate);
-    const surchargeLabel = rule ? formatSurcharge(rule) : "";
+    const surchargeLabel = rule  formatSurcharge(rule) : "";
     if (surchargeLabel) {
       const badge = document.createElement("div");
       badge.className = "day-surcharge";
@@ -666,7 +666,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
   // Mode 1: نفس الجدولة لكل الخدمات
   if (inputMode.value === "same"){
     const specialText = document.getElementById("specialRequest")
-      ? document.getElementById("specialRequest").value || ""
+       document.getElementById("specialRequest").value || ""
       : "";
 
     const days = Array.from(
@@ -675,9 +675,9 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
     document.getElementById("day_work_best").value = JSON.stringify(days);
 
-    const endVal = endDate ? (endDate.value || null) : null;
+    const endVal = endDate  (endDate.value || null) : null;
     const endType = (yesBtn && yesBtn.classList.contains("active") && endVal)
-      ? "end_on"
+       "end_on"
       : "no_end";
 
     const endInput = document.getElementById("End_Date");
@@ -709,11 +709,11 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
       const days = Array.from(dayChecks).map(ch => ch.value);
 
-      const dateVal = dateEl ? (dateEl.value || null) : null;
-      const timeVal = timeEl ? (timeEl.value || "") : "";
-      const freqVal = freqEl ? (freqEl.value || "") : "";
-      const notesVal= notesEl ? (notesEl.value || "") : "";
-      const endVal  = endEl ? (endEl.value || null) : null;
+      const dateVal = dateEl  (dateEl.value || null) : null;
+      const timeVal = timeEl  (timeEl.value || "") : "";
+      const freqVal = freqEl  (freqEl.value || "") : "";
+      const notesVal= notesEl  (notesEl.value || "") : "";
+      const endVal  = endEl  (endEl.value || null) : null;
 
       schedules[slug] = {
         date: dateVal,
@@ -781,11 +781,11 @@ function updateScheduleSummary() {
         document.querySelectorAll(".service-acc").forEach(acc => {
             const slug = acc.dataset.service;
 
-            const date = acc.querySelector(".svc-date")?.value || "";
-            const time = acc.querySelector(".svc-time")?.value || "";
-            const freq = acc.querySelector(".svc-frequency")?.value || "";
-            const notes = acc.querySelector(".svc-notes")?.value || "";
-            const endDate = acc.querySelector(".svc-end-date")?.value || "";
+            const date = acc.querySelector(".svc-date").value || "";
+            const time = acc.querySelector(".svc-time").value || "";
+            const freq = acc.querySelector(".svc-frequency").value || "";
+            const notes = acc.querySelector(".svc-notes").value || "";
+            const endDate = acc.querySelector(".svc-end-date").value || "";
 
             const days = Array.from(acc.querySelectorAll(".svc-day:checked"))
                               .map(el => el.value);
@@ -805,7 +805,7 @@ function updateScheduleSummary() {
     }
 
 
-    fetch(`/private/api/booking/{{ booking.id }}/price/?` + params.toString())
+    fetch(`/private/api/booking/{{ booking.id }}/price/` + params.toString())
         .then(res => res.json())
         .then(data => {
 

@@ -726,7 +726,7 @@ class PrivateService(models.Model):
     description = models.TextField(blank=True, null=True)
     recommended = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to="private/services/", blank=True, null=True)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=255)
     hero_image = models.ImageField(upload_to="private/hero/", blank=True, null=True)
     hero_subtitle = models.CharField(max_length=255, blank=True)
     hero_cta_text = models.CharField(max_length=60, blank=True)
@@ -985,7 +985,7 @@ class BookingFormDocument(models.Model):
 class PrivateAddon(models.Model):
     service = models.ForeignKey(PrivateService, on_delete=models.CASCADE, related_name="addons_list")
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=255)
     icon = models.ImageField(upload_to="private/addons/", blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
