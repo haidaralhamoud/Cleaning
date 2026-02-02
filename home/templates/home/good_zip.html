@@ -1,16 +1,16 @@
-{% load static %}
+﻿{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Booking | Hembla</title>
+  <title>Booking | Hembla experten</title>
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 
-  <!-- ترتيب الستيلات: الأساسي، بعدين البوب أب -->
+  <!-- طھط±طھظٹط¨ ط§ظ„ط³طھظٹظ„ط§طھ: ط§ظ„ط£ط³ط§ط³ظٹطŒ ط¨ط¹ط¯ظٹظ† ط§ظ„ط¨ظˆط¨ ط£ط¨ -->
   <link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
   <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
   <link rel="stylesheet" href="{% static 'css/send_email.css' %}">
@@ -118,7 +118,7 @@
       <div class="step">Step 1 of 4</div>
 
       <div class="notice">
-        🎉 Boom! Your area is covered. Please proceed with your booking.
+        ًںژ‰ Boom! Your area is covered. Please proceed with your booking.
       </div>
 
       <section class="booking-method">
@@ -169,7 +169,7 @@
       <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
 
       <h2>Request a Call</h2>
-      <p class="subtitle">Let’s find the best time to call you!</p>
+      <p class="subtitle">Let's find the best time to call you!</p>
 
       <form id="call-request-form" method="POST">
         {% csrf_token %}
@@ -213,7 +213,7 @@
 
       <p class="subtitle">A brief summary is included in your email</p>
 
-      <!-- ⭐ أهم تعديل هون: class="email-form" -->
+      <!-- â­گ ط£ظ‡ظ… طھط¹ط¯ظٹظ„ ظ‡ظˆظ†: class="email-form" -->
       <form method="POST" enctype="multipart/form-data" class="email-form">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="email_request">
@@ -264,7 +264,7 @@
     if (fileInput && fileName) {
       fileInput.addEventListener("change", () => {
         fileName.textContent = fileInput.files.length
-          ? fileInput.files[0].name
+           fileInput.files[0].name
           : "No file chosen";
       });
     }
@@ -274,3 +274,6 @@
 {% include "home/includes/footer.html" %}
 </body>
 </html>
+
+
+

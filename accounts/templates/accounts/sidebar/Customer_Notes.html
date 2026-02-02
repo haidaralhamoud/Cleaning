@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Customer Notes</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <link rel="stylesheet" href="{% static 'css/Customer_Notes.css' %}" />
@@ -169,7 +169,7 @@
       <!-- EMPTY STATE -->
       <div class="empty-state">
         <h3>No notes yet</h3>
-        <p>This customer doesn’t have notes. Add notes to help cleaners with access and preferences.</p>
+        <p>This customer doesn't have notes. Add notes to help cleaners with access and preferences.</p>
 
         <div class="actions">
           <a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
@@ -195,7 +195,7 @@
   if (toggle && sidebar && arrow) {
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
     });
   }
 </script>

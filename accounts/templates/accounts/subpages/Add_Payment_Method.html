@@ -186,7 +186,7 @@ cardInput.addEventListener("input", function () {
 
 function selectType(type) {
   cardTypeInput.value = type;
-  document.querySelector(`.pill[data-type="${type}"]`)?.classList.add("active");
+  document.querySelector(`.pill[data-type="${type}"]`).classList.add("active");
 }
 
 // ===== Expiry auto slash =====

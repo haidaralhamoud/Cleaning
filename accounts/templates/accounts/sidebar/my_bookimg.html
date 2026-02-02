@@ -1,12 +1,12 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>My Bookings - Hembla</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <title>My Bookings - Hembla experten</title>
+  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -88,11 +88,11 @@
   </td>
 <td data-label="View">
   <div class="menu-wrap">
-    <button class="dots">•••</button>
+    <button class="dots">'''</button>
 
     <div class="dropdown">
 
-  {# فقط إذا الحجز مو مكتمل ولا ملغي #}
+  {# ظپظ‚ط· ط¥ط°ط§ ط§ظ„ط­ط¬ط² ظ…ظˆ ظ…ظƒطھظ…ظ„ ظˆظ„ط§ ظ…ظ„ط؛ظٹ #}
   {% if b.status not in "completed cancelled" %}
     <a href="#" class="action-reschedule">Reschedule</a>
     <a href="#" class="action-cancel">Cancel</a>
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // إذا ما في ولا صف ظاهر
+    // ط¥ط°ط§ ظ…ط§ ظپظٹ ظˆظ„ط§ طµظپ ط¸ط§ظ‡ط±
     if (visibleCount === 0) {
       noResults.style.display = "";
     } else {
@@ -171,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // تشغيل افتراضي على All
+  // طھط´ط؛ظٹظ„ ط§ظپطھط±ط§ط¶ظٹ ط¹ظ„ظ‰ All
   filterRows("all");
 });
 
@@ -211,3 +211,6 @@ document.addEventListener("click", () => {
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+
+
+

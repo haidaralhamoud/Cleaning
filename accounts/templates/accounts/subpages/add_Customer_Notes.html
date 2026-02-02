@@ -1,11 +1,11 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Customer Notes | Hembla</title>
+  <title>Customer Notes | Hembla experten</title>
 
   <link rel="stylesheet" href="{% static 'css/add_Customer_Notes.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -182,7 +182,7 @@
   if (toggle && sidebar && arrow) {
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
     });
   }
 </script>
@@ -247,4 +247,7 @@
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+
+
+
 

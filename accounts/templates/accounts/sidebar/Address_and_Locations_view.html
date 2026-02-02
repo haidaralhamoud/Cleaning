@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Customer Profile - Address & Locations</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Address_and_Locations_view.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -88,7 +88,7 @@
 
     <a href="{% url 'accounts:delete_location' location.id %}"
        class="btn btn-danger"
-       onclick="return confirm('Delete this location?')">
+       onclick="return confirm('Delete this location')">
       Remove
     </a>
   </div>
@@ -117,7 +117,7 @@
   toggle.addEventListener("click", () => {
     const open = sidebar.classList.toggle("open");
     if (overlay) overlay.classList.toggle("show", open);
-    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
+    if (arrow) arrow.innerHTML = open  "&#8249;" : "&#8250;";
   });
   if (overlay) {
     overlay.addEventListener("click", () => {

@@ -153,7 +153,7 @@ def sign_up(request):
 
             login_url = reverse("login")
             query = urlencode({"email": email})
-            return redirect(f"{login_url}?{query}")
+            return redirect(f"{login_url}{query}")
     else:
         form = CustomerForm()
 
@@ -899,7 +899,7 @@ def view_service_details(request, booking_type, booking_id):
         quoted_time = booking.format_minutes(
             booking.quoted_duration_minutes
         )
-        if quoted_time == "?":
+        if quoted_time == "":
             quoted_time = None
 
     if not quoted_time:
@@ -910,7 +910,7 @@ def view_service_details(request, booking_type, booking_id):
         quoted_seconds = max(quoted_seconds, duration_seconds, duration_minutes * 60)
 
     if not quoted_time:
-        quoted_time = "?"
+        quoted_time = ""
 
 
 
@@ -1144,7 +1144,7 @@ def Media(request):
             ).first()
             if media:
                 media.delete()
-            return redirect(request.path + f"?booking_type={booking_type}&booking_id={booking_id}")
+            return redirect(request.path + f"booking_type={booking_type}&booking_id={booking_id}")
 
         phase = request.POST.get("phase", "before")
         file = request.FILES.get("file")
@@ -1156,7 +1156,7 @@ def Media(request):
                 file=file,
                 uploaded_by=request.user,
             )
-        return redirect(request.path + f"?booking_type={booking_type}&booking_id={booking_id}")
+        return redirect(request.path + f"booking_type={booking_type}&booking_id={booking_id}")
 
     media_qs = BookingMedia.objects.none()
     if booking:

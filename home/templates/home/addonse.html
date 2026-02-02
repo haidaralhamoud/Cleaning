@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cleaning & Housemaid Add-ons</title>
   <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -116,38 +116,38 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const forms = {
     laundry: `
-      <p><strong>Q1.</strong> How many loads of laundry?</p>
+      <p><strong>Q1.</strong> How many loads of laundry</p>
       <label><input type="radio" name="load"> 1 load</label><br>
       <label><input type="radio" name="load"> 2–3 loads</label><br>
       <label><input type="radio" name="load"> 4–5 loads</label><br>
       <label><input type="radio" name="load"> 6+ loads</label><hr>
-      <p><strong>Q2.</strong> Service type?</p>
+      <p><strong>Q2.</strong> Service type</p>
       <label><input type="radio" name="service"> Washing only</label><br>
       <label><input type="radio" name="service"> Folding only</label><br>
       <label><input type="radio" name="service"> Washing & folding</label><hr>
-      <p><strong>Q3.</strong> Detergent preference?</p>
-      <label><input type="radio" name="detergent"> Use customer’s detergent</label><br>
+      <p><strong>Q3.</strong> Detergent preference</p>
+      <label><input type="radio" name="detergent"> Use customer's detergent</label><br>
       <label><input type="radio" name="detergent"> Bring our own</label><hr>
-      <p><strong>Folding & organizing after wash?</strong></p>
+      <p><strong>Folding & organizing after wash</strong></p>
       <label><input type="radio" name="fold"> Yes</label>
       <label><input type="radio" name="fold"> No</label>
     `,
     ironing: `
-      <p><strong>Q1.</strong> How many items need ironing?</p>
+      <p><strong>Q1.</strong> How many items need ironing</p>
       <label><input type="radio" name="ironing"> Up to 10 items</label><br>
       <label><input type="radio" name="ironing"> 11–20 items</label><br>
       <label><input type="radio" name="ironing"> 21–40 items</label><br>
       <label><input type="radio" name="ironing"> 40+ items</label><hr>
-      <p><strong>Q2.</strong> Finish preference?</p>
+      <p><strong>Q2.</strong> Finish preference</p>
       <label><input type="radio" name="finish"> Folded</label>
       <label><input type="radio" name="finish"> On hangers</label>
     `,
     dishwashing: `
-      <p><strong>Q1.</strong> How many dishes need washing?</p>
+      <p><strong>Q1.</strong> How many dishes need washing</p>
       <label><input type="radio" name="dishes"> Small load (10–20 items)</label><br>
       <label><input type="radio" name="dishes"> Medium load (20–50 items)</label><br>
       <label><input type="radio" name="dishes"> Large load (50+ items)</label><hr>
-      <p><strong>Q2.</strong> Include pots & pans?</p>
+      <p><strong>Q2.</strong> Include pots & pans</p>
       <label><input type="radio" name="pots"> Yes</label>
       <label><input type="radio" name="pots"> No</label>
     `,
@@ -166,41 +166,41 @@ document.addEventListener("DOMContentLoaded", () => {
       <input type="text" placeholder="e.g., 3rd floor">
     `,
     appliance: `
-      <p><strong>Q1.</strong> Which appliances should we clean?</p>
+      <p><strong>Q1.</strong> Which appliances should we clean</p>
       <label><input type="checkbox"> Fridge</label>
       <label><input type="checkbox"> Freezer</label>
       <label><input type="checkbox"> Oven</label>
       <label><input type="checkbox"> Microwave</label><br>
       <label>Other: <input type="text"></label><hr>
-      <p><strong>Q2.</strong> Should we empty contents for you?</p>
+      <p><strong>Q2.</strong> Should we empty contents for you</p>
       <label><input type="radio" name="empty"> Yes, please</label>
-      <label><input type="radio" name="empty"> No, I’ll do it</label><hr>
+      <label><input type="radio" name="empty"> No, I'll do it</label><hr>
       <p><strong>Last deep clean</strong></p>
       <label><input type="radio" name="time"> &lt; 3 months</label>
       <label><input type="radio" name="time"> 3–6 months</label>
       <label><input type="radio" name="time"> &gt; 6 months</label>
     `,
     cabinet: `
-      <p><strong>Q1.</strong> Which area(s) to organize?</p>
+      <p><strong>Q1.</strong> Which area(s) to organize</p>
       <label><input type="checkbox"> Kitchen cabinets</label>
       <label><input type="checkbox"> Wardrobe</label>
       <label><input type="checkbox"> Storage closet</label>
       <label><input type="checkbox"> Other</label><hr>
-      <p><strong>Q2.</strong> Organization type?</p>
+      <p><strong>Q2.</strong> Organization type</p>
       <label><input type="radio" name="org"> Light tidy-up</label>
       <label><input type="radio" name="org"> Full re-organization</label><hr>
       <p><strong>Number of cabinets/closets</strong></p>
       <input type="number" placeholder="e.g., 4"><hr>
-      <p><strong>Do you have storage bins/boxes?</strong></p>
+      <p><strong>Do you have storage bins/boxes</strong></p>
       <label><input type="radio" name="bins"> Yes</label>
       <label><input type="radio" name="bins"> No</label>
     `,
     eco: `
-      <p><strong>Should we use eco-friendly products?</strong></p>
+      <p><strong>Should we use eco-friendly products</strong></p>
       <label><input type="radio" name="eco"> Yes, bring eco-products</label><br>
-      <label><input type="radio" name="eco"> I’ll provide eco-products</label><br>
+      <label><input type="radio" name="eco"> I'll provide eco-products</label><br>
       <label><input type="radio" name="eco"> No, standard products are fine</label><hr>
-      <p><strong>Allergies or sensitivities?</strong></p>
+      <p><strong>Allergies or sensitivities</strong></p>
       <label><input type="radio" name="allergy"> Yes</label>
       <label><input type="radio" name="allergy"> No</label><br>
       <textarea placeholder="Describe allergies or sensitivities..."></textarea>
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <label><input type="radio" name="type"> Sofa</label>
       <label><input type="radio" name="type"> Chairs</label>
       <label><input type="radio" name="type"> Mattress</label><hr>
-      <p><strong>Stains present?</strong></p>
+      <p><strong>Stains present</strong></p>
       <label><input type="radio" name="stain"> Yes</label>
       <label><input type="radio" name="stain"> No</label><hr>
       <p><strong>Upload photo</strong></p>
@@ -224,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <label><input type="radio" name="curtain"> Blackout</label><hr>
       <p><strong>Number of sets</strong></p>
       <input type="number" placeholder="e.g., 3"><hr>
-      <p><strong>Removable?</strong></p>
+      <p><strong>Removable</strong></p>
       <label><input type="radio" name="removable"> Yes</label>
       <label><input type="radio" name="removable"> No</label><hr>
       <p><strong>Upload photo (optional)</strong></p>
@@ -270,29 +270,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const forms = {
       laundry: `
-        <p><strong>Q1.</strong> How many loads of laundry?</p>
+        <p><strong>Q1.</strong> How many loads of laundry</p>
         <label><input type="radio" name="load"> 1 load</label><br>
         <label><input type="radio" name="load"> 2–3 loads</label><br>
         <label><input type="radio" name="load"> 4–5 loads</label><br>
         <label><input type="radio" name="load"> 6+ loads</label><hr>
-        <p><strong>Q2.</strong> Service type?</p>
+        <p><strong>Q2.</strong> Service type</p>
         <label><input type="radio" name="service"> Washing only</label><br>
         <label><input type="radio" name="service"> Folding only</label><br>
         <label><input type="radio" name="service"> Washing & folding</label><hr>
-        <p><strong>Q3.</strong> Detergent preference?</p>
-        <label><input type="radio" name="detergent"> Use customer’s detergent</label><br>
+        <p><strong>Q3.</strong> Detergent preference</p>
+        <label><input type="radio" name="detergent"> Use customer's detergent</label><br>
         <label><input type="radio" name="detergent"> Bring our own</label><hr>
-        <p><strong>Folding & organizing after wash?</strong></p>
+        <p><strong>Folding & organizing after wash</strong></p>
         <label><input type="radio" name="fold"> Yes</label>
         <label><input type="radio" name="fold"> No</label>
       `,
       ironing: `
-        <p><strong>Q1.</strong> How many items need ironing?</p>
+        <p><strong>Q1.</strong> How many items need ironing</p>
         <label><input type="radio" name="ironing"> Up to 10 items</label><br>
         <label><input type="radio" name="ironing"> 11–20 items</label><br>
         <label><input type="radio" name="ironing"> 21–40 items</label><br>
         <label><input type="radio" name="ironing"> 40+ items</label><hr>
-        <p><strong>Q2.</strong> Finish preference?</p>
+        <p><strong>Q2.</strong> Finish preference</p>
         <label><input type="radio" name="finish"> Folded</label>
         <label><input type="radio" name="finish"> On hangers</label>
       `

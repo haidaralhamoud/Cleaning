@@ -1,22 +1,22 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Your Cart – Hembla</title>
+<title>Your Cart ' Hembla experten</title>
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 <link rel="stylesheet" href="{% static 'css/PrivateCart.css' %}">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 </head>
 <body>
 {% include "home/includes/main_header.html" %}
 
-<!-- 🔥 عنصر مخفي لحتى JS يلاقي cart-count -->
+<!-- ًں”¥ ط¹ظ†طµط± ظ…ط®ظپظٹ ظ„ط­طھظ‰ JS ظٹظ„ط§ظ‚ظٹ cart-count -->
 <div style="display:none;">
     <span id="cart-count">{{ cart|length }}</span>
 </div>
@@ -48,7 +48,7 @@
         {% endfor %}
 
         <a href="{% url 'home:private_cart_continue' %}" class="btn-continue">
-            Continue Booking →
+            Continue Booking '
         </a>
 
     {% else %}
@@ -69,11 +69,11 @@ function removeItem(slug) {
         .then(r => r.json())
         .then(data => {
 
-            // احذف العنصر من الصفحة
+            // ط§ط­ط°ظپ ط§ظ„ط¹ظ†طµط± ظ…ظ† ط§ظ„طµظپط­ط©
             const item = document.getElementById(`item-${slug}`);
             if (item) item.remove();
 
-            // حدّث عداد السلة (موجود الآن لأنك نقلت الهيدر)
+            // ط­ط¯ظ'ط« ط¹ط¯ط§ط¯ ط§ظ„ط³ظ„ط© (ظ…ظˆط¬ظˆط¯ ط§ظ„ط¢ظ† ظ„ط£ظ†ظƒ ظ†ظ‚ظ„طھ ط§ظ„ظ‡ظٹط¯ط±)
             const counter = document.getElementById("cart-count");
             if (counter) counter.innerText = data.count;
 
@@ -88,3 +88,6 @@ function removeItem(slug) {
 </body>
 
 </html>
+
+
+

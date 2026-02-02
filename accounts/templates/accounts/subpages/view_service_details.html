@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Customer Profile View</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -483,7 +483,7 @@
           <div class="card media-gallery">
             <div class="media-header">
               <h3>Media Gallery</h3>
-              <a href="{% url 'accounts:Media' %}?booking_type={{ booking_type }}&booking_id={{ booking.id }}" class="see-more">see more →</a>
+              <a href="{% url 'accounts:Media' %}booking_type={{ booking_type }}&booking_id={{ booking.id }}" class="see-more">see more →</a>
             </div>
 
             <div class="media-carousel">
@@ -494,10 +494,10 @@
                     <img src="{{ media.file.url }}" alt="{{ media.phase }} photo">
                   {% endfor %}
                 {% else %}
-                  <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
-                  <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
-                  <img src="https://via.placeholder.com/130x100?text=Kitchen" alt="Kitchen photo">
-                  <img src="https://via.placeholder.com/130x100?text=Bathroom" alt="Bathroom photo">
+                  <img src="https://via.placeholder.com/130x100text=Before" alt="Before photo">
+                  <img src="https://via.placeholder.com/130x100text=After" alt="After photo">
+                  <img src="https://via.placeholder.com/130x100text=Kitchen" alt="Kitchen photo">
+                  <img src="https://via.placeholder.com/130x100text=Bathroom" alt="Bathroom photo">
                 {% endif %}
               </div>
               <button class="arrow-btn right">›</button>
@@ -526,8 +526,8 @@
           </div>
 
           <div class="card help">
-            <span class="need-help"><img src="{% static 'images/vector27.svg'%}" alt="">Need help?</span>
-            <p>Something not right with your service? Let us know.</p>
+            <span class="need-help"><img src="{% static 'images/vector27.svg'%}" alt="">Need help</span>
+            <p>Something not right with your service Let us know.</p>
             <div class="actions">
                 <a href="{% url 'accounts:Report_Incident' %}" class="report-btn">
                   <img src="{% static 'images/commercial0.png'%}" alt="Report">
@@ -650,10 +650,10 @@
     <!-- ===== APPROVE WORK POPUP ===== -->
   <div class="popup-overlay" id="popupOverlay">
     <div class="popup approve-popup">
-      <button class="close-btn" id="closePopupBtn">?</button>
+      <button class="close-btn" id="closePopupBtn"></button>
       <img class="logo" src="{% static 'images/frame-16865526320.png'%}" alt="Happy Home Logo">
       <p class="message">
-        <strong>Happy home, happy you ??</strong><br>
+        <strong>Happy home, happy you </strong><br>
         Clean, fresh, and ready to enjoy. Until next time!
       </p>
       <div class="buttons">
@@ -673,7 +673,7 @@
     <form class="popup request-fix-popup" id="requestFixForm" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="hidden" name="form_type" value="request_fix">
-      <button class="close-btn" id="closeFixPopupBtn">?</button>
+      <button class="close-btn" id="closeFixPopupBtn"></button>
       <div class="upload-zone" id="requestFixUpload">
         <input type="file" id="requestFixFiles" name="files" accept="image/*" multiple>
         <div class="upload-icon">
@@ -686,7 +686,7 @@
       </div>
       <div class="upload-previews" id="requestFixPreviews"></div>
       <p class="message">
-        <strong>Request Fix ??</strong><br>
+        <strong>Request Fix </strong><br>
         Please describe what needs to be corrected. Our team will review it right away!
       </p>
       <textarea name="message" placeholder="Describe your issue..." required></textarea>
@@ -702,7 +702,7 @@
   <!-- ===== ADD-ONS POPUP ===== -->
   <div class="popup-overlay" id="addonsPopupOverlay">
     <div class="popup addons-popup">
-      <button class="close-btn" id="closeAddonsPopup">?</button>
+      <button class="close-btn" id="closeAddonsPopup"></button>
       <h3 class="addons-title">Available Add-ons</h3>
       <div class="addons-body">
         <div id="addonsList"></div>
@@ -814,7 +814,7 @@ function getCookie(name) {
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
       menuOverlay.classList.toggle("show");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
+      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
     });
 
     menuOverlay.addEventListener("click", () => {
@@ -1006,7 +1006,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script>
 function toggleNoteForm() {
   const form = document.getElementById("noteForm");
-  form.style.display = form.style.display === "none" ? "block" : "none";
+  form.style.display = form.style.display === "none"  "block" : "none";
 }
 </script>
 
@@ -1051,11 +1051,11 @@ const output = document.getElementById("actualTime");
 
 if (container) {
   const start = new Date(container.dataset.start);
-  const end = container.dataset.end ? new Date(container.dataset.end) : null;
+  const end = container.dataset.end  new Date(container.dataset.end) : null;
   const quotedSeconds = parseInt(container.dataset.quoted || "0", 10);
 
   function updateTime() {
-    const now = end ? end : new Date();
+    const now = end  end : new Date();
     const diff = Math.floor((now - start) / 1000);
 
     if (diff >= 0) {
@@ -1130,7 +1130,7 @@ function renderAddonsList() {
       sectionHtml += `
         <button type="button" class="addon-card" data-service="${svc}" data-addon="${key}">
           <div class="addon-icon-wrap">
-            ${ad.icon ? `<img src="${ad.icon}" alt="">` : `<span class="addon-icon-fallback">+</span>`}
+            ${ad.icon  `<img src="${ad.icon}" alt="">` : `<span class="addon-icon-fallback">+</span>`}
           </div>
           <div class="addon-info">
             <div class="addon-title">${ad.label}</div>
@@ -1159,7 +1159,7 @@ function renderAddonsList() {
 function openAddonForm(serviceSlug, addonKey) {
   CURRENT_SERVICE = serviceSlug;
   CURRENT_ADDON = addonKey;
-  const addon = AVAILABLE_ADDONS?.[serviceSlug]?.addons?.[addonKey];
+  const addon = AVAILABLE_ADDONS.[serviceSlug].addons.[addonKey];
   if (!addon) return;
 
   addonFormPane.innerHTML = `
@@ -1167,7 +1167,7 @@ function openAddonForm(serviceSlug, addonKey) {
     <div class="addon-form-body">
       ${addon.form || ""}
     </div>
-    <button type="button" class="btn-back" id="backToAddons">? Back to list</button>
+    <button type="button" class="btn-back" id="backToAddons"> Back to list</button>
   `;
 
   if (window.initCustomSelects) {
@@ -1252,7 +1252,7 @@ function updateCharges(pricing) {
     const row = document.createElement("div");
     row.className = "row";
     row.innerHTML = `<span>Discount</span><span class="green" id="chargeDiscount"></span>`;
-    const totalRow = rows.querySelector("#chargeTotal")?.parentElement || null;
+    const totalRow = rows.querySelector("#chargeTotal").parentElement || null;
     if (totalRow) {
       rows.insertBefore(row, totalRow);
     } else {

@@ -1,9 +1,9 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Jobs | Hembla</title>
+  <title>My Jobs | Hembla experten</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -193,7 +193,7 @@
         <a href="{% url 'accounts:provider_booking_detail' b.type b.id %}" class="list-item">
           <div class="meta">
             <div class="thread-title">{{ b.title }}</div>
-            <div class="thread-sub">#{{ b.id }} ?? {{ b.when|date:"M d, Y" }}</div>
+            <div class="thread-sub">#{{ b.id }}  {{ b.when|date:"M d, Y" }}</div>
           </div>
           <div class="status-pill status-{{ b.status }}">{{ b.status }}</div>
         </a>
@@ -211,7 +211,7 @@
 <script>
   function toggleMenu() {
     const menu = document.getElementById("menu");
-    menu.style.display = menu.style.display === "block" ? "none" : "block";
+    menu.style.display = menu.style.display === "block"  "none" : "block";
   }
 
   function playSound() {
@@ -232,3 +232,6 @@
 
 </body>
 </html>
+
+
+

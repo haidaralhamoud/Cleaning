@@ -1,11 +1,11 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign Up | Hembla</title>
+  <title>Sign Up | Hembla experten</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
@@ -20,14 +20,14 @@
   <div class="signup-box">
     <img src="{% static 'images/add-user-male0.png'%}" alt="Add User Icon" class="add-icon">
 
-    <h1 class="title">Get started with Hembla</h1>
+    <h1 class="title">Get started with Hembla experten</h1>
     <p class="subtitle">Create an account to access our services</p>
 
     <!-- FORM START -->
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
 
-      <!-- الحقل المخفي الذي يولده Django فقط -->
+      <!-- ط§ظ„ط­ظ‚ظ„ ط§ظ„ظ…ط®ظپظٹ ط§ظ„ط°ظٹ ظٹظˆظ„ط¯ظ‡ Django ظپظ‚ط· -->
       {{ form.custom_addons }}
 
       <div class="form-group">
@@ -174,7 +174,7 @@
 
       <button type="submit" class="btn-submit">Create Account</button>
 
-      <p class="login-text">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+      <p class="login-text">Already have an account <a href="{% url 'login' %}">Log in</a></p>
     </form>
     <!-- FORM END -->
 
@@ -212,7 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tag.textContent = value;
 
         const close = document.createElement("span");
-        close.textContent = "×";
+        close.textContent = "أ—";
         close.className = "tag-close";
         close.onclick = () => {
             addonsList = addonsList.filter(v => v !== value);
@@ -241,3 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+
+
+

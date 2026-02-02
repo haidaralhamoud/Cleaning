@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Incident Report</title>
-  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Incident_Report_order.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -156,7 +156,7 @@
                 <button class="close-btn" onclick="toggleSatisfaction()">Close Incident</button>
               </div>
               <div id="satisfactionSection" class="satisfaction hidden">
-                <p>Was this resolved to your satisfaction?</p>
+                <p>Was this resolved to your satisfaction</p>
                 <div class="response-buttons">
                   <button class="response-btn yes">Yes</button>
                   <button class="response-btn no">No</button>
@@ -179,8 +179,8 @@
   <script>
     function saveFeedback() {
       const comment = document.querySelector('#satisfactionSection textarea').value.trim();
-      const response = document.querySelector('.response-btn.yes.active') ? 'Yes' :
-                       document.querySelector('.response-btn.no.active') ? 'No' : 'Not selected';
+      const response = document.querySelector('.response-btn.yes.active')  'Yes' :
+                       document.querySelector('.response-btn.no.active')  'No' : 'Not selected';
       alert(`Your feedback has been saved!
 Response: ${response}
 Comment: ${comment || "No comment"}`);
@@ -219,7 +219,7 @@ Comment: ${comment || "No comment"}`);
       toggle.addEventListener("click", () => {
         const open = sidebar.classList.toggle("open");
         if (overlay) overlay.classList.toggle("show", open);
-        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
+        if (arrow) arrow.style.transform = open  "rotate(180deg)" : "rotate(0deg)";
       });
     }
     if (overlay) {

@@ -32,13 +32,13 @@
             <td class="text-end">
               <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' item.slug obj.pk %}">Edit</a>
               {% if item.slug == "provider-profiles" %}
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_create' 'provider-messages' %}?provider_id={{ obj.user.id }}">Contact</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_create' 'provider-messages' %}provider_id={{ obj.user.id }}">Contact</a>
               {% endif %}
               {% if item.slug == "private-services" %}
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ obj.pk }}">Cards</a>
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}?service_id={{ obj.pk }}">Pricing</a>
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}?service_id={{ obj.pk }}">Estimate</a>
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-eco' %}?service_id={{ obj.pk }}">Eco</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}service_id={{ obj.pk }}">Cards</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}service_id={{ obj.pk }}">Pricing</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}service_id={{ obj.pk }}">Estimate</a>
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-eco' %}service_id={{ obj.pk }}">Eco</a>
               {% endif %}
               <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
             </td>
@@ -55,17 +55,17 @@
       <ul class="pagination">
         {% if objects.has_previous %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ objects.previous_page_number }}&q={{ query }}">Prev</a>
+            <a class="page-link" href="page={{ objects.previous_page_number }}&q={{ query }}">Prev</a>
           </li>
         {% endif %}
         {% for p in objects.paginator.page_range %}
           <li class="page-item {% if objects.number == p %}active{% endif %}">
-            <a class="page-link" href="?page={{ p }}&q={{ query }}">{{ p }}</a>
+            <a class="page-link" href="page={{ p }}&q={{ query }}">{{ p }}</a>
           </li>
         {% endfor %}
         {% if objects.has_next %}
           <li class="page-item">
-            <a class="page-link" href="?page={{ objects.next_page_number }}&q={{ query }}">Next</a>
+            <a class="page-link" href="page={{ objects.next_page_number }}&q={{ query }}">Next</a>
           </li>
         {% endif %}
       </ul>
