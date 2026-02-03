@@ -1,0 +1,28 @@
+﻿{% extends "electricity/base_minimal.html" %}
+{% load static %}
+
+{% block title %}Electrical & Smart Home | The Gold Standard{% endblock %}
+
+{% block content %}
+<section class="hero hero-minimal">
+  <div class="hero-media" style="background-image: linear-gradient(180deg, rgba(8, 9, 12, 0.9), rgba(8, 9, 12, 0.55)), url('{% static 'electricity/img/hero.png' %}');"></div>
+  <div class="hero-content minimal-content">
+    <div class="hero-kicker minimal-kicker">
+      <span class="line"></span>
+      <span>Integrated Infrastructure Group</span>
+    </div>
+    <h1 class="hero-title minimal-title">
+      THE <span class="accent">GOLD</span><br>
+      STANDARD.
+    </h1>
+    <p class="hero-subtitle minimal-subtitle">
+      Delivering mission-critical electrical, smart home, and energy solutions for modern homes, properties, and businesses.
+    </p>
+    <div class="hero-actions minimal-actions">
+      <a class="btn btn-primary" href="{% url 'electricity:services' %}">Book an Electrician</a>
+      <a class="btn btn-secondary" href="{% url 'electricity:services' %}">Schedule a Consultation</a>
+    </div>
+    <div class="hero-note minimal-note">Fully operational today. Our website is expanding — our standards are not.</div>
+  </div>
+</section>
+{% endblock %}

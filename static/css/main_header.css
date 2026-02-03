@@ -10,6 +10,11 @@
   gap: 6px;
 }
 
+.dropdown-toggle .caret {
+  font-size: 12px;
+  margin-top: 1px;
+}
+
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -119,27 +124,40 @@
 }
 
 .btn-auth {
-  padding: 8px 18px;
-  border-radius: 10px;
+  padding: 10px 22px;
+  border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
   background: #00a3c8;
   color: #fff;
-  transition: .25s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   font-size: 0.9rem;
   border: none;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0, 163, 200, 0.2);
+}
+
+.menu-toggle {
+  background: #fff;
+  border: 1px solid rgba(0, 163, 200, 0.2);
+  color: #00a3c8;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-weight: 700;
   cursor: pointer;
 }
 
 .btn-auth:hover {
   background: #0089a8;
   color: #fff;
+  transform: translateY(-1px);
 }
 
 .btn-auth.outline {
   background: transparent;
   color: #00a3c8;
   border: 2px solid #00a3c8;
+  box-shadow: none;
 }
 
 .btn-auth.outline:hover {
@@ -149,6 +167,7 @@
 
 .btn-auth.logout {
   background: #ff4f4f;
+  box-shadow: 0 10px 20px rgba(255, 79, 79, 0.2);
 }
 
 .btn-auth.logout:hover {

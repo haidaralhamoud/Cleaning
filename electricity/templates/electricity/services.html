@@ -1,0 +1,184 @@
+{% extends "electricity/base.html" %}
+{% load static electricity_extras %}
+
+{% block title %}Electrical Services | Hembla experten{% endblock %}
+{% block body_class %}services-page{% endblock %}
+
+{% block content %}
+<section class="hero hero-ref">
+  <div class="hero-media" style="background-image: linear-gradient(180deg, rgba(12, 14, 18, 0.78), rgba(12, 14, 18, 0.45)), url('{% static 'electricity/img/hero-services.jpg' %}');"></div>
+  <div class="container hero-content">
+    <div class="hero-kicker">
+      <span class="line"></span>
+      <span>Integrated Infrastructure Group</span>
+    </div>
+    <h1 class="hero-title">
+      Warmth Meets<br>
+      <span class="hero-italic">Intelligence</span><br>
+      Designed for<br>
+      Modern Living
+    </h1>
+    <p class="hero-subtitle">
+      Redefining smart home infrastructure with advanced comfort,
+      security, and energy efficiency. We elevate your experience -
+      today.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'electricity:services' %}">Schedule a Consultation</a>
+      <a class="btn btn-secondary" href="{% url 'electricity:services' %}">Book an Electrician</a>
+    </div>
+  </div>
+</section>
+
+<section class="feature-strip">
+  <div class="container feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg class="feature-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.2l5-.7L12 3z"/>
+        </svg>
+      </div>
+      <div>
+        <h3>Tailored Comfort</h3>
+        <p>Advanced systems crafted to adapt to your lifestyle and property.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg class="feature-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3l7 3v5c0 4.4-3 8.4-7 10-4-1.6-7-5.6-7-10V6l7-3z"/>
+        </svg>
+      </div>
+      <div>
+        <h3>Resilient Security</h3>
+        <p>Proactive monitoring and smart defense for peace of mind.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">
+        <svg class="feature-svg" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3c4.4 0 8 3.6 8 8 0 5.5-4.3 9.3-8.9 9.9-.7.1-1.1-.3-1.1-.9v-3.2c0-.6.4-1.1 1-1.3 2.4-.6 4-2.6 4-4.6 0-2.8-2.2-5-5-5s-5 2.2-5 5c0 2 1.6 4 4 4.6.6.2 1 .7 1 1.3V20c0 .6-.4 1-1 1-4.9-.6-9-4.4-9-9.9 0-4.4 3.6-8 8-8z"/>
+        </svg>
+      </div>
+      <div>
+        <h3>Peak Efficiency</h3>
+        <p>Integrated energy management to maximize performance and savings.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-light">
+  <div class="container">
+    <div class="section-header ecosystem-header">
+      <div>
+        <h2>The Service Ecosystem</h2>
+      </div>
+      <p class="section-copy">While our detailed technical library is in development, our boutique engineering team is fully operational and ready to serve you today.</p>
+    </div>
+
+    <div class="service-grid">
+      {% for service in services %}
+        <article class="service-card service-card-dynamic">
+          <div class="service-media">
+            {% if service.icon %}
+              <img src="{{ service.icon.url }}" alt="{{ service.title }}">
+            {% else %}
+              <div class="service-fallback">{{ service.title|slice:":2" }}</div>
+            {% endif %}
+          </div>
+          <div class="service-body">
+            <h3>{{ service.title }}</h3>
+            <span class="service-tag">Smart Infrastructure</span>
+            {% if service.bullet_points %}
+              <ul class="service-bullets">
+                {% for line in service.bullet_points|split_lines %}
+                  <li>{{ line }}</li>
+                {% endfor %}
+              </ul>
+            {% elif service.short_description %}
+              <p class="service-description">{{ service.short_description }}</p>
+            {% endif %}
+            <button class="mini-cta">Schedule a consultation</button>
+          </div>
+        </article>
+      {% empty %}
+        <div class="empty-state">
+          <h3>No services available yet</h3>
+          <p>New electrical solutions are being curated. Please check back soon.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="section engineering-section">
+  <div class="container engineering-grid">
+    <div class="engineering-media">
+      <img src="{% static 'electricity/img/engineering-wires.jpg' %}" alt="Engineering integrity">
+    </div>
+    <div class="engineering-content">
+      <div class="eyebrow">Exceptional Foundations</div>
+      <h2>Engineering<br><span class="hero-italic">Integrity</span></h2>
+      <p class="engineering-lead">
+        Our electrical division manages the complex infrastructure required for high-end modern smart homes and
+        precision commercial spaces.
+      </p>
+      <div class="engineering-columns">
+        <ul class="engineering-list">
+          <li>Troubleshooting and Diagnostics</li>
+          <li>Panel Upgrades</li>
+          <li>Energy Optimization</li>
+        </ul>
+        <div class="engineering-side">
+          Our teams ensure seamless installation, precise integration, and long-term system reliability across every project.
+        </div>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-secondary" href="{% url 'electricity:services' %}">Book an Electrical Consultation</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-light">
+  <div class="container">
+    <div class="cta-panel muted-panel">
+      <div>
+        <div class="eyebrow">More Smart Home Details</div>
+        <h2>Coming Soon</h2>
+        <p>We are currently collecting our advanced catalog and proprietary solutions to help you get the most out of your infrastructure.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn btn-primary" href="{% url 'electricity:services' %}">Schedule a Smart Home Consultation</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section mini-cta-section">
+  <div class="container mini-cta-grid">
+    <div class="mini-cta-card">
+      <h3>Schedule a Smart Home Consultation</h3>
+      <p>Let us recommend the right smart systems for your property.</p>
+      <a class="card-link" href="{% url 'electricity:services' %}">Schedule Now</a>
+    </div>
+    <div class="mini-cta-card">
+      <h3>Book an Licensed Electrician</h3>
+      <p>Premium electrical installation and maintenance services.</p>
+      <a class="card-link" href="{% url 'electricity:services' %}">Book Consultation</a>
+    </div>
+  </div>
+</section>
+
+<section class="section bottom-cta">
+  <div class="container bottom-cta-inner">
+    <h2>Ready to upgrade<br><span>Your Home?</span></h2>
+    <p>Our boutique engineering teams are fully operational and ready for deployment.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="{% url 'electricity:services' %}">Schedule a Consultation</a>
+      <a class="btn btn-secondary" href="{% url 'electricity:services' %}">Request Electrical</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect , get_object_or_404
 from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm, ServiceCommentForm, ServiceReviewForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.contrib import messages
 from django.contrib.auth import logout
 from accounts.models import PointsTransaction
 
@@ -18,6 +19,7 @@ from django.http import Http404
 from django.urls import reverse_lazy, reverse
 from urllib.parse import urlencode
 from django.contrib.auth.forms import PasswordChangeForm
+from django.urls import reverse
 from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from .models import (
@@ -1487,17 +1489,19 @@ def Add_Payment_Method(request):
 
 @login_required
 def Change_Password(request):
+    customer = Customer.objects.filter(user=request.user).first()
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
-            update_session_auth_hash(request, user)  # مهم حتى ما يطلع Logout
+            update_session_auth_hash(request, user)  # ?????? ?????? ???? ???????? Logout
             return render(
                 request,
                 "accounts/sidebar/Change_Password.html",
                 {
                     "form": PasswordChangeForm(request.user),
-                    "show_popup": True,  # ⭐ هون السر
+                    "sidebar_customer": customer,
+                    "show_popup": True,  # ??? ?????? ????????
                 }
             )
     else:
@@ -1506,9 +1510,8 @@ def Change_Password(request):
     return render(
         request,
         "accounts/sidebar/Change_Password.html",
-        {"form": form}
+        {"form": form, "sidebar_customer": customer}
     )
-    return render(request, "accounts/sidebar/Change_Password.html")
 
 @login_required
 def Service_History_and_Ratings(request):
@@ -2046,7 +2049,7 @@ def provider_booking_detail(request, booking_type, booking_id):
     ).order_by("created_at")
 
     # =========================
-    # 🔔 unread messages count
+    # unread messages count
     # =========================
     from accounts.models import ChatThread, ChatMessage
 
@@ -2065,6 +2068,15 @@ def provider_booking_detail(request, booking_type, booking_id):
     except ChatThread.DoesNotExist:
         pass
 
+    preferences_url = ""
+    if getattr(booking, "user", None):
+        customer = Customer.objects.filter(user=booking.user).first()
+        if customer:
+            preferences_url = reverse(
+                "accounts:provider_customer_preferences",
+                args=[booking_type, booking.id]
+            )
+
     return render(
         request,
         "accounts/provider/provider_booking_detail.html",
@@ -2072,9 +2084,47 @@ def provider_booking_detail(request, booking_type, booking_id):
             "booking": booking,
             "booking_type": booking_type,
             "timeline": timeline,
-            "unread_messages_count": unread_messages_count,  # 🔥 مهم
+            "unread_messages_count": unread_messages_count,
+            "preferences_url": preferences_url,
         }
     )
+
+
+
+@login_required
+def provider_customer_preferences(request, booking_type, booking_id):
+    if not _provider_required(request.user):
+        raise Http404()
+
+    booking = _get_booking_for_provider(request, booking_type, booking_id)
+    if not getattr(booking, "user", None):
+        raise Http404()
+
+    customer = Customer.objects.filter(user=booking.user).first()
+    if not customer:
+        raise Http404()
+
+    prefs, _ = CustomerPreferences.objects.get_or_create(customer=customer)
+
+    context = {
+        "prefs": prefs,
+        "selected_cleaning": prefs.cleaning_types or [],
+        "selected_products": prefs.preferred_products or [],
+        "excluded_products": prefs.excluded_products or [],
+        "selected_frequency": prefs.frequency or "",
+        "selected_priorities": prefs.priorities or [],
+        "selected_lifestyle": prefs.lifestyle_addons or [],
+        "selected_assembly": prefs.assembly_services or [],
+        "products_custom": prefs.products_custom or "",
+        "frequency_custom": prefs.frequency_custom or "",
+        "priorities_custom": prefs.priorities_custom or "",
+        "customer_name": f"{customer.first_name} {customer.last_name}".strip() or customer.user.username,
+        "customer_id": customer.id,
+        "booking": booking,
+        "booking_type": booking_type,
+    }
+
+    return render(request, "accounts/provider/provider_customer_preferences.html", context)
 
 
 

@@ -1,4 +1,4 @@
-﻿
+
 {% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
@@ -54,11 +54,11 @@
 <!-- ============================================================================================= -->
 
   
-  <!-- ===== HERO (ط§ظ„طµظˆط±ط© + ط§ظ„ظ†طµ + ط§ظ„ط£ط²ط±ط§ط± ظپظˆظ‚ ط§ظ„طµظˆط±ط©) ===== -->
+  <!-- ===== HERO (الصورة + النص + الأزرار فوق الصورة) ===== -->
   <section class="hero">
     <div class="hero-bg" ></div>
 
-    <!-- ط§ظ„ظ„ظˆط­ ط§ظ„ط£ط¨ظٹط¶ ط¹ظ„ظ‰ ظٹط³ط§ط± ط§ظ„طµظˆط±ط© (ظ…ط·ط§ط¨ظ‚ ظ„ظ„ط¥ط·ط§ط± ط§ظ„ط£ط¨ظٹط¶ ط¨ط§ظ„طھطµظ…ظٹظ…) -->
+    <!-- اللوح الأبيض على يسار الصورة (مطابق للإطار الأبيض بالتصميم) -->
     <div class="hero-panel"></div>
 
     <div class="hero-inner container">
@@ -69,10 +69,35 @@
           Hembla experten makes it easy to book trusted pros who treat your home like their own, fast, fair, and worry free.
         </p>
         <div class="hero-buttons">
-          <a class="btn btn-primary" href="#">Book Cleaning</a>
-          <a class="btn btn-secondary" href="#">Same Day Service</a>
-          {% if user.is_superuser %}
-            <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
+          <div class="same-day-dropdown">
+            <a class="btn btn-primary same-day-button" href="{% url 'home:all_services_private' %}">
+              Book Cleaning <span class="caret" aria-hidden="true"></span>
+            </a>
+            <div class="same-day-menu" aria-label="Book Cleaning options">
+              <a href="{% url 'home:all_services_private' %}?urgent=1">Private Booking</a>
+              <a href="{% url 'home:business_start_booking' %}?urgent=1">Business Booking</a>
+            </div>
+          </div>
+          <div class="same-day-dropdown">
+            <button type="button" class="btn btn-secondary same-day-button">
+              Same Day Service <span class="caret" aria-hidden="true"></span>
+            </button>
+            <div class="same-day-menu" aria-label="Same Day Service options">
+              <a href="{% url 'home:all_services_private' %}?urgent=1">Private Booking</a>
+              <a href="{% url 'home:business_start_booking' %}?urgent=1">Business Booking</a>
+            </div>
+          </div>
+          <a class="btn btn-secondary" href="{% url 'electricity:home' %}">Go to Electrical & Smart Home Solutions</a>
+          {% if user.is_authenticated %}
+            {% if user.access_profile %}
+              {% if user.access_profile.role == "global_super" or user.access_profile.site == "electrical" %}
+                <a class="btn btn-secondary" href="/electrical-admin/">Electrical Admin</a>
+              {% elif user.is_superuser %}
+                <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
+              {% endif %}
+            {% elif user.is_superuser %}
+              <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
+            {% endif %}
           {% endif %}
         </div>
       </div>
@@ -120,7 +145,7 @@
       </article>
     </div>
 
-    <a href="#" class="btn-naked" >See All Services</a>
+    <button type="button" class="btn-naked js-services-modal">See All Services</button>
   </section>
 
   <!-- ===== EXTRA SERVICES ===== -->
@@ -164,10 +189,10 @@
       </article>
     </div>
 
-    <a href="#" class="btn-naked">See All Services</a>
+    <button type="button" class="btn-naked js-services-modal">See All Services</button>
   </section>
 
-  <!-- ===== HOW IT WORKS (ط¯ظˆط§ط¦ط± + ط®ط· ظ…ظˆطµظˆظ„) ===== -->
+  <!-- ===== HOW IT WORKS (دوائر + خط موصول) ===== -->
   <section class="how">
     <div class="container">
       <h2 class="section-title">How it Works</h2>
@@ -259,12 +284,51 @@
 
 
 
-  <!-- ظ…ظٹظ†ظˆ ظ…ظˆط¨ط§ظٹظ„ ط¨ط³ظٹط·ط© ط¨ط¯ظˆظ† JS ط«ظ‚ظٹظ„ -->
+  <!-- مينو موبايل بسيطة بدون JS ثقيل -->
+  <!-- ===== Services Modal ===== -->
+  <div class="services-modal" id="servicesModal" aria-hidden="true">
+    <div class="services-modal__overlay" data-services-close></div>
+    <div class="services-modal__panel" role="dialog" aria-modal="true" aria-labelledby="servicesModalTitle">
+      <button class="services-modal__close" type="button" aria-label="Close" data-services-close>?</button>
+      <h3 id="servicesModalTitle">Choose Service Type</h3>
+      <p>Pick the right category to continue your booking.</p>
+      <div class="services-modal__actions">
+        <a class="btn btn-primary" href="{% url 'home:all_services_private' %}">Private Services</a>
+        <a class="btn btn-secondary" href="{% url 'home:business_all_services' %}">Business Services</a>
+      </div>
+    </div>
+  </div>
+
   <script>
     const toggle = document.querySelector('.nav-toggle');
     const nav = document.querySelector('.main-nav');
     toggle.addEventListener('click', () => nav.classList.toggle('open'));
   </script>
+
+  <script>
+    const servicesModal = document.getElementById('servicesModal');
+    const serviceTriggers = document.querySelectorAll('.js-services-modal');
+    const serviceCloses = servicesModal ? servicesModal.querySelectorAll('[data-services-close]') : [];
+
+    const openServicesModal = () => {
+      if (!servicesModal) return;
+      servicesModal.classList.add('is-open');
+      servicesModal.setAttribute('aria-hidden', 'false');
+    };
+
+    const closeServicesModal = () => {
+      if (!servicesModal) return;
+      servicesModal.classList.remove('is-open');
+      servicesModal.setAttribute('aria-hidden', 'true');
+    };
+
+    serviceTriggers.forEach((btn) => btn.addEventListener('click', openServicesModal));
+    serviceCloses.forEach((btn) => btn.addEventListener('click', closeServicesModal));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeServicesModal();
+    });
+  </script>
+
   <script>
     const grid = document.querySelector('.t-grid[data-group-size]');
     if (grid) {
@@ -277,7 +341,7 @@
         bullets.innerHTML = '';
         for (let i = 0; i < totalPages; i += 1) {
           const dot = document.createElement('span');
-          dot.className = 'bullet' + (i === 0  ' active' : '');
+          dot.className = 'bullet' + (i === 0 ? ' active' : '');
           bullets.appendChild(dot);
         }
         bullets.dataset.pages = String(totalPages);
@@ -323,6 +387,7 @@
   
 </body>
 </html>
+
 
 
 

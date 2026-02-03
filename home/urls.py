@@ -15,6 +15,7 @@ urlpatterns = [
     path("services/contact/submit/", views.service_contact_submit, name="service_contact_submit"),
     path("dashboard/", views.dashboard_home, name="dashboard_home"),
     path("dashboard/notifications/", views.dashboard_notifications_api, name="dashboard_notifications_api"),
+    path("dashboard/change-password/", views.dashboard_change_password, name="dashboard_change_password"),
     path("dashboard/<str:model>/", views.dashboard_model_list, name="dashboard_model_list"),
     path("dashboard/<str:model>/add/", views.dashboard_model_create, name="dashboard_model_create"),
     path("dashboard/<str:model>/<int:pk>/edit/", views.dashboard_model_edit, name="dashboard_model_edit"),

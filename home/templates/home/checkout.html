@@ -193,21 +193,33 @@
           {% csrf_token %}
           <input type="hidden" name="form_type" value="payment">
 
-          <div class="payment-options">
-            <label class="payment-option">
+          <div class="payment-options" id="paymentOptions">
+            <label class="payment-option is-active">
               <input type="radio" name="payment_method" value="card" checked>
+              <span class="payment-logo">
+                <img src="{% static 'images/payment-method-visa0.svg' %}" alt="Credit Card">
+              </span>
               <span class="payment-label">Credit Card</span>
             </label>
             <label class="payment-option">
               <input type="radio" name="payment_method" value="paypal">
-              <span class="payment-label">PayPal</span>
+              <span class="payment-logo">
+                <img src="{% static 'images/paypal.svg' %}" alt="PayPal">
+              </span>
+              <span class="payment-label">Paypal</span>
             </label>
             <label class="payment-option">
               <input type="radio" name="payment_method" value="klarna">
+              <span class="payment-logo">
+                <img src="{% static 'images/payment-method-klarna0.svg' %}" alt="Klarna">
+              </span>
               <span class="payment-label">Klarna</span>
             </label>
             <label class="payment-option">
               <input type="radio" name="payment_method" value="swish">
+              <span class="payment-logo">
+                <img src="{% static 'images/swish.svg' %}" alt="Swish">
+              </span>
               <span class="payment-label">Swish</span>
             </label>
           </div>
@@ -264,6 +276,21 @@
     };
     checkbox.addEventListener("change", toggle);
     toggle();
+  })();
+</script>
+<script>
+  (function () {
+    var options = document.getElementById("paymentOptions");
+    if (!options) return;
+    options.querySelectorAll("input[type='radio']").forEach(function (input) {
+      input.addEventListener("change", function () {
+        options.querySelectorAll(".payment-option").forEach(function (label) {
+          label.classList.remove("is-active");
+        });
+        var label = input.closest(".payment-option");
+        if (label) label.classList.add("is-active");
+      });
+    });
   })();
 </script>
 <script src="{% static 'js/main_header.js' %}"></script>

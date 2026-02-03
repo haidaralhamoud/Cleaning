@@ -29,11 +29,11 @@
 
     <!-- Title -->
     <div class="title">
-      <span class="icon">ًںڈ¢</span>
+      <span class="icon">&#127970;</span>
       <h1>Company Info</h1>
     </div>
 
-<form method="POST" class="form-card">
+<form method="POST" class="form-card" id="companyInfoForm">
   {% csrf_token %}
 
   <div class="form-group full">
@@ -66,17 +66,18 @@
     <label>Phone</label>
     {{ form.phone }}
   </div>
+<div class="form-error" id="companyInfoError">Please fill in all required fields.</div>
 <div class="form-actions">
   <div class="action-left">
     <a onclick="window.history.back();" class="back-btn">
-      <span class="back-icon">'</span>
+      <span class="back-icon">&larr;</span>
       Back
     </a>
   </div>
   <div class="action-right">
     <button type="submit" class="next-btn">
       Next
-      <span class="next-icon">'</span>
+      <span class="next-icon">&rarr;</span>
     </button>
   </div>
 </div>
@@ -84,6 +85,46 @@
 </form>
 
   </div>
+
+<script>
+  const companyForm = document.getElementById("companyInfoForm");
+  const companyError = document.getElementById("companyInfoError");
+  const companyFields = [
+    document.getElementById("id_company_name"),
+    document.getElementById("id_contact_person"),
+    document.getElementById("id_role"),
+    document.getElementById("id_office_address"),
+    document.getElementById("id_email"),
+    document.getElementById("id_phone")
+  ];
+
+  const clearCompanyErrors = () => {
+    companyFields.forEach((field) => field && field.classList.remove("field-error"));
+    companyError.classList.remove("is-visible");
+  };
+
+  companyFields.forEach((field) => {
+    if (!field) return;
+    field.addEventListener("input", clearCompanyErrors);
+    field.addEventListener("change", clearCompanyErrors);
+  });
+
+  companyForm.addEventListener("submit", (e) => {
+    clearCompanyErrors();
+    let hasError = false;
+    companyFields.forEach((field) => {
+      if (!field) return;
+      if (!field.value || !field.value.trim()) {
+        field.classList.add("field-error");
+        hasError = true;
+      }
+    });
+    if (hasError) {
+      e.preventDefault();
+      companyError.classList.add("is-visible");
+    }
+  });
+</script>
 
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>

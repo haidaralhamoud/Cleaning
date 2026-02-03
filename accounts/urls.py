@@ -49,6 +49,7 @@ urlpatterns = [
     path("provider/bookings/", views.provider_bookings, name="provider_bookings"),
     path("provider/messages/", views.provider_inbox, name="provider_inbox"),
     path("provider/booking/<str:booking_type>/<int:booking_id>/", views.provider_booking_detail, name="provider_booking_detail"),
+    path("provider/booking/<str:booking_type>/<int:booking_id>/preferences/", views.provider_customer_preferences, name="provider_customer_preferences"),
     path("provider/booking/<str:booking_type>/<int:booking_id>/action/", views.provider_booking_action, name="provider_booking_action"),
     path("provider/profile/", views.provider_profile, name="provider_profile"),
     # path(

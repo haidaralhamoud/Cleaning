@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Provider — Booking #{{ booking.id }}</title>
+  <title>Provider - Booking #{{ booking.id }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -110,6 +110,27 @@
       font-size: 14px;
       border: 1px solid #e6f1f6;
     }
+.pref-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #e6f7fb;
+  color: #0b6b88;
+  border: 1px solid #bfe7f3;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+  box-shadow: 0 4px 10px rgba(0, 163, 200, .15);
+}
+
+.pref-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 163, 200, .2);
+}
+
+
 .chat-btn {
   width: 42px;
   height: 42px;
@@ -173,18 +194,20 @@
 {% include "home/includes/main_header.html" %}
 <div class="container">
   <div class="provider-card">
-
-    <!-- TOP BAR -->
 <div class="top-bar">
-  <a href="{% url 'accounts:provider_bookings' %}" class="back">← Back to bookings</a>
+  <a href="{% url 'accounts:provider_bookings' %}" class="back">Back to bookings</a>
 
   <div style="display:flex; align-items:center; gap:14px;">
-    <!-- زر الشات -->
+    {% if preferences_url %}
+      <a href="{{ preferences_url }}" class="pref-btn">View Preferences</a>
+    {% endif %}
+
+
     <a href="{% url 'accounts:booking_chat' booking_type booking.id %}"
        class="chat-btn"
        title="Message customer">
 <div class="chat-wrapper">
-  <span class="chat-icon">💬</span>
+  <span class="chat-icon">Chat</span>
 
   {% if unread_messages_count > 0 %}
     <span class="chat-badge">{{ unread_messages_count }}</span>
@@ -255,25 +278,17 @@
     {% for m in messages %}
       <div class="message">{{ m }}</div>
     {% endfor %}
-
-    <!-- ACTION BUTTONS -->
     <div class="action-grid">
-
-      <!-- ON THE WAY -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="on_the_way">
-        <button class="action-btn" {% if booking.status != "ASSIGNED" %}disabled{% endif %}>On the way</button>
+        <button class="action-btn" {% if booking.status != "ASSIGNED" and booking.status != "ORDERED" %}disabled{% endif %}>On the way</button>
       </form>
-
-      <!-- START -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="started">
         <button class="action-btn" {% if booking.status != "ON_THE_WAY" %}disabled{% endif %}>Start</button>
       </form>
-
-      <!-- PAUSE -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="paused">
@@ -288,8 +303,6 @@
 
 
       </form>
-
-      <!-- RESUME -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="resume">
@@ -300,8 +313,6 @@
 </button>
 
       </form>
-
-      <!-- COMPLETE -->
       <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="completed">
@@ -315,7 +326,6 @@
 
 
       </form>
-<!-- REPORT NO SHOW -->
 <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
   {% csrf_token %}
   <input type="hidden" name="action" value="report_no_show">
@@ -331,14 +341,12 @@
 </form>
 
     </div>
-
-    <!-- TIMELINE -->
     <div class="timeline">
       <h3>Timeline</h3>
       {% for item in timeline %}
         <div class="timeline-item">
           <b>{{ item.status }}</b>
-          <small>{{ item.created_at|date:"F d, Y · h:i A" }}</small>
+          <small>{{ item.created_at|date:"F d, Y - h:i A" }}</small>
           {% if item.note %}<small>{{ item.note }}</small>{% endif %}
         </div>
       {% empty %}

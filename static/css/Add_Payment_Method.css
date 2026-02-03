@@ -49,7 +49,7 @@ input[type="text"]:focus{outline:none;border-color:var(--primary);box-shadow:0 0
 }
 .input-wrap.icon-user::before{background-image:url("../images/person0.png")}
 .input-wrap.icon-card::before{background-image:url("../images/magnetic-card0.png")}
-.input-wrap.icon-calendar::before{background-image:url("../images/calendar0.png")}
+.input-wrap.icon-calendar::before{background-image:var(--calendar-icon-url)}
 .input-wrap.icon-lock::before{background-image:url("../images/lock0.png")}
 
 /* Pills */

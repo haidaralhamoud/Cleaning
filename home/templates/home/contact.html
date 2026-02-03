@@ -90,13 +90,13 @@
 
     <div class="agreement">
       <label>
-        <input type="checkbox" />
+        <input type="checkbox" id="agree_terms" />
         I agree to the Processing of my data in accordance with the
         <a href="#">privacy policy</a>
       </label>
     </div>
 
-<button class="send-btn" type="button" onclick="validateAndSubmit()">Send Message</button>
+<button class="send-btn" id="sendMessageBtn" type="button" onclick="validateAndSubmit()" disabled>Send Message</button>
   </form>
 </div>
 
@@ -104,9 +104,9 @@
         <!-- Right: Contact Info -->
         <div class="contact-info">
           <h2>Our Contact Information</h2>
-          <p>ًں“چ 123 Clean Street, AnyTown</p>
-          <p>ًں“‍ (555) 123-4567</p>
-          <p>'' Support@Hembla experten.com</p>
+          <p>&#128205; 123 Clean Street, AnyTown</p>
+          <p>&#128222; (555) 123-4567</p>
+          <p>&#128231; Support@Hembla experten.com</p>
         </div>
       </div>
     </div>
@@ -142,6 +142,12 @@ function closePopup() {
 
 <script>
 function validateAndSubmit() {
+    const agree = document.getElementById("agree_terms");
+    if (!agree || !agree.checked) {
+        alert("Please agree to the privacy policy.");
+        return;
+    }
+
     const requiredFields = [
         'id_first_name',
         'id_last_name',
@@ -169,6 +175,16 @@ function validateAndSubmit() {
 
     // ط¥ط°ط§ ظƒظ„ط´ظٹ طھظ…ط§ظ… ' ط£ط±ط³ظ„ ط§ظ„ظپظˆط±ظ…
     document.querySelector("form").submit();
+}
+
+const agreeBox = document.getElementById("agree_terms");
+const sendBtn = document.getElementById("sendMessageBtn");
+if (agreeBox && sendBtn) {
+  const toggleBtn = () => {
+    sendBtn.disabled = !agreeBox.checked;
+  };
+  agreeBox.addEventListener("change", toggleBtn);
+  toggleBtn();
 }
 </script>
 

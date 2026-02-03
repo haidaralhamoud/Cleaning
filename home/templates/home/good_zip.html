@@ -118,7 +118,7 @@
       <div class="step">Step 1 of 4</div>
 
       <div class="notice">
-        ًںژ‰ Boom! Your area is covered. Please proceed with your booking.
+        &#127881; Boom! Your area is covered. Please proceed with your booking.
       </div>
 
       <section class="booking-method">
@@ -128,7 +128,7 @@
         <div class="methods-grid">
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/icon-calendar.svg' %}" alt="Calendar icon"></div>
+            <div class="icon-circle"><img src="{% static 'images/calendar-unified.svg' %}" alt="Calendar icon"></div>
             <h4>Book Online Now</h4>
             <p>Choose your service, pick a date...</p>
 <a href="{% url 'home:private_booking_start' service.slug %}" class="btn">
@@ -187,7 +187,7 @@
         <label>Preferred Time</label>
         <div class="input-with-icon">
           <input type="datetime-local" name="preferred_time" required>
-          <img src="{% static 'images/icon-calendar-line.svg' %}" class="calendar-icon" alt="Calendar">
+          <img src="{% static 'images/calendar-unified.svg' %}" class="calendar-icon" alt="Calendar">
         </div>
 
         <label>Message (Optional)</label>
