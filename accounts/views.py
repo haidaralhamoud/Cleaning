@@ -150,8 +150,8 @@ def sign_up(request):
                     referral.referred_user = user
                     referral.save()
 
-                    user.has_referral_discount = True
-                    user.save()
+                    customer.has_referral_discount = True
+                    customer.save(update_fields=["has_referral_discount"])
 
             login_url = reverse("login")
             query = urlencode({"email": email})
@@ -1717,6 +1717,7 @@ from accounts.models import (
     Referral,
     LoyaltyTier,
 )
+from accounts.utils import generate_referral_code
 from home.models import PrivateBooking, BusinessBooking
 
 
@@ -1798,6 +1799,20 @@ def Loyalty_and_Rewards(request):
     refer_percent = int((refer_done / refer_target) * 100)
 
     # ==================================================
+    # REFERRAL LINK
+    # ==================================================
+    referral = Referral.objects.filter(referrer=request.user).first()
+    if not referral:
+        code = generate_referral_code()
+        while Referral.objects.filter(code=code).exists():
+            code = generate_referral_code()
+        referral = Referral.objects.create(referrer=request.user, code=code)
+
+    referral_link = request.build_absolute_uri(
+        f"{reverse('accounts:sign_up')}?ref={referral.code}"
+    )
+
+    # ==================================================
     # REWARDS (STATIC FOR NOW)
     # ==================================================
 
@@ -1848,6 +1863,8 @@ def Loyalty_and_Rewards(request):
             "rewards": rewards,  # ✅ هون
 
             "promotion": promotion,
+            "referral_code": referral.code,
+            "referral_link": referral_link,
         }
     )
 

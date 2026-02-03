@@ -222,6 +222,13 @@ class ZipCheckForm(forms.Form):
         })
     )
 
+    def clean_zip(self):
+        value = self.cleaned_data.get("zip", "")
+        digits = "".join(ch for ch in str(value) if ch.isdigit())
+        if len(digits) != 5:
+            raise forms.ValidationError("Enter a 5-digit zip code.")
+        return digits
+
 class NotAvailableZipForm(forms.ModelForm):
 
     class Meta:

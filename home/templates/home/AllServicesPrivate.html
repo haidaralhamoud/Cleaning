@@ -23,9 +23,10 @@
         <p class="section-subtitle">Search by name, description, or focus on recommended services.</p>
       </div>
       <div class="header-actions">
-        <a href="{% url 'home:private_cart' %}" class="cart-box" aria-label="View cart">
-          <span class="cart-icon">Cart</span>
-          <span id="cart-count">0</span>
+        <a href="{% url 'home:private_cart' %}" class="cart-link cart-box" aria-label="View cart">
+          <span class="cart-icon" aria-hidden="true"></span>
+          <span>Cart</span>
+          <span class="cart-count" id="cart-count">0</span>
         </a>
       </div>
     </div>

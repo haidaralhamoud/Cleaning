@@ -99,6 +99,11 @@
   backdrop-filter: blur(6px);
 }
 
+/* Hide mobile header title on customer pages */
+.mobile-header .mobile-title {
+  display: none;
+}
+
 .menu-toggle.customer-menu-toggle .arrow {
   position: relative;
   display: inline-block;
@@ -394,5 +399,88 @@
 @media (max-width: 991px) {
   .menu-toggle.customer-menu-toggle {
     display: inline-flex !important;
+  }
+}
+
+/* Common mobile layout safety for customer pages */
+@media (max-width: 991px) {
+  .main {
+    padding-top: 56px !important;
+  }
+
+  .page-title,
+  h1.page-title,
+  .section-title {
+    text-align: center !important;
+  }
+
+  .card,
+  .section,
+  .panel,
+  .table-wrapper,
+  .table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  img,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Mobile hard override to avoid per-page conflicts */
+@media (max-width: 991px) {
+  .sidebar.customer-sidebar {
+    position: fixed !important;
+    top: 70px !important;
+    left: 0 !important;
+    width: min(82vw, 320px) !important;
+    height: calc(100vh - 70px) !important;
+    margin: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+    z-index: 2000 !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar.customer-sidebar.open,
+  .sidebar.customer-sidebar.active {
+    transform: translateX(0) !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar.customer-sidebar .sidebar-inner {
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 24px;
+  }
+
+  .customer-sidebar .profile-head {
+    padding: 18px 14px 10px;
+  }
+
+  .customer-sidebar .nav-item {
+    padding: 9px 12px;
+  }
+
+  .customer-sidebar .nav-ico {
+    width: 30px;
+    height: 30px;
+  }
+
+  .customer-sidebar .nav-ico img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .customer-menu-overlay {
+    background: rgba(8, 24, 32, 0.5);
+    backdrop-filter: blur(4px);
   }
 }
