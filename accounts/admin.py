@@ -12,6 +12,7 @@ from .models import (
     Service,
     BookingChecklist,
     DiscountCode,
+    UserAccessProfile,
 )
 
 # =========================
@@ -112,3 +113,10 @@ class ProviderRatingSummaryAdmin(admin.ModelAdmin):
     ordering = ("-avg_rating",)
     readonly_fields = ("updated_at",)
     search_fields = ("provider__username", "provider__email")
+
+
+@admin.register(UserAccessProfile)
+class UserAccessProfileAdmin(admin.ModelAdmin):
+    list_display = ("user", "site", "role", "created_at")
+    list_filter = ("site", "role")
+    search_fields = ("user__username", "user__email")

@@ -1061,3 +1061,42 @@ class ProviderAdminMessage(models.Model):
 
     def __str__(self):
         return f"{self.title} -> {self.provider}"
+
+
+class UserAccessProfile(models.Model):
+    SITE_CHOICES = [
+        ("main", "Main"),
+        ("electrical", "Electrical"),
+    ]
+    ROLE_CHOICES = [
+        ("global_super", "Global Super"),
+        ("electrical_super", "Electrical Super"),
+        ("electrical_admin", "Electrical Admin"),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="access_profile",
+    )
+    site = models.CharField(max_length=20, choices=SITE_CHOICES, default="main")
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} | {self.site} | {self.role or 'no-role'}"
+
+
+from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+@receiver(post_save, sender=get_user_model())
+def create_access_profile(sender, instance, created, **kwargs):
+    if created:
+        profile, _ = UserAccessProfile.objects.get_or_create(user=instance)
+        if instance.is_superuser and profile.role != "global_super":
+            profile.role = "global_super"
+            profile.site = "main"
+            profile.save()

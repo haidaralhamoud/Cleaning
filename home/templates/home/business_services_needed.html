@@ -51,7 +51,7 @@
         <span class="back-icon">&larr;</span>
         Back
       </a>
-      <form method="POST" id="servicesForm">
+      <form method="POST" id="servicesForm" data-skip-validate>
         {% csrf_token %}
         <input type="hidden" name="selected_services" id="selectedServicesInput">
         <button type="submit" class="next-btn">

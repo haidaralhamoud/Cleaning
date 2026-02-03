@@ -70,6 +70,79 @@ body{
 .dash-title{font-size:22px;font-weight:800}
 .dash-actions{display:flex;align-items:center;gap:12px}
 
+/* ===== Password Modal ===== */
+.dash-modal{
+  position:fixed; inset:0; display:grid; place-items:center;
+  opacity:0; pointer-events:none; z-index:999;
+  transition:opacity .2s ease;
+}
+.dash-modal.open{opacity:1; pointer-events:auto}
+.dash-modal__backdrop{
+  position:absolute; inset:0; background:rgba(15,23,42,.45);
+  backdrop-filter:blur(4px);
+}
+.dash-modal__panel{
+  position:relative;
+  background:linear-gradient(180deg, #ffffff, #f7fbff);
+  width:min(440px, 92%);
+  border-radius:18px;
+  padding:22px 20px 18px;
+  box-shadow:0 24px 60px rgba(15,23,42,.22);
+  border:1px solid #e6eef6;
+}
+.dash-modal__close{
+  position:absolute; right:12px; top:10px; border:none; background:#eef2f7;
+  width:30px; height:30px; border-radius:50%; cursor:pointer;
+}
+.dash-modal__panel h3{
+  font-weight:800;
+  font-size:20px;
+  margin-bottom:12px;
+  color:#0b6b88;
+}
+.dash-modal__label{
+  display:block;
+  font-weight:700;
+  margin:12px 0 6px;
+  color:#1f2937;
+}
+.dash-modal__input{
+  width:100%;
+  border:1px solid #d7e3ee;
+  border-radius:12px;
+  padding:11px 12px;
+  font-size:14px;
+  background:#f9fcff;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+.dash-modal__input:focus{
+  outline:none;
+  border-color:#71c3d6;
+  box-shadow:0 0 0 3px rgba(14,165,164,.15);
+}
+.dash-modal__submit{
+  margin-top:16px;
+  width:100%;
+  border:none;
+  border-radius:12px;
+  padding:12px 14px;
+  background:linear-gradient(135deg, #0ea5a4, #0891b2);
+  color:#fff;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 10px 20px rgba(14,165,164,.25);
+}
+.dash-modal__messages{margin-bottom:10px}
+.dash-modal__message{
+  padding:10px 12px;
+  border-radius:12px;
+  margin-bottom:6px;
+  font-weight:700;
+  border-left:4px solid transparent;
+}
+.dash-modal__message.success{background:#ecfdf3;color:#11643a;border:1px solid #b7f0cf}
+.dash-modal__message.error{background:#fff1f1;color:#9b1c1c;border:1px solid #ffd0d0}
+
 /* ===== Notifications ===== */
 .dash-bell{position:relative}
 .dash-bell-btn{

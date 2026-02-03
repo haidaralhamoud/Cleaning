@@ -117,12 +117,19 @@ label span{color:red}
 input,
 textarea,
 select{
-  border:1px solid var(--border);
+  border:2px solid #7cc6e6;
   border-radius:10px;
   padding:15px;
   font-size:16px;
   color:rgba(137,137,137,0.85);
   background:#fff;
+}
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:#039fc8;
+  box-shadow:0 0 0 4px rgba(3,159,200,0.15);
+  outline:none;
 }
 textarea{resize:none; height:150px}
 
@@ -137,6 +144,11 @@ textarea{resize:none; height:150px}
 .agreement{
   margin:25px 0;
   font-size:16px;
+}
+.agreement input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  accent-color:#039fc8;
 }
 .agreement a{
   color:var(--teal);
@@ -156,6 +168,83 @@ textarea{resize:none; height:150px}
   transition:0.3s ease;
 }
 .send-btn:hover{background:var(--teal-dark)}
+.send-btn:disabled{
+  background:#c9d6df;
+  cursor:not-allowed;
+}
+
+input[type="file"]{
+  padding:10px;
+  font-size:14px;
+}
+input[type="file"]::file-selector-button{
+  border:none;
+  background:#039fc8;
+  color:#fff;
+  padding:8px 14px;
+  border-radius:8px;
+  margin-right:10px;
+  font-weight:700;
+  cursor:pointer;
+}
+input[type="file"]::file-selector-button:hover{
+  background:#0283a9;
+}
+
+.custom-select select{
+  display:none;
+}
+.custom-select{
+  position:relative;
+  width:100%;
+}
+.custom-select-toggle{
+  width:100%;
+  padding:15px;
+  border-radius:10px;
+  border:2px solid #7cc6e6;
+  background:#fff;
+  text-align:left;
+  font-size:16px;
+  color:rgba(137,137,137,0.85);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  cursor:pointer;
+}
+.custom-select.open .custom-select-toggle{
+  border-color:#039fc8;
+  box-shadow:0 0 0 4px rgba(3,159,200,0.15);
+}
+.custom-select-menu{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  right:0;
+  background:#fff;
+  border:1px solid #dbe7ef;
+  border-radius:10px;
+  box-shadow:0 12px 24px rgba(15,23,42,0.12);
+  padding:8px;
+  display:none;
+  z-index:10;
+}
+.custom-select.open .custom-select-menu{
+  display:block;
+}
+.custom-select-option{
+  width:100%;
+  text-align:left;
+  border:none;
+  background:#fff;
+  padding:10px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:15px;
+}
+.custom-select-option:hover{
+  background:#eef7fb;
+}
 
 /* ===== File upload helper ===== */
 .file-upload{

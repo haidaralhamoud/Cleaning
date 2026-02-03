@@ -67,6 +67,7 @@
             </div>
           </div>
           <a class="btn btn-light" href="{% url 'home:home' %}">Home</a>
+          <button class="btn btn-outline-secondary" id="dashChangePasswordBtn" type="button">Change Password</button>
           <a class="btn btn-outline-primary" href="{% url 'admin:index' %}">Django Admin</a>
         </div>
       </header>
@@ -83,8 +84,8 @@
       notifBtn.addEventListener("click", (e) => {
         e.stopPropagation();
         const open = notifMenu.classList.toggle("open");
-        notifBtn.setAttribute("aria-expanded", open  "true" : "false");
-        notifMenu.setAttribute("aria-hidden", open  "false" : "true");
+        notifBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        notifMenu.setAttribute("aria-hidden", open ? "false" : "true");
       });
       document.addEventListener("click", () => {
         notifMenu.classList.remove("open");
@@ -118,10 +119,10 @@
         const noShowEl = document.getElementById("dashNotifNoShow");
         const customersEl = document.getElementById("dashNotifCustomers");
         const incidentsEl = document.getElementById("dashNotifIncidents");
-        if (newEl) newEl.textContent = data.new_bookings  0;
-        if (noShowEl) noShowEl.textContent = data.pending_no_show  0;
-        if (customersEl) customersEl.textContent = data.new_customers  0;
-        if (incidentsEl) incidentsEl.textContent = data.new_incidents  0;
+        if (newEl) newEl.textContent = data.new_bookings || 0;
+        if (noShowEl) noShowEl.textContent = data.pending_no_show || 0;
+        if (customersEl) customersEl.textContent = data.new_customers || 0;
+        if (incidentsEl) incidentsEl.textContent = data.new_incidents || 0;
 
         const list = document.getElementById("dashNotifList");
         if (list) {
@@ -152,6 +153,62 @@
 
     refreshDashboardNotifications();
     setInterval(refreshDashboardNotifications, 15000);
+  </script>
+
+  <div class="dash-modal" id="dashPasswordModal" aria-hidden="true">
+    <div class="dash-modal__backdrop" data-dash-modal-close></div>
+    <div class="dash-modal__panel" role="dialog" aria-modal="true" aria-labelledby="dashPasswordTitle">
+      <button class="dash-modal__close" type="button" data-dash-modal-close>&times;</button>
+      <h3 id="dashPasswordTitle">Change Password</h3>
+
+      {% if messages %}
+        <div class="dash-modal__messages" data-open-on-load="true">
+          {% for message in messages %}
+            <div class="dash-modal__message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'home:dashboard_change_password' %}">
+        {% csrf_token %}
+        <label class="dash-modal__label">Current password</label>
+        <input class="dash-modal__input" type="password" name="old_password" required>
+
+        <label class="dash-modal__label">New password</label>
+        <input class="dash-modal__input" type="password" name="new_password1" required>
+
+        <label class="dash-modal__label">Confirm new password</label>
+        <input class="dash-modal__input" type="password" name="new_password2" required>
+
+        <button class="dash-modal__submit" type="submit">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const pwdBtn = document.getElementById("dashChangePasswordBtn");
+    const pwdModal = document.getElementById("dashPasswordModal");
+    const pwdCloses = pwdModal ? pwdModal.querySelectorAll("[data-dash-modal-close]") : [];
+
+    const openPwdModal = () => {
+      if (!pwdModal) return;
+      pwdModal.classList.add("open");
+      pwdModal.setAttribute("aria-hidden", "false");
+    };
+    const closePwdModal = () => {
+      if (!pwdModal) return;
+      pwdModal.classList.remove("open");
+      pwdModal.setAttribute("aria-hidden", "true");
+    };
+
+    if (pwdBtn) pwdBtn.addEventListener("click", openPwdModal);
+    pwdCloses.forEach((btn) => btn.addEventListener("click", closePwdModal));
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closePwdModal();
+    });
+
+    const msgWrap = pwdModal ? pwdModal.querySelector("[data-open-on-load]") : null;
+    if (msgWrap) openPwdModal();
   </script>
 </body>
 </html>

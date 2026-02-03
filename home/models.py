@@ -43,6 +43,7 @@ class BaseBooking(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     scheduled_at = models.DateTimeField(null=True, blank=True)
+    is_urgent = models.BooleanField(default=False)
 
     provider_on_way_at = models.DateTimeField(null=True, blank=True)
     started_at = models.DateTimeField(null=True, blank=True)
@@ -159,7 +160,7 @@ class BaseBooking(models.Model):
         )
 
     def mark_on_the_way(self, user=None):
-        if self.status != "ASSIGNED":
+        if self.status not in ["ORDERED", "ASSIGNED"]:
             return
 
         self.status = "ON_THE_WAY"

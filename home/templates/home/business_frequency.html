@@ -37,12 +37,12 @@
 
       <div class="options">
         <button type="button" class="freq-card" data-type="daily">
-          <img src="{% static 'images/calendar0.png' %}" alt="Daily">
+          <img src="{% static 'images/calendar-unified.svg' %}" alt="Daily">
           <span>Daily</span>
         </button>
 
         <button type="button" class="freq-card" data-type="times">
-          <img src="{% static 'images/calendar2.png' %}" alt="Times per week">
+          <img src="{% static 'images/calendar-unified.svg' %}" alt="Times per week">
           <div class="card-content">
             <select class="times-select" id="timesSelect" aria-label="Times per week">
               <option>1</option>
@@ -56,26 +56,27 @@
         </button>
 
         <button type="button" class="freq-card" data-type="weekly">
-          <img src="{% static 'images/calendar3.png' %}" alt="Weekly">
+          <img src="{% static 'images/calendar-unified.svg' %}" alt="Weekly">
           <span>Weekly</span>
         </button>
 
         <button type="button" class="freq-card" data-type="monthly">
-          <img src="{% static 'images/calendar4.png' %}" alt="Monthly">
+          <img src="{% static 'images/calendar-unified.svg' %}" alt="Monthly">
           <span>Monthly</span>
         </button>
 
         <button type="button" class="freq-card" data-type="ondemand">
-          <img src="{% static 'images/calendar5.png' %}" alt="On-demand">
+          <img src="{% static 'images/calendar-unified.svg' %}" alt="On-demand">
           <span>On-demand</span>
         </button>
 
         <button type="button" class="freq-card" data-type="yearly">
-          <img src="{% static 'images/calendar6.png' %}" alt="Yearly">
+          <img src="{% static 'images/calendar-unified.svg' %}" alt="Yearly">
           <span>Yearly</span>
         </button>
       </div>
 
+      <div class="form-error" id="frequencyError">Please select a frequency option.</div>
       <div class="buttons form-actions">
         <a onclick="window.history.back();" class="back-btn">
           <span class="back-icon">&larr;</span>
@@ -100,6 +101,7 @@
     const cards = document.querySelectorAll('.freq-card');
     let selected = null;
 
+    const frequencyError = document.getElementById("frequencyError");
     cards.forEach(card => {
       card.addEventListener('click', () => {
         cards.forEach(c => c.classList.remove('selected'));
@@ -115,6 +117,7 @@
         }
 
         document.getElementById("frequencyInput").value = JSON.stringify(selected);
+        frequencyError.classList.remove("is-visible");
       });
     });
 
@@ -123,14 +126,16 @@
       if (card.classList.contains("selected")) {
         selected = { type: "times_per_week", value: document.getElementById("timesSelect").value };
         document.getElementById("frequencyInput").value = JSON.stringify(selected);
+        frequencyError.classList.remove("is-visible");
       }
     });
   </script>
   <script>
-    document.querySelector("form").addEventListener("submit", (e) => {
+    const frequencyForm = document.querySelector("form");
+    frequencyForm.addEventListener("submit", (e) => {
       if (!document.getElementById("frequencyInput").value) {
         e.preventDefault();
-        alert("Please select a frequency option.");
+        frequencyError.classList.add("is-visible");
       }
     });
   </script>

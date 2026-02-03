@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -24,7 +24,7 @@
       </div>
       <div class="header-actions">
         <a href="{% url 'home:private_cart' %}" class="cart-box" aria-label="View cart">
-          <span class="cart-icon">ًں›'</span>
+          <span class="cart-icon">Cart</span>
           <span id="cart-count">0</span>
         </a>
       </div>
@@ -78,14 +78,14 @@
 
         <div class="service-actions">
           <button class="btn-cart" onclick="addToCart('{{ service.slug }}')">Add to Cart</button>
-          <a href="{% url 'home:private_zip_step1' service.slug %}" class="btn-book">Book Now</a>
+          <a href="{% url 'home:private_zip_step1' service.slug %}{% if request.session.urgent_booking %}?urgent=1{% endif %}" class="btn-book">Book Now</a>
         </div>
 
       </div>
       {% endfor %}
 
     </div>
-</main> 
+</main>
 
 <script>
 function addToCart(slug) {
@@ -119,7 +119,7 @@ const cards = Array.from(document.querySelectorAll(".service-card"));
 function applyFilters() {
     const query = (searchInput.value || "").trim().toLowerCase();
     const activePill = document.querySelector(".filter-pill.active");
-    const activeFilter = activePill  activePill.dataset.filter : "all";
+    const activeFilter = activePill ? activePill.dataset.filter : "all";
 
     let visibleCount = 0;
 
@@ -132,12 +132,12 @@ function applyFilters() {
         const matchesRecommended = activeFilter !== "recommended" || isRecommended;
 
         const shouldShow = matchesQuery && matchesRecommended;
-        card.style.display = shouldShow  "" : "none";
+        card.style.display = shouldShow ? "" : "none";
         if (shouldShow) visibleCount += 1;
     });
 
     if (resultsCount) {
-        resultsCount.textContent = `${visibleCount} service${visibleCount === 1  "" : "s"}`;
+        resultsCount.textContent = `${visibleCount} service${visibleCount === 1 ? "" : "s"}`;
     }
 }
 
@@ -160,6 +160,3 @@ document.addEventListener("DOMContentLoaded", applyFilters);
 </script>
 </body>
 </html>
-
-
-

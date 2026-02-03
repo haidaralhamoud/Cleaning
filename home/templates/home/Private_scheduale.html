@@ -9,44 +9,37 @@
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 <link rel="stylesheet" href="{% static 'css/Private_scheduale.css' %}">
-
 </head>
 <body>
 {% include "home/includes/main_header.html" %}
 
-<form method="post" id="scheduleForm" action="{% url 'home:private_booking_schedule' booking.id %}">
+<form method="post" id="scheduleForm" data-skip-validate action="{% url 'home:private_booking_schedule' booking.id %}">
   {% csrf_token %}
 
-  <!-- hidden fields لمود same -->
   <input type="hidden" name="appointment_date" id="appointment_date">
   <input type="hidden" name="appointment_time_window" id="appointment_time_window">
   <input type="hidden" name="day_work_best" id="day_work_best">
   <input type="hidden" name="End_Date" id="End_Date">
   <input type="hidden" name="frequency_type" id="frequency_type">
   <input type="hidden" name="special_timing_requests" id="special_timing_requests">
-
-  <!-- نوع الجدولة -->
   <input type="hidden" name="schedule_mode" id="schedule_mode" value="">
-  <!-- JSON لكل خدمة في حال per_service -->
   <input type="hidden" name="schedules_json" id="schedules_json">
 
   <div class="container">
-    <!-- LEFT SECTION -->
     <div class="left">
       <div class="step-title">Step 3 of 4</div>
       <div class="progress"></div>
 
       <h2>When would you like your services</h2>
 
-      <!-- اختيار نوع الـ schedule -->
       {% if services|length > 1 %}
         <p class="mode-caption">How would you like to schedule your services</p>
 
         <div class="mode-row">
             <div class="mode-card" data-mode="same">
               <div class="mode-title">Use the same schedule for all services</div>
-              <small>We'll apply this date, time window and frequency to every service in your cart.</small>
-              <span class="badge">Fast &amp; easy</span>
+              <small>We will apply this date, time window and frequency to every service in your cart.</small>
+              <span class="badge">Fast and easy</span>
             </div>
             <div class="mode-card" data-mode="per_service">
               <div class="mode-title">Set a separate schedule for each service</div>
@@ -55,17 +48,13 @@
             </div>
         </div>
       {% else %}
-        <!-- خدمة واحدة → نفس الجدولة تلقائياً -->
         <input type="hidden" id="schedule_mode" name="schedule_mode" value="same">
       {% endif %}
 
-      <!-- 🟦 نفس الـ Schedule لكل الخدمات -->
       <div id="sameScheduleArea" class="hidden">
-
         <p class="section-caption">Schedule for all services:</p>
 
         <div class="q-row">
-          <!-- Calendar -->
           <div class="q-col">
             <div class="calendar-container">
               <div class="calendar-header">
@@ -80,7 +69,6 @@
             </div>
           </div>
 
-          <!-- Time Window -->
           <div class="q-col">
             <div class="time-box">
               <h3>Q2. Choose a Time Window</h3>
@@ -92,70 +80,34 @@
           </div>
         </div>
 
-        <!-- Special Requests -->
         <div class="request-box">
           <h3>Q3. Special Timing Requests (optional)</h3>
-          <textarea id="specialRequest" placeholder="Tell us if there&apos;s anything we should know..."></textarea>
+          <textarea id="specialRequest" placeholder="Tell us if there is anything we should know..."></textarea>
         </div>
 
-        <!-- Frequency & Days -->
-        <h2>Schedule &amp; Frequency</h2>
+        <h2>Schedule and Frequency</h2>
         <div class="freq-row">
           <div class="freq-col">
             <h3>Q1. How often would you like this service</h3>
-  <div class="freq-btn" data-freq="weekly">
-      Weekly <span class="save-tag"></span>
-  </div>
-
-  <div class="freq-btn" data-freq="biweekly">
-      Every 2 weeks <span class="save-tag"></span>
-  </div>
-
-  <div class="freq-btn" data-freq="monthly">
-      Monthly <span class="save-tag"></span>
-  </div>
-
+            <div class="freq-btn" data-freq="weekly">Weekly <span class="save-tag"></span></div>
+            <div class="freq-btn" data-freq="biweekly">Every 2 weeks <span class="save-tag"></span></div>
+            <div class="freq-btn" data-freq="monthly">Monthly <span class="save-tag"></span></div>
           </div>
 
           <div class="freq-col">
-<h3>Q2. Which day(s) work best for you</h3>
-
-<div class="days-grid2" id="weekDays">
-
-    <label class="day-check weekend">
-        <input type="checkbox" data-day="Mon"/> Monday
-    </label>
-
-    <label class="day-check">
-        <input type="checkbox" data-day="Tue"/> Tuesday
-    </label>
-
-    <label class="day-check">
-        <input type="checkbox" data-day="Wed"/> Wednesday
-    </label>
-
-    <label class="day-check">
-        <input type="checkbox" data-day="Thu"/> Thursday
-    </label>
-
-    <label class="day-check weekend">
-        <input type="checkbox" data-day="Fri"/> Friday
-    </label>
-
-    <label class="day-check weekend">
-        <input type="checkbox" data-day="Sat"/> Saturday
-    </label>
-
-    <label class="day-check weekend">
-        <input type="checkbox" data-day="Sun"/> Sunday
-    </label>
-
-</div>
-
+            <h3>Q2. Which day(s) work best for you</h3>
+            <div class="days-grid2" id="weekDays">
+              <label class="day-check weekend"><input type="checkbox" data-day="Mon"/> Monday</label>
+              <label class="day-check"><input type="checkbox" data-day="Tue"/> Tuesday</label>
+              <label class="day-check"><input type="checkbox" data-day="Wed"/> Wednesday</label>
+              <label class="day-check"><input type="checkbox" data-day="Thu"/> Thursday</label>
+              <label class="day-check weekend"><input type="checkbox" data-day="Fri"/> Friday</label>
+              <label class="day-check weekend"><input type="checkbox" data-day="Sat"/> Saturday</label>
+              <label class="day-check weekend"><input type="checkbox" data-day="Sun"/> Sunday</label>
+            </div>
           </div>
         </div>
 
-        <!-- End Date -->
         <div class="end-date">
           <h3>Q3. End Date (optional)</h3>
           <div class="end-date-buttons">
@@ -166,7 +118,6 @@
         </div>
       </div>
 
-      <!-- 🟣 Schedule منفصل لكل خدمة -->
       <div id="perServiceArea" class="per-service-area hidden">
         <h3 class="section-subtitle">Set a dedicated schedule for each service</h3>
 
@@ -184,7 +135,7 @@
             </div>
             <button type="button" class="acc-toggle-btn">
               <span>Schedule</span>
-              <span class="acc-arrow">▾</span>
+              <span class="acc-arrow">v</span>
             </button>
           </div>
           <div class="acc-body">
@@ -197,7 +148,7 @@
                 <div class="svc-col">
                   <label class="svc-label">Time Window</label>
                   <select class="svc-select svc-time">
-                    <option value="">Select…</option>
+                    <option value="">Select</option>
                     <option value="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</option>
                     <option value="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</option>
                     <option value="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</option>
@@ -257,16 +208,13 @@
         {% endfor %}
       </div>
 
-      <!-- زر المتابعة في اليسار -->
       <div class="primary-action">
         <button type="submit" class="checkout-btn checkout-primary">
-          Continue →
+          Continue ->
         </button>
       </div>
-
     </div>
 
-    <!-- RIGHT SUMMARY (REAL DYNAMIC FROM API) -->
     <div class="right">
         <h3>Booking Summary</h3>
         <div class="line"></div>
@@ -299,42 +247,26 @@
         </div>
 
         <div class="checkout-wrapper">
-            <button type="submit" class="checkout-btn">Continue →</button>
+            <button type="submit" class="checkout-btn">Continue -></button>
         </div>
     </div>
-
   </div>
 </form>
-
-
 
 {{ date_rules|json_script:"dateRules" }}
 {{ schedule_rules|json_script:"scheduleRules" }}
 <script>
 let DATE_RULES = JSON.parse(document.getElementById("dateRules").textContent);
 if (typeof DATE_RULES === "string") {
-  try {
-    DATE_RULES = JSON.parse(DATE_RULES);
-  } catch (err) {
-    DATE_RULES = [];
-  }
+  try { DATE_RULES = JSON.parse(DATE_RULES); } catch (err) { DATE_RULES = []; }
 }
-if (!Array.isArray(DATE_RULES)) {
-  DATE_RULES = [];
-}
-</script>
-<script>
+if (!Array.isArray(DATE_RULES)) { DATE_RULES = []; }
+
 let SCHEDULE_RULES = JSON.parse(document.getElementById("scheduleRules").textContent);
 if (typeof SCHEDULE_RULES === "string") {
-  try {
-    SCHEDULE_RULES = JSON.parse(SCHEDULE_RULES);
-  } catch (err) {
-    SCHEDULE_RULES = [];
-  }
+  try { SCHEDULE_RULES = JSON.parse(SCHEDULE_RULES); } catch (err) { SCHEDULE_RULES = []; }
 }
-if (!Array.isArray(SCHEDULE_RULES)) {
-  SCHEDULE_RULES = [];
-}
+if (!Array.isArray(SCHEDULE_RULES)) { SCHEDULE_RULES = []; }
 
 const frequencyRuleMap = new Map();
 const dayRuleMap = new Map();
@@ -359,11 +291,7 @@ function updateFrequencyLabels() {
       return;
     }
     const absVal = Math.abs(amount);
-    if (amount < 0) {
-      tag.textContent = `(save up to ${absVal}%)`;
-    } else {
-      tag.textContent = `(+${absVal}%)`;
-    }
+    tag.textContent = amount < 0 ? `(save up to ${absVal}%)` : `(+${absVal}%)`;
   });
 }
 
@@ -385,14 +313,11 @@ function updateDayLabels() {
       wrapper.appendChild(tag);
     }
     const absVal = Math.abs(amount);
-    tag.textContent = amount < 0  `-${absVal}%` : `+${absVal}%`;
+    tag.textContent = amount < 0 ? `-${absVal}%` : `+${absVal}%`;
   });
 }
 
-</script>
-<script>
-/* ---------- Helpers ---------- */
-function pad(n){return n<10 "0"+n : n;}
+function pad(n){ return n < 10 ? "0" + n : n; }
 function toDateKey(dateObj){
   const y = dateObj.getFullYear();
   const m = pad(dateObj.getMonth() + 1);
@@ -400,7 +325,7 @@ function toDateKey(dateObj){
   return `${y}-${m}-${d}`;
 }
 function ruleAmount(rule){
-  const amount = Number(rule.amount  0);
+  const amount = Number(rule.amount || 0);
   if (Number.isNaN(amount)) return 0;
   return amount;
 }
@@ -434,7 +359,6 @@ function getRuleForDate(dateObj){
   return weekdayRules.get(weekday) || null;
 }
 
-/* ---------- Elements & State ---------- */
 const inputDate    = document.getElementById("appointment_date");
 const inputWindow  = document.getElementById("appointment_time_window");
 const inputFreq    = document.getElementById("frequency_type");
@@ -453,16 +377,12 @@ let currentYear  = new Date().getFullYear();
 const monthTitle   = document.getElementById("monthTitle");
 const calendarDays = document.getElementById("calendarDays");
 
-/* ---------- اختيار نوع الـ schedule ---------- */
 const modeCards = document.querySelectorAll(".mode-card");
-
-// خدمة واحدة → same mode تلقائي
 const serviceCount = {{ services|length|default:0 }};
 if (serviceCount === 1) {
-    inputMode.value = "per_service";  // ← هذا هو التعديل
-    inputMode.value = "same";
-    if (sameArea) sameArea.style.display = "block";
-    if (perServiceArea) perServiceArea.style.display = "none";
+  inputMode.value = "same";
+  if (sameArea) sameArea.style.display = "block";
+  if (perServiceArea) perServiceArea.style.display = "none";
 }
 
 modeCards.forEach(card => {
@@ -484,11 +404,9 @@ modeCards.forEach(card => {
   });
 });
 
-/* ---------- Schedule Rules (frequency + days) ---------- */
 updateFrequencyLabels();
 updateDayLabels();
 
-/* ---------- Calendar (same mode) مع الزيادات ---------- */
 function renderCalendar(month, year){
   if (!calendarDays || !monthTitle) return;
 
@@ -503,19 +421,15 @@ function renderCalendar(month, year){
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
-
     const cell = document.createElement("div");
     cell.className = "day";
     cell.textContent = d;
 
-    // ----------------------
-    // 1) اكتشاف اليوم S أو S (Saturday / Sunday)
-    // ----------------------
     const jsDate = new Date(year, month, d);
-    const weekday = jsDate.getDay(); // 0=Sun, 6=Sat
+    const weekday = jsDate.getDay();
 
     const rule = getRuleForDate(jsDate);
-    const surchargeLabel = rule  formatSurcharge(rule) : "";
+    const surchargeLabel = rule ? formatSurcharge(rule) : "";
     if (surchargeLabel) {
       const badge = document.createElement("div");
       badge.className = "day-surcharge";
@@ -524,30 +438,18 @@ function renderCalendar(month, year){
       cell.classList.add("weekend");
     }
 
-    // ----------------------
-    // 2) عند الضغط على اليوم
-    // ----------------------
-cell.addEventListener("click", () => {
-    // 1) إزالة select من كل الأيام
-    document.querySelectorAll(".day").forEach(el => 
-        el.classList.remove("selected")
-    );
+    cell.addEventListener("click", () => {
+      document.querySelectorAll(".day").forEach(el => el.classList.remove("selected"));
+      cell.classList.add("selected");
 
-    // 2) اختيار اليوم الجديد
-    cell.classList.add("selected");
+      const dateStr = `${year}-${pad(month+1)}-${pad(d)}`;
+      inputDate.value = dateStr;
 
-    // 3) تخزين التاريخ بالحقل المخفي
-    const dateStr = `${year}-${pad(month+1)}-${pad(d)}`;
-    inputDate.value = dateStr;
+      const weekdayCode = WEEKDAY_CODES[weekday];
+      document.getElementById("day_work_best").value = JSON.stringify([weekdayCode]);
 
-    // 4) تحديد اليوم (Sat / Sun / Mon ...)
-    const weekdayCode = WEEKDAY_CODES[weekday];
-    document.getElementById("day_work_best").value = JSON.stringify([weekdayCode]);
-
-    // 5) إعادة حساب السعر فوراً
-    updateScheduleSummary();
-});
-
+      updateScheduleSummary();
+    });
 
     calendarDays.appendChild(cell);
   }
@@ -570,7 +472,6 @@ if (prevMonthBtn && nextMonthBtn){
   };
 }
 
-/* ---------- Time Window (same mode) ---------- */
 document.querySelectorAll(".time-option").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.querySelectorAll(".time-option").forEach(b=>b.classList.remove("active"));
@@ -580,7 +481,6 @@ document.querySelectorAll(".time-option").forEach(btn=>{
   });
 });
 
-/* ---------- Frequency (same mode) ---------- */
 document.querySelectorAll(".freq-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.querySelectorAll(".freq-btn").forEach(b=>b.classList.remove("active"));
@@ -593,7 +493,6 @@ document.querySelectorAll(".freq-btn").forEach(btn=>{
   });
 });
 
-/* ---------- Weekday checkboxes (same mode) ---------- */
 document.querySelectorAll(".day-check input").forEach(chk=>{
   chk.addEventListener("change",()=>{
     const label = chk.closest(".day-check");
@@ -605,7 +504,6 @@ document.querySelectorAll(".day-check input").forEach(chk=>{
   });
 });
 
-/* ---------- End Date yes/no (same mode) ---------- */
 const yesBtn = document.getElementById("yesBtn");
 const noBtn  = document.getElementById("noBtn");
 const endDate= document.getElementById("endDate");
@@ -613,22 +511,21 @@ const endDate= document.getElementById("endDate");
 if (noBtn && yesBtn && endDate){
   noBtn.classList.add("active");
 
-  yesBtn.onclick = ()=>{ 
-    yesBtn.classList.add("active"); 
-    noBtn.classList.remove("active"); 
-    endDate.style.display="block"; 
+  yesBtn.onclick = ()=>{
+    yesBtn.classList.add("active");
+    noBtn.classList.remove("active");
+    endDate.style.display = "block";
     updateScheduleSummary();
   };
-  noBtn.onclick  = ()=>{ 
-    noBtn.classList.add("active");  
-    yesBtn.classList.remove("active"); 
-    endDate.style.display="none"; 
+  noBtn.onclick  = ()=>{
+    noBtn.classList.add("active");
+    yesBtn.classList.remove("active");
+    endDate.style.display = "none";
     endDate.value = "";
     updateScheduleSummary();
   };
 }
 
-/* ---------- Accordion لكل خدمة (per_service) ---------- */
 document.querySelectorAll(".service-acc").forEach(acc => {
   const header = acc.querySelector(".acc-header");
   const body   = acc.querySelector(".acc-body");
@@ -646,7 +543,6 @@ document.querySelectorAll(".service-acc").forEach(acc => {
     }
   });
 
-  // أي تغيير داخل الـ body → حدّث الملخص
   body.querySelectorAll("input, select, textarea").forEach(el => {
     el.addEventListener("change", () => {
       updateScheduleSummary();
@@ -654,19 +550,119 @@ document.querySelectorAll(".service-acc").forEach(acc => {
   });
 });
 
-/* ---------- قبل الإرسال – تخزين بيانات الجدولة ---------- */
-document.getElementById("scheduleForm").addEventListener("submit", function(e){
-  // لو في أكثر من خدمة لازم يختار مود
-  if ({{ services|length }} > 1 && !inputMode.value){
-      alert("Please choose how you'd like to schedule your services.");
-      e.preventDefault();
-      return;
+function updateScheduleSummary() {
+  const params = new URLSearchParams();
+  params.append("mode", inputMode.value || "");
+
+  if (inputMode.value === "same") {
+    params.append("date", inputDate.value || "");
+    params.append("time_window", inputWindow.value || "");
+    params.append("frequency", inputFreq.value || "");
+    params.append("weekday", document.getElementById("day_work_best").value);
+
+    const days = Array.from(document.querySelectorAll(".day-check input:checked"))
+                      .map(c => c.dataset.day);
+    params.append("days", JSON.stringify(days));
+  } else {
+    const schedules = {};
+    document.querySelectorAll(".service-acc").forEach(acc => {
+      const slug = acc.dataset.service;
+
+      const date = acc.querySelector(".svc-date").value || "";
+      const time = acc.querySelector(".svc-time").value || "";
+      const freq = acc.querySelector(".svc-frequency").value || "";
+      const notes = acc.querySelector(".svc-notes").value || "";
+      const endDate = acc.querySelector(".svc-end-date").value || "";
+
+      const days = Array.from(acc.querySelectorAll(".svc-day:checked"))
+                        .map(el => el.value);
+
+      schedules[slug] = {
+        date,
+        time_window: time,
+        frequency: freq,
+        days,
+        end_date: endDate,
+        special_request: notes
+      };
+    });
+
+    params.append("schedules_json", JSON.stringify(schedules));
   }
 
-  // Mode 1: نفس الجدولة لكل الخدمات
+  fetch(`/private/api/booking/{{ booking.id }}/price/?` + params.toString())
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("sum_services").textContent = "$" + Number(data.services_total).toFixed(2);
+      document.getElementById("sum_addons").textContent = "$" + Number(data.addons_total).toFixed(2);
+      document.getElementById("sum_schedule").textContent = "$" + Number(data.schedule_extra).toFixed(2);
+      document.getElementById("sum_rot").textContent = "$" + Number(data.rot).toFixed(2);
+      document.getElementById("sum_total").textContent = "$" + Number(data.final).toFixed(2);
+    })
+    .catch(err => console.error("SUMMARY ERROR:", err));
+}
+
+document.getElementById("scheduleForm").addEventListener("submit", function(e){
+  const notify = (msg) => {
+    if (window.showToast) {
+      window.showToast("Missing information", msg);
+    } else {
+      alert(msg);
+    }
+  };
+
+  const clearErrors = () => {
+    document.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
+    document.querySelectorAll(".field-error-pill").forEach(el => el.classList.remove("field-error-pill"));
+    document.querySelectorAll(".time-option.error").forEach(el => el.classList.remove("error"));
+  };
+
+  clearErrors();
+
+  if ({{ services|length }} > 1 && !inputMode.value){
+    e.preventDefault();
+    notify("Please choose how you would like to schedule your services.");
+    return;
+  }
+
   if (inputMode.value === "same"){
+    let valid = true;
+
+    if (!inputDate.value) {
+      valid = false;
+      document.querySelectorAll(".day").forEach(el => {
+        if (el.classList.contains("selected")) el.classList.remove("selected");
+      });
+      if (calendarDays) calendarDays.classList.add("field-error-pill");
+    }
+
+    if (!inputWindow.value) {
+      valid = false;
+      const timeBox = document.querySelector(".time-box");
+      if (timeBox) timeBox.classList.add("field-error-pill");
+    }
+
+    if (!inputFreq.value) {
+      valid = false;
+      const freqWrap = document.querySelector(".freq-row");
+      if (freqWrap) freqWrap.classList.add("field-error-pill");
+    }
+
+    const dayChecks = Array.from(document.querySelectorAll(".day-check input:checked"));
+    if (!dayChecks.length) {
+      valid = false;
+      const daysWrap = document.getElementById("weekDays");
+      if (daysWrap) daysWrap.classList.add("field-error-pill");
+    }
+
+    if (!valid) {
+      e.preventDefault();
+      notify("Please complete the scheduling details before continuing.");
+      return;
+    }
+
     const specialText = document.getElementById("specialRequest")
-       document.getElementById("specialRequest").value || ""
+      ? document.getElementById("specialRequest").value || ""
       : "";
 
     const days = Array.from(
@@ -675,9 +671,9 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
     document.getElementById("day_work_best").value = JSON.stringify(days);
 
-    const endVal = endDate  (endDate.value || null) : null;
+    const endVal = endDate ? (endDate.value || null) : null;
     const endType = (yesBtn && yesBtn.classList.contains("active") && endVal)
-       "end_on"
+      ? "end_on"
       : "no_end";
 
     const endInput = document.getElementById("End_Date");
@@ -691,9 +687,54 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
     };
 
     inputSpecial.value = JSON.stringify(payload);
-
   } else if (inputMode.value === "per_service") {
-    // Mode 2: جدول منفصل لكل خدمة
+    let valid = true;
+    let firstInvalid = null;
+
+    document.querySelectorAll(".service-acc").forEach(acc => {
+      const dateEl   = acc.querySelector(".svc-date");
+      const timeEl   = acc.querySelector(".svc-time");
+      const freqEl   = acc.querySelector(".svc-frequency");
+      const daysWrap = acc.querySelector(".svc-days");
+      const dayChecks= acc.querySelectorAll(".svc-day:checked");
+
+      if (!dateEl.value) {
+        valid = false;
+        dateEl.classList.add("field-error");
+        firstInvalid = firstInvalid || acc;
+      }
+
+      if (!timeEl.value) {
+        valid = false;
+        timeEl.classList.add("field-error");
+        firstInvalid = firstInvalid || acc;
+      }
+
+      if (!freqEl.value) {
+        valid = false;
+        freqEl.classList.add("field-error");
+        firstInvalid = firstInvalid || acc;
+      }
+
+      if (!dayChecks.length) {
+        valid = false;
+        if (daysWrap) daysWrap.classList.add("field-error-pill");
+        firstInvalid = firstInvalid || acc;
+      }
+    });
+
+    if (!valid) {
+      e.preventDefault();
+      if (firstInvalid) {
+        firstInvalid.classList.add("open");
+        const body = firstInvalid.querySelector(".acc-body");
+        if (body) body.style.maxHeight = body.scrollHeight + "px";
+        firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      notify("Please complete all schedule fields for each service.");
+      return;
+    }
+
     const schedules = {};
 
     document.querySelectorAll(".service-acc").forEach(acc => {
@@ -709,11 +750,11 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
       const days = Array.from(dayChecks).map(ch => ch.value);
 
-      const dateVal = dateEl  (dateEl.value || null) : null;
-      const timeVal = timeEl  (timeEl.value || "") : "";
-      const freqVal = freqEl  (freqEl.value || "") : "";
-      const notesVal= notesEl  (notesEl.value || "") : "";
-      const endVal  = endEl  (endEl.value || null) : null;
+      const dateVal = dateEl ? (dateEl.value || null) : null;
+      const timeVal = timeEl ? (timeEl.value || "") : "";
+      const freqVal = freqEl ? (freqEl.value || "") : "";
+      const notesVal= notesEl ? (notesEl.value || "") : "";
+      const endVal  = endEl ? (endEl.value || null) : null;
 
       schedules[slug] = {
         date: dateVal,
@@ -727,7 +768,6 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
     inputSchedulesJson.value = JSON.stringify(schedules);
 
-    // تفريغ حقول مود same
     inputDate.value = "";
     inputWindow.value = "";
     inputFreq.value = "";
@@ -737,221 +777,11 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
   }
 });
 
-/* ---------- Summary from REAL API (with small animation on Total) ---------- */
-let lastTotal = 0;
-
-function animateTotal(from, to, duration = 250) {
-    const el = document.getElementById("sum_total");
-    if (!el) return;
-    const start = performance.now();
-
-    function step(now){
-        const p = Math.min(1, (now - start) / duration);
-        const val = from + (to - from) * p;
-        el.textContent = "$" + val.toFixed(2);
-        if (p < 1) requestAnimationFrame(step);
-    }
-    requestAnimationFrame(step);
-}
-
-function updateScheduleSummary() {
-
-    const params = new URLSearchParams();
-
-    params.append("mode", inputMode.value || "");
-
-    if (inputMode.value === "same") {
-
-        // SAME MODE
-        params.append("date", inputDate.value || "");
-        params.append("time_window", inputWindow.value || "");
-        params.append("frequency", inputFreq.value || "");
-        params.append("weekday", document.getElementById("day_work_best").value);
-
-        const days = Array.from(document.querySelectorAll(".day-check input:checked"))
-                          .map(c => c.dataset.day);
-
-        params.append("days", JSON.stringify(days));
-
-    } else {
-
-        // PER SERVICE MODE
-        const schedules = {};
-
-        document.querySelectorAll(".service-acc").forEach(acc => {
-            const slug = acc.dataset.service;
-
-            const date = acc.querySelector(".svc-date").value || "";
-            const time = acc.querySelector(".svc-time").value || "";
-            const freq = acc.querySelector(".svc-frequency").value || "";
-            const notes = acc.querySelector(".svc-notes").value || "";
-            const endDate = acc.querySelector(".svc-end-date").value || "";
-
-            const days = Array.from(acc.querySelectorAll(".svc-day:checked"))
-                              .map(el => el.value);
-
-            schedules[slug] = {
-                date,
-                time_window: time,
-                frequency: freq,
-                days,
-                end_date: endDate,
-                special_request: notes
-            };
-        });
-
-        params.append("schedules_json", JSON.stringify(schedules));
-
-    }
-
-
-    fetch(`/private/api/booking/{{ booking.id }}/price/` + params.toString())
-        .then(res => res.json())
-        .then(data => {
-
-            document.getElementById("sum_services").textContent =
-                "$" + Number(data.services_total).toFixed(2);
-
-            document.getElementById("sum_addons").textContent =
-                "$" + Number(data.addons_total).toFixed(2);
-
-            document.getElementById("sum_schedule").textContent =
-                "$" + Number(data.schedule_extra).toFixed(2);
-
-            document.getElementById("sum_rot").textContent =
-                "$" + Number(data.rot).toFixed(2);
-
-            animateTotal(lastTotal, Number(data.final));
-
-            lastTotal = Number(data.final);
-        })
-        .catch(err => console.error("SUMMARY ERROR:", err));
-}
-
-// أول تحميل للصفحة
 document.addEventListener("DOMContentLoaded", () => {
-    updateScheduleSummary();
+  updateScheduleSummary();
 });
 </script>
 
-
-<script>
-function validateScheduleForm() {
-
-    // -------- 1) اختيار المود --------
-    if ({{ services|length }} > 1 && !inputMode.value) {
-        alert("Please choose how you'd like to schedule your services.");
-        return false;
-    }
-
-    // تنظيف أخطاء سابقة
-    document.querySelectorAll(".input-error").forEach(el =>
-        el.classList.remove("input-error")
-    );
-
-    // -------- 2) SAME MODE --------
-    if (inputMode.value === "same") {
-
-        if (!inputDate.value) {
-            alert("Please select a date.");
-            document.getElementById("calendarDays").scrollIntoView({behavior:"smooth"});
-            return false;
-        }
-
-        if (!inputWindow.value) {
-            alert("Please choose a time window.");
-            document.querySelector(".time-box").scrollIntoView({behavior:"smooth"});
-            return false;
-        }
-
-        if (!inputFreq.value) {
-            alert("Please select a frequency.");
-            document.querySelector(".freq-row").scrollIntoView({behavior:"smooth"});
-            return false;
-        }
-
-        const days = document.querySelectorAll(".day-check input:checked");
-        if (days.length === 0) {
-            alert("Please select at least one preferred day.");
-            document.getElementById("weekDays").scrollIntoView({behavior:"smooth"});
-            return false;
-        }
-
-        return true;
-    }
-
-    // -------- 3) PER SERVICE MODE --------
-    if (inputMode.value === "per_service") {
-
-        let valid = true;
-        let firstErrorAcc = null;
-
-        document.querySelectorAll(".service-acc").forEach(acc => {
-
-            const date = acc.querySelector(".svc-date");
-            const time = acc.querySelector(".svc-time");
-            const freq = acc.querySelector(".svc-frequency");
-            const days = acc.querySelectorAll(".svc-day:checked");
-
-            let localError = false;
-
-            if (!date.value) {
-                date.classList.add("input-error");
-                localError = true;
-            }
-
-            if (!time.value) {
-                time.classList.add("input-error");
-                localError = true;
-            }
-
-            if (!freq.value) {
-                freq.classList.add("input-error");
-                localError = true;
-            }
-
-            if (days.length === 0) {
-                acc.querySelector(".svc-days").classList.add("input-error");
-                localError = true;
-            }
-
-            if (localError) {
-                valid = false;
-
-                // افتح accordion
-                if (!acc.classList.contains("open")) {
-                    acc.classList.add("open");
-                    acc.querySelector(".acc-body").style.maxHeight =
-                        acc.querySelector(".acc-body").scrollHeight + "px";
-                }
-
-                if (!firstErrorAcc) firstErrorAcc = acc;
-            }
-        });
-
-        if (!valid) {
-            alert("Please complete schedule details for all services.");
-            firstErrorAcc.scrollIntoView({behavior:"smooth", block:"center"});
-            return false;
-        }
-
-        return true;
-    }
-
-    return true;
-}
-</script>
-<script>
-document.getElementById("scheduleForm").addEventListener("submit", function(e){
-
-    if (!validateScheduleForm()) {
-        e.preventDefault();
-        return;
-    }
-
-    // ⬇️ خليه يكمل كود التخزين تبعك طبيعي
-});
-</script>
 <script src="{% static 'js/main_header.js' %}"></script>
 {% include "home/includes/footer.html" %}
 </body>

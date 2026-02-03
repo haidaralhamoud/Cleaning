@@ -104,12 +104,14 @@ class BusinessBookingAdmin(admin.ModelAdmin):
         "email",
         "phone",
         "status",
+        "is_urgent",
         "total_price",
         "refund_amount",
         "is_refunded",
         "path_type",
         "created_at",
     )
+    list_filter = ("status", "is_urgent")
     inlines = [BookingChecklistInline]  
     search_fields = ("company_name", "email", "phone")
     ordering = ("-created_at",)
@@ -239,7 +241,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
 
         ("System", {
-            "fields": ("status", "created_at"),
+            "fields": ("status", "is_urgent", "created_at"),
         }),
 
 
@@ -629,13 +631,14 @@ class PrivateBookingAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "status",
+        "is_urgent",
         "total_price",
         "refund_amount",
         "is_refunded",
         "created_at",
     )
     inlines = [BookingChecklistInline]
-    list_filter = ("booking_method", "zip_is_available", "schedule_mode")
+    list_filter = ("booking_method", "zip_is_available", "schedule_mode", "is_urgent")
     search_fields = ("id", "zip_code")
     ordering = ("-created_at",)
 
@@ -764,7 +767,7 @@ class PrivateBookingAdmin(admin.ModelAdmin):
             "classes": ("collapse",),
         }),
 
-        ("System Fields", {"fields": ("status", "created_at")}),
+        ("System Fields", {"fields": ("status", "is_urgent", "created_at")}),
     )
 
     def get_fieldsets(self, request, obj=None):

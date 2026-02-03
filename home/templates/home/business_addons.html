@@ -29,7 +29,7 @@
       <p>Think of add-ons as the extras that businesses often forget, but really need.</p>
     </section>
 
-    <form method="POST" id="addonsForm">
+    <form method="POST" id="addonsForm" data-skip-validate>
       {% csrf_token %}
       <input type="hidden" name="selected_addons" id="selectedAddonsInput">
 

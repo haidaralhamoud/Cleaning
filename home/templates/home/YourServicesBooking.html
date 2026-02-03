@@ -68,17 +68,26 @@
       background: #00a3c8;
     }
 
-    <style>
-.error {
-    border: 2px solid #e74c3c !important;
-    background: #fff6f6;
-}
-</style>
+    .error {
+      border: 2px solid #e74c3c !important;
+      background: #fff6f6;
+    }
 
   </style>
 </head>
 <body>
 {% include "home/includes/main_header.html" %}
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    {% for message in messages %}
+      if (window.showToast) {
+        window.showToast("Missing answers", "{{ message|escapejs }}");
+      }
+    {% endfor %}
+  });
+</script>
+{% endif %}
 
 <!-- HERO -->
 <section class="hero" style="background-image: url('{% static 'images/hero.png' %}');">
@@ -99,7 +108,7 @@
     <h2>Your Selected Services</h2>
     <h3>What can we help with</h3>
 
-    <form method="post">
+    <form method="post" data-skip-validate onsubmit="return handleServicesSubmit(event);">
       {% csrf_token %}
 
       {% for service in services %}
@@ -108,7 +117,7 @@
           <h5>{{ forloop.counter }}. {{ service.title }}</h5>
           <button type="button" class="svc-toggle" aria-expanded="false">
             Questions
-            <span class="chev">▾</span>
+            <span class="chev">v</span>
           </button>
         </div>
         <div class="service-body">
@@ -121,7 +130,7 @@
               <label>{{ question.label }}</label>
 
               {% if question.type == "select" %}
-                <select name="{{ service.slug }}__{{ q_key }}" class="js-custom-select">
+                <select name="{{ service.slug }}__{{ q_key }}" class="js-custom-select" data-no-custom>
                   <option value="">Select...</option>
                   {% for opt in question.options %}
                     <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
@@ -131,7 +140,7 @@
                 </select>
 
               {% elif question.type == "multiselect" %}
-                <select name="{{ service.slug }}__{{ q_key }}" multiple>
+                <select name="{{ service.slug }}__{{ q_key }}" multiple data-no-custom>
                   {% for opt in question.options %}
                     <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
                       {% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}{% if opt.duration %} ({{ opt.duration }} min){% endif %}
@@ -295,7 +304,7 @@ function openAddonsPopup(serviceSlug) {
           <div class="addon-card" onclick="openAddonForm('${serviceSlug}','${key}')">
             <img src="${ad.icon}" class="addon-icon">
             <p>${ad.label}</p>
-            <div class="check-box ${isChecked  'checked' : ''}"></div>
+            <div class="check-box ${isChecked ? 'checked' : ''}"></div>
           </div>
         `;
     }
@@ -325,7 +334,7 @@ function openAddonForm(serviceSlug, addonKey) {
         </div>
       </div>
       <button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">
-        ← Back to Add-ons
+        &larr; Back to Add-ons
       </button>
     `;
 
@@ -393,6 +402,10 @@ document.getElementById("savePopup").onclick = () => {
                 data[f.name] = data[f.name] || [];
                 data[f.name].push(f.value);
             }
+        } else if (f.tagName === "SELECT" && f.multiple) {
+            const values = Array.from(f.selectedOptions).map(o => o.value).filter(Boolean);
+            data[f.name] = values;
+            if (!values.length) valid = false;
         } else {
             const v = (f.value || "").trim();
             data[f.name] = v;
@@ -405,7 +418,11 @@ document.getElementById("savePopup").onclick = () => {
     }
 
     if (!valid) {
-        alert("Please answer all questions for this add-on before saving.");
+        if (window.showToast) {
+            window.showToast("Add-on incomplete", "Please answer all questions for this add-on before saving.");
+        } else {
+            alert("Please answer all questions for this add-on before saving.");
+        }
         return;
     }
 
@@ -505,7 +522,7 @@ document.querySelectorAll("select, input, textarea").forEach(el => {
 
         if (this.type === "radio") {
             const checked = document.querySelector(`[name="${this.name}"]:checked`);
-            updateAnswer({{ booking.id }}, service, field, checked  checked.value : "");
+            updateAnswer({{ booking.id }}, service, field, checked ? checked.value : "");
             return;
         }
 
@@ -536,13 +553,14 @@ function validateMainQuestions() {
     let firstError = null;
 
     document.querySelectorAll("[name]").forEach(el => {
-        // فقط أسئلة الخدمات (service__question)
+        // ??? ????? ??????? (service__question)
         if (!el.name.includes("__")) return;
 
-        // تجاهل hidden
+        // ????? hidden
         if (el.type === "hidden") return;
 
         let value = "";
+        let fieldValid = true;
 
         if (el.type === "checkbox") {
             const group = document.querySelectorAll(`[name="${el.name}"]`);
@@ -550,30 +568,42 @@ function validateMainQuestions() {
             if (!checked) {
                 valid = false;
                 firstError = firstError || el;
+                fieldValid = false;
             }
         } else if (el.type === "radio") {
             const checked = document.querySelector(`[name="${el.name}"]:checked`);
             if (!checked) {
                 valid = false;
                 firstError = firstError || el;
+                fieldValid = false;
             }
         } else if (el.tagName === "SELECT" && el.multiple) {
             if (!Array.from(el.selectedOptions).length) {
                 valid = false;
                 firstError = firstError || el;
+                fieldValid = false;
             }
         } else {
             value = (el.value || "").trim();
             if (!value) {
                 valid = false;
                 firstError = firstError || el;
+                fieldValid = false;
             }
         }
 
-        if (!valid) {
-            el.classList.add("error");
+        if (!fieldValid) {
+            if (el.closest(".custom-select")) {
+                el.closest(".custom-select").classList.add("field-error-pill");
+            } else {
+                el.classList.add("error");
+            }
         } else {
-            el.classList.remove("error");
+            if (el.closest(".custom-select")) {
+                el.closest(".custom-select").classList.remove("field-error-pill");
+            } else {
+                el.classList.remove("error");
+            }
         }
     });
 
@@ -588,41 +618,48 @@ function validateMainQuestions() {
     }
 
     return valid;
-}
-</script>
+}</script>
 <script>
 function validateAddons() {
-    for (let service in ADDONS_DATA) {
-        for (let addon in ADDONS_DATA[service]) {
-            const fields = ADDONS_DATA[service][addon];
-
-            for (let key in fields) {
-                if (!fields[key]) {
-                    alert("Please complete all fields for selected add-ons.");
-                    return false;
-                }
-            }
-        }
-    }
     return true;
 }
 </script>
 
 <script>
-document.querySelector("form").addEventListener("submit", function(e) {
-
+function handleServicesSubmit(e) {
     if (!validateMainQuestions()) {
-        e.preventDefault();
-        alert("Please answer all required service questions before continuing.");
-        return;
+        if (e) e.preventDefault();
+        if (window.showToast) {
+            window.showToast("Missing answers", "Please answer all required service questions before continuing.");
+        } else {
+            alert("Please answer all required service questions before continuing.");
+        }
+        return false;
     }
 
     if (!validateAddons()) {
-        e.preventDefault();
-        return;
+        if (e) e.preventDefault();
+        return false;
     }
 
-});
+    return true;
+}
+
+const servicesForm = document.querySelector('form[method="post"]');
+const summaryContinue = document.querySelector(".js-summary-continue");
+if (summaryContinue && servicesForm) {
+    summaryContinue.addEventListener("click", (e) => {
+        e.preventDefault();
+        if (servicesForm.requestSubmit) {
+            servicesForm.requestSubmit();
+        } else {
+            const ok = servicesForm.dispatchEvent(new Event("submit", { cancelable: true }));
+            if (ok) servicesForm.submit();
+        }
+    });
+}
+
+if (servicesForm) servicesForm.addEventListener("submit", handleServicesSubmit);
 </script>
 <script>
 document.querySelectorAll(".svc-toggle").forEach(btn => {
@@ -630,7 +667,7 @@ document.querySelectorAll(".svc-toggle").forEach(btn => {
         const box = btn.closest(".service-box");
         if (!box) return;
         const isOpen = box.classList.toggle("open");
-        btn.setAttribute("aria-expanded", isOpen  "true" : "false");
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     });
 });
 document.querySelectorAll(".service-head").forEach(head => {
@@ -640,13 +677,14 @@ document.querySelectorAll(".service-head").forEach(head => {
         const btn = box.querySelector(".svc-toggle");
         if (!box || !btn) return;
         const isOpen = box.classList.toggle("open");
-        btn.setAttribute("aria-expanded", isOpen  "true" : "false");
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
     });
 });
 </script>
 <script>
 function setupCustomSelects(root = document) {
     root.querySelectorAll("select.js-custom-select").forEach(select => {
+        if (select.hasAttribute("data-no-custom")) return;
         if (select.dataset.customized) return;
         select.dataset.customized = "true";
 
@@ -705,4 +743,5 @@ document.addEventListener("click", (e) => {
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+
 

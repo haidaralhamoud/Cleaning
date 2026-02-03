@@ -19,11 +19,14 @@ from django.urls import path , include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.auth import views as auth_views
+from electricity.admin_site import electricity_admin_site
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
+    path('electrical-admin/', electricity_admin_site.urls),
     path('', include('home.urls' , namespace='home') ),
     path('accounts/', include('accounts.urls' , namespace='accounts') ),
+    path('electricity/', include('electricity.urls', namespace='electricity')),
     path("accounts/login/", auth_views.LoginView.as_view(), name="login"),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

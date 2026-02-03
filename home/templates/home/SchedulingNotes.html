@@ -42,13 +42,16 @@
         <div class="form-row">
           <div class="form-group">
             <label for="start-date">Desired start date</label>
-            <input type="date" id="start-date" name="start_date_tmp">
+            <div class="date-input">
+              <input type="date" id="start-date" name="start_date_tmp" required>
+              <button type="button" class="date-trigger" data-date-trigger="start-date" aria-label="Open calendar"></button>
+            </div>
           </div>
 
           <div class="form-group">
             <label for="preferred-time">Preferred time</label>
             <div class="custom-select" data-custom-select>
-              <select id="preferred-time" name="preferred_time_tmp" data-native-select>
+              <select id="preferred-time" name="preferred_time_tmp" data-native-select required>
                 <option value="">Select...</option>
                 <option>Before office hours</option>
                 <option>During office hours</option>
@@ -88,7 +91,10 @@
                 <input type="radio" name="days" value="custom-date">
                 <span>Custom date</span>
               </label>
-              <input type="date" id="custom-date" name="custom_date_tmp" disabled>
+              <div class="date-input">
+                <input type="date" id="custom-date" name="custom_date_tmp" disabled>
+                <button type="button" class="date-trigger" data-date-trigger="custom-date" aria-label="Open calendar"></button>
+              </div>
             </div>
 
             <div class="custom-field">
@@ -130,8 +136,14 @@
     document.querySelectorAll("input[name='days']").forEach((radio) => {
       radio.addEventListener("change", () => {
         const value = radio.value;
-        document.getElementById("custom-date").disabled = value !== "custom-date";
-        document.getElementById("custom-time").disabled = value !== "custom-time";
+        const customDate = document.getElementById("custom-date");
+        const customTime = document.getElementById("custom-time");
+        customDate.disabled = value !== "custom-date";
+        customTime.disabled = value !== "custom-time";
+        const customTrigger = document.querySelector("[data-date-trigger='custom-date']");
+        if (customTrigger) {
+          customTrigger.disabled = customDate.disabled;
+        }
       });
     });
 
@@ -144,7 +156,7 @@
 
       const selectedDay = document.querySelector("input[name='days']:checked");
       document.getElementById("days_type_input").value =
-        selectedDay  selectedDay.value : "";
+        selectedDay ? selectedDay.value : "";
 
       document.getElementById("custom_date_input").value =
         document.getElementById("custom-date").value || "";

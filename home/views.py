@@ -38,6 +38,8 @@ from .pricing_utils import calculate_booking_price
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django import forms
 from django.forms import modelform_factory
 from django.db.models import Q, JSONField
@@ -117,6 +119,31 @@ def _staff_required(user):
 
 
 def _dashboard_notifications():
+    def _booking_dashboard_url(booking_type, booking_id):
+        if booking_type == "business":
+            slug = "business-bookings"
+        elif booking_type == "private":
+            slug = "private-bookings"
+        else:
+            return "/dashboard/"
+        return f"/dashboard/{slug}/{booking_id}/edit/"
+
+    def _status_label(status_value):
+        labels = {
+            "ORDERED": "Order placed",
+            "SCHEDULED": "Confirmed / Scheduled",
+            "ASSIGNED": "Provider assigned",
+            "ON_THE_WAY": "Provider on the way",
+            "STARTED": "Service started",
+            "PAUSED": "Service paused",
+            "RESUMED": "Service resumed",
+            "COMPLETED": "Service completed",
+            "CANCELLED_BY_CUSTOMER": "Cancelled by customer",
+            "NO_SHOW": "No show",
+            "INCIDENT_REPORTED": "Incident reported",
+            "REFUNDED": "Refunded",
+        }
+        return labels.get(status_value, status_value)
     now = timezone.now()
     since = now - timedelta(days=1)
 
@@ -167,11 +194,16 @@ def _dashboard_notifications():
 
     items = []
     for r in recent_status:
+        status_text = _status_label(r.status)
+        note = (r.note or "").strip()
+        detail = f"Status update: {status_text}"
+        if note and note.lower() != status_text.lower():
+            detail = f"{detail} - {note}"
         items.append({
-            "title": f"{r.booking_type.title()} #{r.booking_id}",
-            "detail": r.note or r.status,
+            "title": f"{r.booking_type.title()} #{r.booking_id} - {status_text}",
+            "detail": detail,
             "time": r.created_at,
-            "url": f"/dashboard/{r.booking_type}-bookings/",
+            "url": _booking_dashboard_url(r.booking_type, r.booking_id),
         })
     for fix in recent_fixes:
         items.append({
@@ -209,12 +241,19 @@ def _dashboard_notifications():
             "url": "/dashboard/service-reviews/",
         })
     for msg in recent_messages:
-        detail = f"{msg.thread.booking_type.title()} #{msg.thread.booking_id}"
+        booking_type = msg.thread.booking_type
+        booking_id = msg.thread.booking_id
+        message_preview = (msg.text or "").strip()
+        if len(message_preview) > 60:
+            message_preview = f"{message_preview[:60]}..."
+        detail = f"{booking_type.title()} #{booking_id}"
+        if message_preview:
+            detail = f"{detail} - {message_preview}"
         items.append({
             "title": f"New Message from {msg.sender}",
             "detail": detail,
             "time": msg.created_at,
-            "url": "",
+            "url": _booking_dashboard_url(booking_type, booking_id),
         })
     items = sorted(items, key=lambda i: i["time"], reverse=True)[:6]
 
@@ -296,6 +335,22 @@ def dashboard_home(request):
     context = {"cards": cards, "items": items}
     context.update(_dashboard_notifications())
     return render(request, "dashboard/index.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_change_password(request):
+    if request.method != "POST":
+        return redirect("home:dashboard_home")
+
+    form = PasswordChangeForm(request.user, request.POST)
+    if form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)
+        messages.success(request, "Password updated successfully.")
+    else:
+        messages.error(request, "Please check the password fields and try again.")
+
+    return redirect("home:dashboard_home")
 
 
 def _model_fields(model):
@@ -918,6 +973,7 @@ def business_start_booking(request):
     request.session["business_booking_draft"] = {
         "selected_service": service,
         "path_type": "bundle",
+        "is_urgent": request.GET.get("urgent") == "1",
     }
     request.session.modified = True
     return redirect("home:business_company_info", booking_id=0)
@@ -961,6 +1017,7 @@ def _draft_booking_from_session(request):
         "custom_time",
         "notes",
         "path_type",
+        "is_urgent",
     ):
         if field in data:
             setattr(booking, field, data.get(field))
@@ -1240,6 +1297,7 @@ def business_scheduling(request, booking_id):
             custom_time=draft.get("custom_time"),
             notes=draft.get("notes"),
             path_type=draft.get("path_type") or "bundle",
+            is_urgent=bool(draft.get("is_urgent")),
             user=request.user if request.user.is_authenticated else None,
         )
         selected_bundle_id = draft.get("selected_bundle_id")
@@ -1248,6 +1306,8 @@ def business_scheduling(request, booking_id):
 
         created.save()
         created.log_status(user=request.user, note="Order placed")
+        if created.is_urgent:
+            created.log_status(user=request.user, note="Urgent booking (same day) requested")
         request.session.pop("business_booking_draft", None)
 
         return redirect("home:business_thank_you", booking_id=created.id)
@@ -1289,6 +1349,9 @@ def business_thank_you(request, booking_id):
 # ================================================================================================================
 def all_services(request):
     services = PrivateService.objects.all()
+    if request.GET.get("urgent") == "1":
+        request.session["urgent_booking"] = True
+        request.session.modified = True
     return render(request, "home/AllServicesPrivate.html", {"services": services})
 
 
@@ -1299,6 +1362,9 @@ AVAILABLE_ZIPS = ["123", "111", "325", "777"]  # مؤقتاً
 
 def private_zip_step1(request, service_slug):
     service = get_object_or_404(PrivateService, slug=service_slug)
+    if request.GET.get("urgent") == "1":
+        request.session["urgent_booking"] = True
+        request.session.modified = True
 
     zip_form = ZipCheckForm()
     not_available_form = None
@@ -1572,12 +1638,19 @@ def private_booking_start(request, service_slug):
     """
     service = get_object_or_404(PrivateService, slug=service_slug)
 
+    urgent_flag = request.GET.get("urgent") == "1" or request.session.get("urgent_booking")
+
     booking = PrivateBooking.objects.create(
-    booking_method="online",
-    main_category=service.category.slug,
-    selected_services=[service.slug],
-    user=request.user if request.user.is_authenticated else None
-)
+        booking_method="online",
+        main_category=service.category.slug,
+        selected_services=[service.slug],
+        user=request.user if request.user.is_authenticated else None,
+        is_urgent=bool(urgent_flag),
+    )
+
+    if urgent_flag:
+        booking.log_status(note="Urgent booking (same day) requested")
+        request.session.pop("urgent_booking", None)
     return redirect("home:private_booking_services", booking_id=booking.id)
 
 def private_booking_services(request, booking_id):
@@ -1620,6 +1693,33 @@ def private_booking_services(request, booking_id):
             raw_addons = json.loads(addons_json)
         except:
             raw_addons = {}
+
+        # Server-side validation: all service questions required
+        missing = []
+        for service in services:
+            s_key = service.slug
+            if not service.questions:
+                continue
+            for q_key, q_info in service.questions.items():
+                q_type = (q_info or {}).get("type")
+                answer = service_answers.get(s_key, {}).get(q_key)
+                if q_type in ("multiselect", "checkbox"):
+                    if not answer:
+                        missing.append(f"{s_key}__{q_key}")
+                else:
+                    if not answer:
+                        missing.append(f"{s_key}__{q_key}")
+
+        if missing:
+            messages.error(request, "Please answer all required service questions before continuing.")
+            pricing = calculate_booking_price(booking)
+            return render(request, "home/YourServicesBooking.html", {
+                "booking": booking,
+                "services": services,
+                "saved_addons": json.dumps(raw_addons or {}),
+                "pricing": pricing,
+            })
+
 
         final_addons = {}
 

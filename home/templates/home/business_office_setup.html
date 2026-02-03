@@ -34,7 +34,7 @@
       <h2>Office Setup</h2>
     </div>
 
-    <form method="POST" class="form-card">
+    <form method="POST" class="form-card" id="officeSetupForm">
       {% csrf_token %}
 
       <label>Office size</label>
@@ -51,7 +51,7 @@
       <input type="hidden" id="restrooms_input" name="restrooms"
              value="{{ form.instance.restrooms }}">
 
-      <div class="restroom-options">
+      <div class="restroom-options" id="restroomGroup">
         <div class="restroom-btn" data-val="1">1</div>
         <div class="restroom-btn" data-val="2">2</div>
         <div class="restroom-btn" data-val="3">3</div>
@@ -72,6 +72,7 @@
         </label>
       </div>
 
+      <div class="form-error" id="officeSetupError">Please fill in all required fields.</div>
       <div class="form-actions">
         <a onclick="window.history.back();" class="back-btn">
           <span class="back-icon">&larr;</span>
@@ -91,6 +92,7 @@
   <script>
     const restroomButtons = document.querySelectorAll(".restroom-btn");
     const restroomHidden = document.getElementById("restrooms_input");
+    const restroomGroup = document.getElementById("restroomGroup");
 
     let saved = restroomHidden.value;
 
@@ -105,7 +107,53 @@
         restroomButtons.forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
         restroomHidden.value = btn.dataset.val;
+        restroomGroup.classList.remove("field-error-pill");
       });
+    });
+  </script>
+  <script>
+    const officeForm = document.getElementById("officeSetupForm");
+    const officeError = document.getElementById("officeSetupError");
+    const officeFields = [
+      document.getElementById("id_office_size"),
+      document.getElementById("id_num_employees"),
+      document.getElementById("id_floors"),
+      document.getElementById("restrooms_input")
+    ];
+
+    const clearOfficeErrors = () => {
+      officeFields.forEach((field) => field && field.classList.remove("field-error"));
+      document.getElementById("restroomGroup").classList.remove("field-error-pill");
+      officeError.classList.remove("is-visible");
+    };
+
+    officeFields.forEach((field) => {
+      if (!field) return;
+      field.addEventListener("input", clearOfficeErrors);
+      field.addEventListener("change", clearOfficeErrors);
+    });
+
+    officeForm.addEventListener("submit", (e) => {
+      clearOfficeErrors();
+      let hasError = false;
+
+      officeFields.forEach((field) => {
+        if (!field) return;
+        if (!field.value || !field.value.trim()) {
+          field.classList.add("field-error");
+          hasError = true;
+        }
+      });
+
+      if (!document.getElementById("restrooms_input").value) {
+        document.getElementById("restroomGroup").classList.add("field-error-pill");
+        hasError = true;
+      }
+
+      if (hasError) {
+        e.preventDefault();
+        officeError.classList.add("is-visible");
+      }
     });
   </script>
 

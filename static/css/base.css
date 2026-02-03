@@ -1,5 +1,9 @@
 @import url("https://fonts.googleapis.com/css2family=Vesper+Libre:wght@400;500;600;700&display=swap");
 
+:root {
+  --calendar-icon-url: url("../images/calendar-unified.svg");
+}
+
 /* ====== HEADER BASE ====== */
 .main-header {
   width: 100%;
@@ -503,4 +507,176 @@ body {
 .custom-select-option.is-disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+/* ====== Hembla Calendar ====== */
+.hembla-calendar {
+  position: absolute;
+  width: 320px;
+  border-radius: 18px;
+  background: #f7f9fb;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  border: 1px solid #dfe8ef;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 1200;
+}
+
+.hembla-calendar.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.hembla-calendar__header {
+  background: linear-gradient(90deg, #14a5c9, #7dd4e8);
+  color: #fff;
+  padding: 12px 16px;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+}
+
+.hembla-calendar__title {
+  font-size: 14px;
+}
+
+.hembla-calendar__body {
+  padding: 12px 16px 14px;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  align-items: center;
+  row-gap: 10px;
+}
+
+.hembla-calendar__month {
+  text-align: center;
+  font-weight: 700;
+  color: #0b6b88;
+}
+
+.hembla-calendar__nav {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: #e8f3f6;
+  color: #0b6b88;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hembla-calendar__weekdays,
+.hembla-calendar__days {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.hembla-calendar__weekdays span {
+  font-size: 12px;
+  font-weight: 700;
+  color: #6b7280;
+}
+
+.hembla-calendar__day,
+.hembla-calendar__empty {
+  height: 30px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.hembla-calendar__day {
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.hembla-calendar__day:hover {
+  background: #e7f5fb;
+  color: #0b6b88;
+}
+
+.hembla-calendar__day.is-selected {
+  background: #0ea5c8;
+  color: #fff;
+}
+
+.hembla-calendar__day.is-today {
+  border: 1px solid #0ea5c8;
+}
+
+.hembla-calendar__footer {
+  text-align: center;
+  padding: 8px 12px 12px;
+  font-size: 11px;
+  color: #7b8794;
+}
+
+/* ===== Validation ===== */
+.form-error {
+  margin: 12px 0 18px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #fff3f3;
+  border: 1px solid #ffb4b4;
+  color: #b42318;
+  font-weight: 700;
+  font-size: 14px;
+  display: none;
+}
+.form-error.is-visible {
+  display: block;
+}
+.field-error {
+  border-color: #ff7a7a !important;
+  box-shadow: 0 0 0 4px rgba(255, 122, 122, 0.18);
+}
+.field-error-pill {
+  box-shadow: 0 0 0 3px rgba(255, 122, 122, 0.25);
+  border-color: #ff7a7a !important;
+}
+
+/* ===== Toast ===== */
+.toast-wrap {
+  position: fixed;
+  right: 20px;
+  top: 90px;
+  display: grid;
+  gap: 10px;
+  z-index: 1200;
+  pointer-events: none;
+}
+.toast {
+  min-width: 260px;
+  max-width: 340px;
+  background: #0f172a;
+  color: #fff;
+  padding: 12px 14px;
+  border-radius: 12px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.25);
+  display: grid;
+  gap: 4px;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity .2s ease, transform .2s ease;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.toast__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.toast__desc {
+  font-size: 13px;
+  opacity: 0.85;
 }
