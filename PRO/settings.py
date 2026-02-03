@@ -35,10 +35,13 @@ if env_path.exists():
 SECRET_KEY = 'django-insecure-%g@=l33ao&ipxo7$8*13mgmc9e#b-j661-3i^#_4fno-s@b&89'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'hembla-experten.se',
+    'www.hembla-experten.se',
+    '45.93.137.166',
+]
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
@@ -177,6 +180,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
