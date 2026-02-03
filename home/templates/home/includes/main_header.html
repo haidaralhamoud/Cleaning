@@ -4,7 +4,11 @@
     <img src="{% static 'images/logo.png' %}" alt="Logo">
   </div>
 
-  <button class="menu-toggle" id="menu-toggle" type="button">Menu</button>
+  
+
+  <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open menu">
+    <span class="menu-icon" aria-hidden="true"></span>
+  </button>
 
   <nav class="nav-links" id="nav-links">
     <a href="{% url 'home:home' %}">HOME</a>
@@ -23,11 +27,6 @@
     </a>
   </nav>
 
-  <a href="{% url 'home:private_cart' %}" class="cart-link">
-    <span class="cart-icon">Cart</span>
-    <span>Cart</span>
-    <span class="cart-count" id="cartCount" data-url="{% url 'home:private_cart_count' %}">0</span>
-  </a>
 
   <div class="auth-buttons">
     {% if user.is_authenticated %}

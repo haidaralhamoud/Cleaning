@@ -84,6 +84,11 @@
           <div class="discount-saved">
             You saved <b>{{ discount_preview_amount|floatformat:2 }}$</b> with this code.
           </div>
+        {% elif referral_discount_applied %}
+          <div class="discount-saved">
+            Referral discount applied: <b>{{ referral_discount_percent }}%</b>
+            (saved {{ referral_discount_amount|floatformat:2 }}$).
+          </div>
         {% endif %}
       </section>
 
@@ -171,6 +176,12 @@
             <div class="summary-line discount-line">
               <span>Discount</span>
               <span>-{{ discount_preview_amount|floatformat:2 }}$</span>
+            </div>
+          {% endif %}
+          {% if referral_discount_applied %}
+            <div class="summary-line discount-line">
+              <span>Referral discount ({{ referral_discount_percent }}%)</span>
+              <span>-{{ referral_discount_amount|floatformat:2 }}$</span>
             </div>
           {% endif %}
 

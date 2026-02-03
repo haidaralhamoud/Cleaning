@@ -2,6 +2,7 @@
 
 :root {
   --calendar-icon-url: url("../images/calendar-unified.svg");
+  --cart-icon-url: url("../images/cart-unified.svg");
 }
 
 /* ====== HEADER BASE ====== */

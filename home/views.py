@@ -1358,7 +1358,45 @@ def all_services(request):
 
 
 
-AVAILABLE_ZIPS = ["123", "111", "325", "777"]  # مؤقتاً
+AVAILABLE_ZIP_RANGES = [
+    (10000, 12999),  # Stockholm City
+    (13100, 13199),  # Nacka
+    (13200, 13299),
+    (13300, 13399),
+    (13500, 13599),  # Tyreso
+    (13600, 13699),  # Haninge
+    (14100, 14199),  # Huddinge
+    (14200, 14299),
+    (14500, 14599),  # Botkyrka
+    (14600, 14699),
+    (14700, 14799),
+    (16900, 16999),  # Solna
+    (17100, 17199),
+    (17200, 17299),  # Sundbyberg
+    (17400, 17499),
+    (17500, 17599),  # Jarfalla
+    (17700, 17799),
+    (17800, 17899),  # Ekero
+    (18100, 18199),  # Lidingo
+    (18200, 18299),  # Danderyd
+    (18300, 18399),  # Tabby
+    (18600, 18699),  # Vallentuna
+]
+
+
+def _normalize_zip(zip_code_value):
+    digits = "".join(ch for ch in str(zip_code_value) if ch.isdigit())
+    if len(digits) != 5:
+        return None
+    return int(digits)
+
+
+def _is_zip_available(zip_code_value):
+    numeric = _normalize_zip(zip_code_value)
+    if numeric is None:
+        return False
+    return any(start <= numeric <= end for start, end in AVAILABLE_ZIP_RANGES)
+
 
 def private_zip_step1(request, service_slug):
     service = get_object_or_404(PrivateService, slug=service_slug)
@@ -1378,11 +1416,12 @@ def private_zip_step1(request, service_slug):
             zip_form = ZipCheckForm(request.POST)
             if zip_form.is_valid():
                 zip_code_value = zip_form.cleaned_data["zip"]
+                normalized_zip = _normalize_zip(zip_code_value)
 
-                if zip_code_value in AVAILABLE_ZIPS:
+                if _is_zip_available(zip_code_value):
 
                     # (اختياري) إنشاء booking لاحقاً، مو هون
-                    request.session["zip_code"] = zip_code_value
+                    request.session["zip_code"] = str(normalized_zip) if normalized_zip else str(zip_code_value)
 
                     return redirect(
                         "home:private_zip_available",
@@ -1390,10 +1429,13 @@ def private_zip_step1(request, service_slug):
                     )
 
                 else:
+                    request.session.pop("zip_code", None)
                     show_not_available = True
                     not_available_form = NotAvailableZipForm(
-                        initial={"zip_code": zip_code_value}
+                        initial={"zip_code": str(normalized_zip) if normalized_zip else zip_code_value}
                     )
+            else:
+                request.session.pop("zip_code", None)
 
         # 2) الضغط على Submit تبع الفورم التاني
         elif "contact-submit" in request.POST:
@@ -1450,6 +1492,20 @@ def private_booking_checkout(request, booking_id):
     customer = None
     if request.user.is_authenticated:
         customer = Customer.objects.filter(user=request.user).first()
+    completed_bookings = 0
+    if request.user.is_authenticated:
+        completed_bookings = (
+            PrivateBooking.objects.filter(user=request.user, status="COMPLETED").count()
+            + BusinessBooking.objects.filter(user=request.user, status="COMPLETED").count()
+        )
+    referral_discount_percent = 10
+    referral_discount_amount = Decimal("0.00")
+    referral_discount_applied = False
+    referral_discount_eligible = (
+        customer is not None
+        and customer.has_referral_discount
+        and completed_bookings == 0
+    )
 
     display_address = None
     if customer:
@@ -1495,6 +1551,10 @@ def private_booking_checkout(request, booking_id):
             booking.discount_code = None
             booking.save(update_fields=["discount_code"])
             messages.warning(request, reason or "Discount code is not valid anymore.")
+    elif referral_discount_eligible:
+        referral_discount_amount = final_after_rot * Decimal(referral_discount_percent) / Decimal(100)
+        final_preview_price = final_after_rot - referral_discount_amount
+        referral_discount_applied = True
 
     # ==========================
     # 📨 POST
@@ -1532,6 +1592,7 @@ def private_booking_checkout(request, booking_id):
             fresh_pricing = calculate_booking_price(booking)
             final_amount = Decimal(str(fresh_pricing["final"]))
             discount_amount = Decimal("0.00")
+            discount_code_applied = False
 
             if booking.discount_code:
                 dc = booking.discount_code
@@ -1549,6 +1610,14 @@ def private_booking_checkout(request, booking_id):
                 dc.save(update_fields=["used_count", "is_used"])
 
                 booking.discount_code = None
+                discount_code_applied = True
+
+            if referral_discount_eligible and not discount_code_applied:
+                referral_discount_amount = final_amount * Decimal(referral_discount_percent) / Decimal(100)
+                final_amount -= referral_discount_amount
+                if customer and customer.has_referral_discount:
+                    customer.has_referral_discount = False
+                    customer.save(update_fields=["has_referral_discount"])
 
             booking.total_price = final_amount
             booking.rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
@@ -1565,6 +1634,10 @@ def private_booking_checkout(request, booking_id):
         "booking": booking,
         "services": services,
         "discount_preview_amount": discount_preview_amount,
+        "referral_discount_amount": referral_discount_amount,
+        "referral_discount_percent": referral_discount_percent,
+        "referral_discount_applied": referral_discount_applied,
+        "referral_discount_eligible": referral_discount_eligible,
         "final_preview_price": final_preview_price,
         "pricing": pricing,
         "services_total": services_total,

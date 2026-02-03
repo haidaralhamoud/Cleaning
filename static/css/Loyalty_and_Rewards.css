@@ -63,6 +63,12 @@ body{
 .points-text small{color:var(--muted);font-weight:700;display:block;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
 .points-text strong{display:block;font-weight:900;font-size:28px;letter-spacing:-.02em}
 .points-text span{color:var(--muted);font-weight:600;font-size:14px}
+.tier-icon{
+  width:18px;
+  height:18px;
+  vertical-align:-3px;
+  margin-left:6px;
+}
 .tier-pill{
   display:flex;align-items:center;justify-content:center;
   background:#0ea5a41a;border-radius:999px;padding:10px 18px;
@@ -175,7 +181,7 @@ body{
 @media (max-width: 992px){
   .layout{flex-direction:column;padding-top:80px}
   .sidebar{width:100%;order:2;position:relative;top:auto}
-  .main{order:1}
+  .main{order:1;display:flex;flex-direction:column;align-items:center}
   .tiers,.rewards,.grid-2{grid-template-columns:1fr}
 }
 @media (max-width: 768px){
@@ -183,4 +189,15 @@ body{
   .points-box{flex-direction:column;align-items:flex-start}
   .mobile-header{display:flex}
   .menu-toggle.floating{display:flex}
+}
+
+@media (max-width: 600px){
+  .layout{padding:12px}
+  .card{padding:16px 14px;border-radius:18px}
+  .points-box{padding:14px;gap:10px}
+  .points-text strong{font-size:24px}
+  .tier-pill{width:100%;justify-content:flex-start}
+  .share-row{flex-direction:column;align-items:stretch}
+  .share-row .share{width:100%;justify-content:center}
+  .reward h5{font-size:16px}
 }
