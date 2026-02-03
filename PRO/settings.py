@@ -138,7 +138,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'hembla_db',
         'USER': 'hembla_user',
-        'PASSWORD': 'StrongPassword123',
+        'PASSWORD': 'Hembla123456789@',
         'HOST': 'localhost',
         'PORT': '5432',
     }
