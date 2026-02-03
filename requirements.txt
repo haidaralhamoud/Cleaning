@@ -1,0 +1,16 @@
+asgiref==3.10.0
+beautifulsoup4==4.14.2
+bootstrap4==0.1.0
+Django==5.2.7
+django-bootstrap4==25.2
+django-filter==25.2
+django-jazzmin==3.0.1
+django-jsoneditor==0.2.4
+packaging==25.0
+pillow==12.0.0
+psycopg==3.3.2
+psycopg-binary==3.3.2
+soupsieve==2.8
+sqlparse==0.5.3
+typing_extensions==4.15.0
+tzdata==2025.2
