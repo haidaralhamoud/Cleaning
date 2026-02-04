@@ -35,13 +35,13 @@ if env_path.exists():
 SECRET_KEY = 'django-insecure-%g@=l33ao&ipxo7$8*13mgmc9e#b-j661-3i^#_4fno-s@b&89'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-# ALLOWED_HOSTS = [
-#     'hembla-experten.se',
-#     'www.hembla-experten.se',
-#     '45.93.137.166',
-# ]
+ALLOWED_HOSTS = [
+    'hembla-experten.se',
+    'www.hembla-experten.se',
+    '45.93.137.166',
+]
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 
@@ -132,26 +132,26 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
-        'USER': os.getenv('POSTGRES_USER', 'cleaning'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-    },
-}
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'hembla_db',
-#         'USER': 'hembla_user',
-#         'PASSWORD': 'Hembla123456789@',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
+#         'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
+#         'USER': os.getenv('POSTGRES_USER', 'cleaning'),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+#         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+#         'PORT': os.getenv('POSTGRES_PORT', '5432'),
+#     },
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'hembla_db',
+        'USER': 'hembla_user',
+        'PASSWORD': 'Hembla123456789@',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
