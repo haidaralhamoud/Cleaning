@@ -50,6 +50,7 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
+from django.conf import settings
 from home.models import (
     BookingStatusHistory,
     BookingTimeline,
@@ -71,6 +72,18 @@ import json
 from django.db.models import Avg, Count
 User = get_user_model()
 from .forms import ProviderProfileForm
+# ======================================================
+# AUTH
+# ======================================================
+class RememberMeLoginView(LoginView):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        remember = self.request.POST.get("remember_me") == "on"
+        if remember:
+            self.request.session.set_expiry(settings.SESSION_COOKIE_AGE)
+        else:
+            self.request.session.set_expiry(0)
+        return response
 # ======================================================
 # SIGN UP
 # ======================================================

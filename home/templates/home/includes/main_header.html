@@ -25,17 +25,42 @@
       FEEDBACK
       <span class="nav-dot" aria-hidden="true"></span>
     </a>
+
+    <div class="nav-mobile-auth">
+      {% if user.is_authenticated %}
+        {% if user.access_profile %}
+          {% if user.is_superuser %}
+            <a href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
+          {% elif user.is_staff %}
+            <a href="{% url 'accounts:provider_inbox' %}">Messages</a>
+          {% endif %}
+        {% elif user.is_superuser %}
+          <a href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
+        {% elif user.is_staff %}
+          <a href="{% url 'accounts:provider_inbox' %}">Messages</a>
+        {% endif %}
+
+        {% if user.is_staff %}
+          <a href="{% url 'accounts:provider_profile' %}">My Profile</a>
+        {% else %}
+          <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
+        {% endif %}
+        <form method="POST" action="{% url 'accounts:logout' %}" class="nav-mobile-logout">
+          {% csrf_token %}
+          <button type="submit">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'accounts:sign_up' %}">Sign Up</a>
+        <a href="{% url 'login' %}">Sign In</a>
+      {% endif %}
+    </div>
   </nav>
 
 
   <div class="auth-buttons">
     {% if user.is_authenticated %}
       {% if user.access_profile %}
-        {% if user.access_profile.role == "global_super" or user.access_profile.site == "electrical" %}
-          <a href="/electrical-admin/" class="btn-auth">
-            Electrical Admin
-          </a>
-        {% elif user.is_superuser %}
+        {% if user.is_superuser %}
           <a href="{% url 'home:dashboard_home' %}" class="btn-auth">
             Admin Dashboard
           </a>

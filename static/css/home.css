@@ -25,6 +25,7 @@ body{
     radial-gradient(800px 500px at 90% 0%, rgba(74,169,108,.12), transparent 55%),
     var(--bg);
   line-height:1.6;
+  overflow-x:hidden;
 }
 img{display:block;max-width:100%;height:auto}
 
@@ -113,7 +114,7 @@ img{display:block;max-width:100%;height:auto}
 }
 
 /* ===== HERO ===== */
-.hero{position:relative; min-height:clamp(520px, 60vh, 660px); overflow:visible}
+.hero{position:relative; min-height:clamp(520px, 60vh, 660px); overflow:hidden}
 .hero-bg{
   position:absolute; inset:0; background-position:center; background-size:cover;
   filter:saturate(105%) contrast(98%);
@@ -418,8 +419,24 @@ img{display:block;max-width:100%;height:auto}
     background:#fff; padding:12px 5%; border-top:1px solid rgba(16,18,20,.08);
   }
   .nav-toggle{display:block}
-  .hero-panel{width:100%; background:rgba(255,255,255,.82)}
-  .hero-inner{min-height:520px}
+  .hero-panel{
+    width:100vw;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(255,255,255,.88);
+    border-right:none;
+  }
+  .hero-inner{
+    min-height:520px;
+    padding:32px 0 48px;
+  }
+  .hero-copy{
+    max-width:100%;
+    text-align:center;
+  }
+  .hero-buttons{
+    justify-content:center;
+  }
   .steps{grid-template-columns:1fr; gap:26px}
   .track{display:none}
 }
@@ -433,11 +450,17 @@ img{display:block;max-width:100%;height:auto}
   .mini-cards{grid-template-columns:1fr}
   .t-grid{grid-template-columns:1fr}
   .f-about .logo{width:160px; height:160px}
-  .hero-buttons{gap:10px}
+  .hero-buttons{
+    gap:10px;
+  }
+  .hero::before,
+  .hero::after{
+    opacity:.3;
+  }
 }
 @media (max-width:520px){
   .topbar .container{gap:12px}
-  .hero{min-height:480px}
+  .hero{min-height:440px}
   .hero-copy h1{font-size:clamp(28px, 8vw, 36px)}
   .hero-copy p{font-size:16px}
   .dot{width:72px; height:72px; font-size:26px}

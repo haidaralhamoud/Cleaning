@@ -1066,12 +1066,9 @@ class ProviderAdminMessage(models.Model):
 class UserAccessProfile(models.Model):
     SITE_CHOICES = [
         ("main", "Main"),
-        ("electrical", "Electrical"),
     ]
     ROLE_CHOICES = [
         ("global_super", "Global Super"),
-        ("electrical_super", "Electrical Super"),
-        ("electrical_admin", "Electrical Admin"),
     ]
 
     user = models.OneToOneField(
