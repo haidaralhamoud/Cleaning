@@ -24,7 +24,7 @@
     <p class="subtitle">Create an account to access our services</p>
 
     <!-- FORM START -->
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
 
       <!-- ط§ظ„ط­ظ‚ظ„ ط§ظ„ظ…ط®ظپظٹ ط§ظ„ط°ظٹ ظٹظˆظ„ط¯ظ‡ Django ظپظ‚ط· -->
@@ -132,7 +132,7 @@
         </div>
 
         <div class="addons-field">
-          <input type="text" id="addonInput" placeholder="Add-Ons">
+          <input type="text" id="addonInput" placeholder="Add-Ons" data-optional="true">
           <button type="button" id="addAddonBtn" class="add-btn">Add</button>
         </div>
       </div>
@@ -172,7 +172,7 @@
         <label>I agree to the Terms and Privacy Policy.</label>
       </div>
 
-      <button type="submit" class="btn-submit">Create Account</button>
+      <button type="submit" class="btn-submit" id="signupSubmit">Create Account</button>
 
       <p class="login-text">Already have an account <a href="{% url 'login' %}">Log in</a></p>
     </form>
@@ -235,6 +235,39 @@ document.addEventListener("DOMContentLoaded", () => {
             addTag();
         }
     });
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const agree = document.getElementById("agreeTerms") || document.getElementById("id_accepted_terms");
+  const submit = document.getElementById("signupSubmit");
+
+  if (!agree || !submit) {
+    return;
+  }
+
+  const updateState = () => {
+    submit.disabled = !agree.checked;
+  };
+
+  updateState();
+  agree.addEventListener("change", updateState);
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const addonInput = document.getElementById("addonInput");
+  if (addonInput) {
+    addonInput.required = false;
+    addonInput.setAttribute("data-optional", "true");
+  }
+
+  document.querySelectorAll(".checkbox-group input[type='checkbox']").forEach((el) => {
+    el.required = false;
+    el.setAttribute("data-optional", "true");
+  });
 });
 </script>
 

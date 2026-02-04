@@ -19,7 +19,11 @@ class CustomerForm(forms.ModelForm):
     # الحقل المخفي الخاص بالـ Add-Ons
     custom_addons = forms.CharField(widget=forms.HiddenInput(), required=False)
 
-    accepted_terms = forms.BooleanField()
+    accepted_terms = forms.BooleanField(
+        required=True,
+        widget=forms.CheckboxInput(attrs={"required": "required", "id": "agreeTerms"}),
+        error_messages={"required": "You must agree to the Terms and Privacy Policy."},
+    )
 
     region = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))
     contact_name = forms.CharField(required=False, widget=forms.TextInput(attrs={"class": "input"}))

@@ -90,7 +90,7 @@ class Customer(models.Model):
     emergency_relation = models.CharField(max_length=100, blank=True)
 
     # Desired Services (existing)
-    desired_services = models.ManyToManyField(Service)
+    desired_services = models.ManyToManyField(Service, blank=True)
 
     custom_addons = models.JSONField(default=list, blank=True)
     optional_note = models.TextField(blank=True, null=True)
