@@ -35,7 +35,7 @@ if env_path.exists():
 SECRET_KEY = 'django-insecure-%g@=l33ao&ipxo7$8*13mgmc9e#b-j661-3i^#_4fno-s@b&89'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True 
 
 ALLOWED_HOSTS = [
     'hembla-experten.se',
