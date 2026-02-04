@@ -168,7 +168,7 @@ def sign_up(request):
 
             login_url = reverse("login")
             query = urlencode({"email": email})
-            return redirect(f"{login_url}{query}")
+            return redirect(f"{login_url}?{query}")
     else:
         form = CustomerForm()
 
