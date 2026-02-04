@@ -87,15 +87,8 @@
               <a href="{% url 'home:business_start_booking' %}?urgent=1">Business Booking</a>
             </div>
           </div>
-          <a class="btn btn-secondary" href="{% url 'electricity:home' %}">Go to Electrical & Smart Home Solutions</a>
           {% if user.is_authenticated %}
-            {% if user.access_profile %}
-              {% if user.access_profile.role == "global_super" or user.access_profile.site == "electrical" %}
-                <a class="btn btn-secondary" href="/electrical-admin/">Electrical Admin</a>
-              {% elif user.is_superuser %}
-                <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
-              {% endif %}
-            {% elif user.is_superuser %}
+            {% if user.is_superuser %}
               <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
             {% endif %}
           {% endif %}
