@@ -1,7 +1,10 @@
 from decimal import Decimal
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.utils.dateparse import parse_date
+import logging
 from datetime import timedelta
+import re
 
 from accounts.models import DiscountCode
 from .pricing_utils import calculate_booking_price
@@ -35,11 +38,16 @@ from django.contrib import messages
 import json
 from datetime import datetime  # فوق
 from .pricing_utils import calculate_booking_price
+from .availability_utils import (
+    generate_slots,
+    select_nearest_provider,
+    provider_available_after_minutes,
+)
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth import update_session_auth_hash, get_user_model
 from django import forms
 from django.forms import modelform_factory
 from django.db.models import Q, JSONField
@@ -47,6 +55,110 @@ from django.core.paginator import Paginator
 from django.utils.safestring import mark_safe
 
 from .dashboard import get_dashboard_items, get_item_by_slug
+
+logger = logging.getLogger(__name__)
+User = get_user_model()
+
+
+def _normalize_location(value):
+    if not value:
+        return ""
+    return re.sub(r"\s+", " ", str(value)).strip().lower()
+
+
+def _booking_location_candidates(booking):
+    if not booking:
+        return []
+    values = []
+    if hasattr(booking, "area") and booking.area:
+        values.append(booking.area)
+    if hasattr(booking, "address") and booking.address:
+        values.append(booking.address)
+    if hasattr(booking, "office_address") and booking.office_address:
+        values.append(booking.office_address)
+    return [_normalize_location(v) for v in values if v]
+
+
+def _provider_matches_location(provider_profile, booking_locations):
+    if not booking_locations:
+        return True
+    if not provider_profile:
+        return False
+    provider_values = [
+        provider_profile.area,
+        provider_profile.city,
+        provider_profile.region,
+    ] + (provider_profile.nearby_areas or [])
+    provider_values = [_normalize_location(v) for v in provider_values if v]
+    if not provider_values:
+        return False
+    for booking_loc in booking_locations:
+        for provider_loc in provider_values:
+            if not booking_loc or not provider_loc:
+                continue
+            if booking_loc == provider_loc:
+                return True
+            if booking_loc in provider_loc or provider_loc in booking_loc:
+                return True
+    return False
+
+
+def _filtered_provider_queryset(booking):
+    providers = (
+        User.objects.filter(provider_profile__is_active=True)
+        .select_related("provider_profile")
+        .order_by("username")
+    )
+    if not booking:
+        return providers
+
+    booking_locations = _booking_location_candidates(booking)
+    allowed_ids = []
+    for provider in providers:
+        profile = getattr(provider, "provider_profile", None)
+        if not _provider_matches_location(profile, booking_locations):
+            continue
+        if not booking.provider_is_available(provider):
+            continue
+        allowed_ids.append(provider.id)
+
+    if booking.provider_id and booking.provider_id not in allowed_ids:
+        allowed_ids.append(booking.provider_id)
+
+    return User.objects.filter(id__in=allowed_ids).order_by("username")
+
+
+def _provider_debug_payload(booking):
+    booking_locations = _booking_location_candidates(booking)
+    providers = (
+        User.objects.filter(provider_profile__isnull=False)
+        .select_related("provider_profile")
+        .order_by("username")
+    )
+    rows = []
+    for provider in providers:
+        reasons = []
+        profile = getattr(provider, "provider_profile", None)
+        if not profile:
+            reasons.append("No provider profile")
+        else:
+            if not profile.is_active:
+                reasons.append("Profile inactive")
+            if booking_locations and not _provider_matches_location(profile, booking_locations):
+                reasons.append("Not in same/nearby area")
+        if profile and booking and not booking.provider_is_available(provider):
+            reasons.append("Overlapping booking")
+
+        status = "Included" if not reasons else "Excluded"
+        rows.append({
+            "username": provider.get_full_name() or provider.username,
+            "reasons": reasons,
+            "status": status,
+        })
+    return {
+        "booking_locations": booking_locations,
+        "providers": rows,
+    }
 
 # ================================
 # STATIC PAGES
@@ -478,6 +590,8 @@ class BusinessBookingDashboardForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if "provider" in self.fields:
+            self.fields["provider"].queryset = _filtered_provider_queryset(self.instance)
         if self.instance and self.instance.pk:
             services = self.instance.services_needed or []
             addons = self.instance.addons or []
@@ -501,6 +615,18 @@ class BusinessBookingDashboardForm(forms.ModelForm):
             else:
                 self.fields["frequency_type"].initial = ""
 
+    def clean_provider(self):
+        provider = self.cleaned_data.get("provider")
+        if not provider:
+            return provider
+        booking_locations = _booking_location_candidates(self.instance)
+        profile = getattr(provider, "provider_profile", None)
+        if booking_locations and not _provider_matches_location(profile, booking_locations):
+            raise forms.ValidationError("Provider is not in the same or nearby area.")
+        if self.instance and not self.instance.provider_is_available(provider):
+            raise forms.ValidationError("Provider is already assigned to an overlapping booking.")
+        return provider
+
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.services_needed = self._lines_to_list(
@@ -520,6 +646,29 @@ class BusinessBookingDashboardForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class PrivateBookingDashboardForm(forms.ModelForm):
+    class Meta:
+        model = PrivateBooking
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "provider" in self.fields:
+            self.fields["provider"].queryset = _filtered_provider_queryset(self.instance)
+
+    def clean_provider(self):
+        provider = self.cleaned_data.get("provider")
+        if not provider:
+            return provider
+        booking_locations = _booking_location_candidates(self.instance)
+        profile = getattr(provider, "provider_profile", None)
+        if booking_locations and not _provider_matches_location(profile, booking_locations):
+            raise forms.ValidationError("Provider is not in the same or nearby area.")
+        if self.instance and not self.instance.provider_is_available(provider):
+            raise forms.ValidationError("Provider is already assigned to an overlapping booking.")
+        return provider
 
 
 EMOJI_OPTIONS = [
@@ -543,6 +692,91 @@ class BusinessAddonDashboardForm(forms.ModelForm):
     class Meta:
         model = BusinessAddon
         fields = "__all__"
+
+class ProviderProfileDashboardCreateForm(forms.Form):
+    username = forms.CharField(label="Username", max_length=150)
+    email = forms.EmailField(label="Email")
+    first_name = forms.CharField(label="First name", required=False)
+    last_name = forms.CharField(label="Last name", required=False)
+    password1 = forms.CharField(label="Password", widget=forms.PasswordInput)
+    password2 = forms.CharField(label="Confirm password", widget=forms.PasswordInput)
+
+    city = forms.CharField(label="City", required=False)
+    region = forms.CharField(label="Region", required=False)
+    area = forms.CharField(label="Area / District", required=False)
+    nearby_areas = forms.CharField(
+        label="Nearby areas",
+        required=False,
+        help_text="Comma-separated nearby areas.",
+    )
+    bio = forms.CharField(label="Bio", required=False, widget=forms.Textarea(attrs={"rows": 3}))
+    is_active = forms.BooleanField(label="Active", required=False, initial=True)
+
+    def clean(self):
+        cleaned = super().clean()
+        pwd1 = cleaned.get("password1")
+        pwd2 = cleaned.get("password2")
+        if pwd1 and pwd2 and pwd1 != pwd2:
+            self.add_error("password2", "Passwords do not match.")
+        username = cleaned.get("username")
+        if username and User.objects.filter(username=username).exists():
+            self.add_error("username", "Username already exists.")
+        email = cleaned.get("email")
+        if email and User.objects.filter(email=email).exists():
+            self.add_error("email", "Email already exists.")
+        return cleaned
+
+    def save(self):
+        user = User(
+            username=self.cleaned_data["username"],
+            email=self.cleaned_data.get("email", ""),
+            first_name=self.cleaned_data.get("first_name", ""),
+            last_name=self.cleaned_data.get("last_name", ""),
+            is_active=True,
+        )
+        user.set_password(self.cleaned_data["password1"])
+        user.save()
+
+        nearby_raw = self.cleaned_data.get("nearby_areas") or ""
+        nearby_list = [p.strip() for p in nearby_raw.split(",") if p.strip()]
+
+        profile = ProviderProfile.objects.create(
+            user=user,
+            bio=self.cleaned_data.get("bio", ""),
+            is_active=bool(self.cleaned_data.get("is_active")),
+            city=self.cleaned_data.get("city", ""),
+            region=self.cleaned_data.get("region", ""),
+            area=self.cleaned_data.get("area", ""),
+            nearby_areas=nearby_list,
+        )
+        return profile
+
+
+class ProviderProfileDashboardEditForm(forms.ModelForm):
+    nearby_areas_text = forms.CharField(
+        label="Nearby areas",
+        required=False,
+        help_text="Comma-separated nearby areas.",
+    )
+
+    class Meta:
+        model = ProviderProfile
+        fields = ["user", "bio", "is_active", "city", "region", "area"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "user" in self.fields:
+            self.fields["user"].disabled = True
+        if self.instance and self.instance.nearby_areas:
+            self.fields["nearby_areas_text"].initial = ", ".join(self.instance.nearby_areas)
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        raw = self.cleaned_data.get("nearby_areas_text") or ""
+        instance.nearby_areas = [p.strip() for p in raw.split(",") if p.strip()]
+        if commit:
+            instance.save()
+        return instance
 
 
 class DateSurchargeDashboardForm(forms.ModelForm):
@@ -695,7 +929,10 @@ def dashboard_model_list(request, model):
     paginator = Paginator(qs, 12)
     page = paginator.get_page(request.GET.get("page"))
 
-    display_fields = _model_fields(item.model)[:5]
+    if item.slug == "provider-profiles":
+        display_fields = ["user", "city", "region", "area", "nearby_areas", "is_active"]
+    else:
+        display_fields = _model_fields(item.model)[:5]
 
     context = {
         "items": get_dashboard_items(),
@@ -722,12 +959,20 @@ def dashboard_model_create(request, model):
             form=BusinessBookingDashboardForm,
             exclude=_exclude_fields_for_form(item.model),
         )
+    elif item.model == PrivateBooking:
+        Form = modelform_factory(
+            item.model,
+            form=PrivateBookingDashboardForm,
+            exclude=_exclude_fields_for_form(item.model),
+        )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
     elif item.model == DateSurcharge:
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
         Form = ScheduleRuleDashboardForm
+    elif item.model == ProviderProfile:
+        Form = ProviderProfileDashboardCreateForm
     else:
         Form = modelform_factory(
             item.model,
@@ -738,10 +983,13 @@ def dashboard_model_create(request, model):
         form = Form(request.POST, request.FILES)
         form = _bootstrap_form(form)
         if form.is_valid():
-            obj = form.save(commit=False)
-            if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
-                obj.created_by = request.user
-            obj.save()
+            if isinstance(form, forms.ModelForm):
+                obj = form.save(commit=False)
+                if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
+                    obj.created_by = request.user
+                obj.save()
+            else:
+                form.save()
             return redirect("home:dashboard_model_list", model=item.slug)
     else:
         initial = {}
@@ -784,12 +1032,20 @@ def dashboard_model_edit(request, model, pk):
             form=BusinessBookingDashboardForm,
             exclude=_exclude_fields_for_form(item.model),
         )
+    elif item.model == PrivateBooking:
+        Form = modelform_factory(
+            item.model,
+            form=PrivateBookingDashboardForm,
+            exclude=_exclude_fields_for_form(item.model),
+        )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
     elif item.model == DateSurcharge:
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
         Form = ScheduleRuleDashboardForm
+    elif item.model == ProviderProfile:
+        Form = ProviderProfileDashboardEditForm
     else:
         Form = modelform_factory(
             item.model,
@@ -842,6 +1098,8 @@ def dashboard_model_edit(request, model, pk):
         "addons_for_service": addons_for_service,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
+    if item.model in {BusinessBooking, PrivateBooking}:
+        context["provider_debug"] = _provider_debug_payload(obj)
     context.update(_dashboard_notifications())
     return render(request, "dashboard/form.html", context)
 
@@ -956,7 +1214,11 @@ def apply_page(request, job_id=None):
 # ================================
 def all_services_business(request):
     services = BusinessService.objects.all()
-    return render(request, "home/AllServicesBusiness.html", {"services": services})
+    urgent_selected = request.GET.get("urgent") == "1"
+    return render(request, "home/AllServicesBusiness.html", {
+        "services": services,
+        "urgent_selected": urgent_selected,
+    })
 
 
 # ================================
@@ -1250,12 +1512,13 @@ def business_scheduling(request, booking_id):
 
     if request.method == "POST":
 
-        # أخذ البيانات
-        start_date = request.POST.get("start_date")
+        # ??? ????????
+        start_date_raw = request.POST.get("start_date")
         preferred_time = request.POST.get("preferred_time")
+        custom_date_raw = request.POST.get("custom_date") or None
 
-        # التحقق
-        if not start_date or not preferred_time:
+        # ??????
+        if not start_date_raw or not preferred_time:
             return render(request, "home/SchedulingNotes.html", {
                 "booking": booking,
                 "step": step_number,
@@ -1264,11 +1527,22 @@ def business_scheduling(request, booking_id):
                 "error": "Please select a start date and preferred time."
             })
 
+        start_date = parse_date(start_date_raw)
+        custom_date = parse_date(custom_date_raw) if custom_date_raw else None
+        if not start_date or (custom_date_raw and not custom_date):
+            return render(request, "home/SchedulingNotes.html", {
+                "booking": booking,
+                "step": step_number,
+                "total_steps": total_steps,
+                "range_total_steps": range_steps,
+                "error": "Invalid date format. Please choose a valid date."
+            })
+
         _update_business_draft(request, {
-            "start_date": start_date,
+            "start_date": start_date_raw,
             "preferred_time": preferred_time,
             "days_type": request.POST.get("days_type"),
-            "custom_date": request.POST.get("custom_date") or None,
+            "custom_date": custom_date_raw,
             "custom_time": request.POST.get("custom_time") or None,
             "notes": request.POST.get("notes"),
         })
@@ -1290,10 +1564,10 @@ def business_scheduling(request, booking_id):
             services_needed=draft.get("services_needed"),
             addons=draft.get("addons"),
             frequency=draft.get("frequency"),
-            start_date=draft.get("start_date"),
+            start_date=start_date,
             preferred_time=draft.get("preferred_time"),
             days_type=draft.get("days_type"),
-            custom_date=draft.get("custom_date"),
+            custom_date=custom_date,
             custom_time=draft.get("custom_time"),
             notes=draft.get("notes"),
             path_type=draft.get("path_type") or "bundle",
@@ -1304,11 +1578,21 @@ def business_scheduling(request, booking_id):
         if selected_bundle_id:
             created.selected_bundle_id = selected_bundle_id
 
-        created.save()
-        created.log_status(user=request.user, note="Order placed")
-        if created.is_urgent:
-            created.log_status(user=request.user, note="Urgent booking (same day) requested")
-        request.session.pop("business_booking_draft", None)
+        try:
+            created.save()
+            created.log_status(user=request.user, note="Order placed")
+            if created.is_urgent:
+                created.log_status(user=request.user, note="Urgent booking (same day) requested")
+            request.session.pop("business_booking_draft", None)
+        except Exception:
+            logger.exception("Business scheduling failed for draft=%s", draft)
+            return render(request, "home/SchedulingNotes.html", {
+                "booking": booking,
+                "step": step_number,
+                "total_steps": total_steps,
+                "range_total_steps": range_steps,
+                "error": "Something went wrong while placing your booking. Please try again."
+            })
 
         return redirect("home:business_thank_you", booking_id=created.id)
 
@@ -1349,10 +1633,18 @@ def business_thank_you(request, booking_id):
 # ================================================================================================================
 def all_services(request):
     services = PrivateService.objects.all()
-    if request.GET.get("urgent") == "1":
+    urgent_param = request.GET.get("urgent")
+    if urgent_param == "1":
         request.session["urgent_booking"] = True
         request.session.modified = True
-    return render(request, "home/AllServicesPrivate.html", {"services": services})
+    elif urgent_param == "0":
+        request.session.pop("urgent_booking", None)
+        request.session.modified = True
+    urgent_selected = bool(request.session.get("urgent_booking")) or urgent_param == "1"
+    return render(request, "home/AllServicesPrivate.html", {
+        "services": services,
+        "urgent_selected": urgent_selected,
+    })
 
 
 
@@ -1961,7 +2253,8 @@ def private_booking_schedule(request, booking_id):
             print(2)
             # تاريخ
             date = request.POST.get("appointment_date")
-            booking.appointment_date = date if date else None
+            date_obj = parse_date(date) if date else None
+            booking.appointment_date = date_obj if date_obj else None
             print(booking.appointment_date)
             # وقت
             time_window = request.POST.get("appointment_time_window")
@@ -2012,6 +2305,60 @@ def private_booking_schedule(request, booking_id):
         # 3) إعادة حساب السعر
         # -----------------------------
         pricing = calculate_booking_price(booking)
+        duration_minutes = int(pricing.get("duration_minutes") or 0)
+
+        invalid_price = any((service.price or 0) <= 0 for service in services)
+        if invalid_price:
+            messages.error(request, "This service is not bookable yet. Please choose another service.")
+            return render(request, "home/Private_scheduale.html", {
+                "booking": booking,
+                "services": services,
+                "date_rules": date_rules_json,
+                "schedule_rules": schedule_rules_json,
+                "pricing": pricing,
+            })
+
+        if duration_minutes <= 0:
+            messages.error(request, "Please complete required options to calculate a valid duration.")
+            return render(request, "home/Private_scheduale.html", {
+                "booking": booking,
+                "services": services,
+                "date_rules": date_rules_json,
+                "schedule_rules": schedule_rules_json,
+                "pricing": pricing,
+            })
+
+        if mode == "same":
+            if not booking.appointment_date:
+                messages.error(request, "Please select a valid appointment date.")
+                return render(request, "home/Private_scheduale.html", {
+                    "booking": booking,
+                    "services": services,
+                    "date_rules": date_rules_json,
+                    "schedule_rules": schedule_rules_json,
+                    "pricing": pricing,
+                })
+            time_hint = booking.appointment_time_window or ""
+            time_candidates = booking._parse_time_candidates(time_hint)
+            if not time_candidates:
+                messages.error(request, "Please select a valid time window.")
+                return render(request, "home/Private_scheduale.html", {
+                    "booking": booking,
+                    "services": services,
+                    "date_rules": date_rules_json,
+                    "schedule_rules": schedule_rules_json,
+                    "pricing": pricing,
+                })
+            start_time = time_candidates[0]
+            tz = timezone.get_current_timezone()
+            booking.scheduled_at = timezone.make_aware(
+                datetime.combine(booking.appointment_date, start_time),
+                tz
+            )
+        else:
+            booking.scheduled_at = None
+
+        booking.quoted_duration_minutes = duration_minutes
         booking.pricing_details = pricing
         booking.total_price = pricing["final"]
         booking.subtotal = pricing["subtotal"]
@@ -2107,6 +2454,60 @@ def private_price_api(request, booking_id):
         "final": pricing["final"],
         "duration_hours": pricing.get("duration_hours", 0),
         "duration_seconds": pricing.get("duration_seconds", 0),
+    })
+
+
+def private_provider_availability_api(request):
+    date_str = request.GET.get("date")
+    booking_id = request.GET.get("booking_id")
+    if not date_str or not booking_id:
+        return JsonResponse({"error": "Missing date or booking_id"}, status=400)
+
+    date_obj = parse_date(date_str)
+    if not date_obj:
+        return JsonResponse({"error": "Invalid date"}, status=400)
+
+    booking = get_object_or_404(PrivateBooking, id=booking_id)
+
+    duration_minutes = int(booking.quoted_duration_minutes or 0)
+    if duration_minutes <= 0:
+        pricing = calculate_booking_price(booking)
+        duration_minutes = int(pricing.get("duration_minutes") or 0)
+
+    if duration_minutes <= 0:
+        return JsonResponse({"error": "Invalid duration"}, status=400)
+
+    booking.quoted_duration_minutes = duration_minutes
+
+    try:
+        slot_size = int(request.GET.get("slot_size", 30))
+    except ValueError:
+        slot_size = 30
+    slot_size = max(5, min(slot_size, 120))
+
+    providers = select_nearest_provider(booking, date_obj, slot_size_minutes=slot_size)
+
+    data = []
+    for provider, earliest in providers:
+        slots = generate_slots(
+            provider,
+            date_obj,
+            duration_minutes,
+            slot_size_minutes=slot_size,
+        )
+        data.append({
+            "provider_id": provider.id,
+            "provider_name": provider.get_full_name() or provider.username,
+            "earliest_slot": earliest.isoformat() if earliest else None,
+            "slots": [s.isoformat() for s in slots],
+            "available_after_minutes": provider_available_after_minutes(provider, timezone.now()),
+        })
+
+    return JsonResponse({
+        "date": date_str,
+        "duration_minutes": duration_minutes,
+        "slot_size_minutes": slot_size,
+        "providers": data,
     })
 
 

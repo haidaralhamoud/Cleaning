@@ -190,6 +190,61 @@
     </div>
   </div>
 
+  {% if provider_debug %}
+    <div class="card shadow-sm mt-3">
+      <div class="card-body">
+        <h5 class="mb-3">Provider Debug</h5>
+        <div class="mb-3">
+          <div class="fw-semibold">Booking location candidates</div>
+          {% if provider_debug.booking_locations %}
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              {% for loc in provider_debug.booking_locations %}
+                <span class="badge bg-light text-dark border">{{ loc }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-muted small">No location found on this booking.</div>
+          {% endif %}
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Provider</th>
+                <th>Status</th>
+                <th>Reasons</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in provider_debug.providers %}
+                <tr>
+                  <td>{{ row.username }}</td>
+                  <td>
+                    {% if row.status == "Included" %}
+                      <span class="badge bg-success">Included</span>
+                    {% else %}
+                      <span class="badge bg-danger">Excluded</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if row.reasons %}
+                      {% for r in row.reasons %}
+                        <span class="badge bg-light text-dark border me-1">{{ r }}</span>
+                      {% endfor %}
+                    {% else %}
+                      <span class="text-muted small">—</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
   {% if item.slug == "service-cards" or item.slug == "service-content" %}
   <script>
     document.addEventListener("DOMContentLoaded", () => {

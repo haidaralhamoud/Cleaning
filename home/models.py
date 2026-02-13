@@ -1,9 +1,10 @@
 from decimal import Decimal
+import re
+from datetime import timedelta, time, datetime
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.utils import timezone
-from datetime import timedelta
 from django.utils import timezone
 
 from accounts.models import ChatThread, DiscountCode
@@ -31,6 +32,9 @@ class BaseBooking(models.Model):
         ("REFUNDED", "Refunded"),
     ]
 
+    INACTIVE_STATUSES = {"COMPLETED", "CANCELLED_BY_CUSTOMER", "NO_SHOW", "REFUNDED"}
+    DEFAULT_DURATION_MINUTES = 120
+
     status = models.CharField(
         max_length=30,
         choices=STATUS_CHOICES,
@@ -53,6 +57,14 @@ class BaseBooking(models.Model):
     quoted_duration_minutes = models.PositiveIntegerField(
         default=0,
         help_text="Expected service duration in minutes"
+    )
+    conflict_override = models.BooleanField(
+        default=False,
+        help_text="Admin override when a scheduling conflict exists"
+    )
+    conflict_override_note = models.CharField(
+        max_length=255,
+        blank=True
     )
 
     # =========================
@@ -121,6 +133,174 @@ class BaseBooking(models.Model):
             changed_by=user,
             note=note
         )
+
+    def _booking_type(self):
+        return "private" if self.__class__.__name__ == "PrivateBooking" else "business"
+
+    def _get_booking_date(self):
+        if self.__class__.__name__ == "PrivateBooking":
+            return self.appointment_date
+        return self.custom_date or self.start_date
+
+    def _get_time_hint(self):
+        if self.__class__.__name__ == "PrivateBooking":
+            return self.appointment_time_window
+        return self.custom_time or self.preferred_time
+
+    def _parse_time_candidates(self, raw):
+        if not raw:
+            return []
+        raw_lower = raw.lower()
+        candidates = []
+        matches = re.findall(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", raw_lower)
+        for hour_str, minute_str, meridian in matches:
+            hour = int(hour_str)
+            minute = int(minute_str or 0)
+            if meridian:
+                if meridian == "pm" and hour != 12:
+                    hour += 12
+                if meridian == "am" and hour == 12:
+                    hour = 0
+            if 0 <= hour <= 23 and 0 <= minute <= 59:
+                candidates.append(time(hour=hour, minute=minute))
+
+        if candidates:
+            return candidates
+
+        if "morning" in raw_lower:
+            return [time(hour=9, minute=0)]
+        if "afternoon" in raw_lower:
+            return [time(hour=13, minute=0)]
+        if "evening" in raw_lower or "night" in raw_lower:
+            return [time(hour=17, minute=0)]
+        return []
+
+    def _parse_duration_minutes(self):
+        if self.quoted_duration_minutes:
+            return int(self.quoted_duration_minutes)
+        duration_raw = None
+        if self.__class__.__name__ == "PrivateBooking":
+            duration_raw = self.duration_hours
+        if duration_raw:
+            match = re.search(r"(\d+(?:\.\d+)?)", str(duration_raw))
+            if match:
+                try:
+                    return int(float(match.group(1)) * 60)
+                except ValueError:
+                    pass
+        return self.DEFAULT_DURATION_MINUTES
+
+    def get_service_window(self):
+        if self.scheduled_at and self.quoted_duration_minutes:
+            start_dt = self.scheduled_at
+            if timezone.is_naive(start_dt):
+                start_dt = timezone.make_aware(start_dt, timezone.get_current_timezone())
+            end_dt = start_dt + timedelta(minutes=int(self.quoted_duration_minutes))
+            return start_dt, end_dt
+
+        booking_date = self._get_booking_date()
+        if not booking_date:
+            return None, None
+
+        time_hint = self._get_time_hint() or ""
+        times = self._parse_time_candidates(time_hint)
+        duration_minutes = self._parse_duration_minutes()
+        tz = timezone.get_current_timezone()
+
+        if len(times) >= 2:
+            start_time = times[0]
+            end_time = times[1]
+            start_dt = timezone.make_aware(datetime.combine(booking_date, start_time), tz)
+            end_dt = timezone.make_aware(datetime.combine(booking_date, end_time), tz)
+            if end_dt <= start_dt:
+                end_dt = start_dt + timedelta(minutes=duration_minutes)
+            return start_dt, end_dt
+
+        if len(times) == 1:
+            start_dt = timezone.make_aware(datetime.combine(booking_date, times[0]), tz)
+            end_dt = start_dt + timedelta(minutes=duration_minutes)
+            return start_dt, end_dt
+
+        start_dt = timezone.make_aware(datetime.combine(booking_date, time(hour=0, minute=0)), tz)
+        end_dt = timezone.make_aware(datetime.combine(booking_date, time(hour=23, minute=59)), tz)
+        return start_dt, end_dt
+
+    def provider_is_available(self, provider):
+        if not provider:
+            return True
+
+        target_start, target_end = self.get_service_window()
+        if not target_start or not target_end:
+            return True
+
+        from home.models import PrivateBooking, BusinessBooking
+
+        private_qs = PrivateBooking.objects.filter(provider=provider).exclude(
+            status__in=self.INACTIVE_STATUSES
+        )
+        business_qs = BusinessBooking.objects.filter(provider=provider).exclude(
+            status__in=self.INACTIVE_STATUSES
+        )
+
+        if self.__class__.__name__ == "PrivateBooking":
+            private_qs = private_qs.exclude(id=self.id)
+        else:
+            business_qs = business_qs.exclude(id=self.id)
+
+        active_bookings = list(private_qs) + list(business_qs)
+
+        for booking in active_bookings:
+            other_start, other_end = booking.get_service_window()
+            if not other_start or not other_end:
+                return False
+            if target_start.date() != other_start.date():
+                continue
+            if target_start < other_end and other_start < target_end:
+                return False
+        return True
+
+    def extend_duration(self, extra_minutes, allow_conflict=False, note=""):
+        if extra_minutes is None or int(extra_minutes) <= 0:
+            raise ValidationError("Extra minutes must be greater than zero.")
+        if not self.scheduled_at:
+            raise ValidationError("Booking must have scheduled_at to extend duration.")
+
+        new_duration = int(self.quoted_duration_minutes or 0) + int(extra_minutes)
+        if new_duration <= 0:
+            raise ValidationError("Resulting duration must be greater than zero.")
+
+        start_dt = self.scheduled_at
+        if timezone.is_naive(start_dt):
+            start_dt = timezone.make_aware(start_dt, timezone.get_current_timezone())
+        new_end = start_dt + timedelta(minutes=new_duration)
+
+        if self.provider:
+            from home.models import PrivateBooking, BusinessBooking
+            private_qs = PrivateBooking.objects.filter(provider=self.provider).exclude(
+                status__in=self.INACTIVE_STATUSES
+            )
+            business_qs = BusinessBooking.objects.filter(provider=self.provider).exclude(
+                status__in=self.INACTIVE_STATUSES
+            )
+            if self.__class__.__name__ == "PrivateBooking":
+                private_qs = private_qs.exclude(id=self.id)
+            else:
+                business_qs = business_qs.exclude(id=self.id)
+
+            for booking in list(private_qs) + list(business_qs):
+                other_start, other_end = booking.get_service_window()
+                if not other_start or not other_end:
+                    continue
+                if start_dt < other_end and other_start < new_end:
+                    if not allow_conflict:
+                        raise ValidationError("Extension conflicts with another booking.")
+                    self.conflict_override = True
+                    if note:
+                        self.conflict_override_note = note
+                    break
+
+        self.quoted_duration_minutes = new_duration
+        self.save(update_fields=["quoted_duration_minutes", "conflict_override", "conflict_override_note"])
 
     # =========================
     # REFUND ACTION (🔥 الأساس)
@@ -284,6 +464,9 @@ class BaseBooking(models.Model):
     def assign_provider(self, provider, user=None):
         if self.provider == provider and self.status != "ORDERED":
             return
+
+        if not self.provider_is_available(provider):
+            raise ValueError("Provider is already assigned to an overlapping booking.")
 
         self.provider = provider
         self.status = "ASSIGNED"

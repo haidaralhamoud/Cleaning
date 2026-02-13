@@ -51,6 +51,91 @@ body {
   margin-top: 6px;
 }
 
+.urgent-banner {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 2px dashed rgba(0, 163, 200, 0.45);
+  background: linear-gradient(90deg, rgba(0, 163, 200, 0.08), rgba(113, 178, 71, 0.08));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 12px 26px rgba(0, 163, 200, 0.08);
+}
+
+.urgent-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.urgent-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(0, 163, 200, 0.18);
+  color: var(--brand);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Inter", sans-serif;
+  flex: 0 0 auto;
+}
+
+.urgent-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--ink-900);
+  font-family: "Inter", sans-serif;
+}
+
+.urgent-subtitle {
+  font-size: 13px;
+  color: var(--ink-700);
+  font-family: "Inter", sans-serif;
+}
+
+.urgent-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.urgent-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 163, 200, 0.35);
+  background: #fff;
+  color: var(--brand);
+  font-weight: 700;
+  font-family: "Inter", sans-serif;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  box-shadow: 0 10px 20px rgba(0, 163, 200, 0.1);
+}
+
+.urgent-btn.is-active {
+  background: var(--brand);
+  color: #fff;
+  border-color: var(--brand);
+  box-shadow: 0 14px 28px rgba(0, 163, 200, 0.22);
+}
+
+.urgent-btn.urgent-yes {
+  background: rgba(113, 178, 71, 0.12);
+  color: #4d8b2f;
+  border-color: rgba(113, 178, 71, 0.45);
+}
+
+.urgent-btn.urgent-yes.is-active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
 .divider {
   border: none;
   height: 2px;
@@ -264,5 +349,13 @@ body {
   .quote-btn {
     width: 100%;
     text-align: center;
+  }
+  .urgent-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .urgent-actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

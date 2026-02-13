@@ -145,18 +145,7 @@ body {
   transform: translateY(-1px);
 }
 
-/* Mobile header */
-.mobile-header {
-  display: none;
-  background: #fff;
-  padding: 10px 16px;
-  box-shadow: var(--shadow-sm);
-  align-items: center;
-  justify-content: center;
-  position: sticky;
-  top: 0;
-  z-index: 90;
-}
+
 
 .menu-toggle.floating {
   position: fixed;

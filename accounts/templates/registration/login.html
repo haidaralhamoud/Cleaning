@@ -1,6 +1,7 @@
 ﻿{% load static %}
 
 {% load bootstrap4 %}
+{% load socialaccount %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -54,9 +55,9 @@
 
         <div class="divider"><span>OR</span></div>
 
-        <button type="button" class="btn-social google">
+        <a href="{% url 'accounts:google_login_start' %}" class="btn-social google">
           <img src="{% static 'images/google0.png'%}" alt="Google Icon"> Continue with Google
-        </button>
+        </a>
 
         <button type="button" class="btn-social bankid">
           <img src="{% static 'images/attachment-6-10.png'%}" alt="BankID Icon"> Continue with BankID

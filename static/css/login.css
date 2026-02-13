@@ -247,6 +247,7 @@ body {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+  text-decoration: none;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
 }
@@ -263,6 +264,13 @@ body {
 
 .btn-social.google {
   background: linear-gradient(135deg, #4285f4 0%, #1a73e8 100%);
+}
+
+.btn-social.is-disabled {
+  filter: grayscale(0.6);
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .btn-social.bankid {

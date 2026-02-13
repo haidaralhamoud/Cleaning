@@ -131,6 +131,11 @@ path(
     views.private_price_api,
     name="private_price_api"
 ),
+path(
+    "private/api/providers/availability/",
+    views.private_provider_availability_api,
+    name="private_provider_availability_api"
+),
 
 path(
     "private/api/booking/<int:booking_id>/update-answer/",

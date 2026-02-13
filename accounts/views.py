@@ -44,6 +44,7 @@ from .models import (
     BookingRequestFixAttachment,
     CustomerNotification,
     ProviderAdminMessage,
+    ProviderProfile,
 )
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
@@ -71,7 +72,7 @@ from django.http import HttpResponse, JsonResponse
 import json
 from django.db.models import Avg, Count
 User = get_user_model()
-from .forms import ProviderProfileForm
+from .forms import ProviderProfileForm, ProviderLocationForm
 # ======================================================
 # AUTH
 # ======================================================
@@ -84,6 +85,26 @@ class RememberMeLoginView(LoginView):
         else:
             self.request.session.set_expiry(0)
         return response
+
+
+def google_login_start(request):
+    try:
+        from allauth.socialaccount.models import SocialApp
+        has_google = SocialApp.objects.filter(provider="google").exists()
+    except Exception:
+        has_google = False
+
+    if not has_google:
+        messages.error(request, "Google login is not configured yet.")
+        return redirect("login")
+
+    try:
+        from allauth.socialaccount.providers.google.views import oauth2_login
+    except Exception:
+        messages.error(request, "Google login is not available right now.")
+        return redirect("login")
+
+    return oauth2_login(request)
 # ======================================================
 # SIGN UP
 # ======================================================
@@ -2242,14 +2263,19 @@ def provider_profile(request):
     if not _provider_required(request.user):
         return redirect("accounts:customer_profile_view")
 
+    provider_profile, _ = ProviderProfile.objects.get_or_create(user=request.user)
+
     if request.method == "POST":
         form = ProviderProfileForm(request.POST, instance=request.user)
-        if form.is_valid():
+        location_form = ProviderLocationForm(request.POST, instance=provider_profile)
+        if form.is_valid() and location_form.is_valid():
             form.save()
+            location_form.save()
             messages.success(request, "Profile updated successfully")
             return redirect("accounts:provider_profile")
     else:
         form = ProviderProfileForm(instance=request.user)
+        location_form = ProviderLocationForm(instance=provider_profile)
 
     active_private = PrivateBooking.objects.filter(
         provider=request.user
@@ -2277,6 +2303,7 @@ def provider_profile(request):
 
     return render(request, "accounts/provider/provider_profile.html", {
         "form": form,
+        "location_form": location_form,
         "active_orders": active_private + active_business,
         "completed_orders": completed_private + completed_business,
         "unread_admin": unread_admin,

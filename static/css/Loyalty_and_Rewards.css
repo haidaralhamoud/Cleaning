@@ -177,11 +177,35 @@ body{
 .mobile-header{display:none;background:#fff;padding:10px 16px;box-shadow:var(--shadow);align-items:center;justify-content:center;position:sticky;top:0;z-index:90}
 .menu-toggle.floating{position:fixed;top:14px;left:14px;width:44px;height:44px;background:var(--primary);border:none;border-radius:50%;display:none;align-items:center;justify-content:center;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,0.25);z-index:200}
 .menu-toggle.floating:hover{background:var(--primary-dark)}
+.menu-toggle-wrap{position:fixed;top:0;left:0;width:0;height:0;pointer-events:none}
+.menu-toggle-wrap .menu-toggle{pointer-events:auto}
 
 @media (max-width: 992px){
-  .layout{flex-direction:column;padding-top:80px}
+  .layout{
+    flex-direction:column;
+    padding-top:80px;
+    align-items:center !important;
+  }
   .sidebar{width:100%;order:2;position:relative;top:auto}
-  .main{order:1;display:flex;flex-direction:column;align-items:center}
+  .main{
+    order:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100% !important;
+    max-width:520px !important;
+    margin-left:auto !important;
+    margin-right:auto !important;
+  }
+  .page-title{text-align:center}
+  .card,
+  .points-box,
+  .tiers,
+  .milestones,
+  .rewards,
+  .refer,
+  .grid-2,
+  .promo{width:100%}
   .tiers,.rewards,.grid-2{grid-template-columns:1fr}
 }
 @media (max-width: 768px){

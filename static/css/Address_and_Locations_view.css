@@ -325,7 +325,7 @@ body{
 /* ===== Mobile Header ===== */
 .mobile-header {
   display: none;
-  background: #fff;
+
   padding: 10px 16px;
   box-shadow: var(--shadow);
   align-items: center;

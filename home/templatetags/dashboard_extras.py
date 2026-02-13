@@ -18,3 +18,10 @@ def attr(obj, name):
         return getattr(obj, name)
     except Exception:
         return ""
+
+@register.filter
+def human_label(value):
+    if not value:
+        return ""
+    text = str(value).replace("_", " ").strip()
+    return " ".join(word.capitalize() for word in text.split())
