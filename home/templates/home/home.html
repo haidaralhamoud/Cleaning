@@ -46,7 +46,7 @@
     }
 
   </style>
-  <title>Document</title>
+  <title>Hembla experten </title>
 </head>
 <body>
 {% include "home/includes/main_header.html" %}
@@ -70,12 +70,12 @@
         </p>
         <div class="hero-buttons">
           <div class="same-day-dropdown">
-            <a class="btn btn-primary same-day-button" href="{% url 'home:all_services_private' %}">
+            <button type="button" class="btn btn-primary same-day-button">
               Book Cleaning <span class="caret" aria-hidden="true"></span>
-            </a>
+            </button>
             <div class="same-day-menu" aria-label="Book Cleaning options">
-              <a href="{% url 'home:all_services_private' %}?urgent=1">Private Booking</a>
-              <a href="{% url 'home:business_start_booking' %}?urgent=1">Business Booking</a>
+              <a href="{% url 'home:all_services_private' %}">Private Booking</a>
+              <a href="http://127.0.0.1:8000/business/services/">Business Booking</a>
             </div>
           </div>
           <div class="same-day-dropdown">
@@ -84,7 +84,7 @@
             </button>
             <div class="same-day-menu" aria-label="Same Day Service options">
               <a href="{% url 'home:all_services_private' %}?urgent=1">Private Booking</a>
-              <a href="{% url 'home:business_start_booking' %}?urgent=1">Business Booking</a>
+              <a href="http://127.0.0.1:8000/business/services/">Business Booking</a>
             </div>
           </div>
           {% if user.is_authenticated %}

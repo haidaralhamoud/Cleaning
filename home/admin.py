@@ -5,6 +5,8 @@ from django.contrib import admin, messages
 from django.shortcuts import redirect
 from django.urls import path
 from django import forms
+from django.contrib.auth import get_user_model
+import re
 from .models import (
     Contact,
     Job,
@@ -43,6 +45,7 @@ from accounts.models import BookingChecklist   # ✅ استيراد فقط
 # # Register your models here.
 # أعلى الملف
 from accounts.models import PointsTransaction
+User = get_user_model()
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
@@ -93,6 +96,74 @@ class BookingChecklistInline(admin.StackedInline):
     model = BookingChecklist
     extra = 0
     can_delete = False
+
+
+def _normalize_location(value):
+    if not value:
+        return ""
+    return re.sub(r"\s+", " ", str(value)).strip().lower()
+
+
+def _booking_location_candidates(booking):
+    if not booking:
+        return []
+    values = []
+    if hasattr(booking, "area") and booking.area:
+        values.append(booking.area)
+    if hasattr(booking, "address") and booking.address:
+        values.append(booking.address)
+    if hasattr(booking, "office_address") and booking.office_address:
+        values.append(booking.office_address)
+    return [_normalize_location(v) for v in values if v]
+
+
+def _provider_matches_location(provider_profile, booking_locations):
+    if not booking_locations:
+        return True
+    if not provider_profile:
+        return False
+    provider_values = [
+        provider_profile.area,
+        provider_profile.city,
+        provider_profile.region,
+    ] + (provider_profile.nearby_areas or [])
+    provider_values = [_normalize_location(v) for v in provider_values if v]
+    if not provider_values:
+        return False
+    for booking_loc in booking_locations:
+        for provider_loc in provider_values:
+            if not booking_loc or not provider_loc:
+                continue
+            if booking_loc == provider_loc:
+                return True
+            if booking_loc in provider_loc or provider_loc in booking_loc:
+                return True
+    return False
+
+
+def _filtered_provider_queryset(booking):
+    providers = (
+        User.objects.filter(provider_profile__is_active=True)
+        .select_related("provider_profile")
+        .order_by("username")
+    )
+    if not booking:
+        return providers
+
+    booking_locations = _booking_location_candidates(booking)
+    allowed_ids = []
+    for provider in providers:
+        profile = getattr(provider, "provider_profile", None)
+        if not _provider_matches_location(profile, booking_locations):
+            continue
+        if not booking.provider_is_available(provider):
+            continue
+        allowed_ids.append(provider.id)
+
+    if booking.provider_id and booking.provider_id not in allowed_ids:
+        allowed_ids.append(booking.provider_id)
+
+    return User.objects.filter(id__in=allowed_ids).order_by("username")
 
 @admin.register(BusinessBooking)
 class BusinessBookingAdmin(admin.ModelAdmin):
@@ -315,6 +386,16 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
         return super().response_change(request, obj)
 
+    def get_form(self, request, obj=None, **kwargs):
+        request._booking_obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "provider":
+            booking = getattr(request, "_booking_obj", None)
+            kwargs["queryset"] = _filtered_provider_queryset(booking)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 
 
@@ -339,7 +420,16 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         old = None
         if change:
-            old = BusinessBooking.objects.get(pk=obj.pk)
+            old = PrivateBooking.objects.get(pk=obj.pk)
+
+        if obj.provider and not obj.provider_is_available(obj.provider):
+            messages.error(request, "Provider is already assigned to an overlapping booking.")
+            if old:
+                obj.provider = old.provider
+            else:
+                obj.provider = None
+            obj.save(update_fields=["provider"])
+            return
 
         super().save_model(request, obj, form, change)
 
@@ -738,6 +828,8 @@ class PrivateBookingAdmin(admin.ModelAdmin):
         ("ZIP Code Check", {"fields": ("zip_code", "zip_is_available")}),
         ("Booking Method", {"fields": ("booking_method", "schedule_mode")}),
 
+        ("Assignment", {"fields": ("provider",)}),
+
         ("Category & Services", {
             "fields": ("main_category", "selected_services_pretty", "service_answers_pretty")
         }),
@@ -802,11 +894,11 @@ class PrivateBookingAdmin(admin.ModelAdmin):
         # View mode: readonly
         ro = tuple(model_fields) + pretty
 
-        # Edit mode: allow refund fields
+        # Edit mode: allow refund fields + provider assignment
         if request.GET.get("edit") == "1":
             ro = tuple(
                 f for f in model_fields
-                if f not in ("refund_amount", "refund_reason", "is_refunded")
+                if f not in ("refund_amount", "refund_reason", "is_refunded", "provider")
             ) + pretty
 
         # إذا refunded: قفل كل شي
@@ -822,6 +914,15 @@ class PrivateBookingAdmin(admin.ModelAdmin):
         old = None
         if change:
             old = BusinessBooking.objects.get(pk=obj.pk)
+
+        if obj.provider and not obj.provider_is_available(obj.provider):
+            messages.error(request, "Provider is already assigned to an overlapping booking.")
+            if old:
+                obj.provider = old.provider
+            else:
+                obj.provider = None
+            obj.save(update_fields=["provider"])
+            return
 
         super().save_model(request, obj, form, change)
 
@@ -841,6 +942,16 @@ class PrivateBookingAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def get_form(self, request, obj=None, **kwargs):
+        request._booking_obj = obj
+        return super().get_form(request, obj, **kwargs)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "provider":
+            booking = getattr(request, "_booking_obj", None)
+            kwargs["queryset"] = _filtered_provider_queryset(booking)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 @admin.register(CallRequest)
 class CallRequestAdmin(admin.ModelAdmin):

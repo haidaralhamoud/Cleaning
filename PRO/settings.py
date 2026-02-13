@@ -42,22 +42,39 @@ ALLOWED_HOSTS = [
     'www.hembla-experten.se',
     '45.93.137.166',
 ]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://hembla-experten.se",
+    "https://www.hembla-experten.se",
+]
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
+SITE_ID = 1
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+SOCIALACCOUNT_QUERY_EMAIL = True
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
 # Application definition
 
 INSTALLED_APPS = [
     'jazzmin',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sites',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap4',
     'home',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
     
 ]
 
@@ -97,6 +114,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'PRO.middleware.AdminSiteAccessGuard',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -104,6 +122,7 @@ MIDDLEWARE = [
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailPhoneUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 ROOT_URLCONF = 'PRO.urls'
 
@@ -187,7 +206,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
@@ -201,4 +220,4 @@ STATICFILES_DIRS = [
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR, "media")
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False

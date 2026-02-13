@@ -195,15 +195,15 @@
   background: transparent;
   border: none;
   color: #00a3c8;
-  width: 34px;
-  height: 24px;
+  width: 36px;
+  height: 28px;
   padding: 0;
   cursor: pointer;
 }
 
 .menu-toggle .menu-icon {
   position: relative;
-  width: 22px;
+  width: 24px;
   height: 16px;
   display: inline-block;
 }

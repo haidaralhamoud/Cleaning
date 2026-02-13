@@ -43,7 +43,7 @@
           <div class="form-group">
             <label for="start-date">Desired start date</label>
             <div class="date-input">
-              <input type="date" id="start-date" name="start_date_tmp" required>
+              <input type="date" id="start-date" name="start_date_tmp" required readonly>
               <button type="button" class="date-trigger" data-date-trigger="start-date" aria-label="Open calendar"></button>
             </div>
           </div>
@@ -92,7 +92,7 @@
                 <span>Custom date</span>
               </label>
               <div class="date-input">
-                <input type="date" id="custom-date" name="custom_date_tmp" disabled>
+                <input type="date" id="custom-date" name="custom_date_tmp" disabled readonly>
                 <button type="button" class="date-trigger" data-date-trigger="custom-date" aria-label="Open calendar"></button>
               </div>
             </div>
@@ -133,6 +133,31 @@
   {% include "home/includes/footer.html" %}
 
   <script>
+    document.querySelectorAll("input[type='date']").forEach((input) => {
+      input.addEventListener("focus", () => {
+        if (typeof input.showPicker === "function") {
+          input.showPicker();
+        }
+      });
+      input.addEventListener("click", () => {
+        if (typeof input.showPicker === "function") {
+          input.showPicker();
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-date-trigger]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetId = btn.getAttribute("data-date-trigger");
+        const input = document.getElementById(targetId);
+        if (!input) return;
+        input.focus();
+        if (typeof input.showPicker === "function") {
+          input.showPicker();
+        }
+      });
+    });
+
     document.querySelectorAll("input[name='days']").forEach((radio) => {
       radio.addEventListener("change", () => {
         const value = radio.value;

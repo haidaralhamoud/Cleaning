@@ -297,13 +297,12 @@
 
 <!-- ================= HEADER ================= -->
 {% include "home/includes/main_header.html" %}
-<div class="mobile-header">
+<div >
   <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
     <span class="arrow">&#8250;</span>
   </button>
-  
+  <div class="mobile-title"></div>
 </div>
-
 <!-- ================= LAYOUT ================= -->
 <div class="layout">
 
@@ -384,13 +383,12 @@
 
     <!-- ================= Column 1 ================= -->
     <div class="col">
-      {% if customer.profile_photo %}
-        <img src="{{ customer.profile_photo.url }}" alt="profile" class="profile-icon profile-photo">
-      {% else %}
-        <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon profile-photo">
-      {% endif %}
-
-      <div class="field">
+      <div class="field field-photo">
+        {% if customer.profile_photo %}
+          <img src="{{ customer.profile_photo.url }}" alt="profile" class="profile-icon profile-photo">
+        {% else %}
+          <img src="{% static 'images/ellipse-270.png'%}" alt="profile" class="profile-icon profile-photo">
+        {% endif %}
         <div class="label">Profile photo</div>
         <div class="val view-only">Tap edit to update</div>
         <div class="edit-only" style="display:none">
@@ -401,7 +399,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-email">
         <div class="label">Email Address</div>
         <div class="val view-only">{{ customer.email }}</div>
         <div class="edit-only" style="display:none">
@@ -409,7 +407,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-language">
         <div class="label">Preferred language</div>
         <div class="val view-only">{{ customer.get_preferred_language_display }}</div>
         <div class="edit-only" style="display:none">
@@ -417,7 +415,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-dob">
         <div class="label">Date of birth</div>
         <div class="val view-only">
           {% if customer.date_of_birth %}
@@ -432,7 +430,7 @@
 
     <!-- ================= Column 2 ================= -->
     <div class="col">
-      <div class="field">
+      <div class="field field-first-name">
         <div class="label">First Name</div>
         <div class="val view-only">{{ customer.first_name }}</div>
         <div class="edit-only" style="display:none">
@@ -440,7 +438,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-country">
         <div class="label">Country code</div>
         <div class="val view-only">{{ customer.country_code|default:"-" }}</div>
         <div class="edit-only" style="display:none">
@@ -448,7 +446,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-contact">
         <div class="label">Preferred contact method</div>
         <div class="val view-only">
           {{ customer.get_preferred_contact_method_display|default:"-" }}
@@ -458,7 +456,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-gender">
         <div class="label">Gender</div>
         <div class="val view-only">{{ customer.gender|default:"-"|capfirst }}</div>
         <div class="edit-only" style="display:none">
@@ -469,7 +467,7 @@
 
     <!-- ================= Column 3 ================= -->
     <div class="col">
-      <div class="field">
+      <div class="field field-last-name">
         <div class="label">Last Name</div>
         <div class="val view-only">{{ customer.last_name }}</div>
         <div class="edit-only" style="display:none">
@@ -477,7 +475,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-phone">
         <div class="label">Phone number</div>
         <div class="val view-only">{{ customer.phone }}</div>
         <div class="edit-only" style="display:none">
@@ -485,7 +483,7 @@
         </div>
       </div>
 
-      <div class="field">
+      <div class="field field-pronouns">
         <div class="label">Pronouns</div>
         <div class="val view-only">{{ customer.pronouns|default:"-" }}</div>
         <div class="edit-only" style="display:none">
@@ -651,14 +649,24 @@
 
         <div class="right-column">
           <article class="card side">
-            <div class="side-head"><img src="{% static 'images/heart0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil0.png'%}"></button></div>
+            <div class="side-head">
+              <img src="{% static 'images/heart0.png'%}" class="side-ico">
+              <a href="{% url 'accounts:Service_Preferences' %}" class="edit-btn" aria-label="Edit service preferences">
+                <img src="{% static 'images/edit-pencil0.png'%}">
+              </a>
+            </div>
             <h3 class="side-title">Service<br>Preferences</h3>
             <p class="side-text">Set your preferences for cleaning services.</p>
             <a href="{% url 'accounts:Service_Preferences' %}"><button class="btn btn-primary full">View preferences</button></a>
           </article>
 
           <article class="card side">
-            <div class="side-head"><img src="{% static 'images/subscription0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil3.png'%}"></button></div>
+            <div class="side-head">
+              <img src="{% static 'images/subscription0.png'%}" class="side-ico">
+              <button class="edit-btn js-open-subscription" type="button" aria-label="Edit subscription">
+                <img src="{% static 'images/edit-pencil3.png'%}">
+              </button>
+            </div>
             <h3 class="side-title">Subscription</h3>
             <p class="side-text">
               {% if subscription.status == "cancelled" %}
@@ -671,7 +679,12 @@
           </article>
 
           <article class="card side">
-            <div class="side-head"><img src="{% static 'images/receive-cash0.png'%}" class="side-ico"><button class="edit-btn"><img src="{% static 'images/edit-pencil4.png'%}"></button></div>
+            <div class="side-head">
+              <img src="{% static 'images/receive-cash0.png'%}" class="side-ico">
+              <a href="{% url 'accounts:Payment_and_Billing' %}" class="edit-btn" aria-label="Edit payment and billing">
+                <img src="{% static 'images/edit-pencil4.png'%}">
+              </a>
+            </div>
             <h3 class="side-title">Payment & Billing</h3>
             <p class="side-text">Next billing date : Oct 25, 2024</p>
              <a href="{% url 'accounts:Payment_and_Billing' %}"><button class="btn btn-primary full">View billing Details</button></a>
@@ -819,9 +832,9 @@ function toggleBasicEdit() {
 
   const editing = editFields[0].style.display === 'block';
 
-  viewFields.forEach(el => el.style.display = editing  'block' : 'none');
-  editFields.forEach(el => el.style.display = editing  'none' : 'block');
-  if (actions) actions.style.display = editing  'none' : 'block';
+  viewFields.forEach(el => el.style.display = editing ? 'block' : 'none');
+  editFields.forEach(el => el.style.display = editing ? 'none' : 'block');
+  if (actions) actions.style.display = editing ? 'none' : 'block';
 }
 </script>
 
@@ -863,6 +876,10 @@ function toggleBasicEdit() {
   if (openBtn) {
     openBtn.addEventListener("click", () => openModal(mainModal));
   }
+
+  document.querySelectorAll(".js-open-subscription").forEach(btn => {
+    btn.addEventListener("click", () => openModal(mainModal));
+  });
 
   document.querySelectorAll("[data-close]").forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -942,7 +959,7 @@ function toggleBasicEdit() {
     confirmCancelBtn.addEventListener("click", async () => {
       const data = new FormData();
       data.append("action", "cancel");
-      data.append("cancel_reason", cancelReason  cancelReason.value : "");
+      data.append("cancel_reason", cancelReason ? cancelReason.value : "");
       const res = await fetch("{% url 'accounts:manage_subscription' %}", {
         method: "POST",
         headers: { "X-CSRFToken": getCookie("csrftoken") },

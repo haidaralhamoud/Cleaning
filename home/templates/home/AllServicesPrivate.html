@@ -31,6 +31,20 @@
       </div>
     </div>
 
+    <div class="urgent-banner">
+      <div class="urgent-copy">
+        <span class="urgent-icon" aria-hidden="true">!</span>
+        <div>
+          <p class="urgent-title">Need this urgently?</p>
+          <p class="urgent-subtitle">Select Yes for same-day priority. We will do our best to schedule the earliest available time.</p>
+        </div>
+      </div>
+      <div class="urgent-actions">
+        <a href="?urgent=0" class="urgent-btn {% if urgent_selected %}is-ghost{% else %}is-active{% endif %}">No</a>
+        <a href="?urgent=1" class="urgent-btn urgent-yes {% if urgent_selected %}is-active{% endif %}">Yes</a>
+      </div>
+    </div>
+
     <div class="filter-bar">
       <div class="search-field">
         <input type="text" id="serviceSearch" placeholder="Search by name or description">
@@ -40,6 +54,7 @@
         <button type="button" class="filter-pill" data-filter="recommended">Recommended</button>
         <button type="button" class="filter-pill" data-filter="clear" id="clearFilters">Clear</button>
       </div>
+      <button type="button" class="filter-apply" id="applyFilters">Apply</button>
       <div class="results-count" id="resultsCount">0 services</div>
     </div>
 
@@ -79,7 +94,7 @@
 
         <div class="service-actions">
           <button class="btn-cart" onclick="addToCart('{{ service.slug }}')">Add to Cart</button>
-          <a href="{% url 'home:private_zip_step1' service.slug %}{% if request.session.urgent_booking %}?urgent=1{% endif %}" class="btn-book">Book Now</a>
+          <a href="{% url 'home:private_zip_step1' service.slug %}{% if urgent_selected %}?urgent=1{% endif %}" class="btn-book">Book Now</a>
         </div>
 
       </div>
@@ -116,6 +131,7 @@ const searchInput = document.getElementById("serviceSearch");
 const resultsCount = document.getElementById("resultsCount");
 const filterPills = document.querySelectorAll(".filter-pill");
 const cards = Array.from(document.querySelectorAll(".service-card"));
+const applyButton = document.getElementById("applyFilters");
 
 function applyFilters() {
     const query = (searchInput.value || "").trim().toLowerCase();
@@ -148,15 +164,26 @@ filterPills.forEach(pill => {
             filterPills.forEach(p => p.classList.remove("active"));
             document.querySelector('[data-filter="all"]').classList.add("active");
             if (searchInput) searchInput.value = "";
+            applyFilters();
         } else {
             filterPills.forEach(p => p.classList.remove("active"));
             pill.classList.add("active");
         }
-        applyFilters();
     });
 });
 
-searchInput.addEventListener("input", () => applyFilters());
+if (searchInput) {
+    searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            applyFilters();
+        }
+    });
+}
+
+if (applyButton) {
+    applyButton.addEventListener("click", applyFilters);
+}
 document.addEventListener("DOMContentLoaded", applyFilters);
 </script>
 </body>

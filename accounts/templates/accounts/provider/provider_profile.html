@@ -91,6 +91,26 @@
           {{ form.email }}
         </div>
 
+        <div class="field">
+          <label>City</label>
+          {{ location_form.city }}
+        </div>
+
+        <div class="field">
+          <label>Region</label>
+          {{ location_form.region }}
+        </div>
+
+        <div class="field">
+          <label>Area / District</label>
+          {{ location_form.area }}
+        </div>
+
+        <div class="field">
+          <label>Nearby Areas</label>
+          {{ location_form.nearby_areas_text }}
+        </div>
+
         <button class="btn">Save Changes</button>
         <a href="{% url 'accounts:provider_change_password' %}" class="link-soft">
           Change Password

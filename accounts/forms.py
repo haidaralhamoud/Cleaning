@@ -1,5 +1,5 @@
 from django import forms
-from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference, ServiceComment, ServiceReview
+from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference, ServiceComment, ServiceReview, ProviderProfile
 import json
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -239,6 +239,52 @@ class ProviderProfileForm(forms.ModelForm):
                 "placeholder": "Email address"
             }),
         }
+
+
+class ProviderLocationForm(forms.ModelForm):
+    nearby_areas_text = forms.CharField(
+        required=False,
+        label="Nearby areas",
+        widget=forms.TextInput(attrs={
+            "class": "input",
+            "placeholder": "Comma-separated nearby areas"
+        })
+    )
+
+    class Meta:
+        model = ProviderProfile
+        fields = ["city", "region", "area"]
+        widgets = {
+            "city": forms.TextInput(attrs={
+                "class": "input",
+                "placeholder": "City"
+            }),
+            "region": forms.TextInput(attrs={
+                "class": "input",
+                "placeholder": "Region"
+            }),
+            "area": forms.TextInput(attrs={
+                "class": "input",
+                "placeholder": "Area / District"
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.nearby_areas:
+            self.fields["nearby_areas_text"].initial = ", ".join(self.instance.nearby_areas)
+
+    def clean_nearby_areas_text(self):
+        raw = self.cleaned_data.get("nearby_areas_text", "") or ""
+        parts = [p.strip() for p in raw.split(",") if p.strip()]
+        return parts
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.nearby_areas = self.cleaned_data.get("nearby_areas_text", [])
+        if commit:
+            instance.save()
+        return instance
 
 
 

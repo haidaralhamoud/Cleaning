@@ -1019,6 +1019,11 @@ class ProviderProfile(models.Model):
 
     bio = models.TextField(blank=True)
 
+    city = models.CharField(max_length=100, blank=True)
+    region = models.CharField(max_length=100, blank=True)
+    area = models.CharField(max_length=120, blank=True)
+    nearby_areas = models.JSONField(default=list, blank=True)
+
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

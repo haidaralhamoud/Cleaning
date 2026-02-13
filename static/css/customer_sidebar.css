@@ -80,10 +80,10 @@
 
 /* ===== Mobile Menu Toggle + Overlay ===== */
 .menu-toggle.customer-menu-toggle {
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  background: rgba(8, 74, 96, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: #039fc8;
   color: #fff;
-  box-shadow: 0 14px 30px rgba(7, 44, 58, 0.4);
+  box-shadow: 0 14px 30px rgba(3, 159, 200, 0.35);
   border-radius: 50%;
   width: 50px;
   height: 50px;
@@ -139,7 +139,7 @@
 
 .menu-toggle.customer-menu-toggle:hover {
   transform: translateY(-2px);
-  box-shadow: 0 18px 34px rgba(7, 44, 58, 0.5);
+  box-shadow: 0 18px 34px rgba(3, 159, 200, 0.45);
 }
 
 .menu-toggle.customer-menu-toggle:active {

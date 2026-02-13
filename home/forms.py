@@ -160,6 +160,10 @@ class OfficeSetupForm(forms.ModelForm):
         self.fields["num_employees"].required = True
         self.fields["floors"].required = True
         self.fields["restrooms"].required = True
+        # Optional: do not force kitchen cleaning toggle
+        if "kitchen_cleaning" in self.fields:
+            self.fields["kitchen_cleaning"].required = False
+            self.fields["kitchen_cleaning"].widget.attrs.pop("required", None)
 
     class Meta:
         model = BusinessBooking

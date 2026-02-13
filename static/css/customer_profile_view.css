@@ -552,12 +552,12 @@ body {
 .mobile-header {
   display: none;
   background: #fff;
-  padding: 10px 16px;
+  padding: 10px 16px 10px 64px;
   box-shadow: var(--shadow-sm);
   align-items: center;
   justify-content: center;
   position: sticky;
-  top: 0;
+  top: 70px;
   z-index: 1200;
 }
 
@@ -661,11 +661,227 @@ body {
   }
 
   .page-title {
-    font-size: 24px;
+    font-size: 22px;
+    text-align: left;
+    margin-bottom: 14px;
+    margin-left: 56px;
   }
 
   .btn {
     padding: 6px 10px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  .card-header {
+    align-items: center;
+    gap: 10px;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-size: 18px;
+  }
+
+  .order-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .ongoing-orders .subtitle {
+    margin-left: 0;
+    font-size: 13px;
+  }
+
+  .order-block {
+    gap: 14px;
+  }
+
+  .order-line {
+    border-top: none;
+    padding-top: 0;
+    padding: 12px;
+    border-radius: 12px;
+    background: #f7fbff;
+    border: 1px solid rgba(3, 159, 200, 0.12);
+  }
+
+  .order-name {
+    font-size: 14px;
+  }
+
+  .order-id {
+    font-size: 12.5px;
+  }
+
+  .order-date {
+    font-size: 12.5px;
+  }
+
+  .order-actions {
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .order-actions .btn {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+
+  .pill {
+    min-width: 90px;
+    font-size: 11.5px;
+  }
+}
+
+@media (max-width: 520px) {
+  .content {
+    padding: 6px 12px 20px;
+  }
+
+  .cards-container {
+    gap: 12px;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 18px;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+  }
+
+  .card-header {
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .card-title {
+    font-size: 16px;
+    gap: 6px;
+  }
+
+  .tiny-ico {
+    width: 20px;
+    height: 20px;
+  }
+
+  .basic-info .profile-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .basic-info .col {
+    gap: 8px;
+  }
+
+  .field {
+    margin-bottom: 6px;
+  }
+
+  .field .label,
+  .basic-info .label {
+    font-size: 13px;
+  }
+
+  .field .val,
+  .basic-info .val {
+    font-size: 13px;
+  }
+
+  .stack {
+    gap: 12px;
+  }
+
+  .row-ic {
+    gap: 8px;
+  }
+
+  .row-ic img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .row-title {
+    font-size: 14px;
+  }
+
+  .row-text {
+    font-size: 13px;
+  }
+
+  .right-column .card {
+    min-width: 100%;
+  }
+
+  /* Basic info: cleaner mobile layout */
+  .basic-info .info-grid3 {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .basic-info .col {
+    display: contents;
+    background: transparent;
+    border: 0;
+    padding: 0;
+  }
+
+  .basic-info .field {
+    background: rgba(3, 159, 200, 0.06);
+    border: 1px solid rgba(3, 159, 200, 0.12);
+    border-radius: 14px;
+    padding: 12px;
+    margin: 0;
+  }
+
+  .basic-info .field-photo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .basic-info .field-photo .profile-icon {
+    margin: 0;
+    align-self: flex-start;
+  }
+
+  .basic-info .field-first-name { order: 2; }
+  .basic-info .field-last-name { order: 3; }
+  .basic-info .field-email { order: 4; }
+  .basic-info .field-phone { order: 5; }
+  .basic-info .field-country { order: 6; }
+  .basic-info .field-contact { order: 7; }
+  .basic-info .field-language { order: 8; }
+  .basic-info .field-dob { order: 9; }
+  .basic-info .field-gender { order: 10; }
+  .basic-info .field-pronouns { order: 11; }
+  .basic-info .field-photo { order: 1; }
+
+  .basic-info .emergency {
+    border-top: none;
+    margin-top: 6px;
+    padding-top: 0;
+  }
+
+  .basic-info .emergency .grid {
+    gap: 12px;
+  }
+
+  .basic-info .emergency .field {
+    background: rgba(3, 159, 200, 0.06);
+    border: 1px solid rgba(3, 159, 200, 0.12);
+    border-radius: 14px;
+    padding: 12px;
+    margin: 0;
+  }
+
+  .basic-info .em-title {
+    font-size: 16px;
+    margin-bottom: 8px;
   }
 }
 
@@ -676,6 +892,10 @@ body {
 
   .menu-toggle.floating {
     display: inline-flex !important;
+  }
+
+  .content {
+    padding-top: 8px;
   }
 }
 

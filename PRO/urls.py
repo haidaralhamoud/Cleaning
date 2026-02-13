@@ -22,6 +22,7 @@ from django.contrib.auth import views as auth_views
 from accounts.views import RememberMeLoginView
 urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('', include('home.urls' , namespace='home') ),
     path('accounts/', include('accounts.urls' , namespace='accounts') ),

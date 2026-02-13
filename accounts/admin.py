@@ -82,9 +82,9 @@ class DiscountCodeAdmin(admin.ModelAdmin):
 # =========================
 @admin.register(ProviderProfile)
 class ProviderProfileAdmin(admin.ModelAdmin):
-    list_display = ("user", "is_active", "has_photo")
+    list_display = ("user", "area", "city", "region", "is_active", "has_photo")
     list_filter = ("is_active",)
-    search_fields = ("user__username", "user__email")
+    search_fields = ("user__username", "user__email", "area", "city", "region")
     readonly_fields = ("preview_photo",)
 
     def has_photo(self, obj):

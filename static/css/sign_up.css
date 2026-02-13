@@ -167,6 +167,54 @@ select {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
+input[type="file"].file-input__field {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.file-input {
+  position: relative;
+}
+
+.file-input__label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(3, 159, 200, 0.35);
+  background: linear-gradient(135deg, rgba(3, 159, 200, 0.08), rgba(113, 178, 71, 0.08));
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+}
+
+.file-input__label:hover {
+  border-color: rgba(3, 159, 200, 0.6);
+  box-shadow: 0 10px 24px rgba(3, 159, 200, 0.18);
+  transform: translateY(-1px);
+}
+
+.file-input__cta {
+  background: linear-gradient(135deg, #08b3dd, #039fc8);
+  color: #fff;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(3, 159, 200, 0.25);
+  white-space: nowrap;
+}
+
+.file-input__name {
+  font-size: 14px;
+  color: rgba(10, 10, 10, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 input:focus,
 textarea:focus,
 select:focus {
@@ -360,6 +408,20 @@ textarea {
   margin-top: 1.5rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
   box-shadow: 0 12px 28px rgba(3, 159, 200, 0.28);
+}
+
+.btn-submit[disabled] {
+  background: linear-gradient(135deg, #89d9ef 0%, #66c7e4 50%, #5fb7d3 100%);
+  color: #ffffff;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: saturate(0.75);
+  transform: none;
+}
+
+.btn-submit[disabled]:hover {
+  filter: saturate(0.75);
+  transform: none;
 }
 
 .btn-submit:hover {
