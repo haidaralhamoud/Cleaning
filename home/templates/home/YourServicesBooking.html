@@ -130,7 +130,7 @@
               <label>{{ question.label }}</label>
 
               {% if question.type == "select" %}
-                <select name="{{ service.slug }}__{{ q_key }}" class="js-custom-select" data-no-custom>
+                <select name="{{ service.slug }}__{{ q_key }}" class="js-custom-select">
                   <option value="">Select...</option>
                   {% for opt in question.options %}
                     <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
@@ -199,9 +199,7 @@
         <!-- زر add-ons -->
         <button type="button"
                 class="btn-blue"
-                onclick="openAddonsPopup('{{ service.slug }}')">
-            Add ons
-        </button>
+                onclick="openAddonsPopup('{{ service.slug }}')">Add ons</button>
         </div>
 
       </div>
@@ -329,13 +327,9 @@ function openAddonForm(serviceSlug, addonKey) {
 
     popupBody.innerHTML = `
       <div class="addon-form-wrapper">
-        <div class="addon-form-grid">
-          ${addon.form}
-        </div>
+        <div class="addon-form-grid">${addon.form}</div>
       </div>
-      <button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">
-        &larr; Back to Add-ons
-      </button>
+      <button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">&larr; Back to Add-ons</button>
     `;
 
     popupBody.querySelectorAll("select").forEach(sel => {
@@ -682,66 +676,17 @@ document.querySelectorAll(".service-head").forEach(head => {
 });
 </script>
 <script>
-function setupCustomSelects(root = document) {
-    root.querySelectorAll("select.js-custom-select").forEach(select => {
-        if (select.hasAttribute("data-no-custom")) return;
-        if (select.dataset.customized) return;
-        select.dataset.customized = "true";
-
-        const wrapper = document.createElement("div");
-        wrapper.className = "custom-select";
-
-        const trigger = document.createElement("button");
-        trigger.type = "button";
-        trigger.className = "custom-trigger";
-        trigger.textContent = select.options[select.selectedIndex].text || "Select...";
-
-        const list = document.createElement("div");
-        list.className = "custom-options";
-
-        Array.from(select.options).forEach((opt, idx) => {
-            const item = document.createElement("button");
-            item.type = "button";
-            item.className = "custom-option";
-            item.textContent = opt.text;
-            if (idx === select.selectedIndex) item.classList.add("selected");
-            item.addEventListener("click", () => {
-                select.selectedIndex = idx;
-                select.dispatchEvent(new Event("change", { bubbles: true }));
-                trigger.textContent = opt.text || "Select...";
-                list.querySelectorAll(".custom-option").forEach(o => o.classList.remove("selected"));
-                item.classList.add("selected");
-                wrapper.classList.remove("open");
-            });
-            list.appendChild(item);
-        });
-
-        wrapper.appendChild(trigger);
-        wrapper.appendChild(list);
-        select.parentNode.insertBefore(wrapper, select);
-        select.classList.add("is-hidden");
-
-        trigger.addEventListener("click", () => {
-            document.querySelectorAll(".custom-select.open").forEach(el => {
-                if (el !== wrapper) el.classList.remove("open");
-            });
-            wrapper.classList.toggle("open");
-        });
-    });
+function setupCustomSelects() {
+    if (window.initCustomSelects) {
+        window.initCustomSelects();
+    }
 }
 
 setupCustomSelects();
-
-document.addEventListener("click", (e) => {
-    if (!e.target.closest(".custom-select")) {
-        document.querySelectorAll(".custom-select.open").forEach(el => el.classList.remove("open"));
-    }
-});
 </script>
 
 {% include "home/includes/footer.html" %}
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-
 

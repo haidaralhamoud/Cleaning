@@ -169,7 +169,7 @@
     padding-top: 70px !important;
   }
 
-  .menu-toggle.customer-menu-toggle { display: inline-flex !important; }
+  .menu-toggle.customer-menu-toggle { display: none !important; }
 
   .customer-sidebar {
     transition: transform 0.35s ease, box-shadow 0.35s ease;
@@ -269,6 +269,10 @@
     top: 84px;
     left: 14px;
   }
+}
+
+@media (max-width: 768px) {
+  .menu-toggle.customer-menu-toggle { display: inline-flex !important; }
 }
 
 @media (min-width: 1025px) {

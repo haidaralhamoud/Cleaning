@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+  <main class="signin-container">
+    <div class="signin-box reset-box">
+      <img src="{% static 'images/confetti0.png'%}" alt="Confetti" class="confetti">
+
+      <h1 class="title">Complete your signup</h1>
+      <p class="subtitle">
+        Confirm your details to finish signing in with Google.
+      </p>
+
+      <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="alert-error" role="alert">
+            <span>{{ form.non_field_errors|striptags }}</span>
+          </div>
+        {% endif %}
+
+        <label class="field-label" for="id_email">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="id_email"
+          class="input-field"
+          autocomplete="email"
+          required
+          value="{{ form.email.value|default_if_none:'' }}"
+        >
+        {% if form.email.errors %}
+          <div class="field-error">{{ form.email.errors|striptags }}</div>
+        {% endif %}
+
+        {% for hidden in form.hidden_fields %}
+          {{ hidden }}
+        {% endfor %}
+
+        <button type="submit" class="btn-login">Continue</button>
+      </form>
+    </div>
+  </main>
+{% endblock %}

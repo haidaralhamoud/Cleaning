@@ -1019,6 +1019,46 @@ class ServiceCard(models.Model):
         return [line.strip() for line in self.body.splitlines() if line.strip()]
 
 
+class FAQCategory(models.Model):
+    title = models.CharField(max_length=150)
+    icon = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Example: ? or fa-solid fa-circle-question"
+    )
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "title"]
+
+    def __str__(self):
+        return self.title
+
+
+class FAQItem(models.Model):
+    category = models.ForeignKey(
+        FAQCategory,
+        on_delete=models.CASCADE,
+        related_name="items"
+    )
+    question = models.CharField(max_length=255)
+    answer = models.TextField()
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["order", "question"]
+
+    def __str__(self):
+        return self.question
+
+    @property
+    def answer_lines(self):
+        lines = [line.strip() for line in (self.answer or "").splitlines() if line.strip()]
+        return lines or [""]
+
+
 class PrivateBooking(BaseBooking):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

@@ -66,16 +66,12 @@
                 data-addons="{{ b.addons|join:'||' }}"
                 data-notes="{{ b.notes }}"
                 data-discount="{{ b.discount }}"
-              >
-                Learn More
-              </button>
+              >Learn More</button>
 
               <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="bundle_id" value="{{ b.id }}">
-                <button type="submit" class="btn btn-primary choose-plan" data-type="bundle">
-                  Add to booking
-                </button>
+                <button type="submit" class="btn btn-primary choose-plan" data-type="bundle">Add to booking</button>
               </form>
             </div>
           </div>
@@ -94,9 +90,7 @@
           </p>
           <div class="bundle__actions bundle__actions--single">
             <a href="{% url 'home:business_services_needed' booking_id %}?path=custom"
-             class="btn btn-primary btn-wide">
-              Create Your Plan
-            </a>
+             class="btn btn-primary btn-wide">Create Your Plan</a>
           </div>
         </div>
       </article>
@@ -182,9 +176,7 @@
             </div>
           </div>
 
-          <button class="modal-action-btn" id="modalAddBtn">
-            Add Bundle and save ${discount}
-          </button>
+          <button class="modal-action-btn" id="modalAddBtn">Add Bundle and save ${discount}</button>
         `;
 
         document.getElementById("modal-body").innerHTML = html;

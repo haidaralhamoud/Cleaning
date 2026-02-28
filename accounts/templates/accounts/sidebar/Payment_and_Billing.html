@@ -133,20 +133,20 @@
           {% if invoices %}
             {% for inv in invoices %}
               <tr>
-                <td>{{ inv.invoice_number }}</td>
-                <td>{{ inv.issued_at|date:"M d, Y" }}</td>
-                <td>{{ inv.amount }} {{ inv.currency }}</td>
-                <td>
+                <td data-label="Invoice #">{{ inv.invoice_number }}</td>
+                <td data-label="Date">{{ inv.issued_at|date:"M d, Y" }}</td>
+                <td data-label="Amount">{{ inv.amount }} {{ inv.currency }}</td>
+                <td data-label="Payment Method">
                   {% if inv.payment_method %}
                     {{ inv.payment_method.get_card_type_display }} &#9733;&#9733;&#9733;&#9733; {{ inv.payment_method.card_last4 }}
                   {% else %}
                     —
                   {% endif %}
                 </td>
-                <td>
+                <td data-label="Status">
                   <span class="status {{ inv.status|lower }}">{{ inv.get_status_display }}</span>
                 </td>
-                <td><a href="#" class="muted">Download</a></td>
+                <td data-label="Download"><a href="#" class="muted">Download</a></td>
               </tr>
             {% endfor %}
           {% else %}
@@ -444,4 +444,3 @@
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-

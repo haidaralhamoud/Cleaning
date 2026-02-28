@@ -1,0 +1,624 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-15 14:22+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: .\home\templates\home\about.html:10
+#, fuzzy
+#| msgid "Hembla experten Customer"
+msgid "About Us - Hembla experten"
+msgstr "نبذة عنا - خبراء هيمبلا"
+
+#: .\home\templates\home\about.html:434
+msgid "Hembla experten Is Here for Your Real Life"
+msgstr "خبراء هيمبلا هنا من أجل حياتك الواقعية"
+
+#: .\home\templates\home\about.html:436
+msgid ""
+"\n"
+"        Life doesn't happen in perfect, polished moments. It's kids running "
+"through\n"
+"        the hallway, a chair breaking before dinner guests arrive, the dog "
+"tracking\n"
+"        mud across the living room, or the fridge dying right before the "
+"weekend.\n"
+"        We started Hembla experten because we know that home isn't just "
+"where you live it's\n"
+"        where life unfolds. And when life gets messy, you deserve more than "
+"just a\n"
+"        service. You deserve real help you can count on, for whatever your "
+"day throws\n"
+"        at you.\n"
+"        "
+msgstr ""
+"\n"
+"الحياة لا تسير في لحظات مثالية ومنظمة. إنها مليئة بأطفال يركضون في الممر، وكرسي ينكسر قبل وصول الضيوف، وكلب يلطخ غرفة المعيشة بالطين، أو ثلاجة تتعطل قبل عطلة نهاية الأسبوع. أسسنا هيمبلا إكسبيرتن لأننا نؤمن أن المنزل ليس مجرد مكان للعيش، بل هو مسرح الحياة. وعندما تصبح الحياة فوضوية، فأنت تستحق أكثر من مجرد خدمة. أنت تستحق مساعدة حقيقية يمكنك الاعتماد عليها، مهما كانت تحديات يومك."
+"        "
+
+#: .\home\templates\home\about.html:457
+msgid "Guides illustration"
+msgstr "دليل توضيحي"
+
+#: .\home\templates\home\about.html:460
+msgid "What Guides Us"
+msgstr "ما الذي يرشدنا"
+
+#: .\home\templates\home\about.html:462
+msgid ""
+"\n"
+"        We're not here to be the biggest, we're here to be the one you trust "
+"enough\n"
+"        to call again and again.\n"
+"        "
+msgstr ""
+"\n"
+"لسنا هنا لنكون الأكبر، بل لنكون الشخص الذي تثق به بما يكفي لتتصل به مرارًا وتكرارًا."
+"        "
+
+#: .\home\templates\home\about.html:468
+msgid "precision icon"
+msgstr "رمز الدقة"
+
+#: .\home\templates\home\about.html:470
+msgid "Do it right, every time."
+msgstr "افعلها بشكل صحيح، في كل مرة."
+
+#: .\home\templates\home\about.html:471 .\home\templates\home\about.html:479
+msgid ""
+"We remember your preferences, your routines, and that little thing you "
+"mentioned last time."
+msgstr "نتذكر تفضيلاتك، وروتينك اليومي، وذلك الشيء الصغير الذي ذكرته في المرة الماضية."
+
+#: .\home\templates\home\about.html:476
+msgid "personal icon"
+msgstr "أيقونة شخصية"
+
+#: .\home\templates\home\about.html:478
+msgid "Make it personal."
+msgstr "اجعلها شخصية."
+
+#: .\home\templates\home\about.html:484
+msgid "care icon"
+msgstr "رمز العناية"
+
+#: .\home\templates\home\about.html:486
+msgid "Care for the bigger picture."
+msgstr "اهتم بالصورة الأكبر."
+
+#: .\home\templates\home\about.html:487
+msgid ""
+"Eco-friendly choices, fair treatment of our team, and services that fit into "
+"your life, not the other way around."
+msgstr "خيارات صديقة للبيئة، ومعاملة عادلة لفريقنا، وخدمات تتناسب مع حياتك، وليس العكس."
+
+#: .\home\templates\home\about.html:497
+msgid "Where We're Going"
+msgstr "إلى أين نحن ذاهبون"
+
+#: .\home\templates\home\about.html:499
+msgid ""
+"\n"
+"        We're building a future where every household can get help with "
+"anything,\n"
+"        in minutes, from one trusted place.\n"
+"        "
+msgstr ""
+"\n"
+"??? ???? ???????? ???? ??? ??? ??? ?? ???? ??? ???????? ??? ???? ???? ?????? ??? ???? ???? ?????."
+"        "
+
+#: .\home\templates\home\about.html:506
+msgid ""
+"\n"
+"        Not just cleaning. Not just repairs. Not just childcare. All of it, "
+"all\n"
+"        connected, all simple.\n"
+"        "
+msgstr ""
+"\n"
+"??? ??????? ???? ??? ??????? ???? ??? ????? ????? ???. ?? ?? ??? ????? ???? ?????."
+"        "
+
+#: .\home\templates\home\about.html:513
+msgid ""
+"\n"
+"        We want you to spend less time stressing over your to-do list and "
+"more\n"
+"        time living in the home you love.\n"
+"        "
+msgstr ""
+"\n"
+"????? ?? ???? ????? ??? ?? ????? ??? ????? ?????? ?????? ???? ?? ????? ?? ????? ???? ????."
+"        "
+
+#: .\home\templates\home\about.html:518
+msgid "See How We Can Help Today"
+msgstr "???? ??? ?????? ???????? ?????"
+
+#: .\home\templates\home\about.html:521
+msgid "Future section image"
+msgstr "???? ??? ????????"
+
+#: .\home\templates\home\about.html:527
+msgid "Our Goals"
+msgstr "???????"
+
+#: .\home\templates\home\about.html:529
+msgid ""
+"\n"
+"      We're building Hembla experten to be more than just a service, we want "
+"to be part\n"
+"      of people's lives, helping them feel more at home every day.\n"
+"      "
+msgstr ""
+"\n"
+"???? ????? ???????? ????? ???? ?? ???? ????? ???? ?? ???? ????? ?? ???? ?????? ???????? ??? ?????? ????? ???? ?? ?????? ?? ???."
+"      "
+
+#: .\home\templates\home\about.html:535
+msgid "Here's what we're working toward"
+msgstr "???? ?? ???? ????"
+
+#: .\home\templates\home\about.html:541 .\home\templates\home\about.html:549
+#: .\home\templates\home\about.html:557
+msgid "icon"
+msgstr "??????"
+
+#: .\home\templates\home\about.html:543
+msgid "Earn Your Trust, Every Time"
+msgstr "????? ???? ?? ?? ???"
+
+#: .\home\templates\home\about.html:544
+msgid ""
+"We aim to keep our satisfaction rate near perfect by listening, improving, "
+"and showing up for our customers in every service we provide."
+msgstr "???? ?????? ???? ??? ??????? ?????? ?? ?????? ??? ???????? ???????? ????????? ?? ?? ???? ??????."
+
+#: .\home\templates\home\about.html:551
+msgid "Reach More Communities"
+msgstr "??? ??? ??????? ????"
+
+#: .\home\templates\home\about.html:552
+msgid ""
+"Bring Hembla's trusted home and lifestyle services, from cleaning to "
+"childcare to repairs, to 5 new cities in the next 3 years."
+msgstr "????? ????? ????? ???????? ???????? ?????? ???? ?????? ? ?? ??????? ??? ????? ??????? ?????????? ? ??? 5 ??? ????? ???? ??????? ?????? ???????."
+
+#: .\home\templates\home\about.html:559
+msgid "Help 10,000 Homes Thrive"
+msgstr "????? 10,000 ???? ??? ????????"
+
+#: .\home\templates\home\about.html:560
+msgid ""
+"Reach 10,000 homes served, creating cleaner, safer, and more comfortable "
+"spaces for thousands of people."
+msgstr "??? ??? ???? 10,000 ????? ????? ?????? ???? ????? ?????? ????? ????? ???????."
+
+#: .\home\templates\home\about.html:565 .\home\templates\home\about.html:566
+#: .\home\templates\home\about.html:567
+msgid "circle"
+msgstr "?????"
+
+#: .\home\templates\home\contact.html:9 .\home\templates\home\contact.html:27
+msgid "Contact Us"
+msgstr "تواصل معنا"
+
+#: .\home\templates\home\contact.html:28
+msgid ""
+"We love hearing from you! Let us know how we can make your experience even "
+"better."
+msgstr "يسعدنا تلقي ملاحظاتكم! أخبرونا كيف يمكننا تحسين تجربتكم."
+
+#: .\home\templates\home\contact.html:39
+msgid "First Name"
+msgstr "الاسم الأول"
+
+#: .\home\templates\home\contact.html:44
+msgid "Last Name"
+msgstr "اسم العائلة"
+
+#: .\home\templates\home\contact.html:51
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: .\home\templates\home\contact.html:56
+msgid "Country Code"
+msgstr "رمز الدولة"
+
+#: .\home\templates\home\contact.html:63
+msgid "Phone Number"
+msgstr "رقم الهاتف"
+
+#: .\home\templates\home\contact.html:69
+msgid "Message"
+msgstr "الرسالة"
+
+#: .\home\templates\home\contact.html:75
+msgid "Inquiry Type"
+msgstr "نوع الاستفسار"
+
+#: .\home\templates\home\contact.html:80
+msgid "Attach file"
+msgstr "إرفاق ملف"
+
+#: .\home\templates\home\contact.html:86
+msgid "Preferred Contact Method"
+msgstr "وسيلة التواصل المفضلة"
+
+#: .\home\templates\home\contact.html:93
+msgid "I agree to the Processing of my data in accordance with the"
+msgstr "أوافق على معالجة بياناتي وفقًا لـ"
+
+#: .\home\templates\home\contact.html:94
+msgid "privacy policy"
+msgstr "سياسة الخصوصية"
+
+#: .\home\templates\home\contact.html:98
+msgid "Send Message"
+msgstr "إرسال رسالة"
+
+#: .\home\templates\home\contact.html:105
+msgid "Our Contact Information"
+msgstr "معلومات التواصل"
+
+#: .\home\templates\home\contact.html:106
+msgid "123 Clean Street, AnyTown"
+msgstr "123 شارع كلين، أني تاون"
+
+#: .\home\templates\home\contact.html:107
+msgid "(555) 123-4567"
+msgstr "(555) 123-4567"
+
+#: .\home\templates\home\contact.html:108
+#, fuzzy
+#| msgid "Hembla experten Customer"
+msgid "Support@Hembla experten.com"
+msgstr "Support@Hembla experten.com"
+
+#: .\home\templates\home\contact.html:118
+msgid "Thank You! We've Got Your Message"
+msgstr "شكراً لك! لقد استلمنا رسالتك"
+
+#: .\home\templates\home\contact.html:119
+msgid ""
+"We appreciate you reaching out to Hembla experten. Our team will review your "
+"message and get back to you within 24 hours."
+msgstr "نشكركم على تواصلكم مع خبراء هيمبلا. سيقوم فريقنا بمراجعة رسالتكم والرد عليكم خلال 24 ساعة."
+
+#: .\home\templates\home\contact.html:122
+msgid "Close"
+msgstr "اغلاق"
+
+#: .\home\templates\home\contact.html:123
+msgid "Back to Home"
+msgstr "الرجوع الى الصفحة الرئيسية"
+
+#: .\home\templates\home\feedback_request.html:8
+#, fuzzy
+#| msgid "Hembla experten Customer"
+msgid "Feedback | Hembla experten"
+msgstr "الملاحظات | همبلا إكسبيرتن"
+
+#: .\home\templates\home\feedback_request.html:20
+msgid "Feedback"
+msgstr "الملاحظات"
+
+#: .\home\templates\home\feedback_request.html:21
+msgid "Share your feedback or request a new service."
+msgstr "شاركنا ملاحظاتك أو اطلب خدمة جديدة."
+
+#: .\home\templates\home\feedback_request.html:25
+msgid ""
+"We want to hear from you. Tell us about your experience, suggest "
+"improvements, or request a new service. If it's something we don't currently "
+"offer, we can explore it."
+msgstr "نرغب في الاستماع إليكم. أخبرونا عن تجربتكم، واقترحوا تحسينات، أو اطلبوا خدمة جديدة. إذا كانت الخدمة غير متوفرة لدينا حاليًا، فسندرس إمكانية إضافتها."
+
+#: .\home\templates\home\feedback_request.html:30
+msgid "Your Name"
+msgstr "اسمك"
+
+#: .\home\templates\home\feedback_request.html:34
+msgid "Your Feedback"
+msgstr "ملاحظاتك"
+
+#: .\home\templates\home\feedback_request.html:38
+msgid "Rating"
+msgstr "التقييم"
+
+#: .\home\templates\home\feedback_request.html:56
+msgid "OR"
+msgstr "أو"
+
+#: .\home\templates\home\feedback_request.html:60
+msgid "Need a service we don't have"
+msgstr "تحتاج خدمة لا نقدمها؟"
+
+#: .\home\templates\home\feedback_request.html:62
+#, fuzzy
+#| msgid "Choose Service Type"
+msgid "Service Type"
+msgstr "نوع الخدمة"
+
+#: .\home\templates\home\feedback_request.html:66
+msgid "Describe Your Request"
+msgstr "صف طلبك"
+
+#: .\home\templates\home\feedback_request.html:71
+msgid "Send Feedback / Request Service"
+msgstr "إرسال الملاحظات / طلب خدمة"
+
+#: .\home\templates\home\home.html:67
+msgid "More Time for What Matters Most"
+msgstr " مزيد من الوقت لما هو أهم "
+
+#: .\home\templates\home\home.html:69
+msgid ""
+"\n"
+"          Life's busy, finding help shouldn't be. Between work, family, and "
+"everyday stress, your time is precious.\n"
+"          Hembla experten makes it easy to book trusted pros who treat your "
+"home like their own, fast, fair, and worry free.\n"
+"          "
+msgstr ""
+"\n"
+"الحياة مزدحمة، لكن الحصول على المساعدة لا يجب أن يكون كذلك.\n"
+"بين العمل والعائلة وضغوط الحياة اليومية، وقتك ثمين.\n"
+"يسهّل عليك حجز متخصصين موثوقين.\n"
+"وفريق همبلا ايكسبيرتن يعاملون منزلك كما لو كان منزلهم، بسرعة، وبأسعار عادلة، "
+"وبدون أي قلق.          "
+
+#: .\home\templates\home\home.html:77
+msgid "Book Cleaning"
+msgstr "احجز التنظيف"
+
+#: .\home\templates\home\home.html:80 .\home\templates\home\home.html:89
+msgid "Private Booking"
+msgstr "حجز للأفراد"
+
+#: .\home\templates\home\home.html:81 .\home\templates\home\home.html:90
+msgid "Business Booking"
+msgstr "حجز للأعمال"
+
+#: .\home\templates\home\home.html:86
+msgid "Same Day Service"
+msgstr "خدمة في نفس اليوم"
+
+#: .\home\templates\home\home.html:95
+msgid "Admin Dashboard"
+msgstr "لوحة تحكم الإدارة"
+
+#: .\home\templates\home\home.html:105
+msgid "Our Standout Services"
+msgstr "خدماتنا المميزة"
+
+#: .\home\templates\home\home.html:107
+msgid ""
+"\n"
+"      From sparkling homes to helping hands, we're here for every moment, "
+"whether it's a quick refresh, a full transformation, or urgent care when you "
+"need it most.\n"
+"      "
+msgstr ""
+"\n"
+"من بريق المنزل إلى اليد التي تساعد، نحن معك في كل لحظة: لمسة سريعة، تغيير "
+"كامل، أو رعاية عاجلة عندما تحتاجها أكثر.      "
+
+#: .\home\templates\home\home.html:117
+msgid "Home Cleaning"
+msgstr "تنظيف المنازل"
+
+#: .\home\templates\home\home.html:118
+msgid ""
+"Standard Cleaning done right, consistent, detailed, and one less thing to "
+"worry about."
+msgstr "تنظيف قياسي بإتقان، ثابت ودقيق، وشيء أقلّ تقلق بشأنه."
+
+#: .\home\templates\home\home.html:125
+msgid "Deep Cleaning"
+msgstr "تنظيف عميق"
+
+#: .\home\templates\home\home.html:126
+msgid ""
+"We clean where regular cleaning doesn't, for a home that feels fresh, clear, "
+"and truly cared for."
+msgstr ""
+"ننظّف حيث لا يصل التنظيف المعتاد، لمنزل يشعر بالانتعاش والصفاء والرعاية "
+"الحقيقية."
+
+#: .\home\templates\home\home.html:133
+msgid "Business Cleaning"
+msgstr "تنظيف الشركات"
+
+#: .\home\templates\home\home.html:134
+msgid ""
+"Your workplace reflects your brand. Our expert cleaning keeps it looking "
+"sharp, professional, and always ready for business."
+msgstr ""
+"مكان عملك يعكس علامتك. تنظيفنا الاحترافي يبقيه أنيقًا ومهنيًا وجاهزًا دائمًا "
+"للعمل."
+
+#: .\home\templates\home\home.html:141
+msgid "Urgent Cleaning"
+msgstr "تنظيف عاجل"
+
+#: .\home\templates\home\home.html:142
+msgid ""
+"Need cleaning now We arrive within 1'3 hours, fast, reliable, and hassle-"
+"free."
+msgstr "تحتاج تنظيفًا الآن؟ نصل خلال 1'3 ساعات، بسرعة وموثوقية وبدون أي تعقيد."
+
+#: .\home\templates\home\home.html:146 .\home\templates\home\home.html:192
+msgid "See All Services"
+msgstr "عرض كل الخدمات"
+
+#: .\home\templates\home\home.html:151
+msgid "More Than Just Cleaning"
+msgstr "أكثر من مجرد تنظيف"
+
+#: .\home\templates\home\home.html:153
+msgid ""
+"\n"
+"      From caring for your pets to fixing what's broken, we're here for "
+"life's little (and big) moments, personal, reliable, and tailored to you\n"
+"      "
+msgstr ""
+"\n"
+"من رعاية حيواناتك الأليفة إلى إصلاح ما يتعطل، نحن هنا للحظات الحياة الصغيرة "
+"(والكبيرة)، بخدمة شخصية موثوقة ومصممة لك.      "
+
+#: .\home\templates\home\home.html:163
+msgid "Pet Walking"
+msgstr "تمشية الحيوانات الأليفة"
+
+#: .\home\templates\home\home.html:164
+msgid "Loving care and happy walks for your furry friends while you're away"
+msgstr "عناية محبة ونزهات سعيدة لأصدقائك ذوي الفراء أثناء غيابك."
+
+#: .\home\templates\home\home.html:171
+msgid "Home Repairs"
+msgstr "إصلاحات منزلية"
+
+#: .\home\templates\home\home.html:172
+msgid "Quick fixes and skilled hands to keep your home feeling perfect"
+msgstr "إصلاحات سريعة وأيدٍ ماهرة ليبقى منزلك بأفضل حال."
+
+#: .\home\templates\home\home.html:179
+msgid "Event Assistance"
+msgstr "مساعدة للفعاليات"
+
+#: .\home\templates\home\home.html:180
+msgid "Helping hands for every occasion, from setup to cleanup"
+msgstr "أيادٍ مساعدة لكل مناسبة، من التجهيز حتى التنظيف."
+
+#: .\home\templates\home\home.html:187
+msgid "Special Assistance"
+msgstr "مساعدة خاصة"
+
+#: .\home\templates\home\home.html:188
+msgid "Compassionate support for individuals needing extra help at home"
+msgstr "دعم متعاطف لمن يحتاج مساعدة إضافية في المنزل."
+
+#: .\home\templates\home\home.html:198
+msgid "How it Works"
+msgstr "كيف نعمل"
+
+#: .\home\templates\home\home.html:199
+msgid "A Helping Hand in Just Three Simple Steps"
+msgstr "مساعدة في ثلاث خطوات بسيطة"
+
+#: .\home\templates\home\home.html:206
+msgid "Book Online"
+msgstr "احجز أونلاين"
+
+#: .\home\templates\home\home.html:207
+msgid ""
+"Choose the service you need, pick a date and time, and get an instant quote, "
+"fast, simple, and stress-free"
+msgstr ""
+"اختر الخدمة التي تحتاجها، وحدد التاريخ والوقت، واحصل على عرض فوري — بسرعة "
+"وببساطة وبدون توتر."
+
+#: .\home\templates\home\home.html:212
+msgid "We Help"
+msgstr "نحن نهتم"
+
+#: .\home\templates\home\home.html:213
+msgid ""
+"A vetted, friendly professional arrives on time with everything needed, "
+"whether it's cleaning, repairs, or special assistance."
+msgstr ""
+"يصل محترف موثوق وودود في الوقت المحدد ومعه كل ما يلزم، سواء للتنظيف أو "
+"الإصلاحات أو المساعدة الخاصة."
+
+#: .\home\templates\home\home.html:218
+msgid "You Relax"
+msgstr "وأنت ترتاح"
+
+#: .\home\templates\home\home.html:219
+msgid ""
+"Enjoy more free time, a comfortable home, and the peace of mind that comes "
+"with knowing it's all taken care of"
+msgstr ""
+"استمتع بوقت فراغ أكثر ومنزل مريح وراحة بال عندما تعرف أن كل شيء مُعتنى به."
+
+#: .\home\templates\home\home.html:228
+msgid "What Our Customers Say"
+msgstr "ماذا يقول عملاؤنا"
+
+#: .\home\templates\home\home.html:229
+msgid ""
+"We're proud to make life easier for our customers. Here's what they have to "
+"say about their Hembla experten experience"
+msgstr ""
+"نفخر بأننا نجعل حياة عملائنا أسهل. إليك ما يقولونه عن تجربتهم مع Hembla "
+"experten."
+
+#: .\home\templates\home\home.html:239
+msgid "Hembla experten Customer"
+msgstr "عميل Hembla experten"
+
+#: .\home\templates\home\home.html:253
+msgid ""
+"So impressed with Hembla experten! They arrived on time, worked quickly but "
+"with such attention to detail, and my apartment has never looked better. It "
+"honestly feels like a fresh start every time they come. Highly recommend!"
+msgstr ""
+"انبسطت جدًا مع Hembla experten! وصلوا في الوقت المحدد، واشتغلوا بسرعة مع "
+"اهتمام كبير بالتفاصيل، وشقتي ما كانت أبدًا بهالجمال. بصراحة بحسها بداية جديدة "
+"كل مرة ييجوا. بنصح فيهم بقوة!"
+
+#: .\home\templates\home\home.html:261
+msgid ""
+"The deep cleaning service was worth every Krona. My home smells amazing, "
+"looks spotless, and they even made sure everything was safe for my dog. The "
+"team was friendly, efficient, and professional from start to finish"
+msgstr ""
+"خدمة التنظيف العميق كانت تستاهل كل كرونة. بيتي ريحته رائعة ونظيف جدًا، وحتى "
+"تأكدوا إن كل شيء آمن لكلبي. الفريق كان ودودًا وسريعًا ومحترفًا من البداية "
+"للنهاية."
+
+#: .\home\templates\home\home.html:269
+msgid ""
+"I use their service every two weeks and its been a total lifesaver for my "
+"busy schedule. Theyre reliable, trustworthy, and always leave my home "
+"sparkling. Its such a relief knowing I can count on them!"
+msgstr ""
+"بستخدم خدمتهم كل أسبوعين، وبصراحة أنقذت جدولي المزدحم. موثوقين وجديرين "
+"بالثقة ودايمًا يخلّوا البيت يلمع. راحة كبيرة لما تعرف إنك تقدر تعتمد عليهم!"
+
+#: .\home\templates\home\home.html:293
+msgid "Choose Service Type"
+msgstr "اختر نوع الخدمة"
+
+#: .\home\templates\home\home.html:294
+msgid "Pick the right category to continue your booking."
+msgstr "اختر الفئة المناسبة لإكمال الحجز."
+
+#: .\home\templates\home\home.html:296
+msgid "Private Services"
+msgstr "خدمات الأفراد"
+
+#: .\home\templates\home\home.html:297
+msgid "Business Services"
+msgstr "خدمات الشركات"
+
+#: .\home\templates\home\includes\main_header.html:68
+msgid "Language"
+msgstr ""

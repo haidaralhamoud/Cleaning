@@ -37,6 +37,8 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("not-available-zips", home_models.NotAvailableZipRequest, "Zip Requests", "fa-solid fa-location-dot"),
         DashboardItem("call-requests", home_models.CallRequest, "Call Requests", "fa-solid fa-phone"),
         DashboardItem("email-requests", home_models.EmailRequest, "Email Requests", "fa-solid fa-envelope-open-text"),
+        DashboardItem("faq-categories", home_models.FAQCategory, "FAQ Categories", "fa-solid fa-circle-question"),
+        DashboardItem("faq-items", home_models.FAQItem, "FAQ Items", "fa-solid fa-circle-question"),
         DashboardItem("booking-form-docs", home_models.BookingFormDocument, "Booking Form Docs", "fa-solid fa-file-word"),
         DashboardItem("booking-notes", home_models.BookingNote, "Booking Notes", "fa-solid fa-note-sticky"),
         DashboardItem("status-history", home_models.BookingStatusHistory, "Status History", "fa-solid fa-clock-rotate-left"),

@@ -217,6 +217,9 @@ img { max-width: 100%; height: auto; display: block; }
     flex-direction: column;
     text-align: center;
   }
+  .intro-text {
+    text-align: center;
+  }
   .principles,
   .goals-cards {
     flex-direction: column;

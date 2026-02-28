@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="{% static 'css/AllServicesBusiness.css'%}" />
 </head>
 <body>
-<!-- ✅ HEADER -->
+<!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
   <main class="container">
@@ -64,9 +64,7 @@
 
     <!-- زر بدء المسار -->
 <a href="{% url 'home:business_start_booking' %}?service={{ s.title }}{% if urgent_selected %}&urgent=1{% endif %}" 
-   class="quote-btn">
-  Request Quote
-</a>
+   class="quote-btn">Request Quote</a>
 
 
   </div>
@@ -80,7 +78,7 @@
     <div class="filter-card" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
       <div class="filter-head">
         <h3 id="filterTitle">Filter Services</h3>
-        <button class="filter-close" id="filterClose" aria-label="Close">✕</button>
+        <button class="filter-close" id="filterClose" aria-label="Close">&times;</button>
       </div>
       <input class="filter-input" id="filterInput" type="text" placeholder="Search by name or description">
       <div class="filter-actions">

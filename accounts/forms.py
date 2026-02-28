@@ -41,6 +41,13 @@ class CustomerForm(forms.ModelForm):
             "preferred_language", "profile_photo", "password", "accepted_terms"
         ]
 
+    def __init__(self, *args, **kwargs):
+        self.locked_email = kwargs.pop("locked_email", None)
+        super().__init__(*args, **kwargs)
+        if self.locked_email:
+            self.fields["email"].initial = self.locked_email
+            self.fields["email"].disabled = True
+
     def clean(self):
         cleaned = super().clean()
 
@@ -50,6 +57,11 @@ class CustomerForm(forms.ModelForm):
 
         if password != confirm_password:
             self.add_error("confirm_password", "Passwords do not match")
+
+        if self.locked_email:
+            if cleaned.get("email") and cleaned.get("email") != self.locked_email:
+                self.add_error("email", "Email must match your Google account.")
+            cleaned["email"] = self.locked_email
 
         # معالجة الـ Add-ons من JSON
         addons_raw = cleaned.get("custom_addons")
@@ -364,3 +376,49 @@ class ServiceCommentForm(forms.ModelForm):
         if not text:
             raise forms.ValidationError("Comment cannot be empty.")
         return text
+
+
+class PasswordResetRequestForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={"class": "input-field", "placeholder": "Email"})
+    )
+
+    def clean_email(self):
+        email = (self.cleaned_data.get("email") or "").strip().lower()
+        if not User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("No account found with this email.")
+        return email
+
+
+class OTPVerifyForm(forms.Form):
+    code = forms.CharField(min_length=6, max_length=6)
+
+    def clean_code(self):
+        code = self.cleaned_data["code"].strip()
+        if not code.isdigit():
+            raise forms.ValidationError("أدخل رمزاً من 6 أرقام.")
+        return code
+
+
+class SetNewPasswordForm(forms.Form):
+    new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "input-field"}))
+    new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "input-field"}))
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned = super().clean()
+        password1 = cleaned.get("new_password1")
+        password2 = cleaned.get("new_password2")
+        if password1 and password2 and password1 != password2:
+            self.add_error("new_password2", "كلمتا المرور غير متطابقتين.")
+        return cleaned
+
+    def clean_new_password1(self):
+        password = self.cleaned_data.get("new_password1")
+        if password:
+            from django.contrib.auth import password_validation
+            password_validation.validate_password(password, self.user)
+        return password

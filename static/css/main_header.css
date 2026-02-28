@@ -132,6 +132,92 @@
   gap: 12px;
 }
 
+.lang-dropdown {
+  position: relative;
+}
+
+.lang-form {
+  position: relative;
+}
+
+.lang-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 163, 200, 0.25);
+  background: #f5fcff;
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lang-toggle:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(0, 163, 200, 0.18);
+}
+
+.lang-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  padding: 8px 0;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all .25s ease;
+  z-index: 999;
+}
+
+.lang-form:hover .lang-menu,
+.lang-form:focus-within .lang-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.lang-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 16px;
+  color: #1f2937;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.lang-option:hover {
+  background: #f2f7fa;
+  color: #00a3c8;
+}
+
+.lang-option.is-active {
+  color: #00a3c8;
+  background: #eef9fc;
+}
+
+.lang-code {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
 .cart-link {
   display: inline-flex;
   align-items: center;
@@ -248,6 +334,38 @@
 
 .btn-auth.logout:hover {
   background: #e63e3e;
+}
+
+.lang-switch {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 5%;
+  background: #fff;
+}
+
+.lang-switch form {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-switch select {
+  border: 1px solid rgba(0, 163, 200, 0.25);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: #fff;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.lang-switch button {
+  border: 1px solid rgba(0, 163, 200, 0.25);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: #f5fcff;
+  color: #00a3c8;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

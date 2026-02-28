@@ -2,7 +2,6 @@
 
 {% load bootstrap4 %}
 {% load socialaccount %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,7 +35,10 @@
 
         <input type="password" name="password" placeholder="Password" class="input-field" required>
  {% if form.errors %}
-    <p>Your username and password didn't match. Please try again.</p>
+    <div class="alert-error" role="alert">
+      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+      <span>Your username and password didn't match. Please try again.</span>
+    </div>
   {% endif %}
   {% if next %}
     {% if user.is_authenticated %}
@@ -79,7 +81,6 @@
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-
 
 
 

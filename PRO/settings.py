@@ -11,10 +11,19 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+try:
+    from dotenv import load_dotenv
+except Exception:
+    load_dotenv = None
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env via python-dotenv if available.
+if load_dotenv:
+    load_dotenv()
 
 # Load .env if present (simple KEY=VALUE lines).
 env_path = BASE_DIR / ".env"
@@ -54,6 +63,7 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountLoggingAdapter"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
@@ -111,6 +121,7 @@ JAZZMIN_SETTINGS["icons"].update({
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -129,7 +140,7 @@ ROOT_URLCONF = 'PRO.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['TEMPLATES'],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -156,7 +167,7 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 #         'ENGINE': 'django.db.backends.postgresql',
 #         'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
 #         'USER': os.getenv('POSTGRES_USER', 'cleaning'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'Hembla@2026'),
 #         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
 #         'PORT': os.getenv('POSTGRES_PORT', '5432'),
 #     },
@@ -171,6 +182,14 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -194,13 +213,23 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ("en", "English"),
+    ("ar", "العربية"),
+    ("sv", "Svenska"),
+]
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [
+    BASE_DIR / "locale",
+]
 
 
 # Static files (CSS, JavaScript, Images)
@@ -220,4 +249,41 @@ STATICFILES_DIRS = [
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR, "media")
-CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Email (default to console backend for development)
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() == "true"
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    f"Hembla Experten <{EMAIL_HOST_USER}>" if EMAIL_HOST_USER else "Hembla Experten <no-reply@yourdomain.com>",
+)
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
+
+# --- SMTP sanity + startup log (no secrets) ---
+import logging
+logger = logging.getLogger("PRO.settings")
+logger.info("EMAIL_BACKEND=%s", EMAIL_BACKEND)
+logger.info("EMAIL_HOST=%s", EMAIL_HOST)
+logger.info("EMAIL_PORT=%s", EMAIL_PORT)
+logger.info("EMAIL_USE_TLS=%s", EMAIL_USE_TLS)
+logger.info("EMAIL_USE_SSL=%s", EMAIL_USE_SSL)
+
+if EMAIL_USE_TLS and EMAIL_USE_SSL:
+    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL cannot both be True.")
+
+if EMAIL_PORT == 587:
+    EMAIL_USE_TLS = True
+    EMAIL_USE_SSL = False
+elif EMAIL_PORT == 465:
+    EMAIL_USE_SSL = True
+    EMAIL_USE_TLS = False
+
+
+##################################################################SERVER
+

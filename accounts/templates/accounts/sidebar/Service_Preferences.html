@@ -1,6 +1,5 @@
 {% load static %}
 {% load bootstrap4 %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,7 +41,7 @@
     <h1 class="page-title">Customize Your Cleaning Preferences</h1>
 
     <!-- ===== FORM: حفظ ضربة وحدة ===== -->
-    <form method="post" action="">
+    <form method="post" action="" data-skip-validate>
       {% csrf_token %}
 
       <!-- إذا بدك تربطها بكائن preferences موجود -->
@@ -607,4 +606,3 @@ function saveCustomField(fieldName, inputId) {
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-

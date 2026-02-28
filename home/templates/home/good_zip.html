@@ -1,5 +1,4 @@
 ﻿{% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -117,9 +116,7 @@
     <div class="left-section">
       <div class="step">Step 1 of 4</div>
 
-      <div class="notice">
-        &#127881; Boom! Your area is covered. Please proceed with your booking.
-      </div>
+      <div class="notice">&#127881; Boom! Your area is covered. Please proceed with your booking.</div>
 
       <section class="booking-method">
         <h3>Choose Your Booking Method</h3>
@@ -131,9 +128,7 @@
             <div class="icon-circle"><img src="{% static 'images/calendar-unified.svg' %}" alt="Calendar icon"></div>
             <h4>Book Online Now</h4>
             <p>Choose your service, pick a date...</p>
-<a href="{% url 'home:private_booking_start' service.slug %}" class="btn">
-    Book Now
-</a>
+<a href="{% url 'home:private_booking_start' service.slug %}" class="btn">Book Now</a>
 
           </div>
 
@@ -348,6 +343,5 @@
 {% include "home/includes/footer.html" %}
 </body>
 </html>
-
 
 

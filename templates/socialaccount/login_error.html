@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="signin-box text-center">
+
+      <div style="font-size:40px;margin-bottom:15px;">⚠️</div>
+
+      <h2 class="title">Google Login Failed</h2>
+      <p class="subtitle">
+          Something went wrong while logging in with Google.
+      </p>
+
+      <a href="{% url 'account_login' %}" class="btn-login">
+          Back to Login
+      </a>
+
+  </div>
+</div>
+{% endblock %}

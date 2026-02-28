@@ -594,7 +594,7 @@ body {
   background: var(--brand);
   color: #fff;
   cursor: pointer;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
@@ -885,7 +885,7 @@ body {
   }
 }
 
-@media (max-width: 991px) {
+@media (max-width: 768px) {
   .mobile-header {
     display: flex !important;
   }

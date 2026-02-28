@@ -95,6 +95,11 @@ body {
 .input-with-icon input {
   padding-right: 44px;
 }
+.input-with-icon input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #fff;
+}
 .input-with-icon input[type="date"]::-webkit-calendar-picker-indicator {
   opacity: 0;
   position: absolute;

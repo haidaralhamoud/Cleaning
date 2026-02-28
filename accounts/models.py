@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth.hashers import check_password, make_password
+from datetime import timedelta
+import secrets
 import uuid
 
 
@@ -1087,6 +1090,59 @@ class UserAccessProfile(models.Model):
 
     def __str__(self):
         return f"{self.user} | {self.site} | {self.role or 'no-role'}"
+
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="password_reset_otps",
+    )
+    email = models.EmailField(db_index=True)
+    otp_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveSmallIntegerField(default=0)
+    is_used = models.BooleanField(default=False)
+    last_sent_at = models.DateTimeField()
+    locked_until = models.DateTimeField(null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["email", "-created_at"]),
+        ]
+
+    def __str__(self):
+        return f"OTP for {self.email} ({'used' if self.is_used else 'active'})"
+
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+    def is_locked(self):
+        return self.locked_until and timezone.now() < self.locked_until
+
+    def check_code(self, raw_code):
+        return check_password(str(raw_code), self.otp_hash)
+
+    @classmethod
+    def create_otp(cls, email, user=None, ip_address=None, ttl_minutes=10):
+        code = f"{secrets.randbelow(1000000):06d}"
+        now = timezone.now()
+        obj = cls.objects.create(
+            user=user,
+            email=email.lower().strip(),
+            otp_hash=make_password(code),
+            created_at=now,
+            expires_at=now + timedelta(minutes=ttl_minutes),
+            attempts=0,
+            is_used=False,
+            last_sent_at=now,
+            ip_address=ip_address,
+        )
+        return obj, code
 
 
 from django.contrib.auth import get_user_model

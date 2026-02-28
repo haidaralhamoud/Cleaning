@@ -91,6 +91,7 @@
           id="key_custom_instructions"
           name="key_custom_instructions"
           placeholder="Custom instructions"
+          data-optional="true"
           value="{{ form.instance.key_custom_instructions|default:'' }}"
         >
         {% if form.key_custom_instructions.errors %}
@@ -247,7 +248,6 @@
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-
 
 
 

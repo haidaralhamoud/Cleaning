@@ -250,7 +250,22 @@ body {
   background: #e6f7fb;
 }
 .svc-toggle .chev {
+  font-size: 0;
+  line-height: 0;
+  width: 12px;
+  height: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: transform 0.2s ease;
+}
+.svc-toggle .chev::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid #0f172a;
+  border-bottom: 2px solid #0f172a;
+  transform: rotate(45deg);
 }
 .service-box.open .svc-toggle .chev {
   transform: rotate(180deg);
@@ -312,8 +327,8 @@ textarea {
   box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
-.js-custom-select.is-hidden {
-  display: none;
+select.js-custom-select.is-hidden {
+  display: none !important;
 }
 
 .custom-select {
@@ -326,7 +341,7 @@ textarea {
   border-radius: 16px;
   border: 2px solid #cfe3ef;
   background: #ffffff;
-  padding: 0 52px 0 14px;
+  padding: 0 42px 0 14px;
   font-size: 14px;
   text-align: left;
   cursor: pointer;
@@ -334,16 +349,20 @@ textarea {
   position: relative;
 }
 
+.custom-trigger::before {
+  content: none;
+}
+
 .custom-trigger::after {
   content: "";
   position: absolute;
   right: 16px;
   top: 50%;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   border-right: 2px solid #5b6b78;
   border-bottom: 2px solid #5b6b78;
-  transform: translateY(-60%) rotate(45deg);
+  transform: translateY(-50%) rotate(45deg);
   transition: transform 0.2s ease;
 }
 
@@ -353,7 +372,7 @@ textarea {
 }
 
 .custom-select.open .custom-trigger::after {
-  transform: translateY(-40%) rotate(-135deg);
+  transform: translateY(-50%) rotate(-135deg);
 }
 
 .custom-options {

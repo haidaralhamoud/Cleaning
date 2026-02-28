@@ -1,0 +1,632 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-15 14:22+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: .\home\templates\home\about.html:10
+#, fuzzy
+#| msgid "Hembla experten Customer"
+msgid "About Us - Hembla experten"
+msgstr "Om oss - Hembla experten"
+
+#: .\home\templates\home\about.html:434
+msgid "Hembla experten Is Here for Your Real Life"
+msgstr "Hembla experten finns h?r f?r ditt verkliga liv"
+
+#: .\home\templates\home\about.html:436
+msgid ""
+"\n"
+"        Life doesn't happen in perfect, polished moments. It's kids running "
+"through\n"
+"        the hallway, a chair breaking before dinner guests arrive, the dog "
+"tracking\n"
+"        mud across the living room, or the fridge dying right before the "
+"weekend.\n"
+"        We started Hembla experten because we know that home isn't just "
+"where you live it's\n"
+"        where life unfolds. And when life gets messy, you deserve more than "
+"just a\n"
+"        service. You deserve real help you can count on, for whatever your "
+"day throws\n"
+"        at you.\n"
+"        "
+msgstr ""
+"\n"
+"Livet h?nder inte i perfekta, polerade stunder. Det ?r barn som springer i hallen, en stol som g?r s?nder innan g?sterna kommer, hunden som drar in lera i vardagsrummet, eller kylen som ger upp precis f?re helgen. Vi startade Hembla experten f?r att vi vet att hemmet inte bara ?r d?r du bor, det ?r d?r livet tar form. Och n?r livet blir r?rigt f?rtj?nar du mer ?n bara en tj?nst. Du f?rtj?nar riktig hj?lp som du kan lita p?, oavsett vad dagen bjuder p?."
+"        "
+
+#: .\home\templates\home\about.html:457
+msgid "Guides illustration"
+msgstr "Illustration av riktlinjer"
+
+#: .\home\templates\home\about.html:460
+msgid "What Guides Us"
+msgstr "Det som v?gleder oss"
+
+#: .\home\templates\home\about.html:462
+msgid ""
+"\n"
+"        We're not here to be the biggest, we're here to be the one you trust "
+"enough\n"
+"        to call again and again.\n"
+"        "
+msgstr ""
+"\n"
+"Vi ?r inte h?r f?r att vara st?rst, vi ?r h?r f?r att vara den du litar p? och ringer om och om igen."
+"        "
+
+#: .\home\templates\home\about.html:468
+msgid "precision icon"
+msgstr "precision-ikon"
+
+#: .\home\templates\home\about.html:470
+msgid "Do it right, every time."
+msgstr "G?r det r?tt, varje g?ng."
+
+#: .\home\templates\home\about.html:471 .\home\templates\home\about.html:479
+msgid ""
+"We remember your preferences, your routines, and that little thing you "
+"mentioned last time."
+msgstr "Vi kommer ih?g dina preferenser, dina rutiner och den d?r lilla detaljen du n?mnde sist."
+
+#: .\home\templates\home\about.html:476
+msgid "personal icon"
+msgstr "personlig ikon"
+
+#: .\home\templates\home\about.html:478
+msgid "Make it personal."
+msgstr "G?r det personligt."
+
+#: .\home\templates\home\about.html:484
+msgid "care icon"
+msgstr "omsorgsikon"
+
+#: .\home\templates\home\about.html:486
+msgid "Care for the bigger picture."
+msgstr "Se till helheten."
+
+#: .\home\templates\home\about.html:487
+msgid ""
+"Eco-friendly choices, fair treatment of our team, and services that fit into "
+"your life, not the other way around."
+msgstr "Milj?v?nliga val, r?ttvis behandling av v?rt team och tj?nster som passar in i ditt liv, inte tv?rtom."
+
+#: .\home\templates\home\about.html:497
+msgid "Where We're Going"
+msgstr "Vart vi ?r p? v?g"
+
+#: .\home\templates\home\about.html:499
+msgid ""
+"\n"
+"        We're building a future where every household can get help with "
+"anything,\n"
+"        in minutes, from one trusted place.\n"
+"        "
+msgstr ""
+"\n"
+"Vi bygger en framtid d?r varje hush?ll kan f? hj?lp med vad som helst, inom minuter, fr?n en och samma p?litliga plats."
+"        "
+
+#: .\home\templates\home\about.html:506
+msgid ""
+"\n"
+"        Not just cleaning. Not just repairs. Not just childcare. All of it, "
+"all\n"
+"        connected, all simple.\n"
+"        "
+msgstr ""
+"\n"
+"Inte bara st?dning. Inte bara reparationer. Inte bara barnpassning. Allt ihop, sammankopplat och enkelt."
+"        "
+
+#: .\home\templates\home\about.html:513
+msgid ""
+"\n"
+"        We want you to spend less time stressing over your to-do list and "
+"more\n"
+"        time living in the home you love.\n"
+"        "
+msgstr ""
+"\n"
+"Vi vill att du ska l?gga mindre tid p? att stressa ?ver din att-g?ra-lista och mer tid p? att leva i hemmet du ?lskar."
+"        "
+
+#: .\home\templates\home\about.html:518
+msgid "See How We Can Help Today"
+msgstr "Se hur vi kan hj?lpa idag"
+
+#: .\home\templates\home\about.html:521
+msgid "Future section image"
+msgstr "Bild f?r framtidsavsnittet"
+
+#: .\home\templates\home\about.html:527
+msgid "Our Goals"
+msgstr "V?ra m?l"
+
+#: .\home\templates\home\about.html:529
+msgid ""
+"\n"
+"      We're building Hembla experten to be more than just a service, we want "
+"to be part\n"
+"      of people's lives, helping them feel more at home every day.\n"
+"      "
+msgstr ""
+"\n"
+"Vi bygger Hembla experten f?r att vara mer ?n bara en tj?nst; vi vill vara en del av m?nniskors liv och hj?lpa dem att k?nna sig mer hemma varje dag."
+"      "
+
+#: .\home\templates\home\about.html:535
+msgid "Here's what we're working toward"
+msgstr "Det h?r ?r vad vi arbetar mot"
+
+#: .\home\templates\home\about.html:541 .\home\templates\home\about.html:549
+#: .\home\templates\home\about.html:557
+msgid "icon"
+msgstr "ikon"
+
+#: .\home\templates\home\about.html:543
+msgid "Earn Your Trust, Every Time"
+msgstr "F?rtj?na ditt f?rtroende, varje g?ng"
+
+#: .\home\templates\home\about.html:544
+msgid ""
+"We aim to keep our satisfaction rate near perfect by listening, improving, "
+"and showing up for our customers in every service we provide."
+msgstr "Vi str?var efter att h?lla v?r n?jdhet n?ra perfekt genom att lyssna, f?rb?ttra oss och finnas d?r f?r v?ra kunder i varje tj?nst vi levererar."
+
+#: .\home\templates\home\about.html:551
+msgid "Reach More Communities"
+msgstr "N? fler samh?llen"
+
+#: .\home\templates\home\about.html:552
+msgid ""
+"Bring Hembla's trusted home and lifestyle services, from cleaning to "
+"childcare to repairs, to 5 new cities in the next 3 years."
+msgstr "Ta Hembla expertens p?litliga hem- och livsstilstj?nster, fr?n st?dning till barnpassning och reparationer, till 5 nya st?der inom de kommande 3 ?ren."
+
+#: .\home\templates\home\about.html:559
+msgid "Help 10,000 Homes Thrive"
+msgstr "Hj?lpa 10 000 hem att blomstra"
+
+#: .\home\templates\home\about.html:560
+msgid ""
+"Reach 10,000 homes served, creating cleaner, safer, and more comfortable "
+"spaces for thousands of people."
+msgstr "N? 10 000 hem betj?nade och skapa renare, s?krare och mer bekv?ma milj?er f?r tusentals m?nniskor."
+
+#: .\home\templates\home\about.html:565 .\home\templates\home\about.html:566
+#: .\home\templates\home\about.html:567
+msgid "circle"
+msgstr "cirkel"
+
+#: .\home\templates\home\contact.html:9 .\home\templates\home\contact.html:27
+msgid "Contact Us"
+msgstr "Kontakta oss"
+
+#: .\home\templates\home\contact.html:28
+msgid ""
+"We love hearing from you! Let us know how we can make your experience even "
+"better."
+msgstr "Vi ?lskar att h?ra fr?n dig! Ber?tta hur vi kan g?ra din upplevelse ?nnu b?ttre."
+
+#: .\home\templates\home\contact.html:39
+msgid "First Name"
+msgstr "F?rnamn"
+
+#: .\home\templates\home\contact.html:44
+msgid "Last Name"
+msgstr "Efternamn"
+
+#: .\home\templates\home\contact.html:51
+msgid "Email"
+msgstr "E-post"
+
+#: .\home\templates\home\contact.html:56
+msgid "Country Code"
+msgstr "Landskod"
+
+#: .\home\templates\home\contact.html:63
+msgid "Phone Number"
+msgstr "Telefonnummer"
+
+#: .\home\templates\home\contact.html:69
+msgid "Message"
+msgstr "Meddelande"
+
+#: .\home\templates\home\contact.html:75
+msgid "Inquiry Type"
+msgstr "?rendetyp"
+
+#: .\home\templates\home\contact.html:80
+msgid "Attach file"
+msgstr "Bifoga fil"
+
+#: .\home\templates\home\contact.html:86
+msgid "Preferred Contact Method"
+msgstr "F?redragen kontaktmetod"
+
+#: .\home\templates\home\contact.html:93
+msgid "I agree to the Processing of my data in accordance with the"
+msgstr "Jag godk?nner behandlingen av mina uppgifter i enlighet med"
+
+#: .\home\templates\home\contact.html:94
+msgid "privacy policy"
+msgstr "integritetspolicyn"
+
+#: .\home\templates\home\contact.html:98
+msgid "Send Message"
+msgstr "Skicka meddelande"
+
+#: .\home\templates\home\contact.html:105
+msgid "Our Contact Information"
+msgstr "V?ra kontaktuppgifter"
+
+#: .\home\templates\home\contact.html:106
+msgid "123 Clean Street, AnyTown"
+msgstr "123 Clean Street, AnyTown"
+
+#: .\home\templates\home\contact.html:107
+msgid "(555) 123-4567"
+msgstr "(555) 123-4567"
+
+#: .\home\templates\home\contact.html:108
+#, fuzzy
+#| msgid "Hembla experten Customer"
+msgid "Support@Hembla experten.com"
+msgstr "Support@Hembla experten.com"
+
+#: .\home\templates\home\contact.html:118
+msgid "Thank You! We've Got Your Message"
+msgstr "Tack! Vi har tagit emot ditt meddelande"
+
+#: .\home\templates\home\contact.html:119
+msgid ""
+"We appreciate you reaching out to Hembla experten. Our team will review your "
+"message and get back to you within 24 hours."
+msgstr "Vi uppskattar att du kontaktar Hembla experten. V?rt team kommer att granska ditt meddelande och ?terkomma inom 24 timmar."
+
+#: .\home\templates\home\contact.html:122
+msgid "Close"
+msgstr "St?ng"
+
+#: .\home\templates\home\contact.html:123
+msgid "Back to Home"
+msgstr "Tillbaka till startsidan"
+
+#: .\home\templates\home\feedback_request.html:8
+#, fuzzy
+#| msgid "Hembla experten Customer"
+msgid "Feedback | Hembla experten"
+msgstr "Feedback | Hembla experten"
+
+#: .\home\templates\home\feedback_request.html:20
+msgid "Feedback"
+msgstr "Feedback"
+
+#: .\home\templates\home\feedback_request.html:21
+msgid "Share your feedback or request a new service."
+msgstr "Dela din feedback eller beg?r en ny tj?nst."
+
+#: .\home\templates\home\feedback_request.html:25
+msgid ""
+"We want to hear from you. Tell us about your experience, suggest "
+"improvements, or request a new service. If it's something we don't currently "
+"offer, we can explore it."
+msgstr "Vi vill g?rna h?ra fr?n dig. Ber?tta om din upplevelse, f?resl? f?rb?ttringar eller beg?r en ny tj?nst. Om det ?r n?got vi inte erbjuder idag kan vi unders?ka det."
+
+#: .\home\templates\home\feedback_request.html:30
+msgid "Your Name"
+msgstr "Ditt namn"
+
+#: .\home\templates\home\feedback_request.html:34
+msgid "Your Feedback"
+msgstr "Din feedback"
+
+#: .\home\templates\home\feedback_request.html:38
+msgid "Rating"
+msgstr "Betyg"
+
+#: .\home\templates\home\feedback_request.html:56
+msgid "OR"
+msgstr "ELLER"
+
+#: .\home\templates\home\feedback_request.html:60
+msgid "Need a service we don't have"
+msgstr "Beh?ver du en tj?nst vi inte har"
+
+#: .\home\templates\home\feedback_request.html:62
+#, fuzzy
+#| msgid "Choose Service Type"
+msgid "Service Type"
+msgstr "Tj?nstetyp"
+
+#: .\home\templates\home\feedback_request.html:66
+msgid "Describe Your Request"
+msgstr "Beskriv din f?rfr?gan"
+
+#: .\home\templates\home\feedback_request.html:71
+msgid "Send Feedback / Request Service"
+msgstr "Skicka feedback / beg?r tj?nst"
+
+#: .\home\templates\home\home.html:67
+msgid "More Time for What Matters Most"
+msgstr "Mer tid för det som betyder mest"
+
+#: .\home\templates\home\home.html:69
+msgid ""
+"\n"
+"          Life's busy, finding help shouldn't be. Between work, family, and "
+"everyday stress, your time is precious.\n"
+"          Hembla experten makes it easy to book trusted pros who treat your "
+"home like their own, fast, fair, and worry free.\n"
+"          "
+msgstr ""
+"\n"
+"Livet är fullt, att hitta hjälp ska inte vara det. Mellan arbete, familj och "
+"vardagsstress är din tid värdefull. Hembla experten gör det enkelt att boka "
+"pålitliga proffs som behandlar ditt hem som sitt eget, snabbt, rättvist och "
+"bekymmersfritt.          "
+
+#: .\home\templates\home\home.html:77
+msgid "Book Cleaning"
+msgstr "Boka städning"
+
+#: .\home\templates\home\home.html:80 .\home\templates\home\home.html:89
+msgid "Private Booking"
+msgstr "Privat bokning"
+
+#: .\home\templates\home\home.html:81 .\home\templates\home\home.html:90
+msgid "Business Booking"
+msgstr "Företagsbokning"
+
+#: .\home\templates\home\home.html:86
+msgid "Same Day Service"
+msgstr "Service samma dag"
+
+#: .\home\templates\home\home.html:95
+msgid "Admin Dashboard"
+msgstr "Adminpanel"
+
+#: .\home\templates\home\home.html:105
+msgid "Our Standout Services"
+msgstr "Våra utmärkta tjänster"
+
+#: .\home\templates\home\home.html:107
+msgid ""
+"\n"
+"      From sparkling homes to helping hands, we're here for every moment, "
+"whether it's a quick refresh, a full transformation, or urgent care when you "
+"need it most.\n"
+"      "
+msgstr ""
+"\n"
+"Från skinande hem till hjälpande händer finns vi här för varje tillfälle, "
+"oavsett om det gäller en snabb uppfräschning, en fullständig förvandling "
+"eller akuthjälp när du behöver den som mest.      "
+
+#: .\home\templates\home\home.html:117
+msgid "Home Cleaning"
+msgstr "Hemstädning"
+
+#: .\home\templates\home\home.html:118
+msgid ""
+"Standard Cleaning done right, consistent, detailed, and one less thing to "
+"worry about."
+msgstr ""
+"Standardstädning som görs rätt, konsekvent, noggrant och en sak mindre att "
+"oroa sig för."
+
+#: .\home\templates\home\home.html:125
+msgid "Deep Cleaning"
+msgstr "Djuprengöring"
+
+#: .\home\templates\home\home.html:126
+msgid ""
+"We clean where regular cleaning doesn't, for a home that feels fresh, clear, "
+"and truly cared for."
+msgstr ""
+"Vi städar där vanlig städning inte räcker, för ett hem som känns fräscht, "
+"rent och omsorgsfullt omhändertaget."
+
+#: .\home\templates\home\home.html:133
+msgid "Business Cleaning"
+msgstr "Företagsstädning"
+
+#: .\home\templates\home\home.html:134
+msgid ""
+"Your workplace reflects your brand. Our expert cleaning keeps it looking "
+"sharp, professional, and always ready for business."
+msgstr ""
+"Din arbetsplats speglar ditt varumärke. Vår expertstädning håller den snygg, "
+"professionell och alltid redo för affärer."
+
+#: .\home\templates\home\home.html:141
+msgid "Urgent Cleaning"
+msgstr "Akutstädning"
+
+#: .\home\templates\home\home.html:142
+msgid ""
+"Need cleaning now We arrive within 1'3 hours, fast, reliable, and hassle-"
+"free."
+msgstr ""
+"Behöver du städning nu? Vi är på plats inom 1'3 timmar, snabbt, pålitligt "
+"och utan krångel."
+
+#: .\home\templates\home\home.html:146 .\home\templates\home\home.html:192
+msgid "See All Services"
+msgstr "Se alla tjänster"
+
+#: .\home\templates\home\home.html:151
+msgid "More Than Just Cleaning"
+msgstr "Mer än bara städning"
+
+#: .\home\templates\home\home.html:153
+msgid ""
+"\n"
+"      From caring for your pets to fixing what's broken, we're here for "
+"life's little (and big) moments, personal, reliable, and tailored to you\n"
+"      "
+msgstr ""
+"\n"
+"Från att ta hand om dina husdjur till att fixa det som gått sönder finns vi "
+"här för livets små (och stora) stunder, personligt, pålitligt och anpassat "
+"för dig.      "
+
+#: .\home\templates\home\home.html:163
+msgid "Pet Walking"
+msgstr "Hundrastning"
+
+#: .\home\templates\home\home.html:164
+msgid "Loving care and happy walks for your furry friends while you're away"
+msgstr ""
+"Kärleksfull omsorg och glada promenader för dina lurviga vänner när du är "
+"borta."
+
+#: .\home\templates\home\home.html:171
+msgid "Home Repairs"
+msgstr "Hemreparationer"
+
+#: .\home\templates\home\home.html:172
+msgid "Quick fixes and skilled hands to keep your home feeling perfect"
+msgstr "Snabba fixar och skickliga händer som håller ditt hem i toppskick."
+
+#: .\home\templates\home\home.html:179
+msgid "Event Assistance"
+msgstr "Eventhj?lp"
+
+#: .\home\templates\home\home.html:180
+msgid "Helping hands for every occasion, from setup to cleanup"
+msgstr "Hjälpande händer för varje tillfälle, från uppsättning till städning."
+
+#: .\home\templates\home\home.html:187
+msgid "Special Assistance"
+msgstr "Särskild hjälp"
+
+#: .\home\templates\home\home.html:188
+msgid "Compassionate support for individuals needing extra help at home"
+msgstr "Omtänksamt stöd för personer som behöver extra hjälp hemma."
+
+#: .\home\templates\home\home.html:198
+msgid "How it Works"
+msgstr "Så fungerar det"
+
+#: .\home\templates\home\home.html:199
+msgid "A Helping Hand in Just Three Simple Steps"
+msgstr "En hjälpande hand i bara tre enkla steg"
+
+#: .\home\templates\home\home.html:206
+msgid "Book Online"
+msgstr "Boka online"
+
+#: .\home\templates\home\home.html:207
+msgid ""
+"Choose the service you need, pick a date and time, and get an instant quote, "
+"fast, simple, and stress-free"
+msgstr ""
+"Välj tjänsten du behöver, välj datum och tid och få en offert direkt, "
+"snabbt, enkelt och stressfritt."
+
+#: .\home\templates\home\home.html:212
+msgid "We Help"
+msgstr "Vi hjälper"
+
+#: .\home\templates\home\home.html:213
+msgid ""
+"A vetted, friendly professional arrives on time with everything needed, "
+"whether it's cleaning, repairs, or special assistance."
+msgstr ""
+"En kontrollerad och vänlig professionell kommer i tid med allt som behövs, "
+"oavsett om det gäller städning, reparationer eller särskild hjälp."
+
+#: .\home\templates\home\home.html:218
+msgid "You Relax"
+msgstr "Du kan slappna av"
+
+#: .\home\templates\home\home.html:219
+msgid ""
+"Enjoy more free time, a comfortable home, and the peace of mind that comes "
+"with knowing it's all taken care of"
+msgstr ""
+"Njut av mer fritid, ett bekvämt hem och tryggheten i att veta att allt är "
+"omhändertaget."
+
+#: .\home\templates\home\home.html:228
+msgid "What Our Customers Say"
+msgstr "Vad våra kunder säger"
+
+#: .\home\templates\home\home.html:229
+msgid ""
+"We're proud to make life easier for our customers. Here's what they have to "
+"say about their Hembla experten experience"
+msgstr ""
+"Vi är stolta över att göra livet enklare för våra kunder. Här är vad de "
+"säger om sin upplevelse med Hembla experten."
+
+#: .\home\templates\home\home.html:239
+msgid "Hembla experten Customer"
+msgstr "Hembla experten-kund"
+
+#: .\home\templates\home\home.html:253
+msgid ""
+"So impressed with Hembla experten! They arrived on time, worked quickly but "
+"with such attention to detail, and my apartment has never looked better. It "
+"honestly feels like a fresh start every time they come. Highly recommend!"
+msgstr ""
+"Så imponerad av Hembla experten! De kom i tid, arbetade snabbt men med stor "
+"känsla för detaljer, och min lägenhet har aldrig sett bättre ut. Det känns "
+"verkligen som en nystart varje gång de kommer. Rekommenderas varmt!"
+
+#: .\home\templates\home\home.html:261
+msgid ""
+"The deep cleaning service was worth every Krona. My home smells amazing, "
+"looks spotless, and they even made sure everything was safe for my dog. The "
+"team was friendly, efficient, and professional from start to finish"
+msgstr ""
+"Djuprengöringen var värd varenda krona. Mitt hem doftar fantastiskt och ser "
+"skinande rent ut, och de såg till att allt var säkert för min hund. Teamet "
+"var vänligt, effektivt och professionellt från början till slut."
+
+#: .\home\templates\home\home.html:269
+msgid ""
+"I use their service every two weeks and its been a total lifesaver for my "
+"busy schedule. Theyre reliable, trustworthy, and always leave my home "
+"sparkling. Its such a relief knowing I can count on them!"
+msgstr ""
+"Jag använder deras tjänst varannan vecka och den har verkligen räddat mitt "
+"hektiska schema. De är pålitliga, förtroendeingivande och lämnar alltid mitt "
+"hem skinande rent. Det är en lättnad att veta att jag kan räkna med dem!"
+
+#: .\home\templates\home\home.html:293
+msgid "Choose Service Type"
+msgstr "Välj tjänstetyp"
+
+#: .\home\templates\home\home.html:294
+msgid "Pick the right category to continue your booking."
+msgstr "Välj rätt kategori för att fortsätta din bokning."
+
+#: .\home\templates\home\home.html:296
+msgid "Private Services"
+msgstr "Privata tjänster"
+
+#: .\home\templates\home\home.html:297
+msgid "Business Services"
+msgstr "Företagstjänster"
+
+#: .\home\templates\home\includes\main_header.html:68
+msgid "Language"
+msgstr ""

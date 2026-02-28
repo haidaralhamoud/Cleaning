@@ -1,6 +1,7 @@
 
 {% load static %}
 {% load bootstrap4 %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,7 +47,7 @@
     }
 
   </style>
-  <title>Hembla experten </title>
+  <title>Hembla experten</title>
 </head>
 <body>
 {% include "home/includes/main_header.html" %}
@@ -63,33 +64,35 @@
 
     <div class="hero-inner container">
       <div class="hero-copy">
-        <h1>More Time for What Matters Most</h1>
+        <h1>{% trans "More Time for What Matters Most" %}</h1>
         <p>
+          {% blocktrans %}
           Life's busy, finding help shouldn't be. Between work, family, and everyday stress, your time is precious.
           Hembla experten makes it easy to book trusted pros who treat your home like their own, fast, fair, and worry free.
+          {% endblocktrans %}
         </p>
         <div class="hero-buttons">
           <div class="same-day-dropdown">
             <button type="button" class="btn btn-primary same-day-button">
-              Book Cleaning <span class="caret" aria-hidden="true"></span>
+              {% trans "Book Cleaning" %} <span class="caret" aria-hidden="true"></span>
             </button>
             <div class="same-day-menu" aria-label="Book Cleaning options">
-              <a href="{% url 'home:all_services_private' %}">Private Booking</a>
-              <a href="http://127.0.0.1:8000/business/services/">Business Booking</a>
+              <a href="{% url 'home:all_services_private' %}">{% trans "Private Booking" %}</a>
+              <a href="http://127.0.0.1:8000/business/services/">{% trans "Business Booking" %}</a>
             </div>
           </div>
           <div class="same-day-dropdown">
             <button type="button" class="btn btn-secondary same-day-button">
-              Same Day Service <span class="caret" aria-hidden="true"></span>
+              {% trans "Same Day Service" %} <span class="caret" aria-hidden="true"></span>
             </button>
             <div class="same-day-menu" aria-label="Same Day Service options">
-              <a href="{% url 'home:all_services_private' %}?urgent=1">Private Booking</a>
-              <a href="http://127.0.0.1:8000/business/services/">Business Booking</a>
+              <a href="{% url 'home:all_services_private' %}?urgent=1">{% trans "Private Booking" %}</a>
+              <a href="http://127.0.0.1:8000/business/services/">{% trans "Business Booking" %}</a>
             </div>
           </div>
           {% if user.is_authenticated %}
             {% if user.is_superuser %}
-              <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">Admin Dashboard</a>
+              <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">{% trans "Admin Dashboard" %}</a>
             {% endif %}
           {% endif %}
         </div>
@@ -99,9 +102,11 @@
 
   <!-- ===== OUR SERVICES ===== -->
   <section class="services container">
-    <h2 class="section-title">Our Standout Services</h2>
+    <h2 class="section-title">{% trans "Our Standout Services" %}</h2>
     <p class="lead">
+      {% blocktrans %}
       From sparkling homes to helping hands, we're here for every moment, whether it's a quick refresh, a full transformation, or urgent care when you need it most.
+      {% endblocktrans %}
     </p>
 
     <div class="cards">
@@ -109,43 +114,45 @@
         <div class="card-icon circle">
           <img src="{% static 'images/work-from-home0.png'%}" alt="Home Cleaning">
         </div>
-        <h3>Home Cleaning</h3>
-        <p>Standard Cleaning done right, consistent, detailed, and one less thing to worry about.</p>
+        <h3>{% trans "Home Cleaning" %}</h3>
+        <p>{% trans "Standard Cleaning done right, consistent, detailed, and one less thing to worry about." %}</p>
       </article>
 
       <article class="card solid">
         <div class="card-icon circle">
           <img src="{% static 'images/sparkles0.png'%}" alt="Deep Cleaning">
         </div>
-        <h3 class="white">Deep Cleaning</h3>
-        <p class="white">We clean where regular cleaning doesn't, for a home that feels fresh, clear, and truly cared for.</p>
+        <h3 class="white">{% trans "Deep Cleaning" %}</h3>
+        <p class="white">{% trans "We clean where regular cleaning doesn't, for a home that feels fresh, clear, and truly cared for." %}</p>
       </article>
 
       <article class="card soft">
         <div class="card-icon circle">
           <img src="{% static 'images/work-from-home1.png'%}" alt="Business Cleaning">
         </div>
-        <h3>Business Cleaning</h3>
-        <p>Your workplace reflects your brand. Our expert cleaning keeps it looking sharp, professional, and always ready for business.</p>
+        <h3>{% trans "Business Cleaning" %}</h3>
+        <p>{% trans "Your workplace reflects your brand. Our expert cleaning keeps it looking sharp, professional, and always ready for business." %}</p>
       </article>
 
       <article class="card solid">
         <div class="card-icon circle">
           <img src="{% static 'images/last-24-hours0.png'%}" alt="Urgent Cleaning">
         </div>
-        <h3 class="white">Urgent Cleaning</h3>
-        <p class="white">Need cleaning now We arrive within 1'3 hours, fast, reliable, and hassle-free.</p>
+        <h3 class="white">{% trans "Urgent Cleaning" %}</h3>
+        <p class="white">{% trans "Need cleaning now We arrive within 1'3 hours, fast, reliable, and hassle-free." %}</p>
       </article>
     </div>
 
-    <button type="button" class="btn-naked js-services-modal">See All Services</button>
+    <button type="button" class="btn-naked js-services-modal">{% trans "See All Services" %}</button>
   </section>
 
   <!-- ===== EXTRA SERVICES ===== -->
   <section class="extras container">
-    <h2 class="section-title">More Than Just Cleaning</h2>
+    <h2 class="section-title">{% trans "More Than Just Cleaning" %}</h2>
     <p class="lead small">
+      {% blocktrans %}
       From caring for your pets to fixing what's broken, we're here for life's little (and big) moments, personal, reliable, and tailored to you
+      {% endblocktrans %}
     </p>
 
     <div class="mini-cards">
@@ -153,63 +160,63 @@
         <div class="mini-badge">
           <img src="{% static 'images/attachment-10.png'%}" alt="Pet Walking">
         </div>
-        <h4>Pet Walking</h4>
-        <p>Loving care and happy walks for your furry friends while you're away</p>
+        <h4>{% trans "Pet Walking" %}</h4>
+        <p>{% trans "Loving care and happy walks for your furry friends while you're away" %}</p>
       </article>
 
       <article class="mini">
         <div class="mini-badge">
           <img src="{% static 'images/attachment-1-10.png'%}" alt="Home Repairs">
         </div>
-        <h4>Home Repairs</h4>
-        <p>Quick fixes and skilled hands to keep your home feeling perfect</p>
+        <h4>{% trans "Home Repairs" %}</h4>
+        <p>{% trans "Quick fixes and skilled hands to keep your home feeling perfect" %}</p>
       </article>
 
       <article class="mini">
         <div class="mini-badge">
           <img src="{% static 'images/attachment-2-10.png'%}" alt="Event Assistance">
         </div>
-        <h4>Event Assistance</h4>
-        <p>Helping hands for every occasion, from setup to cleanup</p>
+        <h4>{% trans "Event Assistance" %}</h4>
+        <p>{% trans "Helping hands for every occasion, from setup to cleanup" %}</p>
       </article>
 
       <article class="mini">
         <div class="mini-badge">
           <img src="{% static 'images/attachment-3-10.png'%}" alt="Special Assistance">
         </div>
-        <h4>Special Assistance</h4>
-        <p>Compassionate support for individuals needing extra help at home</p>
+        <h4>{% trans "Special Assistance" %}</h4>
+        <p>{% trans "Compassionate support for individuals needing extra help at home" %}</p>
       </article>
     </div>
 
-    <button type="button" class="btn-naked js-services-modal">See All Services</button>
+    <button type="button" class="btn-naked js-services-modal">{% trans "See All Services" %}</button>
   </section>
 
   <!-- ===== HOW IT WORKS (دوائر + خط موصول) ===== -->
   <section class="how">
     <div class="container">
-      <h2 class="section-title">How it Works</h2>
-      <p class="lead">A Helping Hand in Just Three Simple Steps</p>
+      <h2 class="section-title">{% trans "How it Works" %}</h2>
+      <p class="lead">{% trans "A Helping Hand in Just Three Simple Steps" %}</p>
 
       <div class="steps">
         <div class="track"></div>
 
         <div class="step">
           <div class="dot">1</div>
-          <h3>Book Online</h3>
-          <p>Choose the service you need, pick a date and time, and get an instant quote, fast, simple, and stress-free</p>
+          <h3>{% trans "Book Online" %}</h3>
+          <p>{% trans "Choose the service you need, pick a date and time, and get an instant quote, fast, simple, and stress-free" %}</p>
         </div>
 
         <div class="step">
           <div class="dot">2</div>
-          <h3>We Help</h3>
-          <p>A vetted, friendly professional arrives on time with everything needed, whether it's cleaning, repairs, or special assistance.</p>
+          <h3>{% trans "We Help" %}</h3>
+          <p>{% trans "A vetted, friendly professional arrives on time with everything needed, whether it's cleaning, repairs, or special assistance." %}</p>
         </div>
 
         <div class="step">
           <div class="dot">3</div>
-          <h3>You Relax</h3>
-          <p>Enjoy more free time, a comfortable home, and the peace of mind that comes with knowing it's all taken care of</p>
+          <h3>{% trans "You Relax" %}</h3>
+          <p>{% trans "Enjoy more free time, a comfortable home, and the peace of mind that comes with knowing it's all taken care of" %}</p>
         </div>
       </div>
     </div>
@@ -218,8 +225,8 @@
   <!-- ===== TESTIMONIALS ===== -->
   <section class="testimonials">
     <div class="container">
-      <h2 class="section-title">What Our Customers Say</h2>
-      <p class="lead lead-paginator">We're proud to make life easier for our customers. Here's what they have to say about their Hembla experten experience</p>
+      <h2 class="section-title">{% trans "What Our Customers Say" %}</h2>
+      <p class="lead lead-paginator">{% trans "We're proud to make life easier for our customers. Here's what they have to say about their Hembla experten experience" %}</p>
 
       <div class="t-grid" data-group-size="3">
         {% if feedbacks %}
@@ -229,7 +236,7 @@
                 {% if feedback.customer_name %}
                   {{ feedback.customer_name }}
                 {% else %}
-                  Hembla experten Customer
+                  {% trans "Hembla experten Customer" %}
                 {% endif %}
               </h4>
               <p class="t-text">{{ feedback.feedback_text }}</p>
@@ -243,7 +250,7 @@
         {% else %}
           <article class="t-card">
             <h4 class="t-name">Emma Johansson</h4>
-            <p class="t-text">So impressed with Hembla experten! They arrived on time, worked quickly but with such attention to detail, and my apartment has never looked better. It honestly feels like a fresh start every time they come. Highly recommend!</p>
+            <p class="t-text">{% trans "So impressed with Hembla experten! They arrived on time, worked quickly but with such attention to detail, and my apartment has never looked better. It honestly feels like a fresh start every time they come. Highly recommend!" %}</p>
             <div class="stars">
               <img src="{% static 'images/star0.svg'%}" alt=""><img src="{% static 'images/star1.svg'%}" alt=""><img src="{% static 'images/star2.svg'%}" alt=""><img src="{% static 'images/star3.svg'%}" alt=""><img src="{% static 'images/star4.svg'%}" alt="">
             </div>
@@ -251,7 +258,7 @@
 
           <article class="t-card raised">
             <h4 class="t-name">Lucas Meyer</h4>
-            <p class="t-text">The deep cleaning service was worth every Krona. My home smells amazing, looks spotless, and they even made sure everything was safe for my dog. The team was friendly, efficient, and professional from start to finish</p>
+            <p class="t-text">{% trans "The deep cleaning service was worth every Krona. My home smells amazing, looks spotless, and they even made sure everything was safe for my dog. The team was friendly, efficient, and professional from start to finish" %}</p>
             <div class="stars">
               <img src="{% static 'images/star5.svg'%}" alt=""><img src="{% static 'images/star6.svg'%}" alt=""><img src="{% static 'images/star7.svg'%}" alt=""><img src="{% static 'images/star8.svg'%}" alt=""><img src="{% static 'images/star9.svg'%}" alt="">
             </div>
@@ -259,7 +266,7 @@
 
           <article class="t-card">
             <h4 class="t-name">Sofia Andersson</h4>
-            <p class="t-text">I use their service every two weeks and its been a total lifesaver for my busy schedule. Theyre reliable, trustworthy, and always leave my home sparkling. Its such a relief knowing I can count on them!</p>
+            <p class="t-text">{% trans "I use their service every two weeks and its been a total lifesaver for my busy schedule. Theyre reliable, trustworthy, and always leave my home sparkling. Its such a relief knowing I can count on them!" %}</p>
             <div class="stars">
               <img src="{% static 'images/star10.svg'%}" alt=""><img src="{% static 'images/star11.svg'%}" alt=""><img src="{% static 'images/star12.svg'%}" alt=""><img src="{% static 'images/star13.svg'%}" alt="">
             </div>
@@ -282,12 +289,12 @@
   <div class="services-modal" id="servicesModal" aria-hidden="true">
     <div class="services-modal__overlay" data-services-close></div>
     <div class="services-modal__panel" role="dialog" aria-modal="true" aria-labelledby="servicesModalTitle">
-      <button class="services-modal__close" type="button" aria-label="Close" data-services-close>?</button>
-      <h3 id="servicesModalTitle">Choose Service Type</h3>
-      <p>Pick the right category to continue your booking.</p>
+      <button class="services-modal__close" type="button" aria-label="Close" data-services-close>&times;</button>
+      <h3 id="servicesModalTitle">{% trans "Choose Service Type" %}</h3>
+      <p>{% trans "Pick the right category to continue your booking." %}</p>
       <div class="services-modal__actions">
-        <a class="btn btn-primary" href="{% url 'home:all_services_private' %}">Private Services</a>
-        <a class="btn btn-secondary" href="{% url 'home:business_all_services' %}">Business Services</a>
+        <a class="btn btn-primary" href="{% url 'home:all_services_private' %}">{% trans "Private Services" %}</a>
+        <a class="btn btn-secondary" href="{% url 'home:business_all_services' %}">{% trans "Business Services" %}</a>
       </div>
     </div>
   </div>
@@ -380,7 +387,6 @@
   
 </body>
 </html>
-
 
 
 

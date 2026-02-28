@@ -1,5 +1,4 @@
 {% load static %}
-{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,11 +19,11 @@
     <img src="{% static 'images/google0.png' %}" alt="Google Icon" class="confetti">
 
     {% if process == "connect" %}
-      <h1 class="title">{% blocktrans with provider.name as provider %}Connect {{ provider }}{% endblocktrans %}</h1>
-      <p class="subtitle">{% blocktrans with provider.name as provider %}You are about to connect a new third-party account from {{ provider }}.{% endblocktrans %}</p>
+      <h1 class="title">Connect {{ provider }}</h1>
+      <p class="subtitle">You are about to connect a new third-party account from {{ provider }}.</p>
     {% else %}
-      <h1 class="title">{% blocktrans with provider.name as provider %}Sign In Via {{ provider }}{% endblocktrans %}</h1>
-      <p class="subtitle">{% blocktrans with provider.name as provider %}You are about to sign in using a third-party account from {{ provider }}.{% endblocktrans %}</p>
+      <h1 class="title">Sign In Via {{ provider }}</h1>
+      <p class="subtitle">You are about to sign in using a third-party account from {{ provider }}.</p>
     {% endif %}
 
     <form method="post" id="googleContinueForm">

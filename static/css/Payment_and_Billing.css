@@ -174,4 +174,42 @@ body{
 @media (max-width: 560px){
   .inline-grid{grid-template-columns:1fr}
   .modal-actions{flex-direction:column;align-items:stretch}
+
+  .invoice-history table,
+  .invoice-history thead,
+  .invoice-history tbody,
+  .invoice-history th,
+  .invoice-history td,
+  .invoice-history tr{
+    display:block;
+    width:100%;
+  }
+  .invoice-history thead{
+    display:none;
+  }
+  .invoice-history tr{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:14px;
+    padding:10px 12px;
+    margin-bottom:12px;
+    box-shadow:0 8px 18px rgba(15,23,42,.08);
+  }
+  .invoice-history td{
+    border:none;
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:6px 0;
+    text-align:left;
+    font-size:14px;
+  }
+  .invoice-history td::before{
+    content:attr(data-label);
+    font-weight:700;
+    color:var(--muted);
+  }
+  .invoice-history td[colspan]{
+    justify-content:center;
+  }
 }

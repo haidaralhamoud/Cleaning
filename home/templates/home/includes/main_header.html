@@ -1,5 +1,6 @@
 {% load static %}
 {% load user_extras %}
+{% load i18n %}
 <header class="main-header">
   <div class="logo">
     <img src="{% static 'images/logo.png' %}" alt="Logo">
@@ -59,7 +60,32 @@
 
 
   <div class="auth-buttons">
-    {% if user.is_authenticated %}
+    {% comment %}
+    <div class="lang-dropdown">
+      {% get_current_language as CURRENT_LANGUAGE %}
+      <form action="{% url 'set_language' %}" method="post" class="lang-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button type="button" class="lang-toggle" aria-label="{% trans 'Language' %}">
+          <svg class="lang-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 2a10 10 0 100 20 10 10 0 000-20Zm7.93 9h-3.12a15.2 15.2 0 00-1.07-5.02A8.02 8.02 0 0119.93 11ZM12 4c.7.9 1.7 3.1 2.1 7H9.9C10.3 7.1 11.3 4.9 12 4Zm-3.74 1.98A15.2 15.2 0 007.19 11H4.07a8.02 8.02 0 014.19-5.02ZM4.07 13h3.12a15.2 15.2 0 001.07 5.02A8.02 8.02 0 014.07 13ZM12 20c-.7-.9-1.7-3.1-2.1-7h4.2c-.4 3.9-1.4 6.1-2.1 7Zm3.74-1.98A15.2 15.2 0 0016.81 13h3.12a8.02 8.02 0 01-4.19 5.02Z"/>
+          </svg>
+          <span class="lang-code">{{ CURRENT_LANGUAGE|upper }}</span>
+          <span class="caret" aria-hidden="true"></span>
+        </button>
+        <div class="lang-menu">
+          {% get_available_languages as LANGUAGES %}
+          {% for lang in LANGUAGES %}
+            <button type="submit" name="language" value="{{ lang.0 }}" class="lang-option{% if lang.0 == CURRENT_LANGUAGE %} is-active{% endif %}">
+              <span class="lang-label">{{ lang.1 }}</span>
+              <span class="lang-code">{{ lang.0|upper }}</span>
+            </button>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
+    {% endcomment %}
+      {% if user.is_authenticated %}
       {% if user.access_profile %}
         {% if user.is_superuser %}
           <a href="{% url 'home:dashboard_home' %}" class="btn-auth">
@@ -113,3 +139,5 @@
     {% endif %}
   </div>
 </header>
+
+

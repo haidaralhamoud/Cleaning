@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.utils.translation import gettext as _
 import datetime
 from typing import Counter
 from django.db.models import Q
@@ -6,7 +7,7 @@ from django.db import IntegrityError
 from django.utils.dateparse import parse_date
 
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm, ServiceCommentForm, ServiceReviewForm
+from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm, ServiceCommentForm, ServiceReviewForm, PasswordResetRequestForm, OTPVerifyForm, SetNewPasswordForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
@@ -45,6 +46,7 @@ from .models import (
     CustomerNotification,
     ProviderAdminMessage,
     ProviderProfile,
+    PasswordResetOTP,
 )
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
@@ -52,6 +54,10 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives, get_connection
+from django.template.loader import render_to_string
+import logging
+from smtplib import SMTPException
 from home.models import (
     BookingStatusHistory,
     BookingTimeline,
@@ -66,13 +72,17 @@ from .forms import (
     CustomerBasicInfoForm,
     CustomerLocationForm,
     IncidentForm,
-    BookingChecklistForm 
+    BookingChecklistForm,
+    PasswordResetRequestForm,
+    OTPVerifyForm,
+    SetNewPasswordForm,
 )
 from django.http import HttpResponse, JsonResponse
 import json
 from django.db.models import Avg, Count
 User = get_user_model()
 from .forms import ProviderProfileForm, ProviderLocationForm
+logger = logging.getLogger(__name__)
 # ======================================================
 # AUTH
 # ======================================================
@@ -85,6 +95,221 @@ class RememberMeLoginView(LoginView):
         else:
             self.request.session.set_expiry(0)
         return response
+
+
+OTP_TTL_MINUTES = 10
+OTP_MAX_ATTEMPTS = 5
+OTP_LOCK_MINUTES = 15
+OTP_RESEND_COOLDOWN_SECONDS = 60
+RESET_SESSION_TTL_SECONDS = 15 * 60
+
+
+def _normalize_email(email):
+    return (email or "").strip().lower()
+
+
+def _get_client_ip(request):
+    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.META.get("REMOTE_ADDR")
+
+
+def _get_latest_active_otp(email):
+    now = timezone.now()
+    return (
+        PasswordResetOTP.objects.filter(
+            email=email,
+            is_used=False,
+            expires_at__gt=now,
+        ).filter(Q(locked_until__isnull=True) | Q(locked_until__lte=now))
+        .order_by("-created_at")
+        .first()
+    )
+
+
+def _is_locked_for(email, ip_address):
+    now = timezone.now()
+    email_lock = PasswordResetOTP.objects.filter(email=email, locked_until__gt=now).exists()
+    if email_lock:
+        return True
+    if ip_address:
+        ip_lock = PasswordResetOTP.objects.filter(ip_address=ip_address, locked_until__gt=now).exists()
+        return ip_lock
+    return False
+
+
+def _send_reset_code(email, user, request):
+    now = timezone.now()
+    ip_address = _get_client_ip(request)
+    if _is_locked_for(email, ip_address):
+        return False
+    latest_email = PasswordResetOTP.objects.filter(email=email).order_by("-created_at").first()
+    latest_ip = (
+        PasswordResetOTP.objects.filter(ip_address=ip_address).order_by("-created_at").first()
+        if ip_address
+        else None
+    )
+    if latest_email and latest_email.last_sent_at and (now - latest_email.last_sent_at).total_seconds() < OTP_RESEND_COOLDOWN_SECONDS:
+        return False
+    if latest_ip and latest_ip.last_sent_at and (now - latest_ip.last_sent_at).total_seconds() < OTP_RESEND_COOLDOWN_SECONDS:
+        return False
+
+    PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
+    otp_obj, code = PasswordResetOTP.create_otp(
+        email=email,
+        user=user,
+        ip_address=ip_address,
+        ttl_minutes=OTP_TTL_MINUTES,
+    )
+
+    subject = _("رمز إعادة تعيين كلمة المرور")
+    context = {"code": code, "ttl": OTP_TTL_MINUTES}
+    text_body = render_to_string("accounts/emails/password_reset_code.txt", context)
+    html_body = render_to_string("accounts/emails/password_reset_code.html", context)
+    message = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [email])
+    message.attach_alternative(html_body, "text/html")
+    try:
+        connection = get_connection()
+        connection.open()
+        connection.close()
+        message.send(fail_silently=False)
+    except SMTPException:
+        logger.exception("SMTP error while sending password reset code to %s", email)
+        raise
+    return True
+
+
+def password_reset_request(request):
+    form = PasswordResetRequestForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        email = _normalize_email(form.cleaned_data["email"])
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            form.add_error("email", _("No account found with this email."))
+            return render(
+                request,
+                "accounts/password_reset_request.html",
+                {"form": form},
+            )
+        _send_reset_code(email, user, request)
+
+        request.session["password_reset_email"] = email
+        messages.success(request, _("We sent a verification code to your email."))
+        return redirect("password_reset_verify")
+
+    return render(
+        request,
+        "accounts/password_reset_request.html",
+        {"form": form},
+    )
+
+
+def password_reset_verify(request):
+    email = _normalize_email(request.session.get("password_reset_email"))
+    if not email:
+        return redirect("password_reset")
+
+    form = OTPVerifyForm(request.POST or None)
+    if request.method == "POST":
+        if _is_locked_for(email, _get_client_ip(request)):
+            form.add_error("code", _("تم تجاوز عدد المحاولات. حاول لاحقاً."))
+            return render(
+                request,
+                "accounts/password_reset_verify.html",
+                {"form": form, "email": email, "cooldown_seconds": 0},
+            )
+
+        if request.POST.get("resend") == "1":
+            user = User.objects.filter(email__iexact=email).first()
+            if user:
+                _send_reset_code(email, user, request)
+            messages.success(request, _("We sent a verification code to your email."))
+            return redirect("password_reset_verify")
+
+        if form.is_valid():
+            otp = _get_latest_active_otp(email)
+            if not otp:
+                latest = (
+                    PasswordResetOTP.objects.filter(email=email, is_used=False)
+                    .order_by("-created_at")
+                    .first()
+                )
+                if latest and latest.is_locked():
+                    form.add_error("code", _("تم تجاوز عدد المحاولات. حاول لاحقاً."))
+                elif latest and latest.is_expired():
+                    latest.is_used = True
+                    latest.save(update_fields=["is_used"])
+                    form.add_error("code", _("رمز غير صالح أو منتهي."))
+                else:
+                    form.add_error("code", _("رمز غير صالح أو منتهي."))
+            elif not otp.check_code(form.cleaned_data["code"]):
+                otp.attempts += 1
+                if otp.attempts >= OTP_MAX_ATTEMPTS:
+                    otp.locked_until = timezone.now() + datetime.timedelta(minutes=OTP_LOCK_MINUTES)
+                otp.save(update_fields=["attempts", "locked_until"])
+                form.add_error("code", _("رمز غير صحيح. حاول مرة أخرى."))
+            else:
+                otp.is_used = True
+                otp.save(update_fields=["is_used"])
+                PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
+                request.session["password_reset_verified_email"] = email
+                request.session["password_reset_verified_at"] = int(timezone.now().timestamp())
+                return redirect("password_reset_new")
+
+    latest = PasswordResetOTP.objects.filter(email=email).order_by("-created_at").first()
+    cooldown_seconds = 0
+    if latest and latest.last_sent_at:
+        elapsed = (timezone.now() - latest.last_sent_at).total_seconds()
+        cooldown_seconds = max(0, OTP_RESEND_COOLDOWN_SECONDS - int(elapsed))
+
+    return render(
+        request,
+        "accounts/password_reset_verify.html",
+        {"form": form, "email": email, "cooldown_seconds": cooldown_seconds},
+    )
+
+
+def password_reset_new(request):
+    email = _normalize_email(request.session.get("password_reset_verified_email"))
+    verified_at = request.session.get("password_reset_verified_at")
+    if not email or not verified_at:
+        return redirect("password_reset")
+
+    age = timezone.now().timestamp() - int(verified_at)
+    if age > RESET_SESSION_TTL_SECONDS:
+        request.session.pop("password_reset_verified_email", None)
+        request.session.pop("password_reset_verified_at", None)
+        messages.error(request, _("انتهت مدة التحقق. اطلب رمزاً جديداً."))
+        return redirect("password_reset")
+
+    user = User.objects.filter(email__iexact=email).first()
+    if not user:
+        messages.error(request, _("لا يوجد حساب لهذا البريد."))
+        return redirect("password_reset")
+
+    form = SetNewPasswordForm(request.POST or None, user=user)
+    if request.method == "POST" and form.is_valid():
+        user.set_password(form.cleaned_data["new_password1"])
+        user.save()
+        PasswordResetOTP.objects.filter(email=email).update(is_used=True)
+
+        request.session.pop("password_reset_email", None)
+        request.session.pop("password_reset_verified_email", None)
+        request.session.pop("password_reset_verified_at", None)
+
+        query = urlencode({"email": email})
+        return redirect(f"{reverse('password_reset_success')}?{query}")
+
+    return render(
+        request,
+        "accounts/password_reset_new.html",
+        {"form": form, "email": email},
+    )
+
+
+def password_reset_success(request):
+    return render(request, "accounts/password_reset_success.html")
 
 
 def google_login_start(request):
@@ -110,9 +335,12 @@ def google_login_start(request):
 # ======================================================
 def sign_up(request):
     ref_code = request.GET.get("ref")
+    locked_email = None
+    if request.user.is_authenticated and request.user.email:
+        locked_email = request.user.email
 
     if request.method == "POST":
-        form = CustomerForm(request.POST, request.FILES)
+        form = CustomerForm(request.POST, request.FILES, locked_email=locked_email)
 
         if form.is_valid():
             email = form.cleaned_data["email"]
@@ -191,7 +419,7 @@ def sign_up(request):
             query = urlencode({"email": email})
             return redirect(f"{login_url}?{query}")
     else:
-        form = CustomerForm()
+        form = CustomerForm(locked_email=locked_email)
 
     return render(request, "registration/sign_up.html", {"form": form})
 
@@ -203,7 +431,10 @@ def sign_up(request):
 # ======================================================
 @login_required
 def customer_profile_view(request):
-    customer = get_object_or_404(Customer, user=request.user)
+    customer = Customer.objects.filter(user=request.user).first()
+    if not customer:
+        messages.error(request, "Please complete your profile to access this page.")
+        return redirect("accounts:sign_up")
 
     if request.method == "POST":
         basic_form = CustomerBasicInfoForm(
@@ -1286,51 +1517,28 @@ def Service_Preferences(request):
         if request.POST.get("save_custom"):
             target = request.POST.get("save_custom")
             if target == "products":
-                value = request.POST.get("products_custom", "").strip()
-                if value:
-                    prefs.products_custom = value
+                prefs.products_custom = request.POST.get("products_custom", "").strip()
             elif target == "frequency":
-                value = request.POST.get("frequency_custom", "").strip()
-                if value:
-                    prefs.frequency_custom = value
+                prefs.frequency_custom = request.POST.get("frequency_custom", "").strip()
             elif target == "priorities":
-                value = request.POST.get("priorities_custom", "").strip()
-                if value:
-                    prefs.priorities_custom = value
+                prefs.priorities_custom = request.POST.get("priorities_custom", "").strip()
             prefs.save()
             return redirect("accounts:Service_Preferences")
 
-        if "cleaning_types" in request.POST:
-            prefs.cleaning_types = request.POST.getlist("cleaning_types")
+        # Always overwrite lists so unchecking clears values
+        prefs.cleaning_types = request.POST.getlist("cleaning_types")
+        prefs.preferred_products = request.POST.getlist("preferred_products")
+        prefs.excluded_products = request.POST.getlist("excluded_products")
+        prefs.priorities = request.POST.getlist("priorities")
+        prefs.lifestyle_addons = request.POST.getlist("lifestyle_addons")
+        prefs.assembly_services = request.POST.getlist("assembly_services")
 
-        if "preferred_products" in request.POST:
-            prefs.preferred_products = request.POST.getlist("preferred_products")
+        prefs.frequency = request.POST.get("frequency") or None
 
-        if "excluded_products" in request.POST:
-            prefs.excluded_products = request.POST.getlist("excluded_products")
-
-        if "frequency" in request.POST:
-            prefs.frequency = request.POST.get("frequency") or None
-
-        if "priorities" in request.POST:
-            prefs.priorities = request.POST.getlist("priorities")
-
-        if "lifestyle_addons" in request.POST:
-            prefs.lifestyle_addons = request.POST.getlist("lifestyle_addons")
-
-        if "assembly_services" in request.POST:
-            prefs.assembly_services = request.POST.getlist("assembly_services")
-
-        products_custom = request.POST.get("products_custom", "").strip()
-        frequency_custom = request.POST.get("frequency_custom", "").strip()
-        priorities_custom = request.POST.get("priorities_custom", "").strip()
-
-        if products_custom:
-            prefs.products_custom = products_custom
-        if frequency_custom:
-            prefs.frequency_custom = frequency_custom
-        if priorities_custom:
-            prefs.priorities_custom = priorities_custom
+        # Allow clearing custom fields
+        prefs.products_custom = request.POST.get("products_custom", "").strip()
+        prefs.frequency_custom = request.POST.get("frequency_custom", "").strip()
+        prefs.priorities_custom = request.POST.get("priorities_custom", "").strip()
 
         prefs.save()
         return redirect("accounts:Service_Preferences")

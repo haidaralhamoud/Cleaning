@@ -18,7 +18,7 @@ from .models import (
     Job, Application, BookingNote, BusinessBooking, BusinessService, DateSurcharge, PrivateAddon,
     BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, CallRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
-    Contact,
+    Contact, FAQCategory, FAQItem,
     ScheduleRule,
 )
 from accounts.models import (
@@ -50,7 +50,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash, get_user_model
 from django import forms
 from django.forms import modelform_factory
-from django.db.models import Q, JSONField
+from django.db.models import Q, JSONField, Prefetch
 from django.core.paginator import Paginator
 from django.utils.safestring import mark_safe
 
@@ -171,7 +171,13 @@ def about(request):
     return render(request, "home/about.html")
 
 def faq(request):
-    return render(request, "home/FAQ.html")
+    categories = (
+        FAQCategory.objects.filter(is_active=True)
+        .prefetch_related(
+            Prefetch("items", queryset=FAQItem.objects.filter(is_active=True))
+        )
+    )
+    return render(request, "home/FAQ.html", {"faq_categories": categories})
 
 def Privacy_Policy(request):
     return render(request, "home/Privacy_Policy.html")

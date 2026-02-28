@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+  <main class="signin-container">
+    <div class="signin-box reset-box">
+      <img src="{% static 'images/confetti0.png'%}" alt="Confetti" class="confetti">
+
+      <h1 class="title">Third-Party Login Failure</h1>
+      <p class="subtitle">We couldn't complete the sign-in with your external provider.</p>
+
+      <div class="alert-error" role="alert">
+        <span>Please try again or use email/password.</span>
+      </div>
+
+      <a class="btn-login" href="{% url 'login' %}">Back to login</a>
+    </div>
+  </main>
+{% endblock %}
