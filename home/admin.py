@@ -12,6 +12,7 @@ from .models import (
     Job,
     Application,
     BusinessService,
+    BusinessServiceCard,
     BusinessBooking,
     BusinessBundle,
     BusinessAddon,
@@ -88,7 +89,6 @@ class ContactAdmin(admin.ModelAdmin):
 
 # admin.site.register(Service)
 admin.site.register(Job)
-admin.site.register(BusinessService)
 admin.site.register(BookingStatusHistory)
 
 
@@ -634,6 +634,33 @@ class ServiceEcoPointInline(admin.TabularInline):
     fields = ("title", "body", "icon", "order")
 
 
+class BusinessServiceCardInline(admin.StackedInline):
+    model = BusinessServiceCard
+    extra = 0
+    fields = ("title", "body", "order")
+
+
+@admin.register(BusinessService)
+class BusinessServiceAdmin(admin.ModelAdmin):
+    list_display = ("id", "title")
+    search_fields = ("title",)
+    inlines = [BusinessServiceCardInline]
+    fieldsets = (
+        ("Basic Info", {
+            "fields": (
+                "title",
+                "description",
+                "detail_description",
+                "recommended",
+                "image",
+                "hero_image",
+                "icon",
+                "description_service_aviable",
+            )
+        }),
+    )
+
+
 
 
 @admin.register(ScheduleRule)
@@ -685,6 +712,11 @@ class PrivateServiceAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceCard)
 class ServiceCardAdmin(admin.ModelAdmin):
+    list_display = ("service", "title", "order")
+
+
+@admin.register(BusinessServiceCard)
+class BusinessServiceCardAdmin(admin.ModelAdmin):
     list_display = ("service", "title", "order")
 
 

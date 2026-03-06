@@ -6,6 +6,48 @@
   <div class="card shadow-sm">
     <div class="card-body">
       <h5 class="mb-3">{% if mode == "edit" %}Edit{% else %}Add{% endif %} {{ item.label|slice:":-1" }}</h5>
+      {% if item.slug == "private-services" and object %}
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ object.pk }}">Cards</a>
+          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}?service_id={{ object.pk }}">Pricing</a>
+          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}?service_id={{ object.pk }}">Estimate</a>
+          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-eco' %}?service_id={{ object.pk }}">Eco</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-cards' %}?service_id={{ object.pk }}">+ Card</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-pricing' %}?service_id={{ object.pk }}">+ Pricing</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-estimates' %}?service_id={{ object.pk }}">+ Estimate</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-eco' %}?service_id={{ object.pk }}">+ Eco</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ object.pk }}">+ Add-on</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.slug %}" target="_blank">Open Page</a>
+        </div>
+      {% endif %}
+      {% if item.slug == "business-services" and object %}
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'business-service-cards' %}?service_id={{ object.pk }}">Cards</a>
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' object.pk %}" target="_blank">Open Page</a>
+        </div>
+      {% endif %}
+      {% if item.slug == "business-bundles" and object %}
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_bundles' 0 %}" target="_blank">Open Page</a>
+        </div>
+      {% endif %}
+      {% if mode == "edit" and object %}
+        {% if item.slug == "business-service-cards" %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' object.service.id %}" target="_blank">Open Page</a>
+          </div>
+        {% endif %}
+        {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" or item.slug == "service-eco" %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.service.slug %}" target="_blank">Open Page</a>
+          </div>
+        {% endif %}
+        {% if item.slug == "service-eco-points" %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.promise.service.slug %}" target="_blank">Open Page</a>
+          </div>
+        {% endif %}
+      {% endif %}
       <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% if item.slug == "date-surcharges" %}
@@ -179,6 +221,56 @@
               </div>
             {% else %}
               <div class="text-muted small">No add-ons yet for this service.</div>
+            {% endif %}
+          </div>
+        {% endif %}
+        {% if item.slug == "business-services" and object %}
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Business Service Cards</h6>
+              <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{% url 'home:dashboard_model_create' 'business-service-cards' %}?service_id={{ object.pk }}">
+                  <i class="fa-solid fa-plus"></i> Add Card
+                </a>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'home:dashboard_model_list' 'business-service-cards' %}?service_id={{ object.pk }}">
+                  View Cards
+                </a>
+              </div>
+            </div>
+            {% if business_cards_for_service and business_cards_for_service|length %}
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Order</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for card in business_cards_for_service %}
+                      <tr>
+                        <td>{{ card.title }}</td>
+                        <td>{{ card.order }}</td>
+                        <td class="text-end">
+                          <a class="btn btn-sm btn-outline-secondary"
+                             href="{% url 'home:dashboard_model_edit' 'business-service-cards' card.pk %}">
+                            Edit
+                          </a>
+                          <a class="btn btn-sm btn-outline-danger"
+                             href="{% url 'home:dashboard_model_delete' 'business-service-cards' card.pk %}">
+                            Delete
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-muted small">No cards yet for this service.</div>
             {% endif %}
           </div>
         {% endif %}

@@ -21,6 +21,7 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("jobs", home_models.Job, "Jobs", "fa-solid fa-briefcase"),
         DashboardItem("applications", home_models.Application, "Applications", "fa-solid fa-file-lines"),
         DashboardItem("business-services", home_models.BusinessService, "Business Services", "fa-solid fa-building"),
+        DashboardItem("business-service-cards", home_models.BusinessServiceCard, "Business Service Cards", "fa-solid fa-layer-group"),
         DashboardItem("business-bundles", home_models.BusinessBundle, "Business Bundles", "fa-solid fa-layer-group"),
         DashboardItem("business-addons", home_models.BusinessAddon, "Business Add-ons", "fa-solid fa-circle-plus"),
         DashboardItem("business-bookings", home_models.BusinessBooking, "Business Bookings", "fa-solid fa-calendar-check"),

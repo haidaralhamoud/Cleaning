@@ -31,6 +31,7 @@ urlpatterns = [
     path("apply/<int:job_id>/", views.apply_page, name="apply_page"),
 
     path("business/services/", views.all_services_business, name="business_all_services"),
+    path("business/services/<int:service_id>/", views.business_service_detail, name="business_service_detail"),
 
 # Step 1 — All Services
 

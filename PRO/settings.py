@@ -41,21 +41,21 @@ if env_path.exists():
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%g@=l33ao&ipxo7$8*13mgmc9e#b-j661-3i^#_4fno-s@b&89'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False 
+DEBUG = True
 
-ALLOWED_HOSTS = [
-    'hembla-experten.se',
-    'www.hembla-experten.se',
-    '45.93.137.166',
-]
+# ALLOWED_HOSTS = [
+#     'hembla-experten.se',
+#     'www.hembla-experten.se',
+#     '45.93.137.166',
+# ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://hembla-experten.se",
-    "https://www.hembla-experten.se",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://hembla-experten.se",
+#     "https://www.hembla-experten.se",
+# ]
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 SITE_ID = 1
@@ -80,7 +80,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap4',
-    'home',
+    'home.apps.HomeConfig',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -162,26 +162,26 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
-#         'USER': os.getenv('POSTGRES_USER', 'cleaning'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'Hembla@2026'),
-#         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-#         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-#     },
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hembla_db',
-        'USER': 'hembla_user',
-        'PASSWORD': 'Hembla123456789@',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+        'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
+        'USER': os.getenv('POSTGRES_USER', 'cleaning'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    },
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'hembla_db',
+#         'USER': 'hembla_user',
+#         'PASSWORD': 'Hembla123456789@',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 if "test" in sys.argv:
     DATABASES = {
@@ -251,19 +251,19 @@ MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR, "media")
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Email (default to console backend for development)
+# Email (Hostinger SMTP)
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST = "smtp.hostinger.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = "services@hembla-experten.se"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True").lower() == "true"
-EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False").lower() == "true"
-DEFAULT_FROM_EMAIL = os.getenv(
-    "DEFAULT_FROM_EMAIL",
-    f"Hembla Experten <{EMAIL_HOST_USER}>" if EMAIL_HOST_USER else "Hembla Experten <no-reply@yourdomain.com>",
-)
-EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
+DEFAULT_FROM_EMAIL = "Hembla Experten <services@hembla-experten.se>"
+EMAIL_TIMEOUT = 10
+
+#book's email
+ADMIN_ALERT_EMAIL = "services@hembla-experten.se"
 
 # --- SMTP sanity + startup log (no secrets) ---
 import logging
@@ -271,18 +271,7 @@ logger = logging.getLogger("PRO.settings")
 logger.info("EMAIL_BACKEND=%s", EMAIL_BACKEND)
 logger.info("EMAIL_HOST=%s", EMAIL_HOST)
 logger.info("EMAIL_PORT=%s", EMAIL_PORT)
-logger.info("EMAIL_USE_TLS=%s", EMAIL_USE_TLS)
 logger.info("EMAIL_USE_SSL=%s", EMAIL_USE_SSL)
-
-if EMAIL_USE_TLS and EMAIL_USE_SSL:
-    raise ValueError("EMAIL_USE_TLS and EMAIL_USE_SSL cannot both be True.")
-
-if EMAIL_PORT == 587:
-    EMAIL_USE_TLS = True
-    EMAIL_USE_SSL = False
-elif EMAIL_PORT == 465:
-    EMAIL_USE_SSL = True
-    EMAIL_USE_TLS = False
 
 
 ##################################################################SERVER

@@ -8,13 +8,32 @@
       <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
       <button class="btn btn-outline-primary" type="submit">Search</button>
     </form>
-    <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}">
-      <i class="fa-solid fa-plus"></i> Add
-    </a>
+    <div class="d-flex gap-2 flex-wrap">
+      {% if service_id and item.slug == "service-cards" %}
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'private-services' service_id %}">
+          Back to Service
+        </a>
+      {% endif %}
+      {% if service_id and item.slug == "business-service-cards" %}
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'business-services' service_id %}">
+          Back to Service
+        </a>
+      {% endif %}
+      {% if service_id %}
+        {% if item.slug == "service-pricing" or item.slug == "service-estimates" or item.slug == "service-eco" or item.slug == "service-eco-points" %}
+          <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'private-services' service_id %}">
+            Back to Service
+          </a>
+        {% endif %}
+      {% endif %}
+      <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}">
+        <i class="fa-solid fa-plus"></i> Add
+      </a>
+    </div>
   </div>
 
   <div class="table-responsive">
-    <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle dash-table">
       <thead>
         <tr>
           {% for field in display_fields %}
@@ -27,18 +46,46 @@
         {% for obj in objects %}
           <tr>
             {% for field in display_fields %}
-              <td>{{ obj|attr:field }}</td>
+              {% with val=obj|attr:field %}
+              <td>
+                {% if val and val.url %}
+                  <div class="dash-file">
+                    <img class="dash-thumb" src="{{ val.url }}" alt="">
+                  </div>
+                {% else %}
+                  <div class="cell-clamp" title="{{ val }}">{{ val }}</div>
+                {% endif %}
+              </td>
+              {% endwith %}
             {% endfor %}
-            <td class="text-end">
+            <td class="text-end dash-actions-cell">
               <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' item.slug obj.pk %}">Edit</a>
               {% if item.slug == "provider-profiles" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_create' 'provider-messages' %}?provider_id={{ obj.user.id }}">Contact</a>
               {% endif %}
               {% if item.slug == "private-services" %}
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ obj.pk }}">Cards</a>
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}?service_id={{ obj.pk }}">Pricing</a>
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}?service_id={{ obj.pk }}">Estimate</a>
-                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-eco' %}?service_id={{ obj.pk }}">Eco</a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-cards' %}?service_id={{ obj.pk }}">+ Card</a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-pricing' %}?service_id={{ obj.pk }}">+ Pricing</a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-estimates' %}?service_id={{ obj.pk }}">+ Estimate</a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-eco' %}?service_id={{ obj.pk }}">+ Eco</a>
+                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ obj.pk }}">+ Add-on</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.slug %}" target="_blank">Open Page</a>
+              {% endif %}
+              {% if item.slug == "business-services" %}
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'business-service-cards' %}?service_id={{ obj.pk }}">Cards</a>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' obj.pk %}" target="_blank">Open Page</a>
+              {% endif %}
+              {% if item.slug == "business-bundles" %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_bundles' 0 %}" target="_blank">Open Page</a>
+              {% endif %}
+              {% if item.slug == "business-service-cards" %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' obj.service.id %}" target="_blank">Open Page</a>
+              {% endif %}
+              {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" or item.slug == "service-eco" %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.service.slug %}" target="_blank">Open Page</a>
+              {% endif %}
+              {% if item.slug == "service-eco-points" %}
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.promise.service.slug %}" target="_blank">Open Page</a>
               {% endif %}
               <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
             </td>

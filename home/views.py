@@ -15,7 +15,7 @@ from .forms import (
 from django.views.decorators.http import require_POST
 
 from .models import (
-    Job, Application, BookingNote, BusinessBooking, BusinessService, DateSurcharge, PrivateAddon,
+    Job, Application, BookingNote, BusinessBooking, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
     BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, CallRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
     Contact, FAQCategory, FAQItem,
@@ -919,7 +919,7 @@ def dashboard_model_list(request, model):
 
     qs = item.model.objects.all()
     service_id = request.GET.get("service_id")
-    if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "ServiceEcoPromise"}:
+    if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "ServiceEcoPromise", "BusinessServiceCard"}:
         qs = qs.filter(service_id=service_id)
     q = request.GET.get("q", "").strip()
     if q:
@@ -935,10 +935,28 @@ def dashboard_model_list(request, model):
     paginator = Paginator(qs, 12)
     page = paginator.get_page(request.GET.get("page"))
 
-    if item.slug == "provider-profiles":
-        display_fields = ["user", "city", "region", "area", "nearby_areas", "is_active"]
-    else:
-        display_fields = _model_fields(item.model)[:5]
+    display_fields_map = {
+        "provider-profiles": ["user", "city", "region", "area", "nearby_areas", "is_active"],
+        "business-services": ["title", "recommended", "detail_description", "image", "hero_image"],
+        "business-service-cards": ["service", "title", "order"],
+        "business-bundles": ["title", "discount", "short_description", "image"],
+        "business-addons": ["title", "description", "emoji"],
+        "private-services": ["title", "category", "price", "recommended", "image"],
+        "private-addons": ["title", "service", "price", "price_per_unit", "icon"],
+        "service-cards": ["service", "title", "order"],
+        "service-pricing": ["service", "price_value", "price_note", "cta_text"],
+        "service-estimates": ["service", "property_label", "bedrooms_label", "cta_text"],
+        "service-eco": ["service", "title", "cta_text", "subtitle"],
+        "service-eco-points": ["promise", "title", "order", "icon"],
+    }
+    display_fields = display_fields_map.get(item.slug, _model_fields(item.model)[:5])
+
+    service_obj = None
+    if service_id:
+        if item.slug in {"service-cards", "service-pricing", "service-estimates", "service-eco", "service-eco-points"}:
+            service_obj = PrivateService.objects.filter(id=service_id).first()
+        if item.slug == "business-service-cards":
+            service_obj = BusinessService.objects.filter(id=service_id).first()
 
     context = {
         "items": get_dashboard_items(),
@@ -946,6 +964,8 @@ def dashboard_model_list(request, model):
         "objects": page,
         "display_fields": display_fields,
         "query": q,
+        "service_id": service_id,
+        "service_obj": service_obj,
     }
     context.update(_dashboard_notifications())
     return render(request, "dashboard/list.html", context)
@@ -1000,6 +1020,10 @@ def dashboard_model_create(request, model):
     else:
         initial = {}
         if item.model == PrivateAddon:
+            service_id = request.GET.get("service_id")
+            if service_id:
+                initial["service"] = service_id
+        if item.model == BusinessServiceCard:
             service_id = request.GET.get("service_id")
             if service_id:
                 initial["service"] = service_id
@@ -1081,10 +1105,13 @@ def dashboard_model_edit(request, model, pk):
 
     addon_form_preview = None
     addons_for_service = None
+    business_cards_for_service = None
     if item.model.__name__ == "PrivateAddon" and obj.form_html:
         addon_form_preview = mark_safe(obj.form_html)
     if item.model == PrivateService:
         addons_for_service = PrivateAddon.objects.filter(service=obj).order_by("title")
+    if item.model == BusinessService:
+        business_cards_for_service = BusinessServiceCard.objects.filter(service=obj).order_by("order", "title")
 
     json_readonly = None
     if item.model not in {BusinessBundle, BusinessBooking}:
@@ -1102,6 +1129,7 @@ def dashboard_model_edit(request, model, pk):
         "json_readonly": json_readonly,
         "addon_form_preview": addon_form_preview,
         "addons_for_service": addons_for_service,
+        "business_cards_for_service": business_cards_for_service,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
     if item.model in {BusinessBooking, PrivateBooking}:
@@ -1223,6 +1251,16 @@ def all_services_business(request):
     urgent_selected = request.GET.get("urgent") == "1"
     return render(request, "home/AllServicesBusiness.html", {
         "services": services,
+        "urgent_selected": urgent_selected,
+    })
+
+
+def business_service_detail(request, service_id):
+    service = get_object_or_404(BusinessService.objects.prefetch_related("cards"), id=service_id)
+    urgent_selected = request.GET.get("urgent") == "1"
+    return render(request, "home/business_service_detail.html", {
+        "service": service,
+        "cards": list(service.cards.all()),
         "urgent_selected": urgent_selected,
     })
 

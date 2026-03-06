@@ -63,6 +63,61 @@
     </div>
   </section>
 
+  <section class="dash-fast">
+    <div class="dash-fast-card">
+      <div class="dash-fast-title">Quick Add</div>
+      <div class="dash-fast-sub">Create the most used service content fast.</div>
+      <div class="dash-fast-actions">
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_create' 'private-services' %}">
+          <i class="fa-solid fa-broom"></i>
+          <span>Private Service</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_create' 'business-services' %}">
+          <i class="fa-solid fa-building"></i>
+          <span>Business Service</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_create' 'private-addons' %}">
+          <i class="fa-solid fa-puzzle-piece"></i>
+          <span>Private Add-on</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_create' 'business-service-cards' %}">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Business Card</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_create' 'service-cards' %}">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Service Card</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_create' 'business-bundles' %}">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Business Bundle</span>
+        </a>
+      </div>
+    </div>
+    <div class="dash-fast-card">
+      <div class="dash-fast-title">Bookings Inbox</div>
+      <div class="dash-fast-sub">Jump straight to new bookings.</div>
+      <div class="dash-fast-actions">
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_list' 'private-bookings' %}">
+          <i class="fa-solid fa-house"></i>
+          <span>Private Bookings</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_list' 'business-bookings' %}">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Business Bookings</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_list' 'request-fixes' %}">
+          <i class="fa-solid fa-wrench"></i>
+          <span>Request Fixes</span>
+        </a>
+        <a class="dash-quick-btn" href="{% url 'home:dashboard_model_list' 'no-show' %}">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>No Show Reports</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
   <div class="dash-grid">
     <section>
       <div class="dash-section-head">

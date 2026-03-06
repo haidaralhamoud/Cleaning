@@ -50,10 +50,16 @@
   {% for s in services %}
   <div class="service-card" data-title="{{ s.title|lower }}" data-desc="{{ s.description|default:''|lower }}">
     
-    <img src="{{ s.image.url }}" alt="{{ s.title }}">
+    <a class="service-image-link" href="{% url 'home:business_service_detail' s.id %}{% if urgent_selected %}?urgent=1{% endif %}">
+      <img src="{{ s.image.url }}" alt="{{ s.title }}">
+    </a>
 
     <div class="service-content">
-      <h2>{{ s.title }}</h2>
+      <h2>
+        <a class="service-title-link" href="{% url 'home:business_service_detail' s.id %}{% if urgent_selected %}?urgent=1{% endif %}">
+          {{ s.title }}
+        </a>
+      </h2>
 
       <p>{{ s.description }}</p>
 

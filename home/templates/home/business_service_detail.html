@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ service.title }} | Business Service</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/service_detail.css' %}">
+</head>
+<body class="service-detail-page">
+  {% include "home/includes/main_header.html" %}
+
+  <main class="service-detail">
+    <section class="hero" style="background-image: url('{% if service.hero_image %}{{ service.hero_image.url }}{% else %}{{ service.image.url }}{% endif %}');">
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <h1>{{ service.title }}</h1>
+        {% if service.recommended %}
+          <p class="hero-subtitle">{{ service.recommended }}</p>
+        {% endif %}
+        <a href="{% url 'home:business_start_booking' %}?service={{ service.title }}{% if urgent_selected %}&urgent=1{% endif %}" class="hero-cta">Request Quote</a>
+      </div>
+    </section>
+
+    <section class="content">
+      <p class="service-intro">{{ service.detail_description|default:service.description }}</p>
+
+      <div class="checklist-header">
+        <span class="check-icon">&#10003;</span>
+        <h2>Complete {{ service.title }} Checklist</h2>
+      </div>
+
+      <div class="checklist-grid">
+        {% for card in cards %}
+          <article class="checklist-card">
+            <div class="card-title">
+              <span class="card-icon">&#10003;</span>
+              <h3>{{ card.title }}</h3>
+            </div>
+            <ul>
+              {% for item in card.items %}
+                <li>{{ item }}</li>
+              {% endfor %}
+            </ul>
+          </article>
+        {% empty %}
+          <article class="checklist-card">
+            <div class="card-title">
+              <span class="card-icon">&#10003;</span>
+              <h3>No detail cards added yet</h3>
+            </div>
+            <ul>
+              <li>Add cards from the admin to show checklist items.</li>
+            </ul>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+
+  {% include "home/includes/footer.html" %}
+  <script src="{% static 'js/main_header.js' %}"></script>
+</body>
+</html>

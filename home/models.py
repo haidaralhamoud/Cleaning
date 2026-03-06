@@ -765,13 +765,37 @@ class Application(models.Model):
 class BusinessService(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
+    detail_description = models.TextField(blank=True, null=True)
     recommended = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to="business_services/")
+    hero_image = models.ImageField(upload_to="business_services/hero/", blank=True, null=True)
     icon = models.ImageField(upload_to="services/")
     description_service_aviable = models.TextField()
 
     def __str__(self):
         return self.title
+
+
+class BusinessServiceCard(models.Model):
+    service = models.ForeignKey(
+        BusinessService,
+        on_delete=models.CASCADE,
+        related_name="cards"
+    )
+    title = models.CharField(max_length=150)
+    body = models.TextField(
+        help_text="One bullet per line"
+    )
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+
+    def __str__(self):
+        return f"{self.service.title} - {self.title}"
+
+    def items(self):
+        return [line.strip() for line in self.body.splitlines() if line.strip()]
 
 
 class BusinessBundle(models.Model):

@@ -204,6 +204,17 @@ body {
   object-fit: cover;
 }
 
+.service-title-link,
+.service-image-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.service-title-link:hover {
+  color: var(--brand-dark);
+}
+
 .service-content {
   flex: 1;
 }

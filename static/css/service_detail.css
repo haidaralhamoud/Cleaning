@@ -152,7 +152,7 @@ body.service-detail-page {
 }
 
 .checklist-card li::before {
- 
+  content: "•";
   position: absolute;
   left: 0;
   color: #2b6cb0;
