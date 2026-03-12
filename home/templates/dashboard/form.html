@@ -110,6 +110,9 @@
                   <div class="form-text">
                     Add the question, select a type, and (if needed) add options with a price for each answer.
                   </div>
+                  <div class="form-text" data-q-currency-hint>
+                    Option prices use the selected service/add-on currency.
+                  </div>
                   <div class="qs-warning text-danger small d-none" data-q-warning></div>
                 </div>
                 <div class="d-none">{{ field }}</div>
@@ -386,6 +389,10 @@
       const addBtn = builder.querySelector("[data-q-add]");
       const warning = builder.querySelector("[data-q-warning]");
       const form = builder.closest("form");
+      const currencyHint = builder.querySelector("[data-q-currency-hint]");
+      const currencyField =
+        form.querySelector("#id_price_currency") ||
+        form.querySelector('[name="price_currency"]');
 
       const TYPE_OPTIONS = [
         { value: "select", label: "Select (single)" },
@@ -444,6 +451,17 @@
           el.addEventListener("input", syncToTextarea);
         });
         listEl.appendChild(row);
+        updateCurrencyHint();
+      };
+
+      const updateCurrencyHint = () => {
+        const currency = (currencyField && currencyField.value ? currencyField.value : "SEK").toUpperCase();
+        if (currencyHint) {
+          currencyHint.textContent = `Option prices use the selected service/add-on currency: ${currency}.`;
+        }
+        list.querySelectorAll("[data-q-opt-price]").forEach((input) => {
+          input.placeholder = `Price (${currency})`;
+        });
       };
 
       const addQuestion = (data = {}) => {
@@ -633,7 +651,12 @@
       };
 
       addBtn.addEventListener("click", () => addQuestion());
+      if (currencyField) {
+        currencyField.addEventListener("change", updateCurrencyHint);
+        currencyField.addEventListener("input", updateCurrencyHint);
+      }
       loadInitial();
+      updateCurrencyHint();
 
       form.addEventListener("submit", (e) => {
         syncToTextarea();
