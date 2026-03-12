@@ -153,7 +153,7 @@
       <div class="divider"></div>
       <p class="empty">Your Booking is Empty</p>
       <div class="summary-row"><span>Time estimate</span><span>0</span></div>
-      <div class="summary-row"><span>SubTotal</span><span>0$</span></div>
+      <div class="summary-row"><span>SubTotal</span><span>{{ service.price_currency|default:stripe_currency|upper }} 0</span></div>
     </aside>
 
   </main>

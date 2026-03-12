@@ -2679,6 +2679,7 @@ def private_zip_available(request, service_slug):
         "service_slug": service_slug,
         "call_success": call_success,
         "email_success": email_success,
+        "stripe_currency": (settings.STRIPE_CURRENCY or "sek").lower(),
     })
 
 def private_thank_you(request):

@@ -4,12 +4,12 @@
 
     <div class="item">
         <span>Services</span>
-        <span id="sum_services">${{ pricing.services_total|default:"0" }}</span>
+        <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:"0" }}</span>
     </div>
 
     <div class="item">
         <span>Add-ons</span>
-        <span id="sum_addons">${{ pricing.addons_total|default:"0" }}</span>
+        <span id="sum_addons">{{ pricing.currency|default:"sek"|upper }} {{ pricing.addons_total|default:"0" }}</span>
     </div>
 
     <div class="item">
@@ -19,14 +19,14 @@
 
     <div class="item">
         <span>ROT Deduction ({{ pricing.rot_percent|default:"0" }}%)</span>
-        <span id="sum_rot">-${{ pricing.rot|default:"0" }}</span>
+        <span id="sum_rot">-{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0" }}</span>
     </div>
 
     <hr>
 
     <div class="item total">
         <span>Total</span>
-        <span id="sum_total">${{ pricing.final|default:"0" }}</span>
+        <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ pricing.final|default:"0" }}</span>
     </div>
 
     <button type="button" class="btn-blue js-summary-continue">Continue</button>

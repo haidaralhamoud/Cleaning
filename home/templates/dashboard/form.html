@@ -202,8 +202,8 @@
                       <tr>
                         <td>{{ addon.title }}</td>
                         <td>{{ addon.slug }}</td>
-                        <td>{{ addon.price }}</td>
-                        <td>{{ addon.price_per_unit }}</td>
+                        <td>{{ addon.price }} {{ addon.price_currency }}</td>
+                        <td>{{ addon.price_per_unit }} {{ addon.price_currency }}</td>
                         <td class="text-end">
                           <a class="btn btn-sm btn-outline-secondary"
                              href="{% url 'home:dashboard_model_edit' 'private-addons' addon.pk %}">

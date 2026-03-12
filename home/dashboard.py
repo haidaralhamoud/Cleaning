@@ -46,6 +46,7 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("no-show", home_models.NoShowReport, "No Show Reports", "fa-solid fa-triangle-exclamation"),
         DashboardItem("schedule-rules", home_models.ScheduleRule, "Frequency Rules", "fa-solid fa-calendar-days"),
         DashboardItem("rot-settings", home_models.RotSetting, "ROT Settings", "fa-solid fa-percent"),
+        DashboardItem("currency-rates", home_models.CurrencyRate, "Currency Rates", "fa-solid fa-money-bill-transfer"),
         DashboardItem("date-surcharges", home_models.DateSurcharge, "Date Surcharges", "fa-solid fa-percent"),
         # Pricing rules handled inside question options now
         # Accounts app
