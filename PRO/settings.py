@@ -179,16 +179,16 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 #         'PORT': os.getenv('POSTGRES_PORT', '5432'),
 #     },
 # }
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hembla_db',
-        'USER': 'hembla_user',
-        'PASSWORD': 'Hembla123456789@',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'hembla_db',
+#         'USER': 'hembla_user',
+#         'PASSWORD': 'Hembla123456789@',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 if "test" in sys.argv:
     DATABASES = {

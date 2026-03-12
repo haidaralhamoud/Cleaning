@@ -3139,12 +3139,23 @@ def private_booking_schedule(request):
     # -----------------------------
     print(4)
     temp_booking = _build_private_booking_from_draft(draft, request.user)
+    initial_schedule_state = {
+        "mode": temp_booking.schedule_mode or ("same" if len(services) <= 1 else ""),
+        "appointment_date": temp_booking.appointment_date.isoformat() if hasattr(temp_booking.appointment_date, "isoformat") else (temp_booking.appointment_date or ""),
+        "appointment_time_window": temp_booking.appointment_time_window or "",
+        "frequency_type": temp_booking.frequency_type or "",
+        "day_work_best": temp_booking.day_work_best or [],
+        "special_timing_requests": temp_booking.special_timing_requests or "",
+        "end_date": temp_booking.End_Date or "",
+        "service_schedules": temp_booking.service_schedules or {},
+    }
     return render(request, "home/Private_scheduale.html", {
         "booking": temp_booking,
         "services": services,
         "date_rules": date_rules_json,
         "schedule_rules": schedule_rules_json,
         "pricing": calculate_booking_price(temp_booking),
+        "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
     })
 
 
@@ -3211,7 +3222,7 @@ def private_price_api(request):
             booking.day_work_best = []
     # -----------------------------------------------
 
-    pricing = calculate_booking_price(temp_booking)
+    pricing = calculate_booking_price(booking)
 
     return JsonResponse({
         "services_total": pricing["services_total"],

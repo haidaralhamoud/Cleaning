@@ -371,6 +371,7 @@
 @media (max-width: 768px) {
   .main-header {
     gap: 10px;
+    z-index: 3000;
   }
   .auth-buttons {
     display: none;
@@ -393,6 +394,7 @@
 
   .nav-links {
     order: 4;
+    z-index: 3100;
   }
 
   .auth-buttons {

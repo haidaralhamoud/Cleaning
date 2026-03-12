@@ -293,6 +293,7 @@ input {
 .service-box.open .service-body {
   max-height: 2000px;
   opacity: 1;
+  overflow: visible;
 }
 
 .row {
@@ -551,6 +552,8 @@ a.btn-blue {
 @media (max-width: 768px) {
   .content {
     flex-direction: column;
+    padding: 1.25rem 4%;
+    gap: 1.25rem;
   }
 
   .services-grid {
@@ -558,16 +561,46 @@ a.btn-blue {
     align-items: center;
   }
 
+  .left,
+  .summary {
+    width: 100%;
+  }
+
+  .service-box {
+    margin-bottom: 1.25rem;
+  }
+
   .row {
     flex-direction: column;
+    gap: 0.85rem;
   }
 
   .summary {
     width: 100%;
+    position: static;
   }
 
   .service-head {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px;
+  }
+
+  .service-body {
+    padding: 0 16px 16px;
+  }
+
+  .svc-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .custom-select,
+  .custom-select-menu {
+    width: 100%;
+  }
+
+  .custom-select-menu {
+    z-index: 1200;
   }
 }

@@ -219,29 +219,29 @@
 
         <div class="summary-item">
             <span>Services</span>
-            <span id="sum_services">$0</span>
+            <span id="sum_services">${{ pricing.services_total|default:0|floatformat:2 }}</span>
         </div>
 
         <div class="summary-item">
             <span>Add-ons</span>
-            <span id="sum_addons">$0</span>
+            <span id="sum_addons">${{ pricing.addons_total|default:0|floatformat:2 }}</span>
         </div>
 
         <div class="summary-item">
             <span>Schedule</span>
-            <span id="sum_schedule">$0</span>
+            <span id="sum_schedule">${{ pricing.schedule_extra|default:0|floatformat:2 }}</span>
         </div>
 
         <div class="summary-item">
             <span>ROT Deduction</span>
-            <span id="sum_rot">$0</span>
+            <span id="sum_rot">${{ pricing.rot|default:0|floatformat:2 }}</span>
         </div>
 
         <div class="line"></div>
 
         <div class="summary-item total">
             <span>Total</span>
-            <span id="sum_total">$0</span>
+            <span id="sum_total">${{ pricing.final|default:0|floatformat:2 }}</span>
         </div>
 
         <div class="checkout-wrapper">
@@ -253,6 +253,8 @@
 
 {{ date_rules|json_script:"dateRules" }}
 {{ schedule_rules|json_script:"scheduleRules" }}
+{{ initial_schedule_state|json_script:"initialScheduleState" }}
+{{ pricing|json_script:"initialPricingData" }}
 <script>
 let DATE_RULES = JSON.parse(document.getElementById("dateRules").textContent);
 if (typeof DATE_RULES === "string") {
@@ -265,6 +267,20 @@ if (typeof SCHEDULE_RULES === "string") {
   try { SCHEDULE_RULES = JSON.parse(SCHEDULE_RULES); } catch (err) { SCHEDULE_RULES = []; }
 }
 if (!Array.isArray(SCHEDULE_RULES)) { SCHEDULE_RULES = []; }
+let INITIAL_SCHEDULE_STATE = JSON.parse(document.getElementById("initialScheduleState").textContent || "{}");
+if (typeof INITIAL_SCHEDULE_STATE === "string") {
+  try { INITIAL_SCHEDULE_STATE = JSON.parse(INITIAL_SCHEDULE_STATE); } catch (err) { INITIAL_SCHEDULE_STATE = {}; }
+}
+if (!INITIAL_SCHEDULE_STATE || typeof INITIAL_SCHEDULE_STATE !== "object") {
+  INITIAL_SCHEDULE_STATE = {};
+}
+let INITIAL_PRICING_DATA = JSON.parse(document.getElementById("initialPricingData").textContent || "{}");
+if (typeof INITIAL_PRICING_DATA === "string") {
+  try { INITIAL_PRICING_DATA = JSON.parse(INITIAL_PRICING_DATA); } catch (err) { INITIAL_PRICING_DATA = {}; }
+}
+if (!INITIAL_PRICING_DATA || typeof INITIAL_PRICING_DATA !== "object") {
+  INITIAL_PRICING_DATA = {};
+}
 
 const frequencyRuleMap = new Map();
 const dayRuleMap = new Map();
@@ -550,21 +566,28 @@ document.querySelectorAll(".service-acc").forEach(acc => {
 
 function updateScheduleSummary() {
   const params = new URLSearchParams();
-  params.append("mode", inputMode.value || "");
+  const activeMode = inputMode.value || INITIAL_SCHEDULE_STATE.mode || (serviceCount === 1 ? "same" : "");
 
-  if (inputMode.value === "same") {
+  if (activeMode) {
+    params.append("mode", activeMode);
+  }
+
+  if (activeMode === "same") {
+    const days = Array.from(document.querySelectorAll(".day-check input:checked"))
+                      .map(c => c.dataset.day);
+    const encodedDays = JSON.stringify(days);
+
+    document.getElementById("day_work_best").value = encodedDays;
     params.append("date", inputDate.value || "");
     params.append("time_window", inputWindow.value || "");
     params.append("frequency", inputFreq.value || "");
-    params.append("weekday", document.getElementById("day_work_best").value);
-
-    const days = Array.from(document.querySelectorAll(".day-check input:checked"))
-                      .map(c => c.dataset.day);
-    params.append("days", JSON.stringify(days));
-  } else {
+    params.append("weekday", encodedDays);
+    params.append("days", encodedDays);
+  } else if (activeMode === "per_service") {
     const schedules = {};
     document.querySelectorAll(".service-acc").forEach(acc => {
       const slug = acc.dataset.service;
+      if (!slug) return;
 
       const date = acc.querySelector(".svc-date").value || "";
       const time = acc.querySelector(".svc-time").value || "";
@@ -585,19 +608,130 @@ function updateScheduleSummary() {
       };
     });
 
-    params.append("schedules_json", JSON.stringify(schedules));
+    inputSchedulesJson.value = JSON.stringify(schedules);
+    params.append("schedules_json", inputSchedulesJson.value);
   }
 
-  fetch(`/private/api/booking/price/?` + params.toString())
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("sum_services").textContent = "$" + Number(data.services_total).toFixed(2);
-      document.getElementById("sum_addons").textContent = "$" + Number(data.addons_total).toFixed(2);
-      document.getElementById("sum_schedule").textContent = "$" + Number(data.schedule_extra).toFixed(2);
-      document.getElementById("sum_rot").textContent = "$" + Number(data.rot).toFixed(2);
-      document.getElementById("sum_total").textContent = "$" + Number(data.final).toFixed(2);
+  fetch(`/private/api/booking/price/?${params.toString()}`)
+    .then(res => {
+      if (!res.ok) {
+        throw new Error(`Price API failed with status ${res.status}`);
+      }
+      return res.json();
     })
-    .catch(err => console.error("SUMMARY ERROR:", err));
+    .then(data => setSummaryValues(data))
+    .catch(() => setSummaryValues(INITIAL_PRICING_DATA));
+}
+function safeParseJson(value, fallback) {
+  if (!value) return fallback;
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch (err) {
+    return fallback;
+  }
+}
+
+function setSummaryValues(data) {
+  if (!data) return;
+  document.getElementById("sum_services").textContent = "$" + Number(data.services_total || 0).toFixed(2);
+  document.getElementById("sum_addons").textContent = "$" + Number(data.addons_total || 0).toFixed(2);
+  document.getElementById("sum_schedule").textContent = "$" + Number(data.schedule_extra || 0).toFixed(2);
+  document.getElementById("sum_rot").textContent = "$" + Number(data.rot || 0).toFixed(2);
+  document.getElementById("sum_total").textContent = "$" + Number(data.final || 0).toFixed(2);
+}
+
+function applyInitialScheduleState() {
+  const state = INITIAL_SCHEDULE_STATE || {};
+  const initialMode = state.mode || (serviceCount === 1 ? "same" : "");
+
+  if (initialMode) {
+    inputMode.value = initialMode;
+    modeCards.forEach(card => {
+      card.classList.toggle("selected", card.getAttribute("data-mode") === initialMode);
+    });
+    if (sameArea) sameArea.style.display = initialMode === "same" ? "block" : "none";
+    if (perServiceArea) perServiceArea.style.display = initialMode === "per_service" ? "block" : "none";
+  }
+
+  if (state.appointment_date && inputDate) {
+    inputDate.value = state.appointment_date;
+    const initialDate = new Date(state.appointment_date + "T00:00:00");
+    if (!Number.isNaN(initialDate.getTime())) {
+      currentMonth = initialDate.getMonth();
+      currentYear = initialDate.getFullYear();
+      renderCalendar(currentMonth, currentYear);
+      const selectedDay = Array.from(document.querySelectorAll(".day"))
+        .find((el) => el.firstChild && String(el.firstChild.textContent).trim() === String(initialDate.getDate()));
+      if (selectedDay) selectedDay.classList.add("selected");
+    }
+  }
+
+  if (state.appointment_time_window && inputWindow) {
+    inputWindow.value = state.appointment_time_window;
+    document.querySelectorAll(".time-option").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-time") === state.appointment_time_window);
+    });
+  }
+
+  if (state.frequency_type && inputFreq) {
+    inputFreq.value = state.frequency_type;
+    document.querySelectorAll(".freq-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.getAttribute("data-freq") === state.frequency_type);
+    });
+  }
+
+  const sameDays = Array.isArray(state.day_work_best) ? state.day_work_best : [];
+  if (sameDays.length) {
+    document.getElementById("day_work_best").value = JSON.stringify(sameDays);
+    document.querySelectorAll(".day-check input[data-day]").forEach((chk) => {
+      const isChecked = sameDays.includes(chk.getAttribute("data-day"));
+      chk.checked = isChecked;
+      const label = chk.closest(".day-check");
+      if (label) label.classList.toggle("active", isChecked);
+    });
+  }
+
+  const specialPayload = safeParseJson(state.special_timing_requests, {});
+  const specialRequestEl = document.getElementById("specialRequest");
+  if (specialRequestEl) {
+    specialRequestEl.value = (specialPayload && typeof specialPayload === "object" && specialPayload.special_request !== undefined)
+      ? (specialPayload.special_request || "")
+      : (typeof state.special_timing_requests === "string" ? state.special_timing_requests : "");
+  }
+
+  const initialEndDate = state.end_date || (specialPayload && typeof specialPayload === "object" ? (specialPayload.end_date || "") : "");
+  if (endDate && initialEndDate) {
+    endDate.value = initialEndDate;
+    endDate.style.display = "block";
+    yesBtn.classList.add("active");
+    noBtn.classList.remove("active");
+  }
+
+  const serviceSchedules = state.service_schedules || {};
+  document.querySelectorAll(".service-acc").forEach((acc) => {
+    const slug = acc.getAttribute("data-service");
+    const schedule = serviceSchedules[slug] || {};
+    const dateEl = acc.querySelector(".svc-date");
+    const timeEl = acc.querySelector(".svc-time");
+    const freqEl = acc.querySelector(".svc-frequency");
+    const notesEl = acc.querySelector(".svc-notes");
+    const endEl = acc.querySelector(".svc-end-date");
+
+    if (dateEl) dateEl.value = schedule.date || "";
+    if (timeEl) timeEl.value = schedule.time_window || "";
+    if (freqEl) freqEl.value = schedule.frequency || "";
+    if (notesEl) notesEl.value = schedule.special_request || "";
+    if (endEl) endEl.value = schedule.end_date || "";
+
+    const serviceDays = Array.isArray(schedule.days) ? schedule.days : [];
+    acc.querySelectorAll(".svc-day").forEach((chk) => {
+      const isChecked = serviceDays.includes(chk.value);
+      chk.checked = isChecked;
+      const pill = chk.closest(".svc-day-pill");
+      if (pill) pill.classList.toggle("active", isChecked);
+    });
+  });
 }
 
 document.getElementById("scheduleForm").addEventListener("submit", function(e){
@@ -776,6 +910,8 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  setSummaryValues(INITIAL_PRICING_DATA);
+  applyInitialScheduleState();
   updateScheduleSummary();
 });
 </script>
