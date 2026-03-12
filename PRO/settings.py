@@ -10,29 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+
 import os
 import sys
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+
 try:
     from dotenv import load_dotenv
 except Exception:
     load_dotenv = None
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR.parent / ".env")
 
-# Load .env via python-dotenv if available.
-if load_dotenv:
-    from dotenv import load_dotenv
-    from pathlib import Path
-    import os
-
-    BASE_DIR = Path(__file__).resolve().parent.parent
-
+# Load .env via python-dotenv if available
+if load_dotenv is not None:
     load_dotenv(BASE_DIR / ".env")
-# Load .env if present (simple KEY=VALUE lines).
+
+# Fallback simple .env loader
 env_path = BASE_DIR / ".env"
 if env_path.exists():
     with env_path.open("r", encoding="utf-8") as env_file:
