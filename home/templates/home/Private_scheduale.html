@@ -9,6 +9,24 @@
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 <link rel="stylesheet" href="{% static 'css/private_scheduale.css' %}">
+<style>
+.schedule-messages {
+  margin: 16px auto 0;
+  width: min(1200px, calc(100% - 32px));
+}
+.schedule-message {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.schedule-message-error {
+  background: #ffe7e7;
+  border: 1px solid #f3b3b3;
+  color: #8c1d1d;
+}
+</style>
 </head>
 <body>
 {% include "home/includes/main_header.html" %}
@@ -24,6 +42,14 @@
   <input type="hidden" name="special_timing_requests" id="special_timing_requests">
   <input type="hidden" name="schedule_mode" id="schedule_mode" value="">
   <input type="hidden" name="schedules_json" id="schedules_json">
+
+  <div id="scheduleMessages" class="schedule-messages" {% if not messages %}hidden{% endif %}>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="schedule-message schedule-message-error">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  </div>
 
   <div class="container">
     <div class="left">
@@ -379,6 +405,7 @@ const inputFreq    = document.getElementById("frequency_type");
 const inputSpecial = document.getElementById("special_timing_requests");
 const inputMode    = document.getElementById("schedule_mode");
 const inputSchedulesJson = document.getElementById("schedules_json");
+const scheduleMessages = document.getElementById("scheduleMessages");
 
 const sameArea       = document.getElementById("sameScheduleArea");
 const perServiceArea = document.getElementById("perServiceArea");
@@ -641,6 +668,23 @@ function setSummaryValues(data) {
   document.getElementById("sum_total").textContent = "$" + Number(data.final || 0).toFixed(2);
 }
 
+function showScheduleMessage(message) {
+  if (!scheduleMessages) return;
+  scheduleMessages.hidden = false;
+  scheduleMessages.innerHTML = "";
+  const item = document.createElement("div");
+  item.className = "schedule-message schedule-message-error";
+  item.textContent = message;
+  scheduleMessages.appendChild(item);
+  scheduleMessages.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function clearScheduleMessages() {
+  if (!scheduleMessages) return;
+  scheduleMessages.innerHTML = "";
+  scheduleMessages.hidden = true;
+}
+
 function applyInitialScheduleState() {
   const state = INITIAL_SCHEDULE_STATE || {};
   const initialMode = state.mode || (serviceCount === 1 ? "same" : "");
@@ -736,11 +780,7 @@ function applyInitialScheduleState() {
 
 document.getElementById("scheduleForm").addEventListener("submit", function(e){
   const notify = (msg) => {
-    if (window.showToast) {
-      window.showToast("Missing information", msg);
-    } else {
-      alert(msg);
-    }
+    showScheduleMessage(msg);
   };
 
   const clearErrors = () => {
@@ -749,6 +789,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
     document.querySelectorAll(".time-option.error").forEach(el => el.classList.remove("error"));
   };
 
+  clearScheduleMessages();
   clearErrors();
 
   if ({{ services|length }} > 1 && !inputMode.value){
