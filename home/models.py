@@ -10,6 +10,12 @@ from django.utils import timezone
 from accounts.models import ChatThread, DiscountCode
 User = get_user_model()
 
+PRICE_CURRENCY_CHOICES = [
+    ("SEK", "Swedish Krona (SEK)"),
+    ("USD", "US Dollar (USD)"),
+    ("EUR", "Euro (EUR)"),
+]
+
 # =====================================================================
 # BASE BOOKING
 # =====================================================================
@@ -942,6 +948,11 @@ class PrivateService(models.Model):
     intro_text = models.TextField(blank=True)
     starting_price = models.CharField(max_length=50, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    price_currency = models.CharField(
+        max_length=3,
+        choices=PRICE_CURRENCY_CHOICES,
+        default="USD",
+    )
     questions = models.JSONField(blank=True, null=True)
 
     def __str__(self):
@@ -1285,6 +1296,11 @@ class PrivateAddon(models.Model):
     icon = models.ImageField(upload_to="private/addons/", blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    price_currency = models.CharField(
+        max_length=3,
+        choices=PRICE_CURRENCY_CHOICES,
+        default="USD",
+    )
     form_html = models.TextField(blank=True, null=True)
     questions = models.JSONField(blank=True, null=True)
 
@@ -1400,6 +1416,33 @@ class RotSetting(models.Model):
 
     def __str__(self):
         return f"ROT {self.amount}"
+
+
+class CurrencyRate(models.Model):
+    source_currency = models.CharField(
+        max_length=3,
+        choices=PRICE_CURRENCY_CHOICES,
+        unique=True,
+    )
+    target_currency = models.CharField(
+        max_length=3,
+        choices=PRICE_CURRENCY_CHOICES,
+        default="SEK",
+    )
+    exchange_rate = models.DecimalField(
+        max_digits=12,
+        decimal_places=6,
+        default=1,
+        help_text="How many target currency units equal 1 source currency unit.",
+    )
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["source_currency"]
+
+    def __str__(self):
+        return f"1 {self.source_currency} = {self.exchange_rate} {self.target_currency}"
 
 
 class DateSurcharge(models.Model):

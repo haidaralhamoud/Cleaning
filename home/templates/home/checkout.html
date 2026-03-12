@@ -37,7 +37,7 @@
               <h3>{{ s.title }}</h3>
               <p>{{ s.category.title }}</p>
             </div>
-            <span>+{{ s.price }}$</span>
+            <span>+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
           </div>
           {% endfor %}
         </div>
@@ -80,12 +80,12 @@
 
         {% if booking.discount_code %}
           <div class="discount-saved">
-            You saved <b>{{ discount_preview_amount|floatformat:2 }}$</b> with this code.
+            You saved <b>{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</b> with this code.
           </div>
         {% elif referral_discount_applied %}
           <div class="discount-saved">
             Referral discount applied: <b>{{ referral_discount_percent }}%</b>
-            (saved {{ referral_discount_amount|floatformat:2 }}$).
+            (saved {{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).
           </div>
         {% endif %}
       </section>
@@ -144,48 +144,48 @@
             </div>
           <div class="summary-line">
             <span>Services</span>
-            <span>{{ services_total|floatformat:2 }}$</span>
+            <span>{{ services_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
           <div class="summary-line">
             <span>Add-ons</span>
-            <span>{{ addons_total|floatformat:2 }}$</span>
+            <span>{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
           <div class="summary-line">
             <span>Schedule</span>
-            <span>{{ schedule_extra|floatformat:2 }}$</span>
+            <span>{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
           {% if date_surcharge and date_surcharge != 0 %}
             <div class="summary-line">
               <span>Date surcharge</span>
-              <span>{{ date_surcharge|floatformat:2 }}$</span>
+              <span>{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
             </div>
           {% endif %}
           <div class="summary-line">
             <span>Subtotal</span>
-            <span>{{ subtotal|floatformat:2 }}$</span>
+            <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
 
           <div class="summary-line">
             <span>ROT Deduction ({{ rot_percent|default:"0" }}%)</span>
-            <span>-{{ rot_value|floatformat:2 }}$</span>
+            <span>-{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
 
           {% if booking.discount_code %}
             <div class="summary-line discount-line">
               <span>Discount</span>
-              <span>-{{ discount_preview_amount|floatformat:2 }}$</span>
+              <span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
             </div>
           {% endif %}
           {% if referral_discount_applied %}
             <div class="summary-line discount-line">
               <span>Referral discount ({{ referral_discount_percent }}%)</span>
-              <span>-{{ referral_discount_amount|floatformat:2 }}$</span>
+              <span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
             </div>
           {% endif %}
 
           <div class="summary-total">
             <span>Total</span>
-            <span>{{ final_preview_price|floatformat:2 }}$</span>
+            <span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
           <p class="note">This price includes your ROT deduction.</p>
           </div>

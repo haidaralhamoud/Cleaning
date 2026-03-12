@@ -3210,6 +3210,7 @@ def private_price_api(request):
         "schedule_extra": pricing["schedule_extra"],
         "rot": pricing["rot"],
         "final": pricing["final"],
+        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
         "duration_hours": pricing.get("duration_hours", 0),
         "duration_seconds": pricing.get("duration_seconds", 0),
     })

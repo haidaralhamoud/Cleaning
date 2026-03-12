@@ -1,4 +1,5 @@
 from decimal import Decimal
+from django.conf import settings
 from .models import (
     PrivateService,
     PrivateAddon,
@@ -6,6 +7,7 @@ from .models import (
     PrivateBooking,
     DateSurcharge,
     RotSetting,
+    CurrencyRate,
 )
 from datetime import datetime
 
@@ -59,6 +61,30 @@ def _coerce_decimal(value):
     except Exception:
         return Decimal("0.00")
 
+
+def _normalize_currency(value, default="SEK"):
+    return (value or default or "SEK").upper()
+
+
+def _build_currency_rates(target_currency):
+    target = _normalize_currency(target_currency)
+    rates = {(target, target): Decimal("1.0")}
+    for rate in CurrencyRate.objects.filter(is_active=True):
+        rates[(
+            _normalize_currency(rate.source_currency),
+            _normalize_currency(rate.target_currency),
+        )] = _coerce_decimal(rate.exchange_rate)
+    return rates
+
+
+def _convert_currency(amount, source_currency, target_currency, rates):
+    source = _normalize_currency(source_currency)
+    target = _normalize_currency(target_currency)
+    amount = _coerce_decimal(amount)
+    if source == target:
+        return amount
+    return amount * rates.get((source, target), Decimal("1.0"))
+
 def _normalize_answers(value):
     if value is None or value == "":
         return []
@@ -66,7 +92,7 @@ def _normalize_answers(value):
         return value
     return [value]
 
-def _options_price(options, answers):
+def _options_price(options, answers, source_currency, target_currency, currency_rates):
     total = Decimal("0.00")
     if not options:
         return total
@@ -75,7 +101,12 @@ def _options_price(options, answers):
         if isinstance(opt, dict):
             value_key = str(opt.get("value") or opt.get("label") or "")
             if value_key and value_key in answer_set:
-                total += _coerce_decimal(opt.get("price", 0))
+                total += _convert_currency(
+                    opt.get("price", 0),
+                    source_currency,
+                    target_currency,
+                    currency_rates,
+                )
     return total
 
 def _options_duration(options, answers):
@@ -95,6 +126,8 @@ def calculate_booking_price(booking):
     services_total = Decimal("0.00")
     addons_total = Decimal("0.00")
     duration_minutes = Decimal("0.00")
+    target_currency = _normalize_currency(getattr(settings, "STRIPE_CURRENCY", "SEK"))
+    currency_rates = _build_currency_rates(target_currency)
 
     selected_slugs = booking.selected_services or []
     services = list(PrivateService.objects.filter(slug__in=selected_slugs))
@@ -118,7 +151,8 @@ def calculate_booking_price(booking):
     # 1) SERVICE PRICES
     # --------------------------
     for service in services:
-        price = service.price
+        source_currency = getattr(service, "price_currency", target_currency)
+        price = _convert_currency(service.price, source_currency, target_currency, currency_rates)
         answers = (booking.service_answers or {}).get(service.slug, {})
 
         questions = service.questions or {}
@@ -128,7 +162,7 @@ def calculate_booking_price(booking):
             options = q_info.get("options") or []
             if not options:
                 continue
-            price += _options_price(options, answers.get(q_key))
+            price += _options_price(options, answers.get(q_key), source_currency, target_currency, currency_rates)
             duration_minutes += _options_duration(options, answers.get(q_key))
 
         services_total += price
@@ -145,7 +179,8 @@ def calculate_booking_price(booking):
             if addon is None:
                 continue
 
-            price = addon.price
+            source_currency = getattr(addon, "price_currency", target_currency)
+            price = _convert_currency(addon.price, source_currency, target_currency, currency_rates)
 
             questions = addon.questions or {}
             for q_key, q_info in questions.items():
@@ -154,13 +189,18 @@ def calculate_booking_price(booking):
                 options = q_info.get("options") or []
                 if not options:
                     continue
-                price += _options_price(options, fields.get(q_key))
+                price += _options_price(options, fields.get(q_key), source_currency, target_currency, currency_rates)
                 duration_minutes += _options_duration(options, fields.get(q_key))
 
             if addon.price_per_unit > 0:
                 for _, val in fields.items():
                     if str(val).isdigit():
-                        price += addon.price_per_unit * int(val)
+                        price += _convert_currency(
+                            addon.price_per_unit * int(val),
+                            source_currency,
+                            target_currency,
+                            currency_rates,
+                        )
 
             addons_total += price
 
@@ -258,6 +298,7 @@ def calculate_booking_price(booking):
         "date_surcharge": float(date_surcharge),
         "rot": float(rot_amount),
         "rot_percent": float(rot_percent),
+        "currency": target_currency.lower(),
         "final": float(final - rot_amount),
         "duration_minutes": float(duration_minutes),
         "duration_hours": float(duration_hours),

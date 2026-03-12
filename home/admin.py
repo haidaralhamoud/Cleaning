@@ -35,6 +35,7 @@ from .models import (
     ServiceEstimate,
     ServiceEcoPromise,
     ServiceEcoPoint,
+    CurrencyRate,
 )
 from jsoneditor.forms import JSONEditor
 from django.utils.html import format_html
@@ -586,7 +587,7 @@ class PrivateMainCategoryAdmin(admin.ModelAdmin):
 class PrivateAddonInline(admin.StackedInline):
     model = PrivateAddon
     extra = 1
-    fields = ("title", "slug", "icon", "price", "price_per_unit", "form_html")
+    fields = ("title", "slug", "icon", "price", "price_currency", "price_per_unit", "form_html")
 
 
 class ServiceQuestionRuleInline(admin.TabularInline):
@@ -670,7 +671,7 @@ class ScheduleRuleAdmin(admin.ModelAdmin):
 
 @admin.register(PrivateService)
 class PrivateServiceAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "category", "slug", "price")
+    list_display = ("id", "title", "category", "slug", "price", "price_currency")
     prepopulated_fields = {"slug": ("title",)}
     fieldsets = (
         ("Basic Info", {
@@ -679,6 +680,7 @@ class PrivateServiceAdmin(admin.ModelAdmin):
                 "title",
                 "slug",
                 "price",
+                "price_currency",
                 "description",
                 "recommended",
                 "image",
@@ -1033,9 +1035,16 @@ class EmailRequestAdmin(admin.ModelAdmin):
 
 @admin.register(PrivateAddon)
 class PrivateAddonAdmin(admin.ModelAdmin):
-    list_display = ("title", "service", "slug", "price", "price_per_unit")
+    list_display = ("title", "service", "slug", "price", "price_currency", "price_per_unit")
     search_fields = ("title", "slug")
     inlines = [AddonRuleInline]
+
+
+@admin.register(CurrencyRate)
+class CurrencyRateAdmin(admin.ModelAdmin):
+    list_display = ("source_currency", "target_currency", "exchange_rate", "is_active", "updated_at")
+    list_filter = ("target_currency", "is_active")
+    ordering = ("source_currency",)
 
 
 @admin.register(DateSurcharge)
