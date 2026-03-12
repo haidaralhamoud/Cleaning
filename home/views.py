@@ -2999,6 +2999,26 @@ def private_booking_schedule(request):
         cls=DjangoJSONEncoder,
     )
 
+    def _render_schedule_page(temp_booking, pricing):
+        initial_schedule_state = {
+            "mode": temp_booking.schedule_mode or ("same" if len(services) <= 1 else ""),
+            "appointment_date": temp_booking.appointment_date.isoformat() if hasattr(temp_booking.appointment_date, "isoformat") else (temp_booking.appointment_date or ""),
+            "appointment_time_window": temp_booking.appointment_time_window or "",
+            "frequency_type": temp_booking.frequency_type or "",
+            "day_work_best": temp_booking.day_work_best or [],
+            "special_timing_requests": temp_booking.special_timing_requests or "",
+            "end_date": temp_booking.End_Date or "",
+            "service_schedules": temp_booking.service_schedules or {},
+        }
+        return render(request, "home/Private_scheduale.html", {
+            "booking": temp_booking,
+            "services": services,
+            "date_rules": date_rules_json,
+            "schedule_rules": schedule_rules_json,
+            "pricing": pricing,
+            "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
+        })
+
     # -----------------------------
     # 2) POST – تخزين البيانات
     # -----------------------------
@@ -3071,45 +3091,21 @@ def private_booking_schedule(request):
         invalid_price = any((service.price or 0) <= 0 for service in services)
         if invalid_price:
             messages.error(request, "This service is not bookable yet. Please choose another service.")
-            return render(request, "home/Private_scheduale.html", {
-                "booking": temp_booking,
-                "services": services,
-                "date_rules": date_rules_json,
-                "schedule_rules": schedule_rules_json,
-                "pricing": pricing,
-            })
+            return _render_schedule_page(temp_booking, pricing)
 
         if duration_minutes <= 0:
             messages.error(request, "Please complete required options to calculate a valid duration.")
-            return render(request, "home/Private_scheduale.html", {
-                "booking": temp_booking,
-                "services": services,
-                "date_rules": date_rules_json,
-                "schedule_rules": schedule_rules_json,
-                "pricing": pricing,
-            })
+            return _render_schedule_page(temp_booking, pricing)
 
         if mode == "same":
             if not draft.get("appointment_date"):
                 messages.error(request, "Please select a valid appointment date.")
-                return render(request, "home/Private_scheduale.html", {
-                    "booking": temp_booking,
-                    "services": services,
-                    "date_rules": date_rules_json,
-                    "schedule_rules": schedule_rules_json,
-                    "pricing": pricing,
-                })
+                return _render_schedule_page(temp_booking, pricing)
             time_hint = draft.get("appointment_time_window") or ""
             time_candidates = temp_booking._parse_time_candidates(time_hint)
             if not time_candidates:
                 messages.error(request, "Please select a valid time window.")
-                return render(request, "home/Private_scheduale.html", {
-                    "booking": temp_booking,
-                    "services": services,
-                    "date_rules": date_rules_json,
-                    "schedule_rules": schedule_rules_json,
-                    "pricing": pricing,
-                })
+                return _render_schedule_page(temp_booking, pricing)
             start_time = time_candidates[0]
             tz = timezone.get_current_timezone()
             appointment_date_obj = parse_date(draft.get("appointment_date")) if draft.get("appointment_date") else None
@@ -3139,24 +3135,7 @@ def private_booking_schedule(request):
     # -----------------------------
     print(4)
     temp_booking = _build_private_booking_from_draft(draft, request.user)
-    initial_schedule_state = {
-        "mode": temp_booking.schedule_mode or ("same" if len(services) <= 1 else ""),
-        "appointment_date": temp_booking.appointment_date.isoformat() if hasattr(temp_booking.appointment_date, "isoformat") else (temp_booking.appointment_date or ""),
-        "appointment_time_window": temp_booking.appointment_time_window or "",
-        "frequency_type": temp_booking.frequency_type or "",
-        "day_work_best": temp_booking.day_work_best or [],
-        "special_timing_requests": temp_booking.special_timing_requests or "",
-        "end_date": temp_booking.End_Date or "",
-        "service_schedules": temp_booking.service_schedules or {},
-    }
-    return render(request, "home/Private_scheduale.html", {
-        "booking": temp_booking,
-        "services": services,
-        "date_rules": date_rules_json,
-        "schedule_rules": schedule_rules_json,
-        "pricing": calculate_booking_price(temp_booking),
-        "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
-    })
+    return _render_schedule_page(temp_booking, calculate_booking_price(temp_booking))
 
 
 def private_price_api(request):
