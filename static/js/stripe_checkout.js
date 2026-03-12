@@ -88,10 +88,7 @@
       redirect: "if_required"
     }).then(function (result) {
       if (result.error) {
-        if (failureUrl) {
-          window.location.href = failureUrl;
-          return;
-        }
+        console.error("[Stripe] confirmPayment error", result.error);
         if (errorEl) errorEl.textContent = result.error.message || "Payment failed.";
         button.disabled = false;
         button.textContent = originalText;
@@ -99,10 +96,7 @@
       }
 
       if (!result.paymentIntent) {
-        if (failureUrl) {
-          window.location.href = failureUrl;
-          return;
-        }
+        console.error("[Stripe] confirmPayment completed without paymentIntent", result);
         if (errorEl) errorEl.textContent = "Payment did not complete.";
         button.disabled = false;
         button.textContent = originalText;
@@ -120,8 +114,7 @@
       }
 
       if (failureUrl) {
-        window.location.href = failureUrl;
-        return;
+        console.error("[Stripe] Unexpected payment intent status", result.paymentIntent.status, result.paymentIntent);
       }
       if (errorEl) errorEl.textContent = "Payment did not complete.";
       button.disabled = false;
