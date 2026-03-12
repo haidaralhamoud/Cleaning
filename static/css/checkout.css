@@ -279,6 +279,15 @@ hr {
   height: 18px;
 }
 
+.payment-option input:disabled {
+  cursor: not-allowed;
+}
+
+.payment-option input:disabled ~ .payment-logo,
+.payment-option input:disabled ~ .payment-label {
+  opacity: 0.5;
+}
+
 .payment-option:hover {
   border-color: #5bbf4d;
   box-shadow: 0 8px 16px rgba(91, 191, 77, 0.15);
@@ -312,6 +321,29 @@ hr {
   flex-direction: column;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.stripe-card-element {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.payment-options--static {
+  margin-bottom: 12px;
+}
+
+.payment-method-note {
+  margin-bottom: 12px;
+  color: #475569;
+  font-size: 14px;
+}
+
+.card-errors {
+  color: #c0392b;
+  font-size: 13px;
+  min-height: 18px;
 }
 
 .payment-inputs input {

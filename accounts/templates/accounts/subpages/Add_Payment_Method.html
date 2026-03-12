@@ -40,7 +40,7 @@
   <section class="card">
     <h2>Add Payment Method</h2>
 
-    <form method="post">
+    <form id="payment-form" method="post" data-skip-validate>
       {% csrf_token %}
       {% if form.errors %}
         <div class="form-errors">
@@ -67,15 +67,9 @@
       <div class="form-group">
         <label>Card Number</label>
         <div class="input-wrap icon-card">
-          <input
-            type="text"
-            id="cardNumber"
-            name="card_number"
-            placeholder="1234 5678 9012 3456"
-            maxlength="19"
-            inputmode="numeric"
-            required
-          >
+          <div class="stripe-host stripe-host--wide">
+            <div id="card-number-element" class="stripe-mount"></div>
+          </div>
         </div>
       </div>
 
@@ -84,36 +78,22 @@
         <div class="form-group">
           <label>Expiration Date</label>
           <div class="input-wrap icon-calendar">
-            <input
-              type="text"
-              id="expiryDate"
-              name="expiry_date"
-              placeholder="MM/YY"
-              maxlength="5"
-              inputmode="numeric"
-              required
-            >
+            <div class="stripe-host stripe-host--narrow">
+              <div id="card-expiry-element" class="stripe-mount"></div>
+            </div>
           </div>
         </div>
 
         <div class="form-group">
           <label>CVV</label>
           <div class="input-wrap icon-lock">
-            <input
-              type="text"
-              id="cvv"
-              name="cvv"
-              placeholder="CVV"
-              maxlength="4"
-              inputmode="numeric"
-              required
-            >
+            <div class="stripe-host stripe-host-cvv">
+              <div id="card-cvc-element" class="stripe-mount"></div>
+            </div>
           </div>
+          <p class="field-hint">3-digit code on the back of your card</p>
         </div>
       </div>
-
-      <!-- Card Type -->
-      <input type="hidden" name="card_type" id="cardType" required>
 
       <div class="form-group">
         <label>Card Type</label>
@@ -145,7 +125,11 @@
         </label>
       </div>
 
-      <button type="submit" class="btn">Save Payment Method</button>
+      <input type="hidden" id="setupIntentId" name="setup_intent_id">
+
+      <div id="card-errors" class="form-errors" style="display:none"></div>
+
+      <button type="button" class="btn" id="save-payment-method-btn">Save Payment Method</button>
 
     </form>
   </section>
@@ -154,83 +138,262 @@
 
 <!-- ================= JS ================= -->
 
-<script>
-// ===== Card Number formatting + detect type =====
-const cardInput = document.getElementById("cardNumber");
-const cardTypeInput = document.getElementById("cardType");
-const pills = document.querySelectorAll(".pill");
-
-function resetPills() {
-  pills.forEach(p => p.classList.remove("active"));
-}
-
-cardInput.addEventListener("input", function () {
-  let value = this.value.replace(/\D/g, "");
-  this.value = value.replace(/(.{4})/g, "$1 ").trim();
-
-  resetPills();
-
-  if (value.startsWith("4")) {
-    selectType("visa");
-  } else if (value.startsWith("5")) {
-    selectType("mastercard");
-  } else if (value.startsWith("34") || value.startsWith("37")) {
-    selectType("amex");
-  } else if (value.startsWith("6")) {
-    selectType("discover");
-  } else {
-    cardTypeInput.value = "";
-  }
-});
-
-function selectType(type) {
-  cardTypeInput.value = type;
-  document.querySelector(`.pill[data-type="${type}"]`).classList.add("active");
-}
-
-// ===== Expiry auto slash =====
-const expiryInput = document.getElementById("expiryDate");
-expiryInput.addEventListener("input", function () {
-  let v = this.value.replace(/\D/g, "");
-  if (v.length >= 3) v = v.slice(0,2) + "/" + v.slice(2,4);
-  this.value = v;
-});
-
-// ===== CVV numeric only =====
-document.getElementById("cvv").addEventListener("input", function () {
-  this.value = this.value.replace(/\D/g, "");
-});
-
-// ===== Manual pill click =====
-pills.forEach(pill => {
-  pill.addEventListener("click", () => {
-    resetPills();
-    pill.classList.add("active");
-    cardTypeInput.value = pill.dataset.type;
-  });
-});
-</script>
-
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 (function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
+  const publishableKey = "{{ stripe_publishable_key|escapejs }}";
+  const stripeReady = "{{ stripe_ready|yesno:'1,0' }}" === "1";
+  const setupIntentUrl = "{% url 'accounts:create_setup_intent' %}";
+
+  const form = document.getElementById("payment-form");
+  const submitBtn = document.getElementById("save-payment-method-btn");
+  const errorBox = document.getElementById("card-errors");
+  const setupIntentIdInput = document.getElementById("setupIntentId");
+  const cardholderInput = form ? form.querySelector("input[name='cardholder_name']") : null;
+  const pills = document.querySelectorAll(".pill");
+
+  function showError(message) {
+    if (!errorBox) return;
+    if (message) {
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+    } else {
+      errorBox.textContent = "";
+      errorBox.style.display = "none";
+    }
   }
+
+  function resetPills() {
+    pills.forEach(p => p.classList.remove("active"));
+  }
+
+  function setBrand(brand) {
+    if (!brand) return;
+    const map = {
+      visa: "visa",
+      mastercard: "mastercard",
+      amex: "amex",
+      american_express: "amex",
+      discover: "discover",
+    };
+    const key = map[brand] || "";
+    resetPills();
+    if (key) {
+      const pill = document.querySelector(`.pill[data-type="${key}"]`);
+      if (pill) pill.classList.add("active");
+    }
+  }
+
+  if (!stripeReady || !publishableKey) {
+    if (submitBtn) submitBtn.disabled = true;
+    showError("Stripe is not configured. Please try again later.");
+    return;
+  }
+
+  const stripe = Stripe(publishableKey);
+  const elements = stripe.elements();
+  const baseStyle = {
+    base: {
+      color: "#0f172a",
+      fontSize: "15px",
+      fontFamily: "Inter, system-ui, sans-serif",
+      lineHeight: "22px",
+      backgroundColor: "#ffffff",
+      "::placeholder": { color: "#94a3b8" },
+    },
+    invalid: { color: "#b91c1c" },
+  };
+
+  const baseStyleSmall = {
+    base: {
+      color: "#0f172a",
+      fontSize: "14px",
+      fontFamily: "Inter, system-ui, sans-serif",
+      lineHeight: "22px",
+      backgroundColor: "#ffffff",
+      "::placeholder": { color: "#94a3b8" },
+    },
+    invalid: { color: "#b91c1c" },
+  };
+
+  const cardNumber = elements.create("cardNumber", { style: baseStyle, showIcon: false });
+  const cardExpiry = elements.create("cardExpiry", { style: baseStyleSmall, placeholder: "MM / YY" });
+  const cardCvc = elements.create("cardCvc", { style: baseStyleSmall, placeholder: "123" });
+
+  window.requestAnimationFrame(() => {
+    try {
+      cardNumber.mount("#card-number-element");
+      cardExpiry.mount("#card-expiry-element");
+      cardCvc.mount("#card-cvc-element");
+    } catch (err) {
+      console.error("[Stripe] mount error", err);
+      showError("Payment form failed to load. Please refresh and try again.");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+    }
+  });
+
+  cardNumber.on("change", (event) => {
+    if (event.error) {
+      showError(event.error.message);
+    } else {
+      showError("");
+    }
+    if (event.brand) setBrand(event.brand);
+  });
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return "";
+  }
+
+  const csrftoken = getCookie("csrftoken");
+
+  async function handleSave(event) {
+    if (event) event.preventDefault();
+    showError("");
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Processing...";
+    }
+    if (!cardholderInput || !cardholderInput.value.trim()) {
+      showError("Cardholder name is required.");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
+
+    const setupResponse = await fetch(setupIntentUrl, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken,
+      },
+    });
+    let setupPayload = null;
+    try {
+      setupPayload = await setupResponse.json();
+    } catch (err) {
+      setupPayload = null;
+      console.error("[Stripe] parse setup intent payload error", err);
+    }
+
+    if (!setupResponse.ok || !setupPayload || !setupPayload.ok) {
+      const message = setupPayload && setupPayload.error ? setupPayload.error : "Failed to initialize payment form.";
+      showError(message);
+      if (window.showToast) {
+        window.showToast("Payment Method Failed", message);
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
+
+    const clientSecret = setupPayload.client_secret;
+    const setupIntentId = setupPayload.setup_intent_id || "";
+    if (setupIntentIdInput) {
+      setupIntentIdInput.value = setupIntentId;
+    }
+    if (!clientSecret || !setupIntentId) {
+      showError("Failed to initialize payment form.");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
+
+    let result;
+    try {
+      result = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: {
+          card: cardNumber,
+          billing_details: {
+            name: cardholderInput ? cardholderInput.value : "",
+          },
+        },
+      });
+    } catch (err) {
+      console.error("[Stripe] confirmCardSetup threw", err);
+      showError("Payment method setup failed.");
+      if (window.showToast) {
+        window.showToast("Payment Method Failed", "Payment method setup failed.");
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
+
+    if (result.error) {
+      console.error("[Stripe] confirmCardSetup error detail", result.error);
+      showError(result.error.message || "Payment method setup failed.");
+      if (window.showToast) {
+        window.showToast("Payment Method Failed", result.error.message || "Payment method setup failed.");
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
+
+    const confirmedSetupIntentId = result.setupIntent?.id || setupIntentId;
+
+    const saveBody = {
+      setup_intent_id: confirmedSetupIntentId,
+      cardholder_name: cardholderInput.value,
+      is_default: document.querySelector("input[name='is_default']")?.checked ?? false,
+    };
+    const saveResponse = await fetch("{% url 'accounts:save_payment_method' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": csrftoken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(saveBody),
+    });
+    let savePayload = null;
+    try {
+      savePayload = await saveResponse.json();
+    } catch (err) {
+      savePayload = null;
+      console.error("[Stripe] parse save payload error", err);
+    }
+
+    if (!saveResponse.ok || !savePayload || !savePayload.ok) {
+      const message = savePayload && savePayload.error ? savePayload.error : `Could not save payment method (${saveResponse.status})`;
+      console.error("[Stripe] save response failed", saveResponse, savePayload);
+      showError(message);
+      if (window.showToast) {
+        window.showToast("Payment Method Failed", message);
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
+
+    if (window.showToast) {
+      window.showToast("Payment Method Saved", "Your card was added successfully.");
+    }
+    setTimeout(() => {
+      window.location.href = "{% url 'accounts:Payment_and_Billing' %}";
+    }, 700);
+  }
+
+  if (submitBtn) submitBtn.addEventListener("click", handleSave);
+  if (form) form.addEventListener("submit", handleSave);
 })();
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-
-

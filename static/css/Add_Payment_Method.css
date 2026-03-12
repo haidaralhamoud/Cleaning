@@ -24,7 +24,7 @@ body{
 
 /* ===== LAYOUT ===== */
 .layout{display:flex;gap:20px;padding:20px;align-items:flex-start}
-.main{flex:1;min-width:0;padding:10px 6px}
+.main{flex:1;min-width:0;padding:10px 6px;position:relative;z-index:20}
 .main h2{font-family:"Vesper Libre",serif;font-size:24px;margin-bottom:18px;color:#0f172a}
 
 /* ===== CARD ===== */
@@ -41,11 +41,90 @@ input[type="text"]{
   padding:10px 12px 10px 44px;font-size:15px;color:#0f172a;background:#fff
 }
 input[type="text"]:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,163,200,.18)}
+.stripe-host{
+    width:100%;
+    min-height:46px;
+    display:block;
+    position:relative;
+    z-index:1;
+    border:1px solid rgba(0,163,200,.35);
+    border-radius:12px;
+    background:#fff;
+    overflow:hidden;
+    box-sizing:border-box;
+}
+.stripe-host--wide{
+    height:46px;
+}
+.stripe-host--narrow{
+    width:152px;
+    min-width:152px;
+    height:46px;
+}
+.stripe-host-cvv{
+    width:180px;
+    min-width:180px;
+    height:46px;
+}
+.stripe-mount{
+    width:100%;
+    height:100%;
+    padding:12px 14px 12px 44px;
+    box-sizing:border-box;
+}
+.stripe-host--narrow .stripe-mount{
+    padding-left:34px;
+}
+.stripe-host-cvv .stripe-mount{
+    padding-left:34px;
+}
+.StripeElement{
+    width:100%;
+    height:100%;
+    display:block;
+    box-sizing:border-box;
+}
+.stripe-host iframe,
+.stripe-mount iframe{
+    width:100% !important;
+    height:100% !important;
+    display:block !important;
+    border:0 !important;
+    visibility:visible !important;
+    pointer-events:auto !important;
+    min-height:100% !important;
+}
+#card-number-element,
+#card-expiry-element,
+#card-cvc-element{
+    width:100%;
+    height:100%;
+    min-height:100%;
+}
+.StripeElement--focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(0,163,200,.18)
+}
+.StripeElement iframe{
+  width:100% !important;
+  height:100% !important;
+  border:0;
+  display:block
+}
+.StripeElement--invalid{
+  border-color:#ef4444;
+  box-shadow:0 0 0 3px rgba(239,68,68,.18)
+}
 
-.input-wrap{position:relative}
+.input-wrap{
+  position:relative;
+  overflow:visible !important;
+}
 .input-wrap::before{
   content:"";position:absolute;left:12px;top:50%;transform:translateY(-50%);
-  width:20px;height:20px;background-size:contain;background-repeat:no-repeat;opacity:.8
+  width:20px;height:20px;background-size:contain;background-repeat:no-repeat;opacity:.8;
+  pointer-events:none;
+  z-index:2
 }
 .input-wrap.icon-user::before{background-image:url("../images/person0.png")}
 .input-wrap.icon-card::before{background-image:url("../images/magnetic-card0.png")}
@@ -88,6 +167,9 @@ input[type="text"]:focus{outline:none;border-color:var(--primary);box-shadow:0 0
   background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;
   border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:13px;font-weight:600
 }
+.field-hint{
+  font-size:12px;color:#475569;margin-top:6px;margin-left:4px;
+}
 .form-errors .error{margin:4px 0}
 
 /* ===== Mobile Header ===== */
@@ -102,4 +184,11 @@ input[type="text"]:focus{outline:none;border-color:var(--primary);box-shadow:0 0
   .sidebar.open{left:0}
   .main{padding:25px}
   .card{padding:22px;width:92%;margin:0 auto}
+}
+
+/* Keep Stripe iframe interactive without adding extra box model on mount nodes */
+.stripe-host iframe {
+    height: 46px !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }

@@ -146,21 +146,20 @@
   transform: translateY(0) scale(0.98);
 }
 
-.customer-menu-overlay {
+.customer-menu-overlay{
   position: fixed;
-  inset: 0;
-  background: rgba(5, 24, 34, 0.35);
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 1100;
+  inset:0;
+  background:rgba(5,24,34,.35);
+  backdrop-filter:blur(2px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:10;
 }
 
-.customer-menu-overlay.show,
-.sidebar.open ~ .customer-menu-overlay {
-  opacity: 1;
-  pointer-events: auto;
+.customer-menu-overlay.show{
+  opacity:1;
+  pointer-events:auto;
 }
 
 @media (max-width: 1024px) {

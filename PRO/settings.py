@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 import sys
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 try:
     from dotenv import load_dotenv
 except Exception:
@@ -20,11 +21,17 @@ except Exception:
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR.parent / ".env")
 
 # Load .env via python-dotenv if available.
 if load_dotenv:
-    load_dotenv()
+    from dotenv import load_dotenv
+    from pathlib import Path
+    import os
 
+    BASE_DIR = Path(__file__).resolve().parent.parent
+
+    load_dotenv(BASE_DIR / ".env")
 # Load .env if present (simple KEY=VALUE lines).
 env_path = BASE_DIR / ".env"
 if env_path.exists():
@@ -56,6 +63,11 @@ CSRF_TRUSTED_ORIGINS = [
     "https://hembla-experten.se",
     "https://www.hembla-experten.se",
 ]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 SITE_ID = 1
@@ -264,6 +276,42 @@ EMAIL_TIMEOUT = 10
 
 #book's email
 ADMIN_ALERT_EMAIL = "services@hembla-experten.se"
+
+# Stripe
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_CURRENCY = os.getenv("STRIPE_CURRENCY", "sek").lower()
+
+
+def _stripe_key_mode(value, publishable=False):
+    if not value:
+        return ""
+    if publishable:
+        if value.startswith("pk_live_"):
+            return "live"
+        if value.startswith("pk_test_"):
+            return "test"
+    else:
+        if value.startswith("sk_live_"):
+            return "live"
+        if value.startswith("sk_test_"):
+            return "test"
+    raise ImproperlyConfigured("Stripe keys must use the expected pk_/sk_ prefixes.")
+
+
+_stripe_publishable_mode = _stripe_key_mode(STRIPE_PUBLISHABLE_KEY, publishable=True)
+_stripe_secret_mode = _stripe_key_mode(STRIPE_SECRET_KEY)
+if _stripe_publishable_mode != _stripe_secret_mode:
+    raise ImproperlyConfigured(
+        "Stripe publishable and secret keys must both be test keys or both be live keys."
+    )
+if _stripe_secret_mode and not STRIPE_WEBHOOK_SECRET:
+    raise ImproperlyConfigured(
+        "STRIPE_WEBHOOK_SECRET is required whenever Stripe keys are configured."
+    )
+if STRIPE_WEBHOOK_SECRET and not STRIPE_WEBHOOK_SECRET.startswith("whsec_"):
+    raise ImproperlyConfigured("STRIPE_WEBHOOK_SECRET must use the Stripe whsec_ format.")
 
 # --- SMTP sanity + startup log (no secrets) ---
 import logging

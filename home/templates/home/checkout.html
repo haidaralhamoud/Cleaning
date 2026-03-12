@@ -26,7 +26,7 @@
       <section class="card services-card">
         <div class="card-header">
           <h2>Selected Services</h2>
-          <a href="{% url 'home:private_booking_services' booking.id %}" class="edit-btn">Edit</a>
+          <a href="{% url 'home:private_booking_services' %}" class="edit-btn">Edit</a>
         </div>
         <hr>
 
@@ -100,7 +100,7 @@
           <div class="summary-card">
             <div class="summary-card-head">
               <h4>Service Date & Time</h4>
-              <a href="{% url 'home:private_booking_schedule' booking.id %}" class="edit-btn">Edit</a>
+              <a href="{% url 'home:private_booking_schedule' %}" class="edit-btn">Edit</a>
             </div>
             {% if booking.schedule_mode == "same" %}
               <p class="summary-detail">Date: {{ booking.appointment_date|default:"Not set" }}</p>
@@ -198,48 +198,34 @@
         </div>
         <hr>
 
-        <form method="POST" id="paymentForm">
+        <form method="POST" id="paymentForm"
+              data-stripe-publishable-key="{{ stripe_publishable_key }}"
+              data-stripe-client-secret="{{ stripe_client_secret }}"
+              data-stripe-payment-intent="{{ stripe_payment_intent_id }}"
+              data-stripe-complete-url="{{ payment_complete_url }}"
+              data-stripe-return-url="{{ payment_return_url }}"
+              data-stripe-ready="{{ stripe_ready|yesno:'1,0' }}"
+              data-stripe-currency="{{ stripe_currency }}"
+              data-stripe-failure-url="{{ payment_failed_url }}">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="payment">
 
-          <div class="payment-options" id="paymentOptions">
-            <label class="payment-option is-active">
-              <input type="radio" name="payment_method" value="card" checked>
+          <div class="payment-options payment-options--static">
+            <div class="payment-option is-active">
               <span class="payment-logo">
-                <img src="{% static 'images/payment-method-visa0.svg' %}" alt="Credit Card">
+                <img src="{% static 'images/payment-method-visa0.svg' %}" alt="Stripe Payment Element">
               </span>
-              <span class="payment-label">Credit Card</span>
-            </label>
-            <label class="payment-option">
-              <input type="radio" name="payment_method" value="paypal">
-              <span class="payment-logo">
-                <img src="{% static 'images/paypal.svg' %}" alt="PayPal">
-              </span>
-              <span class="payment-label">Paypal</span>
-            </label>
-            <label class="payment-option">
-              <input type="radio" name="payment_method" value="klarna">
-              <span class="payment-logo">
-                <img src="{% static 'images/payment-method-klarna0.svg' %}" alt="Klarna">
-              </span>
-              <span class="payment-label">Klarna</span>
-            </label>
-            <label class="payment-option">
-              <input type="radio" name="payment_method" value="swish">
-              <span class="payment-logo">
-                <img src="{% static 'images/swish.svg' %}" alt="Swish">
-              </span>
-              <span class="payment-label">Swish</span>
-            </label>
+              <span class="payment-label">Secure card payment</span>
+            </div>
+          </div>
+
+          <div class="payment-method-note">
+            Pay securely by card in {{ stripe_currency|upper }}.
           </div>
 
           <div class="payment-inputs">
-            <input type="text" name="card_number" placeholder="Card Number">
-            <div class="input-row">
-              <input class="inputrow" name="card_expiry" type="text" placeholder="MM/YY">
-              <input class="inputrow" name="card_cvv" type="text" placeholder="CVV">
-            </div>
-            <input type="text" name="card_name" placeholder="Name on Card">
+            <div id="payment-element" class="stripe-card-element"></div>
+            <div id="card-errors" class="card-errors" role="alert"></div>
           </div>
 
           <div class="terms">
@@ -248,6 +234,12 @@
               I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>.
             </label>
           </div>
+
+          {% if not stripe_ready %}
+            <div class="flash error" style="margin-top: 10px;">
+              Payment service is not configured. Please try again later.
+            </div>
+          {% endif %}
 
           <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
         </form>
@@ -277,31 +269,20 @@
 
 <script>
   (function () {
+    var form = document.getElementById("paymentForm");
     var checkbox = document.getElementById("agreeTerms");
     var button = document.getElementById("confirmPayment");
     if (!checkbox || !button) return;
+    var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";
     var toggle = function () {
-      button.disabled = !checkbox.checked;
+      button.disabled = !checkbox.checked || !stripeReady;
     };
     checkbox.addEventListener("change", toggle);
     toggle();
   })();
 </script>
-<script>
-  (function () {
-    var options = document.getElementById("paymentOptions");
-    if (!options) return;
-    options.querySelectorAll("input[type='radio']").forEach(function (input) {
-      input.addEventListener("change", function () {
-        options.querySelectorAll(".payment-option").forEach(function (label) {
-          label.classList.remove("is-active");
-        });
-        var label = input.closest(".payment-option");
-        if (label) label.classList.add("is-active");
-      });
-    });
-  })();
-</script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="{% static 'js/stripe_checkout.js' %}"></script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

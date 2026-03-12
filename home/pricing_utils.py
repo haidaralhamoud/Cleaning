@@ -92,13 +92,27 @@ def _options_duration(options, answers):
 
 
 def calculate_booking_price(booking):
-
     services_total = Decimal("0.00")
     addons_total = Decimal("0.00")
     duration_minutes = Decimal("0.00")
 
     selected_slugs = booking.selected_services or []
-    services = PrivateService.objects.filter(slug__in=selected_slugs)
+    services = list(PrivateService.objects.filter(slug__in=selected_slugs))
+    addon_slugs = {
+        addon_slug
+        for addons in (booking.addons_selected or {}).values()
+        for addon_slug in addons.keys()
+    }
+    addons_by_slug = {
+        addon.slug: addon
+        for addon in PrivateAddon.objects.filter(slug__in=addon_slugs)
+    }
+    schedule_rules = {
+        (rule.key, rule.value): rule
+        for rule in ScheduleRule.objects.filter(key__in=["frequency_type", "day"])
+    }
+    date_surcharge_rules = list(DateSurcharge.objects.all())
+    rot_setting = RotSetting.objects.order_by("-updated_at").first()
 
     # --------------------------
     # 1) SERVICE PRICES
@@ -127,9 +141,8 @@ def calculate_booking_price(booking):
     addons_data = booking.addons_selected or {}
     for svc, addons in addons_data.items():
         for addon_slug, fields in addons.items():
-            try:
-                addon = PrivateAddon.objects.get(slug=addon_slug)
-            except PrivateAddon.DoesNotExist:
+            addon = addons_by_slug.get(addon_slug)
+            if addon is None:
                 continue
 
             price = addon.price
@@ -172,13 +185,13 @@ def calculate_booking_price(booking):
         # frequency
         if booking.frequency_type:
             freq = booking.frequency_type.strip()
-            rule = ScheduleRule.objects.filter(key="frequency_type", value=freq).first()
+            rule = schedule_rules.get(("frequency_type", freq))
             if rule:
                 schedule_extra += apply_percentage(subtotal, rule.price_change)
 
         # days
         for d in booking.day_work_best or []:
-            rule = ScheduleRule.objects.filter(key="day", value=d).first()
+            rule = schedule_rules.get(("day", d))
             if rule:
                 schedule_extra += apply_percentage(subtotal, rule.price_change)
 
@@ -189,23 +202,45 @@ def calculate_booking_price(booking):
 
             freq = data.get("frequency")
             if freq:
-                rule = ScheduleRule.objects.filter(key="frequency_type", value=freq).first()
+                rule = schedule_rules.get(("frequency_type", freq))
                 if rule:
                     schedule_extra += apply_percentage(subtotal, rule.price_change)
 
             for d in data.get("days", []):
-                rule = ScheduleRule.objects.filter(key="day", value=d).first()
+                rule = schedule_rules.get(("day", d))
                 if rule:
                     schedule_extra += apply_percentage(subtotal, rule.price_change)
 
     # --------------------------
     # 4) FINAL TOTAL
     # --------------------------
-    final_with_date = apply_date_surcharge(booking, subtotal)
+    final_with_date = subtotal
+    if booking.appointment_date:
+        final_with_date = subtotal
+        if isinstance(booking.appointment_date, str):
+            try:
+                date_obj = datetime.strptime(booking.appointment_date, "%Y-%m-%d").date()
+            except Exception:
+                date_obj = None
+        else:
+            date_obj = booking.appointment_date
+
+        if date_obj:
+            weekday = date_obj.strftime("%a")
+            for rule in date_surcharge_rules:
+                if rule.rule_type == "weekday" and rule.weekday == weekday:
+                    if rule.surcharge_type == "percent":
+                        final_with_date += (final_with_date * (rule.amount / 100))
+                    else:
+                        final_with_date += rule.amount
+                if rule.rule_type == "date" and rule.date == date_obj:
+                    if rule.surcharge_type == "percent":
+                        final_with_date += (final_with_date * (rule.amount / 100))
+                    else:
+                        final_with_date += rule.amount
     date_surcharge = final_with_date - subtotal
     final = final_with_date + schedule_extra
 
-    rot_setting = RotSetting.objects.order_by("-updated_at").first()
     rot_percent = _coerce_decimal(rot_setting.amount) if rot_setting else Decimal("0.00")
     if rot_percent < 0:
         rot_percent = Decimal("0.00")

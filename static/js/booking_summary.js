@@ -1,5 +1,5 @@
-function updateSummary(bookingId) {
-    fetch(`/private/api/booking/${bookingId}/price/`)
+function updateSummary() {
+    fetch(`/private/api/booking/price/`)
         .then(r => r.json())
         .then(data => {
             document.getElementById("sum_services").innerText = "$" + data.services_total;

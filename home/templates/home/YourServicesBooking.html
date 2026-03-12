@@ -448,7 +448,7 @@ document.getElementById("popup").onclick = e => {
 // عند تحميل الصفحة
 window.addEventListener("load", () => {
     document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
-    updateSummary({{ booking.id }});
+    updateSummary();
 });
 </script>
 
@@ -457,8 +457,8 @@ window.addEventListener("load", () => {
 <!-- =============  API FUNCTIONS (SUMMARY / UPDATE) ============= -->
 <script>
 // تحديث الفاتورة
-function updateSummary(bookingId) {
-    fetch(`/private/api/booking/${bookingId}/price/`)
+function updateSummary() {
+    fetch(`/private/api/booking/price/`)
         .then(r => r.json())
         .then(data => {
             document.getElementById("sum_services").innerText = "$" + data.services_total;
@@ -480,17 +480,17 @@ function formatDuration(totalSeconds) {
 
 
 // تحديث الإجابات
-function updateAnswer(bookingId, serviceSlug, fieldKey, value) {
+function updateAnswer(serviceSlug, fieldKey, value) {
     let fd = new FormData();
     fd.append("service", serviceSlug);
     fd.append("field", fieldKey);
     fd.append("value", value);
 
-    fetch(`/private/api/booking/${bookingId}/update-answer/`, {
+    fetch(`/private/api/booking/update-answer/`, {
         method: "POST",
         body: fd
     })
-    .then(() => updateSummary(bookingId));
+    .then(() => updateSummary());
 }
 
 
@@ -503,24 +503,24 @@ document.querySelectorAll("select, input, textarea").forEach(el => {
 
         if (this.tagName === "SELECT" && this.multiple) {
             const values = Array.from(this.selectedOptions).map(o => o.value);
-            updateAnswer({{ booking.id }}, service, field, JSON.stringify(values));
+            updateAnswer(service, field, JSON.stringify(values));
             return;
         }
 
         if (this.type === "checkbox") {
             const group = document.querySelectorAll(`[name="${this.name}"]`);
             const values = Array.from(group).filter(i => i.checked).map(i => i.value);
-            updateAnswer({{ booking.id }}, service, field, JSON.stringify(values));
+            updateAnswer(service, field, JSON.stringify(values));
             return;
         }
 
         if (this.type === "radio") {
             const checked = document.querySelector(`[name="${this.name}"]:checked`);
-            updateAnswer({{ booking.id }}, service, field, checked ? checked.value : "");
+            updateAnswer(service, field, checked ? checked.value : "");
             return;
         }
 
-        updateAnswer({{ booking.id }}, service, field, this.value);
+        updateAnswer(service, field, this.value);
     });
 });
 </script>
@@ -532,11 +532,11 @@ function sendAddonsUpdate() {
     const fd = new FormData();
     fd.append("addons_json", JSON.stringify(ADDONS_DATA));
 
-    fetch(`/private/api/booking/{{ booking.id }}/update-addons/`, {
+    fetch(`/private/api/booking/update-addons/`, {
         method: "POST",
         body: fd
     })
-    .then(() => updateSummary({{ booking.id }}));
+    .then(() => updateSummary());
 }
 </script>
 

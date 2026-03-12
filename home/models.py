@@ -1141,15 +1141,17 @@ class PrivateBooking(BaseBooking):
 
     payment_method = models.CharField(
         max_length=50,
-        choices=[("card", "Credit Card"), ("paypal", "Paypal"), ("klarna", "Klarna"), ("swish", "Swish")],
+        choices=[("card", "Credit Card")],
         blank=True,
         null=True
     )
 
-    card_number = models.CharField(max_length=50, blank=True, null=True)
-    card_expiry = models.CharField(max_length=10, blank=True, null=True)
-    card_cvv = models.CharField(max_length=10, blank=True, null=True)
-    card_name = models.CharField(max_length=255, blank=True, null=True)
+    payment_intent_id = models.CharField(max_length=255, blank=True, null=True, db_index=True, unique=True)
+    payment_status = models.CharField(max_length=50, blank=True, null=True)
+    payment_brand = models.CharField(max_length=50, blank=True, null=True)
+    payment_last4 = models.CharField(max_length=4, blank=True, null=True)
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_currency = models.CharField(max_length=10, blank=True, null=True)
 
     accepted_terms = models.BooleanField(default=False)
 
@@ -1162,6 +1164,52 @@ class PrivateBooking(BaseBooking):
     )
     def __str__(self):
         return f"PrivateBooking #{self.id}"
+
+
+# =====================================================================
+# DRAFTS (Stripe checkout before booking creation)
+# =====================================================================
+
+class PrivateBookingDraft(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("completed", "Completed"),
+        ("expired", "Expired"),
+        ("failed", "Failed"),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="private_booking_drafts",
+    )
+    payment_intent_id = models.CharField(max_length=255, unique=True, db_index=True)
+    payment_status = models.CharField(max_length=50, blank=True, null=True)
+    payment_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_currency = models.CharField(max_length=10, blank=True, null=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    payload = models.JSONField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"PrivateDraft {self.payment_intent_id}"
+
+
+class StripeWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True, db_index=True)
+    event_type = models.CharField(max_length=100)
+    payment_intent_id = models.CharField(max_length=255, blank=True, null=True, db_index=True)
+    processed_at = models.DateTimeField(blank=True, null=True)
+    last_error = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"StripeEvent {self.event_id}"
 
 
 # =====================================================================

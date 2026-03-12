@@ -76,17 +76,21 @@
                   {% if pm.is_default %}
                     <span class="btn-default state">Default</span>
                   {% else %}
-                    <a href="{% url 'accounts:set_payment_default' pm.id %}" class="btn-default">
-                      Set as default
-                    </a>
+                    <form method="post" action="{% url 'accounts:set_payment_default' pm.id %}" style="display:inline;">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-default">Set as default</button>
+                    </form>
                   {% endif %}
 
-                  <a href="{% url 'accounts:delete_payment_method' pm.id %}"
-                     class="icon-edit"
-                     aria-label="Delete payment method"
-                     onclick="return confirm('Delete this payment method')">
-                    &times;
-                  </a>
+                  <form method="post" action="{% url 'accounts:delete_payment_method' pm.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="icon-edit"
+                            aria-label="Delete payment method"
+                            onclick="return confirm('Delete this payment method')">
+                      &times;
+                    </button>
+                  </form>
                 </div>
               </div>
             {% endfor %}

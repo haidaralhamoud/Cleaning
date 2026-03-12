@@ -1,10 +1,11 @@
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 import logging
 from datetime import timedelta
 import re
+import stripe
 
 from accounts.models import DiscountCode
 from .pricing_utils import calculate_booking_price
@@ -13,12 +14,15 @@ from .forms import (
     ContactForm, ApplicationForm, BusinessCompanyInfoForm, OfficeSetupForm , ZipCheckForm, NotAvailableZipForm,CallRequestForm, FeedbackRequestForm
 )
 from django.views.decorators.http import require_POST
+from django.conf import settings
+from django.db import IntegrityError, transaction
+from django.urls import reverse
 
 from .models import (
     Job, Application, BookingNote, BusinessBooking, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
-    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, CallRequest,
+    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
-    Contact, FAQCategory, FAQItem,
+    Contact, FAQCategory, FAQItem, StripeWebhookEvent,
     ScheduleRule,
 )
 from accounts.models import (
@@ -32,7 +36,7 @@ from accounts.models import (
     ProviderAdminMessage,
     ChatMessage,
 )
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 import json
 from django.contrib import messages
 import json
@@ -58,6 +62,273 @@ from .dashboard import get_dashboard_items, get_item_by_slug
 
 logger = logging.getLogger(__name__)
 User = get_user_model()
+
+DRAFT_SESSION_KEY = "private_booking_draft"
+
+
+def _get_private_draft_data(request):
+    data = request.session.get(DRAFT_SESSION_KEY)
+    if not isinstance(data, dict):
+        data = {}
+    return data
+
+
+def _save_private_draft_data(request, data):
+    request.session[DRAFT_SESSION_KEY] = data
+    request.session.modified = True
+
+
+def _parse_iso_datetime(value):
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+    except Exception:
+        return None
+    if timezone.is_naive(dt):
+        dt = timezone.make_aware(dt, timezone.get_current_timezone())
+    return dt
+
+
+def _build_private_booking_from_draft(draft, user=None):
+    booking = PrivateBooking()
+    booking.booking_method = draft.get("booking_method")
+    booking.main_category = draft.get("main_category")
+    booking.selected_services = draft.get("selected_services") or []
+    booking.service_answers = draft.get("service_answers") or {}
+    booking.addons_selected = draft.get("addons_selected") or {}
+    booking.service_schedules = draft.get("service_schedules") or {}
+    booking.schedule_mode = draft.get("schedule_mode") or "same"
+    booking.appointment_date = draft.get("appointment_date") or None
+    booking.appointment_time_window = draft.get("appointment_time_window")
+    booking.frequency_type = draft.get("frequency_type")
+    booking.special_timing_requests = draft.get("special_timing_requests")
+    booking.day_work_best = draft.get("day_work_best") or []
+    booking.End_Date = draft.get("End_Date")
+    booking.pricing_details = draft.get("pricing_details")
+    booking.total_price = Decimal(str(draft.get("total_price", 0) or 0))
+    booking.subtotal = Decimal(str(draft.get("subtotal", 0) or 0))
+    booking.rot_discount = Decimal(str(draft.get("rot_discount", 0) or 0))
+    booking.address = draft.get("address")
+    booking.area = draft.get("area")
+    booking.duration_hours = draft.get("duration_hours")
+    booking.quoted_duration_minutes = draft.get("quoted_duration_minutes") or 0
+    booking.is_urgent = bool(draft.get("is_urgent"))
+    booking.zip_code = draft.get("zip_code")
+    booking.zip_is_available = bool(draft.get("zip_is_available"))
+    booking.scheduled_at = _parse_iso_datetime(draft.get("scheduled_at"))
+    if user and user.is_authenticated:
+        booking.user = user
+    return booking
+
+
+def _stripe_amount_from_decimal(amount):
+    if amount is None:
+        return 0
+    quantized = amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return int((quantized * 100).to_integral_value(rounding=ROUND_HALF_UP))
+
+
+def _card_details_from_intent(intent):
+    brand = None
+    last4 = None
+    charges = intent.get("charges", {}) if isinstance(intent, dict) else {}
+    data = charges.get("data", []) if isinstance(charges, dict) else []
+    if data:
+        details = data[0].get("payment_method_details", {})
+        card = details.get("card", {})
+        brand = card.get("brand")
+        last4 = card.get("last4")
+    if not brand or not last4:
+        payment_method = intent.get("payment_method")
+        if isinstance(payment_method, dict):
+            card = payment_method.get("card", {})
+            brand = brand or card.get("brand")
+            last4 = last4 or card.get("last4")
+    return brand, last4
+
+
+def _get_or_create_checkout_stripe_customer(customer):
+    if customer is None:
+        return None
+
+    stripe_customer_id = (getattr(customer, "stripe_customer_id", None) or "").strip()
+    if stripe_customer_id:
+        return stripe_customer_id
+
+    stripe_customer = stripe.Customer.create(
+        email=customer.email or None,
+        name=f"{customer.first_name} {customer.last_name}".strip() or None,
+        metadata={
+            "app_customer_id": str(customer.id),
+            "user_id": str(customer.user_id),
+        },
+    )
+    customer.stripe_customer_id = stripe_customer.id
+    customer.save(update_fields=["stripe_customer_id"])
+    return stripe_customer.id
+
+
+def _serialize_private_payment_summary(summary):
+    return {
+        "amount": f"{summary['amount']:.2f}",
+        "amount_cents": summary["amount_cents"],
+        "currency": summary["currency"],
+    }
+
+
+def _calculate_private_payment_summary(booking, currency):
+    fresh_pricing = calculate_booking_price(booking)
+    base_total = Decimal(str(fresh_pricing.get("final", 0) or 0))
+    subtotal = Decimal(str(fresh_pricing.get("subtotal", 0) or 0))
+    rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
+
+    customer = None
+    if booking.user_id:
+        customer = Customer.objects.filter(user_id=booking.user_id).first()
+
+    completed_bookings = 0
+    if booking.user_id:
+        completed_bookings = (
+            PrivateBooking.objects.filter(user_id=booking.user_id, status="COMPLETED").count()
+            + BusinessBooking.objects.filter(user_id=booking.user_id, status="COMPLETED").count()
+        )
+
+    referral_discount_percent = 10
+    referral_discount_eligible = (
+        customer is not None
+        and customer.has_referral_discount
+        and completed_bookings == 0
+    )
+
+    final_amount = base_total
+    discount_code = None
+    referral_discount_applied = False
+
+    if booking.discount_code:
+        dc = booking.discount_code
+        is_valid, _ = dc.validate(user=booking.user)
+        if is_valid:
+            discount_amount = base_total * Decimal(dc.percent) / Decimal(100)
+            final_amount = base_total - discount_amount
+            discount_code = dc
+
+    if referral_discount_eligible and discount_code is None:
+        referral_discount_amount = base_total * Decimal(referral_discount_percent) / Decimal(100)
+        final_amount = base_total - referral_discount_amount
+        referral_discount_applied = True
+
+    final_amount = final_amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    return {
+        "pricing": fresh_pricing,
+        "base_total": base_total,
+        "subtotal": subtotal,
+        "rot_discount": rot_discount,
+        "amount": final_amount,
+        "amount_cents": _stripe_amount_from_decimal(final_amount),
+        "currency": (currency or "").lower(),
+        "discount_code": discount_code,
+        "referral_discount_applied": referral_discount_applied,
+        "customer": customer,
+    }
+
+
+def _payment_intent_metadata_matches(intent, draft_record, user_id=None):
+    metadata = getattr(intent, "metadata", None) or {}
+    if str(metadata.get("booking_type") or "") != "private":
+        return False
+    if str(metadata.get("draft_id") or "") != str(draft_record.id):
+        return False
+    if user_id is not None and str(metadata.get("user_id") or "") != str(user_id):
+        return False
+    return True
+
+
+def _verify_private_payment_intent(intent, draft_record, summary, require_user_id=None):
+    if intent.status != "succeeded":
+        return False, "Payment not completed."
+
+    received_amount = intent.get("amount_received") or intent.get("amount") or 0
+    if int(received_amount) != int(summary["amount_cents"]):
+        return False, "Payment amount mismatch."
+
+    intent_currency = (intent.get("currency") or "").lower()
+    if intent_currency != summary["currency"]:
+        return False, "Payment currency mismatch."
+
+    if not _payment_intent_metadata_matches(intent, draft_record, user_id=require_user_id):
+        return False, "Payment metadata mismatch."
+
+    return True, None
+
+
+def _apply_private_booking_payment(booking, intent, payment_summary=None):
+    if booking.payment_status == "succeeded":
+        return
+
+    payment_summary = payment_summary or _calculate_private_payment_summary(
+        booking,
+        (intent.get("currency") or settings.STRIPE_CURRENCY or "usd").lower(),
+    )
+
+    if payment_summary["discount_code"] is not None:
+        dc = payment_summary["discount_code"]
+        dc.used_count += 1
+        if dc.max_uses is not None and dc.used_count >= dc.max_uses:
+            dc.is_used = True
+        dc.save(update_fields=["used_count", "is_used"])
+        booking.discount_code = None
+
+    customer = payment_summary["customer"]
+    if payment_summary["referral_discount_applied"] and customer and customer.has_referral_discount:
+        customer.has_referral_discount = False
+        customer.save(update_fields=["has_referral_discount"])
+
+    brand, last4 = _card_details_from_intent(intent)
+    booking.payment_method = "card"
+    booking.payment_status = intent.get("status")
+    booking.payment_intent_id = intent.get("id")
+    booking.payment_amount = payment_summary["amount"]
+    booking.payment_currency = payment_summary["currency"] or None
+    booking.payment_brand = brand
+    booking.payment_last4 = last4
+    booking.accepted_terms = True
+    booking.total_price = payment_summary["amount"]
+    booking.subtotal = payment_summary["subtotal"]
+    booking.rot_discount = payment_summary["rot_discount"]
+    booking.save()
+
+
+def _create_private_booking_from_draft_payload(payload):
+    booking = _build_private_booking_from_draft(payload)
+    booking.accepted_terms = True
+    scheduled_at = _parse_iso_datetime(payload.get("scheduled_at"))
+    if scheduled_at:
+        booking.scheduled_at = scheduled_at
+
+    user_id = payload.get("user_id")
+    if user_id:
+        booking.user_id = user_id
+
+    discount_code_id = payload.get("discount_code_id")
+    if discount_code_id:
+        booking.discount_code_id = discount_code_id
+
+    booking.save()
+    return booking
+
+
+def _mark_private_draft_failed(draft_record, status_value, error_message=None):
+    update_fields = ["payment_status", "status"]
+    draft_record.payment_status = status_value
+    draft_record.status = "failed"
+    if error_message:
+        logger.error(
+            "Private booking draft %s marked failed: %s",
+            draft_record.id,
+            error_message,
+        )
+    draft_record.save(update_fields=update_fields)
 
 
 def _normalize_location(value):
@@ -1758,6 +2029,10 @@ def private_zip_step1(request, service_slug):
 
                     # (اختياري) إنشاء booking لاحقاً، مو هون
                     request.session["zip_code"] = str(normalized_zip) if normalized_zip else str(zip_code_value)
+                    draft = _get_private_draft_data(request)
+                    draft["zip_code"] = str(normalized_zip) if normalized_zip else str(zip_code_value)
+                    draft["zip_is_available"] = True
+                    _save_private_draft_data(request, draft)
 
                     return redirect(
                         "home:private_zip_available",
@@ -1800,11 +2075,22 @@ def private_zip_step1(request, service_slug):
     })
 
 @login_required
-def private_booking_checkout(request, booking_id):
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
-    services = PrivateService.objects.filter(slug__in=booking.selected_services)
+def private_booking_checkout(request):
+    draft = _get_private_draft_data(request)
+    selected_slugs = draft.get("selected_services") or []
+    if not selected_slugs:
+        cart = request.session.get("private_cart", [])
+        if cart:
+            draft["selected_services"] = cart
+            _save_private_draft_data(request, draft)
+            selected_slugs = cart
+        else:
+            return redirect("home:all_services_private")
 
-    pricing = calculate_booking_price(booking)
+    services = PrivateService.objects.filter(slug__in=selected_slugs).select_related("category")
+    temp_booking = _build_private_booking_from_draft(draft, request.user)
+
+    pricing = calculate_booking_price(temp_booking)
     services_total = Decimal(str(pricing["services_total"]))
     addons_total = Decimal(str(pricing["addons_total"]))
     schedule_extra = Decimal(str(pricing["schedule_extra"]))
@@ -1819,11 +2105,12 @@ def private_booking_checkout(request, booking_id):
         rot_value = Decimal("0.00")
     final_after_rot = base_total
 
-    if booking.subtotal != subtotal or booking.total_price != final_after_rot or booking.rot_discount != rot_value:
-        booking.subtotal = subtotal
-        booking.total_price = final_after_rot
-        booking.rot_discount = rot_value
-        booking.save(update_fields=["subtotal", "total_price", "rot_discount"])
+    draft["subtotal"] = float(subtotal)
+    draft["total_price"] = float(final_after_rot)
+    draft["rot_discount"] = float(rot_value)
+    draft["pricing_details"] = pricing
+    draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
+    _save_private_draft_data(request, draft)
 
     customer = None
     if request.user.is_authenticated:
@@ -1849,14 +2136,14 @@ def private_booking_checkout(request, booking_id):
     if not display_address:
         display_address = "Not provided"
 
-    display_area = booking.area
+    display_area = draft.get("area")
     if not display_area and customer:
         display_area = customer.city
     if not display_area:
         display_area = "Not provided"
 
-    if booking.duration_hours:
-        display_duration = booking.duration_hours
+    if draft.get("duration_hours"):
+        display_duration = draft.get("duration_hours")
     elif duration_seconds > 0:
         hours = duration_seconds // 3600
         minutes = (duration_seconds % 3600) // 60
@@ -1866,9 +2153,8 @@ def private_booking_checkout(request, booking_id):
         display_duration = "To be confirmed"
 
     # ربط المستخدم
-    if booking.user is None:
-        booking.user = request.user
-        booking.save(update_fields=["user"])
+    if temp_booking.user is None and request.user.is_authenticated:
+        temp_booking.user = request.user
 
     # ==========================
     # 🧮 PREVIEW CALCULATION
@@ -1876,21 +2162,42 @@ def private_booking_checkout(request, booking_id):
     discount_preview_amount = Decimal("0.00")
     final_preview_price = final_after_rot
 
-    if booking.discount_code:
-        is_valid, reason = booking.discount_code.validate(user=request.user)
-        if is_valid:
-            discount_preview_amount = (
-                final_after_rot * Decimal(booking.discount_code.percent) / Decimal(100)
-            )
-            final_preview_price = final_after_rot - discount_preview_amount
+    discount_code_display = None
+    discount_code_id = draft.get("discount_code_id")
+    if discount_code_id:
+        dc = DiscountCode.objects.filter(id=discount_code_id).first()
+        if not dc:
+            draft.pop("discount_code_id", None)
+            _save_private_draft_data(request, draft)
+            messages.warning(request, "Discount code is not valid anymore.")
         else:
-            booking.discount_code = None
-            booking.save(update_fields=["discount_code"])
-            messages.warning(request, reason or "Discount code is not valid anymore.")
+            is_valid, reason = dc.validate(user=request.user)
+            if is_valid:
+                discount_code_display = dc
+                temp_booking.discount_code = dc
+                discount_preview_amount = (
+                    final_after_rot * Decimal(dc.percent) / Decimal(100)
+                )
+                final_preview_price = final_after_rot - discount_preview_amount
+            else:
+                draft.pop("discount_code_id", None)
+                _save_private_draft_data(request, draft)
+                messages.warning(request, reason or "Discount code is not valid anymore.")
     elif referral_discount_eligible:
         referral_discount_amount = final_after_rot * Decimal(referral_discount_percent) / Decimal(100)
         final_preview_price = final_after_rot - referral_discount_amount
         referral_discount_applied = True
+
+    stripe_publishable_key = settings.STRIPE_PUBLISHABLE_KEY
+    stripe_secret_key = settings.STRIPE_SECRET_KEY
+    stripe_currency = (settings.STRIPE_CURRENCY or "sek").lower()
+
+    payment_summary = _calculate_private_payment_summary(temp_booking, stripe_currency)
+    final_preview_price = payment_summary["amount"]
+    payment_summary_data = _serialize_private_payment_summary(payment_summary)
+
+    draft["payment_summary"] = payment_summary_data
+    _save_private_draft_data(request, draft)
 
     # ==========================
     # 📨 POST
@@ -1910,64 +2217,171 @@ def private_booking_checkout(request, booking_id):
                 if not is_valid:
                     messages.error(request, reason)
                 else:
-                    booking.discount_code = dc
-                    booking.save(update_fields=["discount_code"])
-                    messages.success(request, "Discount code applied successfully ✅")
+                    draft["discount_code_id"] = dc.id
+                    _save_private_draft_data(request, draft)
+                    messages.success(request, "Discount code applied successfully.")
 
-            return redirect("home:private_booking_checkout", booking_id=booking.id)
+            return redirect("home:private_booking_checkout")
 
         # 💳 CONFIRM PAYMENT
         elif form_type == "payment":
-            booking.payment_method = request.POST.get("payment_method")
-            booking.card_number = request.POST.get("card_number")
-            booking.card_expiry = request.POST.get("card_expiry")
-            booking.card_cvv = request.POST.get("card_cvv")
-            booking.card_name = request.POST.get("card_name")
-            booking.accepted_terms = True
-
-            fresh_pricing = calculate_booking_price(booking)
-            final_amount = Decimal(str(fresh_pricing["final"]))
-            discount_amount = Decimal("0.00")
-            discount_code_applied = False
-
-            if booking.discount_code:
-                dc = booking.discount_code
-                is_valid, reason = dc.validate(user=request.user)
-                if not is_valid:
-                    messages.error(request, reason or "Discount code is not valid.")
-                    return redirect("home:private_booking_checkout", booking_id=booking.id)
-
-                discount_amount = final_amount * Decimal(dc.percent) / Decimal(100)
-                final_amount -= discount_amount
-
-                dc.used_count += 1
-                if dc.max_uses is not None and dc.used_count >= dc.max_uses:
-                    dc.is_used = True
-                dc.save(update_fields=["used_count", "is_used"])
-
-                booking.discount_code = None
-                discount_code_applied = True
-
-            if referral_discount_eligible and not discount_code_applied:
-                referral_discount_amount = final_amount * Decimal(referral_discount_percent) / Decimal(100)
-                final_amount -= referral_discount_amount
-                if customer and customer.has_referral_discount:
-                    customer.has_referral_discount = False
-                    customer.save(update_fields=["has_referral_discount"])
-
-            booking.total_price = final_amount
-            booking.rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
-            booking.subtotal = Decimal(str(fresh_pricing.get("subtotal", 0) or 0))
-            booking.save()
-            return redirect("home:thank_you_page")
+            messages.error(request, "Please complete payment using the card form.")
+            return redirect("home:private_booking_checkout")
 
         elif form_type == "remove_discount":
-            booking.discount_code = None
-            booking.save(update_fields=["discount_code"])
+            draft.pop("discount_code_id", None)
+            _save_private_draft_data(request, draft)
             messages.info(request, "Discount code removed.")
-            return redirect("home:private_booking_checkout", booking_id=booking.id)
+            return redirect("home:private_booking_checkout")
+
+    # ==========================
+    # STRIPE PAYMENT INTENT
+    # ==========================
+    stripe_client_secret = draft.get("stripe_client_secret")
+    stripe_payment_intent_id = draft.get("payment_intent_id")
+    stripe_ready = bool(stripe_publishable_key and stripe_secret_key)
+    payment_element_version = "payment_element_card_v1"
+    current_payment_signature = json.dumps(
+        {
+            "amount_cents": payment_summary_data["amount_cents"],
+            "currency": payment_summary_data["currency"],
+            "selected_services": selected_slugs,
+            "discount_code_id": draft.get("discount_code_id"),
+            "appointment_date": draft.get("appointment_date"),
+            "appointment_time_window": draft.get("appointment_time_window"),
+            "schedule_mode": draft.get("schedule_mode"),
+        },
+        sort_keys=True,
+        cls=DjangoJSONEncoder,
+    )
+
+    if stripe_ready:
+        if payment_summary["amount_cents"] <= 0:
+            stripe_ready = False
+            messages.error(request, "Payment amount must be greater than zero.")
+        else:
+            stripe.api_key = stripe_secret_key
+            customer_name = ""
+            customer_email = ""
+            customer_phone = ""
+            if request.user.is_authenticated:
+                customer_name = request.user.get_full_name() or request.user.username or ""
+                customer_email = request.user.email or ""
+            if customer:
+                customer_name = customer_name or f"{customer.first_name} {customer.last_name}".strip()
+                customer_email = customer_email or customer.email or ""
+                customer_phone = customer.phone or ""
+            stripe_customer_id = _get_or_create_checkout_stripe_customer(customer)
+
+            draft_payload = dict(draft)
+            draft_payload.update({
+                "selected_services": selected_slugs,
+                "pricing_details": pricing,
+                "discount_code_id": draft.get("discount_code_id"),
+                "user_id": request.user.id if request.user.is_authenticated else None,
+                "customer_name": customer_name,
+                "customer_email": customer_email,
+                "customer_phone": customer_phone,
+            })
+
+            draft_record = None
+            if stripe_payment_intent_id:
+                draft_record = PrivateBookingDraft.objects.filter(
+                    payment_intent_id=stripe_payment_intent_id,
+                    user=request.user,
+                ).first()
+
+            metadata = {
+                "booking_type": "private",
+                "draft_id": str(draft_record.id) if draft_record else "",
+                "user_id": str(request.user.id),
+                "service_id": ",".join(selected_slugs),
+                "date": draft.get("appointment_date") or "",
+                "time": draft.get("appointment_time_window") or "",
+                "price": payment_summary_data["amount"],
+                "currency": payment_summary_data["currency"],
+            }
+
+            signature_changed = draft.get("payment_signature") != current_payment_signature
+
+            try:
+                intent = None
+                needs_metadata_sync = False
+                intent_requires_replacement = (
+                    draft.get("payment_element_version") != payment_element_version
+                    or (draft.get("payment_summary") or {}).get("currency") != stripe_currency
+                )
+                if not stripe_payment_intent_id or intent_requires_replacement:
+                    create_kwargs = {
+                        "amount": payment_summary["amount_cents"],
+                        "currency": stripe_currency,
+                        "payment_method_types": ["card"],
+                        "metadata": {"booking_type": "private", "user_id": str(request.user.id)},
+                        "description": "Private booking checkout",
+                    }
+                    if stripe_customer_id:
+                        create_kwargs["customer"] = stripe_customer_id
+                    intent = stripe.PaymentIntent.create(**create_kwargs)
+                    needs_metadata_sync = True
+                elif signature_changed:
+                    intent = stripe.PaymentIntent.modify(
+                        stripe_payment_intent_id,
+                        amount=payment_summary["amount_cents"],
+                    )
+                    needs_metadata_sync = True
+                elif not stripe_client_secret:
+                    intent = stripe.PaymentIntent.retrieve(stripe_payment_intent_id)
+
+                if intent is not None:
+                    stripe_client_secret = intent.client_secret
+                    stripe_payment_intent_id = intent.id
+
+                draft_record, _ = PrivateBookingDraft.objects.update_or_create(
+                    payment_intent_id=stripe_payment_intent_id,
+                    defaults={
+                        "user": request.user,
+                        "payment_status": getattr(intent, "status", None) or draft.get("payment_status") or "requires_payment_method",
+                        "payment_amount": payment_summary["amount"],
+                        "payment_currency": stripe_currency,
+                        "payload": draft_payload,
+                        "status": "pending",
+                    },
+                )
+
+                metadata["draft_id"] = str(draft_record.id)
+                metadata_sync_key = f"{stripe_payment_intent_id}:{draft_record.id}:{current_payment_signature}"
+                if not stripe_payment_intent_id:
+                    raise ValueError("Stripe payment intent was not initialized.")
+                if intent is None and (
+                    needs_metadata_sync or draft.get("metadata_sync_key") != metadata_sync_key
+                ):
+                    intent = stripe.PaymentIntent.modify(
+                        stripe_payment_intent_id,
+                        metadata=metadata,
+                    )
+                elif intent is not None and (
+                    needs_metadata_sync or draft.get("metadata_sync_key") != metadata_sync_key
+                ):
+                    intent = stripe.PaymentIntent.modify(intent.id, metadata=metadata)
+
+                if intent is not None:
+                    stripe_client_secret = intent.client_secret
+
+                draft["payment_intent_id"] = stripe_payment_intent_id
+                draft["payment_status"] = draft_record.payment_status
+                draft["stripe_client_secret"] = stripe_client_secret
+                draft["payment_signature"] = current_payment_signature
+                draft["metadata_sync_key"] = metadata_sync_key
+                draft["payment_element_version"] = payment_element_version
+                _save_private_draft_data(request, draft)
+
+                logger.info("Stripe PaymentIntent ready: %s", stripe_payment_intent_id)
+            except Exception:
+                logger.exception("Stripe PaymentIntent error for private draft")
+                messages.error(request, "Payment service is temporarily unavailable. Please try again.")
+                stripe_ready = False
     return render(request, "home/checkout.html", {
-        "booking": booking,
+        "booking": temp_booking,
         "services": services,
         "discount_preview_amount": discount_preview_amount,
         "referral_discount_amount": referral_discount_amount,
@@ -1987,7 +2401,250 @@ def private_booking_checkout(request, booking_id):
         "display_area": display_area,
         "display_duration": display_duration,
         "rot_percent": rot_percent,
+        "stripe_publishable_key": stripe_publishable_key,
+        "stripe_client_secret": stripe_client_secret,
+        "stripe_payment_intent_id": stripe_payment_intent_id,
+        "stripe_ready": stripe_ready,
+        "stripe_currency": stripe_currency,
+        "payment_complete_url": reverse("home:private_booking_payment_complete"),
+        "payment_return_url": request.build_absolute_uri(reverse("home:private_booking_payment_complete")),
+        "payment_failed_url": reverse("home:payment_failed"),
     })
+
+@login_required
+def private_booking_payment_complete(request):
+    if request.method not in ("GET", "POST"):
+        return HttpResponse(status=405)
+
+    payment_intent_id = (
+        request.POST.get("payment_intent_id")
+        or request.GET.get("payment_intent")
+        or request.GET.get("payment_intent_id")
+        or ""
+    ).strip()
+
+    if not payment_intent_id:
+        if request.method == "GET":
+            messages.error(request, "Missing payment intent.")
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": "Missing payment intent."}, status=400)
+
+    if not settings.STRIPE_SECRET_KEY:
+        if request.method == "GET":
+            messages.error(request, "Payment service not configured.")
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": "Payment service not configured."}, status=400)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    try:
+        intent = stripe.PaymentIntent.retrieve(payment_intent_id, expand=["payment_method"])
+    except Exception:
+        logger.exception("Stripe retrieve failed for intent %s", payment_intent_id)
+        if request.method == "GET":
+            messages.error(request, "Unable to verify payment.")
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": "Unable to verify payment."}, status=400)
+
+    session_draft = _get_private_draft_data(request)
+    if session_draft.get("payment_intent_id") != payment_intent_id:
+        if request.method == "GET":
+            messages.error(request, "Payment session mismatch.")
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": "Payment session mismatch."}, status=400)
+
+    draft_record = PrivateBookingDraft.objects.filter(
+        payment_intent_id=payment_intent_id,
+        user=request.user,
+    ).first()
+    if not draft_record:
+        if request.method == "GET":
+            messages.error(request, "Draft not found.")
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": "Draft not found."}, status=400)
+
+    temp_booking = _build_private_booking_from_draft(draft_record.payload or {}, request.user)
+    if draft_record.payload and draft_record.payload.get("discount_code_id"):
+        temp_booking.discount_code_id = draft_record.payload.get("discount_code_id")
+    payment_summary = _calculate_private_payment_summary(temp_booking, draft_record.payment_currency or settings.STRIPE_CURRENCY or "usd")
+    if request.method == "GET" and intent.status in ("processing", "requires_action", "requires_capture"):
+        received_amount = intent.get("amount_received") or intent.get("amount") or 0
+        intent_currency = (intent.get("currency") or "").lower()
+        if int(received_amount) != int(payment_summary["amount_cents"]):
+            _mark_private_draft_failed(draft_record, intent.status, "Payment amount mismatch.")
+            messages.error(request, "Payment amount mismatch.")
+            return redirect("home:payment_failed")
+        if intent_currency != payment_summary["currency"]:
+            _mark_private_draft_failed(draft_record, intent.status, "Payment currency mismatch.")
+            messages.error(request, "Payment currency mismatch.")
+            return redirect("home:payment_failed")
+        if not _payment_intent_metadata_matches(intent, draft_record, user_id=request.user.id):
+            _mark_private_draft_failed(draft_record, intent.status, "Payment metadata mismatch.")
+            messages.error(request, "Payment metadata mismatch.")
+            return redirect("home:payment_failed")
+
+        draft_record.payment_status = intent.status
+        draft_record.save(update_fields=["payment_status"])
+        request.session["latest_private_payment_intent_id"] = payment_intent_id
+        request.session.pop(DRAFT_SESSION_KEY, None)
+        messages.info(request, "Payment submitted. We are waiting for Stripe confirmation.")
+        return redirect(f"{reverse('home:payment_success')}?payment_intent_id={payment_intent_id}")
+
+    valid_payment, payment_error = _verify_private_payment_intent(
+        intent,
+        draft_record,
+        payment_summary,
+        require_user_id=request.user.id,
+    )
+    if not valid_payment:
+        _mark_private_draft_failed(draft_record, intent.status, payment_error)
+        if request.method == "GET":
+            messages.error(request, payment_error)
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": payment_error}, status=400)
+
+    serialized_summary = _serialize_private_payment_summary(payment_summary)
+    if draft_record.payment_amount != payment_summary["amount"] or (draft_record.payment_currency or "").lower() != serialized_summary["currency"]:
+        _mark_private_draft_failed(draft_record, intent.status, "Draft payment summary mismatch.")
+        if request.method == "GET":
+            messages.error(request, "Draft payment summary mismatch.")
+            return redirect("home:payment_failed")
+        return JsonResponse({"error": "Draft payment summary mismatch."}, status=400)
+
+    draft_record.payment_status = intent.status
+    draft_record.status = "paid"
+    draft_record.save(update_fields=["payment_status", "status"])
+    logger.info("Stripe payment verified on client for draft %s", draft_record.id)
+
+    request.session["latest_private_payment_intent_id"] = payment_intent_id
+    processing_url = f"{reverse('home:payment_success')}?payment_intent_id={payment_intent_id}"
+    request.session.pop(DRAFT_SESSION_KEY, None)
+
+    if request.method == "GET":
+        return redirect(processing_url)
+    return JsonResponse({"redirect_url": processing_url})
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    if not settings.STRIPE_SECRET_KEY or not settings.STRIPE_WEBHOOK_SECRET:
+        return HttpResponse(status=400)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    payload = request.body
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload=payload,
+            sig_header=sig_header,
+            secret=settings.STRIPE_WEBHOOK_SECRET,
+        )
+    except ValueError:
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError:
+        return HttpResponse(status=400)
+    except Exception:
+        return HttpResponse(status=400)
+
+    event_type = event.get("type")
+    event_id = event.get("id")
+    data = event.get("data", {}).get("object", {})
+    payment_intent_id = data.get("id")
+
+    if not event_id:
+        logger.error("Stripe webhook received without event id.")
+        return HttpResponse(status=400)
+
+    try:
+        with transaction.atomic():
+            webhook_event, created = StripeWebhookEvent.objects.select_for_update().get_or_create(
+                event_id=event_id,
+                defaults={
+                    "event_type": event_type,
+                    "payment_intent_id": payment_intent_id,
+                },
+            )
+            if not created:
+                webhook_event.event_type = event_type
+                webhook_event.payment_intent_id = payment_intent_id
+                webhook_event.save(update_fields=["event_type", "payment_intent_id", "updated_at"])
+                if webhook_event.processed_at:
+                    logger.info("Stripe webhook duplicate ignored: %s", event_id)
+                    return HttpResponse(status=200)
+    except IntegrityError:
+        logger.info("Stripe webhook duplicate ignored after integrity error: %s", event_id)
+        return HttpResponse(status=200)
+
+    draft_record = None
+    if payment_intent_id:
+        draft_record = PrivateBookingDraft.objects.filter(payment_intent_id=payment_intent_id).first()
+
+    if not draft_record:
+        logger.warning("Stripe webhook: draft not found for intent %s", payment_intent_id)
+        return HttpResponse(status=200)
+
+    if event_type == "payment_intent.succeeded":
+        try:
+            intent = stripe.PaymentIntent.retrieve(payment_intent_id, expand=["payment_method"])
+            payload = draft_record.payload or {}
+            with transaction.atomic():
+                draft_record = PrivateBookingDraft.objects.select_for_update().get(pk=draft_record.pk)
+                if PrivateBooking.objects.filter(payment_intent_id=payment_intent_id).exists():
+                    draft_record.payment_status = data.get("status")
+                    draft_record.status = "completed"
+                    draft_record.save(update_fields=["payment_status", "status"])
+                else:
+                    temp_booking = _build_private_booking_from_draft(payload)
+                    if payload.get("user_id"):
+                        temp_booking.user_id = payload.get("user_id")
+                    if payload.get("discount_code_id"):
+                        temp_booking.discount_code_id = payload.get("discount_code_id")
+                    payment_summary = _calculate_private_payment_summary(
+                        temp_booking,
+                        draft_record.payment_currency or settings.STRIPE_CURRENCY or "usd",
+                    )
+                    valid_payment, payment_error = _verify_private_payment_intent(
+                        intent,
+                        draft_record,
+                        payment_summary,
+                        require_user_id=draft_record.user_id,
+                    )
+                    if not valid_payment:
+                        _mark_private_draft_failed(draft_record, intent.status, payment_error)
+                        raise ValueError(payment_error)
+
+                    booking = _create_private_booking_from_draft_payload(payload)
+                    _apply_private_booking_payment(booking, intent, payment_summary=payment_summary)
+                    draft_record.payment_status = intent.status
+                    draft_record.status = "completed"
+                    draft_record.save(update_fields=["payment_status", "status"])
+                    logger.info("Private booking created from draft %s (booking_id=%s)", draft_record.id, booking.id)
+
+                StripeWebhookEvent.objects.filter(event_id=event_id).update(
+                    processed_at=timezone.now(),
+                    last_error="",
+                )
+        except Exception:
+            logger.exception("Stripe webhook processing failed for intent %s event %s", payment_intent_id, event_id)
+            StripeWebhookEvent.objects.filter(event_id=event_id).update(last_error=f"Fulfillment failed for {payment_intent_id}")
+            return HttpResponse(status=500)
+    elif event_type in ("payment_intent.payment_failed", "payment_intent.canceled"):
+        draft_record.payment_status = data.get("status")
+        draft_record.status = "expired"
+        draft_record.save(update_fields=["payment_status", "status"])
+        logger.info("Stripe payment not completed for draft %s (status=%s)", draft_record.id, draft_record.payment_status)
+        StripeWebhookEvent.objects.filter(event_id=event_id).update(
+            processed_at=timezone.now(),
+            last_error="",
+        )
+    else:
+        StripeWebhookEvent.objects.filter(event_id=event_id).update(
+            processed_at=timezone.now(),
+            last_error="",
+        )
+
+    return HttpResponse(status=200)
 
 def private_zip_available(request, service_slug):
     service = get_object_or_404(PrivateService, slug=service_slug)
@@ -2027,6 +2684,51 @@ def private_zip_available(request, service_slug):
 def private_thank_you(request):
     return render(request, "home/thank_you_page.html")
 
+@login_required
+def payment_success(request):
+    payment_intent_id = (
+        request.GET.get("payment_intent_id")
+        or request.session.get("latest_private_payment_intent_id")
+        or ""
+    ).strip()
+    booking = None
+    draft_record = None
+
+    if payment_intent_id:
+        booking = PrivateBooking.objects.filter(
+            payment_intent_id=payment_intent_id,
+            user=request.user,
+        ).first()
+        draft_record = PrivateBookingDraft.objects.filter(
+            payment_intent_id=payment_intent_id,
+            user=request.user,
+        ).first()
+
+    if booking is not None:
+        return render(
+            request,
+            "home/payment_success.html",
+            {
+                "booking": booking,
+                "payment_intent_id": payment_intent_id,
+            },
+        )
+
+    if draft_record and draft_record.status in ("failed", "expired"):
+        messages.error(request, "Payment could not be completed.")
+        return redirect("home:payment_failed")
+
+    return render(
+        request,
+        "home/payment_processing.html",
+        {
+            "payment_intent_id": payment_intent_id,
+        },
+    )
+
+def payment_failed(request):
+    return render(request, "home/payment_failed.html")
+
 def submit_call_request(request):
     if request.method == "POST":
         form = CallRequestForm(request.POST)
@@ -2049,23 +2751,28 @@ def private_booking_start(request, service_slug):
 
     urgent_flag = request.GET.get("urgent") == "1" or request.session.get("urgent_booking")
 
-    booking = PrivateBooking.objects.create(
-        booking_method="online",
-        main_category=service.category.slug,
-        selected_services=[service.slug],
-        user=request.user if request.user.is_authenticated else None,
-        is_urgent=bool(urgent_flag),
-    )
+    cart = request.session.get("private_cart", [])
+    selected_services = cart or [service.slug]
+
+    draft = _get_private_draft_data(request)
+    draft.update({
+        "booking_method": "online",
+        "main_category": service.category.slug,
+        "selected_services": selected_services,
+        "is_urgent": bool(urgent_flag),
+        "user_id": request.user.id if request.user.is_authenticated else None,
+    })
 
     if urgent_flag:
-        booking.log_status(note="Urgent booking (same day) requested")
         request.session.pop("urgent_booking", None)
-    return redirect("home:private_booking_services", booking_id=booking.id)
 
-def private_booking_services(request, booking_id):
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
+    _save_private_draft_data(request, draft)
+    return redirect("home:private_booking_services")
 
-    selected_slugs = booking.selected_services or []
+def private_booking_services(request):
+    draft = _get_private_draft_data(request)
+
+    selected_slugs = draft.get("selected_services") or []
     if not selected_slugs:
         return redirect("home:all_services_private")
 
@@ -2078,7 +2785,7 @@ def private_booking_services(request, booking_id):
 
     if request.method == "POST":
         # 1) جمع إجابات الأسئلة
-        service_answers = booking.service_answers or {}
+        service_answers = draft.get("service_answers") or {}
 
         for service in services:
             s_key = service.slug
@@ -2093,7 +2800,7 @@ def private_booking_services(request, booking_id):
                     else:
                         service_answers[s_key][q_key] = request.POST.get(field_name, "")
 
-        booking.service_answers = service_answers
+        draft["service_answers"] = service_answers
 
         # 2) الـ Add-ons
         addons_json = request.POST.get("addons_selected") or "{}"
@@ -2121,9 +2828,10 @@ def private_booking_services(request, booking_id):
 
         if missing:
             messages.error(request, "Please answer all required service questions before continuing.")
-            pricing = calculate_booking_price(booking)
+            temp_booking = _build_private_booking_from_draft(draft, request.user)
+            pricing = calculate_booking_price(temp_booking)
             return render(request, "home/YourServicesBooking.html", {
-                "booking": booking,
+                "booking": temp_booking,
                 "services": services,
                 "saved_addons": json.dumps(raw_addons or {}),
                 "pricing": pricing,
@@ -2161,39 +2869,47 @@ def private_booking_services(request, booking_id):
                     "price": float(total_price),
                 }
 
-        booking.addons_selected = final_addons
+        draft["addons_selected"] = final_addons
 
 
         # ⭐⭐⭐ 2.5) تخزين الـ schedule لو وصل من الصفحة ⭐⭐⭐
         schedules_json = request.POST.get("schedules_json")
         if schedules_json:
             try:
-                booking.service_schedules = json.loads(schedules_json)
+                draft["service_schedules"] = json.loads(schedules_json)
             except:
-                booking.service_schedules = {}
+                draft["service_schedules"] = {}
 
         # 3) حساب السعر
-        pricing = calculate_booking_price(booking)
+        temp_booking = _build_private_booking_from_draft(draft, request.user)
+        pricing = calculate_booking_price(temp_booking)
 
-        booking.pricing_details = pricing
-        booking.subtotal = Decimal(str(pricing["subtotal"]))
-        booking.rot_discount = Decimal(str(pricing["rot"]))
-        booking.total_price = Decimal(str(pricing["final"]))
-        booking.save()
+        duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
+        hours = duration_seconds // 3600
+        minutes = (duration_seconds % 3600) // 60
+        seconds = duration_seconds % 60
+        draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
+        draft["pricing_details"] = pricing
+        draft["subtotal"] = pricing.get("subtotal", 0) or 0
+        draft["rot_discount"] = pricing.get("rot", 0) or 0
+        draft["total_price"] = pricing.get("final", 0) or 0
+        _save_private_draft_data(request, draft)
 
         # لو الطلب AJAX → رجّع JSON
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             from django.http import JsonResponse
             return JsonResponse(pricing)
 
-        return redirect("home:private_booking_schedule", booking_id=booking.id)
+        return redirect("home:private_booking_schedule")
 
     # GET
-    pricing = calculate_booking_price(booking)
+    temp_booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(temp_booking)
     return render(request, "home/YourServicesBooking.html", {
-        "booking": booking,
+        "booking": temp_booking,
         "services": services,
-        "saved_addons": json.dumps(booking.addons_selected or {}),
+        "saved_addons": json.dumps(draft.get("addons_selected") or {}),
         "pricing": pricing,
     })
 
@@ -2260,16 +2976,16 @@ def private_cart_count(request):
     cart = request.session.get("private_cart", [])
     return JsonResponse({"count": len(cart)})
 
-def private_booking_schedule(request, booking_id):
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
+def private_booking_schedule(request):
+    draft = _get_private_draft_data(request)
 
-    if not booking.selected_services:
+    if not draft.get("selected_services"):
         cart = request.session.get("private_cart", [])
         if cart:
-            booking.selected_services = cart
-            booking.save(update_fields=["selected_services"])
+            draft["selected_services"] = cart
+            _save_private_draft_data(request, draft)
 
-    services = PrivateService.objects.filter(slug__in=booking.selected_services)
+    services = PrivateService.objects.filter(slug__in=(draft.get("selected_services") or []))
 
     # -----------------------------
     # 1) تجهيز قوانين الزيادة للـ JS
@@ -2290,7 +3006,7 @@ def private_booking_schedule(request, booking_id):
         print(1)
         # MODE
         mode = request.POST.get("schedule_mode")
-        booking.schedule_mode = mode
+        draft["schedule_mode"] = mode
 
         # ---------------- SAME MODE ----------------
         if mode == "same":
@@ -2298,30 +3014,30 @@ def private_booking_schedule(request, booking_id):
             # تاريخ
             date = request.POST.get("appointment_date")
             date_obj = parse_date(date) if date else None
-            booking.appointment_date = date_obj if date_obj else None
-            print(booking.appointment_date)
+            draft["appointment_date"] = date_obj.isoformat() if date_obj else None
+            print(draft.get("appointment_date"))
             # وقت
             time_window = request.POST.get("appointment_time_window")
-            booking.appointment_time_window = time_window
-            print(booking.appointment_time_window)
+            draft["appointment_time_window"] = time_window
+            print(draft.get("appointment_time_window"))
             # Frequency
             frequency = request.POST.get("frequency_type")
-            booking.frequency_type = frequency
-            print(booking.frequency_type)
+            draft["frequency_type"] = frequency
+            print(draft.get("frequency_type"))
             # أيام العمل
             days_json = request.POST.get("day_work_best")
-            booking.day_work_best = json.loads(days_json) if days_json else []
-            print(booking.day_work_best)
+            draft["day_work_best"] = json.loads(days_json) if days_json else []
+            print(draft.get("day_work_best"))
             # Special timing
             special = request.POST.get("special_timing_requests")
-            booking.special_timing_requests = special
+            draft["special_timing_requests"] = special
             
             # End Date
             end_date = request.POST.get("End_Date")
-            booking.End_Date = end_date if end_date else None
+            draft["End_Date"] = end_date if end_date else None
 
             # تفريغ الجدول المنفصل
-            booking.service_schedules = {}
+            draft["service_schedules"] = {}
 
         # ---------------- PER SERVICE MODE ----------------
         elif mode == "per_service":
@@ -2335,27 +3051,28 @@ def private_booking_schedule(request, booking_id):
             else:
                 schedules = {}
 
-            booking.service_schedules = schedules
+            draft["service_schedules"] = schedules
 
             # تفريغ قيم المود "same"
-            booking.appointment_date = None
-            booking.appointment_time_window = None
-            booking.frequency_type = None
-            booking.day_work_best = []
-            booking.special_timing_requests = None
-            booking.End_Date = None
+            draft["appointment_date"] = None
+            draft["appointment_time_window"] = None
+            draft["frequency_type"] = None
+            draft["day_work_best"] = []
+            draft["special_timing_requests"] = None
+            draft["End_Date"] = None
 
         # -----------------------------
         # 3) إعادة حساب السعر
         # -----------------------------
-        pricing = calculate_booking_price(booking)
+        temp_booking = _build_private_booking_from_draft(draft, request.user)
+        pricing = calculate_booking_price(temp_booking)
         duration_minutes = int(pricing.get("duration_minutes") or 0)
 
         invalid_price = any((service.price or 0) <= 0 for service in services)
         if invalid_price:
             messages.error(request, "This service is not bookable yet. Please choose another service.")
             return render(request, "home/Private_scheduale.html", {
-                "booking": booking,
+                "booking": temp_booking,
                 "services": services,
                 "date_rules": date_rules_json,
                 "schedule_rules": schedule_rules_json,
@@ -2365,7 +3082,7 @@ def private_booking_schedule(request, booking_id):
         if duration_minutes <= 0:
             messages.error(request, "Please complete required options to calculate a valid duration.")
             return render(request, "home/Private_scheduale.html", {
-                "booking": booking,
+                "booking": temp_booking,
                 "services": services,
                 "date_rules": date_rules_json,
                 "schedule_rules": schedule_rules_json,
@@ -2373,21 +3090,21 @@ def private_booking_schedule(request, booking_id):
             })
 
         if mode == "same":
-            if not booking.appointment_date:
+            if not draft.get("appointment_date"):
                 messages.error(request, "Please select a valid appointment date.")
                 return render(request, "home/Private_scheduale.html", {
-                    "booking": booking,
+                    "booking": temp_booking,
                     "services": services,
                     "date_rules": date_rules_json,
                     "schedule_rules": schedule_rules_json,
                     "pricing": pricing,
                 })
-            time_hint = booking.appointment_time_window or ""
-            time_candidates = booking._parse_time_candidates(time_hint)
+            time_hint = draft.get("appointment_time_window") or ""
+            time_candidates = temp_booking._parse_time_candidates(time_hint)
             if not time_candidates:
                 messages.error(request, "Please select a valid time window.")
                 return render(request, "home/Private_scheduale.html", {
-                    "booking": booking,
+                    "booking": temp_booking,
                     "services": services,
                     "date_rules": date_rules_json,
                     "schedule_rules": schedule_rules_json,
@@ -2395,45 +3112,52 @@ def private_booking_schedule(request, booking_id):
                 })
             start_time = time_candidates[0]
             tz = timezone.get_current_timezone()
-            booking.scheduled_at = timezone.make_aware(
-                datetime.combine(booking.appointment_date, start_time),
-                tz
-            )
+            appointment_date_obj = parse_date(draft.get("appointment_date")) if draft.get("appointment_date") else None
+            if appointment_date_obj:
+                scheduled_at = timezone.make_aware(
+                    datetime.combine(appointment_date_obj, start_time),
+                    tz
+                )
+                draft["scheduled_at"] = scheduled_at.isoformat()
+            else:
+                draft["scheduled_at"] = None
         else:
-            booking.scheduled_at = None
+            draft["scheduled_at"] = None
 
-        booking.quoted_duration_minutes = duration_minutes
-        booking.pricing_details = pricing
-        booking.total_price = pricing["final"]
-        booking.subtotal = pricing["subtotal"]
-        booking.rot_discount = pricing["rot"]
+        draft["quoted_duration_minutes"] = duration_minutes
+        draft["pricing_details"] = pricing
+        draft["total_price"] = pricing["final"]
+        draft["subtotal"] = pricing["subtotal"]
+        draft["rot_discount"] = pricing["rot"]
 
-        booking.save()
+        _save_private_draft_data(request, draft)
 
-        return redirect("home:private_booking_checkout" , booking_id=booking.id)
+        return redirect("home:private_booking_checkout")
 
     # -----------------------------
     # 3) Render
     # -----------------------------
     print(4)
+    temp_booking = _build_private_booking_from_draft(draft, request.user)
     return render(request, "home/Private_scheduale.html", {
-        "booking": booking,
+        "booking": temp_booking,
         "services": services,
         "date_rules": date_rules_json,
         "schedule_rules": schedule_rules_json,
-        "pricing": calculate_booking_price(booking),
+        "pricing": calculate_booking_price(temp_booking),
     })
 
 
-def private_price_api(request, booking_id):
+def private_price_api(request):
+    draft = _get_private_draft_data(request)
 
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
-
-    if not booking.selected_services:
+    if not draft.get("selected_services"):
         cart = request.session.get("private_cart", [])
         if cart:
-            booking.selected_services = cart
-            booking.save(update_fields=["selected_services"])
+            draft["selected_services"] = cart
+            _save_private_draft_data(request, draft)
+
+    booking = _build_private_booking_from_draft(draft, request.user)
 
     # --------------------------
     # 1) جدولة: same أو per_service
@@ -2487,7 +3211,7 @@ def private_price_api(request, booking_id):
             booking.day_work_best = []
     # -----------------------------------------------
 
-    pricing = calculate_booking_price(booking)
+    pricing = calculate_booking_price(temp_booking)
 
     return JsonResponse({
         "services_total": pricing["services_total"],
@@ -2503,19 +3227,24 @@ def private_price_api(request, booking_id):
 
 def private_provider_availability_api(request):
     date_str = request.GET.get("date")
-    booking_id = request.GET.get("booking_id")
-    if not date_str or not booking_id:
-        return JsonResponse({"error": "Missing date or booking_id"}, status=400)
+    if not date_str:
+        return JsonResponse({"error": "Missing date"}, status=400)
 
     date_obj = parse_date(date_str)
     if not date_obj:
         return JsonResponse({"error": "Invalid date"}, status=400)
 
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
+    draft = _get_private_draft_data(request)
+    if not draft.get("selected_services"):
+        return JsonResponse({"error": "Missing booking details"}, status=400)
+
+    booking = _build_private_booking_from_draft(draft, request.user)
+    booking.appointment_date = date_obj
 
     duration_minutes = int(booking.quoted_duration_minutes or 0)
     if duration_minutes <= 0:
-        pricing = calculate_booking_price(booking)
+        temp_booking = _build_private_booking_from_draft(draft, request.user)
+        pricing = calculate_booking_price(temp_booking)
         duration_minutes = int(pricing.get("duration_minutes") or 0)
 
     if duration_minutes <= 0:
@@ -2556,11 +3285,11 @@ def private_provider_availability_api(request):
 
 
 @csrf_exempt
-def private_update_answer_api(request, booking_id):
+def private_update_answer_api(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST only"}, status=400)
 
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
+    draft = _get_private_draft_data(request)
 
     field = request.POST.get("field")
     value = request.POST.get("value")
@@ -2578,29 +3307,32 @@ def private_update_answer_api(request, booking_id):
             except json.JSONDecodeError:
                 parsed_value = value
 
-    answers = booking.service_answers or {}
+    answers = draft.get("service_answers") or {}
     answers.setdefault(service_slug, {})
     answers[service_slug][field] = parsed_value
 
-    booking.service_answers = answers
-    pricing = calculate_booking_price(booking)
+    draft["service_answers"] = answers
+    temp_booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(temp_booking)
     duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
     hours = duration_seconds // 3600
     minutes = (duration_seconds % 3600) // 60
     seconds = duration_seconds % 60
-    booking.duration_hours = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    booking.save(update_fields=["service_answers", "duration_hours"])
+    draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
+    draft["pricing_details"] = pricing
+    _save_private_draft_data(request, draft)
 
     return JsonResponse({"success": True})
 
 
 
 @csrf_exempt
-def private_update_addons_api(request, booking_id):
+def private_update_addons_api(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST only"}, status=400)
 
-    booking = get_object_or_404(PrivateBooking, id=booking_id)
+    draft = _get_private_draft_data(request)
 
     raw = request.POST.get("addons_json", "{}")
 
@@ -2609,18 +3341,20 @@ def private_update_addons_api(request, booking_id):
     except:
         addons = {}
 
-    booking.addons_selected = addons
-    pricing = calculate_booking_price(booking)
+    draft["addons_selected"] = addons
+    temp_booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(temp_booking)
     duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
     hours = duration_seconds // 3600
     minutes = (duration_seconds % 3600) // 60
     seconds = duration_seconds % 60
-    booking.duration_hours = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    booking.subtotal = pricing.get("subtotal", 0) or 0
-    booking.total_price = pricing.get("final", 0) or 0
-    booking.rot_discount = pricing.get("rot", 0) or 0
-    booking.pricing_details = pricing
-    booking.save(update_fields=["addons_selected", "duration_hours", "subtotal", "total_price", "rot_discount", "pricing_details"])
+    draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
+    draft["subtotal"] = pricing.get("subtotal", 0) or 0
+    draft["total_price"] = pricing.get("final", 0) or 0
+    draft["rot_discount"] = pricing.get("rot", 0) or 0
+    draft["pricing_details"] = pricing
+    _save_private_draft_data(request, draft)
 
     return JsonResponse({
         "success": True,

@@ -100,6 +100,7 @@ class Customer(models.Model):
 
     preferred_language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
     profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    stripe_customer_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
 
     accepted_terms = models.BooleanField(default=False)
 
@@ -352,6 +353,9 @@ class PaymentMethod(models.Model):
     cardholder_name = models.CharField(max_length=100)
     card_last4 = models.CharField(max_length=4)
     expiry_date = models.CharField(max_length=5)  # MM/YY
+    stripe_payment_method_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
+    exp_month = models.PositiveSmallIntegerField(blank=True, null=True)
+    exp_year = models.PositiveSmallIntegerField(blank=True, null=True)
 
     CARD_TYPES = [
         ("visa", "Visa"),

@@ -110,7 +110,7 @@ path(
             name="private_booking_start"
         ),
         path(
-            "private/booking/<int:booking_id>/services/",
+            "private/booking/services/",
             views.private_booking_services,
             name="private_booking_services"
         ),
@@ -123,12 +123,12 @@ path("private/cart/remove-json/<slug:service_slug>/",
         path("private/cart/add/<slug:slug>/", views.private_cart_add, name="private_cart_add"),
 path("private/cart/count/", views.private_cart_count, name="private_cart_count"),
 path(
-    "private/booking/<int:booking_id>/schedule/",
+    "private/booking/schedule/",
     views.private_booking_schedule,
     name="private_booking_schedule"
 ),
 path(
-    "private/api/booking/<int:booking_id>/price/",
+    "private/api/booking/price/",
     views.private_price_api,
     name="private_price_api"
 ),
@@ -139,7 +139,7 @@ path(
 ),
 
 path(
-    "private/api/booking/<int:booking_id>/update-answer/",
+    "private/api/booking/update-answer/",
     views.private_update_answer_api,
     name="private_update_answer_api"
 ),
@@ -147,17 +147,27 @@ path(
 
 
 path(
-    "private/api/booking/<int:booking_id>/update-addons/",
+    "private/api/booking/update-addons/",
     views.private_update_addons_api,
     name="private_update_addons_api"
 ),
 
 # Checkout page
 path(
-    "booking/<int:booking_id>/checkout/",
+    "booking/checkout/",
     views.private_booking_checkout,
     name="private_booking_checkout"
 ),
+path(
+    "booking/payment/complete/",
+    views.private_booking_payment_complete,
+    name="private_booking_payment_complete"
+),
+
+path("payment/success/", views.payment_success, name="payment_success"),
+path("payment/failed/", views.payment_failed, name="payment_failed"),
+
+path("stripe/webhook/", views.stripe_webhook, name="stripe_webhook"),
 
 path("booking/add-note/", views.add_booking_note, name="add_booking_note"),
 

@@ -12,5 +12,6 @@ psycopg==3.3.2
 psycopg-binary==3.3.2
 soupsieve==2.8
 sqlparse==0.5.3
+stripe==12.0.0
 typing_extensions==4.15.0
 tzdata==2025.2

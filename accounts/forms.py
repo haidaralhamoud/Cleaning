@@ -226,8 +226,6 @@ class PaymentMethodForm(forms.ModelForm):
         model = PaymentMethod
         fields = [
             "cardholder_name",
-            "expiry_date",
-            "card_type",
             "is_default",
         ]
 

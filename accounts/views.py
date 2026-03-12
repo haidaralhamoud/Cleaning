@@ -58,6 +58,7 @@ from django.core.mail import EmailMultiAlternatives, get_connection
 from django.template.loader import render_to_string
 import logging
 from smtplib import SMTPException
+import stripe
 from home.models import (
     BookingStatusHistory,
     BookingTimeline,
@@ -113,6 +114,24 @@ def _get_client_ip(request):
     if forwarded:
         return forwarded.split(",")[0].strip()
     return request.META.get("REMOTE_ADDR")
+
+
+def _get_or_create_stripe_customer(customer):
+    stripe_customer_id = (getattr(customer, "stripe_customer_id", None) or "").strip()
+    if stripe_customer_id:
+        return stripe_customer_id
+
+    stripe_customer = stripe.Customer.create(
+        email=customer.email or None,
+        name=f"{customer.first_name} {customer.last_name}".strip() or None,
+        metadata={
+            "app_customer_id": str(customer.id),
+            "user_id": str(customer.user_id),
+        },
+    )
+    customer.stripe_customer_id = stripe_customer.id
+    customer.save(update_fields=["stripe_customer_id"])
+    return stripe_customer.id
 
 
 def _get_latest_active_otp(email):
@@ -1628,10 +1647,12 @@ def add_Customer_Notes(request):
 @login_required
 def Payment_and_Billing(request):
     customer = request.user.customer
+    logger.info("[Payment & Billing] user=%s customer=%s", request.user, customer.id if customer else None)
 
     payment_methods = PaymentMethod.objects.filter(
         customer=customer
     ).order_by( "-created_at")
+    logger.info("[Payment & Billing] payment methods count=%s", payment_methods.count())
 
     invoices = Invoice.objects.filter(
         customer=customer
@@ -1662,6 +1683,7 @@ def Payment_and_Billing(request):
     )
 
 @login_required
+@require_POST
 def set_payment_default(request, pk):
     customer = request.user.customer
 
@@ -1681,6 +1703,7 @@ def set_payment_default(request, pk):
     return redirect("accounts:Payment_and_Billing")
 
 @login_required
+@require_POST
 def delete_payment_method(request, pk):
     customer = request.user.customer
 
@@ -1695,38 +1718,197 @@ def delete_payment_method(request, pk):
     return render(request, "accounts/sidebar/Payment_and_Billing.html")
 
 
+@login_required
 def Add_Payment_Method(request):
-    customer = request.user.customer
+    form = PaymentMethodForm()
+    stripe_ready = bool(settings.STRIPE_PUBLISHABLE_KEY and settings.STRIPE_SECRET_KEY)
+    client_secret = ""
 
-    if request.method == "POST":
-        form = PaymentMethodForm(request.POST)
-
-        if form.is_valid():
-            payment = form.save(commit=False)
-            payment.customer = customer
-
-            # استخراج آخر 4 أرقام فقط
-            card_number = request.POST.get("card_number", "")
-            payment.card_last4 = card_number[-4:] if len(card_number) >= 4 else ""
-
-            # إذا اختارها افتراضية → نلغي الافتراضية عن الباقي
-            if payment.is_default:
-                PaymentMethod.objects.filter(
-                    customer=customer,
-                    is_default=True
-                ).update(is_default=False)
-
-            payment.save()
-            return redirect("accounts:Payment_and_Billing")
+    if not stripe_ready:
+        logger.warning("Stripe keys are missing for Add_Payment_Method view.")
     else:
-        form = PaymentMethodForm()
+        stripe.api_key = settings.STRIPE_SECRET_KEY
 
     return render(
         request,
         "accounts/subpages/Add_Payment_Method.html",
-        {"form": form}
+        {
+            "form": form,
+            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
+            "stripe_client_secret": client_secret,
+            "stripe_ready": stripe_ready,
+        },
     )
-    return render(request, "accounts/subpages/Add_Payment_Method.html")
+
+
+@login_required
+@require_POST
+def create_setup_intent(request):
+    if not hasattr(request.user, "customer"):
+        return JsonResponse({"ok": False, "error": "Customer profile missing"}, status=400)
+
+    customer = request.user.customer
+    if not settings.STRIPE_SECRET_KEY:
+        return JsonResponse({"ok": False, "error": "Stripe is not configured."}, status=500)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    try:
+        stripe_customer_id = _get_or_create_stripe_customer(customer)
+        setup_intent = stripe.SetupIntent.create(
+            customer=stripe_customer_id,
+            payment_method_types=["card"],
+            metadata={
+                "context": "add_payment_method",
+                "user_id": str(request.user.id),
+                "customer_id": str(customer.id),
+            },
+        )
+    except Exception as exc:
+        logger.exception("Failed to create Stripe SetupIntent")
+        return JsonResponse({"ok": False, "error": f"Failed to create setup intent: {exc}"}, status=500)
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "client_secret": setup_intent.client_secret,
+            "setup_intent_id": setup_intent.id,
+        }
+    )
+
+
+@login_required
+@require_POST
+def save_payment_method(request):
+    if not hasattr(request.user, "customer"):
+        return JsonResponse({"ok": False, "error": "Customer profile missing"}, status=400)
+
+    customer = request.user.customer
+    payload_data = {}
+    if request.content_type == "application/json":
+        try:
+            payload_data = json.loads(request.body.decode("utf-8") or "{}")
+        except json.JSONDecodeError as exc:
+            logger.error("[Stripe save] invalid JSON payload: %s", exc)
+    form = PaymentMethodForm(payload_data or request.POST)
+    if not form.is_valid():
+        return JsonResponse(
+            {"ok": False, "error": "Invalid form data.", "details": form.errors},
+            status=400,
+        )
+
+    setup_intent_id = (
+        payload_data.get("setup_intent_id")
+        or request.POST.get("setup_intent_id")
+        or ""
+    ).strip()
+    if not setup_intent_id:
+        return JsonResponse({"ok": False, "error": "Missing setup_intent_id."}, status=400)
+
+    if not settings.STRIPE_SECRET_KEY:
+        return JsonResponse({"ok": False, "error": "Stripe is not configured."}, status=500)
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    try:
+        setup_intent = stripe.SetupIntent.retrieve(setup_intent_id)
+    except Exception as exc:
+        logger.exception("Failed to retrieve Stripe SetupIntent")
+        return JsonResponse(
+            {"ok": False, "error": f"Could not verify setup intent: {exc}"},
+            status=400,
+        )
+
+    if getattr(setup_intent, "status", None) != "succeeded":
+        return JsonResponse({"ok": False, "error": "Setup intent is not completed."}, status=400)
+
+    stripe_customer_id = None
+    for attr_name in ("stripe_customer_id", "stripe_customer"):
+        value = getattr(customer, attr_name, None)
+        if value:
+            stripe_customer_id = str(value)
+            break
+    if not stripe_customer_id:
+        user_value = getattr(request.user, "stripe_customer_id", None)
+        if user_value:
+            stripe_customer_id = str(user_value)
+
+    setup_intent_customer = getattr(setup_intent, "customer", None)
+    if stripe_customer_id and str(setup_intent_customer or "") != stripe_customer_id:
+        return JsonResponse({"ok": False, "error": "Setup intent customer mismatch."}, status=400)
+
+    payment_method_id = (getattr(setup_intent, "payment_method", None) or "").strip()
+    if not payment_method_id:
+        return JsonResponse({"ok": False, "error": "Setup intent missing payment method."}, status=400)
+
+    try:
+        pm = stripe.PaymentMethod.retrieve(payment_method_id)
+    except Exception as exc:
+        logger.exception("Failed to retrieve Stripe PaymentMethod")
+        return JsonResponse(
+            {"ok": False, "error": f"Could not verify payment method: {exc}"},
+            status=400,
+        )
+
+    card = getattr(pm, "card", None)
+    if not card:
+        return JsonResponse({"ok": False, "error": "Invalid card data."}, status=400)
+
+    try:
+        brand = (card.brand or "").lower()
+        last4 = card.last4 or ""
+        exp_month = card.exp_month
+        exp_year = card.exp_year
+    except Exception:
+        logger.exception("Unexpected card payload for PaymentMethod")
+        return JsonResponse({"ok": False, "error": "Invalid card data."}, status=400)
+
+    brand_map = {
+        "visa": "visa",
+        "mastercard": "mastercard",
+        "amex": "amex",
+        "american_express": "amex",
+        "discover": "discover",
+    }
+    card_type = brand_map.get(brand, "visa")
+
+    expiry_date = ""
+    if exp_month and exp_year:
+        expiry_date = f"{int(exp_month):02d}/{str(exp_year)[-2:]}"
+
+    is_default = form.cleaned_data.get("is_default", False)
+    if is_default:
+        PaymentMethod.objects.filter(customer=customer, is_default=True).update(is_default=False)
+
+    existing = PaymentMethod.objects.filter(
+        customer=customer,
+        stripe_payment_method_id=payment_method_id,
+    ).first()
+
+    try:
+        if existing:
+            existing.cardholder_name = form.cleaned_data["cardholder_name"]
+            existing.card_last4 = last4
+            existing.expiry_date = expiry_date
+            existing.card_type = card_type
+            existing.exp_month = exp_month
+            existing.exp_year = exp_year
+            existing.is_default = is_default or existing.is_default
+            existing.save()
+        else:
+            PaymentMethod.objects.create(
+                customer=customer,
+                cardholder_name=form.cleaned_data["cardholder_name"],
+                card_last4=last4,
+                expiry_date=expiry_date,
+                card_type=card_type,
+                is_default=is_default,
+                stripe_payment_method_id=payment_method_id,
+                exp_month=exp_month,
+                exp_year=exp_year,
+            )
+    except Exception as exc:
+        logger.exception("Failed to save payment method")
+        return JsonResponse({"ok": False, "error": f"Failed to save card: {exc}"}, status=500)
+    return JsonResponse({"ok": True})
 
 
 @login_required

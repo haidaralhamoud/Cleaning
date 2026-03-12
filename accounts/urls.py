@@ -1,10 +1,9 @@
-from django.urls import include, path
+from django.urls import include, path, reverse_lazy
 
 from accounts.views_admin import finalize_booking
 from . import views
 from .views import booking_chat, redeem_reward
 from django.contrib.auth import views as auth_views
-from .views_admin import finalize_booking
 
 app_name='accounts'
 urlpatterns = [
@@ -32,6 +31,8 @@ urlpatterns = [
     # Subpages
     path("add_Customer_Notes/", views.add_Customer_Notes, name="add_Customer_Notes"),
     path("Add_Payment_Method/", views.Add_Payment_Method, name="Add_Payment_Method"),
+    path("payment-methods/setup-intent/", views.create_setup_intent, name="create_setup_intent"),
+    path("payment-methods/save/", views.save_payment_method, name="save_payment_method"),
     path("Add_Address_and_Locations/", views.Add_Address_and_Locations, name="Add_Address_and_Locations"),
     path("Incident_Report_order/<int:incident_id>", views.Incident_Report_order, name="Incident_Report_order"),
     path(
@@ -62,7 +63,7 @@ urlpatterns = [
         "provider/change-password/",
         auth_views.PasswordChangeView.as_view(
             template_name="accounts/provider/provider_change_password.html",
-            success_url="accounts/provider/profile/"
+            success_url=reverse_lazy("accounts:provider_profile")
         ),
         name="provider_change_password"
     ),
@@ -90,7 +91,7 @@ path(
 path("chat/<str:booking_type>/<int:booking_id>/", views.booking_chat, name="booking_chat"),
 
 
-path(
+    path(
     "admin/bookings/<str:booking_type>/<int:booking_id>/finalize/",
     finalize_booking,
     name="finalize_booking"
@@ -103,8 +104,3 @@ path(
         name="redeem_reward"
     ),
 ]
-path(
-    "admin/bookings/<str:booking_type>/<int:booking_id>/finalize/",
-    finalize_booking,
-    name="finalize_booking"
-),

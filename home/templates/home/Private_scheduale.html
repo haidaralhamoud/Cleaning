@@ -13,7 +13,7 @@
 <body>
 {% include "home/includes/main_header.html" %}
 
-<form method="post" id="scheduleForm" data-skip-validate action="{% url 'home:private_booking_schedule' booking.id %}">
+<form method="post" id="scheduleForm" data-skip-validate action="{% url 'home:private_booking_schedule' %}">
   {% csrf_token %}
 
   <input type="hidden" name="appointment_date" id="appointment_date">
@@ -588,7 +588,7 @@ function updateScheduleSummary() {
     params.append("schedules_json", JSON.stringify(schedules));
   }
 
-  fetch(`/private/api/booking/{{ booking.id }}/price/?` + params.toString())
+  fetch(`/private/api/booking/price/?` + params.toString())
     .then(res => res.json())
     .then(data => {
       document.getElementById("sum_services").textContent = "$" + Number(data.services_total).toFixed(2);
