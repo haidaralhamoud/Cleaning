@@ -28,14 +28,15 @@
       font-size: 16px;
       margin: 12px 0 24px;
     }
-    .payment-status a {
+    .payment-status button {
       display: inline-block;
       background: #039fc8;
       color: #fff;
-      text-decoration: none;
       padding: 12px 24px;
       border-radius: 12px;
       font-weight: 700;
+      border: 0;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -44,14 +45,9 @@
 
 <div class="payment-status">
   <h1>Payment received</h1>
-  <p>We are waiting for Stripe to confirm your payment and create the booking. This page refreshes automatically.</p>
-  <a href="{% url 'home:payment_success' %}{% if payment_intent_id %}?payment_intent_id={{ payment_intent_id }}{% endif %}">Refresh status</a>
+  <p>Payment received. Once Stripe confirms the transaction, your order will be completed. You may close this page. A confirmation email will be sent shortly.</p>
+  <button type="button" onclick="window.close()">Close</button>
 </div>
 
-<script>
-  setTimeout(function () {
-    window.location.reload();
-  }, 4000);
-</script>
 </body>
 </html>
