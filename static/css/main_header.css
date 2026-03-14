@@ -7,36 +7,11 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
   text-decoration: none;
 }
 
 .dropdown-label {
   display: inline-block;
-}
-
-.nav-chevron {
-  width: 14px;
-  height: 14px;
-  display: inline-block;
-  color: currentColor;
-  transform: translateY(1px);
-  transition: transform 0.22s ease, opacity 0.22s ease;
-  opacity: 0.82;
-}
-
-.nav-chevron svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.nav-chevron path {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 .dropdown-menu {
@@ -72,12 +47,6 @@
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
-}
-
-.nav-dropdown:hover .nav-chevron,
-.nav-dropdown:focus-within .nav-chevron {
-  transform: translateY(1px) rotate(180deg);
-  opacity: 1;
 }
 
 .nav-feedback {
