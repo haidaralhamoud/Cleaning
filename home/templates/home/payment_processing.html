@@ -46,8 +46,51 @@
 <div class="payment-status">
   <h1>Payment received</h1>
   <p>Payment received. Once Stripe confirms the transaction, your order will be completed. You may close this page. A confirmation email will be sent shortly.</p>
-  <button type="button" onclick="window.close()">Close</button>
+  <button type="button" id="payment-close-btn">Close</button>
 </div>
+
+<script>
+  (function () {
+    const fallbackUrl = "{{ fallback_url|escapejs }}";
+    const paymentIntentId = "{{ payment_intent_id|escapejs }}";
+    const button = document.getElementById("payment-close-btn");
+    let refreshAttempts = 0;
+    const maxRefreshAttempts = 24;
+
+    function goToBestDestination() {
+      if (window.opener && !window.opener.closed) {
+        window.close();
+        return;
+      }
+
+      if (window.history.length > 1) {
+        window.history.back();
+        return;
+      }
+
+      window.location.href = fallbackUrl;
+    }
+
+    if (button) {
+      button.addEventListener("click", goToBestDestination);
+    }
+
+    function pollForCompletion() {
+      if (!paymentIntentId || refreshAttempts >= maxRefreshAttempts) {
+        return;
+      }
+      refreshAttempts += 1;
+      window.setTimeout(function () {
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set("payment_intent_id", paymentIntentId);
+        nextUrl.searchParams.set("poll", String(refreshAttempts));
+        window.location.replace(nextUrl.toString());
+      }, 5000);
+    }
+
+    pollForCompletion();
+  })();
+</script>
 
 </body>
 </html>

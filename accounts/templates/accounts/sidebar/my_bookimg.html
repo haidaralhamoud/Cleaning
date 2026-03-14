@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Bookings - Hembla experten</title>
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -64,7 +64,7 @@
             </thead>
 <tbody>
 {% for b in bookings %}
-<tr data-status="{{ b.status|lower }}">
+<tr data-status="{{ b.status_group }}">
   <td data-label="Order ID">#{{ b.id }}</td>
   <td data-label="Customer Name">{{ b.customer_name }}</td>
  <td data-label="Service Type">
@@ -78,28 +78,21 @@
   <td data-label="Location">{{ b.location }}</td>
   <td data-label="Status">
     <span class="status status-{{ b.status|lower }}">
-  {% if b.status == "upcoming" %}
-    Scheduled
-  {% else %}
-    {{ b.status|title }}
-  {% endif %}
+  {{ b.status_label }}
 </span>
 
   </td>
 <td data-label="View">
   <div class="menu-wrap">
-    <button class="dots">'''</button>
+    <button class="dots" type="button" aria-label="Open booking actions" aria-expanded="false">...</button>
 
     <div class="dropdown">
 
   {# ظپظ‚ط· ط¥ط°ط§ ط§ظ„ط­ط¬ط² ظ…ظˆ ظ…ظƒطھظ…ظ„ ظˆظ„ط§ ظ…ظ„ط؛ظٹ #}
-  {% if b.status not in "completed cancelled" %}
-    <a href="#" class="action-reschedule">Reschedule</a>
-    <a href="#" class="action-cancel">Cancel</a>
+  <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-view">View booking</a>
+  {% if b.status_group != "completed" and b.status_group != "cancelled" %}
+    <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-reschedule">Manage booking</a>
   {% endif %}
-
-  <a href="#" class="action-invoice">Download invoice</a>
-  <a href="#" class="action-add">Add service</a>
 
 </div>
 
@@ -178,13 +171,20 @@ document.addEventListener("DOMContentLoaded", () => {
 document.querySelectorAll(".dots").forEach(btn => {
   btn.addEventListener("click", e => {
     e.stopPropagation();
+    const menuWrap = btn.closest(".menu-wrap");
+    const willOpen = !menuWrap.classList.contains("show");
+
     document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-    btn.closest(".menu-wrap").classList.toggle("show");
+    document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));
+
+    menuWrap.classList.toggle("show", willOpen);
+    btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
   });
 });
 
 document.addEventListener("click", () => {
   document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
+  document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));
 });
 
 </script>

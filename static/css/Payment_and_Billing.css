@@ -43,7 +43,8 @@ body{
 .payment-methods-card .card-header h2{font-family:"Vesper Libre",serif;font-size:22px}
 .btn-icon{
   background:var(--primary);color:#fff;border:none;border-radius:50%;width:36px;height:36px;
-  font-size:22px;line-height:1;cursor:pointer;transition:.2s ease;box-shadow:0 10px 20px rgba(10,167,167,.25)
+  font-size:22px;line-height:1;cursor:pointer;transition:.2s ease;box-shadow:0 10px 20px rgba(10,167,167,.25);
+  display:inline-flex;align-items:center;justify-content:center;text-decoration:none
 }
 .btn-icon:hover{background:var(--primary-dark);transform:translateY(-1px)}
 

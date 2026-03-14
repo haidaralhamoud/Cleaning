@@ -45,7 +45,7 @@
 <div class="payment-status">
   <h1>Booking confirmed</h1>
   <p>Your payment was verified and your booking has been created successfully.</p>
-  <a href="{% url 'home:all_services_private' %}">Back to services</a>
+  <a href="{{ fallback_url }}">View booking</a>
 </div>
 
 </body>

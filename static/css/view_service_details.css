@@ -33,14 +33,14 @@ body {
 }
 
 /* ---------- LAYOUT ---------- */
-.page {
+main.page {
   display: flex;
   padding: 20px;
   gap: 20px;
 }
 
 /* Sidebar */
-.sidebar{
+.sidebar:not(.customer-sidebar){
   width:var(--sidebar-w);
   background:#fff;
   border-radius:15px;
@@ -66,7 +66,7 @@ body {
 }
 
 /* ---------- MENU TOGGLE ---------- */
-.menu-toggle {
+.menu-toggle:not(.customer-menu-toggle) {
   position: fixed;
   top: 18px;
   left: 18px;
@@ -86,7 +86,7 @@ body {
   transition: all 0.25s ease;
   z-index: 1100;
 }
-.menu-toggle:hover {
+.menu-toggle:not(.customer-menu-toggle):hover {
   background: var(--brand-dark);
   transform: scale(1.05);
 }
@@ -95,7 +95,7 @@ body {
 }
 
 /* ---------- OVERLAY ---------- */
-.overlay {
+.overlay:not(.customer-menu-overlay) {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.25);
@@ -104,14 +104,14 @@ body {
   transition: opacity 0.3s ease;
   z-index: 1000;
 }
-.overlay.show {
+.overlay:not(.customer-menu-overlay).show {
   opacity: 1;
   pointer-events: auto;
 }
 
 /* ---------- RESPONSIVE ---------- */
 @media (max-width: 990px) {
-  .sidebar {
+  .sidebar:not(.customer-sidebar) {
     position: fixed;
     left: -320px;
     top: 0;
@@ -121,16 +121,16 @@ body {
     transition: left 0.3s ease;
     z-index: 1003;
   }
-  .sidebar.open { left: 0; }
-  .menu-toggle { display: flex; }
-  .page {
+  .sidebar:not(.customer-sidebar).open { left: 0; }
+  .menu-toggle:not(.customer-menu-toggle) { display: flex; }
+  main.page {
     margin-left: 0;
     padding-top: 80px;
   }
 }
 
 /* ---------- CONTENT ---------- */
-.content {
+main.page .content {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -486,18 +486,18 @@ p {
   .check-grid { flex-direction: column; gap: 20px; }
   h1.deep-clean-service { font-size: 24px; margin-top: 60px; text-align: center; }
   p { font-size: 14px; text-align: center; }
-  .page { padding: 12px; }
+  main.page { padding: 12px; }
   .card { width: 100%; }
 }
 
 /* ===== Sidebar position tweak ===== */
 @media (min-width: 991px) {
-  .sidebar {
+  .sidebar:not(.customer-sidebar) {
     position: fixed;
     left: 25px;
     top: 20px;
   }
-  .page {
+  main.page {
     margin-left: 0;
     padding-left: 360px;
     padding-right: 24px;
@@ -505,21 +505,6 @@ p {
   }
 }
 
-/* ===== Customer page layout fix (keep content aligned with sidebar) ===== */
-@media (min-width: 1025px) {
-  body.customer-profile-view .sidebar.customer-sidebar {
-    position: fixed;
-    top: 90px;
-    left: 24px;
-    margin: 0;
-    height: calc(100vh - 110px);
-    overflow-y: auto;
-  }
-
-  body.customer-profile-view .page {
-    padding-left: calc(var(--sidebar-w) + 60px);
-  }
-}
 /* ---------- TIMELINE (خط بالنص تماماً داخل الدوائر) ---------- */
 /* ---------- TIMELINE مضبوط 100% ---------- */
 /* ===== Timeline مضبوط متل الصورة تماماً ===== */
@@ -1881,5 +1866,171 @@ a {
 @media (max-width: 520px) {
   .addons-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Final page polish overrides ===== */
+body.customer-profile-view .booking-detail-shell {
+  display: grid;
+  grid-template-columns: minmax(280px, var(--sidebar-w)) minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  padding: 16px 24px 32px;
+}
+
+body.customer-profile-view main.page.booking-detail-page {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.customer-profile-view .booking-detail-content {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+}
+
+body.customer-profile-view .deep-clean-service,
+body.customer-profile-view .scheduled,
+body.customer-profile-view .booking-id {
+  display: block !important;
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  margin: 0 0 14px !important;
+}
+
+body.customer-profile-view .booking-detail-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr) !important;
+  gap: 20px !important;
+  margin-top: 20px !important;
+  align-items: start !important;
+  justify-content: stretch !important;
+}
+
+body.customer-profile-view .booking-detail-grid > .left-col,
+body.customer-profile-view .booking-detail-grid > .right-col {
+  display: block !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  align-self: start !important;
+}
+
+body.customer-profile-view .booking-detail-grid .card {
+  margin-top: 0 !important;
+}
+
+body.customer-profile-view .sidebar.customer-sidebar {
+  position: sticky !important;
+  top: 96px !important;
+  left: auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  z-index: 50 !important;
+  align-self: start !important;
+}
+
+body.customer-profile-view .pill.request-addon {
+  width: 100%;
+  min-height: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(3, 159, 200, 0.65);
+  background: linear-gradient(135deg, #ebf9fe 0%, #d8f2fb 100%);
+  color: #0a6d89;
+  box-shadow: 0 12px 24px rgba(3, 159, 200, 0.12);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+
+body.customer-profile-view .pill.request-addon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px rgba(3, 159, 200, 0.18);
+  border-color: var(--brand);
+  background: linear-gradient(135deg, #f4fcff 0%, #e0f6fd 100%);
+}
+
+body.customer-profile-view .popup .close-btn,
+body.customer-profile-view #fixPopupOverlay .close-btn,
+body.customer-profile-view #addonsPopupOverlay .close-btn {
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #03a6d2 0%, #028db3 100%);
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 10px 20px rgba(3, 159, 200, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+body.customer-profile-view .popup .close-btn:hover,
+body.customer-profile-view #fixPopupOverlay .close-btn:hover,
+body.customer-profile-view #addonsPopupOverlay .close-btn:hover {
+  transform: translateY(-1px) rotate(90deg);
+  background: linear-gradient(135deg, #0297bf 0%, #027fa2 100%);
+  box-shadow: 0 14px 26px rgba(3, 159, 200, 0.28);
+}
+
+body.customer-profile-view .addons-popup .buttons {
+  align-items: stretch;
+}
+
+body.customer-profile-view .addons-popup .buttons .secondary,
+body.customer-profile-view .addons-popup .buttons .primary {
+  min-height: 58px;
+  border-radius: 16px;
+  font-size: 15px;
+}
+
+@media (min-width: 992px) {
+  body.customer-profile-view .sidebar.customer-sidebar {
+    top: 96px;
+    left: auto;
+    height: auto;
+  }
+}
+
+@media (max-width: 991px) {
+  body.customer-profile-view .booking-detail-shell {
+    display: block;
+    padding: 0;
+  }
+
+  body.customer-profile-view .booking-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  body.customer-profile-view main.page.booking-detail-page {
+    padding: 88px 12px 24px !important;
+  }
+
+  body.customer-profile-view .sidebar.customer-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
   }
 }

@@ -5,9 +5,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment & Billing ' Customer Profile</title>
+  <title>Payment & Billing | Customer Profile</title>
 
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Payment_and_Billing.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -43,9 +43,7 @@
       <section class="card payment-methods-card">
         <div class="card-header">
           <h2>Payment Methods</h2>
-          <a href="{% url 'accounts:Add_Payment_Method' %}">
-            <button class="btn-icon" aria-label="Add payment method">+</button>
-          </a>
+          <a href="{% url 'accounts:Add_Payment_Method' %}" class="btn-icon" aria-label="Add payment method">+</a>
         </div>
 
         <div class="payments-list">
@@ -100,7 +98,7 @@
         </div>
       </section>
 
-      <!-- ' Subscription (طھط±ظƒظ†ط§ظ‡ ظƒظ…ط§ ظ‡ظˆ) -->
+      <!-- Subscription -->
       <aside class="card subscription-card">
         <h3>Subscription</h3>
         <div class="sub-box">
@@ -119,7 +117,7 @@
 
     </div>
 
-    <!-- ' Invoice History -->
+    <!-- Invoice History -->
     <section class="card invoice-history">
       <h2>Invoice History</h2>
       <table id="invoiceTable">
@@ -150,7 +148,9 @@
                 <td data-label="Status">
                   <span class="status {{ inv.status|lower }}">{{ inv.get_status_display }}</span>
                 </td>
-                <td data-label="Download"><a href="#" class="muted">Download</a></td>
+                <td data-label="Download">
+                  <a href="{% url 'accounts:download_invoice_pdf' inv.id %}" class="muted">Download PDF</a>
+                </td>
               </tr>
             {% endfor %}
           {% else %}
@@ -297,24 +297,6 @@
 
 <script>
 (function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
-  }
-})();
-</script>
-<script>
-(function () {
   const backdrop = document.getElementById("subscriptionBackdrop");
   const mainModal = document.getElementById("subscriptionModal");
   const reviewModal = document.getElementById("reviewModal");
@@ -430,7 +412,7 @@
     confirmCancelBtn.addEventListener("click", async () => {
       const data = new FormData();
       data.append("action", "cancel");
-      data.append("cancel_reason", cancelReason  cancelReason.value : "");
+      data.append("cancel_reason", cancelReason ? cancelReason.value : "");
       const res = await fetch("{% url 'accounts:manage_subscription' %}", {
         method: "POST",
         headers: { "X-CSRFToken": getCookie("csrftoken") },

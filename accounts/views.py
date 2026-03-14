@@ -3,7 +3,7 @@ from django.utils.translation import gettext as _
 import datetime
 from typing import Counter
 from django.db.models import Q
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_date
 
 from django.shortcuts import render, redirect , get_object_or_404
@@ -43,6 +43,7 @@ from .models import (
     Subscription,
     BookingRequestFix,
     BookingRequestFixAttachment,
+    BookingChecklistItem,
     CustomerNotification,
     ProviderAdminMessage,
     ProviderProfile,
@@ -63,6 +64,7 @@ from home.models import (
     BookingStatusHistory,
     BookingTimeline,
     BusinessBooking,
+    BusinessService,
     BookingMedia,
     PrivateBooking,
     PrivateService,
@@ -84,6 +86,103 @@ from django.db.models import Avg, Count
 User = get_user_model()
 from .forms import ProviderProfileForm, ProviderLocationForm
 logger = logging.getLogger(__name__)
+
+
+def _pdf_escape(text):
+    return (
+        str(text)
+        .replace("\\", "\\\\")
+        .replace("(", "\\(")
+        .replace(")", "\\)")
+        .encode("latin-1", "replace")
+        .decode("latin-1")
+    )
+
+
+def _build_simple_pdf(title, lines):
+    page_width = 612
+    page_height = 792
+    margin_left = 50
+    top_y = 760
+    line_height = 18
+    max_lines_per_page = 36
+
+    pages = []
+    current_lines = [title, ""]
+    for line in lines:
+        if len(current_lines) >= max_lines_per_page:
+            pages.append(current_lines)
+            current_lines = [title, ""]
+        current_lines.append(line)
+    if current_lines:
+        pages.append(current_lines)
+
+    objects = []
+
+    def add_object(payload):
+        objects.append(payload)
+        return len(objects)
+
+    font_obj = add_object(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
+    page_ids = []
+
+    for page_lines in pages:
+        content_lines = ["BT", "/F1 12 Tf", f"{margin_left} {top_y} Td"]
+        for idx, line in enumerate(page_lines):
+            safe_line = _pdf_escape(line)
+            if idx == 0:
+                content_lines.append("/F1 18 Tf")
+                content_lines.append(f"({safe_line}) Tj")
+                content_lines.append("/F1 12 Tf")
+            else:
+                content_lines.append("T*")
+                content_lines.append(f"({safe_line}) Tj")
+        content_lines.append("ET")
+        content_stream = ("\n".join(content_lines)).encode("latin-1", "replace")
+        content_obj = add_object(
+            f"<< /Length {len(content_stream)} >>\nstream\n".encode("latin-1")
+            + content_stream
+            + b"\nendstream"
+        )
+        page_obj = add_object(
+            (
+                "<< /Type /Page /Parent {parent} 0 R /MediaBox [0 0 "
+                f"{page_width} {page_height}] /Resources << /Font << /F1 {font_obj} 0 R >> >> "
+                f"/Contents {content_obj} 0 R >>"
+            ).encode("latin-1")
+        )
+        page_ids.append(page_obj)
+
+    kids = " ".join(f"{page_id} 0 R" for page_id in page_ids)
+    pages_obj = add_object(
+        f"<< /Type /Pages /Kids [{kids}] /Count {len(page_ids)} >>".encode("latin-1")
+    )
+    catalog_obj = add_object(
+        f"<< /Type /Catalog /Pages {pages_obj} 0 R >>".encode("latin-1")
+    )
+
+    pdf = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
+    offsets = [0]
+
+    for index, payload in enumerate(objects, start=1):
+        payload = payload.replace(b"{parent}", f"{pages_obj}".encode("latin-1"))
+        offsets.append(len(pdf))
+        pdf.extend(f"{index} 0 obj\n".encode("latin-1"))
+        pdf.extend(payload)
+        pdf.extend(b"\nendobj\n")
+
+    xref_start = len(pdf)
+    pdf.extend(f"xref\n0 {len(objects) + 1}\n".encode("latin-1"))
+    pdf.extend(b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode("latin-1"))
+    pdf.extend(
+        (
+            f"trailer\n<< /Size {len(objects) + 1} /Root {catalog_obj} 0 R >>\n"
+            f"startxref\n{xref_start}\n%%EOF"
+        ).encode("latin-1")
+    )
+    return bytes(pdf)
 # ======================================================
 # AUTH
 # ======================================================
@@ -96,6 +195,220 @@ class RememberMeLoginView(LoginView):
         else:
             self.request.session.set_expiry(0)
         return response
+
+
+def _humanize_service_name(value):
+    text = (value or "").strip()
+    if not text:
+        return ""
+    if "-" in text or "_" in text:
+        return text.replace("-", " ").replace("_", " ").strip().title()
+    return text
+
+
+def _get_private_service_title_map(bookings):
+    service_slugs = {
+        slug
+        for booking in bookings
+        for slug in (booking.selected_services or [])
+        if isinstance(slug, str) and slug.strip()
+    }
+    return dict(
+        PrivateService.objects.filter(slug__in=service_slugs).values_list("slug", "title")
+    )
+
+
+def _get_private_booking_title(booking, private_service_titles):
+    resolved_titles = [
+        private_service_titles.get(slug, _humanize_service_name(slug))
+        for slug in (booking.selected_services or [])
+        if isinstance(slug, str) and slug.strip()
+    ]
+    return ", ".join(resolved_titles) or "Private Service"
+
+
+def _booking_table_status_label(status_value):
+    return "Scheduled" if status_value == "upcoming" else status_value.title()
+
+
+def _build_private_booking_checklist_templates(booking):
+    selected_slugs = booking.selected_services or []
+    services = {
+        service.slug: service
+        for service in PrivateService.objects.filter(slug__in=selected_slugs).prefetch_related("cards")
+    }
+    templates = []
+
+    for service_order, service_slug in enumerate(selected_slugs):
+        service = services.get(service_slug)
+        if service is None:
+            continue
+
+        service_templates = []
+        for group_order, card in enumerate(service.cards.all()):
+            for sort_order, item_label in enumerate(card.items()):
+                service_templates.append({
+                    "service_slug": service.slug,
+                    "service_title": service.title,
+                    "service_order": service_order,
+                    "group_title": card.title or service.title,
+                    "group_order": group_order,
+                    "item_label": item_label,
+                    "sort_order": sort_order,
+                })
+
+        if not service_templates:
+            service_templates.append({
+                "service_slug": service.slug,
+                "service_title": service.title,
+                "service_order": service_order,
+                "group_title": service.title,
+                "group_order": 0,
+                "item_label": f"Complete {service.title}",
+                "sort_order": 0,
+            })
+
+        templates.extend(service_templates)
+
+    return templates
+
+
+def _build_business_booking_checklist_templates(booking):
+    requested_titles = []
+    if booking.selected_service:
+        requested_titles.append(str(booking.selected_service).strip())
+    elif booking.selected_bundle and booking.selected_bundle.title:
+        requested_titles.append(str(booking.selected_bundle.title).strip())
+    for value in (booking.services_needed or []):
+        text = str(value).strip()
+        if text:
+            requested_titles.append(text)
+
+    deduped_titles = []
+    seen = set()
+    for title in requested_titles:
+        key = title.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped_titles.append(title)
+
+    if not deduped_titles:
+        deduped_titles.append("Business Service")
+
+    services = {
+        service.title.lower(): service
+        for service in BusinessService.objects.filter(title__in=deduped_titles).prefetch_related("cards")
+    }
+    templates = []
+
+    for service_order, raw_title in enumerate(deduped_titles):
+        service = services.get(raw_title.lower())
+        service_title = service.title if service else raw_title
+        service_templates = []
+
+        if service is not None:
+            for group_order, card in enumerate(service.cards.all()):
+                for sort_order, item_label in enumerate(card.items()):
+                    service_templates.append({
+                        "service_slug": "",
+                        "service_title": service_title,
+                        "service_order": service_order,
+                        "group_title": card.title or service_title,
+                        "group_order": group_order,
+                        "item_label": item_label,
+                        "sort_order": sort_order,
+                    })
+
+        if not service_templates:
+            service_templates.append({
+                "service_slug": "",
+                "service_title": service_title or "Business Service",
+                "service_order": service_order,
+                "group_title": service_title or "Business Service",
+                "group_order": 0,
+                "item_label": f"Complete {service_title or 'business service'}",
+                "sort_order": 0,
+            })
+
+        templates.extend(service_templates)
+
+    return templates
+
+
+def _ensure_booking_checklist_items(booking, booking_type):
+    filter_kwargs = {
+        "booking_private": booking,
+    } if booking_type == "private" else {
+        "booking_business": booking,
+    }
+
+    items = list(
+        BookingChecklistItem.objects.filter(**filter_kwargs)
+        .select_related("completed_by")
+        .order_by("service_order", "group_order", "sort_order", "id")
+    )
+    if items:
+        return items
+
+    templates = (
+        _build_private_booking_checklist_templates(booking)
+        if booking_type == "private"
+        else _build_business_booking_checklist_templates(booking)
+    )
+    if not templates:
+        return items
+
+    BookingChecklistItem.objects.bulk_create([
+        BookingChecklistItem(
+            booking_private=booking if booking_type == "private" else None,
+            booking_business=booking if booking_type == "business" else None,
+            service_slug=item["service_slug"],
+            service_title=item["service_title"],
+            service_order=item["service_order"],
+            group_title=item["group_title"],
+            group_order=item["group_order"],
+            item_label=item["item_label"],
+            sort_order=item["sort_order"],
+        )
+        for item in templates
+    ])
+    return list(
+        BookingChecklistItem.objects.filter(**filter_kwargs)
+        .select_related("completed_by")
+        .order_by("service_order", "group_order", "sort_order", "id")
+    )
+
+
+def _group_checklist_items(items):
+    service_sections = []
+    service_map = {}
+
+    for item in items:
+        service_key = item.service_title or "Checklist"
+        if service_key not in service_map:
+            service_map[service_key] = {
+                "service_title": service_key,
+                "groups": [],
+                "_group_map": {},
+            }
+            service_sections.append(service_map[service_key])
+
+        section = service_map[service_key]
+        group_key = item.group_title or service_key
+        if group_key not in section["_group_map"]:
+            section["_group_map"][group_key] = {
+                "group_title": group_key,
+                "items": [],
+            }
+            section["groups"].append(section["_group_map"][group_key])
+
+        section["_group_map"][group_key]["items"].append(item)
+
+    for section in service_sections:
+        section.pop("_group_map", None)
+
+    return service_sections
 
 
 OTP_TTL_MINUTES = 10
@@ -383,12 +696,6 @@ def sign_up(request):
             # 2️⃣ إنشاء Customer
             customer = form.save(commit=False)
             customer.user = user
-            customer.primary_address = (
-                f"{customer.full_address}, "
-                f"{customer.house_num}, "
-                f"{customer.city}, "
-                f"{customer.postal_code}"
-            )
             customer.save()
             form.save_m2m()
 
@@ -398,25 +705,24 @@ def sign_up(request):
             entry_code = form.cleaned_data.get("entry_code", "")
             parking_notes = form.cleaned_data.get("parking_notes", "")
 
-            street_address = customer.full_address or ""
+            street_address = customer.display_address() or customer.full_address or ""
             if customer.house_num and customer.house_num not in street_address:
                 street_address = f"{street_address} {customer.house_num}".strip()
 
-            allowed_countries = [c[0] for c in CustomerLocation.COUNTRY]
-            location_country = customer.country if customer.country in allowed_countries else "other"
+            location_country = CustomerLocation.normalize_country_choice(customer.country)
 
             CustomerLocation.objects.create(
                 customer=customer,
                 address_type="home",
                 street_address=street_address or "-",
-                city=customer.city,
+                city=customer.display_city(),
                 region=region or "-",
-                postal_code=customer.postal_code,
+                postal_code=customer.display_postal_code(),
                 country=location_country,
                 contact_name=contact_name,
                 contact_phone=contact_phone,
-                entry_code=entry_code,
-                parking_notes=parking_notes,
+                entry_code=entry_code or customer.display_entry_code(),
+                parking_notes=parking_notes or customer.display_parking_notes(),
                 is_primary=True,
             )
 
@@ -476,6 +782,8 @@ def customer_profile_view(request):
     primary_location = CustomerLocation.objects.filter(
         customer=customer, is_primary=True
     ).first()
+    if primary_location is None:
+        customer.sync_location_cache(save=True)
 
     other_locations = CustomerLocation.objects.filter(
         customer=customer, is_primary=False
@@ -505,27 +813,68 @@ def customer_profile_view(request):
         "RESUMED",
     ]
 
+    private_qs = list(
+        PrivateBooking.objects.filter(
+            user=request.user,
+            status__in=active_statuses,
+        )
+    )
+    business_qs = list(
+        BusinessBooking.objects.filter(
+            user=request.user,
+            status__in=active_statuses,
+        ).select_related("selected_bundle")
+    )
+
+    private_service_titles = _get_private_service_title_map(private_qs)
+
     def build_order_item(booking, booking_type):
         if booking_type == "private":
-            title = ", ".join(booking.selected_services or []) or "Private Service"
-            when = booking.appointment_date or booking.scheduled_at or booking.created_at
+            title = _get_private_booking_title(booking, private_service_titles)
             order_code = f"PB-{booking.id}"
         else:
-            title = (
+            raw_title = (
                 booking.selected_service
                 or (booking.selected_bundle.title if booking.selected_bundle else "Business Service")
             )
-            when = booking.start_date or booking.scheduled_at or booking.created_at
+            title = _humanize_service_name(raw_title) or "Business Service"
             order_code = f"BB-{booking.id}"
 
-        if booking.status in ["ON_THE_WAY", "STARTED", "PAUSED", "RESUMED"]:
-            status_label = "In Progress"
-            status_class = "pill-info"
-            date_label = "In Progress since"
-        else:
-            status_label = "Scheduled"
+        if booking.status == "ORDERED":
+            status_label = _booking_table_status_label(booking.table_status)
+            status_class = "pill-warn"
+            date_label = "Booked on"
+            when = booking.created_at
+        elif booking.status == "ASSIGNED":
+            status_label = _booking_table_status_label(booking.table_status)
             status_class = "pill-warn"
             date_label = "Next Service"
+            when = (
+                getattr(booking, "appointment_date", None)
+                or getattr(booking, "start_date", None)
+                or booking.scheduled_at
+                or booking.created_at
+            )
+        elif booking.status == "ON_THE_WAY":
+            status_label = _booking_table_status_label(booking.table_status)
+            status_class = "pill-info"
+            date_label = "On the way since"
+            when = booking.provider_on_way_at or booking.scheduled_at or booking.created_at
+        elif booking.status in ["STARTED", "PAUSED", "RESUMED"]:
+            status_label = _booking_table_status_label(booking.table_status)
+            status_class = "pill-info"
+            date_label = "In Progress since"
+            when = booking.started_at or booking.provider_on_way_at or booking.scheduled_at or booking.created_at
+        else:
+            status_label = _booking_table_status_label(booking.table_status)
+            status_class = "pill-warn"
+            date_label = "Next Service"
+            when = (
+                getattr(booking, "appointment_date", None)
+                or getattr(booking, "start_date", None)
+                or booking.scheduled_at
+                or booking.created_at
+            )
 
         return {
             "id": booking.id,
@@ -537,16 +886,6 @@ def customer_profile_view(request):
             "status_class": status_class,
             "date_label": date_label,
         }
-
-    private_qs = PrivateBooking.objects.filter(
-        user=request.user,
-        status__in=active_statuses
-    )
-
-    business_qs = BusinessBooking.objects.filter(
-        user=request.user,
-        status__in=active_statuses
-    )
 
     ongoing_orders = [
         build_order_item(b, "private") for b in private_qs
@@ -631,6 +970,8 @@ def manage_subscription(request):
             id=payment_method_id,
             customer=customer
         ).first()
+    else:
+        subscription.payment_method = None
 
     subscription.save()
 
@@ -658,25 +999,24 @@ def Address_and_Locations_view(request):
     customer = get_object_or_404(Customer, user=request.user)
 
     if not CustomerLocation.objects.filter(customer=customer).exists():
-        street_address = customer.full_address or ""
+        street_address = customer.display_address() or customer.full_address or ""
         if customer.house_num and customer.house_num not in street_address:
             street_address = f"{street_address} {customer.house_num}".strip()
 
-        allowed_countries = [c[0] for c in CustomerLocation.COUNTRY]
-        location_country = customer.country if customer.country in allowed_countries else "other"
+        location_country = CustomerLocation.normalize_country_choice(customer.country)
 
         CustomerLocation.objects.create(
             customer=customer,
             address_type="home",
             street_address=street_address or "-",
-            city=customer.city,
+            city=customer.display_city(),
             region="-",
-            postal_code=customer.postal_code,
+            postal_code=customer.display_postal_code(),
             country=location_country,
             contact_name=f"{customer.first_name} {customer.last_name}".strip(),
             contact_phone=customer.phone,
-            entry_code=customer.entry_code,
-            parking_notes=customer.parking_notes,
+            entry_code=customer.display_entry_code(),
+            parking_notes=customer.display_parking_notes(),
             is_primary=True,
         )
 
@@ -782,10 +1122,22 @@ def my_bookimg(request):
     user = request.user
     customer = Customer.objects.filter(user=user).first()
 
-    private_bookings = PrivateBooking.objects.filter(user=user)
-    business_bookings = BusinessBooking.objects.filter(user=user)
+    private_bookings = list(PrivateBooking.objects.filter(user=user))
+    business_bookings = list(BusinessBooking.objects.filter(user=user).select_related("selected_bundle"))
+    private_service_titles = _get_private_service_title_map(private_bookings)
 
     bookings = []
+
+    def booking_status_group(status_value):
+        status_value = (status_value or "").upper()
+        if status_value in {"COMPLETED", "REFUNDED"}:
+            return "completed"
+        if status_value in {"CANCELLED_BY_CUSTOMER", "CANCELLED_BY_ADMIN", "NO_SHOW"}:
+            return "cancelled"
+        if status_value in {"ON_THE_WAY", "STARTED", "PAUSED", "RESUMED"}:
+            return "ongoing"
+        return "upcoming"
+
     full_name = (
         f"{customer.first_name} {customer.last_name}"
         if customer
@@ -796,10 +1148,12 @@ def my_bookimg(request):
             "id": b.id,
             "type": "Private",
             "customer_name": full_name,
-            "service": ", ".join(b.selected_services or []),
+            "service": _get_private_booking_title(b, private_service_titles),
             "date": b.appointment_date,
             "location": b.address or b.area,
-            "status": b.table_status,   # 👈 هون
+            "status": b.table_status,
+            "status_label": _booking_table_status_label(b.table_status),
+            "status_group": booking_status_group(b.status),
         })
 
     for b in business_bookings:
@@ -807,12 +1161,14 @@ def my_bookimg(request):
             "id": b.id,
             "type": "Business",
             "customer_name": full_name,
-            "service": b.selected_service or (
-                b.selected_bundle.title if b.selected_bundle else ""
+            "service": _humanize_service_name(
+                b.selected_service or (b.selected_bundle.title if b.selected_bundle else "")
             ),
             "date": b.start_date,
             "location": b.office_address,
-            "status": b.table_status,   # 👈 وهون
+            "status": b.table_status,
+            "status_label": _booking_table_status_label(b.table_status),
+            "status_group": booking_status_group(b.status),
         })
 
     return render(
@@ -877,12 +1233,12 @@ def view_service_details(request, booking_type, booking_id):
         booking_id=booking.id,
     ).first()
     has_review = existing_review is not None
-    can_rate = booking.provider is not None and not has_review
+    can_rate = booking.provider is not None and booking.status == "COMPLETED" and not has_review
     rating_form = ServiceReviewForm()
 
     if request.method == "POST" and request.POST.get("form_type") == "rating":
         if not can_rate:
-            messages.error(request, "You already rated this service.")
+            messages.error(request, "Rating is only available after the service is completed.")
             return redirect(request.path)
 
         if booking_type == "private":
@@ -908,14 +1264,13 @@ def view_service_details(request, booking_type, booking_id):
     # ===============================
     # 2️⃣ CHECKLIST (ONE TO ONE) - NO AUTO CHECK ✅
     # ===============================
-    if booking_type == "private":
-        checklist, _ = BookingChecklist.objects.get_or_create(
-            booking_private=booking
-        )
-    else:
-        checklist, _ = BookingChecklist.objects.get_or_create(
-            booking_business=booking
-        )
+    checklist_items = _ensure_booking_checklist_items(booking, booking_type)
+    checklist_sections = _group_checklist_items(checklist_items)
+    checklist_total_count = len(checklist_items)
+    checklist_completed_count = sum(1 for item in checklist_items if item.is_completed)
+    checklist_progress_percent = int(
+        (checklist_completed_count / checklist_total_count) * 100
+    ) if checklist_total_count else 0
 
     available_addons_json = "{}"
     saved_addons_json = "{}"
@@ -943,23 +1298,6 @@ def view_service_details(request, booking_type, booking_id):
                 }
         available_addons_json = json.dumps(available_addons)
         saved_addons_json = json.dumps(saved_addons)
-
-   # ===============================
-# 💾 SAVE CHECKLIST (ONLY WHEN USER CLICKS SAVE)
-# ===============================
-    if request.method == "POST" and request.POST.get("form_type") == "checklist":
-
-        print("POST RECEIVED ✅")
-        print(request.POST)   # 🔥 هون لازم يكون فيه البيانات
-
-        checklist_form = BookingChecklistForm(request.POST, instance=checklist)
-        if checklist_form.is_valid():
-            checklist_form.save()
-            messages.success(request, "Checklist saved successfully.")
-            return redirect(request.path)
-
-    else:
-        checklist_form = BookingChecklistForm(instance=checklist)
 
     # ===============================
     # 2.5) REQUEST FIX
@@ -1272,7 +1610,10 @@ def view_service_details(request, booking_type, booking_id):
             "rating_form": rating_form,
             "can_rate": can_rate,
             "has_review": has_review,
-            "checklist_form": checklist_form,
+            "checklist_sections": checklist_sections,
+            "checklist_total_count": checklist_total_count,
+            "checklist_completed_count": checklist_completed_count,
+            "checklist_progress_percent": checklist_progress_percent,
             "notes": notes,   # 🔥
             "quoted_time": quoted_time,
             "quoted_seconds": quoted_seconds,
@@ -1364,7 +1705,7 @@ def Incident_Report_order(request, incident_id):
 @login_required
 def Report_Incident(request):
     if request.method == "POST":
-        form = IncidentForm(request.POST, request.FILES)
+        form = IncidentForm(request.POST, request.FILES, user=request.user)
         if form.is_valid():
             incident = form.save(commit=False)
             incident.customer = request.user
@@ -1390,7 +1731,7 @@ def Report_Incident(request):
                 },
             )
     else:
-        form = IncidentForm()
+        form = IncidentForm(user=request.user)
 
     return render(
         request,
@@ -1490,43 +1831,69 @@ CLEANING_CHOICES = [
 
 @login_required
 def Service_Preferences(request):
-    customer = request.user.customer
+    customer = Customer.objects.filter(user=request.user).first()
+    if customer is None:
+        raise Http404("Customer profile not found")
     prefs, _ = CustomerPreferences.objects.get_or_create(customer=customer)
 
     # =====================================
     # 🔹 AJAX SAVE (Save صغير لكل حقل)
     # =====================================
-    if request.method == "POST" and request.headers.get("Content-Type") == "application/json":
-        data = json.loads(request.body)
+    if request.method == "POST" and (request.content_type or "").startswith("application/json"):
+        try:
+            data = json.loads(request.body.decode("utf-8") or "{}")
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "Invalid JSON payload."}, status=400)
 
-        field = data.get("field")
-        value = data.get("value", "").strip()
+        field = (data.get("field") or "").strip()
+        raw_value = data.get("value")
 
-        if field == "preferred_products":
-            if value and value not in prefs.preferred_products:
-                prefs.preferred_products.append(value)
+        list_fields = {
+            "preferred_products",
+            "excluded_products",
+            "priorities",
+            "cleaning_types",
+            "lifestyle_addons",
+            "assembly_services",
+        }
+        custom_text_fields = {
+            "products_custom",
+            "frequency_custom",
+            "priorities_custom",
+        }
+        scalar_fields = {"frequency"}
 
-        elif field == "frequency":
-            prefs.frequency = value or None
+        if field in list_fields:
+            if isinstance(raw_value, list):
+                cleaned_values = []
+                for item in raw_value:
+                    item_text = str(item).strip()
+                    if item_text and item_text not in cleaned_values:
+                        cleaned_values.append(item_text)
+                setattr(prefs, field, cleaned_values)
+            else:
+                value = str(raw_value or "").strip()
+                current_values = list(getattr(prefs, field) or [])
+                if value and value not in current_values:
+                    current_values.append(value)
+                setattr(prefs, field, current_values)
 
-        elif field == "priorities":
-            if value and value not in prefs.priorities:
-                prefs.priorities.append(value)
+        elif field in scalar_fields:
+            prefs.frequency = str(raw_value or "").strip() or None
 
-        elif field == "cleaning_types":
-            if value and value not in prefs.cleaning_types:
-                prefs.cleaning_types.append(value)
+        elif field in custom_text_fields:
+            setattr(prefs, field, str(raw_value or "").strip())
 
-        elif field == "lifestyle_addons":
-            if value and value not in prefs.lifestyle_addons:
-                prefs.lifestyle_addons.append(value)
-
-        elif field == "assembly_services":
-            if value and value not in prefs.assembly_services:
-                prefs.assembly_services.append(value)
+        else:
+            return JsonResponse({"status": "error", "message": "Unsupported field."}, status=400)
 
         prefs.save()
-        return JsonResponse({"status": "ok"})
+        return JsonResponse({
+            "status": "ok",
+            "field": field,
+            "value": getattr(prefs, field),
+            "updated_at": prefs.updated_at.isoformat() if prefs.updated_at else "",
+        })
 
     # =====================================
     # 🔹 SAVE الكبير (يحفظ كل الصفحة)
@@ -1587,6 +1954,7 @@ def Service_Preferences(request):
 
     return render(request, "accounts/sidebar/Service_Preferences.html", context)
 
+@login_required
 def Communication(request):
     pref, created = CommunicationPreference.objects.get_or_create(
         user=request.user
@@ -1612,46 +1980,87 @@ def Communication(request):
         "notifications": notifications,
     })
 
-    return render(request, "accounts/sidebar/Communication.html")
 
-
+@login_required
 def Customer_Notes(request):
-    # آخر ملاحظة للزبون الحالي (إذا في)
-    notes = CustomerNote.objects.filter(
-        customer=request.user
-    ).order_by("-id").first()
+    customer = get_object_or_404(Customer, user=request.user)
+    notes = CustomerNote.objects.filter(customer=request.user).first()
 
     context = {
-        "notes": notes
+        "customer": customer,
+        "notes": notes,
     }
     return render(request, "accounts/sidebar/Customer_Notes.html", context)
 
-    return render(request, "accounts/sidebar/Customer_Notes.html")
 
-
+@login_required
 def add_Customer_Notes(request):
+    customer = get_object_or_404(Customer, user=request.user)
     note, _ = CustomerNote.objects.get_or_create(customer=request.user)
 
     if request.method == "POST":
         form = CustomerNoteForm(request.POST, instance=note)
         if form.is_valid():
             form.save()
-            # بعد الحفظ رجّع لنفس الصفحة أو لأي صفحة بدك
             return redirect("accounts:Customer_Notes")
     else:
         form = CustomerNoteForm(instance=note)
 
-    return render(request , 'accounts/subpages/add_Customer_Notes.html',{"form": form}) 
-    return render(request, "accounts/subpages/add_Customer_Notes.html")
+    return render(
+        request,
+        "accounts/subpages/add_Customer_Notes.html",
+        {
+            "customer": customer,
+            "form": form,
+        },
+    )
+
+
+def _backfill_missing_private_invoices(customer):
+    paid_bookings = (
+        PrivateBooking.objects.filter(
+            user=customer.user,
+            payment_status="succeeded",
+        )
+        .exclude(payment_intent_id__isnull=True)
+        .exclude(payment_intent_id__exact="")
+        .order_by("-created_at")
+    )
+
+    for booking in paid_bookings:
+        payment_method = None
+        if booking.payment_last4 and booking.payment_brand:
+            payment_method = PaymentMethod.objects.filter(
+                customer=customer,
+                card_last4=booking.payment_last4,
+                card_type=(booking.payment_brand or "").lower(),
+            ).order_by("-is_default", "-created_at").first()
+
+        Invoice.objects.update_or_create(
+            customer=customer,
+            booking_type="private",
+            booking_id=booking.id,
+            defaults={
+                "amount": booking.payment_amount or booking.total_price or 0,
+                "currency": (booking.payment_currency or "USD").upper(),
+                "status": "PAID",
+                "payment_method": payment_method,
+                "paid_at": getattr(booking, "updated_at", None) or timezone.now(),
+                "note": f"Stripe PaymentIntent {booking.payment_intent_id}",
+            },
+        )
+
 
 @login_required
 def Payment_and_Billing(request):
-    customer = request.user.customer
-    logger.info("[Payment & Billing] user=%s customer=%s", request.user, customer.id if customer else None)
+    customer = get_object_or_404(Customer, user=request.user)
+    logger.info("[Payment & Billing] user=%s customer=%s", request.user, customer.id)
+
+    _backfill_missing_private_invoices(customer)
 
     payment_methods = PaymentMethod.objects.filter(
         customer=customer
-    ).order_by( "-created_at")
+    ).order_by("-is_default", "-created_at")
     logger.info("[Payment & Billing] payment methods count=%s", payment_methods.count())
 
     invoices = Invoice.objects.filter(
@@ -1671,6 +2080,7 @@ def Payment_and_Billing(request):
     )
 
     context = {
+        "customer": customer,
         "payment_methods": payment_methods,
         "subscription": subscription,
         "invoices": invoices,
@@ -1682,10 +2092,69 @@ def Payment_and_Billing(request):
         context
     )
 
+
+@login_required
+def download_invoice_pdf(request, invoice_id):
+    customer = get_object_or_404(Customer, user=request.user)
+    invoice = get_object_or_404(
+        Invoice.objects.select_related("payment_method"),
+        id=invoice_id,
+        customer=customer,
+    )
+
+    booking_summary = ""
+    if invoice.booking_type == "private" and invoice.booking_id:
+        booking = PrivateBooking.objects.filter(id=invoice.booking_id, user=request.user).first()
+        if booking:
+            services = booking.selected_services or []
+            service_title_map = _get_private_service_title_map([booking])
+            booking_summary = ", ".join(
+                filter(
+                    None,
+                    [
+                        service_title_map.get(service, _humanize_service_name(service))
+                        for service in services
+                    ],
+                )
+            )
+    elif invoice.booking_type == "business" and invoice.booking_id:
+        booking = BusinessBooking.objects.filter(id=invoice.booking_id, user=request.user).first()
+        if booking:
+            booking_summary = booking.selected_service or booking.company_name or ""
+
+    payment_method_label = "Not available"
+    if invoice.payment_method:
+        payment_method_label = (
+            f"{invoice.payment_method.get_card_type_display()} **** {invoice.payment_method.card_last4}"
+        )
+
+    lines = [
+        f"Invoice Number: {invoice.invoice_number}",
+        f"Customer: {customer.first_name} {customer.last_name}".strip() or customer.email,
+        f"Issued At: {timezone.localtime(invoice.issued_at).strftime('%Y-%m-%d %H:%M')}",
+        f"Status: {invoice.get_status_display()}",
+        f"Amount: {invoice.amount:.2f} {invoice.currency}",
+        f"Payment Method: {payment_method_label}",
+        f"Booking Type: {invoice.get_booking_type_display() if invoice.booking_type else 'N/A'}",
+        f"Booking ID: {invoice.booking_id or 'N/A'}",
+    ]
+
+    if booking_summary:
+        lines.append(f"Service Summary: {booking_summary}")
+    if invoice.paid_at:
+        lines.append(f"Paid At: {timezone.localtime(invoice.paid_at).strftime('%Y-%m-%d %H:%M')}")
+    if invoice.note:
+        lines.append(f"Reference: {invoice.note}")
+
+    pdf_bytes = _build_simple_pdf("Invoice", lines)
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{invoice.invoice_number}.pdf"'
+    return response
+
 @login_required
 @require_POST
 def set_payment_default(request, pk):
-    customer = request.user.customer
+    customer = get_object_or_404(Customer, user=request.user)
 
     PaymentMethod.objects.filter(
         customer=customer,
@@ -1705,21 +2174,28 @@ def set_payment_default(request, pk):
 @login_required
 @require_POST
 def delete_payment_method(request, pk):
-    customer = request.user.customer
+    customer = get_object_or_404(Customer, user=request.user)
 
     payment = get_object_or_404(
         PaymentMethod,
         pk=pk,
         customer=customer
     )
+    was_default = payment.is_default
     payment.delete()
 
+    if was_default:
+        fallback_payment = PaymentMethod.objects.filter(customer=customer).order_by("-created_at").first()
+        if fallback_payment:
+            fallback_payment.is_default = True
+            fallback_payment.save(update_fields=["is_default"])
+
     return redirect("accounts:Payment_and_Billing")
-    return render(request, "accounts/sidebar/Payment_and_Billing.html")
 
 
 @login_required
 def Add_Payment_Method(request):
+    customer = get_object_or_404(Customer, user=request.user)
     form = PaymentMethodForm()
     stripe_ready = bool(settings.STRIPE_PUBLISHABLE_KEY and settings.STRIPE_SECRET_KEY)
     client_secret = ""
@@ -1733,6 +2209,7 @@ def Add_Payment_Method(request):
         request,
         "accounts/subpages/Add_Payment_Method.html",
         {
+            "customer": customer,
             "form": form,
             "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
             "stripe_client_secret": client_secret,
@@ -1744,10 +2221,9 @@ def Add_Payment_Method(request):
 @login_required
 @require_POST
 def create_setup_intent(request):
-    if not hasattr(request.user, "customer"):
+    customer = Customer.objects.filter(user=request.user).first()
+    if not customer:
         return JsonResponse({"ok": False, "error": "Customer profile missing"}, status=400)
-
-    customer = request.user.customer
     if not settings.STRIPE_SECRET_KEY:
         return JsonResponse({"ok": False, "error": "Stripe is not configured."}, status=500)
 
@@ -1779,12 +2255,12 @@ def create_setup_intent(request):
 @login_required
 @require_POST
 def save_payment_method(request):
-    if not hasattr(request.user, "customer"):
+    customer = Customer.objects.filter(user=request.user).first()
+    if not customer:
         return JsonResponse({"ok": False, "error": "Customer profile missing"}, status=400)
 
-    customer = request.user.customer
     payload_data = {}
-    if request.content_type == "application/json":
+    if (request.content_type or "").startswith("application/json"):
         try:
             payload_data = json.loads(request.body.decode("utf-8") or "{}")
         except json.JSONDecodeError as exc:
@@ -1868,13 +2344,18 @@ def save_payment_method(request):
         "american_express": "amex",
         "discover": "discover",
     }
-    card_type = brand_map.get(brand, "visa")
+    card_type = brand_map.get(brand)
+    if not card_type:
+        return JsonResponse(
+            {"ok": False, "error": f"Unsupported card brand: {brand or 'unknown'}."},
+            status=400,
+        )
 
     expiry_date = ""
     if exp_month and exp_year:
         expiry_date = f"{int(exp_month):02d}/{str(exp_year)[-2:]}"
 
-    is_default = form.cleaned_data.get("is_default", False)
+    is_default = form.cleaned_data.get("is_default", False) or not PaymentMethod.objects.filter(customer=customer).exists()
     if is_default:
         PaymentMethod.objects.filter(customer=customer, is_default=True).update(is_default=False)
 
@@ -1913,7 +2394,7 @@ def save_payment_method(request):
 
 @login_required
 def Change_Password(request):
-    customer = Customer.objects.filter(user=request.user).first()
+    customer = get_object_or_404(Customer, user=request.user)
     if request.method == "POST":
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
@@ -1924,8 +2405,8 @@ def Change_Password(request):
                 "accounts/sidebar/Change_Password.html",
                 {
                     "form": PasswordChangeForm(request.user),
-                    "sidebar_customer": customer,
-                    "show_popup": True,  # ??? ?????? ????????
+                    "customer": customer,
+                    "show_popup": True,
                 }
             )
     else:
@@ -1934,39 +2415,58 @@ def Change_Password(request):
     return render(
         request,
         "accounts/sidebar/Change_Password.html",
-        {"form": form, "sidebar_customer": customer}
+        {"form": form, "customer": customer}
     )
 
 @login_required
 def Service_History_and_Ratings(request):
     user = request.user
+    customer = get_object_or_404(Customer, user=user)
 
     # ======================================================
     # 1️⃣ Past Services (COMPLETED only)
     # ======================================================
-    private_done = PrivateBooking.objects.filter(user=user, status="COMPLETED")
-    business_done = BusinessBooking.objects.filter(user=user, status="COMPLETED")
+    private_done = PrivateBooking.objects.filter(user=user, status="COMPLETED").select_related("provider")
+    business_done = BusinessBooking.objects.filter(user=user, status="COMPLETED").select_related("provider", "selected_bundle")
+    private_title_map = _get_private_service_title_map(private_done)
 
     past_services = []
 
     for b in private_done:
+        service_title = ", ".join(
+            [
+                private_title_map.get(service, _humanize_service_name(service))
+                for service in (b.selected_services or [])
+                if service
+            ]
+        ) or "Private Service"
         past_services.append({
             "booking_type": "private",
             "booking_id": b.id,
-            "service_title": ", ".join(b.selected_services or []) or "Private Service",
+            "service_title": service_title,
             "provider": b.provider,
+            "provider_name": (
+                b.provider.get_full_name() or b.provider.username
+                if b.provider else "Provider unavailable"
+            ),
             "date": b.completed_at or b.created_at,
         })
 
     for b in business_done:
+        service_title = (
+            b.selected_service
+            or (b.selected_bundle.title if b.selected_bundle else "")
+            or "Business Service"
+        )
         past_services.append({
             "booking_type": "business",
             "booking_id": b.id,
-            "service_title": (
-                b.selected_service
-                or (b.selected_bundle.title if b.selected_bundle else "Business Service")
-            ),
+            "service_title": _humanize_service_name(service_title),
             "provider": b.provider,
+            "provider_name": (
+                b.provider.get_full_name() or b.provider.username
+                if b.provider else "Provider unavailable"
+            ),
             "date": b.completed_at or b.created_at,
         })
 
@@ -1978,11 +2478,17 @@ def Service_History_and_Ratings(request):
     # ======================================================
     # 2️⃣ Filters
     # ======================================================
-    q = request.GET.get("q")
-    service_filter = request.GET.get("service")
-    provider_filter = request.GET.get("provider")
-    date_from = request.GET.get("from")
-    date_to = request.GET.get("to")
+    q = (request.GET.get("q") or "").strip()
+    service_filter = (request.GET.get("service") or "").strip()
+    provider_filter = (request.GET.get("provider") or "").strip()
+    date_from = (request.GET.get("from") or "").strip()
+    date_to = (request.GET.get("to") or "").strip()
+    parsed_from = parse_date(date_from) if date_from else None
+    parsed_to = parse_date(date_to) if date_to else None
+    service_types = sorted(set(s["service_title"] for s in past_services))
+    providers = User.objects.filter(
+        id__in=[s["provider"].id for s in past_services if s["provider"]]
+    ).distinct()
 
     filtered = []
 
@@ -1997,12 +2503,12 @@ def Service_History_and_Ratings(request):
             if str(s["provider"].id) != provider_filter:
                 continue
 
-        if date_from and s["date"]:
-            if s["date"].date() < parse_date(date_from):
+        if parsed_from and s["date"]:
+            if s["date"].date() < parsed_from:
                 continue
 
-        if date_to and s["date"]:
-            if s["date"].date() > parse_date(date_to):
+        if parsed_to and s["date"]:
+            if s["date"].date() > parsed_to:
                 continue
 
         filtered.append(s)
@@ -2045,7 +2551,7 @@ def Service_History_and_Ratings(request):
     # ======================================================
     top_providers = (
         User.objects
-        .filter(received_service_reviews__isnull=False)
+        .filter(received_service_reviews__isnull=False, provider_profile__isnull=False)
         .annotate(
             avg_rating=Avg("received_service_reviews__overall_rating"),
             total_reviews=Count("received_service_reviews"),
@@ -2072,8 +2578,8 @@ def Service_History_and_Ratings(request):
     # ======================================================
     if request.method == "POST" and request.POST.get("form_type") == "rating":
 
-        booking_type = request.POST.get("booking_type")
-        booking_id = request.POST.get("booking_id")
+        booking_type = (request.POST.get("booking_type") or "").strip()
+        booking_id = (request.POST.get("booking_id") or "").strip()
 
         if ServiceReview.objects.filter(
             customer=user,
@@ -2083,11 +2589,25 @@ def Service_History_and_Ratings(request):
             messages.error(request, "You already rated this service.")
             return redirect(request.path)
 
-        booking = (
-            get_object_or_404(PrivateBooking, id=booking_id)
-            if booking_type == "private"
-            else get_object_or_404(BusinessBooking, id=booking_id)
-        )
+        if booking_type == "private":
+            booking = get_object_or_404(PrivateBooking, id=booking_id, user=user, status="COMPLETED")
+            review_service_title = ", ".join(
+                [
+                    private_title_map.get(service, _humanize_service_name(service))
+                    for service in (booking.selected_services or [])
+                    if service
+                ]
+            ) or "Private Service"
+        elif booking_type == "business":
+            booking = get_object_or_404(BusinessBooking, id=booking_id, user=user, status="COMPLETED")
+            review_service_title = _humanize_service_name(
+                booking.selected_service
+                or (booking.selected_bundle.title if booking.selected_bundle else "")
+                or "Business Service"
+            )
+        else:
+            messages.error(request, "Invalid booking type.")
+            return redirect(request.path)
 
         form = ServiceReviewForm(request.POST)
         if form.is_valid():
@@ -2095,14 +2615,14 @@ def Service_History_and_Ratings(request):
             review.customer = user
             review.booking_type = booking_type
             review.booking_id = booking_id
-            review.service_title = ", ".join(
-                booking.selected_services or []
-            )
+            review.service_title = review_service_title
             review.provider = booking.provider
             review.save()
 
             messages.success(request, "Your rating has been saved ⭐")
             return redirect(request.path)
+
+        messages.error(request, "Please correct the rating form and try again.")
 
     # ======================================================
     # 9️⃣ Filters dropdown data
@@ -2119,6 +2639,7 @@ def Service_History_and_Ratings(request):
     # 🔟 CONTEXT
     # ======================================================
     context = {
+        "customer": customer,
         "past_services": past_services,
         "summary": summary,
         "star_distribution": star_distribution,
@@ -2127,6 +2648,11 @@ def Service_History_and_Ratings(request):
         "rating_form": ServiceReviewForm(),
         "service_types": service_types,
         "providers": providers,
+        "selected_service": service_filter,
+        "selected_provider": provider_filter,
+        "selected_from": date_from,
+        "selected_to": date_to,
+        "search_query": q,
     }
 
     return render(
@@ -2153,6 +2679,7 @@ from accounts.models import PointsTransaction
 
 @login_required
 def Loyalty_and_Rewards(request):
+    customer = get_object_or_404(Customer, user=request.user)
 
     # ==================================================
     # POINTS
@@ -2225,7 +2752,10 @@ def Loyalty_and_Rewards(request):
     # ==================================================
     # REFERRAL LINK
     # ==================================================
-    referral = Referral.objects.filter(referrer=request.user).first()
+    referral = Referral.objects.filter(
+        referrer=request.user,
+        referred_user__isnull=True,
+    ).order_by("-created_at").first()
     if not referral:
         code = generate_referral_code()
         while Referral.objects.filter(code=code).exists():
@@ -2265,6 +2795,7 @@ def Loyalty_and_Rewards(request):
         request,
         "accounts/sidebar/Loyalty_and_Rewards.html",
         {
+            "customer": customer,
             "points_balance": points_balance,
             "transactions": transactions[:10],
 
@@ -2293,94 +2824,29 @@ def Loyalty_and_Rewards(request):
     )
 
 @login_required
+@require_POST
 def redeem_reward(request, reward_id):
     reward = get_object_or_404(Reward, id=reward_id, is_active=True)
 
-    user = request.user
-    balance = sum(t.amount for t in user.points_transactions.all())
+    with transaction.atomic():
+        user = User.objects.select_for_update().get(pk=request.user.pk)
+        balance = sum(t.amount for t in user.points_transactions.all())
 
-    if balance < reward.points_required:
-        messages.error(request, "Not enough points")
-        return redirect("accounts:Loyalty_and_Rewards")
+        if balance < reward.points_required:
+            messages.error(request, "Not enough points.")
+            return redirect("accounts:Loyalty_and_Rewards")
 
-    PointsTransaction.objects.create(
-        user=user,
-        amount=-reward.points_required,
-        reason="REWARD",
-        note=f"Redeemed reward: {reward.title}"
-    )
+        PointsTransaction.objects.create(
+            user=user,
+            amount=-reward.points_required,
+            reason="REWARD",
+            note=f"Redeemed reward: {reward.title}"
+        )
 
-    messages.success(request, "Reward redeemed successfully 🎉")
+    messages.success(request, "Reward redeemed successfully.")
     return redirect("accounts:Loyalty_and_Rewards")
 
-    transactions = PointsTransaction.objects.filter(
-        user=request.user
-    ).order_by("-created_at")
 
-    points_balance = sum(t.amount for t in transactions)
-
-    # =========================
-    # TIER LOGIC (SIMPLE)
-    # =========================
-    if points_balance >= 3000:
-        current_tier = "Gold"
-        next_tier_name = None
-        next_tier_points = 0
-    elif points_balance >= 1000:
-        current_tier = "Silver"
-        next_tier_name = "Gold"
-        next_tier_points = 3000 - points_balance
-    else:
-        current_tier = "Bronze"
-        next_tier_name = "Silver"
-        next_tier_points = 1000 - points_balance
-
-    # =========================
-    # REWARDS (STATIC FOR NOW)
-    # =========================
-    rewards = [
-        {
-            "title": "50% Off Deep Cleaning",
-            "description": "Get a deep cleaning service at half price.",
-            "points_required": 1000,
-            "can_redeem": points_balance >= 1000,
-            "missing_points": max(0, 1000 - points_balance),
-        },
-        {
-            "title": "Free Standard Cleaning",
-            "description": "Enjoy a complimentary standard cleaning.",
-            "points_required": 2000,
-            "can_redeem": points_balance >= 2000,
-            "missing_points": max(0, 2000 - points_balance),
-        },
-        {
-            "title": "Free Babysitting Hour",
-            "description": "One free babysitting hour from our partners.",
-            "points_required": 1500,
-            "can_redeem": points_balance >= 1500,
-            "missing_points": max(0, 1500 - points_balance),
-        },
-    ]
-
-    return render(
-        request,
-        "accounts/sidebar/Loyalty_and_Rewards.html",
-        {
-            "points_balance": points_balance,
-            "transactions": transactions[:10],
-            "current_tier": current_tier,
-            "next_tier_name": next_tier_name,
-            "next_tier_points": next_tier_points,
-            "rewards": rewards,
-        }
-    )
-
-
-
-# ======================================================
-# LOGOUT
-# ======================================================
-@require_POST
 def logout_view(request):
     logout(request)
     return redirect("home:home")
@@ -2407,8 +2873,8 @@ def provider_bookings(request):
     # OPTIONAL (إذا بدك تمنعي أي User عادي)
     if not _provider_required(request.user):
         raise Http404()
-    private_qs = PrivateBooking.objects.filter(provider=request.user).exclude(status__in=["COMPLETED", "CANCELLED"])
-    business_qs = BusinessBooking.objects.filter(provider=request.user).exclude(status__in=["COMPLETED", "CANCELLED"])
+    private_qs = PrivateBooking.objects.filter(provider=request.user).exclude(status__in=PrivateBooking.INACTIVE_STATUSES)
+    business_qs = BusinessBooking.objects.filter(provider=request.user).exclude(status__in=BusinessBooking.INACTIVE_STATUSES)
 
 
     bookings = []
@@ -2483,6 +2949,14 @@ def provider_booking_detail(request, booking_type, booking_id):
         raise Http404()
 
     booking = _get_booking_for_provider(request, booking_type, booking_id)
+    checklist_items = _ensure_booking_checklist_items(booking, booking_type)
+    checklist_sections = _group_checklist_items(checklist_items)
+    checklist_total_count = len(checklist_items)
+    checklist_completed_count = sum(1 for item in checklist_items if item.is_completed)
+    checklist_progress_percent = int(
+        (checklist_completed_count / checklist_total_count) * 100
+    ) if checklist_total_count else 0
+    checklist_locked = booking.status == "COMPLETED"
 
     timeline = BookingStatusHistory.objects.filter(
         booking_type=booking_type,
@@ -2527,8 +3001,56 @@ def provider_booking_detail(request, booking_type, booking_id):
             "timeline": timeline,
             "unread_messages_count": unread_messages_count,
             "preferences_url": preferences_url,
+            "checklist_sections": checklist_sections,
+            "checklist_total_count": checklist_total_count,
+            "checklist_completed_count": checklist_completed_count,
+            "checklist_progress_percent": checklist_progress_percent,
+            "checklist_locked": checklist_locked,
         }
     )
+
+
+@login_required
+@require_POST
+def provider_checklist_item_update(request, booking_type, booking_id, item_id):
+    if not _provider_required(request.user):
+        raise Http404()
+
+    booking = _get_booking_for_provider(request, booking_type, booking_id)
+    if booking.status == "COMPLETED":
+        return JsonResponse({"ok": False, "error": "Checklist is locked after completion."}, status=400)
+
+    filter_kwargs = {
+        "id": item_id,
+        "booking_private": booking,
+    } if booking_type == "private" else {
+        "id": item_id,
+        "booking_business": booking,
+    }
+    item = get_object_or_404(BookingChecklistItem, **filter_kwargs)
+
+    raw_completed = str(request.POST.get("is_completed", "")).strip().lower()
+    is_completed = raw_completed in {"1", "true", "yes", "on"}
+    item.is_completed = is_completed
+    item.completed_at = timezone.now() if is_completed else None
+    item.completed_by = request.user if is_completed else None
+    item.save(update_fields=["is_completed", "completed_at", "completed_by", "updated_at"])
+
+    checklist_items = _ensure_booking_checklist_items(booking, booking_type)
+    total_count = len(checklist_items)
+    completed_count = sum(1 for checklist_item in checklist_items if checklist_item.is_completed)
+    progress_percent = int((completed_count / total_count) * 100) if total_count else 0
+
+    return JsonResponse({
+        "ok": True,
+        "item_id": item.id,
+        "is_completed": item.is_completed,
+        "completed_at": timezone.localtime(item.completed_at).strftime("%b %d, %Y %I:%M %p") if item.completed_at else "",
+        "completed_count": completed_count,
+        "total_count": total_count,
+        "progress_percent": progress_percent,
+        "locked": booking.status == "COMPLETED",
+    })
 
 
 
@@ -2669,10 +3191,10 @@ def provider_profile(request):
 
     active_private = PrivateBooking.objects.filter(
         provider=request.user
-    ).exclude(status__in=["COMPLETED", "CANCELLED"]).count()
+    ).exclude(status__in=PrivateBooking.INACTIVE_STATUSES).count()
     active_business = BusinessBooking.objects.filter(
         provider=request.user
-    ).exclude(status__in=["COMPLETED", "CANCELLED"]).count()
+    ).exclude(status__in=BusinessBooking.INACTIVE_STATUSES).count()
     completed_private = PrivateBooking.objects.filter(
         provider=request.user,
         status="COMPLETED"
@@ -2729,8 +3251,12 @@ def reschedule_booking(request, booking_type, booking_id):
         )
 
     # 🔁 تحديث الجدولة
-    booking.start_date = new_date
-    booking.preferred_time = new_time
+    if booking_type == "business":
+        booking.start_date = new_date
+        booking.preferred_time = new_time
+    else:
+        booking.appointment_date = new_date
+        booking.appointment_time_window = new_time
 
     # (اختياري) رجّع الحالة Scheduled
     booking.status = "SCHEDULED"

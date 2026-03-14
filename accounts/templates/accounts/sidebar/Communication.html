@@ -54,6 +54,13 @@
     <form method="post" class="card">
       {% csrf_token %}
 
+      {% if form.errors %}
+        <div class="form-errors" style="margin-bottom:16px; padding:12px 14px; border-radius:12px; background:#fff1f0; color:#b42318; font-weight:600;">
+          Please review the highlighted communication settings and try again.
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
       <h2 class="section-title">Notifications</h2>
 
       <!-- Service Reminders -->

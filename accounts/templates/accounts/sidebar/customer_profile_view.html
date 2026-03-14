@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Customer Profile Overview</title>
 
-<link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
@@ -195,7 +195,7 @@
     width: 100%;
   }
 
-  /* ===== NAV LINKS (اختSارS - dropdown) ===== */
+  /* ===== NAV LINKS (Ø§Ø®ØªSØ§Ø±S - dropdown) ===== */
   .nav-links {
     position: fixed;
     top: 70px;
@@ -357,7 +357,7 @@
       <div class="order-line">
         <div class="order-info">
           <div class="order-name">No active orders right now</div>
-          <div class="order-id">Once you book a service, it will appear هنا.</div>
+          <div class="order-id">Once you book a service, it will appear here.</div>
         </div>
       </div>
     {% endif %}
@@ -686,7 +686,13 @@
               </a>
             </div>
             <h3 class="side-title">Payment & Billing</h3>
-            <p class="side-text">Next billing date : Oct 25, 2024</p>
+            <p class="side-text">
+              {% if subscription.next_billing_date %}
+                Next billing date: {{ subscription.next_billing_date|date:"M d, Y" }}
+              {% else %}
+                No billing date scheduled yet
+              {% endif %}
+            </p>
              <a href="{% url 'accounts:Payment_and_Billing' %}"><button class="btn btn-primary full">View billing Details</button></a>
           </article>
         </div>
@@ -978,3 +984,4 @@ function toggleBasicEdit() {
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
+

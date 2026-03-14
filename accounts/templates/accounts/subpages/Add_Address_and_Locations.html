@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Add Address & Locations</title>
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Add_Address_and_Locations.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -119,35 +119,22 @@
 
 
 <script>
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    // لما تفتح القائمة السهم ينعكس
-    if (sidebar.classList.contains("open")) {
-      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
-    } else {
-      arrow.innerHTML = "&#8250;"; // › سهم لليمين
-    }
-  });
-</script>
-
-<script>
 (function () {
   const toggle = document.getElementById("menuToggle");
   const sidebar = document.querySelector(".sidebar");
   const overlay = document.querySelector(".customer-menu-overlay");
+  const arrow = document.querySelector(".menu-toggle .arrow");
   if (!toggle || !sidebar) return;
   toggle.addEventListener("click", () => {
     const open = sidebar.classList.toggle("open");
     if (overlay) overlay.classList.toggle("show", open);
+    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
   });
   if (overlay) {
     overlay.addEventListener("click", () => {
       sidebar.classList.remove("open");
       overlay.classList.remove("show");
+      if (arrow) arrow.innerHTML = "&#8250;";
     });
   }
 })();

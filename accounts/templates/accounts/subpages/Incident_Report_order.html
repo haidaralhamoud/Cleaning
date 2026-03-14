@@ -153,17 +153,17 @@
                   <h3>Resolution Feedback</h3>
                   <p class="card-subtitle">Let us know how it went</p>
                 </div>
-                <button class="close-btn" onclick="toggleSatisfaction()">Close Incident</button>
+                <button class="close-btn" type="button" disabled aria-disabled="true">Close Incident</button>
               </div>
-              <div id="satisfactionSection" class="satisfaction hidden">
+              <div id="satisfactionSection" class="satisfaction">
                 <p>Was this resolved to your satisfaction</p>
                 <div class="response-buttons">
-                  <button class="response-btn yes">Yes</button>
-                  <button class="response-btn no">No</button>
+                  <button class="response-btn yes" type="button" disabled>Yes</button>
+                  <button class="response-btn no" type="button" disabled>No</button>
                 </div>
                 <h4>Add Comment</h4>
-                <textarea placeholder="Type your comment here..."></textarea>
-                <button class="save-btn" onclick="saveFeedback()">Save</button>
+                <textarea placeholder="Feedback submission will be available later." disabled></textarea>
+                <button class="save-btn" type="button" disabled>Save</button>
               </div>
             </section>
           </div>
@@ -177,40 +177,6 @@
   {% include "home/includes/footer.html" %}
 
   <script>
-    function saveFeedback() {
-      const comment = document.querySelector('#satisfactionSection textarea').value.trim();
-      const response = document.querySelector('.response-btn.yes.active')  'Yes' :
-                       document.querySelector('.response-btn.no.active')  'No' : 'Not selected';
-      alert(`Your feedback has been saved!
-Response: ${response}
-Comment: ${comment || "No comment"}`);
-      window.location.href = "../Customer Profile-service view/index.html";
-    }
-
-    const yesBtn = document.querySelector('.response-btn.yes');
-    const noBtn = document.querySelector('.response-btn.no');
-    if (yesBtn && noBtn) {
-      yesBtn.addEventListener('click', () => {
-        yesBtn.classList.add('active');
-        noBtn.classList.remove('active');
-      });
-      noBtn.addEventListener('click', () => {
-        noBtn.classList.add('active');
-        yesBtn.classList.remove('active');
-      });
-    }
-  </script>
-
-  <script>
-    function toggleSatisfaction() {
-      const section = document.getElementById('satisfactionSection');
-      if (section) {
-        section.classList.toggle('open');
-      }
-    }
-  </script>
-
-  <script>
     const toggle = document.getElementById("menuToggle");
     const sidebar = document.querySelector(".sidebar");
     const overlay = document.getElementById("menuOverlay");
@@ -219,7 +185,7 @@ Comment: ${comment || "No comment"}`);
       toggle.addEventListener("click", () => {
         const open = sidebar.classList.toggle("open");
         if (overlay) overlay.classList.toggle("show", open);
-        if (arrow) arrow.style.transform = open  "rotate(180deg)" : "rotate(0deg)";
+        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
       });
     }
     if (overlay) {

@@ -162,7 +162,7 @@
   pointer-events:auto;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 991px) {
   body {
     /* Align body offset with fixed header height to avoid extra top gap */
     padding-top: 70px !important;
@@ -274,7 +274,7 @@
   .menu-toggle.customer-menu-toggle { display: inline-flex !important; }
 }
 
-@media (min-width: 1025px) {
+@media (min-width: 992px) {
   .customer-menu-toggle { display: none; }
   .customer-menu-overlay { display: none; }
 }
@@ -316,6 +316,133 @@
   flex-direction: column;
   flex: 1 1 auto;
   padding-bottom: 30px; /* keep previous inner spacing */
+}
+
+/* Desktop hard override so page-level generic sidebar styles do not restyle customer pages */
+body .sidebar.customer-sidebar {
+  width: 300px !important;
+  min-width: 300px !important;
+  background: #fff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 15px !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25) !important;
+  padding: 0 !important;
+  position: sticky !important;
+  top: 10px !important;
+  height: auto !important;
+  margin: 20px !important;
+  overflow: hidden !important;
+  align-self: flex-start !important;
+}
+
+body .sidebar.customer-sidebar .sidebar-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  padding: 0 0 30px !important;
+}
+
+body .customer-sidebar .profile-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 24px 16px 14px !important;
+}
+
+body .customer-sidebar .name {
+  font: 700 20px "Vesper Libre", serif !important;
+  color: #111 !important;
+}
+
+body .customer-sidebar .id {
+  font-size: 13px !important;
+  color: #666 !important;
+}
+
+body .customer-sidebar .side-nav {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 10px !important;
+}
+
+body .customer-sidebar .nav-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  color: #2f2f2f !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
+}
+
+body .customer-sidebar .nav-item:hover {
+  background: #f3f9fc !important;
+  color: #2f2f2f !important;
+  transform: translateX(2px) !important;
+}
+
+body .customer-sidebar .nav-item.active {
+  background: #e7f6fb !important;
+  color: #007ea6 !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 126, 166, 0.2) !important;
+}
+
+body .customer-sidebar .nav-ico {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  border-radius: 10px !important;
+  border: 1px solid #e2eef3 !important;
+  background: #f2f7fa !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .customer-sidebar .nav-ico img {
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain !important;
+  filter: grayscale(1) brightness(0.3) !important;
+}
+
+body .customer-sidebar .nav-item.active .nav-ico {
+  border-color: #bfe6f1 !important;
+  background: #e7f6fb !important;
+}
+
+body .customer-sidebar .nav-item.active .nav-ico img {
+  filter: none !important;
+}
+
+body .customer-sidebar .avatar {
+  width: 72px !important;
+  height: 72px !important;
+  flex: 0 0 72px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  background: radial-gradient(circle at 30% 30%, #ffffff, #cfeef7) !important;
+  border: 2px solid rgba(3, 159, 200, 0.25) !important;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .customer-sidebar .avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 50% !important;
+  display: block !important;
 }
 
 /* Optional: soft gradient at bottom for a subtle finish (uncomment to use) */
@@ -449,6 +576,16 @@
     transition: transform 0.3s ease !important;
     z-index: 2000 !important;
     overflow: hidden !important;
+  }
+
+  body .sidebar.customer-sidebar {
+    width: min(82vw, 320px) !important;
+    min-width: 0 !important;
+    max-width: min(82vw, 320px) !important;
+    margin: 0 !important;
+    top: 70px !important;
+    left: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
   }
 
   .sidebar.customer-sidebar.open,

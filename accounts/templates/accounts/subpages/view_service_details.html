@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Customer Profile View</title>
-  <link href="https://fonts.googleapis.com/css2family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -25,12 +25,12 @@
 
   <!-- Sidebar -->
 
+  <div class="booking-detail-shell">
     {% include "accounts/includes/customer_sidebar.html" with customer=booking.customer %}
 
-
   <!-- الصفحة الكاملة -->
-  <main class="page">
-    <section class="content">
+  <main class="page booking-detail-page">
+    <section class="content booking-detail-content">
       <h1 class="deep-clean-service">{{ service_title }}</h1>
       <p class="scheduled">
         Scheduled for
@@ -40,11 +40,11 @@
       </p>
       <p class="booking-id">
         Booking ID: #{{ booking.id }} |
-        Payment method: {{ payment_method|default:"-" }} |
+        {% if booking_type == "private" %}Payment method: {{ payment_method|default:"-" }} |{% endif %}
         Order type: {{ order_type_label }}
       </p>
 
-      <div class="grid two-cols">
+      <div class="grid two-cols booking-detail-grid">
         <!-- العمود اليساري -->
         <div class="left-col">
     <div class="card timeline">
@@ -218,125 +218,49 @@
 
 <div class="card checklist">
   <h3>Checklist</h3>
-
-  <form method="post" id="checklistForm">
-    {% csrf_token %}
-    <input type="hidden" name="form_type" value="checklist">
-
-    <div class="check-grid">
-
-      <!-- ===== LEFT COLUMN ===== -->
-      <div class="check-col">
-
-        <!-- Kitchen -->
-        <h4>Kitchen</h4>
-
-        <label>
-          <input type="checkbox" name="kitchen_counters"
-            {% if checklist_form.instance.kitchen_counters %}checked{% endif %}>
-          Wipe counters & surfaces
-        </label>
-
-        <label>
-          <input type="checkbox" name="kitchen_sink"
-            {% if checklist_form.instance.kitchen_sink %}checked{% endif %}>
-          Clean sink & faucet
-        </label>
-
-        <label>
-          <input type="checkbox" name="kitchen_floor"
-            {% if checklist_form.instance.kitchen_floor %}checked{% endif %}>
-          Mop floor
-        </label>
-
-        <label>
-          <input type="checkbox" name="kitchen_fridge"
-            {% if checklist_form.instance.kitchen_fridge %}checked{% endif %}>
-          Clean inside fridge (add-on)
-        </label>
-
-        <!-- Bathroom -->
-        <h4>Bathroom</h4>
-
-        <label>
-          <input type="checkbox" name="bathroom_scrub"
-            {% if checklist_form.instance.bathroom_scrub %}checked{% endif %}>
-          Scrub toilet, sink, shower
-        </label>
-
-        <label>
-          <input type="checkbox" name="bathroom_mirrors"
-            {% if checklist_form.instance.bathroom_mirrors %}checked{% endif %}>
-          Wipe mirrors & fixtures
-        </label>
-
-        <label>
-          <input type="checkbox" name="bathroom_floor"
-            {% if checklist_form.instance.bathroom_floor %}checked{% endif %}>
-          Mop floor
-        </label>
-
-      </div>
-
-      <!-- ===== RIGHT COLUMN ===== -->
-      <div class="check-col">
-
-        <!-- Bedrooms -->
-        <h4>Bedrooms</h4>
-
-        <label>
-          <input type="checkbox" name="bedroom_beds"
-            {% if checklist_form.instance.bedroom_beds %}checked{% endif %}>
-          Make beds
-        </label>
-
-        <label>
-          <input type="checkbox" name="bedroom_dust"
-            {% if checklist_form.instance.bedroom_dust %}checked{% endif %}>
-          Dust surfaces
-        </label>
-
-        <label>
-          <input type="checkbox" name="bedroom_floor"
-            {% if checklist_form.instance.bedroom_floor %}checked{% endif %}>
-          Mop/vacuum floors
-        </label>
-
-        <!-- Living Room -->
-        <h4>Living Room</h4>
-
-        <label>
-          <input type="checkbox" name="living_dust"
-            {% if checklist_form.instance.living_dust %}checked{% endif %}>
-          Dust furniture
-        </label>
-
-        <label>
-          <input type="checkbox" name="living_vacuum"
-            {% if checklist_form.instance.living_vacuum %}checked{% endif %}>
-          Vacuum carpet
-        </label>
-
-        <label>
-          <input type="checkbox" name="living_glass"
-            {% if checklist_form.instance.living_glass %}checked{% endif %}>
-          Wipe glass surfaces
-        </label>
-
-      </div>
+  <div class="checklist-progress" style="margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap; font-weight:700;">
+      <span style="padding:6px 12px; border-radius:999px; background:#eaf7fb; color:#0b6b88;">
+        Completed {{ checklist_completed_count }} / {{ checklist_total_count }}
+      </span>
+      <span style="padding:6px 12px; border-radius:999px; background:#f2f9ec; color:#47792c;">
+        {{ checklist_progress_percent }}%
+      </span>
     </div>
-
-    <!-- Notes -->
-    <div class="notes-field">
-      <label>Notes</label>
-      {{ checklist_form.notes }}
-
-      <div class="end-actions">
-        <button type="submit" class="btn btn-blue">Save</button>
-      </div>
+    <div style="height:12px; background:linear-gradient(180deg, #e8f4f8 0%, #f2fbfd 100%); border-radius:999px; overflow:hidden; margin-top:10px; position:relative;">
+      <div style="height:100%; width:{{ checklist_progress_percent }}%; background:linear-gradient(90deg, #039fc8 0%, #71b247 100%);"></div>
     </div>
+  </div>
 
-  </form>
+  {% if checklist_sections %}
+    {% for section in checklist_sections %}
+      <div class="checklist-service-block" style="margin-bottom:18px;">
+        <h4 style="margin-bottom:10px;">{{ section.service_title }}</h4>
+        <div class="check-grid">
+          {% for group in section.groups %}
+            <div class="check-col">
+              <h4>{{ group.group_title }}</h4>
+              {% for item in group.items %}
+                <label class="checklist-item-row" style="display:flex; align-items:flex-start; gap:10px; margin-bottom:10px;">
+                  <input type="checkbox" {% if item.is_completed %}checked{% endif %} disabled>
+                  <span>
+                    {{ item.item_label }}
+                    {% if item.is_completed and item.completed_at %}
+                      <small style="display:block; color:#5b7083;">
+                        Completed {{ item.completed_at|date:"M d, Y h:i A" }}
+                      </small>
+                    {% endif %}
+                  </span>
+                </label>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="muted">No checklist items available for this booking yet.</p>
+  {% endif %}
 </div>
 
 
@@ -456,7 +380,7 @@
                 </div>
 
           <div class="card charges">
-            <h3>Charges</h3>
+            <h3>{% if booking_type == "private" %}Charges{% else %}Pricing Summary{% endif %}</h3>
             <div class="rows">
               {% if booking.subtotal %}
                 <div class="row"><span>Subtotal</span><span id="chargeSubtotal">{{ booking.subtotal }}$</span></div>
@@ -464,8 +388,13 @@
               {% if booking.rot_discount %}
                 <div class="row"><span>Discount</span><span class="green" id="chargeDiscount">-{{ booking.rot_discount }}$</span></div>
               {% endif %}
+              {% if booking_type == "business" and not booking.total_price %}
+                <div class="row"><span>Status</span><span>Pricing pending confirmation</span></div>
+              {% endif %}
               <div class="row"><span>Total</span><span id="chargeTotal">{{ booking.total_price }}$</span></div>
+              {% if booking_type == "private" %}
               <div class="row"><span>Payment Method</span><span>{{ payment_method|default:"-" }}</span></div>
+              {% endif %}
             </div>
             <div class="total-row">
               <span class="blue">Total</span>
@@ -476,7 +405,7 @@
           {% if booking_type == "private" %}
           <button type="button" class="pill request-addon" id="openAddonsPopup"><b>Request Add-on</b></button>
           {% else %}
-          <a href="{% url 'accounts:Add_on_Service_Request' %}" class="see-more"><div class="pill request-addon"><b>Request Add-on</b></div></a>
+          <div class="pill request-addon" style="opacity:.8; cursor:default;"><b>Add-ons are handled by support</b></div>
           {% endif %}
 
                <!-- ===== MEDIA GALLERY ===== -->
@@ -494,10 +423,10 @@
                     <img src="{{ media.file.url }}" alt="{{ media.phase }} photo">
                   {% endfor %}
                 {% else %}
-                  <img src="https://via.placeholder.com/130x100text=Before" alt="Before photo">
-                  <img src="https://via.placeholder.com/130x100text=After" alt="After photo">
-                  <img src="https://via.placeholder.com/130x100text=Kitchen" alt="Kitchen photo">
-                  <img src="https://via.placeholder.com/130x100text=Bathroom" alt="Bathroom photo">
+                  <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
+                  <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
+                  <img src="https://via.placeholder.com/130x100?text=Workspace" alt="Workspace photo">
+                  <img src="https://via.placeholder.com/130x100?text=Equipment" alt="Equipment photo">
                 {% endif %}
               </div>
               <button class="arrow-btn right">›</button>
@@ -537,8 +466,9 @@
           </div>
         </div>
       </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
   {% if can_rate %}
   <!-- ===== REVIEW POPUP ===== -->
@@ -549,7 +479,7 @@
       <input type="hidden" name="booking_type" value="{{ booking_type }}">
       <input type="hidden" name="booking_id" value="{{ booking.id }}">
 
-      <button type="button" class="close-btn" onclick="closeReviewPopup()">x</button>
+      <button type="button" class="close-btn" onclick="closeReviewPopup()" aria-label="Close review popup">&times;</button>
       <h3>Rate Provider</h3>
 
       {% if rating_form.errors %}
@@ -650,7 +580,7 @@
     <!-- ===== APPROVE WORK POPUP ===== -->
   <div class="popup-overlay" id="popupOverlay">
     <div class="popup approve-popup">
-      <button class="close-btn" id="closePopupBtn"></button>
+      <button class="close-btn" id="closePopupBtn" type="button" aria-label="Close approve work popup">&times;</button>
       <img class="logo" src="{% static 'images/frame-16865526320.png'%}" alt="Happy Home Logo">
       <p class="message">
         <strong>Happy home, happy you </strong><br>
@@ -659,10 +589,11 @@
       <div class="buttons">
         {% if booking_type == "private" %}
           <a class="primary" href="{% url 'home:all_services_private' %}">Book Again</a>
+          <a class="secondary" href="{% url 'accounts:Payment_and_Billing' %}">View Receipt</a>
         {% else %}
           <a class="primary" href="{% url 'home:business_all_services' %}">Book Again</a>
+          <a class="secondary" href="{% url 'accounts:my_bookimg' %}">My Bookings</a>
         {% endif %}
-        <a class="secondary" href="{% url 'accounts:Payment_and_Billing' %}">View Receipt</a>
         <a class="secondary" href="{% url 'home:home' %}">Home</a>
       </div>
     </div>
@@ -673,7 +604,7 @@
     <form class="popup request-fix-popup" id="requestFixForm" method="post" enctype="multipart/form-data">
       {% csrf_token %}
       <input type="hidden" name="form_type" value="request_fix">
-      <button class="close-btn" id="closeFixPopupBtn"></button>
+      <button class="close-btn" id="closeFixPopupBtn" type="button" aria-label="Close request fix popup">&times;</button>
       <div class="upload-zone" id="requestFixUpload">
         <input type="file" id="requestFixFiles" name="files" accept="image/*" multiple>
         <div class="upload-icon">
@@ -702,7 +633,7 @@
   <!-- ===== ADD-ONS POPUP ===== -->
   <div class="popup-overlay" id="addonsPopupOverlay">
     <div class="popup addons-popup">
-      <button class="close-btn" id="closeAddonsPopup"></button>
+      <button class="close-btn" id="closeAddonsPopup" type="button" aria-label="Close add-ons popup">&times;</button>
       <h3 class="addons-title">Available Add-ons</h3>
       <div class="addons-body">
         <div id="addonsList"></div>
@@ -714,10 +645,7 @@
       </div>
     </div>
   </div>
-{% include "home/includes/footer.html" %}
-
 <div class="page-save" id="pageSave">
-  <button type="submit" form="checklistForm" class="save-float-btn">Save</button>
 </div>
 <script>
 const noteBox = document.getElementById("addNoteBox");
@@ -783,6 +711,18 @@ function getCookie(name) {
   toggleSaveBar();
 })();
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const mediaHeaderLink = document.querySelector(".media-gallery .see-more");
+  if (mediaHeaderLink) mediaHeaderLink.innerHTML = "see more &rarr;";
+
+  const leftArrow = document.querySelector(".media-gallery .arrow-btn.left");
+  if (leftArrow) leftArrow.innerHTML = "&#8249;";
+
+  const rightArrow = document.querySelector(".media-gallery .arrow-btn.right");
+  if (rightArrow) rightArrow.innerHTML = "&#8250;";
+});
+</script>
 
 <script>
 (function () {
@@ -814,7 +754,7 @@ function getCookie(name) {
     toggle.addEventListener("click", () => {
       sidebar.classList.toggle("open");
       menuOverlay.classList.toggle("show");
-      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
+      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
     });
 
     menuOverlay.addEventListener("click", () => {
@@ -1006,7 +946,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script>
 function toggleNoteForm() {
   const form = document.getElementById("noteForm");
-  form.style.display = form.style.display === "none"  "block" : "none";
+  form.style.display = form.style.display === "none" ? "block" : "none";
 }
 </script>
 
@@ -1051,11 +991,11 @@ const output = document.getElementById("actualTime");
 
 if (container) {
   const start = new Date(container.dataset.start);
-  const end = container.dataset.end  new Date(container.dataset.end) : null;
+  const end = container.dataset.end ? new Date(container.dataset.end) : null;
   const quotedSeconds = parseInt(container.dataset.quoted || "0", 10);
 
   function updateTime() {
-    const now = end  end : new Date();
+    const now = end ? end : new Date();
     const diff = Math.floor((now - start) / 1000);
 
     if (diff >= 0) {
@@ -1130,7 +1070,7 @@ function renderAddonsList() {
       sectionHtml += `
         <button type="button" class="addon-card" data-service="${svc}" data-addon="${key}">
           <div class="addon-icon-wrap">
-            ${ad.icon  `<img src="${ad.icon}" alt="">` : `<span class="addon-icon-fallback">+</span>`}
+            ${ad.icon ? `<img src="${ad.icon}" alt="">` : `<span class="addon-icon-fallback">+</span>`}
           </div>
           <div class="addon-info">
             <div class="addon-title">${ad.label}</div>
@@ -1159,7 +1099,7 @@ function renderAddonsList() {
 function openAddonForm(serviceSlug, addonKey) {
   CURRENT_SERVICE = serviceSlug;
   CURRENT_ADDON = addonKey;
-  const addon = AVAILABLE_ADDONS.[serviceSlug].addons.[addonKey];
+  const addon = AVAILABLE_ADDONS[serviceSlug]?.addons?.[addonKey];
   if (!addon) return;
 
   addonFormPane.innerHTML = `

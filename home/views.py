@@ -31,6 +31,8 @@ from accounts.models import (
     CustomerNotification,
     CustomerNote,
     Incident,
+    Invoice,
+    PaymentMethod,
     ServiceReview,
     ProviderProfile,
     ProviderAdminMessage,
@@ -90,8 +92,35 @@ def _parse_iso_datetime(value):
     return dt
 
 
+def _parse_optional_date(value):
+    if not value:
+        return None
+    if hasattr(value, "year") and hasattr(value, "month") and hasattr(value, "day"):
+        return value
+    return parse_date(str(value))
+
+
+def _get_private_booking_customer_snapshot(customer):
+    if customer is None:
+        return {}
+    return {
+        "address": customer.display_address(),
+        "area": customer.display_city(),
+        "zip_code": customer.display_postal_code(),
+    }
+
+
 def _build_private_booking_from_draft(draft, user=None):
     booking = PrivateBooking()
+    draft_user_id = draft.get("user_id")
+    if user and user.is_authenticated:
+        booking.user = user
+    elif draft_user_id:
+        booking.user_id = draft_user_id
+
+    customer = Customer.objects.filter(user_id=booking.user_id).first() if booking.user_id else None
+    customer_snapshot = _get_private_booking_customer_snapshot(customer)
+
     booking.booking_method = draft.get("booking_method")
     booking.main_category = draft.get("main_category")
     booking.selected_services = draft.get("selected_services") or []
@@ -99,26 +128,24 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.addons_selected = draft.get("addons_selected") or {}
     booking.service_schedules = draft.get("service_schedules") or {}
     booking.schedule_mode = draft.get("schedule_mode") or "same"
-    booking.appointment_date = draft.get("appointment_date") or None
+    booking.appointment_date = _parse_optional_date(draft.get("appointment_date"))
     booking.appointment_time_window = draft.get("appointment_time_window")
     booking.frequency_type = draft.get("frequency_type")
     booking.special_timing_requests = draft.get("special_timing_requests")
     booking.day_work_best = draft.get("day_work_best") or []
-    booking.End_Date = draft.get("End_Date")
+    booking.End_Date = _parse_optional_date(draft.get("End_Date"))
     booking.pricing_details = draft.get("pricing_details")
     booking.total_price = Decimal(str(draft.get("total_price", 0) or 0))
     booking.subtotal = Decimal(str(draft.get("subtotal", 0) or 0))
     booking.rot_discount = Decimal(str(draft.get("rot_discount", 0) or 0))
-    booking.address = draft.get("address")
-    booking.area = draft.get("area")
+    booking.address = draft.get("address") or customer_snapshot.get("address")
+    booking.area = draft.get("area") or customer_snapshot.get("area")
     booking.duration_hours = draft.get("duration_hours")
     booking.quoted_duration_minutes = draft.get("quoted_duration_minutes") or 0
     booking.is_urgent = bool(draft.get("is_urgent"))
-    booking.zip_code = draft.get("zip_code")
+    booking.zip_code = draft.get("zip_code") or customer_snapshot.get("zip_code")
     booking.zip_is_available = bool(draft.get("zip_is_available"))
     booking.scheduled_at = _parse_iso_datetime(draft.get("scheduled_at"))
-    if user and user.is_authenticated:
-        booking.user = user
     return booking
 
 
@@ -299,6 +326,55 @@ def _apply_private_booking_payment(booking, intent, payment_summary=None):
     booking.save()
 
 
+def _sync_private_booking_invoice(booking, intent, payment_summary=None):
+    if booking is None or not booking.user_id:
+        return
+
+    customer = Customer.objects.filter(user_id=booking.user_id).first()
+    if customer is None:
+        return
+
+    payment_summary = payment_summary or {
+        "amount": booking.payment_amount or booking.total_price or Decimal("0.00"),
+        "currency": booking.payment_currency or settings.STRIPE_CURRENCY or "usd",
+    }
+
+    payment_method = None
+    raw_payment_method = intent.get("payment_method")
+    stripe_payment_method_id = ""
+    if isinstance(raw_payment_method, dict):
+        stripe_payment_method_id = (raw_payment_method.get("id") or "").strip()
+    elif raw_payment_method:
+        stripe_payment_method_id = str(raw_payment_method).strip()
+
+    if stripe_payment_method_id:
+        payment_method = PaymentMethod.objects.filter(
+            customer=customer,
+            stripe_payment_method_id=stripe_payment_method_id,
+        ).first()
+
+    if payment_method is None and booking.payment_last4 and booking.payment_brand:
+        payment_method = PaymentMethod.objects.filter(
+            customer=customer,
+            card_last4=booking.payment_last4,
+            card_type=(booking.payment_brand or "").lower(),
+        ).order_by("-is_default", "-created_at").first()
+
+    Invoice.objects.update_or_create(
+        customer=customer,
+        booking_type="private",
+        booking_id=booking.id,
+        defaults={
+            "amount": payment_summary["amount"],
+            "currency": str(payment_summary.get("currency") or "usd").upper(),
+            "status": "PAID" if intent.get("status") == "succeeded" else "PENDING",
+            "payment_method": payment_method,
+            "paid_at": timezone.now() if intent.get("status") == "succeeded" else None,
+            "note": f"Stripe PaymentIntent {intent.get('id') or ''}".strip(),
+        },
+    )
+
+
 def _create_private_booking_from_draft_payload(payload):
     booking = _build_private_booking_from_draft(payload)
     booking.accepted_terms = True
@@ -387,7 +463,7 @@ def _filtered_provider_queryset(booking):
     allowed_ids = []
     for provider in providers:
         profile = getattr(provider, "provider_profile", None)
-        if not _provider_matches_location(profile, booking_locations):
+        if not profile:
             continue
         if not booking.provider_is_available(provider):
             continue
@@ -416,11 +492,12 @@ def _provider_debug_payload(booking):
             if not profile.is_active:
                 reasons.append("Profile inactive")
             if booking_locations and not _provider_matches_location(profile, booking_locations):
-                reasons.append("Not in same/nearby area")
+                reasons.append("Location differs")
         if profile and booking and not booking.provider_is_available(provider):
             reasons.append("Overlapping booking")
 
-        status = "Included" if not reasons else "Excluded"
+        blocking_reasons = [reason for reason in reasons if reason in {"No provider profile", "Profile inactive", "Overlapping booking"}]
+        status = "Included" if not blocking_reasons else "Excluded"
         rows.append({
             "username": provider.get_full_name() or provider.username,
             "reasons": reasons,
@@ -896,10 +973,6 @@ class BusinessBookingDashboardForm(forms.ModelForm):
         provider = self.cleaned_data.get("provider")
         if not provider:
             return provider
-        booking_locations = _booking_location_candidates(self.instance)
-        profile = getattr(provider, "provider_profile", None)
-        if booking_locations and not _provider_matches_location(profile, booking_locations):
-            raise forms.ValidationError("Provider is not in the same or nearby area.")
         if self.instance and not self.instance.provider_is_available(provider):
             raise forms.ValidationError("Provider is already assigned to an overlapping booking.")
         return provider
@@ -939,10 +1012,6 @@ class PrivateBookingDashboardForm(forms.ModelForm):
         provider = self.cleaned_data.get("provider")
         if not provider:
             return provider
-        booking_locations = _booking_location_candidates(self.instance)
-        profile = getattr(provider, "provider_profile", None)
-        if booking_locations and not _provider_matches_location(profile, booking_locations):
-            raise forms.ValidationError("Provider is not in the same or nearby area.")
         if self.instance and not self.instance.provider_is_available(provider):
             raise forms.ValidationError("Provider is already assigned to an overlapping booking.")
         return provider
@@ -1548,7 +1617,7 @@ def business_services(request):
 def business_start_booking(request):
     service = request.GET.get("service")
     request.session["business_booking_draft"] = {
-        "selected_service": service,
+        "selected_service": _normalize_business_service_title(service),
         "path_type": "bundle",
         "is_urgent": request.GET.get("urgent") == "1",
     }
@@ -1565,6 +1634,26 @@ def _update_business_draft(request, updates):
     data.update(updates)
     request.session["business_booking_draft"] = data
     request.session.modified = True
+
+
+def _set_business_path_type(request, path_type):
+    data = _get_business_draft(request)
+    data["path_type"] = path_type
+    if path_type == "bundle":
+        data.pop("services_needed", None)
+        data.pop("addons", None)
+    elif path_type == "custom":
+        data.pop("selected_bundle_id", None)
+    request.session["business_booking_draft"] = data
+    request.session.modified = True
+
+
+def _normalize_business_service_title(raw_value):
+    value = (raw_value or "").strip()
+    if not value:
+        return ""
+    service = BusinessService.objects.filter(title__iexact=value).first()
+    return service.title if service else value
 
 
 def _draft_booking_from_session(request):
@@ -1681,7 +1770,7 @@ def business_bundles(request, booking_id):
 
     booking = _draft_booking_from_session(request)
 
-    _update_business_draft(request, {"path_type": "bundle"})
+    _set_business_path_type(request, "bundle")
 
     total_steps = 7
     range_steps = range(1, total_steps + 1)
@@ -1690,7 +1779,18 @@ def business_bundles(request, booking_id):
     if request.method == "POST":
         bundle_id = request.POST.get("bundle_id")
         if bundle_id:
-            _update_business_draft(request, {"selected_bundle_id": int(bundle_id)})
+            bundle = BusinessBundle.objects.filter(id=bundle_id).first()
+            if bundle is None:
+                return render(request, "home/business_bundles.html", {
+                    "booking": booking,
+                    "bundles": bundles,
+                    "step": 3,
+                    "total_steps": total_steps,
+                    "range_total_steps": range_steps,
+                    "booking_id": 0,
+                    "error": "Selected bundle is not valid.",
+                })
+            _update_business_draft(request, {"selected_bundle_id": bundle.id})
         return redirect("home:business_frequency", booking_id=0)
 
     return render(request, "home/business_bundles.html", {
@@ -1713,7 +1813,7 @@ def business_services_needed(request, booking_id):
 
     booking = _draft_booking_from_session(request)
 
-    _update_business_draft(request, {"path_type": "custom"})
+    _set_business_path_type(request, "custom")
 
     total_steps = 7
     range_steps = range(1, total_steps + 1)
@@ -1721,7 +1821,11 @@ def business_services_needed(request, booking_id):
     if request.method == "POST":
         selected_services = request.POST.get("selected_services")
         if selected_services:
-            _update_business_draft(request, {"services_needed": json.loads(selected_services)})
+            try:
+                parsed_services = json.loads(selected_services)
+            except json.JSONDecodeError:
+                parsed_services = []
+            _update_business_draft(request, {"services_needed": parsed_services})
         return redirect("home:business_addons", booking_id=0)
 
     return render(request, "home/business_services_needed.html", {
@@ -1794,7 +1898,11 @@ def business_frequency(request, booking_id):
     if request.method == "POST":
         freq_raw = request.POST.get("frequency_data")
         if freq_raw:
-            _update_business_draft(request, {"frequency": json.loads(freq_raw)})
+            try:
+                parsed_frequency = json.loads(freq_raw)
+            except json.JSONDecodeError:
+                parsed_frequency = {}
+            _update_business_draft(request, {"frequency": parsed_frequency})
         return redirect("home:business_scheduling", booking_id=0)
 
     return render(request, "home/business_frequency.html", {
@@ -1863,8 +1971,9 @@ def business_scheduling(request, booking_id):
         })
 
         draft = _get_business_draft(request)
+        path_type = draft.get("path_type") or "bundle"
         created = BusinessBooking(
-            selected_service=draft.get("selected_service"),
+            selected_service=_normalize_business_service_title(draft.get("selected_service")),
             company_name=draft.get("company_name"),
             contact_person=draft.get("contact_person"),
             role=draft.get("role"),
@@ -1876,21 +1985,21 @@ def business_scheduling(request, booking_id):
             floors=draft.get("floors"),
             restrooms=draft.get("restrooms"),
             kitchen_cleaning=bool(draft.get("kitchen_cleaning")),
-            services_needed=draft.get("services_needed"),
-            addons=draft.get("addons"),
-            frequency=draft.get("frequency"),
+            services_needed=draft.get("services_needed") if path_type == "custom" else None,
+            addons=draft.get("addons") if path_type == "custom" else None,
+            frequency=draft.get("frequency") or {},
             start_date=start_date,
             preferred_time=draft.get("preferred_time"),
             days_type=draft.get("days_type"),
             custom_date=custom_date,
             custom_time=draft.get("custom_time"),
             notes=draft.get("notes"),
-            path_type=draft.get("path_type") or "bundle",
+            path_type=path_type,
             is_urgent=bool(draft.get("is_urgent")),
             user=request.user if request.user.is_authenticated else None,
         )
         selected_bundle_id = draft.get("selected_bundle_id")
-        if selected_bundle_id:
+        if path_type == "bundle" and selected_bundle_id:
             created.selected_bundle_id = selected_bundle_id
 
         try:
@@ -1898,6 +2007,8 @@ def business_scheduling(request, booking_id):
             created.log_status(user=request.user, note="Order placed")
             if created.is_urgent:
                 created.log_status(user=request.user, note="Urgent booking (same day) requested")
+            request.session["latest_business_booking_id"] = created.id
+            request.session.modified = True
             request.session.pop("business_booking_draft", None)
         except Exception:
             logger.exception("Business scheduling failed for draft=%s", draft)
@@ -1924,6 +2035,12 @@ def business_scheduling(request, booking_id):
 # ================================
 def business_thank_you(request, booking_id):
     booking = get_object_or_404(BusinessBooking, id=booking_id)
+    session_booking_id = request.session.get("latest_business_booking_id")
+    is_owner = request.user.is_authenticated and booking.user_id == request.user.id
+    is_same_session = str(session_booking_id or "") == str(booking.id)
+
+    if not (is_owner or is_same_session):
+        raise Http404("Booking not found")
 
     if booking.path_type == "bundle":
         step_number = 6
@@ -1933,9 +2050,6 @@ def business_thank_you(request, booking_id):
     total_steps = 7
 
     range_steps = range(1, total_steps + 1)
-    if booking.user is None and request.user.is_authenticated:
-        booking.user = request.user
-        booking.save()
     return render(request, "home/business_thank_you.html", {
         "booking": booking,
         "step": step_number,
@@ -2132,15 +2246,24 @@ def private_booking_checkout(request):
 
     display_address = None
     if customer:
-        display_address = customer.primary_address or customer.full_address
+        display_address = customer.display_address()
     if not display_address:
         display_address = "Not provided"
 
     display_area = draft.get("area")
     if not display_area and customer:
-        display_area = customer.city
+        display_area = customer.display_city()
     if not display_area:
         display_area = "Not provided"
+
+    customer_snapshot = _get_private_booking_customer_snapshot(customer)
+    if customer_snapshot.get("address") and not draft.get("address"):
+        draft["address"] = customer_snapshot["address"]
+    if customer_snapshot.get("area") and not draft.get("area"):
+        draft["area"] = customer_snapshot["area"]
+    if customer_snapshot.get("zip_code") and not draft.get("zip_code"):
+        draft["zip_code"] = customer_snapshot["zip_code"]
+    _save_private_draft_data(request, draft)
 
     if draft.get("duration_hours"):
         display_duration = draft.get("duration_hours")
@@ -2446,13 +2569,6 @@ def private_booking_payment_complete(request):
             return redirect("home:payment_failed")
         return JsonResponse({"error": "Unable to verify payment."}, status=400)
 
-    session_draft = _get_private_draft_data(request)
-    if session_draft.get("payment_intent_id") != payment_intent_id:
-        if request.method == "GET":
-            messages.error(request, "Payment session mismatch.")
-            return redirect("home:payment_failed")
-        return JsonResponse({"error": "Payment session mismatch."}, status=400)
-
     draft_record = PrivateBookingDraft.objects.filter(
         payment_intent_id=payment_intent_id,
         user=request.user,
@@ -2462,6 +2578,14 @@ def private_booking_payment_complete(request):
             messages.error(request, "Draft not found.")
             return redirect("home:payment_failed")
         return JsonResponse({"error": "Draft not found."}, status=400)
+
+    session_draft = _get_private_draft_data(request)
+    session_payment_intent_id = (session_draft.get("payment_intent_id") or "").strip()
+    if request.method == "POST" and session_payment_intent_id != payment_intent_id:
+        return JsonResponse({"error": "Payment session mismatch."}, status=400)
+    if request.method == "GET" and session_payment_intent_id and session_payment_intent_id != payment_intent_id:
+        messages.error(request, "Payment session mismatch.")
+        return redirect("home:payment_failed")
 
     temp_booking = _build_private_booking_from_draft(draft_record.payload or {}, request.user)
     if draft_record.payload and draft_record.payload.get("discount_code_id"):
@@ -2591,9 +2715,11 @@ def stripe_webhook(request):
             with transaction.atomic():
                 draft_record = PrivateBookingDraft.objects.select_for_update().get(pk=draft_record.pk)
                 if PrivateBooking.objects.filter(payment_intent_id=payment_intent_id).exists():
+                    booking = PrivateBooking.objects.filter(payment_intent_id=payment_intent_id).first()
                     draft_record.payment_status = data.get("status")
                     draft_record.status = "completed"
                     draft_record.save(update_fields=["payment_status", "status"])
+                    _sync_private_booking_invoice(booking, intent)
                 else:
                     temp_booking = _build_private_booking_from_draft(payload)
                     if payload.get("user_id"):
@@ -2616,15 +2742,16 @@ def stripe_webhook(request):
 
                     booking = _create_private_booking_from_draft_payload(payload)
                     _apply_private_booking_payment(booking, intent, payment_summary=payment_summary)
+                    _sync_private_booking_invoice(booking, intent, payment_summary=payment_summary)
                     draft_record.payment_status = intent.status
                     draft_record.status = "completed"
                     draft_record.save(update_fields=["payment_status", "status"])
                     logger.info("Private booking created from draft %s (booking_id=%s)", draft_record.id, booking.id)
 
-                StripeWebhookEvent.objects.filter(event_id=event_id).update(
-                    processed_at=timezone.now(),
-                    last_error="",
-                )
+            StripeWebhookEvent.objects.filter(event_id=event_id).update(
+                processed_at=timezone.now(),
+                last_error="",
+            )
         except Exception:
             logger.exception("Stripe webhook processing failed for intent %s event %s", payment_intent_id, event_id)
             StripeWebhookEvent.objects.filter(event_id=event_id).update(last_error=f"Fulfillment failed for {payment_intent_id}")
@@ -2694,6 +2821,11 @@ def payment_success(request):
     ).strip()
     booking = None
     draft_record = None
+    fallback_url = (
+        reverse("accounts:my_bookimg")
+        if request.user.is_authenticated
+        else reverse("home:all_services_private")
+    )
 
     if payment_intent_id:
         booking = PrivateBooking.objects.filter(
@@ -2712,6 +2844,10 @@ def payment_success(request):
             {
                 "booking": booking,
                 "payment_intent_id": payment_intent_id,
+                "fallback_url": reverse(
+                    "accounts:view_service_details",
+                    args=["private", booking.id],
+                ),
             },
         )
 
@@ -2724,6 +2860,7 @@ def payment_success(request):
         "home/payment_processing.html",
         {
             "payment_intent_id": payment_intent_id,
+            "fallback_url": fallback_url,
         },
     )
 

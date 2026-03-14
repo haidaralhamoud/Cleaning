@@ -104,6 +104,76 @@ class Customer(models.Model):
 
     accepted_terms = models.BooleanField(default=False)
 
+    def primary_location_obj(self):
+        return self.locations.filter(is_primary=True).first()
+
+    def display_address(self):
+        primary_location = self.primary_location_obj()
+        if primary_location and primary_location.street_address:
+            return primary_location.street_address
+        return self.primary_address or self.full_address or ""
+
+    def display_city(self):
+        primary_location = self.primary_location_obj()
+        if primary_location and primary_location.city:
+            return primary_location.city
+        return self.city or ""
+
+    def display_postal_code(self):
+        primary_location = self.primary_location_obj()
+        if primary_location and primary_location.postal_code:
+            return primary_location.postal_code
+        return self.postal_code or ""
+
+    def display_country(self):
+        primary_location = self.primary_location_obj()
+        if primary_location and primary_location.country:
+            return primary_location.country
+        return self.country or ""
+
+    def display_entry_code(self):
+        primary_location = self.primary_location_obj()
+        if primary_location and primary_location.entry_code:
+            return primary_location.entry_code
+        return self.entry_code or ""
+
+    def display_parking_notes(self):
+        primary_location = self.primary_location_obj()
+        if primary_location and primary_location.parking_notes:
+            return primary_location.parking_notes
+        return self.parking_notes or ""
+
+    def sync_location_cache(self, save=True):
+        primary_location = self.primary_location_obj()
+        other_locations = list(
+            self.locations.filter(is_primary=False).values(
+                "id",
+                "address_type",
+                "street_address",
+                "city",
+                "region",
+                "postal_code",
+                "country",
+                "contact_name",
+                "contact_phone",
+                "entry_code",
+                "parking_notes",
+            )
+        )
+
+        self.additional_locations = other_locations
+        if primary_location:
+            self.primary_address = primary_location.street_address or ""
+            self.entry_code = primary_location.entry_code or ""
+            self.parking_notes = primary_location.parking_notes or ""
+        else:
+            self.primary_address = self.full_address or ""
+            self.entry_code = ""
+            self.parking_notes = ""
+
+        if save and self.pk:
+            self.save(update_fields=["primary_address", "additional_locations", "entry_code", "parking_notes"])
+
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -118,9 +188,8 @@ class CustomerLocation(models.Model):
         ("other", "Other"),
     ]
     COUNTRY = [
+        ("Sweden", "Sweden"),
         ("Syria", "Syria"),
-        ("office", "Office"),
-        ("vacation", "Vacation Home"),
         ("other", "Other"),
     ]
 
@@ -155,6 +224,15 @@ class CustomerLocation(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    @classmethod
+    def normalize_country_choice(cls, value):
+        raw_value = (value or "").strip()
+        if not raw_value:
+            return "other"
+
+        allowed_values = {choice_value.lower(): choice_value for choice_value, _ in cls.COUNTRY}
+        return allowed_values.get(raw_value.lower(), "other")
+
     def save(self, *args, **kwargs):
         # ضمان Location واحدة فقط Primary
         if self.is_primary:
@@ -164,6 +242,21 @@ class CustomerLocation(models.Model):
             ).exclude(pk=self.pk).update(is_primary=False)
 
         super().save(*args, **kwargs)
+        self.customer.sync_location_cache(save=True)
+
+    def delete(self, *args, **kwargs):
+        customer = self.customer
+        was_primary = self.is_primary
+        super().delete(*args, **kwargs)
+
+        if was_primary:
+            replacement = customer.locations.order_by("-created_at").first()
+            if replacement and not replacement.is_primary:
+                replacement.is_primary = True
+                replacement.save(update_fields=["is_primary"])
+                return
+
+        customer.sync_location_cache(save=True)
 
     def __str__(self):
         return f"{self.get_address_type_display()} - {self.street_address}"
@@ -339,6 +432,52 @@ class BookingChecklist(models.Model):
 
     notes = models.TextField(blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class BookingChecklistItem(models.Model):
+    booking_private = models.ForeignKey(
+        "home.PrivateBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="checklist_items",
+    )
+    booking_business = models.ForeignKey(
+        "home.BusinessBooking",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="checklist_items",
+    )
+    service_slug = models.CharField(max_length=255, blank=True)
+    service_title = models.CharField(max_length=255, blank=True)
+    service_order = models.PositiveIntegerField(default=0)
+    group_title = models.CharField(max_length=255, blank=True)
+    group_order = models.PositiveIntegerField(default=0)
+    item_label = models.CharField(max_length=255)
+    sort_order = models.PositiveIntegerField(default=0)
+    is_completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    completed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="completed_checklist_items",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = [
+            "service_order",
+            "group_order",
+            "sort_order",
+            "id",
+        ]
+
+    def __str__(self):
+        return self.item_label
 
 
 # accounts/models.py

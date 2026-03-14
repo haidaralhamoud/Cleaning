@@ -211,7 +211,8 @@
 <script>
   function toggleMenu() {
     const menu = document.getElementById("menu");
-    menu.style.display = menu.style.display === "block"  "none" : "block";
+    if (!menu) return;
+    menu.style.display = menu.style.display === "block" ? "none" : "block";
   }
 
   function playSound() {
@@ -220,13 +221,14 @@
   }
 
   // Auto play sound once if jobs exist
-  {% if bookings %}
-    window.onload = () => {
-      setTimeout(() => {
-        document.getElementById("notifSound").play();
-      }, 800);
+  document.addEventListener("click", function (event) {
+    const avatar = document.querySelector(".avatar");
+    const menu = document.getElementById("menu");
+    if (!menu || !avatar) return;
+    if (!avatar.contains(event.target)) {
+      menu.style.display = "none";
     }
-  {% endif %}
+  });
 </script>
 <script src="{% static 'js/main_header.js' %}"></script>
 

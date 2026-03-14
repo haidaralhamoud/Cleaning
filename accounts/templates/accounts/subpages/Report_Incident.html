@@ -177,48 +177,64 @@
       <form method="post" enctype="multipart/form-data" class="form-section">
         {% csrf_token %}
 
+        {% if form.errors %}
+        <div class="form-errors" style="margin-bottom:16px; padding:12px 14px; border-radius:12px; background:#fff1f0; color:#b42318; font-weight:600;">
+          Please review the highlighted fields and try again.
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
         <div class="input-group">
           <label>Incident Type</label>
+          {{ form.incident_type.errors }}
           {{ form.incident_type }}
         </div>
 
         <div class="input-group">
           <label>Severity</label>
+          {{ form.severity.errors }}
           {{ form.severity }}
         </div>
 
         <div class="input-group">
           <label>Order</label>
+          {{ form.order.errors }}
           {{ form.order }}
         </div>
 
         <div class="input-group">
           <label>Date & Time</label>
+          {{ form.incident_datetime.errors }}
           {{ form.incident_datetime }}
         </div>
 
         <div class="input-group">
           <label>Location</label>
+          {{ form.location.errors }}
           {{ form.location }}
         </div>
 
         <div class="input-group">
           <label>Involved Person</label>
+          {{ form.involved_person.errors }}
           {{ form.involved_person }}
         </div>
 
         <div class="input-group">
           <label>Preferred Resolution</label>
+          {{ form.preferred_resolution.errors }}
           {{ form.preferred_resolution }}
         </div>
 
         <div class="input-group">
           <label>Description</label>
+          {{ form.description.errors }}
           {{ form.description }}
         </div>
 
         <div class="input-group upload-box">
           <label>Upload Evidence</label>
+          {{ form.evidence.errors }}
           {{ form.evidence }}
         </div>
 

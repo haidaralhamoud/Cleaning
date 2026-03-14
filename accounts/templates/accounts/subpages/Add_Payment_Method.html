@@ -269,12 +269,23 @@
       return;
     }
 
-    const setupResponse = await fetch(setupIntentUrl, {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": csrftoken,
-      },
-    });
+    let setupResponse;
+    try {
+      setupResponse = await fetch(setupIntentUrl, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrftoken,
+        },
+      });
+    } catch (err) {
+      console.error("[Stripe] setup intent request failed", err);
+      showError("Network error while initializing payment form.");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
     let setupPayload = null;
     try {
       setupPayload = await setupResponse.json();
@@ -353,14 +364,25 @@
       cardholder_name: cardholderInput.value,
       is_default: document.querySelector("input[name='is_default']")?.checked ?? false,
     };
-    const saveResponse = await fetch("{% url 'accounts:save_payment_method' %}", {
-      method: "POST",
-      headers: {
-        "X-CSRFToken": csrftoken,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(saveBody),
-    });
+    let saveResponse;
+    try {
+      saveResponse = await fetch("{% url 'accounts:save_payment_method' %}", {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrftoken,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(saveBody),
+      });
+    } catch (err) {
+      console.error("[Stripe] save payment method request failed", err);
+      showError("Network error while saving payment method.");
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Save Payment Method";
+      }
+      return;
+    }
     let savePayload = null;
     try {
       savePayload = await saveResponse.json();

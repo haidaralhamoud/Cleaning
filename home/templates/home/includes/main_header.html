@@ -16,7 +16,14 @@
     <a href="{% url 'home:home' %}">HOME</a>
     <a href="{% url 'home:about' %}">ABOUT</a>
     <div class="nav-dropdown">
-      <a href="#" class="dropdown-toggle">SERVICES <span class="caret">v</span></a>
+      <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+        <span class="dropdown-label">SERVICES</span>
+        <span class="nav-chevron" aria-hidden="true">
+          <svg viewBox="0 0 12 8" focusable="false">
+            <path d="M1 1.25 6 6.25l5-5" />
+          </svg>
+        </span>
+      </a>
       <div class="dropdown-menu">
         <a href="{% url 'home:business_all_services' %}">Business Services</a>
         <a href="{% url 'home:all_services_private' %}">Private Services</a>

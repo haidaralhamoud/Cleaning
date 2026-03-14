@@ -33,12 +33,13 @@ class BaseBooking(models.Model):
 
         # Exceptions
         ("CANCELLED_BY_CUSTOMER", "Cancelled by Customer"),
+        ("CANCELLED_BY_ADMIN", "Cancelled by Admin"),
         ("NO_SHOW", "No Show"),
         ("INCIDENT_REPORTED", "Incident Reported"),
         ("REFUNDED", "Refunded"),
     ]
 
-    INACTIVE_STATUSES = {"COMPLETED", "CANCELLED_BY_CUSTOMER", "NO_SHOW", "REFUNDED"}
+    INACTIVE_STATUSES = {"COMPLETED", "CANCELLED_BY_CUSTOMER", "CANCELLED_BY_ADMIN", "NO_SHOW", "REFUNDED"}
     DEFAULT_DURATION_MINUTES = 120
 
     status = models.CharField(
@@ -480,7 +481,7 @@ class BaseBooking(models.Model):
 
         # 🔥 إنشاء ChatThread إذا ما موجود
         ChatThread.objects.get_or_create(
-            booking_type="business",  # أو private
+            booking_type=self._booking_type(),
             booking_id=self.id,
             defaults={
                 "customer": self.user,
@@ -601,11 +602,11 @@ class BaseBooking(models.Model):
 # =========================
     def cancel_by_admin(self, admin_user, note="Cancelled by admin", refund_amount=None):
 
-        self.status = "CANCELLED_BY_CUSTOMER"
+        self.status = "CANCELLED_BY_ADMIN"
         self.save(update_fields=["status"])
 
         self.log_status(user=admin_user, note=note)
-        self._log(status="CANCELLED_BY_CUSTOMER", note=note)
+        self._log(status="CANCELLED_BY_ADMIN", note=note)
 
         if refund_amount:
             self.refund(
@@ -1639,3 +1640,4 @@ class BookingMedia(models.Model):
         if self.booking_type == "private":
             return PrivateBooking.objects.filter(id=self.booking_id).first()
         return BusinessBooking.objects.filter(id=self.booking_id).first()
+

@@ -37,6 +37,9 @@
     <section class="form-box">
       <form method="post">
         {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="field-error">{{ form.non_field_errors|striptags }}</div>
+        {% endif %}
 
         <!-- =============== Key Handling =============== -->
         <h2>Key Handling Instructions</h2>
@@ -176,19 +179,6 @@
 
 
 <script>
-  // sidebar toggle
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-  if (toggle && sidebar && arrow) {
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
-    });
-  }
-</script>
-
-<script>
   // Make option boxes "active" and handle Custom instructions visibility
   function refreshOptions(groupName) {
     const radios = document.querySelectorAll(`input[name="${groupName}"]`);
@@ -227,24 +217,6 @@
   });
 </script>
 
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
-  }
-})();
-</script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

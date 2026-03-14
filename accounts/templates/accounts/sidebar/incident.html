@@ -43,7 +43,7 @@
             <th>Incident ID</th>
             <th>Incident Type</th>
             <th>Reported Date</th>
-            <th>Last Updated</th>
+            <th>Status</th>
             <th>Summary</th>
             <th>View</th>
           </tr>
@@ -55,7 +55,7 @@
 
       <td>{{ incident.incident_type }}</td>
 
-      <td>{{ incident.created_at|date:"F d, Y" }}</td>
+      <td>{{ incident.get_status_display }}</td>
 
       <td>{{ incident.created_at|date:"F d, Y" }}</td>
 

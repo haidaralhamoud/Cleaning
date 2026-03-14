@@ -51,6 +51,10 @@
     .status-PAUSED     { background:#fff7db; color:#a16207; }
     .status-COMPLETED  { background:#e9f7ed; color:#0f7a3f; }
     .status-CANCELLED  { background:#ffe8e8; color:#b91c1c; }
+    .status-CANCELLED_BY_CUSTOMER,
+    .status-CANCELLED_BY_ADMIN,
+    .status-NO_SHOW,
+    .status-REFUNDED { background:#ffe8e8; color:#b91c1c; }
 
     .actions {
       display: grid;
@@ -86,6 +90,83 @@
 
     .timeline {
       margin-top: 30px;
+    }
+
+    .checklist-card {
+      margin-top: 28px;
+      background: #f8fbfd;
+      border: 1px solid #d9edf4;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .checklist-progress {
+      margin-bottom: 16px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .progress-chip {
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e6f7fb;
+      color: #0b6b88;
+      font-size: 13px;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: linear-gradient(180deg, #dceef5 0%, #eaf6fa 100%);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .progress-bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, #00a3c8 0%, #71b247 100%);
+      transition: width .2s ease;
+    }
+
+    .checklist-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .checklist-group {
+      background: #fff;
+      border: 1px solid #e4eef3;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .checklist-group h4 {
+      margin: 0 0 12px;
+      font-size: 17px;
+    }
+
+    .checklist-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .checklist-item small {
+      display: block;
+      color: #5f7280;
+      margin-top: 4px;
     }
 
     .timeline-item {
@@ -341,6 +422,63 @@
 </form>
 
     </div>
+    <div class="checklist-card">
+      <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+        <h3 style="margin:0;">Checklist</h3>
+        <span class="progress-chip" id="providerChecklistSummary">{{ checklist_completed_count }}/{{ checklist_total_count }} completed</span>
+      </div>
+      <div class="checklist-progress">
+        <div class="progress-meta">
+          <span id="providerChecklistPercent">{{ checklist_progress_percent }}%</span>
+          <span class="progress-chip" id="providerChecklistState">
+            {% if checklist_locked %}Locked after completion{% else %}Live progress{% endif %}
+          </span>
+        </div>
+        <div class="progress-bar">
+          <span id="providerChecklistBar" style="width:{{ checklist_progress_percent }}%;"></span>
+        </div>
+      </div>
+      {% if checklist_locked %}
+        <p style="margin:0 0 14px; color:#5f7280; font-weight:600;">Checklist editing is disabled because this booking is completed.</p>
+      {% endif %}
+
+      {% if checklist_sections %}
+        <div id="providerChecklistRoot" data-locked="{% if checklist_locked %}1{% else %}0{% endif %}">
+          {% for section in checklist_sections %}
+            <div style="margin-bottom:16px;">
+              <h3 style="margin:0 0 12px;">{{ section.service_title }}</h3>
+              <div class="checklist-grid">
+                {% for group in section.groups %}
+                  <div class="checklist-group">
+                    <h4>{{ group.group_title }}</h4>
+                    {% for item in group.items %}
+                      <label class="checklist-item" data-item-row="{{ item.id }}">
+                        <input
+                          type="checkbox"
+                          data-checklist-item="{{ item.id }}"
+                          data-update-url="{% url 'accounts:provider_checklist_item_update' booking_type booking.id item.id %}"
+                          {% if item.is_completed %}checked{% endif %}
+                          {% if checklist_locked %}disabled{% endif %}>
+                        <span>
+                          {{ item.item_label }}
+                          <small data-completed-at="{{ item.id }}">
+                            {% if item.is_completed and item.completed_at %}
+                              Completed {{ item.completed_at|date:"M d, Y h:i A" }}
+                            {% endif %}
+                          </small>
+                        </span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="opacity:.7; margin:10px 0 0;">No checklist items available for this booking.</p>
+      {% endif %}
+    </div>
     <div class="timeline">
       <h3>Timeline</h3>
       {% for item in timeline %}
@@ -356,6 +494,80 @@
 
   </div>
 </div>
+<script>
+(function () {
+  const root = document.getElementById("providerChecklistRoot");
+  if (!root) return;
+
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return "";
+  }
+
+  function setLockedState(locked) {
+    root.dataset.locked = locked ? "1" : "0";
+    const state = document.getElementById("providerChecklistState");
+    if (state) {
+      state.textContent = locked ? "Locked after completion" : "Live progress";
+    }
+    root.querySelectorAll("[data-checklist-item]").forEach((checkbox) => {
+      checkbox.disabled = locked;
+    });
+  }
+
+  function updateProgress(data) {
+    const summary = document.getElementById("providerChecklistSummary");
+    const percent = document.getElementById("providerChecklistPercent");
+    const bar = document.getElementById("providerChecklistBar");
+    if (summary) summary.textContent = `${data.completed_count}/${data.total_count} completed`;
+    if (percent) percent.textContent = `${data.progress_percent}%`;
+    if (bar) bar.style.width = `${data.progress_percent}%`;
+    if (Object.prototype.hasOwnProperty.call(data, "locked")) {
+      setLockedState(Boolean(data.locked));
+    }
+  }
+
+  root.querySelectorAll("[data-checklist-item]").forEach((checkbox) => {
+    checkbox.addEventListener("change", async (event) => {
+      if (root.dataset.locked === "1") {
+        event.target.checked = !event.target.checked;
+        return;
+      }
+
+      const previous = !event.target.checked;
+      const note = document.querySelector(`[data-completed-at="${event.target.dataset.checklistItem}"]`);
+
+      try {
+        const body = new URLSearchParams();
+        body.set("is_completed", event.target.checked ? "1" : "0");
+
+        const response = await fetch(event.target.dataset.updateUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: body.toString(),
+        });
+
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "Checklist update failed.");
+        }
+
+        if (note) {
+          note.textContent = data.is_completed && data.completed_at ? `Completed ${data.completed_at}` : "";
+        }
+        updateProgress(data);
+      } catch (error) {
+        event.target.checked = previous;
+      }
+    });
+  });
+})();
+</script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 from django import forms
 from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference, ServiceComment, ServiceReview, ProviderProfile
+from home.models import PrivateBooking, BusinessBooking
 import json
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
@@ -166,6 +167,11 @@ class IncidentForm(forms.ModelForm):
         label="I confirm this report is accurate"
     )
 
+    order = forms.ChoiceField(
+        choices=[],
+        required=True,
+    )
+
     class Meta:
         model = Incident
         fields = [
@@ -186,6 +192,63 @@ class IncidentForm(forms.ModelForm):
             ),
             "description": forms.Textarea(attrs={"rows": 4}),
         }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+
+        self.fields["incident_type"].widget.attrs.update({"class": "form-control"})
+        self.fields["severity"].widget.attrs.update({"class": "form-control"})
+        self.fields["order"].widget.attrs.update({"class": "form-control"})
+        self.fields["incident_datetime"].widget.attrs.update({"class": "form-control"})
+        self.fields["location"].widget.attrs.update({"class": "form-control"})
+        self.fields["involved_person"].widget.attrs.update({"class": "form-control"})
+        self.fields["preferred_resolution"].widget.attrs.update({"class": "form-control"})
+        self.fields["description"].widget.attrs.update({"class": "form-control"})
+        self.fields["evidence"].widget.attrs.update({"class": "form-control"})
+
+        self.fields["order"].choices = self._order_choices()
+
+        if not self.is_bound:
+            self.fields["order"].choices.insert(0, ("", "Select an order"))
+
+    def _order_choices(self):
+        if not self.user or not self.user.is_authenticated:
+            return []
+
+        choices = []
+        private_bookings = PrivateBooking.objects.filter(user=self.user).order_by("-created_at")
+        business_bookings = BusinessBooking.objects.filter(user=self.user).order_by("-created_at")
+
+        for booking in private_bookings:
+            choices.append((
+                f"private:{booking.id}",
+                f"Private #{booking.id}",
+            ))
+
+        for booking in business_bookings:
+            choices.append((
+                f"business:{booking.id}",
+                f"Business #{booking.id}",
+            ))
+
+        return choices
+
+    def clean_order(self):
+        value = (self.cleaned_data.get("order") or "").strip()
+        allowed_values = {choice_value for choice_value, _ in self._order_choices()}
+        if value not in allowed_values:
+            raise forms.ValidationError("Select a valid order from your bookings.")
+        return value
+
+    def clean_incident_datetime(self):
+        value = self.cleaned_data.get("incident_datetime")
+        if value is None:
+            return value
+        from django.utils import timezone
+        if value > timezone.now():
+            raise forms.ValidationError("Incident date and time cannot be in the future.")
+        return value
 
 
 class CustomerNoteForm(forms.ModelForm):

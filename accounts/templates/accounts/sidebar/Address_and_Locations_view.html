@@ -6,7 +6,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Customer Profile - Address & Locations</title>
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Address_and_Locations_view.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -19,10 +19,10 @@
 
    <div class="layout"> 
     <!-- Sidebar -->
-     <!-- زر المينيو يظهر فقط بالموبايل -->
+     <!-- Ø²Ø± Ø§ÙÙÙÙÙÙ ÙØ¸ÙØ± ÙÙØ· Ø¨Ø§ÙÙÙØ¨Ø§ÙÙ -->
 <div >
   <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- › -->
+    <span class="arrow">&#8250;</span> <!-- âº -->
   </button>
   
 </div>
@@ -54,7 +54,7 @@
     </h3>
 
     <p>
-      📍 {{ location.street_address }},
+      Address: {{ location.street_address }},
       {{ location.city }},
       {{ location.region }},
       {{ location.postal_code }},
@@ -62,13 +62,13 @@
     </p>
 
     {% if location.contact_name %}
-      <p>☎ {{ location.contact_name }} · {{ location.contact_phone }}</p>
+      <p>Contact: {{ location.contact_name }} · {{ location.contact_phone }}</p>
     {% endif %}
 
     {% if location.parking_notes or location.entry_code %}
       <p>
-        🅿 {{ location.parking_notes|default:"—" }}
-        · 🔑 {{ location.entry_code|default:"—" }}
+        Parking: {{ location.parking_notes|default:"" }}
+        · Entry: {{ location.entry_code|default:"" }}
       </p>
     {% endif %}
   </div>
@@ -117,7 +117,7 @@
   toggle.addEventListener("click", () => {
     const open = sidebar.classList.toggle("open");
     if (overlay) overlay.classList.toggle("show", open);
-    if (arrow) arrow.innerHTML = open  "&#8249;" : "&#8250;";
+    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
   });
   if (overlay) {
     overlay.addEventListener("click", () => {

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Loyalty & Rewards</title>
   
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/Loyalty_and_Rewards.css' %}" />
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -35,6 +35,14 @@
     <!-- ===== Main Content ===== -->
     <main class="main">
       <h1 class="page-title fade-in">Loyalty &amp; Rewards</h1>
+
+      {% if messages %}
+        <div class="messages-stack">
+          {% for message in messages %}
+            <div class="message {% if message.tags %}message--{{ message.tags }}{% endif %}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
 
       <section class="card fade-in" style="animation-delay:.05s">
         <div class="banner-sky"></div>
@@ -73,7 +81,7 @@
               <h4>{{ tier.name }}</h4>
 
               {% if tier.max_points %}
-                <p>({{ tier.min_points }}'{{ tier.max_points }} pts)</p>
+                <p>({{ tier.min_points }}-{{ tier.max_points }} pts)</p>
               {% else %}
                 <p>(+ {{ tier.min_points }} pts)</p>
               {% endif %}
@@ -101,10 +109,10 @@
 
                 {% if book_5_done < book_5_target %}
                   <div class="hint">
-                    Book {{ book_5_target|add:"-"|add:book_5_done }} more to unlock a Free Add-on!
+                    Book {{ book_5_target|add:"-"|add:book_5_done }} more to unlock a free add-on.
                   </div>
                 {% else %}
-                  <div class="hint success">ًںژ‰ Milestone completed!</div>
+                  <div class="hint success">Milestone completed.</div>
                 {% endif %}
               </div>
 
@@ -120,10 +128,10 @@
 
                 {% if refer_done < refer_target %}
                   <div class="hint">
-                    Invite {{ refer_target|add:"-"|add:refer_done }} more friends to unlock a Free Service!
+                    Invite {{ refer_target|add:"-"|add:refer_done }} more friends to unlock a free service.
                   </div>
                 {% else %}
-                  <div class="hint success">ًںژ‰ Referral reward unlocked!</div>
+                  <div class="hint success">Referral reward unlocked.</div>
                 {% endif %}
               </div>
 
@@ -165,7 +173,7 @@
         <div class="refer">
           <b>Refer a Friend &amp; Earn Big!</b>
           <div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">
-            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> ' your friend gets 10% off their first booking.
+            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> and your friend gets 10% off their first booking.
           </div>
           <div class="share-row" data-referral-link="{{ referral_link }}">
             <a class="share wa"
@@ -187,7 +195,7 @@
         <!-- Activity -->
         <div class="grid-2">
           <div class="activity">
-            <h3 class="section-title" style="margin-top:0">Available Rewards</h3>
+            <h3 class="section-title" style="margin-top:0">Recent Activity</h3>
 
             {% for t in transactions %}
               <div class="item">
@@ -200,7 +208,7 @@
             {% empty %}
               <div class="item">
                 <div><b>No Activity Yet</b></div>
-                <small>'</small>
+                <small>—</small>
                 <div class="pts">0 pts</div>
               </div>
             {% endfor %}
@@ -217,8 +225,8 @@
           <h5>{{ promotion.title }}</h5>
           <p>{{ promotion.description }}</p>
 
-          <button class="btn">
-            ًںڑ€ Book Now & Earn x{{ promotion.points_multiplier }} Points
+          <button class="btn" type="button" disabled>
+            Earn x{{ promotion.points_multiplier }} points on eligible bookings
           </button>
         </div>
 
@@ -238,15 +246,6 @@
         const pct = +el.getAttribute('data-pct') || 0;
         requestAnimationFrame(()=> el.style.width = pct + '%');
       });
-    });
-
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
-
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
     });
   </script>
   <script>
