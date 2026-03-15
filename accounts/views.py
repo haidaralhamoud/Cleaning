@@ -99,23 +99,101 @@ def _pdf_escape(text):
     )
 
 
-def _build_simple_pdf(title, lines):
+def _wrap_pdf_text(text, max_chars=78):
+    words = str(text or "").split()
+    if not words:
+        return [""]
+
+    lines = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        if len(candidate) <= max_chars:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    lines.append(current)
+    return lines
+
+
+def _build_invoice_pdf(title, meta_rows, section_rows, footer_lines=None):
     page_width = 612
     page_height = 792
-    margin_left = 50
-    top_y = 760
+    margin_left = 52
+    margin_right = 560
+    top_y = 748
     line_height = 18
-    max_lines_per_page = 36
+    row_gap = 8
+    section_gap = 18
 
     pages = []
-    current_lines = [title, ""]
-    for line in lines:
-        if len(current_lines) >= max_lines_per_page:
-            pages.append(current_lines)
-            current_lines = [title, ""]
-        current_lines.append(line)
-    if current_lines:
-        pages.append(current_lines)
+    current_page = []
+    current_y = top_y
+
+    def push_page():
+        nonlocal current_page, current_y
+        pages.append(current_page)
+        current_page = []
+        current_y = top_y
+
+    def ensure_space(height_needed):
+        nonlocal current_y
+        if current_y - height_needed < 70:
+            push_page()
+
+    def add_text(text, x, y, font_key="F1", font_size=12):
+        safe_text = _pdf_escape(text)
+        current_page.append(f"BT /{font_key} {font_size} Tf 1 0 0 1 {x} {y} Tm ({safe_text}) Tj ET")
+
+    def add_rule(y):
+        current_page.append(f"{margin_left} {y} m {margin_right} {y} l S")
+
+    title_lines = _wrap_pdf_text(title, max_chars=30)
+    ensure_space(56)
+    for idx, line in enumerate(title_lines):
+        add_text(line, margin_left, current_y - (idx * 26), font_key="F2", font_size=24 if idx == 0 else 20)
+    current_y -= 38 + (max(0, len(title_lines) - 1) * 24)
+    add_rule(current_y)
+    current_y -= 24
+
+    for label, value in meta_rows:
+        wrapped_value = _wrap_pdf_text(value, max_chars=46)
+        row_height = max(line_height * len(wrapped_value), line_height) + row_gap
+        ensure_space(row_height)
+        add_text(label, margin_left, current_y, font_key="F2", font_size=11)
+        for idx, line in enumerate(wrapped_value):
+            add_text(line, 220, current_y - (idx * line_height), font_key="F1", font_size=11)
+        current_y -= row_height
+
+    current_y -= 6
+    add_rule(current_y)
+    current_y -= 22
+    add_text("Details", margin_left, current_y, font_key="F2", font_size=14)
+    current_y -= 24
+
+    for label, value in section_rows:
+        wrapped_value = _wrap_pdf_text(value, max_chars=58)
+        row_height = max(line_height * len(wrapped_value), line_height)
+        ensure_space(row_height + row_gap)
+        add_text(label, margin_left, current_y, font_key="F2", font_size=11)
+        for idx, line in enumerate(wrapped_value):
+            add_text(line, margin_left + 130, current_y - (idx * line_height), font_key="F1", font_size=11)
+        current_y -= row_height + row_gap
+
+    if footer_lines:
+        current_y -= 8
+        add_rule(current_y)
+        current_y -= 22
+        for footer_line in footer_lines:
+            wrapped_footer = _wrap_pdf_text(footer_line, max_chars=82)
+            ensure_space((len(wrapped_footer) * line_height) + 6)
+            for idx, line in enumerate(wrapped_footer):
+                add_text(line, margin_left, current_y - (idx * line_height), font_key="F1", font_size=10)
+            current_y -= (len(wrapped_footer) * line_height) + 6
+
+    if current_page:
+        push_page()
 
     objects = []
 
@@ -123,22 +201,12 @@ def _build_simple_pdf(title, lines):
         objects.append(payload)
         return len(objects)
 
-    font_obj = add_object(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
+    font_regular_obj = add_object(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>")
+    font_bold_obj = add_object(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>")
     page_ids = []
 
-    for page_lines in pages:
-        content_lines = ["BT", "/F1 12 Tf", f"{margin_left} {top_y} Td"]
-        for idx, line in enumerate(page_lines):
-            safe_line = _pdf_escape(line)
-            if idx == 0:
-                content_lines.append("/F1 18 Tf")
-                content_lines.append(f"({safe_line}) Tj")
-                content_lines.append("/F1 12 Tf")
-            else:
-                content_lines.append("T*")
-                content_lines.append(f"({safe_line}) Tj")
-        content_lines.append("ET")
-        content_stream = ("\n".join(content_lines)).encode("latin-1", "replace")
+    for page_commands in pages:
+        content_stream = ("\n".join(page_commands)).encode("latin-1", "replace")
         content_obj = add_object(
             f"<< /Length {len(content_stream)} >>\nstream\n".encode("latin-1")
             + content_stream
@@ -147,7 +215,7 @@ def _build_simple_pdf(title, lines):
         page_obj = add_object(
             (
                 "<< /Type /Page /Parent {parent} 0 R /MediaBox [0 0 "
-                f"{page_width} {page_height}] /Resources << /Font << /F1 {font_obj} 0 R >> >> "
+                f"{page_width} {page_height}] /Resources << /Font << /F1 {font_regular_obj} 0 R /F2 {font_bold_obj} 0 R >> >> "
                 f"/Contents {content_obj} 0 R >>"
             ).encode("latin-1")
         )
@@ -432,7 +500,14 @@ def _get_client_ip(request):
 def _get_or_create_stripe_customer(customer):
     stripe_customer_id = (getattr(customer, "stripe_customer_id", None) or "").strip()
     if stripe_customer_id:
-        return stripe_customer_id
+        try:
+            stripe_customer = stripe.Customer.retrieve(stripe_customer_id)
+            if not getattr(stripe_customer, "deleted", False):
+                return stripe_customer_id
+        except Exception:
+            logger.warning("Stored Stripe customer is invalid for customer %s", customer.id, exc_info=True)
+        customer.stripe_customer_id = None
+        customer.save(update_fields=["stripe_customer_id"])
 
     stripe_customer = stripe.Customer.create(
         email=customer.email or None,
@@ -1426,9 +1501,14 @@ def view_service_details(request, booking_type, booking_id):
 
         refund_note = booking.refund_reason or ""
         refund_amount_text = ""
+        charge_currency = (
+            getattr(booking, "payment_currency", None)
+            or getattr(settings, "STRIPE_CURRENCY", "usd")
+            or "usd"
+        ).upper()
 
         if booking.refund_amount and booking.refund_amount > 0:
-            refund_amount_text = f"Refunded amount: {booking.refund_amount} $"
+            refund_amount_text = f"Refunded amount: {booking.refund_amount} {charge_currency}"
 
         timeline.append({
             "code": "REFUNDED",
@@ -1624,6 +1704,11 @@ def view_service_details(request, booking_type, booking_id):
             "latest_request_fix": latest_request_fix,
             "available_addons_json": available_addons_json,
             "saved_addons_json": saved_addons_json,
+            "charge_currency": (
+                getattr(booking, "payment_currency", None)
+                or getattr(settings, "STRIPE_CURRENCY", "usd")
+                or "usd"
+            ).upper(),
         },
     )
 
@@ -2017,17 +2102,19 @@ def add_Customer_Notes(request):
 
 
 def _backfill_missing_private_invoices(customer):
-    paid_bookings = (
+    bookings_with_payments = (
         PrivateBooking.objects.filter(
             user=customer.user,
-            payment_status="succeeded",
         )
         .exclude(payment_intent_id__isnull=True)
         .exclude(payment_intent_id__exact="")
         .order_by("-created_at")
     )
 
-    for booking in paid_bookings:
+    for booking in bookings_with_payments:
+        if booking.payment_status != "succeeded" and not booking.is_refunded:
+            continue
+
         payment_method = None
         if booking.payment_last4 and booking.payment_brand:
             payment_method = PaymentMethod.objects.filter(
@@ -2041,12 +2128,16 @@ def _backfill_missing_private_invoices(customer):
             booking_type="private",
             booking_id=booking.id,
             defaults={
-                "amount": booking.payment_amount or booking.total_price or 0,
+                "amount": booking.refund_amount if booking.is_refunded else (booking.payment_amount or booking.total_price or 0),
                 "currency": (booking.payment_currency or "USD").upper(),
-                "status": "PAID",
+                "status": "REFUNDED" if booking.is_refunded else "PAID",
                 "payment_method": payment_method,
-                "paid_at": getattr(booking, "updated_at", None) or timezone.now(),
-                "note": f"Stripe PaymentIntent {booking.payment_intent_id}",
+                "paid_at": getattr(booking, "refunded_at", None) if booking.is_refunded else (getattr(booking, "updated_at", None) or timezone.now()),
+                "note": (
+                    f"Refunded. {booking.refund_reason or ''}".strip()
+                    if booking.is_refunded
+                    else f"Stripe PaymentIntent {booking.payment_intent_id}"
+                ),
             },
         )
 
@@ -2128,25 +2219,31 @@ def download_invoice_pdf(request, invoice_id):
             f"{invoice.payment_method.get_card_type_display()} **** {invoice.payment_method.card_last4}"
         )
 
-    lines = [
-        f"Invoice Number: {invoice.invoice_number}",
-        f"Customer: {customer.first_name} {customer.last_name}".strip() or customer.email,
-        f"Issued At: {timezone.localtime(invoice.issued_at).strftime('%Y-%m-%d %H:%M')}",
-        f"Status: {invoice.get_status_display()}",
-        f"Amount: {invoice.amount:.2f} {invoice.currency}",
-        f"Payment Method: {payment_method_label}",
-        f"Booking Type: {invoice.get_booking_type_display() if invoice.booking_type else 'N/A'}",
-        f"Booking ID: {invoice.booking_id or 'N/A'}",
+    customer_name = f"{customer.first_name} {customer.last_name}".strip() or customer.email or "Customer"
+    meta_rows = [
+        ("Invoice Number", invoice.invoice_number),
+        ("Customer", customer_name),
+        ("Issued At", timezone.localtime(invoice.issued_at).strftime("%Y-%m-%d %H:%M")),
+        ("Status", invoice.get_status_display()),
+        ("Amount", f"{invoice.amount:.2f} {invoice.currency}"),
+    ]
+    section_rows = [
+        ("Payment Method", payment_method_label),
+        ("Booking Type", invoice.get_booking_type_display() if invoice.booking_type else "N/A"),
+        ("Booking ID", invoice.booking_id or "N/A"),
     ]
 
     if booking_summary:
-        lines.append(f"Service Summary: {booking_summary}")
+        section_rows.append(("Service Summary", booking_summary))
     if invoice.paid_at:
-        lines.append(f"Paid At: {timezone.localtime(invoice.paid_at).strftime('%Y-%m-%d %H:%M')}")
-    if invoice.note:
-        lines.append(f"Reference: {invoice.note}")
+        section_rows.append(("Paid At", timezone.localtime(invoice.paid_at).strftime("%Y-%m-%d %H:%M")))
 
-    pdf_bytes = _build_simple_pdf("Invoice", lines)
+    footer_lines = []
+    if invoice.note:
+        footer_lines.append(f"Reference: {invoice.note}")
+    footer_lines.append("Thank you for choosing Hembla Experten.")
+
+    pdf_bytes = _build_invoice_pdf("Invoice", meta_rows, section_rows, footer_lines=footer_lines)
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{invoice.invoice_number}.pdf"'
     return response

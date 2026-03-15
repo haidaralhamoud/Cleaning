@@ -383,22 +383,22 @@
             <h3>{% if booking_type == "private" %}Charges{% else %}Pricing Summary{% endif %}</h3>
             <div class="rows">
               {% if booking.subtotal %}
-                <div class="row"><span>Subtotal</span><span id="chargeSubtotal">{{ booking.subtotal }}$</span></div>
+                <div class="row"><span>Subtotal</span><span id="chargeSubtotal">{{ booking.subtotal }} {{ charge_currency }}</span></div>
               {% endif %}
               {% if booking.rot_discount %}
-                <div class="row"><span>Discount</span><span class="green" id="chargeDiscount">-{{ booking.rot_discount }}$</span></div>
+                <div class="row"><span>Discount</span><span class="green" id="chargeDiscount">-{{ booking.rot_discount }} {{ charge_currency }}</span></div>
               {% endif %}
               {% if booking_type == "business" and not booking.total_price %}
                 <div class="row"><span>Status</span><span>Pricing pending confirmation</span></div>
               {% endif %}
-              <div class="row"><span>Total</span><span id="chargeTotal">{{ booking.total_price }}$</span></div>
+              <div class="row"><span>Total</span><span id="chargeTotal">{{ booking.total_price }} {{ charge_currency }}</span></div>
               {% if booking_type == "private" %}
               <div class="row"><span>Payment Method</span><span>{{ payment_method|default:"-" }}</span></div>
               {% endif %}
             </div>
             <div class="total-row">
               <span class="blue">Total</span>
-              <span class="blue" id="chargeTotalBottom">${{ booking.total_price }}</span>
+              <span class="blue" id="chargeTotalBottom">{{ booking.total_price }} {{ charge_currency }}</span>
             </div>
           </div>
 
@@ -1074,7 +1074,7 @@ function renderAddonsList() {
           </div>
           <div class="addon-info">
             <div class="addon-title">${ad.label}</div>
-            <div class="addon-price">$${Number(ad.price || 0).toFixed(2)}</div>
+            <div class="addon-price">${Number(ad.price || 0).toFixed(2)} {{ charge_currency|escapejs }}</div>
           </div>
         </button>
       `;
@@ -1174,6 +1174,7 @@ function collectAddonFormData() {
 
 function updateCharges(pricing) {
   if (!pricing) return;
+  const chargeCurrency = "{{ charge_currency|escapejs }}";
   const rows = document.querySelector(".card.charges .rows");
   let subtotalEl = document.getElementById("chargeSubtotal");
   let discountEl = document.getElementById("chargeDiscount");
@@ -1201,10 +1202,10 @@ function updateCharges(pricing) {
     discountEl = row.querySelector("#chargeDiscount");
   }
 
-  if (subtotalEl) subtotalEl.textContent = `$${Number(pricing.subtotal || 0).toFixed(2)}`;
-  if (discountEl) discountEl.textContent = `-$${Number(pricing.rot || 0).toFixed(2)}`;
-  if (totalEl) totalEl.textContent = `$${Number(pricing.final || 0).toFixed(2)}`;
-  if (totalBottomEl) totalBottomEl.textContent = `$${Number(pricing.final || 0).toFixed(2)}`;
+  if (subtotalEl) subtotalEl.textContent = `${Number(pricing.subtotal || 0).toFixed(2)} ${chargeCurrency}`;
+  if (discountEl) discountEl.textContent = `-${Number(pricing.rot || 0).toFixed(2)} ${chargeCurrency}`;
+  if (totalEl) totalEl.textContent = `${Number(pricing.final || 0).toFixed(2)} ${chargeCurrency}`;
+  if (totalBottomEl) totalBottomEl.textContent = `${Number(pricing.final || 0).toFixed(2)} ${chargeCurrency}`;
 }
 
 function sendAddonsUpdate() {

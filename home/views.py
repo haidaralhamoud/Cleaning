@@ -156,6 +156,13 @@ def _stripe_amount_from_decimal(amount):
     return int((quantized * 100).to_integral_value(rounding=ROUND_HALF_UP))
 
 
+def _stripe_minimum_amount_cents(currency):
+    minimums = {
+        "sek": 300,
+    }
+    return minimums.get((currency or "").lower(), 0)
+
+
 def _card_details_from_intent(intent):
     brand = None
     last4 = None
@@ -181,7 +188,14 @@ def _get_or_create_checkout_stripe_customer(customer):
 
     stripe_customer_id = (getattr(customer, "stripe_customer_id", None) or "").strip()
     if stripe_customer_id:
-        return stripe_customer_id
+        try:
+            stripe_customer = stripe.Customer.retrieve(stripe_customer_id)
+            if not getattr(stripe_customer, "deleted", False):
+                return stripe_customer_id
+        except Exception:
+            logger.warning("Stored Stripe customer is invalid for customer %s", customer.id, exc_info=True)
+        customer.stripe_customer_id = None
+        customer.save(update_fields=["stripe_customer_id"])
 
     stripe_customer = stripe.Customer.create(
         email=customer.email or None,
@@ -1271,6 +1285,18 @@ def dashboard_model_list(request, model):
         for name in text_fields:
             query |= Q(**{f"{name}__icontains": q})
         qs = qs.filter(query)
+
+    field_names = {f.name for f in item.model._meta.fields}
+    if "created_at" in field_names:
+        qs = qs.order_by("-created_at", "-pk")
+    elif "issued_at" in field_names:
+        qs = qs.order_by("-issued_at", "-pk")
+    elif "updated_at" in field_names:
+        qs = qs.order_by("-updated_at", "-pk")
+    elif "date_joined" in field_names:
+        qs = qs.order_by("-date_joined", "-pk")
+    else:
+        qs = qs.order_by("-pk")
 
     paginator = Paginator(qs, 12)
     page = paginator.get_page(request.GET.get("page"))
@@ -2382,6 +2408,14 @@ def private_booking_checkout(request):
         if payment_summary["amount_cents"] <= 0:
             stripe_ready = False
             messages.error(request, "Payment amount must be greater than zero.")
+        elif payment_summary["amount_cents"] < _stripe_minimum_amount_cents(stripe_currency):
+            stripe_ready = False
+            min_amount = Decimal(_stripe_minimum_amount_cents(stripe_currency)) / Decimal("100")
+            messages.error(
+                request,
+                f"Minimum card payment is {min_amount:.2f} {stripe_currency.upper()}. "
+                "Increase the booking total or reduce discounts."
+            )
         else:
             stripe.api_key = stripe_secret_key
             customer_name = ""
@@ -2499,9 +2533,13 @@ def private_booking_checkout(request):
                 _save_private_draft_data(request, draft)
 
                 logger.info("Stripe PaymentIntent ready: %s", stripe_payment_intent_id)
-            except Exception:
+            except Exception as exc:
                 logger.exception("Stripe PaymentIntent error for private draft")
-                messages.error(request, "Payment service is temporarily unavailable. Please try again.")
+                if settings.DEBUG:
+                    user_message = getattr(exc, "user_message", None) or str(exc) or exc.__class__.__name__
+                    messages.error(request, f"Payment service is temporarily unavailable. {user_message}")
+                else:
+                    messages.error(request, "Payment service is temporarily unavailable. Please try again.")
                 stripe_ready = False
     return render(request, "home/checkout.html", {
         "booking": temp_booking,

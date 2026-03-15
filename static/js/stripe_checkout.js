@@ -10,38 +10,64 @@
   var stripeReady = form.getAttribute("data-stripe-ready") === "1";
   var button = document.getElementById("confirmPayment");
   var errorEl = document.getElementById("card-errors");
+  function setError(message) {
+    if (errorEl) errorEl.textContent = message || "";
+  }
+  function formatStripeError(error, fallbackMessage) {
+    if (!error) return fallbackMessage || "Payment failed.";
+    var parts = [];
+    if (error.message) parts.push(error.message);
+    if (error.code) parts.push("code: " + error.code);
+    if (error.decline_code) parts.push("decline: " + error.decline_code);
+    if (error.type) parts.push("type: " + error.type);
+    return parts.join(" | ") || fallbackMessage || "Payment failed.";
+  }
 
   if (typeof Stripe === "undefined") {
     if (button) button.disabled = true;
-    if (errorEl) errorEl.textContent = "Payment service failed to load.";
+    setError("Payment service failed to load.");
     return;
   }
 
   if (!stripeReady || !publishableKey || !clientSecret || !completeUrl) {
     if (button) button.disabled = true;
+    var missing = [];
+    if (!stripeReady) missing.push("stripe not ready");
+    if (!publishableKey) missing.push("publishable key");
+    if (!clientSecret) missing.push("client secret");
+    if (!completeUrl) missing.push("complete url");
+    setError("Payment form is not ready: " + missing.join(", ") + ".");
     return;
   }
 
   var stripe = Stripe(publishableKey);
-  var elements = stripe.elements({
-    clientSecret: clientSecret,
-    appearance: {
-      theme: "stripe",
-      variables: {
-        colorText: "#0f172a",
-        colorDanger: "#c0392b",
-        fontFamily: "\"Inter\", sans-serif"
+  var elements;
+  var paymentElement;
+  try {
+    elements = stripe.elements({
+      clientSecret: clientSecret,
+      appearance: {
+        theme: "stripe",
+        variables: {
+          colorText: "#0f172a",
+          colorDanger: "#c0392b",
+          fontFamily: "\"Inter\", sans-serif"
+        }
       }
-    }
-  });
-  var paymentElement = elements.create("payment", {
-    layout: "tabs"
-  });
-  paymentElement.mount("#payment-element");
+    });
+    paymentElement = elements.create("payment", {
+      layout: "tabs"
+    });
+    paymentElement.mount("#payment-element");
+  } catch (err) {
+    console.error("[Stripe] payment element mount failed", err);
+    if (button) button.disabled = true;
+    setError((err && err.message) || "Payment form failed to initialize.");
+    return;
+  }
 
   paymentElement.on("change", function (event) {
-    if (!errorEl) return;
-    errorEl.textContent = event.error ? event.error.message : "";
+    setError(event.error ? event.error.message : "");
   });
 
   function sendCompletion(paymentIntentId, originalText) {
@@ -61,12 +87,12 @@
           window.location.href = data.redirect_url;
           return;
         }
-        if (errorEl) errorEl.textContent = (data && data.error) || "Payment succeeded, but confirmation failed.";
+        setError((data && data.error) || "Payment succeeded, but confirmation failed.");
         button.disabled = false;
         button.textContent = originalText;
       })
       .catch(function () {
-        if (errorEl) errorEl.textContent = "Payment succeeded, but confirmation failed.";
+        setError("Payment succeeded, but confirmation failed.");
         button.disabled = false;
         button.textContent = originalText;
       });
@@ -89,7 +115,7 @@
     }).then(function (result) {
       if (result.error) {
         console.error("[Stripe] confirmPayment error", result.error);
-        if (errorEl) errorEl.textContent = result.error.message || "Payment failed.";
+        setError(formatStripeError(result.error, "Payment failed."));
         button.disabled = false;
         button.textContent = originalText;
         return;
@@ -97,7 +123,7 @@
 
       if (!result.paymentIntent) {
         console.error("[Stripe] confirmPayment completed without paymentIntent", result);
-        if (errorEl) errorEl.textContent = "Payment did not complete.";
+        setError("Payment did not complete.");
         button.disabled = false;
         button.textContent = originalText;
         return;
@@ -116,7 +142,7 @@
       if (failureUrl) {
         console.error("[Stripe] Unexpected payment intent status", result.paymentIntent.status, result.paymentIntent);
       }
-      if (errorEl) errorEl.textContent = "Payment did not complete.";
+      setError("Payment did not complete.");
       button.disabled = false;
       button.textContent = originalText;
     });

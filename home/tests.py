@@ -4,8 +4,9 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from home.models import PrivateBooking
+from home.models import PrivateBooking, PrivateMainCategory, PrivateService
 from home.availability_utils import generate_slots, provider_available_after_minutes
+from home.pricing_utils import calculate_booking_price
 
 
 class ProviderAvailabilityTests(TestCase):
@@ -97,3 +98,56 @@ class ProviderAvailabilityTests(TestCase):
         booking1.extend_duration(30, allow_conflict=True, note="Admin override")
         booking1.refresh_from_db()
         self.assertTrue(booking1.conflict_override)
+
+
+class BookingPricingDurationTests(TestCase):
+    def setUp(self):
+        self.category = PrivateMainCategory.objects.create(title="Home")
+
+    def test_service_without_option_durations_uses_default_duration(self):
+        service = PrivateService.objects.create(
+            category=self.category,
+            title="Standard Cleaning",
+            slug="standard-cleaning",
+            price=100,
+            questions={
+                "size": {
+                    "label": "Home size",
+                    "type": "select",
+                    "options": [
+                        {"label": "Small", "value": "small"},
+                        {"label": "Large", "value": "large"},
+                    ],
+                }
+            },
+        )
+        booking = PrivateBooking(
+            selected_services=[service.slug],
+            service_answers={service.slug: {"size": "small"}},
+        )
+
+        pricing = calculate_booking_price(booking)
+
+        self.assertEqual(pricing["duration_minutes"], 120.0)
+
+    def test_multiple_services_without_option_durations_stack_default_duration(self):
+        service_one = PrivateService.objects.create(
+            category=self.category,
+            title="Kitchen Cleaning",
+            slug="kitchen-cleaning",
+            price=100,
+        )
+        service_two = PrivateService.objects.create(
+            category=self.category,
+            title="Bathroom Cleaning",
+            slug="bathroom-cleaning",
+            price=100,
+        )
+        booking = PrivateBooking(
+            selected_services=[service_one.slug, service_two.slug],
+            service_answers={},
+        )
+
+        pricing = calculate_booking_price(booking)
+
+        self.assertEqual(pricing["duration_minutes"], 240.0)

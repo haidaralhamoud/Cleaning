@@ -150,10 +150,13 @@ def calculate_booking_price(booking):
     # --------------------------
     # 1) SERVICE PRICES
     # --------------------------
+    default_service_duration = Decimal(str(getattr(booking, "DEFAULT_DURATION_MINUTES", 120)))
+
     for service in services:
         source_currency = getattr(service, "price_currency", target_currency)
         price = _convert_currency(service.price, source_currency, target_currency, currency_rates)
         answers = (booking.service_answers or {}).get(service.slug, {})
+        service_duration = Decimal("0.00")
 
         questions = service.questions or {}
         for q_key, q_info in questions.items():
@@ -163,7 +166,12 @@ def calculate_booking_price(booking):
             if not options:
                 continue
             price += _options_price(options, answers.get(q_key), source_currency, target_currency, currency_rates)
-            duration_minutes += _options_duration(options, answers.get(q_key))
+            service_duration += _options_duration(options, answers.get(q_key))
+
+        if service_duration <= 0:
+            service_duration = default_service_duration
+
+        duration_minutes += service_duration
 
         services_total += price
 

@@ -58,17 +58,7 @@
     const maxRefreshAttempts = 24;
 
     function goToBestDestination() {
-      if (window.opener && !window.opener.closed) {
-        window.close();
-        return;
-      }
-
-      if (window.history.length > 1) {
-        window.history.back();
-        return;
-      }
-
-      window.location.href = fallbackUrl;
+      window.location.href = "/";
     }
 
     if (button) {

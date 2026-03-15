@@ -315,6 +315,7 @@ class BaseBooking(models.Model):
     def refund(self, amount, user=None, reason=""):
 
         from home.models import BookingStatusHistory
+        from accounts.models import Customer, Invoice, PaymentMethod
 
         booking_type = (
             "private"
@@ -345,6 +346,32 @@ class BaseBooking(models.Model):
                 "note": reason
             }
         )
+
+        customer = Customer.objects.filter(user_id=getattr(self, "user_id", None)).first()
+        if customer is not None:
+            payment_method = None
+            payment_brand = getattr(self, "payment_brand", None)
+            payment_last4 = getattr(self, "payment_last4", None)
+            if payment_last4 and payment_brand:
+                payment_method = PaymentMethod.objects.filter(
+                    customer=customer,
+                    card_last4=payment_last4,
+                    card_type=(payment_brand or "").lower(),
+                ).order_by("-is_default", "-created_at").first()
+
+            Invoice.objects.update_or_create(
+                customer=customer,
+                booking_type=booking_type,
+                booking_id=self.id,
+                defaults={
+                    "amount": amount,
+                    "currency": (getattr(self, "payment_currency", None) or "USD").upper(),
+                    "status": "REFUNDED",
+                    "payment_method": payment_method,
+                    "paid_at": getattr(self, "refunded_at", None),
+                    "note": f"Refunded. {reason}".strip(),
+                },
+            )
 
     def mark_on_the_way(self, user=None):
         if self.status not in ["ORDERED", "ASSIGNED"]:
