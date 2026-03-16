@@ -237,6 +237,18 @@ body {
   color: #fff;
 }
 
+.day.day-disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  background: #eef4f7;
+  color: #7f8f98;
+}
+
+.day.day-disabled:hover {
+  background: #eef4f7;
+  color: #7f8f98;
+}
+
 .day.weekend {
   color: #7bbf2f;
   font-weight: 700;

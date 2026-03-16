@@ -100,6 +100,12 @@ def _parse_optional_date(value):
     return parse_date(str(value))
 
 
+def _date_is_before_today(value):
+    if not value:
+        return False
+    return value < timezone.localdate()
+
+
 def _get_private_booking_customer_snapshot(customer):
     if customer is None:
         return {}
@@ -1736,6 +1742,7 @@ def business_company_info(request, booking_id):
 
     total_steps = 7
     range_steps = range(1, total_steps + 1)
+    min_booking_date = timezone.localdate().isoformat()
 
     if request.method == "POST":
         form = BusinessCompanyInfoForm(request.POST)
@@ -1968,13 +1975,14 @@ def business_scheduling(request, booking_id):
 
         # ??????
         if not start_date_raw or not preferred_time:
-            return render(request, "home/SchedulingNotes.html", {
-                "booking": booking,
-                "step": step_number,
-                "total_steps": total_steps,
-                "range_total_steps": range_steps,
-                "error": "Please select a start date and preferred time."
-            })
+              return render(request, "home/SchedulingNotes.html", {
+                  "booking": booking,
+                  "step": step_number,
+                  "total_steps": total_steps,
+                  "range_total_steps": range_steps,
+                  "error": "Please select a start date and preferred time.",
+                  "min_booking_date": min_booking_date,
+              })
 
         start_date = parse_date(start_date_raw)
         custom_date = parse_date(custom_date_raw) if custom_date_raw else None
@@ -1984,7 +1992,18 @@ def business_scheduling(request, booking_id):
                 "step": step_number,
                 "total_steps": total_steps,
                 "range_total_steps": range_steps,
-                "error": "Invalid date format. Please choose a valid date."
+                "error": "Invalid date format. Please choose a valid date.",
+                "min_booking_date": min_booking_date,
+            })
+
+        if _date_is_before_today(start_date) or (custom_date and _date_is_before_today(custom_date)):
+            return render(request, "home/SchedulingNotes.html", {
+                "booking": booking,
+                "step": step_number,
+                "total_steps": total_steps,
+                "range_total_steps": range_steps,
+                "error": "Booking date cannot be before today. Please choose today or a future date.",
+                "min_booking_date": min_booking_date,
             })
 
         _update_business_draft(request, {
@@ -2043,7 +2062,8 @@ def business_scheduling(request, booking_id):
                 "step": step_number,
                 "total_steps": total_steps,
                 "range_total_steps": range_steps,
-                "error": "Something went wrong while placing your booking. Please try again."
+                "error": "Something went wrong while placing your booking. Please try again.",
+                "min_booking_date": min_booking_date,
             })
 
         return redirect("home:business_thank_you", booking_id=created.id)
@@ -2054,6 +2074,7 @@ def business_scheduling(request, booking_id):
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
+        "min_booking_date": min_booking_date,
     })
 
 # ================================
@@ -2076,6 +2097,7 @@ def business_thank_you(request, booking_id):
     total_steps = 7
 
     range_steps = range(1, total_steps + 1)
+    min_booking_date = timezone.localdate().isoformat()
     return render(request, "home/business_thank_you.html", {
         "booking": booking,
         "step": step_number,
@@ -3174,6 +3196,7 @@ def private_booking_schedule(request):
         list(ScheduleRule.objects.values("key", "value", "price_change")),
         cls=DjangoJSONEncoder,
     )
+    min_booking_date = timezone.localdate()
 
     def _render_schedule_page(temp_booking, pricing):
         initial_schedule_state = {
@@ -3193,6 +3216,7 @@ def private_booking_schedule(request):
             "schedule_rules": schedule_rules_json,
             "pricing": pricing,
             "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
+            "min_booking_date": min_booking_date.isoformat(),
         })
 
     # -----------------------------
@@ -3212,6 +3236,11 @@ def private_booking_schedule(request):
             date_obj = parse_date(date) if date else None
             draft["appointment_date"] = date_obj.isoformat() if date_obj else None
             print(draft.get("appointment_date"))
+            if date_obj and _date_is_before_today(date_obj):
+                messages.error(request, "Booking date cannot be before today. Please choose today or a future date.")
+                temp_booking = _build_private_booking_from_draft(draft, request.user)
+                pricing = calculate_booking_price(temp_booking)
+                return _render_schedule_page(temp_booking, pricing)
             # وقت
             time_window = request.POST.get("appointment_time_window")
             draft["appointment_time_window"] = time_window
@@ -3231,6 +3260,17 @@ def private_booking_schedule(request):
             # End Date
             end_date = request.POST.get("End_Date")
             draft["End_Date"] = end_date if end_date else None
+            end_date_obj = parse_date(end_date) if end_date else None
+            if end_date_obj and _date_is_before_today(end_date_obj):
+                messages.error(request, "End date must be today or a future date.")
+                temp_booking = _build_private_booking_from_draft(draft, request.user)
+                pricing = calculate_booking_price(temp_booking)
+                return _render_schedule_page(temp_booking, pricing)
+            if date_obj and end_date_obj and end_date_obj < date_obj:
+                messages.error(request, "End date cannot be earlier than your booking date.")
+                temp_booking = _build_private_booking_from_draft(draft, request.user)
+                pricing = calculate_booking_price(temp_booking)
+                return _render_schedule_page(temp_booking, pricing)
 
             # تفريغ الجدول المنفصل
             draft["service_schedules"] = {}
@@ -3246,6 +3286,31 @@ def private_booking_schedule(request):
                     schedules = {}
             else:
                 schedules = {}
+
+            for service_schedule in schedules.values():
+                if not isinstance(service_schedule, dict):
+                    continue
+                service_date = parse_date(service_schedule.get("date") or "")
+                if service_date and _date_is_before_today(service_date):
+                    messages.error(request, "Each service must be scheduled for today or a future date.")
+                    draft["service_schedules"] = schedules
+                    temp_booking = _build_private_booking_from_draft(draft, request.user)
+                    pricing = calculate_booking_price(temp_booking)
+                    return _render_schedule_page(temp_booking, pricing)
+                service_end_date_raw = service_schedule.get("end_date") or ""
+                service_end_date = parse_date(service_end_date_raw) if service_end_date_raw else None
+                if service_end_date and _date_is_before_today(service_end_date):
+                    messages.error(request, "Each end date must be today or a future date.")
+                    draft["service_schedules"] = schedules
+                    temp_booking = _build_private_booking_from_draft(draft, request.user)
+                    pricing = calculate_booking_price(temp_booking)
+                    return _render_schedule_page(temp_booking, pricing)
+                if service_date and service_end_date and service_end_date < service_date:
+                    messages.error(request, "A service end date cannot be earlier than its booking date.")
+                    draft["service_schedules"] = schedules
+                    temp_booking = _build_private_booking_from_draft(draft, request.user)
+                    pricing = calculate_booking_price(temp_booking)
+                    return _render_schedule_page(temp_booking, pricing)
 
             draft["service_schedules"] = schedules
 
@@ -3277,6 +3342,17 @@ def private_booking_schedule(request):
             if not draft.get("appointment_date"):
                 messages.error(request, "Please select a valid appointment date.")
                 return _render_schedule_page(temp_booking, pricing)
+            appointment_date_obj = parse_date(draft.get("appointment_date")) if draft.get("appointment_date") else None
+            if appointment_date_obj and _date_is_before_today(appointment_date_obj):
+                messages.error(request, "Please choose today or a future date for your booking.")
+                return _render_schedule_page(temp_booking, pricing)
+            end_date_obj = parse_date(draft.get("End_Date")) if draft.get("End_Date") else None
+            if end_date_obj and _date_is_before_today(end_date_obj):
+                messages.error(request, "End date must be today or a future date.")
+                return _render_schedule_page(temp_booking, pricing)
+            if appointment_date_obj and end_date_obj and end_date_obj < appointment_date_obj:
+                messages.error(request, "End date cannot be earlier than your booking date.")
+                return _render_schedule_page(temp_booking, pricing)
             time_hint = draft.get("appointment_time_window") or ""
             time_candidates = temp_booking._parse_time_candidates(time_hint)
             if not time_candidates:
@@ -3284,7 +3360,6 @@ def private_booking_schedule(request):
                 return _render_schedule_page(temp_booking, pricing)
             start_time = time_candidates[0]
             tz = timezone.get_current_timezone()
-            appointment_date_obj = parse_date(draft.get("appointment_date")) if draft.get("appointment_date") else None
             if appointment_date_obj:
                 scheduled_at = timezone.make_aware(
                     datetime.combine(appointment_date_obj, start_time),
@@ -3293,6 +3368,26 @@ def private_booking_schedule(request):
                 draft["scheduled_at"] = scheduled_at.isoformat()
             else:
                 draft["scheduled_at"] = None
+        elif mode == "per_service":
+            schedules = draft.get("service_schedules") or {}
+            for service in services:
+                schedule = schedules.get(service.slug) or {}
+                service_date_raw = schedule.get("date")
+                service_date = parse_date(service_date_raw) if service_date_raw else None
+                if not service_date:
+                    messages.error(request, f"Please choose a valid date for {service.title}.")
+                    return _render_schedule_page(temp_booking, pricing)
+                if _date_is_before_today(service_date):
+                    messages.error(request, f"{service.title} must be scheduled for today or a future date.")
+                    return _render_schedule_page(temp_booking, pricing)
+                service_end_date_raw = schedule.get("end_date") or ""
+                service_end_date = parse_date(service_end_date_raw) if service_end_date_raw else None
+                if service_end_date and _date_is_before_today(service_end_date):
+                    messages.error(request, f"End date for {service.title} must be today or a future date.")
+                    return _render_schedule_page(temp_booking, pricing)
+                if service_end_date and service_end_date < service_date:
+                    messages.error(request, f"End date for {service.title} cannot be earlier than its booking date.")
+                    return _render_schedule_page(temp_booking, pricing)
         else:
             draft["scheduled_at"] = None
 

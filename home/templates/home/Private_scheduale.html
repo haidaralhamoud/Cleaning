@@ -140,7 +140,7 @@
             <div class="end-btn" id="noBtn">No, ongoing until further notice</div>
             <div class="end-btn" id="yesBtn">Yes</div>
           </div>
-          <input type="date" id="endDate" class="hidden">
+          <input type="date" id="endDate" class="hidden" min="{{ min_booking_date }}">
         </div>
       </div>
 
@@ -169,7 +169,7 @@
               <div class="svc-row">
                 <div class="svc-col">
                   <label class="svc-label">Date</label>
-                  <input type="date" class="svc-input svc-date">
+                  <input type="date" class="svc-input svc-date" min="{{ min_booking_date }}">
                 </div>
                 <div class="svc-col">
                   <label class="svc-label">Time Window</label>
@@ -216,7 +216,7 @@
                   <label class="svc-label">End Date (optional)</label>
                   <div class="svc-end-row">
                     <span class="muted-note">Leave empty for ongoing booking.</span>
-                    <input type="date" class="svc-input svc-end-date">
+                    <input type="date" class="svc-input svc-end-date" min="{{ min_booking_date }}">
                   </div>
                 </div>
               </div>
@@ -307,6 +307,7 @@ if (typeof INITIAL_PRICING_DATA === "string") {
 if (!INITIAL_PRICING_DATA || typeof INITIAL_PRICING_DATA !== "object") {
   INITIAL_PRICING_DATA = {};
 }
+const MIN_BOOKING_DATE = "{{ min_booking_date|default:'' }}";
 
 const frequencyRuleMap = new Map();
 const dayRuleMap = new Map();
@@ -377,6 +378,31 @@ function formatSurcharge(rule){
   }
   return `+${amount}%`;
 }
+
+function isPastBookingDate(value) {
+  return Boolean(value && MIN_BOOKING_DATE && value < MIN_BOOKING_DATE);
+}
+
+const PAST_DATE_MESSAGE = "Please choose today or a future date for your booking.";
+const PAST_END_DATE_MESSAGE = "End date must be today or a future date.";
+const END_BEFORE_START_MESSAGE = "End date cannot be earlier than the booking date.";
+
+function showDateAlert(message) {
+  if (typeof window.showToast === "function") {
+    window.showToast(message, "error");
+  }
+  window.alert(message);
+}
+
+document.querySelectorAll(".svc-date, .svc-end-date, #endDate").forEach((input) => {
+  input.addEventListener("change", () => {
+    if (isPastBookingDate(input.value)) {
+      input.value = "";
+      showDateAlert(input.matches(".svc-end-date, #endDate") ? PAST_END_DATE_MESSAGE : PAST_DATE_MESSAGE);
+      updateScheduleSummary();
+    }
+  });
+});
 
 const WEEKDAY_CODES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 const weekdayRules = new Map();
@@ -468,6 +494,8 @@ function renderCalendar(month, year){
 
     const jsDate = new Date(year, month, d);
     const weekday = jsDate.getDay();
+    const dateStr = `${year}-${pad(month+1)}-${pad(d)}`;
+    const isPastDate = isPastBookingDate(dateStr);
 
     const rule = getRuleForDate(jsDate);
     const surchargeLabel = rule ? formatSurcharge(rule) : "";
@@ -479,11 +507,17 @@ function renderCalendar(month, year){
       cell.classList.add("weekend");
     }
 
+    if (isPastDate) {
+      cell.classList.add("day-disabled");
+    }
+
     cell.addEventListener("click", () => {
+      if (isPastDate) {
+        showDateAlert(PAST_DATE_MESSAGE);
+        return;
+      }
       document.querySelectorAll(".day").forEach(el => el.classList.remove("selected"));
       cell.classList.add("selected");
-
-      const dateStr = `${year}-${pad(month+1)}-${pad(d)}`;
       inputDate.value = dateStr;
 
       const weekdayCode = WEEKDAY_CODES[weekday];
@@ -810,6 +844,34 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
       if (calendarDays) calendarDays.classList.add("field-error-pill");
     }
 
+    if (false && isPastBookingDate(inputDate.value)) {
+      e.preventDefault();
+      notify("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+      alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+      return;
+    }
+
+    if (inputDate.value && isPastBookingDate(inputDate.value)) {
+      e.preventDefault();
+      notify(PAST_DATE_MESSAGE);
+      showDateAlert(PAST_DATE_MESSAGE);
+      return;
+    }
+
+    if (endDate && endDate.value && isPastBookingDate(endDate.value)) {
+      e.preventDefault();
+      notify(PAST_END_DATE_MESSAGE);
+      showDateAlert(PAST_END_DATE_MESSAGE);
+      return;
+    }
+
+    if (inputDate.value && endDate && endDate.value && endDate.value < inputDate.value) {
+      e.preventDefault();
+      notify(END_BEFORE_START_MESSAGE);
+      showDateAlert(END_BEFORE_START_MESSAGE);
+      return;
+    }
+
     if (!inputWindow.value) {
       valid = false;
       const timeBox = document.querySelector(".time-box");
@@ -864,17 +926,41 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
   } else if (inputMode.value === "per_service") {
     let valid = true;
     let firstInvalid = null;
+    let hasPastDate = false;
+    let hasPastEndDate = false;
+    let hasEndBeforeStart = false;
 
     document.querySelectorAll(".service-acc").forEach(acc => {
       const dateEl   = acc.querySelector(".svc-date");
       const timeEl   = acc.querySelector(".svc-time");
       const freqEl   = acc.querySelector(".svc-frequency");
+      const endEl    = acc.querySelector(".svc-end-date");
       const daysWrap = acc.querySelector(".svc-days");
       const dayChecks= acc.querySelectorAll(".svc-day:checked");
 
       if (!dateEl.value) {
         valid = false;
         dateEl.classList.add("field-error");
+        firstInvalid = firstInvalid || acc;
+      } else if (isPastBookingDate(dateEl.value)) {
+        valid = false;
+        hasPastDate = true;
+        dateEl.classList.add("field-error");
+        firstInvalid = firstInvalid || acc;
+      }
+
+      if (endEl && endEl.value && isPastBookingDate(endEl.value)) {
+        valid = false;
+        hasPastEndDate = true;
+        endEl.classList.add("field-error");
+        firstInvalid = firstInvalid || acc;
+      }
+
+      if (dateEl.value && endEl && endEl.value && endEl.value < dateEl.value) {
+        valid = false;
+        hasEndBeforeStart = true;
+        dateEl.classList.add("field-error");
+        endEl.classList.add("field-error");
         firstInvalid = firstInvalid || acc;
       }
 
@@ -904,6 +990,31 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
         const body = firstInvalid.querySelector(".acc-body");
         if (body) body.style.maxHeight = body.scrollHeight + "px";
         firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      if (hasPastEndDate) {
+        notify(PAST_END_DATE_MESSAGE);
+        showDateAlert(PAST_END_DATE_MESSAGE);
+        return;
+      }
+      if (hasEndBeforeStart) {
+        notify(END_BEFORE_START_MESSAGE);
+        showDateAlert(END_BEFORE_START_MESSAGE);
+        return;
+      }
+      if (hasPastDate) {
+        notify(PAST_DATE_MESSAGE);
+        showDateAlert(PAST_DATE_MESSAGE);
+        return;
+      }
+      if (false && hasPastDate) {
+        notify(PAST_DATE_MESSAGE);
+        showDateAlert(PAST_DATE_MESSAGE);
+        return;
+      }
+      if (hasPastDate) {
+        notify("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+        alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+        return;
       }
       notify("Please complete all schedule fields for each service.");
       return;
