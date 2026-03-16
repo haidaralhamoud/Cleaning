@@ -13,7 +13,7 @@
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 
 </head>
-<body>
+<body class="address-locations-view">
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
@@ -107,27 +107,6 @@
 
 <div class="overlay customer-menu-overlay" id="menuOverlay"></div>
 
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.getElementById("menuOverlay");
-  const arrow = document.querySelector(".customer-menu-toggle .arrow");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-      if (arrow) arrow.innerHTML = "&#8250;";
-    });
-  }
-})();
-</script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

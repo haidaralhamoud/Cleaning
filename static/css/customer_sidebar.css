@@ -163,12 +163,19 @@
 }
 
 @media (max-width: 991px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   body {
     /* Align body offset with fixed header height to avoid extra top gap */
     padding-top: 70px !important;
   }
 
-  .menu-toggle.customer-menu-toggle { display: none !important; }
+  .menu-toggle.customer-menu-toggle {
+    display: inline-flex !important;
+  }
 
   .customer-sidebar {
     transition: transform 0.35s ease, box-shadow 0.35s ease;
@@ -180,8 +187,10 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   }
 
-  .layout {
+  .layout,
+  .page {
     flex-direction: column;
+    align-items: stretch;
     padding: 8px 12px 16px;
     padding-top: 0;
   }
@@ -245,21 +254,11 @@
   }
 
   /* Ensure main content doesn't keep reserved sidebar space on small screens */
-  .sidebar.customer-sidebar ~ .page,
-  .sidebar.customer-sidebar ~ .main,
-  .sidebar.customer-sidebar ~ .content,
-  .sidebar.customer-sidebar ~ .main-content {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    margin-left: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-  }
-
-  /* When sidebar is opened explicitly, allow page to shift if desired */
-  .sidebar.customer-sidebar.open ~ .page,
-  .sidebar.customer-sidebar.active ~ .page {
+  .main,
+  .content,
+  .main-content {
     padding-left: 0 !important;
+    padding-right: 0 !important;
   }
 }
 
@@ -534,8 +533,10 @@ body .customer-sidebar .avatar img {
 
 /* Common mobile layout safety for customer pages */
 @media (max-width: 991px) {
-  .main {
-    padding-top: 56px !important;
+  .main,
+  .content,
+  .main-content {
+    padding-top: 16px !important;
   }
 
   .page-title,
@@ -592,6 +593,15 @@ body .customer-sidebar .avatar img {
   .sidebar.customer-sidebar.active {
     transform: translateX(0) !important;
   }
+
+  .layout > .main,
+  .layout > .content,
+  .page > .main,
+  .page > .content {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
 }
 
 @media (max-width: 991px) {
@@ -622,5 +632,6 @@ body .customer-sidebar .avatar img {
   .customer-menu-overlay {
     background: rgba(8, 24, 32, 0.5);
     backdrop-filter: blur(4px);
+    z-index: 1900;
   }
 }

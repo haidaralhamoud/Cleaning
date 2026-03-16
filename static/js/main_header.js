@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initCustomSelects();
   initFormValidation();
   initHemblaCalendar();
+  flushDjangoMessagesToToast();
 });
 
 const initCustomSelects = () => {
@@ -160,6 +161,30 @@ const showToast = (title, desc) => {
 };
 
 window.showToast = showToast;
+
+const flushDjangoMessagesToToast = () => {
+  const holder = document.getElementById("django-message-data");
+  if (!holder) return;
+
+  const hasVisibleMessages = document.querySelector(
+    ".flash-stack, .messages-stack, .schedule-messages, .form-messages"
+  );
+  if (hasVisibleMessages) return;
+
+  const items = holder.querySelectorAll(".django-message-item");
+  items.forEach((item) => {
+    const text = item.dataset.text || "";
+    if (!text.trim()) return;
+
+    const tags = item.dataset.tags || "";
+    let title = "Notice";
+    if (tags.includes("error")) title = "Action needed";
+    else if (tags.includes("warning")) title = "Please note";
+    else if (tags.includes("success")) title = "Done";
+
+    showToast(title, text);
+  });
+};
 
 const initFormValidation = () => {
   const forms = Array.from(document.querySelectorAll("form")).filter(

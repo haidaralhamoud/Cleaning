@@ -30,24 +30,35 @@
       <p class="subtitle">Login to your account</p>
 
       <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
+        {% csrf_token %}
+        {% if next %}
+          <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        {% if messages %}
+          <div class="form-messages" role="status" aria-live="polite">
+            {% for message in messages %}
+              <div class="alert-info">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+
         <input type="text" name="username" placeholder="Email or Phone Number" class="input-field" value="{{ request.GET.email|default:'' }}" required>
 
         <input type="password" name="password" placeholder="Password" class="input-field" required>
- {% if form.errors %}
-    <div class="alert-error" role="alert">
-      <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-      <span>Your username and password didn't match. Please try again.</span>
-    </div>
-  {% endif %}
-  {% if next %}
-    {% if user.is_authenticated %}
-      <p>Your account doesn't have access to this page. To proceed,
-      please login with an account that has access.</p>
-    {% else %}
-      <p>Please login to see this page.</p>
-    {% endif %}
-  {% endif %}
+        {% if form.errors %}
+          <div class="alert-error" role="alert">
+            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+            <span>Your username and password didn't match. Please try again.</span>
+          </div>
+        {% endif %}
+        {% if next and not messages %}
+          {% if user.is_authenticated %}
+            <div class="alert-info">Your account does not have access to this page.</div>
+          {% else %}
+            <div class="alert-info">Please sign in to continue.</div>
+          {% endif %}
+        {% endif %}
         <div class="form-options">
           <label><input type="checkbox" name="remember_me" data-optional> Remember me</label>
           <a href="{% url 'password_reset' %}" class="forgot">Forgot Password</a>
@@ -57,7 +68,7 @@
 
         <div class="divider"><span>OR</span></div>
 
-        <a href="{% url 'accounts:google_login_start' %}" class="btn-social google">
+        <a href="{% url 'accounts:google_login_start' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="btn-social google">
           <img src="{% static 'images/google0.png'%}" alt="Google Icon"> Continue with Google
         </a>
 
@@ -66,7 +77,7 @@
         </button>
 
         <p class="signup-text">
-          Don't have an account <a href="{% url 'accounts:sign_up' %}">Sign up</a>
+          Don't have an account <a href="{% url 'accounts:sign_up' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Sign up</a>
         </p>
       </form>
     </div>

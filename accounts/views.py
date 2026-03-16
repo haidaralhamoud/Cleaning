@@ -742,6 +742,7 @@ def google_login_start(request):
 # ======================================================
 def sign_up(request):
     ref_code = request.GET.get("ref")
+    next_url = request.POST.get("next") or request.GET.get("next") or ""
     locked_email = None
     if request.user.is_authenticated and request.user.email:
         locked_email = request.user.email
@@ -756,7 +757,7 @@ def sign_up(request):
             # 1️⃣ إنشاء User
             if User.objects.filter(username=email).exists():
                 form.add_error("email", "Email is already registered.")
-                return render(request, "registration/sign_up.html", {"form": form})
+                return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
             try:
                 user = User.objects.create_user(
@@ -766,7 +767,7 @@ def sign_up(request):
                 )
             except IntegrityError:
                 form.add_error("email", "Email is already registered.")
-                return render(request, "registration/sign_up.html", {"form": form})
+                return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
             # 2️⃣ إنشاء Customer
             customer = form.save(commit=False)
@@ -816,12 +817,15 @@ def sign_up(request):
                     customer.save(update_fields=["has_referral_discount"])
 
             login_url = reverse("login")
-            query = urlencode({"email": email})
+            query_data = {"email": email}
+            if next_url:
+                query_data["next"] = next_url
+            query = urlencode(query_data)
             return redirect(f"{login_url}?{query}")
     else:
         form = CustomerForm(locked_email=locked_email)
 
-    return render(request, "registration/sign_up.html", {"form": form})
+    return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
 
 
@@ -3002,6 +3006,7 @@ def provider_inbox(request):
     if request.user.is_superuser:
         return redirect("home:dashboard_home")
     if not _provider_required(request.user):
+        messages.warning(request, "You do not have permission to access provider messages.")
         return redirect("accounts:customer_profile_view")
 
     from accounts.models import ChatThread, ChatMessage

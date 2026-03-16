@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
 </head>
-<body>
+<body class="my-bookings-view">
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
@@ -189,25 +189,6 @@ document.addEventListener("click", () => {
 
 </script>
 
- 
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
-  }
-})();
-</script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

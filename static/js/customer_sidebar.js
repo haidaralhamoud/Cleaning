@@ -2,7 +2,7 @@ document.addEventListener(
   "DOMContentLoaded",
   () => {
     const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
+    const sidebar = document.querySelector(".customer-sidebar");
     if (!toggle || !sidebar) return;
 
     let overlay = document.querySelector(".customer-menu-overlay");

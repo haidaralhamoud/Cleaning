@@ -363,3 +363,67 @@ body{
 
   .sidebar.open { left: 0; } /* لما تفتح */
 }
+
+@media (max-width: 991px) {
+  .layout {
+    display: block;
+    padding: 0 12px 24px !important;
+  }
+
+  .main {
+    width: 100%;
+    margin: 0 !important;
+    padding: 16px 0 24px !important;
+  }
+
+  .main h1,
+  .main h2 {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .card {
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  body.address-locations-view .sidebar.customer-sidebar,
+  body.address-locations-view .layout > .sidebar.customer-sidebar,
+  body.address-locations-view aside.sidebar.customer-sidebar {
+    position: fixed !important;
+    top: 70px !important;
+    left: 0 !important;
+    width: min(82vw, 320px) !important;
+    max-width: min(82vw, 320px) !important;
+    height: calc(100vh - 70px) !important;
+    margin: 0 !important;
+    transform: translateX(calc(-100% - 24px)) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: 2000 !important;
+    overflow: hidden !important;
+    border-radius: 0 20px 20px 0 !important;
+  }
+
+  body.address-locations-view .sidebar.customer-sidebar.open,
+  body.address-locations-view .sidebar.customer-sidebar.active {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  body.address-locations-view .customer-menu-overlay {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  body.address-locations-view .customer-menu-overlay.show {
+    display: block !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}

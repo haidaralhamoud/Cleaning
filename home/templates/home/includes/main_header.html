@@ -142,4 +142,11 @@
   </div>
 </header>
 
+{% if messages %}
+  <div id="django-message-data" hidden>
+    {% for message in messages %}
+      <div class="django-message-item" data-tags="{{ message.tags|default:'' }}" data-text="{{ message|escape }}"></div>
+    {% endfor %}
+  </div>
+{% endif %}
 
