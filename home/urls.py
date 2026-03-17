@@ -15,9 +15,13 @@ urlpatterns = [
     path("services/contact/submit/", views.service_contact_submit, name="service_contact_submit"),
     path("dashboard/", views.dashboard_home, name="dashboard_home"),
     path("dashboard/notifications/", views.dashboard_notifications_api, name="dashboard_notifications_api"),
+    path("dashboard/request-fixes/<int:fix_id>/<str:status_slug>/", views.dashboard_request_fix_status, name="dashboard_request_fix_status"),
+    path("dashboard/no-show/<int:report_id>/<str:decision_slug>/", views.dashboard_no_show_decision, name="dashboard_no_show_decision"),
+    path("dashboard/bookings/<str:booking_type>/<int:booking_id>/assign-provider/", views.dashboard_assign_provider, name="dashboard_assign_provider"),
     path("dashboard/change-password/", views.dashboard_change_password, name="dashboard_change_password"),
     path("dashboard/<str:model>/", views.dashboard_model_list, name="dashboard_model_list"),
     path("dashboard/<str:model>/add/", views.dashboard_model_create, name="dashboard_model_create"),
+    path("dashboard/<str:model>/<int:pk>/view/", views.dashboard_model_view, name="dashboard_model_view"),
     path("dashboard/<str:model>/<int:pk>/edit/", views.dashboard_model_edit, name="dashboard_model_edit"),
     path("dashboard/<str:model>/<int:pk>/delete/", views.dashboard_model_delete, name="dashboard_model_delete"),
     path(

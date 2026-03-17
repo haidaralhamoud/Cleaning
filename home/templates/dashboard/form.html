@@ -5,7 +5,17 @@
 {% block content %}
   <div class="card shadow-sm">
     <div class="card-body">
-      <h5 class="mb-3">{% if mode == "edit" %}Edit{% else %}Add{% endif %} {{ item.label|slice:":-1" }}</h5>
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h5 class="mb-0">
+          {% if mode == "view" %}View
+          {% elif mode == "edit" %}Edit
+          {% else %}Add{% endif %}
+          {{ item.label|slice:":-1" }}
+        </h5>
+        {% if mode == "view" and object %}
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' item.slug object.pk %}">Edit</a>
+        {% endif %}
+      </div>
       {% if item.slug == "private-services" and object %}
         <div class="mb-3 d-flex flex-wrap gap-2">
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ object.pk }}">Cards</a>
@@ -49,7 +59,9 @@
         {% endif %}
       {% endif %}
       <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+        {% if mode != "view" %}
+          {% csrf_token %}
+        {% endif %}
         {% if item.slug == "date-surcharges" %}
           <div class="mb-3">
             <div class="d-flex flex-wrap gap-2">
@@ -278,8 +290,12 @@
           </div>
         {% endif %}
         <div class="d-flex gap-2">
-          <button class="btn btn-primary" type="submit">Save</button>
-          <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
+          {% if mode != "view" %}
+            <button class="btn btn-primary" type="submit">Save</button>
+            <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
+          {% else %}
+            <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Back</a>
+          {% endif %}
         </div>
       </form>
     </div>

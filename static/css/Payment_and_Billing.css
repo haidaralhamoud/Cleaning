@@ -93,6 +93,7 @@ body{
 .invoice-history table{width:100%;border-collapse:collapse}
 .invoice-history th,.invoice-history td{text-align:left;padding:12px;border-bottom:1px solid #e5e7eb}
 .invoice-history th{background:#f9fbff}
+.invoice-history td.payment-method-cell{text-align:center}
 .method-icon{width:30px;height:auto}
 .status{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
 .status.paid{background:#dcfce7;color:#166534}

@@ -2161,6 +2161,24 @@ def Payment_and_Billing(request):
     invoices = Invoice.objects.filter(
         customer=customer
     ).select_related("payment_method").order_by("-issued_at")[:20]
+    private_booking_brands = {
+        booking.id: (booking.payment_brand or "").strip().title()
+        for booking in PrivateBooking.objects.filter(
+            user=request.user,
+            id__in=[
+                invoice.booking_id
+                for invoice in invoices
+                if invoice.booking_type == "private" and invoice.booking_id
+            ],
+        ).only("id", "payment_brand")
+    }
+    for invoice in invoices:
+        if invoice.payment_method:
+            invoice.display_payment_label = invoice.payment_method.get_card_type_display()
+        elif invoice.booking_type == "private" and invoice.booking_id:
+            invoice.display_payment_label = private_booking_brands.get(invoice.booking_id, "")
+        else:
+            invoice.display_payment_label = ""
 
     subscription, _ = Subscription.objects.get_or_create(
         customer=customer,

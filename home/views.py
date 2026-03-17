@@ -19,7 +19,7 @@ from django.db import IntegrityError, transaction
 from django.urls import reverse
 
 from .models import (
-    Job, Application, BookingNote, BusinessBooking, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
+    BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
     BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
     Contact, FAQCategory, FAQItem, StripeWebhookEvent,
@@ -650,12 +650,31 @@ def _dashboard_notifications():
         .order_by("-created_at")[:6]
     )
     recent_fixes = list(
-        BookingRequestFix.objects.filter(created_at__gte=since)
+        BookingRequestFix.objects.filter(created_at__gte=since).exclude(status="OPEN")
+        .order_by("-created_at")[:6]
+    )
+    recent_open_fixes = list(
+        BookingRequestFix.objects.filter(status="OPEN")
+        .order_by("-created_at")[:6]
+    )
+    recent_pending_no_show = list(
+        NoShowReport.objects.filter(decision="PENDING")
+        .select_related("provider")
         .order_by("-created_at")[:6]
     )
     recent_contacts = list(
         Contact.objects.filter(created_at__gte=since)
         .order_by("-created_at")[:6]
+    )
+    recent_customers = list(
+        Customer.objects.filter(user__date_joined__gte=since)
+        .select_related("user")
+        .order_by("-user__date_joined")[:6]
+    )
+    recent_providers = list(
+        ProviderProfile.objects.filter(user__date_joined__gte=since)
+        .select_related("user")
+        .order_by("-user__date_joined")[:6]
     )
     recent_customer_notes = list(
         CustomerNote.objects.filter(updated_at__gte=since)
@@ -698,12 +717,43 @@ def _dashboard_notifications():
             "time": fix.created_at,
             "url": "/dashboard/request-fixes/",
         })
+    for fix in recent_open_fixes:
+        items.append({
+            "title": f"Open Request Fix #{fix.id}",
+            "detail": f"{fix.booking_type.title()} booking #{fix.booking_id}",
+            "time": fix.created_at,
+            "url": "/dashboard/request-fixes/",
+        })
+    for report in recent_pending_no_show:
+        provider_name = str(report.provider) if report.provider_id else "Unknown provider"
+        items.append({
+            "title": f"Pending No-Show #{report.id}",
+            "detail": f"{report.booking_type.title()} booking #{report.booking_id} - {provider_name}",
+            "time": report.created_at,
+            "url": "/dashboard/no-show-reports/",
+        })
     for contact in recent_contacts:
         items.append({
             "title": f"Contact: {contact.first_name} {contact.last_name}".strip(),
             "detail": contact.inquiry_type or "Contact form",
             "time": contact.created_at,
             "url": "/dashboard/contacts/",
+        })
+    for customer in recent_customers:
+        customer_name = f"{customer.first_name} {customer.last_name}".strip() or customer.email or str(customer)
+        items.append({
+            "title": "New Customer",
+            "detail": customer_name,
+            "time": customer.user.date_joined,
+            "url": "/dashboard/customers/",
+        })
+    for provider in recent_providers:
+        provider_name = getattr(provider.user, "username", "") or str(provider.user)
+        items.append({
+            "title": "New Provider Signup",
+            "detail": provider_name,
+            "time": provider.user.date_joined,
+            "url": "/dashboard/provider-profiles/",
         })
     for note in recent_customer_notes:
         items.append({
@@ -771,6 +821,357 @@ def _dashboard_notifications():
     }
 
 
+def _dashboard_booking_url(booking_type, booking_id):
+    if booking_type == "business":
+        return f"/dashboard/business-bookings/{booking_id}/edit/"
+    return f"/dashboard/private-bookings/{booking_id}/edit/"
+
+
+def _dashboard_get_booking_instance(booking_type, booking_id):
+    if booking_type == "business":
+        return get_object_or_404(BusinessBooking, pk=booking_id)
+    return get_object_or_404(PrivateBooking, pk=booking_id)
+
+
+def _dashboard_async_response(request, ok, message, status=200):
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"ok": ok, "message": message}, status=status)
+    if ok:
+        messages.success(request, message)
+    else:
+        messages.error(request, message)
+    return redirect("home:dashboard_home")
+
+
+def _dashboard_uses_view_mode(item):
+    return item.slug in {
+        "contacts",
+        "feedback",
+        "applications",
+        "private-bookings",
+        "business-bookings",
+        "call-requests",
+        "email-requests",
+        "request-fixes",
+        "customer-notifications",
+        "service-reviews",
+        "service-comments",
+        "customer-notes",
+        "incidents",
+    }
+
+
+def _dashboard_booking_customer_label(booking):
+    if isinstance(booking, BusinessBooking):
+        return booking.company_name or booking.contact_person or booking.email or f"Business #{booking.id}"
+    user = getattr(booking, "user", None)
+    if user:
+        full_name = user.get_full_name().strip()
+        if full_name:
+            return full_name
+        if user.email:
+            return user.email
+        return user.username
+    return f"Private #{booking.id}"
+
+
+def _dashboard_booking_service_label(booking):
+    if isinstance(booking, BusinessBooking):
+        return booking.selected_service or booking.selected_bundle or "Business service"
+    selected = booking.selected_services or []
+    if isinstance(selected, list) and selected:
+        return ", ".join(str(value) for value in selected[:2])
+    return booking.main_category or "Private service"
+
+
+def _dashboard_booking_when(booking):
+    start_dt, _ = booking.get_service_window()
+    if start_dt:
+        return timezone.localtime(start_dt).strftime("%b %d, %I:%M %p")
+    if isinstance(booking, PrivateBooking) and booking.appointment_date:
+        return f"{booking.appointment_date:%b %d, %Y} {booking.appointment_time_window or ''}".strip()
+    if isinstance(booking, BusinessBooking):
+        raw_date = booking.custom_date or booking.start_date
+        raw_time = booking.custom_time or booking.preferred_time or ""
+        if raw_date:
+            return f"{raw_date:%b %d, %Y} {raw_time}".strip()
+    return "Time not set"
+
+
+def _dashboard_booking_priority(booking, now):
+    start_dt, _ = booking.get_service_window()
+    overdue = bool(start_dt and start_dt < now and booking.status not in BaseBooking.INACTIVE_STATUSES)
+    if overdue:
+        return "high"
+    if booking.is_urgent:
+        return "high"
+    if booking.provider_id is None:
+        return "medium"
+    return "normal"
+
+
+def _dashboard_action_center(now):
+    active_statuses = ["ORDERED", "SCHEDULED", "ASSIGNED", "ON_THE_WAY", "STARTED", "PAUSED", "RESUMED"]
+    unassigned_private = list(
+        PrivateBooking.objects.filter(provider__isnull=True, status__in=["ORDERED", "SCHEDULED"])
+        .select_related("user")
+        .order_by("created_at")[:3]
+    )
+    unassigned_business = list(
+        BusinessBooking.objects.filter(provider__isnull=True, status__in=["ORDERED", "SCHEDULED"])
+        .select_related("user", "selected_bundle")
+        .order_by("created_at")[:3]
+    )
+    pending_no_shows = list(
+        NoShowReport.objects.filter(decision="PENDING")
+        .select_related("provider")
+        .order_by("-created_at")[:3]
+    )
+    open_fixes = list(
+        BookingRequestFix.objects.filter(status="OPEN")
+        .select_related("customer")
+        .order_by("-created_at")[:3]
+    )
+    unread_incidents = list(
+        Incident.objects.filter(status="open")
+        .select_related("customer")
+        .order_by("-created_at")[:3]
+    )
+
+    actions = []
+    for booking in unassigned_private:
+        actions.append({
+            "title": f"Assign private booking #{booking.id}",
+            "detail": f"{_dashboard_booking_customer_label(booking)} • {_dashboard_booking_when(booking)}",
+            "meta": _dashboard_booking_service_label(booking),
+            "count": None,
+            "priority": _dashboard_booking_priority(booking, now),
+            "url": _dashboard_booking_url("private", booking.id),
+            "action_label": "Open booking",
+            "cta": "Assign provider",
+        })
+    for booking in unassigned_business:
+        actions.append({
+            "title": f"Assign business booking #{booking.id}",
+            "detail": f"{_dashboard_booking_customer_label(booking)} • {_dashboard_booking_when(booking)}",
+            "meta": _dashboard_booking_service_label(booking),
+            "count": None,
+            "priority": _dashboard_booking_priority(booking, now),
+            "url": _dashboard_booking_url("business", booking.id),
+            "action_label": "Open booking",
+            "cta": "Assign provider",
+        })
+    for report in pending_no_shows:
+        provider_name = str(report.provider) if report.provider_id else "Unknown provider"
+        actions.append({
+            "title": f"Review no-show #{report.id}",
+            "detail": f"{report.booking_type.title()} booking #{report.booking_id} • {provider_name}",
+            "meta": "Decision pending",
+            "count": None,
+            "priority": "high",
+            "url": "/dashboard/no-show/",
+            "cta": "Review case",
+            "primary_action": {
+                "label": "Approve no-show",
+                "url": reverse("home:dashboard_no_show_decision", args=[report.id, "approve"]),
+            },
+            "secondary_action": {
+                "label": "Reject",
+                "url": reverse("home:dashboard_no_show_decision", args=[report.id, "reject"]),
+            },
+        })
+    for fix in open_fixes:
+        customer_name = getattr(fix.customer, "email", "") or getattr(fix.customer, "username", "") or str(fix.customer)
+        actions.append({
+            "title": f"Open fix request #{fix.id}",
+            "detail": f"{customer_name} • {fix.booking_type.title()} booking #{fix.booking_id}",
+            "meta": "Customer waiting for follow-up",
+            "count": None,
+            "priority": "high",
+            "url": "/dashboard/request-fixes/",
+            "action_label": "Open fix",
+            "cta": "Open fix",
+            "primary_action": {
+                "label": "Mark in review",
+                "url": reverse("home:dashboard_request_fix_status", args=[fix.id, "in-review"]),
+            },
+        })
+    for incident in unread_incidents:
+        actions.append({
+            "title": f"Investigate incident #{incident.id}",
+            "detail": f"{incident.customer} • {incident.incident_type or 'Incident'}",
+            "meta": "Open incident",
+            "count": None,
+            "priority": "medium",
+            "url": "/dashboard/incidents/",
+            "action_label": "Open incident",
+            "cta": "Open incident",
+        })
+    return sorted(
+        actions,
+        key=lambda item: {"high": 0, "medium": 1, "normal": 2}.get(item["priority"], 3),
+    )[:8]
+
+
+def _dashboard_today_queue(now):
+    today = timezone.localdate()
+    active_statuses = ["ORDERED", "SCHEDULED", "ASSIGNED", "ON_THE_WAY", "STARTED", "PAUSED", "RESUMED"]
+
+    private_today = list(
+        PrivateBooking.objects.filter(
+            appointment_date=today,
+            status__in=active_statuses,
+        ).select_related("user", "provider")
+    )
+    business_today = list(
+        BusinessBooking.objects.filter(
+            Q(custom_date=today) | Q(start_date=today),
+            status__in=active_statuses,
+        ).select_related("user", "provider", "selected_bundle")
+    )
+    combined = private_today + business_today
+
+    queue_items = []
+    for booking in combined:
+        start_dt, _ = booking.get_service_window()
+        primary_action_label = "Open booking"
+        if booking.provider_id is None:
+            primary_action_label = "Assign provider"
+        elif booking.status in ["STARTED", "ON_THE_WAY", "PAUSED", "RESUMED"]:
+            primary_action_label = "Track booking"
+        provider_options = []
+        if booking.provider_id is None:
+            for provider in _filtered_provider_queryset(booking):
+                provider_label = provider.get_full_name().strip() or provider.username
+                profile = getattr(provider, "provider_profile", None)
+                area_label = ""
+                if profile:
+                    area_label = profile.area or profile.city or profile.region or ""
+                if area_label:
+                    provider_label = f"{provider_label} ({area_label})"
+                provider_options.append({
+                    "id": provider.id,
+                    "label": provider_label,
+                })
+        queue_items.append({
+            "title": f"{booking._booking_type().title()} booking #{booking.id}",
+            "detail": _dashboard_booking_customer_label(booking),
+            "service": _dashboard_booking_service_label(booking),
+            "time_label": _dashboard_booking_when(booking),
+            "status": booking.get_status_display(),
+            "provider": str(booking.provider) if booking.provider_id else "Unassigned",
+            "is_unassigned": booking.provider_id is None,
+            "is_active": booking.status in ["STARTED", "ON_THE_WAY", "PAUSED", "RESUMED"],
+            "is_overdue": bool(start_dt and start_dt < now and booking.status not in BaseBooking.INACTIVE_STATUSES),
+            "url": _dashboard_booking_url(booking._booking_type(), booking.id),
+            "primary_action_label": primary_action_label,
+            "secondary_action_label": "Open details",
+            "provider_options": provider_options,
+            "assign_url": reverse("home:dashboard_assign_provider", args=[booking._booking_type(), booking.id]),
+            "sort_key": start_dt or now,
+        })
+    queue_items = sorted(queue_items, key=lambda item: (item["sort_key"], item["is_unassigned"] is False))[:8]
+
+    active_started = sum(1 for booking in combined if booking.status in ["STARTED", "ON_THE_WAY", "PAUSED", "RESUMED"])
+    overdue = sum(1 for item in queue_items if item["is_overdue"])
+    unassigned = sum(1 for item in queue_items if item["is_unassigned"])
+    return {
+        "summary": {
+            "scheduled_today": len(combined),
+            "active_now": active_started,
+            "overdue": overdue,
+            "unassigned": unassigned,
+        },
+        "items": queue_items,
+    }
+
+
+def _dashboard_unified_inbox(now):
+    since = now - timedelta(days=7)
+    inbox = []
+
+    recent_private = list(
+        PrivateBooking.objects.filter(created_at__gte=since)
+        .select_related("user", "provider")
+        .order_by("-created_at")[:5]
+    )
+    recent_business = list(
+        BusinessBooking.objects.filter(created_at__gte=since)
+        .select_related("user", "provider", "selected_bundle")
+        .order_by("-created_at")[:5]
+    )
+    recent_fixes = list(
+        BookingRequestFix.objects.filter(created_at__gte=since)
+        .select_related("customer")
+        .order_by("-created_at")[:5]
+    )
+    recent_incidents = list(
+        Incident.objects.filter(created_at__gte=since)
+        .select_related("customer")
+        .order_by("-created_at")[:5]
+    )
+    recent_messages = list(
+        ChatMessage.objects.filter(created_at__gte=since, is_read=False)
+        .select_related("sender", "thread")
+        .order_by("-created_at")[:5]
+    )
+
+    for booking in recent_private:
+        inbox.append({
+            "kind": "booking",
+            "kind_label": "Private booking",
+            "title": f"Private booking #{booking.id}",
+            "detail": f"{_dashboard_booking_customer_label(booking)} • {_dashboard_booking_service_label(booking)}",
+            "time": booking.created_at,
+            "state": booking.get_status_display(),
+            "url": _dashboard_booking_url("private", booking.id),
+        })
+    for booking in recent_business:
+        inbox.append({
+            "kind": "booking",
+            "kind_label": "Business booking",
+            "title": f"Business booking #{booking.id}",
+            "detail": f"{_dashboard_booking_customer_label(booking)} • {_dashboard_booking_service_label(booking)}",
+            "time": booking.created_at,
+            "state": booking.get_status_display(),
+            "url": _dashboard_booking_url("business", booking.id),
+        })
+    for fix in recent_fixes:
+        customer_name = getattr(fix.customer, "email", "") or getattr(fix.customer, "username", "") or str(fix.customer)
+        inbox.append({
+            "kind": "fix",
+            "kind_label": "Request fix",
+            "title": f"Request fix #{fix.id}",
+            "detail": f"{customer_name} • {fix.booking_type.title()} booking #{fix.booking_id}",
+            "time": fix.created_at,
+            "state": fix.get_status_display(),
+            "url": "/dashboard/request-fixes/",
+        })
+    for incident in recent_incidents:
+        inbox.append({
+            "kind": "incident",
+            "kind_label": "Incident",
+            "title": f"Incident #{incident.id}",
+            "detail": f"{incident.customer} • {incident.incident_type or 'Incident report'}",
+            "time": incident.created_at,
+            "state": incident.status.title(),
+            "url": "/dashboard/incidents/",
+        })
+    for msg in recent_messages:
+        inbox.append({
+            "kind": "message",
+            "kind_label": "Unread message",
+            "title": f"Message from {msg.sender}",
+            "detail": f"{msg.thread.booking_type.title()} booking #{msg.thread.booking_id}",
+            "time": msg.created_at,
+            "state": "Unread",
+            "url": _dashboard_booking_url(msg.thread.booking_type, msg.thread.booking_id),
+            "action_label": "Open thread",
+        })
+
+    return sorted(inbox, key=lambda item: item["time"], reverse=True)[:12]
+
+
 @user_passes_test(_staff_required)
 def dashboard_notifications_api(request):
     data = _dashboard_notifications()
@@ -818,9 +1219,92 @@ def dashboard_home(request):
             "count": count,
             "alert_count": alert_count,
         })
-    context = {"cards": cards, "items": items}
+    today_queue = _dashboard_today_queue(now)
+    context = {
+        "cards": cards,
+        "items": items,
+        "action_center": _dashboard_action_center(now),
+        "today_queue": today_queue["items"],
+        "today_queue_summary": today_queue["summary"],
+        "unified_inbox": _dashboard_unified_inbox(now),
+    }
     context.update(_dashboard_notifications())
     return render(request, "dashboard/index.html", context)
+
+
+@user_passes_test(_staff_required)
+@require_POST
+def dashboard_request_fix_status(request, fix_id, status_slug):
+    request_fix = get_object_or_404(BookingRequestFix, pk=fix_id)
+    status_map = {
+        "in-review": "IN_REVIEW",
+        "resolved": "RESOLVED",
+    }
+    new_status = status_map.get(status_slug)
+    if not new_status:
+        return _dashboard_async_response(request, False, "Invalid request-fix status.", status=400)
+    if request_fix.status != new_status:
+        request_fix.status = new_status
+        request_fix.save(update_fields=["status"])
+        CustomerNotification.objects.create(
+            user=request_fix.customer,
+            title="Request Fix Updated",
+            body=f"Your request fix for booking #{request_fix.booking_id} is now {new_status.replace('_', ' ').title()}.",
+            notification_type="request_fix",
+            booking_type=request_fix.booking_type,
+            booking_id=request_fix.booking_id,
+            request_fix=request_fix,
+        )
+    return _dashboard_async_response(request, True, f"Request fix #{request_fix.id} updated to {new_status.replace('_', ' ').title()}.")
+
+
+@user_passes_test(_staff_required)
+@require_POST
+def dashboard_no_show_decision(request, report_id, decision_slug):
+    report = get_object_or_404(NoShowReport, pk=report_id)
+    if report.decision != "PENDING":
+        return _dashboard_async_response(request, False, "This no-show report was already reviewed.", status=400)
+
+    booking = _dashboard_get_booking_instance(report.booking_type, report.booking_id)
+    note = f"Dashboard {decision_slug.replace('-', ' ')}"
+    if decision_slug == "approve":
+        report.decision = "APPROVED"
+        report.reviewed_by = request.user
+        report.reviewed_note = note
+        report.reviewed_at = timezone.now()
+        report.save(update_fields=["decision", "reviewed_by", "reviewed_note", "reviewed_at"])
+        booking.approve_no_show(admin_user=request.user, note=note)
+    elif decision_slug == "reject":
+        report.decision = "REJECTED"
+        report.reviewed_by = request.user
+        report.reviewed_note = note
+        report.reviewed_at = timezone.now()
+        report.save(update_fields=["decision", "reviewed_by", "reviewed_note", "reviewed_at"])
+        booking.reject_no_show(admin_user=request.user, note=note)
+    else:
+        return _dashboard_async_response(request, False, "Invalid no-show decision.", status=400)
+    decision_label = "approved" if decision_slug == "approve" else "rejected"
+    return _dashboard_async_response(request, True, f"No-show report #{report.id} {decision_label}.")
+
+
+@user_passes_test(_staff_required)
+@require_POST
+def dashboard_assign_provider(request, booking_type, booking_id):
+    booking = _dashboard_get_booking_instance(booking_type, booking_id)
+    provider_id = (request.POST.get("provider_id") or "").strip()
+    if not provider_id:
+        return _dashboard_async_response(request, False, "Select a provider first.", status=400)
+
+    allowed_provider = _filtered_provider_queryset(booking).filter(pk=provider_id).first()
+    if not allowed_provider:
+        return _dashboard_async_response(request, False, "Selected provider is not available for this booking.", status=400)
+
+    try:
+        booking.assign_provider(provider=allowed_provider, user=request.user)
+        provider_name = allowed_provider.get_full_name().strip() or allowed_provider.username
+        return _dashboard_async_response(request, True, f"{provider_name} assigned to booking #{booking.id}.")
+    except Exception as exc:
+        return _dashboard_async_response(request, False, str(exc) or "Could not assign provider.", status=400)
 
 
 @user_passes_test(_staff_required)
@@ -1338,6 +1822,7 @@ def dashboard_model_list(request, model):
         "query": q,
         "service_id": service_id,
         "service_obj": service_obj,
+        "use_view_mode": _dashboard_uses_view_mode(item),
     }
     context.update(_dashboard_notifications())
     return render(request, "dashboard/list.html", context)
@@ -1497,6 +1982,82 @@ def dashboard_model_edit(request, model, pk):
         "item": item,
         "form": form,
         "mode": "edit",
+        "object": obj,
+        "json_readonly": json_readonly,
+        "addon_form_preview": addon_form_preview,
+        "addons_for_service": addons_for_service,
+        "business_cards_for_service": business_cards_for_service,
+        "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
+    }
+    if item.model in {BusinessBooking, PrivateBooking}:
+        context["provider_debug"] = _provider_debug_payload(obj)
+    context.update(_dashboard_notifications())
+    return render(request, "dashboard/form.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_model_view(request, model, pk):
+    item = get_item_by_slug(model)
+    if not item:
+        return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+
+    obj = get_object_or_404(item.model, pk=pk)
+    if item.model == BusinessBundle:
+        Form = BusinessBundleDashboardForm
+    elif item.model == BusinessBooking:
+        Form = modelform_factory(
+            item.model,
+            form=BusinessBookingDashboardForm,
+            exclude=_exclude_fields_for_form(item.model),
+        )
+    elif item.model == PrivateBooking:
+        Form = modelform_factory(
+            item.model,
+            form=PrivateBookingDashboardForm,
+            exclude=_exclude_fields_for_form(item.model),
+        )
+    elif item.model == BusinessAddon:
+        Form = BusinessAddonDashboardForm
+    elif item.model == DateSurcharge:
+        Form = DateSurchargeDashboardForm
+    elif item.model == ScheduleRule:
+        Form = ScheduleRuleDashboardForm
+    elif item.model == ProviderProfile:
+        Form = ProviderProfileDashboardEditForm
+    else:
+        Form = modelform_factory(
+            item.model,
+            exclude=_exclude_fields_for_form(item.model),
+            formfield_callback=lambda db_field, **kwargs: _json_formfield_callback(item.model, db_field, **kwargs),
+        )
+
+    form = _bootstrap_form(Form(instance=obj))
+    for field in form.fields.values():
+        field.disabled = True
+        widget = field.widget
+        existing_class = widget.attrs.get("class", "")
+        widget.attrs["class"] = f"{existing_class} dash-disabled-field".strip()
+
+    addon_form_preview = None
+    addons_for_service = None
+    business_cards_for_service = None
+    if item.model.__name__ == "PrivateAddon" and getattr(obj, "form_html", ""):
+        addon_form_preview = mark_safe(obj.form_html)
+    if item.model == PrivateService:
+        addons_for_service = PrivateAddon.objects.filter(service=obj).order_by("title")
+    if item.model == BusinessService:
+        business_cards_for_service = BusinessServiceCard.objects.filter(service=obj).order_by("order", "title")
+
+    json_readonly = _json_readonly(
+        obj,
+        exclude_fields=JSON_EDIT_FIELDS.get(item.model, set())
+    )
+
+    context = {
+        "items": get_dashboard_items(),
+        "item": item,
+        "form": form,
+        "mode": "view",
         "object": obj,
         "json_readonly": json_readonly,
         "addon_form_preview": addon_form_preview,

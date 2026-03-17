@@ -59,7 +59,11 @@
               {% endwith %}
             {% endfor %}
             <td class="text-end dash-actions-cell">
-              <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' item.slug obj.pk %}">Edit</a>
+              {% if use_view_mode %}
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_view' item.slug obj.pk %}">View</a>
+              {% else %}
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' item.slug obj.pk %}">Edit</a>
+              {% endif %}
               {% if item.slug == "provider-profiles" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_create' 'provider-messages' %}?provider_id={{ obj.user.id }}">Contact</a>
               {% endif %}

@@ -118,6 +118,163 @@
     </div>
   </section>
 
+  <section class="dash-ops-grid">
+    <section class="dash-panel">
+      <div class="dash-section-head">
+        <div>
+          <h2>Action Center</h2>
+          <p>Priority items that need an admin decision now.</p>
+        </div>
+        <span class="dash-section-pill">{{ action_center|length }} live</span>
+      </div>
+      <div class="dash-filter-row" id="dashActionFilters">
+        <button type="button" class="dash-filter-chip is-active" data-filter="all">All</button>
+        <button type="button" class="dash-filter-chip" data-filter="high">Urgent</button>
+        <button type="button" class="dash-filter-chip" data-filter="medium">Needs review</button>
+        <button type="button" class="dash-filter-chip" data-filter="normal">Routine</button>
+      </div>
+      <div class="dash-stack">
+        {% if action_center %}
+          {% for item in action_center %}
+            <div class="dash-task dash-task--{{ item.priority }}" data-priority="{{ item.priority }}">
+              <div class="dash-task-copy">
+                <div class="dash-task-title">{{ item.title }}</div>
+                <div class="dash-task-detail">{{ item.detail }}</div>
+                <div class="dash-task-meta">{{ item.meta }}</div>
+              </div>
+              <div class="dash-task-actions">
+                {% if item.primary_action %}
+                  <form method="post" action="{{ item.primary_action.url }}" data-dashboard-async="1">
+                    {% csrf_token %}
+                    <button type="submit" class="dash-task-cta dash-task-cta--primary">{{ item.primary_action.label }}</button>
+                  </form>
+                {% endif %}
+                {% if item.secondary_action %}
+                  <form method="post" action="{{ item.secondary_action.url }}" data-dashboard-async="1">
+                    {% csrf_token %}
+                    <button type="submit" class="dash-task-cta">{{ item.secondary_action.label }}</button>
+                  </form>
+                {% endif %}
+                <a class="dash-task-cta" href="{{ item.url }}">{{ item.cta }}</a>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="dash-activity-empty">No urgent actions right now.</div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="dash-panel">
+      <div class="dash-section-head">
+        <div>
+          <h2>Today’s Queue</h2>
+          <p>What is scheduled today, delayed, or still unassigned.</p>
+        </div>
+        <span class="dash-section-pill">Today</span>
+      </div>
+      <div class="dash-filter-row" id="dashQueueFilters">
+        <button type="button" class="dash-filter-chip is-active" data-filter="all">All</button>
+        <button type="button" class="dash-filter-chip" data-filter="overdue">Overdue</button>
+        <button type="button" class="dash-filter-chip" data-filter="unassigned">Unassigned</button>
+        <button type="button" class="dash-filter-chip" data-filter="active">Active now</button>
+      </div>
+      <div class="dash-mini-stats">
+        <div class="dash-mini-stat">
+          <span>Scheduled</span>
+          <b>{{ today_queue_summary.scheduled_today }}</b>
+        </div>
+        <div class="dash-mini-stat">
+          <span>Active now</span>
+          <b>{{ today_queue_summary.active_now }}</b>
+        </div>
+        <div class="dash-mini-stat">
+          <span>Overdue</span>
+          <b>{{ today_queue_summary.overdue }}</b>
+        </div>
+        <div class="dash-mini-stat">
+          <span>Unassigned</span>
+          <b>{{ today_queue_summary.unassigned }}</b>
+        </div>
+      </div>
+      <div class="dash-stack">
+        {% if today_queue %}
+          {% for row in today_queue %}
+            <div class="dash-queue-row{% if row.is_overdue %} is-overdue{% elif row.is_unassigned %} is-unassigned{% endif %}" data-overdue="{% if row.is_overdue %}1{% else %}0{% endif %}" data-unassigned="{% if row.is_unassigned %}1{% else %}0{% endif %}" data-active="{% if row.is_active %}1{% else %}0{% endif %}">
+              <div class="dash-queue-main">
+                <div class="dash-queue-title">{{ row.title }}</div>
+                <div class="dash-queue-detail">{{ row.detail }}</div>
+                <div class="dash-queue-meta">{{ row.service }}</div>
+              </div>
+              <div class="dash-queue-side">
+                <div class="dash-queue-time">{{ row.time_label }}</div>
+                <div class="dash-queue-provider">{{ row.provider }}</div>
+                <span class="dash-queue-status">{{ row.status }}</span>
+                {% if row.is_unassigned and row.provider_options %}
+                  <form method="post" action="{{ row.assign_url }}" class="dash-inline-assign" data-dashboard-async="1">
+                    {% csrf_token %}
+                    <select name="provider_id" class="dash-inline-select">
+                      <option value="">Choose provider</option>
+                      {% for provider in row.provider_options %}
+                        <option value="{{ provider.id }}">{{ provider.label }}</option>
+                      {% endfor %}
+                    </select>
+                    <button type="submit" class="dash-row-btn dash-row-btn--primary">Assign now</button>
+                  </form>
+                {% endif %}
+                <div class="dash-row-actions">
+                  <a class="dash-row-btn dash-row-btn--primary" href="{{ row.url }}">{{ row.primary_action_label }}</a>
+                  <a class="dash-row-btn" href="{{ row.url }}">{{ row.secondary_action_label }}</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="dash-activity-empty">No bookings queued for today.</div>
+        {% endif %}
+      </div>
+    </section>
+  </section>
+
+  <section class="dash-panel">
+    <div class="dash-section-head">
+      <div>
+        <h2>Unified Inbox</h2>
+        <p>Bookings, fixes, incidents, and unread messages in one stream.</p>
+      </div>
+      <span class="dash-section-pill">Last 7 days</span>
+    </div>
+    <div class="dash-filter-row" id="dashInboxFilters">
+      <button type="button" class="dash-filter-chip is-active" data-kind="all">All</button>
+      <button type="button" class="dash-filter-chip" data-kind="booking">Bookings</button>
+      <button type="button" class="dash-filter-chip" data-kind="fix">Fixes</button>
+      <button type="button" class="dash-filter-chip" data-kind="incident">Incidents</button>
+      <button type="button" class="dash-filter-chip" data-kind="message">Messages</button>
+    </div>
+    <div class="dash-inbox-list">
+      {% if unified_inbox %}
+        {% for item in unified_inbox %}
+          <div class="dash-inbox-row dash-inbox-row--{{ item.kind }}" data-kind="{{ item.kind }}">
+            <div class="dash-inbox-badge">{{ item.kind_label }}</div>
+            <div class="dash-inbox-main">
+              <div class="dash-inbox-title">{{ item.title }}</div>
+              <div class="dash-inbox-detail">{{ item.detail }}</div>
+            </div>
+            <div class="dash-inbox-side">
+              <div class="dash-inbox-state">{{ item.state }}</div>
+              <div class="dash-inbox-time">{{ item.time|date:"M d, h:i A" }}</div>
+              <div class="dash-row-actions">
+                <a class="dash-row-btn dash-row-btn--primary" href="{{ item.url }}">{{ item.action_label }}</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="dash-activity-empty">Unified inbox is empty.</div>
+      {% endif %}
+    </div>
+  </section>
+
   <div class="dash-grid">
     <section>
       <div class="dash-section-head">
@@ -171,4 +328,42 @@
       </div>
     </aside>
   </div>
+{% endblock %}
+
+{% block extra_js %}
+  <script>
+    function bindFilterGroup(containerId, rowSelector, matcher) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      const chips = Array.from(container.querySelectorAll(".dash-filter-chip"));
+      const rows = Array.from(document.querySelectorAll(rowSelector));
+      chips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+          const target = chip.dataset.filter || chip.dataset.kind || "all";
+          chips.forEach((btn) => btn.classList.toggle("is-active", btn === chip));
+          rows.forEach((row) => {
+            row.hidden = !matcher(row, target);
+          });
+        });
+      });
+    }
+
+    bindFilterGroup("dashInboxFilters", ".dash-inbox-row[data-kind]", (row, target) => {
+      const rowKind = row.dataset.kind || "";
+      return target === "all" || rowKind === target;
+    });
+
+    bindFilterGroup("dashActionFilters", ".dash-task[data-priority]", (row, target) => {
+      const priority = row.dataset.priority || "";
+      return target === "all" || priority === target;
+    });
+
+    bindFilterGroup("dashQueueFilters", ".dash-queue-row[data-overdue]", (row, target) => {
+      if (target === "all") return true;
+      if (target === "overdue") return row.dataset.overdue === "1";
+      if (target === "unassigned") return row.dataset.unassigned === "1";
+      if (target === "active") return row.dataset.active === "1";
+      return true;
+    });
+  </script>
 {% endblock %}

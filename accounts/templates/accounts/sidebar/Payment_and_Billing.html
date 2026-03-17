@@ -138,9 +138,9 @@
                 <td data-label="Invoice #">{{ inv.invoice_number }}</td>
                 <td data-label="Date">{{ inv.issued_at|date:"M d, Y" }}</td>
                 <td data-label="Amount">{{ inv.amount }} {{ inv.currency }}</td>
-                <td data-label="Payment Method">
-                  {% if inv.payment_method %}
-                    {{ inv.payment_method.get_card_type_display }} &#9733;&#9733;&#9733;&#9733; {{ inv.payment_method.card_last4 }}
+                <td data-label="Payment Method" class="payment-method-cell">
+                  {% if inv.display_payment_label %}
+                    {{ inv.display_payment_label }}
                   {% else %}
                     —
                   {% endif %}

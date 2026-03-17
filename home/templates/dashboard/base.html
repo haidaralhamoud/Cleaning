@@ -12,21 +12,27 @@
   <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 </head>
 <body>
+  <div class="dash-toast-stack" id="dashToastStack" aria-live="polite" aria-atomic="true"></div>
   <div class="dash-layout">
     <aside class="dash-sidebar">
       <div class="dash-brand">
         <img src="{% static 'images/logo.png' %}" alt="Hembla experten">
         <span>Admin Dashboard</span>
       </div>
+      <div class="dash-sidebar-search">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="search" id="dashSidebarSearch" placeholder="Search sections" aria-label="Search dashboard sections">
+      </div>
       <nav class="dash-nav">
-        <a href="{% url 'home:dashboard_home' %}" class="dash-link">
+        <a href="{% url 'home:dashboard_home' %}" class="dash-link" data-nav-label="Overview">
           <i class="fa-solid fa-grid-2"></i> Overview
         </a>
         {% for item in items %}
-          <a href="{% url 'home:dashboard_model_list' item.slug %}" class="dash-link">
+          <a href="{% url 'home:dashboard_model_list' item.slug %}" class="dash-link" data-nav-label="{{ item.label }}">
             <i class="{{ item.icon }}"></i> {{ item.label }}
           </a>
         {% endfor %}
+        <div class="dash-nav-empty" id="dashNavEmpty" hidden>No matching sections.</div>
       </nav>
     </aside>
 
@@ -78,6 +84,75 @@
     </main>
   </div>
   <script>
+    function dashShowToast(message, kind = "success") {
+      const stack = document.getElementById("dashToastStack");
+      if (!stack) return;
+      const item = document.createElement("div");
+      item.className = `dash-toast dash-toast--${kind}`;
+      item.textContent = message;
+      stack.appendChild(item);
+      setTimeout(() => item.classList.add("is-visible"), 20);
+      setTimeout(() => {
+        item.classList.remove("is-visible");
+        setTimeout(() => item.remove(), 220);
+      }, 2200);
+    }
+
+    async function dashSubmitAsyncForm(form) {
+      const submitter = form.querySelector("[type='submit']");
+      if (submitter) submitter.disabled = true;
+      try {
+        const response = await fetch(form.action, {
+          method: form.method || "POST",
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+          body: new FormData(form),
+          credentials: "same-origin",
+        });
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch (e) {
+          payload = {};
+        }
+        if (!response.ok || !payload.ok) {
+          dashShowToast(payload.message || "Action failed.", "error");
+          if (submitter) submitter.disabled = false;
+          return;
+        }
+        dashShowToast(payload.message || "Saved.", "success");
+        window.setTimeout(() => window.location.reload(), 700);
+      } catch (e) {
+        dashShowToast("Network error. Try again.", "error");
+        if (submitter) submitter.disabled = false;
+      }
+    }
+
+    document.addEventListener("submit", (event) => {
+      const form = event.target;
+      if (!(form instanceof HTMLFormElement) || !form.matches("[data-dashboard-async='1']")) return;
+      event.preventDefault();
+      dashSubmitAsyncForm(form);
+    });
+
+    const dashSidebarSearch = document.getElementById("dashSidebarSearch");
+    const dashNavLinks = Array.from(document.querySelectorAll(".dash-nav .dash-link[data-nav-label]"));
+    const dashNavEmpty = document.getElementById("dashNavEmpty");
+    if (dashSidebarSearch && dashNavLinks.length) {
+      dashSidebarSearch.addEventListener("input", () => {
+        const query = (dashSidebarSearch.value || "").trim().toLowerCase();
+        let visibleCount = 0;
+        dashNavLinks.forEach((link) => {
+          const label = (link.dataset.navLabel || "").toLowerCase();
+          const isVisible = !query || label.includes(query);
+          link.hidden = !isVisible;
+          if (isVisible) visibleCount += 1;
+        });
+        if (dashNavEmpty) {
+          dashNavEmpty.hidden = visibleCount !== 0;
+        }
+      });
+    }
+
     const notifBtn = document.getElementById("dashNotifBtn");
     const notifMenu = document.getElementById("dashNotifMenu");
     if (notifBtn && notifMenu) {
@@ -210,6 +285,7 @@
     const msgWrap = pwdModal ? pwdModal.querySelector("[data-open-on-load]") : null;
     if (msgWrap) openPwdModal();
   </script>
+  {% block extra_js %}{% endblock %}
 </body>
 </html>
 
