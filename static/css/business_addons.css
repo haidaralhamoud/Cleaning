@@ -206,9 +206,9 @@ body {
   box-shadow: 0 0 0 4px rgba(0, 163, 200, 0.15);
 }
 
-.confirm-btn {
+form .confirm-btn {
   margin-top: 50px;
-  width: min(520px, 100%);
+  width: min(1200px, 92%);
 }
 
 @media (max-width: 900px) {
@@ -216,7 +216,7 @@ body {
     grid-template-columns: 1fr;
   }
 
-  .confirm-btn {
+  form .confirm-btn {
     flex-direction: column;
   }
 }
