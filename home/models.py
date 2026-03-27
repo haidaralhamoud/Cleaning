@@ -750,6 +750,11 @@ INQUIRY_CHOICES = [
     ('booking', 'Booking'),
 ]
 
+CONTACT_SOURCE_CHOICES = [
+    ("private", "Private"),
+    ("business", "Business"),
+]
+
 class Contact(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
@@ -758,6 +763,7 @@ class Contact(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     message = models.TextField()
     inquiry_type = models.CharField(max_length=50, choices=INQUIRY_CHOICES)
+    source = models.CharField(max_length=20, choices=CONTACT_SOURCE_CHOICES, default="private")
     preferred_method = models.CharField(max_length=50, default='email')
     file = models.FileField(upload_to='contact_files/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -1173,6 +1179,7 @@ class PrivateBooking(BaseBooking):
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     rot_discount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    use_rot = models.BooleanField(default=True)
 
     address = models.CharField(max_length=255, blank=True, null=True)
     area = models.CharField(max_length=255, blank=True, null=True)

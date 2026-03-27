@@ -106,6 +106,7 @@
         <form class="contact-form" method="post" action="{% url 'home:service_contact_submit' %}">
           {% csrf_token %}
           <input type="hidden" name="service_slug" value="{{ service.slug }}">
+          <input type="hidden" name="contact_source" value="private">
           <div class="contact-grid">
             <div class="field">
               <label>First Name</label>

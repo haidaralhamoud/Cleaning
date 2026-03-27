@@ -1,4 +1,4 @@
-{% load static %}
+{% load static user_extras %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,10 +22,12 @@
 
   <div class="services-needed">
     <div class="steps">
-      {% for i in range_total_steps %}
-        <div class="step {% if step == i %}active{% endif %}">
-          Step {{ i }}
-        </div>
+      {% for item in step_items %}
+        {% if item.clickable %}
+          <a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
+        {% else %}
+          <div class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</div>
+        {% endif %}
       {% endfor %}
     </div>
 
@@ -41,7 +43,7 @@
           <span class="selected-pill">Selected</span>
           <img class="service-icon" src="{{ s.icon.url }}" alt="{{ s.title }}">
           <h3>{{ s.title }}</h3>
-          <p>{{ s.description_service_aviable }}</p>
+          <div class="service-description">{{ s.description_service_aviable|format_service_available_description }}</div>
         </div>
       {% endfor %}
     </div>

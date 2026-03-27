@@ -45,6 +45,9 @@ body {
 }
 
 .step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--brand);
   color: var(--brand);
   border-radius: 999px;
@@ -53,6 +56,20 @@ body {
   font-weight: 600;
   background: #fff;
   transition: 0.2s;
+  text-decoration: none;
+}
+
+.steps a.step,
+.steps a.step:visited,
+.steps a.step:hover,
+.steps a.step:focus,
+.steps a.step:active {
+  text-decoration: none;
+}
+
+a.step:hover {
+  background: #f4fbff;
+  transform: translateY(-1px);
 }
 
 .step.active {

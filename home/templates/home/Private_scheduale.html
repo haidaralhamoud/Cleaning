@@ -42,6 +42,7 @@
   <input type="hidden" name="special_timing_requests" id="special_timing_requests">
   <input type="hidden" name="schedule_mode" id="schedule_mode" value="">
   <input type="hidden" name="schedules_json" id="schedules_json">
+  <input type="hidden" name="use_rot" id="schedule_use_rot_input" value="{% if booking.use_rot %}1{% else %}0{% endif %}">
 
   <div id="scheduleMessages" class="schedule-messages" {% if not messages %}hidden{% endif %}>
     {% if messages %}
@@ -243,6 +244,14 @@
         <h3>Booking Summary</h3>
         <div class="line"></div>
 
+        <label class="rot-toggle-row" for="scheduleUseRotToggle">
+            <span class="rot-toggle-copy">
+                <strong>Use ROT deduction</strong>
+                <small>Available for eligible private customers in Sweden.</small>
+            </span>
+            <input type="checkbox" id="scheduleUseRotToggle" {% if booking.use_rot %}checked{% endif %}>
+        </label>
+
         <div class="summary-item">
             <span>Services</span>
             <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:0|floatformat:2 }}</span>
@@ -259,7 +268,7 @@
         </div>
 
         <div class="summary-item">
-            <span>ROT Deduction</span>
+            <span id="sum_rot_label">ROT Deduction{% if pricing.use_rot %} ({{ pricing.rot_percent|floatformat:1 }}%){% else %} (not applied){% endif %}</span>
             <span id="sum_rot">{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:0|floatformat:2 }}</span>
         </div>
 
@@ -269,6 +278,14 @@
             <span>Total</span>
             <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ pricing.final|default:0|floatformat:2 }}</span>
         </div>
+
+        <p class="summary-note" id="sum_total_note">
+            {% if booking.use_rot %}
+              Total includes VAT and ROT deduction.
+            {% else %}
+              Total includes VAT. ROT deduction is not applied.
+            {% endif %}
+        </p>
 
         <div class="checkout-wrapper">
             <button type="submit" class="checkout-btn">Continue -></button>
@@ -431,6 +448,8 @@ const inputFreq    = document.getElementById("frequency_type");
 const inputSpecial = document.getElementById("special_timing_requests");
 const inputMode    = document.getElementById("schedule_mode");
 const inputSchedulesJson = document.getElementById("schedules_json");
+const scheduleUseRotToggle = document.getElementById("scheduleUseRotToggle");
+const scheduleUseRotInput = document.getElementById("schedule_use_rot_input");
 const scheduleMessages = document.getElementById("scheduleMessages");
 
 const sameArea       = document.getElementById("sameScheduleArea");
@@ -673,6 +692,8 @@ function updateScheduleSummary() {
     params.append("schedules_json", inputSchedulesJson.value);
   }
 
+  params.append("use_rot", scheduleUseRotToggle && !scheduleUseRotToggle.checked ? "0" : "1");
+
   fetch(`/private/api/booking/price/?${params.toString()}`)
     .then(res => {
       if (!res.ok) {
@@ -701,6 +722,16 @@ function setSummaryValues(data) {
   document.getElementById("sum_schedule").textContent = currency + " " + Number(data.schedule_extra || 0).toFixed(2);
   document.getElementById("sum_rot").textContent = currency + " " + Number(data.rot || 0).toFixed(2);
   document.getElementById("sum_total").textContent = currency + " " + Number(data.final || 0).toFixed(2);
+  const rotLabel = document.getElementById("sum_rot_label");
+  if (rotLabel) {
+    rotLabel.textContent = data.use_rot ? `ROT Deduction (${Number(data.rot_percent || 0).toFixed(1)}%)` : "ROT Deduction (not applied)";
+  }
+  const totalNote = document.getElementById("sum_total_note");
+  if (totalNote) {
+    totalNote.textContent = data.use_rot
+      ? "Total includes VAT and ROT deduction."
+      : "Total includes VAT. ROT deduction is not applied.";
+  }
 }
 
 function showScheduleMessage(message) {
@@ -1066,6 +1097,26 @@ document.addEventListener("DOMContentLoaded", () => {
   setSummaryValues(INITIAL_PRICING_DATA);
   applyInitialScheduleState();
   updateScheduleSummary();
+  if (scheduleUseRotToggle) {
+    scheduleUseRotToggle.addEventListener("change", () => {
+      if (scheduleUseRotInput) {
+        scheduleUseRotInput.value = scheduleUseRotToggle.checked ? "1" : "0";
+      }
+      const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || "";
+      const fd = new FormData();
+      fd.append("use_rot", scheduleUseRotToggle.checked ? "1" : "0");
+      fetch(`/private/api/booking/update-rot/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken
+        },
+        body: fd
+      })
+      .then(res => res.json())
+      .then(data => setSummaryValues(data))
+      .catch(() => updateScheduleSummary());
+    });
+  }
 });
 </script>
 

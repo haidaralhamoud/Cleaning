@@ -2,6 +2,14 @@
     <h3>Booking Summary</h3>
     <hr>
 
+    <label class="rot-toggle-row" for="useRotToggle">
+        <span class="rot-toggle-copy">
+            <strong>Use ROT deduction</strong>
+            <small>Available for eligible private customers in Sweden.</small>
+        </span>
+        <input type="checkbox" id="useRotToggle" {% if booking.use_rot %}checked{% endif %}>
+    </label>
+
     <div class="item">
         <span>Services</span>
         <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:"0" }}</span>
@@ -18,8 +26,8 @@
     </div>
 
     <div class="item">
-        <span>ROT Deduction ({{ pricing.rot_percent|default:"0" }}%)</span>
-        <span id="sum_rot">-{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0" }}</span>
+        <span id="sum_rot_label">ROT Deduction ({{ pricing.rot_percent|default:"0" }}%)</span>
+        <span id="sum_rot">{% if booking.use_rot %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0" }}</span>
     </div>
 
     <hr>
@@ -28,6 +36,14 @@
         <span>Total</span>
         <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ pricing.final|default:"0" }}</span>
     </div>
+
+    <p class="summary-note" id="sum_total_note">
+        {% if booking.use_rot %}
+          Total includes VAT and ROT deduction.
+        {% else %}
+          Total includes VAT. ROT deduction is not applied.
+        {% endif %}
+    </p>
 
     <button type="button" class="btn-blue js-summary-continue">Continue</button>
 </div>

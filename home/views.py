@@ -80,6 +80,14 @@ def _save_private_draft_data(request, data):
     request.session.modified = True
 
 
+def _is_truthy(value, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    return str(value).strip().lower() in {"1", "true", "yes", "on"}
+
+
 def _parse_iso_datetime(value):
     if not value:
         return None
@@ -144,6 +152,7 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.total_price = Decimal(str(draft.get("total_price", 0) or 0))
     booking.subtotal = Decimal(str(draft.get("subtotal", 0) or 0))
     booking.rot_discount = Decimal(str(draft.get("rot_discount", 0) or 0))
+    booking.use_rot = _is_truthy(draft.get("use_rot"), default=True)
     booking.address = draft.get("address") or customer_snapshot.get("address")
     booking.area = draft.get("area") or customer_snapshot.get("area")
     booking.duration_hours = draft.get("duration_hours")
@@ -574,6 +583,8 @@ def feedback_request(request):
 @require_POST
 def service_contact_submit(request):
     service_slug = (request.POST.get("service_slug") or "").strip()
+    business_service_id = (request.POST.get("business_service_id") or "").strip()
+    contact_source = (request.POST.get("contact_source") or "").strip().lower()
     first_name = (request.POST.get("first_name") or "").strip()
     last_name = (request.POST.get("last_name") or "").strip()
     email = (request.POST.get("email") or "").strip()
@@ -583,6 +594,11 @@ def service_contact_submit(request):
 
     if service_slug:
         message = f"[Service: {service_slug}]\n{message}"
+    elif business_service_id:
+        message = f"[Business Service ID: {business_service_id}]\n{message}"
+
+    if contact_source not in {"private", "business"}:
+        contact_source = "business" if business_service_id else "private"
 
     Contact.objects.create(
         first_name=first_name or "Guest",
@@ -592,11 +608,14 @@ def service_contact_submit(request):
         phone=phone or "",
         message=message or "",
         inquiry_type="general",
+        source=contact_source,
         preferred_method="email",
     )
 
     if service_slug:
         return redirect("accounts:service_detail", slug=service_slug)
+    if business_service_id:
+        return redirect("home:business_service_detail", service_id=business_service_id)
     return redirect("home:home")
 
 
@@ -1762,6 +1781,11 @@ def dashboard_model_list(request, model):
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
 
     qs = item.model.objects.all()
+    if item.model == Contact:
+        if item.slug == "private-contacts":
+            qs = qs.filter(source="private")
+        elif item.slug == "business-contacts":
+            qs = qs.filter(source="business")
     service_id = request.GET.get("service_id")
     if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "ServiceEcoPromise", "BusinessServiceCard"}:
         qs = qs.filter(service_id=service_id)
@@ -1792,6 +1816,8 @@ def dashboard_model_list(request, model):
     page = paginator.get_page(request.GET.get("page"))
 
     display_fields_map = {
+        "private-contacts": ["first_name", "last_name", "email", "phone", "source"],
+        "business-contacts": ["first_name", "last_name", "email", "phone", "source"],
         "provider-profiles": ["user", "city", "region", "area", "nearby_areas", "is_active"],
         "business-services": ["title", "recommended", "detail_description", "image", "hero_image"],
         "business-service-cards": ["service", "title", "order"],
@@ -2286,6 +2312,45 @@ def _draft_booking_from_session(request):
     return booking
 
 
+def _build_business_step_items(path_type, current_step, booking_id=0):
+    path_type = path_type if path_type in {"bundle", "custom"} else "bundle"
+    booking_id = booking_id or 0
+
+    if path_type == "custom":
+        step_routes = {
+            1: ("home:business_company_info", 0),
+            2: ("home:business_office_setup", 0),
+            3: ("home:business_bundles", 0),
+            4: ("home:business_services_needed", 0),
+            5: ("home:business_addons", 0),
+            6: ("home:business_frequency", 0),
+            7: ("home:business_scheduling", 0),
+        }
+    else:
+        step_routes = {
+            1: ("home:business_company_info", 0),
+            2: ("home:business_office_setup", 0),
+            3: ("home:business_bundles", 0),
+            4: ("home:business_frequency", 0),
+            5: ("home:business_scheduling", 0),
+            6: ("home:business_thank_you", booking_id) if booking_id else None,
+            7: None,
+        }
+
+    items = []
+    for number in range(1, 8):
+        route = step_routes.get(number)
+        is_clickable = number <= current_step and route is not None
+        url = reverse(route[0], kwargs={"booking_id": route[1]}) if is_clickable else ""
+        items.append({
+            "number": number,
+            "active": current_step == number,
+            "clickable": is_clickable,
+            "url": url,
+        })
+    return items
+
+
 # ================================
 # STEP 1 — COMPANY INFO
 # ================================
@@ -2317,6 +2382,7 @@ def business_company_info(request, booking_id):
         "booking": booking,
         "form": form,
         "step": 1,
+        "step_items": _build_business_step_items(booking.path_type, 1),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2348,6 +2414,7 @@ def business_office_setup(request, booking_id):
         "booking": booking,
         "form": form,
         "step": 2,
+        "step_items": _build_business_step_items(booking.path_type, 2),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2379,6 +2446,7 @@ def business_bundles(request, booking_id):
                     "booking": booking,
                     "bundles": bundles,
                     "step": 3,
+                    "step_items": _build_business_step_items("bundle", 3),
                     "total_steps": total_steps,
                     "range_total_steps": range_steps,
                     "booking_id": 0,
@@ -2391,6 +2459,7 @@ def business_bundles(request, booking_id):
         "booking": booking,
         "bundles": bundles,
         "step": 3,
+        "step_items": _build_business_step_items("bundle", 3),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2426,6 +2495,7 @@ def business_services_needed(request, booking_id):
         "booking": booking,
         "services": BusinessService.objects.all(),
         "step": 4,
+        "step_items": _build_business_step_items("custom", 4),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2465,6 +2535,7 @@ def business_addons(request, booking_id):
         "booking": booking,
         "addons": BusinessAddon.objects.all(),
         "step": 5,
+        "step_items": _build_business_step_items("custom", 5),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2502,6 +2573,7 @@ def business_frequency(request, booking_id):
     return render(request, "home/business_frequency.html", {
         "booking": booking,
         "step": step_number,
+        "step_items": _build_business_step_items(booking.path_type, step_number),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2539,6 +2611,7 @@ def business_scheduling(request, booking_id):
               return render(request, "home/SchedulingNotes.html", {
                   "booking": booking,
                   "step": step_number,
+                  "step_items": _build_business_step_items(booking.path_type, step_number),
                   "total_steps": total_steps,
                   "range_total_steps": range_steps,
                   "error": "Please select a start date and preferred time.",
@@ -2551,6 +2624,7 @@ def business_scheduling(request, booking_id):
             return render(request, "home/SchedulingNotes.html", {
                 "booking": booking,
                 "step": step_number,
+                "step_items": _build_business_step_items(booking.path_type, step_number),
                 "total_steps": total_steps,
                 "range_total_steps": range_steps,
                 "error": "Invalid date format. Please choose a valid date.",
@@ -2561,6 +2635,7 @@ def business_scheduling(request, booking_id):
             return render(request, "home/SchedulingNotes.html", {
                 "booking": booking,
                 "step": step_number,
+                "step_items": _build_business_step_items(booking.path_type, step_number),
                 "total_steps": total_steps,
                 "range_total_steps": range_steps,
                 "error": "Booking date cannot be before today. Please choose today or a future date.",
@@ -2621,6 +2696,7 @@ def business_scheduling(request, booking_id):
             return render(request, "home/SchedulingNotes.html", {
                 "booking": booking,
                 "step": step_number,
+                "step_items": _build_business_step_items(booking.path_type, step_number),
                 "total_steps": total_steps,
                 "range_total_steps": range_steps,
                 "error": "Something went wrong while placing your booking. Please try again.",
@@ -2632,6 +2708,7 @@ def business_scheduling(request, booking_id):
     return render(request, "home/SchedulingNotes.html", {
         "booking": booking,
         "step": step_number,
+        "step_items": _build_business_step_items(booking.path_type, step_number),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
         "booking_id": 0,
@@ -2662,6 +2739,7 @@ def business_thank_you(request, booking_id):
     return render(request, "home/business_thank_you.html", {
         "booking": booking,
         "step": step_number,
+        "step_items": _build_business_step_items(booking.path_type, step_number, booking.id),
         "total_steps": total_steps,
         "range_total_steps": range_steps,
     })
@@ -3519,6 +3597,7 @@ def private_booking_start(request, service_slug):
         "main_category": service.category.slug,
         "selected_services": selected_services,
         "is_urgent": bool(urgent_flag),
+        "use_rot": _is_truthy(draft.get("use_rot"), default=True),
         "user_id": request.user.id if request.user.is_authenticated else None,
     })
 
@@ -3543,6 +3622,7 @@ def private_booking_services(request):
     )
 
     if request.method == "POST":
+        draft["use_rot"] = _is_truthy(request.POST.get("use_rot"), default=True)
         # 1) جمع إجابات الأسئلة
         service_answers = draft.get("service_answers") or {}
 
@@ -3788,6 +3868,7 @@ def private_booking_schedule(request):
         # MODE
         mode = request.POST.get("schedule_mode")
         draft["schedule_mode"] = mode
+        draft["use_rot"] = _is_truthy(request.POST.get("use_rot"), default=True)
 
         # ---------------- SAME MODE ----------------
         if mode == "same":
@@ -3980,6 +4061,9 @@ def private_price_api(request):
             _save_private_draft_data(request, draft)
 
     booking = _build_private_booking_from_draft(draft, request.user)
+    use_rot_param = request.GET.get("use_rot")
+    if use_rot_param is not None:
+        booking.use_rot = _is_truthy(use_rot_param, default=True)
 
     # --------------------------
     # 1) جدولة: same أو per_service
@@ -4041,7 +4125,41 @@ def private_price_api(request):
         "subtotal": pricing["subtotal"],
         "schedule_extra": pricing["schedule_extra"],
         "rot": pricing["rot"],
+        "rot_percent": pricing.get("rot_percent", 0),
+        "use_rot": pricing.get("use_rot", True),
+        "vat_included": pricing.get("vat_included", True),
         "final": pricing["final"],
+        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+        "duration_hours": pricing.get("duration_hours", 0),
+        "duration_seconds": pricing.get("duration_seconds", 0),
+    })
+
+
+@require_POST
+def private_update_rot_api(request):
+    draft = _get_private_draft_data(request)
+    draft["use_rot"] = _is_truthy(request.POST.get("use_rot"), default=True)
+
+    booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(booking)
+
+    draft["rot_discount"] = pricing.get("rot", 0) or 0
+    draft["pricing_details"] = pricing
+    draft["total_price"] = pricing.get("final", 0) or 0
+    draft["subtotal"] = pricing.get("subtotal", 0) or 0
+    _save_private_draft_data(request, draft)
+
+    return JsonResponse({
+        "success": True,
+        "services_total": pricing.get("services_total", 0),
+        "addons_total": pricing.get("addons_total", 0),
+        "subtotal": pricing.get("subtotal", 0),
+        "schedule_extra": pricing.get("schedule_extra", 0),
+        "rot": pricing.get("rot", 0),
+        "rot_percent": pricing.get("rot_percent", 0),
+        "use_rot": pricing.get("use_rot", True),
+        "vat_included": pricing.get("vat_included", True),
+        "final": pricing.get("final", 0),
         "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
         "duration_hours": pricing.get("duration_hours", 0),
         "duration_seconds": pricing.get("duration_seconds", 0),

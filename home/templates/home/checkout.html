@@ -166,8 +166,14 @@
           </div>
 
           <div class="summary-line">
-            <span>ROT Deduction ({{ rot_percent|default:"0" }}%)</span>
-            <span>-{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            <span>
+              {% if booking.use_rot %}
+                ROT Deduction ({{ rot_percent|default:"0" }}%)
+              {% else %}
+                ROT Deduction (not applied)
+              {% endif %}
+            </span>
+            <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
 
           {% if booking.discount_code %}
@@ -187,7 +193,13 @@
             <span>Total</span>
             <span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
-          <p class="note">This price includes your ROT deduction.</p>
+          <p class="note">
+            {% if booking.use_rot %}
+              This total includes VAT and your ROT deduction.
+            {% else %}
+              This total includes VAT. ROT deduction is not applied.
+            {% endif %}
+          </p>
           </div>
         </div>
       </section>

@@ -21,10 +21,12 @@
 
   <section class="office-setup">
     <div class="steps">
-      {% for i in range_total_steps %}
-        <div class="step {% if step == i %}active{% endif %}">
-          Step {{ i }}
-        </div>
+      {% for item in step_items %}
+        {% if item.clickable %}
+          <a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
+        {% else %}
+          <div class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</div>
+        {% endif %}
       {% endfor %}
     </div>
 

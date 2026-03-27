@@ -16,7 +16,8 @@ class DashboardItem:
 def get_dashboard_items() -> List[DashboardItem]:
     return [
         # Home app
-        DashboardItem("contacts", home_models.Contact, "Contacts", "fa-solid fa-envelope"),
+        DashboardItem("private-contacts", home_models.Contact, "Private Contacts", "fa-solid fa-envelope"),
+        DashboardItem("business-contacts", home_models.Contact, "Business Contacts", "fa-solid fa-building-circle-check"),
         DashboardItem("feedback", home_models.FeedbackRequest, "Feedback", "fa-solid fa-comment-dots"),
         DashboardItem("jobs", home_models.Job, "Jobs", "fa-solid fa-briefcase"),
         DashboardItem("applications", home_models.Application, "Applications", "fa-solid fa-file-lines"),

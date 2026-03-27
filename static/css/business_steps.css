@@ -14,6 +14,9 @@
 }
 
 .step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 16px;
   border: 1px solid var(--brand);
   border-radius: 999px;
@@ -21,6 +24,21 @@
   font-weight: 600;
   background: #fff;
   font-size: 14px;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.steps a.step,
+.steps a.step:visited,
+.steps a.step:hover,
+.steps a.step:focus,
+.steps a.step:active {
+  text-decoration: none;
+}
+
+a.step:hover {
+  background: #f4fbff;
+  transform: translateY(-1px);
 }
 
 .step.active {

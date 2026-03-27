@@ -155,6 +155,11 @@ path(
     views.private_update_addons_api,
     name="private_update_addons_api"
 ),
+path(
+    "private/api/booking/update-rot/",
+    views.private_update_rot_api,
+    name="private_update_rot_api"
+),
 
 # Checkout page
 path(

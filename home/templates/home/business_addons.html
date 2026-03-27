@@ -1,4 +1,4 @@
-{% load static %}
+{% load static user_extras %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -17,10 +17,12 @@
 
   <main class="container">
     <div class="steps">
-      {% for i in range_total_steps %}
-        <div class="step {% if step == i %}active{% endif %}">
-          Step {{ i }}
-        </div>
+      {% for item in step_items %}
+        {% if item.clickable %}
+          <a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
+        {% else %}
+          <div class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</div>
+        {% endif %}
       {% endfor %}
     </div>
 
@@ -39,7 +41,7 @@
             <div class="checkmark-box"></div>
             <div class="addon-content">
               <h3><span class="addon-emoji">{{ a.emoji }}</span>{{ a.title }}</h3>
-              <p>{{ a.description }}</p>
+              <div class="addon-description">{{ a.description|lines_to_green_bullets }}</div>
             </div>
           </div>
         {% endfor %}
@@ -48,7 +50,7 @@
           <div class="checkmark-box"></div>
           <div class="addon-content">
             <h3><span class="addon-emoji">&#9998;</span>Other</h3>
-            <p>(eco-products only, extra fridge cleaning, locker room service...)</p>
+            <div class="addon-description">{{ "(eco-products only, extra fridge cleaning, locker room service...)"|lines_to_green_bullets }}</div>
             <textarea id="otherInput" class="other-text" placeholder="Write your custom add-on here..."></textarea>
           </div>
         </div>

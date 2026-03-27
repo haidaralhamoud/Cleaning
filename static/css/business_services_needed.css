@@ -95,6 +95,23 @@ body {
   margin: 0;
 }
 
+.service-description {
+  text-align: center;
+}
+
+.service-description-section + .service-description-section {
+  margin-top: 10px;
+}
+
+.service-description-section strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin-bottom: 5px;
+  line-height: 1.35;
+}
+
 .checkmark {
   width: 30px;
   height: 30px;

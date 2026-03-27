@@ -150,9 +150,50 @@ body {
   margin: 10px 0;
 }
 
+.rot-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  border: 1px solid rgba(113, 178, 71, 0.22);
+  border-radius: 14px;
+  background: #f8fdf4;
+}
+
+.rot-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rot-toggle-copy strong {
+  font-size: 14px;
+}
+
+.rot-toggle-copy small {
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.rot-toggle-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #71b247;
+  cursor: pointer;
+}
+
 .summary .total {
   font-weight: 700;
   font-size: 1.1rem;
+}
+
+.summary-note {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
 }
 
 /* ===== LEFT ===== */

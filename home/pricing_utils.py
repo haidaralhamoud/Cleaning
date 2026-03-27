@@ -289,12 +289,15 @@ def calculate_booking_price(booking):
     date_surcharge = final_with_date - subtotal
     final = final_with_date + schedule_extra
 
+    use_rot = bool(getattr(booking, "use_rot", True))
     rot_percent = _coerce_decimal(rot_setting.amount) if rot_setting else Decimal("0.00")
     if rot_percent < 0:
         rot_percent = Decimal("0.00")
-    rot_amount = final * (rot_percent / Decimal("100"))
-    if rot_amount > final:
-        rot_amount = final
+    rot_amount = Decimal("0.00")
+    if use_rot:
+        rot_amount = final * (rot_percent / Decimal("100"))
+        if rot_amount > final:
+            rot_amount = final
 
     duration_seconds = int(duration_minutes * Decimal("60")) if duration_minutes else 0
     duration_hours = float(duration_minutes) / 60 if duration_minutes else 0.0
@@ -306,6 +309,8 @@ def calculate_booking_price(booking):
         "date_surcharge": float(date_surcharge),
         "rot": float(rot_amount),
         "rot_percent": float(rot_percent),
+        "use_rot": use_rot,
+        "vat_included": True,
         "currency": target_currency.lower(),
         "final": float(final - rot_amount),
         "duration_minutes": float(duration_minutes),

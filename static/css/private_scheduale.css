@@ -59,6 +59,40 @@ body {
   height: fit-content;
 }
 
+.rot-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  border: 1px solid rgba(113, 178, 71, 0.22);
+  border-radius: 14px;
+  background: #f8fdf4;
+}
+
+.rot-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rot-toggle-copy strong {
+  font-size: 14px;
+}
+
+.rot-toggle-copy small {
+  color: var(--ink-500);
+  line-height: 1.4;
+}
+
+.rot-toggle-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .step-title {
   font-weight: 700;
   font-size: 16px;
@@ -648,6 +682,13 @@ body {
   font-size: 1.2rem;
   font-weight: 700;
   color: var(--brand);
+}
+
+.summary-note {
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-500);
 }
 
 .checkout-wrapper {
