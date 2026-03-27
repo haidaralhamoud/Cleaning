@@ -207,12 +207,8 @@ body {
 }
 
 .confirm-btn {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin: 50px auto 80px;
-  width: min(820px, 90%);
+  margin-top: 50px;
+  width: min(520px, 100%);
 }
 
 @media (max-width: 900px) {

@@ -2589,6 +2589,7 @@ def business_scheduling(request, booking_id):
         return redirect("home:business_company_info", booking_id=0)
 
     booking = _draft_booking_from_session(request)
+    min_booking_date = timezone.localdate().isoformat()
 
     if booking.path_type == "bundle":
         step_number = 5
