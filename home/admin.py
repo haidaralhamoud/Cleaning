@@ -33,8 +33,6 @@ from .models import (
     ServiceCard,
     ServicePricing,
     ServiceEstimate,
-    ServiceEcoPromise,
-    ServiceEcoPoint,
     CurrencyRate,
 )
 from jsoneditor.forms import JSONEditor
@@ -48,6 +46,100 @@ from accounts.models import BookingChecklist   # ✅ استيراد فقط
 # أعلى الملف
 from accounts.models import PointsTransaction
 User = get_user_model()
+
+
+class ServiceEstimateAdminForm(forms.ModelForm):
+    property_options_text = forms.CharField(
+        required=False,
+        label="Property Size options",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="One option per line: Label | Price",
+    )
+    bedrooms_options_text = forms.CharField(
+        required=False,
+        label="Bedrooms options",
+        widget=forms.Textarea(attrs={"rows": 5}),
+        help_text="One option per line: Label | Price",
+    )
+
+    class Meta:
+        model = ServiceEstimate
+        fields = ("service", "property_options_text", "bedrooms_options_text")
+
+    @staticmethod
+    def _parse_options(raw_value, field_name):
+        options = []
+        raw_value = (raw_value or "").strip()
+        if not raw_value:
+            return options
+        for line in raw_value.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if "|" not in line:
+                raise forms.ValidationError({field_name: "Use this format: Label | Price"})
+            label, price_raw = [part.strip() for part in line.split("|", 1)]
+            if not label:
+                raise forms.ValidationError({field_name: "Each option must have a label."})
+            try:
+                price = float(price_raw)
+            except ValueError:
+                raise forms.ValidationError({field_name: f"Invalid price in line: {line}"})
+            options.append({"label": label, "price": price})
+        return options
+
+    @staticmethod
+    def _serialize_options(options):
+        lines = []
+        for option in options or []:
+            label = str(option.get("label", "")).strip()
+            price = option.get("price", 0)
+            if label:
+                lines.append(f"{label} | {price}")
+        return "\n".join(lines)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["property_options_text"].initial = self._serialize_options(
+                self.instance.property_options
+            )
+            self.fields["bedrooms_options_text"].initial = self._serialize_options(
+                self.instance.bedrooms_options
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        try:
+            cleaned["property_options"] = self._parse_options(
+                cleaned.get("property_options_text"),
+                "property_options_text",
+            )
+            cleaned["bedrooms_options"] = self._parse_options(
+                cleaned.get("bedrooms_options_text"),
+                "bedrooms_options_text",
+            )
+        except forms.ValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                for field, messages in exc.message_dict.items():
+                    for message in messages:
+                        self.add_error(field, message)
+            else:
+                self.add_error(None, exc)
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.title = "Get a Quick Estimate"
+        instance.property_label = "Property Size (m²)"
+        instance.bedrooms_label = "Number of Bedrooms"
+        instance.cta_text = "Calculate Estimate"
+        instance.note = "This is an estimate only. Final price may vary based on property condition."
+        instance.property_options = self.cleaned_data.get("property_options", [])
+        instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
+        if commit:
+            instance.save()
+        return instance
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
@@ -604,35 +696,14 @@ class ServiceCardInline(admin.StackedInline):
 class ServicePricingInline(admin.StackedInline):
     model = ServicePricing
     extra = 0
-    fields = (
-        "title",
-        "card_title",
-        "subtitle",
-        "price_label",
-        "price_value",
-        "price_note",
-        "description",
-        "cta_text",
-        "cta_url",
-    )
+    fields = ("price_value", "price_note")
 
 
 class ServiceEstimateInline(admin.StackedInline):
     model = ServiceEstimate
+    form = ServiceEstimateAdminForm
     extra = 0
-    fields = ("title", "property_label", "bedrooms_label", "cta_text", "note")
-
-
-class ServiceEcoPromiseInline(admin.StackedInline):
-    model = ServiceEcoPromise
-    extra = 0
-    fields = ("title", "subtitle", "cta_text")
-
-
-class ServiceEcoPointInline(admin.TabularInline):
-    model = ServiceEcoPoint
-    extra = 0
-    fields = ("title", "body", "icon", "order")
+    fields = ("property_options_text", "bedrooms_options_text")
 
 
 class BusinessServiceCardInline(admin.StackedInline):
@@ -708,7 +779,6 @@ class PrivateServiceAdmin(admin.ModelAdmin):
         ServiceCardInline,
         ServicePricingInline,
         ServiceEstimateInline,
-        ServiceEcoPromiseInline,
     ]
 
 
@@ -722,20 +792,17 @@ class BusinessServiceCardAdmin(admin.ModelAdmin):
     list_display = ("service", "title", "order")
 
 
-@admin.register(ServiceEcoPromise)
-class ServiceEcoPromiseAdmin(admin.ModelAdmin):
-    list_display = ("service", "title")
-    inlines = [ServiceEcoPointInline]
-
-
 @admin.register(ServicePricing)
 class ServicePricingAdmin(admin.ModelAdmin):
-    list_display = ("service", "title", "price_value")
+    list_display = ("service", "price_value", "price_note")
+    fields = ("service", "price_value", "price_note")
 
 
 @admin.register(ServiceEstimate)
 class ServiceEstimateAdmin(admin.ModelAdmin):
+    form = ServiceEstimateAdminForm
     list_display = ("service", "title")
+    fields = ("service", "property_options_text", "bedrooms_options_text")
 
 
 # ================================

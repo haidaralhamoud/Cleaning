@@ -31,8 +31,6 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("service-cards", home_models.ServiceCard, "Service Cards", "fa-solid fa-layer-group"),
         DashboardItem("service-pricing", home_models.ServicePricing, "Service Pricing", "fa-solid fa-tag"),
         DashboardItem("service-estimates", home_models.ServiceEstimate, "Service Estimates", "fa-solid fa-calculator"),
-        DashboardItem("service-eco", home_models.ServiceEcoPromise, "Eco Promise", "fa-solid fa-leaf"),
-        DashboardItem("service-eco-points", home_models.ServiceEcoPoint, "Eco Points", "fa-solid fa-seedling"),
         DashboardItem("private-addons", home_models.PrivateAddon, "Private Add-ons", "fa-solid fa-puzzle-piece"),
         DashboardItem("private-bookings", home_models.PrivateBooking, "Private Bookings", "fa-solid fa-house"),
         DashboardItem("available-zips", home_models.AvailableZipCode, "Available Zips", "fa-solid fa-map-location-dot"),

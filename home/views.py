@@ -22,7 +22,7 @@ from .models import (
     BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
     BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
-    Contact, FAQCategory, FAQItem, StripeWebhookEvent,
+    Contact, FAQCategory, FAQItem, StripeWebhookEvent, ServiceCard, ServicePricing, ServiceEstimate,
     ScheduleRule,
 )
 from accounts.models import (
@@ -1562,6 +1562,121 @@ class BusinessAddonDashboardForm(forms.ModelForm):
         model = BusinessAddon
         fields = "__all__"
 
+
+class ServicePricingDashboardForm(forms.ModelForm):
+    class Meta:
+        model = ServicePricing
+        fields = ("service", "price_value", "price_note")
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.title = "Transparent Pricing"
+        instance.card_title = ""
+        instance.subtitle = ""
+        instance.price_label = ""
+        instance.description = ""
+        instance.cta_text = ""
+        instance.cta_url = ""
+        if commit:
+            instance.save()
+        return instance
+
+
+class ServiceEstimateDashboardForm(forms.ModelForm):
+    property_options_text = forms.CharField(
+        required=False,
+        label="Property Size options",
+        widget=forms.Textarea(attrs={"rows": 6}),
+        help_text="One option per line in this format: Label | Price. Example: 0-50 m² | 0",
+    )
+    bedrooms_options_text = forms.CharField(
+        required=False,
+        label="Bedrooms options",
+        widget=forms.Textarea(attrs={"rows": 6}),
+        help_text="One option per line in this format: Label | Price. Example: 1 bedroom | 150",
+    )
+
+    class Meta:
+        model = ServiceEstimate
+        fields = ("service", "property_options_text", "bedrooms_options_text")
+
+    @staticmethod
+    def _parse_options(raw_value, field_name):
+        options = []
+        raw_value = (raw_value or "").strip()
+        if not raw_value:
+            return options
+        for line in raw_value.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if "|" not in line:
+                raise forms.ValidationError(
+                    {field_name: "Use one option per line in this format: Label | Price"}
+                )
+            label, price_raw = [part.strip() for part in line.split("|", 1)]
+            if not label:
+                raise forms.ValidationError({field_name: "Each option must have a label."})
+            try:
+                price = float(price_raw)
+            except ValueError:
+                raise forms.ValidationError({field_name: f"Invalid price in line: {line}"})
+            options.append({"label": label, "price": price})
+        return options
+
+    @staticmethod
+    def _serialize_options(options):
+        lines = []
+        for option in options or []:
+            label = str(option.get("label", "")).strip()
+            price = option.get("price", 0)
+            if label:
+                lines.append(f"{label} | {price}")
+        return "\n".join(lines)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields["property_options_text"].initial = self._serialize_options(
+                self.instance.property_options
+            )
+            self.fields["bedrooms_options_text"].initial = self._serialize_options(
+                self.instance.bedrooms_options
+            )
+
+    def clean(self):
+        cleaned = super().clean()
+        try:
+            cleaned["property_options"] = self._parse_options(
+                cleaned.get("property_options_text"),
+                "property_options_text",
+            )
+            cleaned["bedrooms_options"] = self._parse_options(
+                cleaned.get("bedrooms_options_text"),
+                "bedrooms_options_text",
+            )
+        except forms.ValidationError as exc:
+            if hasattr(exc, "message_dict"):
+                for field, messages in exc.message_dict.items():
+                    for message in messages:
+                        self.add_error(field, message)
+            else:
+                self.add_error(None, exc)
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.title = "Get a Quick Estimate"
+        instance.property_label = "Property Size (m²)"
+        instance.bedrooms_label = "Number of Bedrooms"
+        instance.cta_text = "Calculate Estimate"
+        instance.note = "This is an estimate only. Final price may vary based on property condition."
+        instance.property_options = self.cleaned_data.get("property_options", [])
+        instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
+        if commit:
+            instance.save()
+        return instance
+
 class ProviderProfileDashboardCreateForm(forms.Form):
     username = forms.CharField(label="Username", max_length=150)
     email = forms.EmailField(label="Email")
@@ -1787,7 +1902,7 @@ def dashboard_model_list(request, model):
         elif item.slug == "business-contacts":
             qs = qs.filter(source="business")
     service_id = request.GET.get("service_id")
-    if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "ServiceEcoPromise", "BusinessServiceCard"}:
+    if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "BusinessServiceCard"}:
         qs = qs.filter(service_id=service_id)
     q = request.GET.get("q", "").strip()
     if q:
@@ -1826,16 +1941,14 @@ def dashboard_model_list(request, model):
         "private-services": ["title", "category", "price", "recommended", "image"],
         "private-addons": ["title", "service", "price", "price_per_unit", "icon"],
         "service-cards": ["service", "title", "order"],
-        "service-pricing": ["service", "price_value", "price_note", "cta_text"],
-        "service-estimates": ["service", "property_label", "bedrooms_label", "cta_text"],
-        "service-eco": ["service", "title", "cta_text", "subtitle"],
-        "service-eco-points": ["promise", "title", "order", "icon"],
+        "service-pricing": ["service", "price_value", "price_note"],
+        "service-estimates": ["service", "property_options", "bedrooms_options"],
     }
     display_fields = display_fields_map.get(item.slug, _model_fields(item.model)[:5])
 
     service_obj = None
     if service_id:
-        if item.slug in {"service-cards", "service-pricing", "service-estimates", "service-eco", "service-eco-points"}:
+        if item.slug in {"service-cards", "service-pricing", "service-estimates"}:
             service_obj = PrivateService.objects.filter(id=service_id).first()
         if item.slug == "business-service-cards":
             service_obj = BusinessService.objects.filter(id=service_id).first()
@@ -1876,6 +1989,10 @@ def dashboard_model_create(request, model):
         )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
+    elif item.model == ServicePricing:
+        Form = ServicePricingDashboardForm
+    elif item.model == ServiceEstimate:
+        Form = ServiceEstimateDashboardForm
     elif item.model == DateSurcharge:
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
@@ -1903,6 +2020,18 @@ def dashboard_model_create(request, model):
     else:
         initial = {}
         if item.model == PrivateAddon:
+            service_id = request.GET.get("service_id")
+            if service_id:
+                initial["service"] = service_id
+        if item.model == ServiceCard:
+            service_id = request.GET.get("service_id")
+            if service_id:
+                initial["service"] = service_id
+        if item.model == ServicePricing:
+            service_id = request.GET.get("service_id")
+            if service_id:
+                initial["service"] = service_id
+        if item.model == ServiceEstimate:
             service_id = request.GET.get("service_id")
             if service_id:
                 initial["service"] = service_id
@@ -1953,6 +2082,10 @@ def dashboard_model_edit(request, model, pk):
         )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
+    elif item.model == ServicePricing:
+        Form = ServicePricingDashboardForm
+    elif item.model == ServiceEstimate:
+        Form = ServiceEstimateDashboardForm
     elif item.model == DateSurcharge:
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:

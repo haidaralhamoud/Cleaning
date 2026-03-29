@@ -21,11 +21,6 @@
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ object.pk }}">Cards</a>
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}?service_id={{ object.pk }}">Pricing</a>
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}?service_id={{ object.pk }}">Estimate</a>
-          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-eco' %}?service_id={{ object.pk }}">Eco</a>
-          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-cards' %}?service_id={{ object.pk }}">+ Card</a>
-          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-pricing' %}?service_id={{ object.pk }}">+ Pricing</a>
-          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-estimates' %}?service_id={{ object.pk }}">+ Estimate</a>
-          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-eco' %}?service_id={{ object.pk }}">+ Eco</a>
           <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ object.pk }}">+ Add-on</a>
           <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.slug %}" target="_blank">Open Page</a>
         </div>
@@ -47,14 +42,9 @@
             <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' object.service.id %}" target="_blank">Open Page</a>
           </div>
         {% endif %}
-        {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" or item.slug == "service-eco" %}
+        {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" %}
           <div class="mb-3 d-flex flex-wrap gap-2">
             <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.service.slug %}" target="_blank">Open Page</a>
-          </div>
-        {% endif %}
-        {% if item.slug == "service-eco-points" %}
-          <div class="mb-3 d-flex flex-wrap gap-2">
-            <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.promise.service.slug %}" target="_blank">Open Page</a>
           </div>
         {% endif %}
       {% endif %}
@@ -66,7 +56,7 @@
           <div class="mb-3">
             <div class="d-flex flex-wrap gap-2">
               <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'home:dashboard_date_surcharge_quick_weekend' %}amount=10&type=percent">
+                 href="{% url 'home:dashboard_date_surcharge_quick_weekend' %}?amount=10&type=percent">
                 Quick add: Sat + Sun +10%
               </a>
               <button type="button" class="btn btn-sm btn-outline-secondary" data-ds-prefill="Sat">
@@ -107,6 +97,23 @@
           {% for field in form %}
             {% if item.slug == "private-addons" and field.name == "price_per_unit" %}
               <div class="d-none">{{ field }}</div>
+            {% elif item.slug == "service-estimates" and field.name == "property_options_text" or item.slug == "service-estimates" and field.name == "bedrooms_options_text" %}
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                <div class="estimate-options-builder" data-estimate-builder data-field-id="{{ field.id_for_label }}">
+                  <div class="estimate-options-list" data-estimate-list></div>
+                  <button type="button" class="btn btn-sm btn-outline-primary mt-2" data-estimate-add>
+                    <i class="fa-solid fa-plus"></i> Add Option
+                  </button>
+                  <div class="d-none">{{ field }}</div>
+                </div>
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
             {% elif field.name == "questions" %}
               {% if item.slug == "private-services" or item.slug == "private-addons" %}
               <div class="col-12 mb-3">
@@ -196,7 +203,7 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0">Private Add-ons for this Service</h6>
               <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'home:dashboard_model_create' 'private-addons' %}service_id={{ object.pk }}">
+                 href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ object.pk }}">
                 <i class="fa-solid fa-plus"></i> Add Add-on
               </a>
             </div>
@@ -395,6 +402,80 @@
     });
   </script>
   {% endif %}
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll("[data-estimate-builder]").forEach((builder) => {
+        const textarea = document.getElementById(builder.dataset.fieldId);
+        const list = builder.querySelector("[data-estimate-list]");
+        const addBtn = builder.querySelector("[data-estimate-add]");
+        const form = builder.closest("form");
+        if (!textarea || !list || !addBtn || !form) return;
+
+        const escapeHtml = (value) =>
+          String(value || "").replace(/[&<>"']/g, (m) => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#039;"
+          }[m]));
+
+        const syncToTextarea = () => {
+          const lines = [];
+          list.querySelectorAll(".estimate-option-row").forEach((row) => {
+            const label = row.querySelector("[data-estimate-label]").value.trim();
+            const price = row.querySelector("[data-estimate-price]").value.trim();
+            if (!label) return;
+            lines.push(`${label} | ${price || 0}`);
+          });
+          textarea.value = lines.join("\n");
+        };
+
+        const addRow = (data = {}) => {
+          const row = document.createElement("div");
+          row.className = "estimate-option-row";
+          row.innerHTML = `
+            <input type="text" class="form-control" placeholder="Option label" data-estimate-label value="${escapeHtml(data.label || "")}">
+            <input type="number" step="0.01" class="form-control" placeholder="Price" data-estimate-price value="${escapeHtml(data.price || "")}">
+            <button type="button" class="btn btn-sm btn-outline-danger" data-estimate-remove>
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          `;
+          row.querySelector("[data-estimate-remove]").addEventListener("click", () => {
+            row.remove();
+            syncToTextarea();
+          });
+          row.querySelectorAll("input").forEach((input) => {
+            input.addEventListener("input", syncToTextarea);
+          });
+          list.appendChild(row);
+        };
+
+        const loadInitial = () => {
+          const raw = textarea.value.trim();
+          if (!raw) return;
+          raw.split(/\r?\n/).forEach((line) => {
+            const parts = line.split("|");
+            const label = (parts[0] || "").trim();
+            const price = (parts[1] || "").trim();
+            if (label) addRow({ label, price });
+          });
+        };
+
+        addBtn.addEventListener("click", () => {
+          addRow();
+          syncToTextarea();
+        });
+
+        loadInitial();
+        if (!list.children.length) {
+          addRow();
+        }
+
+        form.addEventListener("submit", syncToTextarea);
+      });
+    });
+  </script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const builder = document.querySelector("[data-questions-builder]");

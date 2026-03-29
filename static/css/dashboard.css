@@ -898,6 +898,23 @@ textarea.form-control:focus{
 .qs-options-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .qs-options-list{display:flex;flex-direction:column;gap:8px}
 .qs-option-row{display:grid;grid-template-columns:1.5fr 0.8fr auto;gap:8px;align-items:center}
+.estimate-options-builder{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:14px;
+}
+.estimate-options-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.estimate-option-row{
+  display:grid;
+  grid-template-columns:1.6fr 0.8fr auto;
+  gap:8px;
+  align-items:center;
+}
 
 @media (max-width: 1200px){
   .dash-hero{grid-template-columns:1fr}
@@ -912,6 +929,7 @@ textarea.form-control:focus{
 @media (max-width: 768px){
   .qs-grid{grid-template-columns:1fr}
   .qs-option-row{grid-template-columns:1fr}
+  .estimate-option-row{grid-template-columns:1fr}
   .dash-sidebar{
     position:static;
     height:auto;

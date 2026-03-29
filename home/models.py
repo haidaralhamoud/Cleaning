@@ -1022,6 +1022,8 @@ class ServiceEstimate(models.Model):
     title = models.CharField(max_length=120, default="Get a Quick Estimate")
     property_label = models.CharField(max_length=120, default="Property Size (m²)")
     bedrooms_label = models.CharField(max_length=120, default="Number of Bedrooms")
+    property_options = models.JSONField(default=list, blank=True)
+    bedrooms_options = models.JSONField(default=list, blank=True)
     cta_text = models.CharField(max_length=50, default="Calculate Estimate")
     note = models.TextField(blank=True)
 

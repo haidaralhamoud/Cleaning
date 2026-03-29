@@ -20,7 +20,7 @@
         </a>
       {% endif %}
       {% if service_id %}
-        {% if item.slug == "service-pricing" or item.slug == "service-estimates" or item.slug == "service-eco" or item.slug == "service-eco-points" %}
+        {% if item.slug == "service-pricing" or item.slug == "service-estimates" %}
           <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'private-services' service_id %}">
             Back to Service
           </a>
@@ -71,7 +71,6 @@
                 <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-cards' %}?service_id={{ obj.pk }}">+ Card</a>
                 <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-pricing' %}?service_id={{ obj.pk }}">+ Pricing</a>
                 <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-estimates' %}?service_id={{ obj.pk }}">+ Estimate</a>
-                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-eco' %}?service_id={{ obj.pk }}">+ Eco</a>
                 <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ obj.pk }}">+ Add-on</a>
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.slug %}" target="_blank">Open Page</a>
               {% endif %}
@@ -85,11 +84,8 @@
               {% if item.slug == "business-service-cards" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' obj.service.id %}" target="_blank">Open Page</a>
               {% endif %}
-              {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" or item.slug == "service-eco" %}
+              {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.service.slug %}" target="_blank">Open Page</a>
-              {% endif %}
-              {% if item.slug == "service-eco-points" %}
-                <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.promise.service.slug %}" target="_blank">Open Page</a>
               {% endif %}
               <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
             </td>

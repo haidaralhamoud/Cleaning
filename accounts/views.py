@@ -3469,10 +3469,8 @@ def service_detail(request, slug):
             "category",
             "pricing",
             "estimate",
-            "eco_promise",
         ).prefetch_related(
             "cards",
-            "eco_promise__points",
         ),
         slug=slug,
     )
@@ -3518,52 +3516,53 @@ def service_detail(request, slug):
 
     pricing_obj = getattr(service, "pricing", None)
     pricing = {
-        "title": getattr(pricing_obj, "title", "Transparent Pricing"),
-        "subtitle": getattr(
-            pricing_obj,
-            "subtitle",
-            "Our pricing is straightforward. Get a personalized quote based on your home's size and needs.",
-        )
-        or "",
-        "card_title": getattr(pricing_obj, "card_title", "") or service.title,
-        "price_label": getattr(pricing_obj, "price_label", "Starting from"),
+        "title": "Transparent Pricing",
+        "subtitle": "Our pricing is straightforward. Get a personalized quote based on your home's size and needs.",
+        "card_title": service.title,
+        "price_label": "Starting from",
         "price_value": getattr(pricing_obj, "price_value", "") or service.starting_price,
         "price_note": getattr(pricing_obj, "price_note", ""),
-        "description": getattr(pricing_obj, "description", "") or "",
-        "cta_text": getattr(pricing_obj, "cta_text", "Start Your Booking"),
-        "cta_url": getattr(pricing_obj, "cta_url", "") or start_booking_url,
+        "description": "The final price depends on the size of your property and its condition. We provide a firm quote after a quick assessment.",
+        "cta_text": "BOOK NOW",
+        "cta_url": start_booking_url,
     }
 
-    eco_obj = getattr(service, "eco_promise", None)
-    eco_points = []
-    if eco_obj:
-        eco_points = [
-            {
-                "icon": point.icon or "",
-                "title": point.title,
-                "body": point.body,
-            }
-            for point in eco_obj.points.all()
-        ]
-    if not eco_points:
-        eco_points = [
-            {
-                "icon": "",
-                "title": "Environmentally Safe Products",
-                "body": "We use high-quality, plant-based cleaning solutions that are biodegradable and free from harsh chemicals. Safe for your family, pets, and the earth.",
-            },
-            {
-                "icon": "",
-                "title": "Sustainable Methods",
-                "body": "We use high-quality, plant-based cleaning solutions that are biodegradable and free from harsh chemicals. Safe for your family, pets, and the earth.",
-            },
-        ]
+    estimate_obj = getattr(service, "estimate", None)
+    estimate = {
+        "title": "Get a Quick Estimate",
+        "property_label": "Property Size (m²)",
+        "bedrooms_label": "Number of Bedrooms",
+        "cta_text": "Calculate Estimate",
+        "note": "This is an estimate only. Final price may vary based on property condition.",
+        "property_options": getattr(estimate_obj, "property_options", None) or [],
+        "bedrooms_options": getattr(estimate_obj, "bedrooms_options", None) or [],
+    }
 
     eco = {
-        "title": getattr(eco_obj, "title", "Our Eco-Friendly Promise"),
-        "subtitle": getattr(eco_obj, "subtitle", ""),
-        "cta_text": getattr(eco_obj, "cta_text", "Add To Cart"),
-        "points": eco_points,
+        "title": "Our Eco-Friendly Promise",
+        "subtitle": (
+            "We are committed to protecting our planet while providing a spotless home for you. "
+            "Our cleaning methods are kind to the environment as they are tough on dirt."
+        ),
+        "cta_text": "Add To Cart",
+        "points": [
+            {
+                "icon": "eco-products",
+                "title": "Environmentally Safe Products",
+                "body": (
+                    "We use high-quality, plant-based cleaning solutions that are biodegradable "
+                    "and free from harsh chemicals. Safe for your family, pets, and the earth."
+                ),
+            },
+            {
+                "icon": "sustainable-methods",
+                "title": "Sustainable Methods",
+                "body": (
+                    "We use high-quality, plant-based cleaning solutions that are biodegradable "
+                    "and free from harsh chemicals. Safe for your family, pets, and the earth."
+                ),
+            },
+        ],
     }
 
     context = {
@@ -3573,6 +3572,7 @@ def service_detail(request, slug):
         "checklist_title": f"Complete {service.title} Checklist",
         "checklist_cards": checklist_cards,
         "pricing": pricing,
+        "estimate": estimate,
         "eco": eco,
     }
     return render(request, "accounts/services/service_detail.html", context)
