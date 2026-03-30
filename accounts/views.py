@@ -55,11 +55,12 @@ from django.contrib.auth.views import LoginView
 from django.views.decorators.http import require_POST
 from django.contrib.auth.models import User
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives, get_connection
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 import logging
 from smtplib import SMTPException
 import stripe
+from .email_utils import verification_email_connection, verification_from_email
 from home.models import (
     BookingStatusHistory,
     BookingTimeline,
@@ -574,10 +575,16 @@ def _send_reset_code(email, user, request):
     context = {"code": code, "ttl": OTP_TTL_MINUTES}
     text_body = render_to_string("accounts/emails/password_reset_code.txt", context)
     html_body = render_to_string("accounts/emails/password_reset_code.html", context)
-    message = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [email])
+    message = EmailMultiAlternatives(
+        subject,
+        text_body,
+        verification_from_email(),
+        [email],
+        connection=verification_email_connection(),
+    )
     message.attach_alternative(html_body, "text/html")
     try:
-        connection = get_connection()
+        connection = verification_email_connection()
         connection.open()
         connection.close()
         message.send(fail_silently=False)

@@ -70,6 +70,7 @@ ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 SOCIALACCOUNT_QUERY_EMAIL = True
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountLoggingAdapter"
+ACCOUNT_ADAPTER = "accounts.adapters.VerificationEmailAccountAdapter"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
@@ -266,7 +267,16 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = "services@hembla-experten.se"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "Hembla Experten <services@hembla-experten.se>"
+VERIFICATION_FROM_EMAIL = "Hembla Experten Verification <verification@hembla-experten.se>"
 EMAIL_TIMEOUT = 10
+VERIFICATION_EMAIL_BACKEND = EMAIL_BACKEND
+VERIFICATION_EMAIL_HOST = os.getenv("VERIFICATION_EMAIL_HOST", EMAIL_HOST)
+VERIFICATION_EMAIL_PORT = int(os.getenv("VERIFICATION_EMAIL_PORT", EMAIL_PORT))
+VERIFICATION_EMAIL_USE_TLS = os.getenv("VERIFICATION_EMAIL_USE_TLS", str(EMAIL_USE_TLS)).lower() == "true"
+VERIFICATION_EMAIL_USE_SSL = os.getenv("VERIFICATION_EMAIL_USE_SSL", str(EMAIL_USE_SSL)).lower() == "true"
+VERIFICATION_EMAIL_HOST_USER = os.getenv("VERIFICATION_EMAIL_HOST_USER", "verification@hembla-experten.se")
+VERIFICATION_EMAIL_HOST_PASSWORD = os.getenv("VERIFICATION_EMAIL_HOST_PASSWORD", "")
+VERIFICATION_EMAIL_TIMEOUT = int(os.getenv("VERIFICATION_EMAIL_TIMEOUT", EMAIL_TIMEOUT))
 
 #book's email
 ADMIN_ALERT_EMAIL = "services@hembla-experten.se"

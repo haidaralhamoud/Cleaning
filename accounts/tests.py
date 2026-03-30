@@ -14,6 +14,11 @@ User = get_user_model()
 
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    SECURE_SSL_REDIRECT=False,
+    VERIFICATION_FROM_EMAIL="Hembla Experten Verification <verification@hembla-experten.se>",
+    VERIFICATION_EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    VERIFICATION_EMAIL_HOST_USER="verification@hembla-experten.se",
+    VERIFICATION_EMAIL_HOST_PASSWORD="secret",
     DATABASES={
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -34,6 +39,10 @@ class PasswordResetFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(PasswordResetOTP.objects.filter(email="test@example.com").exists())
         self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(
+            mail.outbox[0].from_email,
+            "Hembla Experten Verification <verification@hembla-experten.se>",
+        )
 
     def test_verify_code_success(self):
         otp = PasswordResetOTP.objects.create(

@@ -1,9 +1,11 @@
 import logging
 
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives, send_mail
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.template.loader import render_to_string
+from django.urls import NoReverseMatch, reverse
 
 from accounts.models import (
     Customer,
@@ -44,6 +46,93 @@ def _send_admin_alert(subject, body):
         logger.exception("Failed to send admin alert email")
 
 
+def _public_base_url():
+    for host in getattr(settings, "ALLOWED_HOSTS", []):
+        if host and host not in {"*", "localhost", "127.0.0.1", "45.93.137.166"} and "." in host:
+            return f"https://{host}"
+    return ""
+
+
+def _private_booking_customer_email(booking):
+    user = getattr(booking, "user", None)
+    if user and user.email:
+        return user.email.strip()
+
+    customer = Customer.objects.filter(user_id=getattr(booking, "user_id", None)).first()
+    if customer and customer.email:
+        return customer.email.strip()
+    return ""
+
+
+def _private_booking_customer_name(booking):
+    user = getattr(booking, "user", None)
+    if user:
+        full_name = user.get_full_name().strip()
+        if full_name:
+            return full_name
+
+    customer = Customer.objects.filter(user_id=getattr(booking, "user_id", None)).first()
+    if customer:
+        full_name = f"{customer.first_name} {customer.last_name}".strip()
+        if full_name:
+            return full_name
+
+    if user and user.username:
+        return user.username
+    return "there"
+
+
+def _private_booking_service_titles(booking):
+    selected_services = getattr(booking, "selected_services", None) or []
+    if not isinstance(selected_services, list) or not selected_services:
+        return []
+
+    services_by_slug = {
+        service.slug: service.title
+        for service in PrivateBooking._meta.apps.get_model("home", "PrivateService").objects.filter(
+            slug__in=selected_services
+        )
+    }
+    return [services_by_slug.get(slug, str(slug).replace("-", " ").title()) for slug in selected_services]
+
+
+def _private_booking_details_url(booking):
+    base_url = _public_base_url()
+    if not base_url:
+        return ""
+    try:
+        return f"{base_url}{reverse('accounts:view_service_details', args=['private', booking.id])}"
+    except NoReverseMatch:
+        return ""
+
+
+def _send_private_booking_confirmation(booking):
+    recipient = _private_booking_customer_email(booking)
+    if not recipient:
+        return
+
+    booking_url = _private_booking_details_url(booking)
+    context = {
+        "customer_name": _private_booking_customer_name(booking),
+        "booking": booking,
+        "service_titles": _private_booking_service_titles(booking),
+        "booking_date": booking.appointment_date,
+        "booking_time_window": booking.appointment_time_window or "",
+        "booking_total": booking.payment_amount or booking.total_price,
+        "booking_currency": (booking.payment_currency or "SEK").upper(),
+        "booking_url": booking_url,
+    }
+    subject = f"Your booking is confirmed #{booking.id}"
+    text_body = render_to_string("home/emails/private_booking_confirmation.txt", context)
+    html_body = render_to_string("home/emails/private_booking_confirmation.html", context)
+    message = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient])
+    message.attach_alternative(html_body, "text/html")
+    try:
+        message.send(fail_silently=False)
+    except Exception:
+        logger.exception("Failed to send private booking confirmation email for booking %s", booking.id)
+
+
 def _booking_admin_url(booking_type, booking_id):
     if booking_type == "business":
         return f"/dashboard/business-bookings/{booking_id}/edit/"
@@ -54,6 +143,7 @@ def _booking_admin_url(booking_type, booking_id):
 def notify_private_booking(sender, instance, created, **kwargs):
     if not created:
         return
+    _send_private_booking_confirmation(instance)
     subject = f"New Private Booking #{instance.id}"
     body = f"A new private booking was created.\n\nBooking ID: {instance.id}\nStatus: {instance.status}\nLink: {_booking_admin_url('private', instance.id)}"
     _send_admin_alert(subject, body)

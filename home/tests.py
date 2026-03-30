@@ -1,10 +1,14 @@
 from datetime import datetime, time, timedelta
+from decimal import Decimal
+from django.core import mail
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 from home.models import PrivateBooking, PrivateMainCategory, PrivateService
+from accounts.models import Customer
 from home.availability_utils import generate_slots, provider_available_after_minutes
 from home.pricing_utils import calculate_booking_price
 
@@ -151,3 +155,54 @@ class BookingPricingDurationTests(TestCase):
         pricing = calculate_booking_price(booking)
 
         self.assertEqual(pricing["duration_minutes"], 240.0)
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DEFAULT_FROM_EMAIL="Hembla Experten <services@hembla-experten.se>",
+    ALLOWED_HOSTS=["hembla-experten.se"],
+)
+class BookingEmailSignalTests(TestCase):
+    def test_private_booking_creation_sends_customer_confirmation_email(self):
+        user_model = get_user_model()
+        user = user_model.objects.create_user(
+            username="customer@example.com",
+            email="customer@example.com",
+            password="pass123",
+        )
+        Customer.objects.create(
+            user=user,
+            first_name="Lama",
+            last_name="Hassan",
+            phone="123456",
+            email="customer@example.com",
+        )
+
+        category = PrivateMainCategory.objects.create(title="Home")
+        service = PrivateService.objects.create(
+            category=category,
+            title="Standard Cleaning",
+            slug="standard-cleaning",
+            price=100,
+        )
+
+        PrivateBooking.objects.create(
+            user=user,
+            selected_services=[service.slug],
+            appointment_date=timezone.localdate(),
+            appointment_time_window="09:00 - 12:00",
+            total_price=Decimal("249.00"),
+            payment_amount=Decimal("249.00"),
+            payment_currency="sek",
+        )
+
+        customer_emails = [
+            email for email in mail.outbox
+            if "customer@example.com" in email.to and "Your booking is confirmed" in email.subject
+        ]
+        self.assertEqual(len(customer_emails), 1)
+        customer_email = customer_emails[0]
+        self.assertEqual(customer_email.from_email, "Hembla Experten <services@hembla-experten.se>")
+        self.assertIn("Your booking is confirmed", customer_email.subject)
+        self.assertIn("Standard Cleaning", customer_email.body)
+        self.assertIn("09:00 - 12:00", customer_email.body)

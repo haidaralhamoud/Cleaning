@@ -1,0 +1,16 @@
+Hi {{ customer_name }},
+
+Your booking with Hembla Experten is confirmed.
+
+Booking ID: #{{ booking.id }}
+{% if service_titles %}Service{% if service_titles|length > 1 %}s{% endif %}: {{ service_titles|join:", " }}
+{% endif %}{% if booking_date %}Date: {{ booking_date|date:"F j, Y" }}
+{% endif %}{% if booking_time_window %}Time: {{ booking_time_window }}
+{% endif %}Total: {{ booking_total }} {{ booking_currency }}
+
+We are happy to take care of this for you and we will be in touch if anything needs clarification.
+{% if booking_url %}
+View your booking: {{ booking_url }}
+{% endif %}
+Warmly,
+Hembla Experten

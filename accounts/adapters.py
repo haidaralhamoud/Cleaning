@@ -1,8 +1,21 @@
 import logging
+from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from django.conf import settings
+
+from .email_utils import verification_email_connection, verification_from_email
 
 logger = logging.getLogger(__name__)
+
+
+class VerificationEmailAccountAdapter(DefaultAccountAdapter):
+    def get_from_email(self):
+        return verification_from_email()
+
+    def send_mail(self, template_prefix, email, context):
+        message = self.render_mail(template_prefix, email, context)
+        message.from_email = verification_from_email()
+        message.connection = verification_email_connection()
+        message.send()
 
 
 class SocialAccountLoggingAdapter(DefaultSocialAccountAdapter):
