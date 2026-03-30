@@ -3,12 +3,14 @@ from decimal import Decimal
 from django.core import mail
 from django.test import TestCase
 from django.test.utils import override_settings
+from django.urls import reverse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 from home.models import BusinessBooking, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer
+from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes
 from home.pricing_utils import calculate_booking_price
 
@@ -160,7 +162,9 @@ class BookingPricingDurationTests(TestCase):
 @override_settings(
     EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     DEFAULT_FROM_EMAIL="Hembla Experten <services@hembla-experten.se>",
-    ALLOWED_HOSTS=["hembla-experten.se"],
+    ALLOWED_HOSTS=["hembla-experten.se", "testserver"],
+    CONTACT_SUPPORT_EMAIL="support@hembla-experten.se",
+    SECURE_SSL_REDIRECT=False,
 )
 class BookingEmailSignalTests(TestCase):
     def test_private_booking_creation_sends_customer_confirmation_email(self):
@@ -227,3 +231,24 @@ class BookingEmailSignalTests(TestCase):
         self.assertIn("Acme AB", customer_email.body)
         self.assertIn("Office Cleaning", customer_email.body)
         self.assertIn("08:00 - 10:00", customer_email.body)
+
+    def test_contact_form_sends_email_to_support_and_renders_support_email(self):
+        response = self.client.get(reverse("home:contact"))
+        self.assertContains(response, "support@hembla-experten.se")
+
+        Contact.objects.create(
+            first_name="Lama",
+            last_name="Hassan",
+            email="lama@example.com",
+            country_code="+46",
+            phone="123456",
+            message="Need help",
+            inquiry_type="general",
+            preferred_method="email",
+        )
+
+        support_emails = [
+            email for email in mail.outbox
+            if "support@hembla-experten.se" in email.to and email.subject == "New Contact Message"
+        ]
+        self.assertEqual(len(support_emails), 1)

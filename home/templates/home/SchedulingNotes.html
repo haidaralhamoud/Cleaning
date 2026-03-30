@@ -180,6 +180,7 @@
     });
 
     const minBookingDate = "{{ min_booking_date|default:'' }}";
+    const PAST_DATE_MESSAGE = "You cannot choose a date before today. Please select today or a future date.";
 
     function isPastBookingDate(value) {
       return Boolean(value && minBookingDate && value < minBookingDate);
@@ -189,7 +190,7 @@
       input.addEventListener("change", () => {
         if (isPastBookingDate(input.value)) {
           input.value = "";
-          alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+          alert(PAST_DATE_MESSAGE);
         }
       });
     });
@@ -200,7 +201,7 @@
 
       if (isPastBookingDate(startDateValue) || isPastBookingDate(customDateValue)) {
         event.preventDefault();
-        alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+        alert(PAST_DATE_MESSAGE);
         return;
       }
 

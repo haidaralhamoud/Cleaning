@@ -2292,7 +2292,8 @@ def contact(request):
 
     return render(request, "home/contact.html", {
         "form": form,
-        "show_popup": show_popup
+        "show_popup": show_popup,
+        "support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", "support@hembla-experten.se"),
     })
 
 

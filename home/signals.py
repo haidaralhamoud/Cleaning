@@ -30,6 +30,10 @@ def _admin_email():
     return getattr(settings, "ADMIN_ALERT_EMAIL", "Services@hemblaexperten.se")
 
 
+def _contact_support_email():
+    return getattr(settings, "CONTACT_SUPPORT_EMAIL", _admin_email())
+
+
 def _send_admin_alert(subject, body):
     recipient = _admin_email()
     if not recipient:
@@ -244,7 +248,19 @@ def notify_contact(sender, instance, created, **kwargs):
         return
     subject = "New Contact Message"
     body = f"New contact received.\n\nName: {instance.first_name} {instance.last_name}\nEmail: {instance.email}\nType: {instance.inquiry_type}\nLink: /dashboard/contacts/"
-    _send_admin_alert(subject, body)
+    recipient = _contact_support_email()
+    if not recipient:
+        return
+    try:
+        send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient],
+            fail_silently=True,
+        )
+    except Exception:
+        logger.exception("Failed to send contact form email")
 
 
 @receiver(post_save, sender=Incident)
