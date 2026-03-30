@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from home.models import PrivateBooking, PrivateMainCategory, PrivateService
+from home.models import BusinessBooking, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer
 from home.availability_utils import generate_slots, provider_available_after_minutes
 from home.pricing_utils import calculate_booking_price
@@ -206,3 +206,24 @@ class BookingEmailSignalTests(TestCase):
         self.assertIn("Your booking is confirmed", customer_email.subject)
         self.assertIn("Standard Cleaning", customer_email.body)
         self.assertIn("09:00 - 12:00", customer_email.body)
+
+    def test_business_booking_creation_sends_customer_confirmation_email(self):
+        BusinessBooking.objects.create(
+            company_name="Acme AB",
+            contact_person="Nour",
+            email="office@example.com",
+            selected_service="Office Cleaning",
+            custom_date=timezone.localdate(),
+            custom_time="08:00 - 10:00",
+        )
+
+        customer_emails = [
+            email for email in mail.outbox
+            if "office@example.com" in email.to and "Your business booking is confirmed" in email.subject
+        ]
+        self.assertEqual(len(customer_emails), 1)
+        customer_email = customer_emails[0]
+        self.assertEqual(customer_email.from_email, "Hembla Experten <services@hembla-experten.se>")
+        self.assertIn("Acme AB", customer_email.body)
+        self.assertIn("Office Cleaning", customer_email.body)
+        self.assertIn("08:00 - 10:00", customer_email.body)

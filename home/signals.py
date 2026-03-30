@@ -64,6 +64,17 @@ def _private_booking_customer_email(booking):
     return ""
 
 
+def _business_booking_customer_email(booking):
+    email = (getattr(booking, "email", "") or "").strip()
+    if email:
+        return email
+
+    user = getattr(booking, "user", None)
+    if user and user.email:
+        return user.email.strip()
+    return ""
+
+
 def _private_booking_customer_name(booking):
     user = getattr(booking, "user", None)
     if user:
@@ -82,6 +93,25 @@ def _private_booking_customer_name(booking):
     return "there"
 
 
+def _business_booking_customer_name(booking):
+    for value in (
+        getattr(booking, "contact_person", ""),
+        getattr(booking, "company_name", ""),
+    ):
+        value = (value or "").strip()
+        if value:
+            return value
+
+    user = getattr(booking, "user", None)
+    if user:
+        full_name = user.get_full_name().strip()
+        if full_name:
+            return full_name
+        if user.username:
+            return user.username
+    return "there"
+
+
 def _private_booking_service_titles(booking):
     selected_services = getattr(booking, "selected_services", None) or []
     if not isinstance(selected_services, list) or not selected_services:
@@ -96,12 +126,37 @@ def _private_booking_service_titles(booking):
     return [services_by_slug.get(slug, str(slug).replace("-", " ").title()) for slug in selected_services]
 
 
+def _business_booking_service_label(booking):
+    for value in (
+        getattr(booking, "selected_service", ""),
+        getattr(getattr(booking, "selected_bundle", None), "title", ""),
+    ):
+        value = (value or "").strip()
+        if value:
+            return value
+
+    services_needed = getattr(booking, "services_needed", None) or []
+    if isinstance(services_needed, list) and services_needed:
+        return ", ".join(str(item) for item in services_needed)
+    return "Business cleaning service"
+
+
 def _private_booking_details_url(booking):
     base_url = _public_base_url()
     if not base_url:
         return ""
     try:
         return f"{base_url}{reverse('accounts:view_service_details', args=['private', booking.id])}"
+    except NoReverseMatch:
+        return ""
+
+
+def _business_booking_details_url(booking):
+    base_url = _public_base_url()
+    if not base_url:
+        return ""
+    try:
+        return f"{base_url}{reverse('accounts:view_service_details', args=['business', booking.id])}"
     except NoReverseMatch:
         return ""
 
@@ -133,6 +188,30 @@ def _send_private_booking_confirmation(booking):
         logger.exception("Failed to send private booking confirmation email for booking %s", booking.id)
 
 
+def _send_business_booking_confirmation(booking):
+    recipient = _business_booking_customer_email(booking)
+    if not recipient:
+        return
+
+    context = {
+        "customer_name": _business_booking_customer_name(booking),
+        "booking": booking,
+        "service_label": _business_booking_service_label(booking),
+        "booking_date": booking.custom_date or booking.start_date,
+        "booking_time_window": booking.custom_time or booking.preferred_time or "",
+        "booking_url": _business_booking_details_url(booking),
+    }
+    subject = f"Your business booking is confirmed #{booking.id}"
+    text_body = render_to_string("home/emails/business_booking_confirmation.txt", context)
+    html_body = render_to_string("home/emails/business_booking_confirmation.html", context)
+    message = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient])
+    message.attach_alternative(html_body, "text/html")
+    try:
+        message.send(fail_silently=False)
+    except Exception:
+        logger.exception("Failed to send business booking confirmation email for booking %s", booking.id)
+
+
 def _booking_admin_url(booking_type, booking_id):
     if booking_type == "business":
         return f"/dashboard/business-bookings/{booking_id}/edit/"
@@ -153,6 +232,7 @@ def notify_private_booking(sender, instance, created, **kwargs):
 def notify_business_booking(sender, instance, created, **kwargs):
     if not created:
         return
+    _send_business_booking_confirmation(instance)
     subject = f"New Business Booking #{instance.id}"
     body = f"A new business booking was created.\n\nBooking ID: {instance.id}\nStatus: {instance.status}\nLink: {_booking_admin_url('business', instance.id)}"
     _send_admin_alert(subject, body)

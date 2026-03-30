@@ -1,0 +1,34 @@
+<html>
+  <body style="margin:0;padding:0;background:#f6f1e8;font-family:Georgia, 'Times New Roman', serif;color:#1f2933;">
+    <div style="max-width:640px;margin:32px auto;background:#ffffff;border:1px solid #eadfce;border-radius:18px;overflow:hidden;">
+      <div style="padding:28px 32px;background:#183a37;color:#f8f5ef;">
+        <div style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;opacity:0.8;">Hembla Experten</div>
+        <h1 style="margin:12px 0 0;font-size:30px;line-height:1.2;font-weight:700;">Your business booking is confirmed</h1>
+      </div>
+      <div style="padding:28px 32px;">
+        <p style="margin:0 0 16px;font-size:17px;line-height:1.7;">Hi {{ customer_name }},</p>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Thank you for choosing Hembla Experten. Your business booking is now registered and confirmed in our system.</p>
+        <div style="background:#f8f5ef;border-radius:14px;padding:20px 22px;margin:0 0 20px;">
+          <p style="margin:0 0 10px;font-size:15px;"><strong>Booking ID:</strong> #{{ booking.id }}</p>
+          {% if booking.company_name %}
+          <p style="margin:0 0 10px;font-size:15px;"><strong>Company:</strong> {{ booking.company_name }}</p>
+          {% endif %}
+          <p style="margin:0 0 10px;font-size:15px;"><strong>Service:</strong> {{ service_label }}</p>
+          {% if booking_date %}
+          <p style="margin:0 0 10px;font-size:15px;"><strong>Date:</strong> {{ booking_date|date:"F j, Y" }}</p>
+          {% endif %}
+          {% if booking_time_window %}
+          <p style="margin:0;font-size:15px;"><strong>Time:</strong> {{ booking_time_window }}</p>
+          {% endif %}
+        </div>
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.7;">Our team will contact you if any final details need confirmation before the visit.</p>
+        {% if booking_url %}
+        <p style="margin:0 0 22px;">
+          <a href="{{ booking_url }}" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#bd8b13;color:#ffffff;text-decoration:none;font-size:15px;">View your booking</a>
+        </p>
+        {% endif %}
+        <p style="margin:0;font-size:15px;line-height:1.7;">Warmly,<br>Hembla Experten</p>
+      </div>
+    </div>
+  </body>
+</html>
