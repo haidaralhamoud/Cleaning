@@ -171,10 +171,25 @@
       const button = document.getElementById("estimateCalcBtn");
       if (!propertySelect || !bedroomsSelect || !resultEl || !button) return;
 
-      const parseNumber = (value) => {
-        const cleaned = String(value || "").replace(/[^0-9.,-]/g, "").replace(",", ".");
+      const parsePriceRange = (value) => {
+        const normalized = String(value || "").trim().replace(/\s+/g, "");
+        if (!normalized) return { min: 0, max: 0 };
+
+        const rangeMatch = normalized.match(/^(\d+(?:[.,]\d+)?)\s*-\s*(\d+(?:[.,]\d+)?)$/);
+        if (rangeMatch) {
+          const min = Number(rangeMatch[1].replace(",", "."));
+          const max = Number(rangeMatch[2].replace(",", "."));
+          if (Number.isFinite(min) && Number.isFinite(max)) {
+            return { min, max };
+          }
+        }
+
+        const cleaned = normalized.replace(/[^0-9.,-]/g, "").replace(",", ".");
         const parsed = Number(cleaned);
-        return Number.isFinite(parsed) ? parsed : 0;
+        if (Number.isFinite(parsed)) {
+          return { min: parsed, max: parsed };
+        }
+        return { min: 0, max: 0 };
       };
 
       const formatPrice = (value) => {
@@ -185,10 +200,14 @@
       };
 
       const updateEstimate = () => {
-        const propertyPrice = parseNumber(propertySelect.value);
-        const bedroomsPrice = parseNumber(bedroomsSelect.value);
-        const total = propertyPrice + bedroomsPrice;
-        resultEl.textContent = `Estimated total: ${formatPrice(total)} SEK`;
+        const propertyPrice = parsePriceRange(propertySelect.value);
+        const bedroomsPrice = parsePriceRange(bedroomsSelect.value);
+        const totalMin = propertyPrice.min + bedroomsPrice.min;
+        const totalMax = propertyPrice.max + bedroomsPrice.max;
+        const totalText = totalMin === totalMax
+          ? formatPrice(totalMin)
+          : `${formatPrice(totalMin)}-${formatPrice(totalMax)}`;
+        resultEl.textContent = `Estimated total: ${totalText} SEK`;
       };
 
       button.addEventListener("click", updateEstimate);

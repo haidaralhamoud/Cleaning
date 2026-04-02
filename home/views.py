@@ -1617,10 +1617,7 @@ class ServiceEstimateDashboardForm(forms.ModelForm):
             label, price_raw = [part.strip() for part in line.split("|", 1)]
             if not label:
                 raise forms.ValidationError({field_name: "Each option must have a label."})
-            try:
-                price = float(price_raw)
-            except ValueError:
-                raise forms.ValidationError({field_name: f"Invalid price in line: {line}"})
+            price = price_raw or "0"
             options.append({"label": label, "price": price})
         return options
 

@@ -436,7 +436,7 @@
           row.className = "estimate-option-row";
           row.innerHTML = `
             <input type="text" class="form-control" placeholder="Option label" data-estimate-label value="${escapeHtml(data.label || "")}">
-            <input type="number" step="0.01" class="form-control" placeholder="Price" data-estimate-price value="${escapeHtml(data.price || "")}">
+            <input type="text" class="form-control" placeholder="Price or range (e.g. 700-1200)" data-estimate-price value="${escapeHtml(data.price || "")}">
             <button type="button" class="btn btn-sm btn-outline-danger" data-estimate-remove>
               <i class="fa-solid fa-xmark"></i>
             </button>
