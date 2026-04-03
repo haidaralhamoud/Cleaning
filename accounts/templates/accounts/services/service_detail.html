@@ -70,6 +70,7 @@
             <label for="estimateProperty">{{ estimate.property_label }}</label>
             <select id="estimateProperty">
               {% if estimate.property_options %}
+                <option value="" selected disabled>Select property size</option>
                 {% for option in estimate.property_options %}
                   <option value="{{ option.price }}">{{ option.label }}</option>
                 {% endfor %}
@@ -82,6 +83,7 @@
             <label for="estimateBedrooms">{{ estimate.bedrooms_label }}</label>
             <select id="estimateBedrooms">
               {% if estimate.bedrooms_options %}
+                <option value="" selected disabled>Select number of bedrooms</option>
                 {% for option in estimate.bedrooms_options %}
                   <option value="{{ option.price }}">{{ option.label }}</option>
                 {% endfor %}
@@ -200,6 +202,10 @@
       };
 
       const updateEstimate = () => {
+        if (!propertySelect.value || !bedroomsSelect.value) {
+          resultEl.textContent = "Estimated total: 0 SEK";
+          return;
+        }
         const propertyPrice = parsePriceRange(propertySelect.value);
         const bedroomsPrice = parsePriceRange(bedroomsSelect.value);
         const totalMin = propertyPrice.min + bedroomsPrice.min;

@@ -160,6 +160,11 @@ path(
     views.private_update_rot_api,
     name="private_update_rot_api"
 ),
+path(
+    "private/api/booking/update-reward/",
+    views.private_update_reward_api,
+    name="private_update_reward_api"
+),
 
 # Checkout page
 path(

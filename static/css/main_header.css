@@ -95,6 +95,64 @@ body {
   color: #00a3c8;
 }
 
+.dropdown-submenu {
+  position: relative;
+}
+
+.submenu-toggle {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.submenu-arrow {
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  transform: rotate(45deg);
+  flex: 0 0 auto;
+}
+
+.submenu-menu {
+  position: absolute;
+  top: 0;
+  left: calc(100% - 6px);
+  min-width: 240px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+  padding: 8px 0;
+  max-height: 420px;
+  overflow-y: auto;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(10px);
+  transition: all .25s ease;
+  z-index: 1000;
+}
+
+.submenu-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.submenu-menu::-webkit-scrollbar-thumb {
+  background: rgba(0, 163, 200, 0.32);
+  border-radius: 999px;
+}
+
+.submenu-all {
+  font-weight: 700 !important;
+  color: #00a3c8 !important;
+}
+
+.dropdown-submenu:hover .submenu-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
 .nav-dropdown:hover .dropdown-menu {
   opacity: 1;
   visibility: visible;

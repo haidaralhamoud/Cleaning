@@ -24,10 +24,17 @@
 
   <main class="faq-section">
     <h1>&#10067; FAQ</h1>
+    <div class="faq-search-wrap">
+      <label class="faq-search" for="faqSearchInput">
+        <span class="faq-search-icon" aria-hidden="true"></span>
+        <input type="text" id="faqSearchInput" placeholder="Search questions or answers">
+      </label>
+      <p class="faq-search-note" id="faqSearchNote">Start typing to find answers faster.</p>
+    </div>
 
     {% if faq_categories %}
       {% for category in faq_categories %}
-        <div class="faq-category">
+        <div class="faq-category" data-faq-category>
           <h2>
             {% if category.icon %}
               {% if "fa-" in category.icon %}
@@ -40,7 +47,7 @@
           </h2>
 
           {% for item in category.items.all %}
-            <div class="faq-item">
+            <div class="faq-item" data-faq-item data-search-text="{{ item.question|lower }} {% for line in item.answer_lines %} {{ line|lower }} {% endfor %}">
               <div class="faq-question">Q: {{ item.question }}<span class="toggle-icon">+</span></div>
               {% for line in item.answer_lines %}
                 <div class="faq-answer">{{ line }}</div>
@@ -63,9 +70,14 @@
       </div>
     {% endif %}
 
+    <div class="faq-empty-state" id="faqEmptyState" hidden>
+      <strong>No matching FAQs.</strong>
+      <span>Try another keyword or contact us for help.</span>
+    </div>
+
     <p class="footer-fun">
       &#129300; Still confused Don't worry ' even we get confused sometimes!  
-      <a href="#">Contact us</a> and we'll help you sort it out. &#128516;
+      <a href="{% url 'home:contact' %}">Contact us</a> and we'll help you sort it out. &#128516;
     </p>
   </main>
 
@@ -77,6 +89,43 @@
         item.classList.toggle("open");
       });
     });
+
+    const faqSearchInput = document.getElementById("faqSearchInput");
+    const faqItems = Array.from(document.querySelectorAll("[data-faq-item]"));
+    const faqCategories = Array.from(document.querySelectorAll("[data-faq-category]"));
+    const faqEmptyState = document.getElementById("faqEmptyState");
+    const faqSearchNote = document.getElementById("faqSearchNote");
+
+    function applyFaqSearch() {
+      const query = (faqSearchInput?.value || "").trim().toLowerCase();
+      let visibleItems = 0;
+
+      faqItems.forEach((item) => {
+        const haystack = item.dataset.searchText || "";
+        const matches = !query || haystack.includes(query);
+        item.hidden = !matches;
+        if (matches) visibleItems += 1;
+      });
+
+      faqCategories.forEach((category) => {
+        const hasVisibleItems = Array.from(category.querySelectorAll("[data-faq-item]")).some((item) => !item.hidden);
+        category.hidden = !hasVisibleItems;
+      });
+
+      if (faqEmptyState) {
+        faqEmptyState.hidden = visibleItems > 0;
+      }
+
+      if (faqSearchNote) {
+        faqSearchNote.textContent = query
+          ? `${visibleItems} result${visibleItems === 1 ? "" : "s"} found`
+          : "Start typing to find answers faster.";
+      }
+    }
+
+    if (faqSearchInput) {
+      faqSearchInput.addEventListener("input", applyFaqSearch);
+    }
   </script>
 
 <!-- ============================================================================================= -->

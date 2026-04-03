@@ -971,6 +971,7 @@ class PrivateService(models.Model):
         related_name="services"
     )
     title = models.CharField(max_length=255)
+    display_order = models.PositiveIntegerField(default=0)
     description = models.TextField(blank=True, null=True)
     recommended = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to="private/services/", blank=True, null=True)
@@ -1333,6 +1334,10 @@ class PrivateAddon(models.Model):
     icon = models.ImageField(upload_to="private/addons/", blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    duration_minutes = models.PositiveIntegerField(
+        default=0,
+        help_text="Extra time added by this add-on in minutes.",
+    )
     price_currency = models.CharField(
         max_length=3,
         choices=PRICE_CURRENCY_CHOICES,

@@ -54,8 +54,8 @@ class LoyaltyTierAdmin(admin.ModelAdmin):
 
 @admin.register(Reward)
 class RewardAdmin(admin.ModelAdmin):
-    list_display = ("title", "points_required", "is_active")
-    list_editable = ("points_required", "is_active")
+    list_display = ("title", "points_required", "discount_amount", "is_active")
+    list_editable = ("points_required", "discount_amount", "is_active")
 
 
 # =========================

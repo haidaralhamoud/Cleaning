@@ -215,6 +215,7 @@
                       <th>Title</th>
                       <th>Slug</th>
                       <th>Price</th>
+                      <th>Duration</th>
                       <th>Price / Unit</th>
                       <th class="text-end">Actions</th>
                     </tr>
@@ -225,6 +226,7 @@
                         <td>{{ addon.title }}</td>
                         <td>{{ addon.slug }}</td>
                         <td>{{ addon.price }} {{ addon.price_currency }}</td>
+                        <td>{{ addon.duration_minutes }} min</td>
                         <td>{{ addon.price_per_unit }} {{ addon.price_currency }}</td>
                         <td class="text-end">
                           <a class="btn btn-sm btn-outline-secondary"

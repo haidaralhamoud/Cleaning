@@ -37,6 +37,8 @@ from accounts.models import (
     ProviderProfile,
     ProviderAdminMessage,
     ChatMessage,
+    Reward,
+    PointsTransaction,
 )
 from django.http import JsonResponse, HttpResponse
 import json
@@ -124,6 +126,67 @@ def _get_private_booking_customer_snapshot(customer):
     }
 
 
+def _get_user_points_balance(user):
+    if not user or not user.is_authenticated:
+        return 0
+    return sum(
+        txn.amount
+        for txn in PointsTransaction.objects.filter(user=user).only("amount")
+    )
+
+
+def _get_private_reward_context(user, selected_reward_id=None, use_reward=False, amount=None):
+    zero = Decimal("0.00")
+    if not user or not user.is_authenticated:
+        return {
+            "points_balance": 0,
+            "eligible_rewards": [],
+            "selected_reward": None,
+            "use_reward": False,
+            "reward_discount": zero,
+            "has_rewards": False,
+        }
+
+    points_balance = _get_user_points_balance(user)
+    eligible_rewards = list(
+        Reward.objects.filter(is_active=True, discount_amount__gt=0)
+        .order_by("-discount_amount", "points_required", "title")
+    )
+    eligible_rewards = [reward for reward in eligible_rewards if points_balance >= reward.points_required]
+
+    selected_reward = None
+    if eligible_rewards:
+        if selected_reward_id:
+            try:
+                selected_reward_pk = int(selected_reward_id)
+            except (TypeError, ValueError):
+                selected_reward_pk = None
+            if selected_reward_pk is not None:
+                selected_reward = next(
+                    (reward for reward in eligible_rewards if reward.id == selected_reward_pk),
+                    None,
+                )
+        if selected_reward is None:
+            selected_reward = eligible_rewards[0]
+
+    reward_discount = zero
+    if use_reward and selected_reward is not None:
+        raw_discount = Decimal(str(selected_reward.discount_amount or 0))
+        if amount is not None:
+            reward_discount = min(Decimal(str(amount or 0)), raw_discount)
+        else:
+            reward_discount = raw_discount
+
+    return {
+        "points_balance": points_balance,
+        "eligible_rewards": eligible_rewards,
+        "selected_reward": selected_reward,
+        "use_reward": bool(use_reward and selected_reward is not None),
+        "reward_discount": reward_discount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        "has_rewards": bool(eligible_rewards),
+    }
+
+
 def _build_private_booking_from_draft(draft, user=None):
     booking = PrivateBooking()
     draft_user_id = draft.get("user_id")
@@ -161,6 +224,8 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.zip_code = draft.get("zip_code") or customer_snapshot.get("zip_code")
     booking.zip_is_available = bool(draft.get("zip_is_available"))
     booking.scheduled_at = _parse_iso_datetime(draft.get("scheduled_at"))
+    booking.selected_reward_id = draft.get("selected_reward_id")
+    booking.use_reward = _is_truthy(draft.get("use_reward"), default=False)
     return booking
 
 
@@ -260,6 +325,8 @@ def _calculate_private_payment_summary(booking, currency):
     final_amount = base_total
     discount_code = None
     referral_discount_applied = False
+    reward_discount = Decimal("0.00")
+    reward = None
 
     if booking.discount_code:
         dc = booking.discount_code
@@ -274,6 +341,17 @@ def _calculate_private_payment_summary(booking, currency):
         final_amount = base_total - referral_discount_amount
         referral_discount_applied = True
 
+    reward_context = _get_private_reward_context(
+        booking.user,
+        selected_reward_id=getattr(booking, "selected_reward_id", None),
+        use_reward=_is_truthy(getattr(booking, "use_reward", False), default=False),
+        amount=final_amount,
+    )
+    reward = reward_context["selected_reward"]
+    reward_discount = Decimal(str(reward_context["reward_discount"] or 0))
+    if reward_context["use_reward"] and reward_discount > 0:
+        final_amount -= reward_discount
+
     final_amount = final_amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     return {
         "pricing": fresh_pricing,
@@ -285,6 +363,10 @@ def _calculate_private_payment_summary(booking, currency):
         "currency": (currency or "").lower(),
         "discount_code": discount_code,
         "referral_discount_applied": referral_discount_applied,
+        "reward": reward,
+        "reward_discount": reward_discount,
+        "reward_applied": reward_context["use_reward"],
+        "points_balance": reward_context["points_balance"],
         "customer": customer,
     }
 
@@ -339,6 +421,15 @@ def _apply_private_booking_payment(booking, intent, payment_summary=None):
     if payment_summary["referral_discount_applied"] and customer and customer.has_referral_discount:
         customer.has_referral_discount = False
         customer.save(update_fields=["has_referral_discount"])
+
+    reward = payment_summary.get("reward")
+    if payment_summary.get("reward_applied") and reward is not None and booking.user_id:
+        PointsTransaction.objects.create(
+            user=booking.user,
+            amount=-reward.points_required,
+            reason="REWARD",
+            note=f"Applied reward to private booking: {reward.title}",
+        )
 
     brand, last4 = _card_details_from_intent(intent)
     booking.payment_method = "card"
@@ -1667,7 +1758,7 @@ class ServiceEstimateDashboardForm(forms.ModelForm):
         instance.property_label = "Property Size (m²)"
         instance.bedrooms_label = "Number of Bedrooms"
         instance.cta_text = "Calculate Estimate"
-        instance.note = "This is an estimate only. Final price may vary based on property condition."
+        instance.note = "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition."
         instance.property_options = self.cleaned_data.get("property_options", [])
         instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
         if commit:
@@ -1935,7 +2026,7 @@ def dashboard_model_list(request, model):
         "business-service-cards": ["service", "title", "order"],
         "business-bundles": ["title", "discount", "short_description", "image"],
         "business-addons": ["title", "description", "emoji"],
-        "private-services": ["title", "category", "price", "recommended", "image"],
+        "private-services": ["title", "display_order", "category", "price", "recommended", "image"],
         "private-addons": ["title", "service", "price", "price_per_unit", "icon"],
         "service-cards": ["service", "title", "order"],
         "service-pricing": ["service", "price_value", "price_note"],
@@ -2880,7 +2971,13 @@ def business_thank_you(request, booking_id):
 
 # ================================================================================================================
 def all_services(request):
-    services = PrivateService.objects.all()
+    services = PrivateService.objects.all().order_by("display_order", "title", "id")
+    cart = request.session.get("private_cart", [])
+    cart_lookup = {
+        service.slug: service
+        for service in PrivateService.objects.filter(slug__in=cart)
+    }
+    cart_services = [cart_lookup[slug] for slug in cart if slug in cart_lookup]
     urgent_param = request.GET.get("urgent")
     if urgent_param == "1":
         request.session["urgent_booking"] = True
@@ -2891,6 +2988,7 @@ def all_services(request):
     urgent_selected = bool(request.session.get("urgent_booking")) or urgent_param == "1"
     return render(request, "home/AllServicesPrivate.html", {
         "services": services,
+        "cart_services": cart_services,
         "urgent_selected": urgent_selected,
     })
 
@@ -3137,6 +3235,10 @@ def private_booking_checkout(request):
     payment_summary = _calculate_private_payment_summary(temp_booking, stripe_currency)
     final_preview_price = payment_summary["amount"]
     payment_summary_data = _serialize_private_payment_summary(payment_summary)
+    reward = payment_summary.get("reward")
+    reward_discount_amount = Decimal(str(payment_summary.get("reward_discount", 0) or 0))
+    reward_applied = bool(payment_summary.get("reward_applied"))
+    points_balance = int(payment_summary.get("points_balance", 0) or 0)
 
     draft["payment_summary"] = payment_summary_data
     _save_private_draft_data(request, draft)
@@ -3189,6 +3291,8 @@ def private_booking_checkout(request):
             "currency": payment_summary_data["currency"],
             "selected_services": selected_slugs,
             "discount_code_id": draft.get("discount_code_id"),
+            "selected_reward_id": draft.get("selected_reward_id"),
+            "use_reward": _is_truthy(draft.get("use_reward"), default=False),
             "appointment_date": draft.get("appointment_date"),
             "appointment_time_window": draft.get("appointment_time_window"),
             "schedule_mode": draft.get("schedule_mode"),
@@ -3342,6 +3446,10 @@ def private_booking_checkout(request):
         "referral_discount_percent": referral_discount_percent,
         "referral_discount_applied": referral_discount_applied,
         "referral_discount_eligible": referral_discount_eligible,
+        "reward": reward,
+        "reward_discount_amount": reward_discount_amount,
+        "reward_applied": reward_applied,
+        "points_balance": points_balance,
         "final_preview_price": final_preview_price,
         "pricing": pricing,
         "services_total": services_total,
@@ -3801,11 +3909,18 @@ def private_booking_services(request):
             messages.error(request, "Please answer all required service questions before continuing.")
             temp_booking = _build_private_booking_from_draft(draft, request.user)
             pricing = calculate_booking_price(temp_booking)
+            reward_context = _get_private_reward_context(
+                request.user,
+                selected_reward_id=draft.get("selected_reward_id"),
+                use_reward=_is_truthy(draft.get("use_reward"), default=False),
+                amount=pricing.get("final", 0),
+            )
             return render(request, "home/YourServicesBooking.html", {
                 "booking": temp_booking,
                 "services": services,
                 "saved_addons": json.dumps(raw_addons or {}),
                 "pricing": pricing,
+                "reward_context": reward_context,
             })
 
 
@@ -3877,11 +3992,18 @@ def private_booking_services(request):
     # GET
     temp_booking = _build_private_booking_from_draft(draft, request.user)
     pricing = calculate_booking_price(temp_booking)
+    reward_context = _get_private_reward_context(
+        request.user,
+        selected_reward_id=draft.get("selected_reward_id"),
+        use_reward=_is_truthy(draft.get("use_reward"), default=False),
+        amount=pricing.get("final", 0),
+    )
     return render(request, "home/YourServicesBooking.html", {
         "booking": temp_booking,
         "services": services,
         "saved_addons": json.dumps(draft.get("addons_selected") or {}),
         "pricing": pricing,
+        "reward_context": reward_context,
     })
 
 def private_cart_continue(request):
@@ -4196,6 +4318,9 @@ def private_price_api(request):
     use_rot_param = request.GET.get("use_rot")
     if use_rot_param is not None:
         booking.use_rot = _is_truthy(use_rot_param, default=True)
+    use_reward_param = request.GET.get("use_reward")
+    if use_reward_param is not None:
+        booking.use_reward = _is_truthy(use_reward_param, default=False)
 
     # --------------------------
     # 1) جدولة: same أو per_service
@@ -4250,6 +4375,14 @@ def private_price_api(request):
     # -----------------------------------------------
 
     pricing = calculate_booking_price(booking)
+    reward_context = _get_private_reward_context(
+        request.user,
+        selected_reward_id=draft.get("selected_reward_id"),
+        use_reward=_is_truthy(getattr(booking, "use_reward", False), default=False),
+        amount=pricing.get("final", 0),
+    )
+    reward_discount = reward_context["reward_discount"]
+    final_total = max(Decimal("0.00"), Decimal(str(pricing["final"])) - reward_discount)
 
     return JsonResponse({
         "services_total": pricing["services_total"],
@@ -4259,8 +4392,13 @@ def private_price_api(request):
         "rot": pricing["rot"],
         "rot_percent": pricing.get("rot_percent", 0),
         "use_rot": pricing.get("use_rot", True),
+        "use_reward": reward_context["use_reward"],
+        "reward_available": reward_context["has_rewards"],
+        "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
+        "reward_discount": float(reward_discount),
+        "points_balance": reward_context["points_balance"],
         "vat_included": pricing.get("vat_included", True),
-        "final": pricing["final"],
+        "final": float(final_total),
         "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
         "duration_hours": pricing.get("duration_hours", 0),
         "duration_seconds": pricing.get("duration_seconds", 0),
@@ -4274,10 +4412,18 @@ def private_update_rot_api(request):
 
     booking = _build_private_booking_from_draft(draft, request.user)
     pricing = calculate_booking_price(booking)
+    reward_context = _get_private_reward_context(
+        request.user,
+        selected_reward_id=draft.get("selected_reward_id"),
+        use_reward=_is_truthy(draft.get("use_reward"), default=False),
+        amount=pricing.get("final", 0),
+    )
+    reward_discount = reward_context["reward_discount"]
+    final_total = max(Decimal("0.00"), Decimal(str(pricing.get("final", 0) or 0)) - reward_discount)
 
     draft["rot_discount"] = pricing.get("rot", 0) or 0
     draft["pricing_details"] = pricing
-    draft["total_price"] = pricing.get("final", 0) or 0
+    draft["total_price"] = float(final_total)
     draft["subtotal"] = pricing.get("subtotal", 0) or 0
     _save_private_draft_data(request, draft)
 
@@ -4290,10 +4436,57 @@ def private_update_rot_api(request):
         "rot": pricing.get("rot", 0),
         "rot_percent": pricing.get("rot_percent", 0),
         "use_rot": pricing.get("use_rot", True),
+        "use_reward": reward_context["use_reward"],
+        "reward_discount": float(reward_discount),
+        "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
         "vat_included": pricing.get("vat_included", True),
-        "final": pricing.get("final", 0),
+        "final": float(final_total),
         "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
         "duration_hours": pricing.get("duration_hours", 0),
+        "duration_seconds": pricing.get("duration_seconds", 0),
+    })
+
+
+@require_POST
+def private_update_reward_api(request):
+    draft = _get_private_draft_data(request)
+    draft["use_reward"] = _is_truthy(request.POST.get("use_reward"), default=False)
+
+    booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(booking)
+    reward_context = _get_private_reward_context(
+        request.user,
+        selected_reward_id=draft.get("selected_reward_id"),
+        use_reward=_is_truthy(draft.get("use_reward"), default=False),
+        amount=pricing.get("final", 0),
+    )
+    reward_discount = reward_context["reward_discount"]
+    final_total = max(Decimal("0.00"), Decimal(str(pricing.get("final", 0) or 0)) - reward_discount)
+
+    draft["pricing_details"] = pricing
+    draft["total_price"] = float(final_total)
+    draft["subtotal"] = pricing.get("subtotal", 0) or 0
+    draft["rot_discount"] = pricing.get("rot", 0) or 0
+    if reward_context["selected_reward"] is not None:
+        draft["selected_reward_id"] = reward_context["selected_reward"].id
+    else:
+        draft.pop("selected_reward_id", None)
+    _save_private_draft_data(request, draft)
+
+    return JsonResponse({
+        "success": True,
+        "services_total": pricing.get("services_total", 0),
+        "addons_total": pricing.get("addons_total", 0),
+        "subtotal": pricing.get("subtotal", 0),
+        "rot": pricing.get("rot", 0),
+        "rot_percent": pricing.get("rot_percent", 0),
+        "use_rot": pricing.get("use_rot", True),
+        "use_reward": reward_context["use_reward"],
+        "reward_available": reward_context["has_rewards"],
+        "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
+        "reward_discount": float(reward_discount),
+        "final": float(final_total),
+        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
         "duration_seconds": pricing.get("duration_seconds", 0),
     })
 

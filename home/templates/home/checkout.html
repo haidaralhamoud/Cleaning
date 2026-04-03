@@ -88,6 +88,11 @@
             Referral discount applied: <b>{{ referral_discount_percent }}%</b>
             (saved {{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).
           </div>
+        {% elif reward_applied and reward %}
+          <div class="discount-saved">
+            Reward applied: <b>{{ reward.title }}</b>
+            (saved {{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).
+          </div>
         {% endif %}
       </section>
 
@@ -187,6 +192,12 @@
             <div class="summary-line discount-line">
               <span>Referral discount ({{ referral_discount_percent }}%)</span>
               <span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
+          {% if reward_applied and reward %}
+            <div class="summary-line discount-line">
+              <span>Reward: {{ reward.title }}</span>
+              <span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
             </div>
           {% endif %}
 

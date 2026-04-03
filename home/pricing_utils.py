@@ -189,6 +189,7 @@ def calculate_booking_price(booking):
 
             source_currency = getattr(addon, "price_currency", target_currency)
             price = _convert_currency(addon.price, source_currency, target_currency, currency_rates)
+            duration_minutes += _coerce_decimal(getattr(addon, "duration_minutes", 0) or 0)
 
             questions = addon.questions or {}
             for q_key, q_info in questions.items():

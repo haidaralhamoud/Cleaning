@@ -255,7 +255,28 @@ def _build_invoice_pdf(title, meta_rows, section_rows, footer_lines=None):
 # ======================================================
 # AUTH
 # ======================================================
+BOOKING_NEXT_SESSION_KEY = "post_auth_redirect_url"
+
+
 class RememberMeLoginView(LoginView):
+    def dispatch(self, request, *args, **kwargs):
+        next_url = request.GET.get("next") or request.POST.get("next") or ""
+        if next_url:
+            request.session[BOOKING_NEXT_SESSION_KEY] = next_url
+            request.session.modified = True
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_success_url(self):
+        next_url = (
+            self.request.POST.get("next")
+            or self.request.GET.get("next")
+            or self.request.session.pop(BOOKING_NEXT_SESSION_KEY, "")
+        )
+        if next_url:
+            self.request.session.modified = True
+            return next_url
+        return super().get_success_url()
+
     def form_valid(self, form):
         response = super().form_valid(form)
         remember = self.request.POST.get("remember_me") == "on"
@@ -727,6 +748,11 @@ def password_reset_success(request):
 
 
 def google_login_start(request):
+    next_url = request.GET.get("next") or ""
+    if next_url:
+        request.session[BOOKING_NEXT_SESSION_KEY] = next_url
+        request.session.modified = True
+
     try:
         from allauth.socialaccount.models import SocialApp
         has_google = SocialApp.objects.filter(provider="google").exists()
@@ -750,6 +776,9 @@ def google_login_start(request):
 def sign_up(request):
     ref_code = request.GET.get("ref")
     next_url = request.POST.get("next") or request.GET.get("next") or ""
+    if next_url:
+        request.session[BOOKING_NEXT_SESSION_KEY] = next_url
+        request.session.modified = True
     locked_email = None
     if request.user.is_authenticated and request.user.email:
         locked_email = request.user.email
@@ -3540,7 +3569,7 @@ def service_detail(request, slug):
         "property_label": "Property Size (m²)",
         "bedrooms_label": "Number of Bedrooms",
         "cta_text": "Calculate Estimate",
-        "note": "This is an estimate only. Final price may vary based on property condition.",
+        "note": "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition.",
         "property_options": getattr(estimate_obj, "property_options", None) or [],
         "bedrooms_options": getattr(estimate_obj, "bedrooms_options", None) or [],
     }

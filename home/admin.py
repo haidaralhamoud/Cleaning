@@ -131,7 +131,7 @@ class ServiceEstimateAdminForm(forms.ModelForm):
         instance.property_label = "Property Size (m²)"
         instance.bedrooms_label = "Number of Bedrooms"
         instance.cta_text = "Calculate Estimate"
-        instance.note = "This is an estimate only. Final price may vary based on property condition."
+        instance.note = "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition."
         instance.property_options = self.cleaned_data.get("property_options", [])
         instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
         if commit:
@@ -739,13 +739,14 @@ class ScheduleRuleAdmin(admin.ModelAdmin):
 
 @admin.register(PrivateService)
 class PrivateServiceAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "category", "slug", "price", "price_currency")
+    list_display = ("id", "title", "display_order", "category", "slug", "price", "price_currency")
     prepopulated_fields = {"slug": ("title",)}
     fieldsets = (
         ("Basic Info", {
             "fields": (
                 "category",
                 "title",
+                "display_order",
                 "slug",
                 "price",
                 "price_currency",
@@ -1099,7 +1100,7 @@ class EmailRequestAdmin(admin.ModelAdmin):
 
 @admin.register(PrivateAddon)
 class PrivateAddonAdmin(admin.ModelAdmin):
-    list_display = ("title", "service", "slug", "price", "price_currency", "price_per_unit")
+    list_display = ("title", "service", "slug", "price", "price_currency", "duration_minutes", "price_per_unit")
     search_fields = ("title", "slug")
     inlines = [AddonRuleInline]
 

@@ -10,6 +10,31 @@
         <input type="checkbox" id="useRotToggle" {% if booking.use_rot %}checked{% endif %}>
     </label>
 
+    {% if request.user.is_authenticated %}
+    <label class="rot-toggle-row" for="useRewardToggle">
+        <span class="rot-toggle-copy">
+            <strong>Use reward</strong>
+            {% if reward_context.selected_reward %}
+            <small>
+                {{ reward_context.selected_reward.title }}:
+                save {{ pricing.currency|default:"sek"|upper }} {{ reward_context.selected_reward.discount_amount|floatformat:2 }}
+                for {{ reward_context.selected_reward.points_required }} points.
+            </small>
+            {% else %}
+            <small>
+                No reward available yet. Current balance: {{ reward_context.points_balance|default:"0" }} points.
+            </small>
+            {% endif %}
+        </span>
+        <input
+            type="checkbox"
+            id="useRewardToggle"
+            {% if reward_context.use_reward %}checked{% endif %}
+            {% if not reward_context.selected_reward %}disabled{% endif %}
+        >
+    </label>
+    {% endif %}
+
     <div class="item">
         <span>Services</span>
         <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:"0" }}</span>
@@ -29,6 +54,13 @@
         <span id="sum_rot_label">ROT Deduction ({{ pricing.rot_percent|default:"0" }}%)</span>
         <span id="sum_rot">{% if booking.use_rot %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0" }}</span>
     </div>
+
+    {% if request.user.is_authenticated %}
+    <div class="item">
+        <span id="sum_reward_label">Reward{% if reward_context.selected_reward %}: {{ reward_context.selected_reward.title }}{% else %} (not available){% endif %}</span>
+        <span id="sum_reward">{% if reward_context.use_reward %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ reward_context.reward_discount|default:"0" }}</span>
+    </div>
+    {% endif %}
 
     <hr>
 

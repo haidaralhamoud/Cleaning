@@ -20,8 +20,19 @@
         <span class="dropdown-label">SERVICES</span>
       </a>
       <div class="dropdown-menu">
+        <div class="dropdown-submenu">
+          <a href="{% url 'home:all_services_private' %}" class="submenu-toggle">
+            <span>Private Services</span>
+            <span class="submenu-arrow" aria-hidden="true"></span>
+          </a>
+          <div class="submenu-menu">
+            <a href="{% url 'home:all_services_private' %}" class="submenu-all">All Private Services</a>
+            {% for service in header_private_services %}
+              <a href="{% url 'accounts:service_detail' service.slug %}">{{ service.title }}</a>
+            {% endfor %}
+          </div>
+        </div>
         <a href="{% url 'home:business_all_services' %}">Business Services</a>
-        <a href="{% url 'home:all_services_private' %}">Private Services</a>
       </div>
     </div>
     <a href="{% url 'home:contact' %}">CONTACT</a>

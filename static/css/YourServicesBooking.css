@@ -128,6 +128,111 @@ body {
   flex: 2;
 }
 
+.left > h2 {
+  margin-bottom: 6px;
+}
+
+.left > h3 {
+  margin-bottom: 22px;
+  line-height: 1.35;
+}
+
+.services-carousel-nav {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 14px;
+}
+
+.service-preview-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+}
+
+.service-preview-card {
+  border: 1px solid rgba(3,159,200,0.16);
+  background: #fff;
+  border-radius: 18px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  transition: 0.2s ease;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+}
+
+.service-preview-card:hover,
+.service-preview-card.is-active {
+  border-color: #039fc8;
+  box-shadow: 0 14px 30px rgba(3, 159, 200, 0.14);
+  transform: translateY(-2px);
+}
+
+.service-preview-card span {
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.35;
+}
+
+.service-preview-image {
+  width: 100%;
+  height: 84px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #eff9ff, #f8fdff);
+}
+
+.service-preview-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-nav-arrow {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid rgba(3,159,200,0.2);
+  background: #fff;
+  color: #039fc8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.service-nav-arrow span {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.service-pagination-dots {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 2px 0 24px;
+}
+
+.service-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+}
+
+.service-dot.is-active {
+  width: 28px;
+  background: #71b247;
+}
+
 .summary {
   flex: 1;
   background: #fff;
@@ -258,6 +363,54 @@ body {
   border: 1px solid rgba(3,159,200,0.12);
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
   margin-bottom: 2rem;
+  display: none;
+}
+
+.service-box.is-active {
+  display: block;
+}
+
+.service-banner {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 22px 22px 0;
+}
+
+.service-banner-media {
+  width: 160px;
+  height: 110px;
+  border-radius: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #eef8ff, #f6fcff);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+}
+
+.service-banner-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.service-banner-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-step {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0289ad;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.service-banner-copy h4 {
+  font-size: 1.65rem;
+  line-height: 1.15;
+  margin: 0;
 }
 
 .service-head {
@@ -324,7 +477,7 @@ input {
 }
 
 .service-body {
-  padding: 0 22px 22px;
+  padding: 0 28px 28px;
   border-top: 1px solid rgba(3,159,200,0.12);
   max-height: 0;
   overflow: hidden;
@@ -337,17 +490,27 @@ input {
   overflow: visible;
 }
 
+.service-box.open .service-head {
+  padding-bottom: 16px;
+}
+
+.service-body > .btn-blue {
+  margin-top: 20px;
+}
+
 .row {
   display: flex;
   gap: 1.5rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
+  margin-bottom: 18px;
+  padding-top: 16px;
 }
 
 .input-block {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .input-block.full {
@@ -356,7 +519,8 @@ input {
 
 label {
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 0;
+  line-height: 1.45;
 }
 
 select,
@@ -513,7 +677,7 @@ a.btn-blue {
   border-radius: 12px;
   font-weight: 700;
   cursor: pointer;
-  margin-top: 1rem;
+  margin-top: 12px;
 }
 .btn-blue:hover {
   background: #0289ad;
@@ -609,6 +773,30 @@ a.btn-blue {
 
   .service-box {
     margin-bottom: 1.25rem;
+  }
+
+  .services-carousel-nav {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    gap: 10px;
+  }
+
+  .service-preview-track {
+    grid-template-columns: 1fr;
+  }
+
+  .service-banner {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 18px 16px 0;
+  }
+
+  .service-banner-media {
+    width: 100%;
+    height: 180px;
+  }
+
+  .service-banner-copy h4 {
+    font-size: 1.35rem;
   }
 
   .row {
