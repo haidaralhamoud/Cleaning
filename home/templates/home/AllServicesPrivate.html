@@ -48,6 +48,14 @@
       <div class="search-field">
         <input type="text" id="serviceSearch" placeholder="Search by name or description">
       </div>
+      <div class="category-field">
+        <select id="categoryFilter" data-no-custom>
+          <option value="all">All categories</option>
+          {% for category in categories %}
+            <option value="{{ category.slug }}">{{ category.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
       <div class="filter-pills">
         <button type="button" class="filter-pill active" data-filter="all">All</button>
         <button type="button" class="filter-pill" data-filter="recommended">Recommended</button>
@@ -66,6 +74,7 @@
       <div class="service-card fade-in"
            data-title="{{ service.title|lower|escape }}"
            data-description="{{ service.description|lower|escape }}"
+           data-category="{{ service.category.slug|default:'' }}"
            data-recommended="{% if service.show_recommended_badge %}true{% else %}false{% endif %}"
            data-slug="{{ service.slug }}"
            data-title-display="{{ service.title|escape }}"
@@ -251,6 +260,7 @@ function refreshCartCount() {
 setInterval(refreshCartCount, 2000);
 
 const searchInput = document.getElementById("serviceSearch");
+const categoryFilter = document.getElementById("categoryFilter");
 const resultsCount = document.getElementById("resultsCount");
 const filterPills = document.querySelectorAll(".filter-pill");
 const cards = Array.from(document.querySelectorAll(".service-card"));
@@ -258,6 +268,7 @@ const applyButton = document.getElementById("applyFilters");
 
 function applyFilters() {
     const query = (searchInput.value || "").trim().toLowerCase();
+    const activeCategory = categoryFilter ? categoryFilter.value : "all";
     const activePill = document.querySelector(".filter-pill.active");
     const activeFilter = activePill ? activePill.dataset.filter : "all";
 
@@ -266,12 +277,14 @@ function applyFilters() {
     cards.forEach(card => {
         const title = card.dataset.title || "";
         const desc = card.dataset.description || "";
+        const category = card.dataset.category || "";
         const isRecommended = card.dataset.recommended === "true";
 
         const matchesQuery = !query || title.includes(query) || desc.includes(query);
+        const matchesCategory = activeCategory === "all" || category === activeCategory;
         const matchesRecommended = activeFilter !== "recommended" || isRecommended;
 
-        const shouldShow = matchesQuery && matchesRecommended;
+        const shouldShow = matchesQuery && matchesCategory && matchesRecommended;
         card.style.display = shouldShow ? "" : "none";
         if (shouldShow) visibleCount += 1;
     });
@@ -287,6 +300,7 @@ filterPills.forEach(pill => {
             filterPills.forEach(p => p.classList.remove("active"));
             document.querySelector('[data-filter="all"]').classList.add("active");
             if (searchInput) searchInput.value = "";
+            if (categoryFilter) categoryFilter.value = "all";
             applyFilters();
         } else {
             filterPills.forEach(p => p.classList.remove("active"));
@@ -306,6 +320,10 @@ if (searchInput) {
 
 if (applyButton) {
     applyButton.addEventListener("click", applyFilters);
+}
+
+if (categoryFilter) {
+    categoryFilter.addEventListener("change", applyFilters);
 }
 
 const servicesLayout = document.getElementById("servicesLayout");

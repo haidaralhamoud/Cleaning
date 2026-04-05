@@ -49,7 +49,7 @@
 <div class="services-list">
 
   {% for s in services %}
-  <div class="service-card" data-title="{{ s.title|lower }}" data-desc="{{ s.description|default:''|lower }}">
+  <div class="service-card" data-title="{{ s.title|lower }}" data-desc="{{ s.description|default:''|lower }}" data-category="{{ s.category.slug|default:'' }}">
     
     <a class="service-image-link" href="{% url 'home:business_service_detail' s.id %}{% if urgent_selected %}?urgent=1{% endif %}">
       <img src="{{ s.image.url }}" alt="{{ s.title }}">
@@ -90,6 +90,12 @@
         <button class="filter-close" id="filterClose" aria-label="Close">&times;</button>
       </div>
       <input class="filter-input" id="filterInput" type="text" placeholder="Search by name or description">
+      <select class="filter-select" id="filterCategory">
+        <option value="all">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.slug }}">{{ category.title }}</option>
+        {% endfor %}
+      </select>
       <div class="filter-actions">
         <button class="reset" id="filterReset">Reset</button>
         <button class="apply" id="filterApply">Apply</button>
@@ -104,6 +110,7 @@
     const applyBtn = document.getElementById("filterApply");
     const resetBtn = document.getElementById("filterReset");
     const filterInput = document.getElementById("filterInput");
+    const filterCategory = document.getElementById("filterCategory");
     const cards = document.querySelectorAll(".service-card");
 
     const openModal = () => {
@@ -123,15 +130,20 @@
 
     resetBtn.addEventListener("click", () => {
       filterInput.value = "";
+      filterCategory.value = "all";
       cards.forEach((card) => card.style.display = "");
     });
 
     applyBtn.addEventListener("click", () => {
       const q = filterInput.value.trim().toLowerCase();
+      const category = filterCategory.value;
       cards.forEach((card) => {
         const title = card.dataset.title || "";
         const desc = card.dataset.desc || "";
-        card.style.display = (title.includes(q) || desc.includes(q)) ? "" : "none";
+        const cardCategory = card.dataset.category || "";
+        const matchesQuery = !q || title.includes(q) || desc.includes(q);
+        const matchesCategory = category === "all" || cardCategory === category;
+        card.style.display = (matchesQuery && matchesCategory) ? "" : "none";
       });
       closeModal();
     });

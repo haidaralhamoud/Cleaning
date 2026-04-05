@@ -660,6 +660,16 @@ hr {
   font-size: 13px;
 }
 
+.footer .footer-col.about {
+  align-self: start;
+}
+
+.footer .footer-logo {
+  display: block;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
 @media (max-width: 992px) {
   .checkout-grid {
     grid-template-columns: 1fr;

@@ -314,6 +314,17 @@ body {
   margin: 12px 0 18px;
 }
 
+.filter-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-size: 15px;
+  margin: 0 0 18px;
+  background: #fff;
+  color: var(--ink-900);
+}
+
 .filter-actions {
   display: flex;
   gap: 10px;

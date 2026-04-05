@@ -2574,12 +2574,16 @@ def apply_page(request, job_id=None):
 # ALL BUSINESS SERVICES
 # ================================
 def all_services_business(request):
-    services = BusinessService.objects.all()
+    services = BusinessService.objects.select_related("category").all()
     for service in services:
         service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
+    business_categories = list(
+        BusinessMainCategory.objects.filter(services__isnull=False).distinct().order_by("title")
+    )
     urgent_selected = request.GET.get("urgent") == "1"
     return render(request, "home/AllServicesBusiness.html", {
         "services": services,
+        "categories": business_categories,
         "urgent_selected": urgent_selected,
     })
 
@@ -3146,9 +3150,12 @@ def business_thank_you(request, booking_id):
 
 # ================================================================================================================
 def all_services(request):
-    services = PrivateService.objects.all().order_by("display_order", "title", "id")
+    services = PrivateService.objects.select_related("category").all().order_by("display_order", "title", "id")
     for service in services:
         service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
+    private_categories = list(
+        PrivateMainCategory.objects.filter(privateservice__isnull=False).distinct().order_by("title")
+    )
     cart = request.session.get("private_cart", [])
     cart_lookup = {
         service.slug: service
@@ -3165,6 +3172,7 @@ def all_services(request):
     urgent_selected = bool(request.session.get("urgent_booking")) or urgent_param == "1"
     return render(request, "home/AllServicesPrivate.html", {
         "services": services,
+        "categories": private_categories,
         "cart_services": cart_services,
         "urgent_selected": urgent_selected,
     })

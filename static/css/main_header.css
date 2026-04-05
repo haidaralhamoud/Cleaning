@@ -149,7 +149,7 @@ body {
   gap: 0;
   padding: 0;
   overflow: hidden;
-  max-height: none;
+  max-height: min(68vh, 520px);
 }
 
 .services-category-link {
@@ -166,6 +166,8 @@ body {
   background: #fbfdff;
   border-right: 1px solid rgba(0, 163, 200, 0.12);
   padding: 10px 0;
+  max-height: min(68vh, 520px);
+  overflow-y: auto;
 }
 
 .services-all-link {
