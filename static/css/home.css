@@ -411,7 +411,7 @@ img{display:block;max-width:100%;height:auto}
 .bullets a:hover{transform:translateY(-1px)}
 
 .footer .footer-logo {
-  margin-top: -14px;
+  transform: translateY(-28px);
 }
 
 /* ===== FOOTER ===== */

@@ -441,6 +441,10 @@ button:lang(ar) {
   transform: none !important;
 }
 
+.footer .footer-logo {
+  transform: translateY(-28px);
+}
+
 /* ===== Custom Select (Global) ===== */
 .custom-select {
   position: relative;
