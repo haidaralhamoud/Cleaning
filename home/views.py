@@ -3154,7 +3154,7 @@ def all_services(request):
     for service in services:
         service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
     private_categories = list(
-        PrivateMainCategory.objects.filter(privateservice__isnull=False).distinct().order_by("title")
+        PrivateMainCategory.objects.filter(services__isnull=False).distinct().order_by("title")
     )
     cart = request.session.get("private_cart", [])
     cart_lookup = {

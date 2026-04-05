@@ -410,6 +410,10 @@ img{display:block;max-width:100%;height:auto}
 .bullets a{transition:transform .2s ease, background .2s ease}
 .bullets a:hover{transform:translateY(-1px)}
 
+.footer .footer-logo {
+  margin-top: -14px;
+}
+
 /* ===== FOOTER ===== */
 .site-footer{background:#fff; border-top:3px solid rgba(74,169,108,.5)}
 .footer-grid{
