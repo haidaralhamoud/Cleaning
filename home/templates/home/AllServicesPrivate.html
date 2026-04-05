@@ -49,7 +49,7 @@
         <input type="text" id="serviceSearch" placeholder="Search by name or description">
       </div>
       <div class="category-field">
-        <select id="categoryFilter" data-no-custom>
+        <select id="categoryFilter">
           <option value="all">All categories</option>
           {% for category in categories %}
             <option value="{{ category.slug }}">{{ category.title }}</option>
