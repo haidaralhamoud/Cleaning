@@ -12,66 +12,350 @@
   <link rel="stylesheet" href="{% static 'css/YourServicesBooking.css' %}">
   <link rel="stylesheet" href="{% static 'css/addonse.css' %}">
   <style>
-    .popup-content {
-      width: 900px !important;
-      max-width: 90%;
-      border-radius: 18px;
-      padding: 30px;
-    }
-
-    .addons-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      padding: 10px;
-    }
-
-    .addon-card {
-      background: #fff;
-      border-radius: 18px;
-      padding: 20px;
-      text-align: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-      position: relative;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100%;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .addon-card:hover {
-      transform: translateY(-3px);
-    }
-
-    .addon-card img {
-      width: 70px;
-      height: 70px;
-      object-fit: contain;
-      margin: 0 auto;
-    }
-
-    .check-box {
-      width: 22px;
-      height: 22px;
-      border: 2px solid #00a3c8;
-      border-radius: 6px;
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .check-box.checked {
-      background: #00a3c8;
-    }
-
     .error {
       border: 2px solid #e74c3c !important;
       background: #fff6f6;
+    }
+
+    .booking-mode-tabs {
+      display: flex;
+      gap: 14px;
+      margin: 0 0 22px;
+      padding: 8px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, #f8fdff 0%, #eef8fd 100%);
+      box-shadow: 0 16px 34px rgba(20, 92, 133, 0.12);
+      width: fit-content;
+    }
+
+    .booking-mode-tab {
+      border: 0;
+      padding: 14px 22px;
+      min-width: 170px;
+      border-radius: 18px;
+      background: transparent;
+      color: #3d5870;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, color 0.18s ease;
+    }
+
+    .booking-mode-tab strong {
+      display: block;
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    .booking-mode-tab span {
+      display: block;
+      font-size: 12px;
+      line-height: 1.35;
+      color: #6a8196;
+    }
+
+    .booking-mode-tab.is-active {
+      background: linear-gradient(135deg, #10a8d1 0%, #078fbd 100%);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(7, 143, 189, 0.24);
+      transform: translateY(-1px);
+    }
+
+    .booking-mode-tab.is-active span {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .booking-tab-panel {
+      display: none;
+    }
+
+    .booking-tab-panel.is-active {
+      display: block;
+    }
+
+    .by-room-shell {
+      margin-top: 4px;
+      padding: 26px;
+      border-radius: 28px;
+      background: linear-gradient(180deg, #fbfeff 0%, #f3fbff 100%);
+      border: 1px solid #d8eef9;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 18px 38px rgba(49, 113, 146, 0.08);
+    }
+
+    .by-room-header h6 {
+      margin: 0 0 6px;
+      font-size: 26px;
+      font-weight: 900;
+      color: #11263a;
+    }
+
+    .by-room-header p {
+      margin: 0 0 22px;
+      color: #61788f;
+      font-size: 14px;
+    }
+
+    .by-room-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+    }
+
+    .room-card {
+      border-radius: 22px;
+      border: 1px solid #bce7f7;
+      background: #fff;
+      box-shadow: 0 14px 26px rgba(18, 84, 115, 0.1);
+      padding: 18px 14px 18px;
+      text-align: center;
+    }
+
+    .room-card .room-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .room-card .room-icon img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .room-card .room-icon-fallback {
+      font-size: 28px;
+      line-height: 1;
+      color: #169dca;
+      font-weight: 800;
+    }
+
+    .room-card h6 {
+      margin: 0 0 10px;
+      font-size: 19px;
+      font-weight: 800;
+      color: #183047;
+    }
+
+    .room-price {
+      margin: 0 0 16px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #8f8f8f;
+    }
+
+    .room-counter {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 0;
+      border-radius: 999px;
+      background: transparent;
+      border: 0;
+    }
+
+    .room-counter button {
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 50%;
+      background: #11a2cf;
+      color: #fff;
+      font-weight: 800;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .room-counter button[data-step="-1"] {
+      background: #e2e2e2;
+      color: #2e2e2e;
+    }
+
+    .room-counter input {
+      width: 0;
+      height: 0;
+      opacity: 0;
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .room-card.is-error {
+      border-color: #e74c3c !important;
+      background: #fff8f8;
+    }
+
+    .room-counter-value {
+      min-width: 18px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      color: #111;
+    }
+
+    .by-room-footer {
+      margin-top: 20px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(16, 168, 209, 0.08);
+      color: #48667e;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .category-selector {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr) 48px;
+      gap: 16px;
+      align-items: center;
+      margin: 0 0 18px;
+    }
+
+    .category-track {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 18px;
+    }
+
+    .category-card {
+      border: 1px solid rgba(3,159,200,0.16);
+      background: #fff;
+      border-radius: 20px;
+      padding: 10px 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .category-card:hover,
+    .category-card.is-active {
+      transform: translateY(-2px);
+      border-color: #00a3c8;
+      box-shadow: 0 16px 28px rgba(3,159,200,0.14);
+    }
+
+    .category-card-media {
+      width: 100%;
+      height: 96px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #eef8ff, #f6fcff);
+    }
+
+    .category-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .category-card span {
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .service-tab-groups {
+      margin: 0 0 24px;
+    }
+
+    .service-tab-group {
+      display: none;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .service-tab-group.is-active {
+      display: flex;
+    }
+
+    .service-chip {
+      border: 1px solid #bfe6f4;
+      background: #eaf9ff;
+      color: #1d4d69;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .service-chip:hover,
+    .service-chip.is-active {
+      background: #00a3c8;
+      color: #fff;
+      box-shadow: 0 12px 22px rgba(0,163,200,0.2);
+      transform: translateY(-1px);
+    }
+
+    .service-option-details {
+      margin-top: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .option-detail-card {
+      padding: 16px;
+      border: 1px solid #d8edf7;
+      border-radius: 18px;
+      background: #f9fdff;
+    }
+
+    .option-detail-card h6 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 800;
+      color: #12314a;
+    }
+
+    .option-detail-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .option-detail-field label {
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 700;
+    }
+
+    .option-detail-field input,
+    .option-detail-field select,
+    .option-detail-field textarea {
+      width: 100%;
+    }
+
+    .option-detail-field .option-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    .option-detail-field.is-error {
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #e74c3c;
+      background: #fff8f8;
+    }
+
+    .option-item-stack {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .service-option-inline-details {
+      margin-left: 26px;
+      display: grid;
+      gap: 10px;
     }
 
   </style>
@@ -113,29 +397,31 @@
       {% csrf_token %}
       <input type="hidden" name="use_rot" id="use_rot_input" value="{% if booking.use_rot %}1{% else %}0{% endif %}">
 
-      {% if services|length > 1 %}
-      <div class="services-carousel-nav" aria-label="Selected services navigation">
+      {% if grouped_categories %}
+      <div class="category-selector" aria-label="Selected service categories">
         <button type="button" class="service-nav-arrow" id="servicePrevBtn" aria-label="Previous service">
           <span>&lsaquo;</span>
         </button>
-        <div class="service-preview-track">
-          {% for service in services %}
+        <div class="category-track">
+          {% for category in grouped_categories %}
           <button
             type="button"
-            class="service-preview-card{% if forloop.first %} is-active{% endif %}"
-            data-service-jump="{{ forloop.counter0 }}"
-            aria-label="Go to {{ service.title }}"
+            class="category-card{% if forloop.first %} is-active{% endif %}"
+            data-category-tab="{{ category.slug }}"
+            aria-label="Show {{ category.title }}"
           >
-            <div class="service-preview-image">
-              {% if service.image %}
-                <img src="{{ service.image.url }}" alt="{{ service.title }}">
-              {% elif service.hero_image %}
-                <img src="{{ service.hero_image.url }}" alt="{{ service.title }}">
+            <div class="category-card-media">
+              {% if category.icon_url %}
+                <img src="{{ category.icon_url }}" alt="{{ category.title }}">
+              {% elif category.services.0.image %}
+                <img src="{{ category.services.0.image.url }}" alt="{{ category.title }}">
+              {% elif category.services.0.hero_image %}
+                <img src="{{ category.services.0.hero_image.url }}" alt="{{ category.title }}">
               {% else %}
-                <img src="{% static 'images/hero.png' %}" alt="{{ service.title }}">
+                <img src="{% static 'images/hero.png' %}" alt="{{ category.title }}">
               {% endif %}
             </div>
-            <span>{{ service.title }}</span>
+            <span>{{ category.title }}</span>
           </button>
           {% endfor %}
         </div>
@@ -144,19 +430,34 @@
         </button>
       </div>
       <div class="service-pagination-dots" id="servicePaginationDots">
-        {% for service in services %}
+        {% for category in grouped_categories %}
           <button
             type="button"
             class="service-dot{% if forloop.first %} is-active{% endif %}"
-            data-service-jump="{{ forloop.counter0 }}"
-            aria-label="Show {{ service.title }}"
+            data-category-tab="{{ category.slug }}"
+            aria-label="Show {{ category.title }}"
           ></button>
+        {% endfor %}
+      </div>
+      <div class="service-tab-groups">
+        {% for category in grouped_categories %}
+        <div class="service-tab-group{% if forloop.first %} is-active{% endif %}" data-category-panel="{{ category.slug }}">
+          {% for service in category.services %}
+          <button
+            type="button"
+            class="service-chip{% if forloop.first and forloop.parentloop.first %} is-active{% endif %}"
+            data-service-jump="{{ service.slug }}"
+          >
+            {{ service.title }}
+          </button>
+          {% endfor %}
+        </div>
         {% endfor %}
       </div>
       {% endif %}
 
       {% for service in services %}
-      <div class="service-box{% if forloop.first %} open is-active{% endif %}" data-service="{{ service.slug }}" data-service-index="{{ forloop.counter0 }}">
+      <div class="service-box{% if forloop.first %} open is-active{% endif %}" data-service="{{ service.slug }}" data-category="{{ service.category.slug }}" data-service-index="{{ forloop.counter0 }}">
         <div class="service-banner">
           <div class="service-banner-media">
             {% if service.image %}
@@ -180,11 +481,25 @@
           </button>
         </div>
         <div class="service-body">
+        {% if service.slug == "standard-cleaning" %}
+          <input type="hidden" name="booking_mode_{{ service.slug }}" id="booking_mode_{{ service.slug }}" value="all_area">
+          <div class="booking-mode-tabs" data-mode-tabs="{{ service.slug }}">
+            <button type="button" class="booking-mode-tab is-active" data-service-mode-tab="{{ service.slug }}" data-mode="all_area">
+              <strong>All area</strong>
+              <span>Use the current full-home questions.</span>
+            </button>
+            <button type="button" class="booking-mode-tab" data-service-mode-tab="{{ service.slug }}" data-mode="by_room">
+              <strong>By room</strong>
+              <span>Show the room-by-room layout for Standard Cleaning.</span>
+            </button>
+          </div>
+        {% endif %}
 
+        <div class="booking-tab-panel is-active" data-service-mode-panel="{{ service.slug }}" data-mode="all_area">
         <!-- الأسئلة الأساسية الخاصة بالخدمة -->
         {% if service.questions %}
           {% for q_key, question in service.questions.items %}
-          <div class="row">
+          <div class="row" data-service-question="{{ service.slug }}" data-question-key="{{ q_key }}">
             <div class="input-block">
               <label>{{ question.label }}</label>
 
@@ -192,40 +507,63 @@
                 <select name="{{ service.slug }}__{{ q_key }}" class="js-custom-select">
                   <option value="">Select...</option>
                   {% for opt in question.options %}
-                    <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                      {% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}{% if opt.duration %} ({{ opt.duration }} min){% endif %}
+                  <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
+                      {% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}
                     </option>
                   {% endfor %}
                 </select>
 
               {% elif question.type == "multiselect" %}
-                <select name="{{ service.slug }}__{{ q_key }}" multiple data-no-custom>
+                <div class="option-group">
                   {% for opt in question.options %}
-                    <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                      {% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}{% if opt.duration %} ({{ opt.duration }} min){% endif %}
-                    </option>
+                    <div class="option-item-stack" data-option-inline-wrap>
+                      <label class="option-item">
+                        <input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
+                               value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
+                        <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
+                      </label>
+                      <div
+                        class="service-option-inline-details"
+                        data-option-inline-container
+                        data-option-value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}"
+                      ></div>
+                    </div>
                   {% endfor %}
-                </select>
+                </div>
 
               {% elif question.type == "radio" %}
                 <div class="option-group">
                   {% for opt in question.options %}
-                    <label class="option-item">
-                      <input type="radio" name="{{ service.slug }}__{{ q_key }}"
-                             value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                      <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}{% if opt.duration %} ({{ opt.duration }} min){% endif %}</span>
-                    </label>
+                    <div class="option-item-stack" data-option-inline-wrap>
+                      <label class="option-item">
+                        <input type="radio" name="{{ service.slug }}__{{ q_key }}"
+                               value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
+                        <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
+                      </label>
+                      <div
+                        class="service-option-inline-details"
+                        data-option-inline-container
+                        data-option-value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}"
+                      ></div>
+                    </div>
                   {% endfor %}
                 </div>
 
               {% elif question.type == "checkbox" %}
                 <div class="option-group">
                   {% for opt in question.options %}
-                    <label class="option-item">
-                      <input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
-                             value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                      <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}{% if opt.duration %} ({{ opt.duration }} min){% endif %}</span>
-                    </label>
+                    <div class="option-item-stack" data-option-inline-wrap>
+                      <label class="option-item">
+                        <input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
+                               value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
+                        <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
+                      </label>
+                      <div
+                        class="service-option-inline-details"
+                        data-option-inline-container
+                        data-option-value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}"
+                      ></div>
+                    </div>
                   {% endfor %}
                 </div>
 
@@ -250,9 +588,58 @@
               {% else %}
                 <input type="text" name="{{ service.slug }}__{{ q_key }}">
               {% endif %}
+              <input type="hidden" name="{{ service.slug }}__{{ q_key }}__details" data-question-detail-field>
+              <div class="service-option-details" data-question-detail-container></div>
             </div>
           </div>
-          {% endfor %}
+{% endfor %}
+        {% endif %}
+
+        </div>
+
+        {% if service.slug == "standard-cleaning" %}
+        <div class="booking-tab-panel" data-service-mode-panel="{{ service.slug }}" data-mode="by_room">
+          <div class="by-room-shell">
+            <div class="by-room-header">
+              <h6>Select Room</h6>
+              <p>Choose the specific rooms you want us to clean. This section is visual for now and the room-by-room pricing logic will be wired next.</p>
+            </div>
+            <div class="by-room-grid">
+              {% for room in service.by_room_options %}
+              <div class="room-card">
+                <div class="room-icon">
+                  {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="{{ room.title }}">
+                  {% else %}
+                    <span class="room-icon-fallback">{{ room.short_label }}</span>
+                  {% endif %}
+                </div>
+                <h6>{{ room.title }}</h6>
+                <div class="room-price">{{ room.price_currency }} {{ room.unit_price|floatformat:2 }}</div>
+                <div class="room-counter">
+                  <button type="button" class="room-stepper" data-step="-1">-</button>
+                  <input
+                    type="text"
+                    name="{{ service.slug }}__room__{{ room.id }}"
+                    value="0"
+                    readonly
+                    data-room-input
+                    data-service="{{ service.slug }}"
+                    data-room-price="{{ room.unit_price }}"
+                    data-room-currency="{{ room.price_currency }}"
+                  >
+                  <span class="room-counter-value">0</span>
+                  <button type="button" class="room-stepper" data-step="1">+</button>
+                </div>
+              </div>
+              {% empty %}
+              <div class="by-room-footer" style="grid-column: 1 / -1; margin-top: 0;">
+                No room options are configured yet for this service. Add them from the dashboard.
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
         {% endif %}
 
         <!-- زر add-ons -->
@@ -266,7 +653,6 @@
 
       <!-- هنا يتخزن JSON تبع الـ Add-ons -->
       <input type="hidden" name="addons_selected" id="addons_json">
-
       <button type="submit" class="btn-blue" style="margin-top:20px;">Continue</button>
     </form>
   </div>
@@ -306,7 +692,7 @@
 const SERVICE_ADDONS = {
     {% for service in services %}
     "{{ service.slug }}": {
-        {% for addon in service.addons_list.all %}
+        {% for addon in service.booking_addons %}
         "{{ addon.slug }}": {
             "label": "{{ addon.title|escapejs }}",
             "icon": "{% if addon.icon %}{{ addon.icon.url }}{% endif %}",
@@ -319,27 +705,72 @@ const SERVICE_ADDONS = {
 
 // الـ Add-ons المحفوظة مسبقًا
 const SAVED_ADDONS = {{ saved_addons|safe }};
+const SERVICE_MODES = {{ service_modes_json|safe }};
+const SAVED_SERVICE_ANSWERS = {{ service_answers_json|safe }};
+const SERVICE_QUESTION_CONFIG = {};
 </script>
+{{ service_question_config|json_script:"service-question-config" }}
 
 
 <!-- ================= JS: ADDONS LOGIC ================= -->
 <script>
+Object.assign(
+    SERVICE_QUESTION_CONFIG,
+    JSON.parse(document.getElementById("service-question-config")?.textContent || "{}")
+);
 let CURRENT_SERVICE = null;
 let CURRENT_ADDON = null;
 
 // نسخة العمل
 let ADDONS_DATA = SAVED_ADDONS || {};
 
+function addonHasSavedData(serviceSlug, addonKey) {
+    return Object.prototype.hasOwnProperty.call(ADDONS_DATA?.[serviceSlug] || {}, addonKey);
+}
 
-// فتح قائمة Add-ons
-function openAddonsPopup(serviceSlug) {
-    CURRENT_SERVICE = serviceSlug;
-    CURRENT_ADDON = null;
+function addonRequiresConfig(serviceSlug, addonKey) {
+    const formMarkup = String(SERVICE_ADDONS?.[serviceSlug]?.[addonKey]?.form || "").trim();
+    if (!formMarkup) return false;
+    return /<(input|select|textarea)\b/i.test(formMarkup);
+}
 
+function persistAddonsSelection() {
+    document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
+    return sendAddonsUpdate();
+}
+
+function toggleAddonSelection(serviceSlug, addonKey) {
+    const serviceAddons = ADDONS_DATA[serviceSlug] || {};
+    const isSelected = Object.prototype.hasOwnProperty.call(serviceAddons, addonKey);
+
+    if (isSelected) {
+        delete serviceAddons[addonKey];
+        if (Object.keys(serviceAddons).length) {
+            ADDONS_DATA[serviceSlug] = serviceAddons;
+        } else {
+            delete ADDONS_DATA[serviceSlug];
+        }
+        persistAddonsSelection();
+        renderAddonsGrid(serviceSlug);
+        return;
+    }
+
+    ADDONS_DATA[serviceSlug] = ADDONS_DATA[serviceSlug] || {};
+    ADDONS_DATA[serviceSlug][addonKey] = ADDONS_DATA[serviceSlug][addonKey] || {};
+    persistAddonsSelection();
+
+    if (addonRequiresConfig(serviceSlug, addonKey)) {
+        openAddonForm(serviceSlug, addonKey);
+        return;
+    }
+
+    renderAddonsGrid(serviceSlug);
+}
+
+function renderAddonsGrid(serviceSlug) {
     const popup = document.getElementById("popup");
     const popupTitle = document.getElementById("popupTitle");
     const popupBody = document.getElementById("popupBody");
-
     const addons = SERVICE_ADDONS[serviceSlug];
 
     if (!addons || Object.keys(addons).length === 0) {
@@ -352,13 +783,10 @@ function openAddonsPopup(serviceSlug) {
     let html = "";
     for (let key in addons) {
         const ad = addons[key];
-
-        let isChecked =
-            ADDONS_DATA[serviceSlug] &&
-            ADDONS_DATA[serviceSlug][key];
+        const isChecked = addonHasSavedData(serviceSlug, key);
 
         html += `
-          <div class="addon-card" onclick="openAddonForm('${serviceSlug}','${key}')">
+          <div class="addon-card${isChecked ? ' is-selected' : ''}" onclick="toggleAddonSelection('${serviceSlug}','${key}')">
             <img src="${ad.icon}" class="addon-icon">
             <p>${ad.label}</p>
             <div class="check-box ${isChecked ? 'checked' : ''}"></div>
@@ -369,6 +797,14 @@ function openAddonsPopup(serviceSlug) {
     popupTitle.textContent = "Add-ons";
     popupBody.innerHTML = `<div class="addons-grid">${html}</div>`;
     popup.style.display = "flex";
+}
+
+
+// فتح قائمة Add-ons
+function openAddonsPopup(serviceSlug) {
+    CURRENT_SERVICE = serviceSlug;
+    CURRENT_ADDON = null;
+    renderAddonsGrid(serviceSlug);
 }
 
 
@@ -390,6 +826,14 @@ function openAddonForm(serviceSlug, addonKey) {
       </div>
       <button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">&larr; Back to Add-ons</button>
     `;
+
+    popupBody.querySelectorAll("option").forEach((option) => {
+        option.textContent = (option.textContent || "").replace(/\s*\(\s*-?\d+(?:\.\d+)?\s*min\)\s*$/i, "");
+    });
+
+    popupBody.querySelectorAll(".option-item span, label span").forEach((node) => {
+        node.textContent = (node.textContent || "").replace(/\s*\(\s*-?\d+(?:\.\d+)?\s*min\)\s*$/i, "");
+    });
 
     popupBody.querySelectorAll("select").forEach(sel => {
         if (!sel.multiple) sel.classList.add("js-custom-select");
@@ -516,6 +960,31 @@ window.addEventListener("load", () => {
 <!-- =============  API FUNCTIONS (SUMMARY / UPDATE) ============= -->
 <script>
 // تحديث الفاتورة
+function applySummaryData(data) {
+    const currency = String(data.currency || "sek").toUpperCase();
+    document.getElementById("sum_services").innerText = currency + " " + Number(data.services_total || 0).toFixed(2);
+    document.getElementById("sum_addons").innerText = currency + " " + Number(data.addons_total || 0).toFixed(2);
+    document.getElementById("sum_duration").innerText = formatDuration(data.duration_seconds || 0);
+    document.getElementById("sum_rot").innerText = (data.use_rot ? "-" : "") + currency + " " + Number(data.rot || 0).toFixed(2);
+    document.getElementById("sum_total").innerText = currency + " " + Number(data.final || 0).toFixed(2);
+    const rewardLabel = document.getElementById("sum_reward_label");
+    const rewardValue = document.getElementById("sum_reward");
+    if (rewardLabel && rewardValue) {
+        rewardLabel.innerText = data.reward_title ? `Reward: ${data.reward_title}` : "Reward";
+        rewardValue.innerText = (data.use_reward ? "-" : "") + currency + " " + Number(data.reward_discount || 0).toFixed(2);
+    }
+    const rotLabel = document.getElementById("sum_rot_label");
+    if (rotLabel) {
+        rotLabel.innerText = data.use_rot ? `ROT Deduction (${Number(data.rot_percent || 0).toFixed(1)}%)` : "ROT Deduction (not applied)";
+    }
+    const totalNote = document.getElementById("sum_total_note");
+    if (totalNote) {
+        totalNote.innerText = data.use_rot
+            ? "Total includes VAT and ROT deduction."
+            : "Total includes VAT. ROT deduction is not applied.";
+    }
+}
+
 function updateSummary() {
     const useRotToggle = document.getElementById("useRotToggle");
     const useRewardToggle = document.getElementById("useRewardToggle");
@@ -526,30 +995,7 @@ function updateSummary() {
     params.append("use_reward", useReward ? "1" : "0");
     fetch(`/private/api/booking/price/?${params.toString()}`)
         .then(r => r.json())
-        .then(data => {
-            const currency = String(data.currency || "sek").toUpperCase();
-            document.getElementById("sum_services").innerText = currency + " " + Number(data.services_total || 0).toFixed(2);
-            document.getElementById("sum_addons").innerText = currency + " " + Number(data.addons_total || 0).toFixed(2);
-            document.getElementById("sum_duration").innerText = formatDuration(data.duration_seconds || 0);
-            document.getElementById("sum_rot").innerText = (data.use_rot ? "-" : "") + currency + " " + Number(data.rot || 0).toFixed(2);
-            document.getElementById("sum_total").innerText = currency + " " + Number(data.final || 0).toFixed(2);
-            const rewardLabel = document.getElementById("sum_reward_label");
-            const rewardValue = document.getElementById("sum_reward");
-            if (rewardLabel && rewardValue) {
-                rewardLabel.innerText = data.reward_title ? `Reward: ${data.reward_title}` : "Reward";
-                rewardValue.innerText = (data.use_reward ? "-" : "") + currency + " " + Number(data.reward_discount || 0).toFixed(2);
-            }
-            const rotLabel = document.getElementById("sum_rot_label");
-            if (rotLabel) {
-                rotLabel.innerText = data.use_rot ? `ROT Deduction (${Number(data.rot_percent || 0).toFixed(1)}%)` : "ROT Deduction (not applied)";
-            }
-            const totalNote = document.getElementById("sum_total_note");
-            if (totalNote) {
-                totalNote.innerText = data.use_rot
-                    ? "Total includes VAT and ROT deduction."
-                    : "Total includes VAT. ROT deduction is not applied.";
-            }
-        });
+        .then(data => applySummaryData(data));
 }
 
 function formatDuration(totalSeconds) {
@@ -563,17 +1009,298 @@ function formatDuration(totalSeconds) {
 
 
 // تحديث الإجابات
-function updateAnswer(serviceSlug, fieldKey, value) {
-    let fd = new FormData();
-    fd.append("service", serviceSlug);
-    fd.append("field", fieldKey);
-    fd.append("value", value);
+let answerUpdateQueue = Promise.resolve();
 
-    fetch(`/private/api/booking/update-answer/`, {
-        method: "POST",
-        body: fd
-    })
-    .then(() => updateSummary());
+function updateAnswer(serviceSlug, fieldKey, value, options = {}) {
+    answerUpdateQueue = answerUpdateQueue.then(() => {
+        let fd = new FormData();
+        fd.append("service", serviceSlug);
+        fd.append("field", fieldKey);
+        fd.append("value", value);
+
+        return fetch(`/private/api/booking/update-answer/`, {
+            method: "POST",
+            body: fd
+        })
+        .then(r => r.json())
+        .then((data) => {
+            SAVED_SERVICE_ANSWERS[serviceSlug] = SAVED_SERVICE_ANSWERS[serviceSlug] || {};
+            SAVED_SERVICE_ANSWERS[serviceSlug][fieldKey] = value;
+            if (!options.skipSummary && data && data.success) {
+                applySummaryData(data);
+            } else if (!options.skipSummary) {
+                updateSummary();
+            }
+            return data;
+        });
+    });
+
+    return answerUpdateQueue;
+}
+
+function escapeDetailHtml(value) {
+    return String(value || "").replace(/[&<>"']/g, (m) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+    }[m]));
+}
+
+function getQuestionConfig(serviceSlug, questionKey) {
+    return SERVICE_QUESTION_CONFIG?.[serviceSlug]?.[questionKey] || null;
+}
+
+function getSavedServiceAnswer(serviceSlug, questionKey) {
+    return SAVED_SERVICE_ANSWERS?.[serviceSlug]?.[questionKey];
+}
+
+function getSelectedQuestionValues(questionRow) {
+    const firstField = questionRow.querySelector('[name*="__"]:not([data-question-detail-field])');
+    if (!firstField) return [];
+    const fieldName = firstField.name;
+
+    if (firstField.tagName === "SELECT" && firstField.multiple) {
+        return Array.from(firstField.selectedOptions).map((option) => option.value).filter(Boolean);
+    }
+    if (firstField.type === "checkbox") {
+        return Array.from(questionRow.querySelectorAll(`[name="${fieldName}"]:checked`)).map((input) => input.value).filter(Boolean);
+    }
+    if (firstField.type === "radio") {
+        const checked = questionRow.querySelector(`[name="${fieldName}"]:checked`);
+        return checked ? [checked.value] : [];
+    }
+    return firstField.value ? [firstField.value] : [];
+}
+
+function buildDetailFieldHtml(subKey, subQuestion, savedValue, inputNamePrefix) {
+    const safeValue = escapeDetailHtml(savedValue);
+    if (subQuestion.type === "select") {
+        return `
+          <div class="option-detail-field" data-detail-field-wrap>
+            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+            <select class="js-custom-select" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">
+              <option value="">Select...</option>
+              ${(subQuestion.options || []).map((opt) => {
+                const value = escapeDetailHtml(opt.value || opt.label || opt);
+                const label = escapeDetailHtml(opt.label || opt.value || opt);
+                return `<option value="${value}" ${String(savedValue || "") === String(opt.value || opt.label || opt) ? "selected" : ""}>${label}</option>`;
+              }).join("")}
+            </select>
+          </div>
+        `;
+    }
+    if (subQuestion.type === "multiselect") {
+        const selected = Array.isArray(savedValue) ? new Set(savedValue.map(String)) : new Set();
+        return `
+          <div class="option-detail-field" data-detail-field-wrap>
+            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+            <select multiple data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">
+              ${(subQuestion.options || []).map((opt) => {
+                const rawValue = String(opt.value || opt.label || opt);
+                const label = escapeDetailHtml(opt.label || opt.value || opt);
+                return `<option value="${escapeDetailHtml(rawValue)}" ${selected.has(rawValue) ? "selected" : ""}>${label}</option>`;
+              }).join("")}
+            </select>
+          </div>
+        `;
+    }
+    if (subQuestion.type === "radio" || subQuestion.type === "checkbox" || subQuestion.type === "yes_no") {
+        const options = subQuestion.type === "yes_no"
+            ? [{ label: "Yes", value: "Yes" }, { label: "No", value: "No" }]
+            : (subQuestion.options || []);
+        const selected = Array.isArray(savedValue) ? new Set(savedValue.map(String)) : new Set([String(savedValue || "")]);
+        const inputType = subQuestion.type === "checkbox" ? "checkbox" : "radio";
+        return `
+          <div class="option-detail-field" data-detail-field-wrap>
+            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+            <div class="option-group">
+              ${options.map((opt) => {
+                const rawValue = String(opt.value || opt.label || opt);
+                const checked = subQuestion.type === "checkbox"
+                    ? selected.has(rawValue)
+                    : selected.has(rawValue);
+                return `
+                  <label class="option-item">
+                    <input type="${inputType}" name="${escapeDetailHtml(inputNamePrefix)}" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}" value="${escapeDetailHtml(rawValue)}" ${checked ? "checked" : ""}>
+                    <span>${escapeDetailHtml(opt.label || opt.value || opt)}</span>
+                  </label>
+                `;
+              }).join("")}
+            </div>
+          </div>
+        `;
+    }
+    if (subQuestion.type === "textarea") {
+        return `
+          <div class="option-detail-field" data-detail-field-wrap>
+            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+            <textarea data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">${safeValue}</textarea>
+          </div>
+        `;
+    }
+    const inputType = ["number", "date", "time"].includes(subQuestion.type) ? subQuestion.type : "text";
+    return `
+      <div class="option-detail-field" data-detail-field-wrap>
+        <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+        <input type="${inputType}" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}" value="${safeValue}">
+      </div>
+    `;
+}
+
+function syncQuestionDetailState(questionRow, pushRemote = true) {
+    const serviceSlug = questionRow.dataset.serviceQuestion;
+    const questionKey = questionRow.dataset.questionKey;
+    const hiddenInput = questionRow.querySelector("[data-question-detail-field]");
+    const detailCards = questionRow.querySelectorAll("[data-option-detail-card]");
+    const payload = {};
+
+    detailCards.forEach((card) => {
+        const optionValue = card.dataset.optionValue;
+        const entry = {};
+        const quantityInput = card.querySelector("[data-detail-quantity]");
+        if (quantityInput) {
+            entry.quantity = Math.max(1, Number(quantityInput.value || 1));
+        }
+        const answers = {};
+        card.querySelectorAll("[data-followup-question-key]").forEach((questionBlock) => {
+            const subKey = questionBlock.dataset.followupQuestionKey;
+            const inputs = questionBlock.querySelectorAll(`[data-followup-key="${subKey}"]`);
+            if (!inputs.length) return;
+            const first = inputs[0];
+            if (first.tagName === "SELECT" && first.multiple) {
+                answers[subKey] = Array.from(first.selectedOptions).map((option) => option.value).filter(Boolean);
+            } else if (first.type === "checkbox") {
+                answers[subKey] = Array.from(inputs).filter((input) => input.checked).map((input) => input.value);
+            } else if (first.type === "radio") {
+                const checked = Array.from(inputs).find((input) => input.checked);
+                answers[subKey] = checked ? checked.value : "";
+            } else {
+                answers[subKey] = first.value || "";
+            }
+        });
+        if (Object.keys(answers).length) {
+            entry.answers = answers;
+        }
+        payload[optionValue] = entry;
+    });
+
+    hiddenInput.value = Object.keys(payload).length ? JSON.stringify(payload) : "";
+    if (pushRemote) {
+        updateAnswer(serviceSlug, `${questionKey}__details`, hiddenInput.value || "{}", { skipSummary: true }).then(() => updateSummary());
+    }
+}
+
+function bindQuestionDetailEvents(questionRow) {
+    questionRow.querySelectorAll("[data-detail-input], [data-detail-quantity]").forEach((input) => {
+        if (input.dataset.detailBound === "1") return;
+        input.dataset.detailBound = "1";
+        const eventName = input.tagName === "SELECT" || input.type === "checkbox" || input.type === "radio" ? "change" : "input";
+        input.addEventListener(eventName, () => syncQuestionDetailState(questionRow));
+    });
+    setupCustomSelects(questionRow);
+}
+
+function renderQuestionDetailBlocks(questionRow, pushRemote = false) {
+    const serviceSlug = questionRow.dataset.serviceQuestion;
+    const questionKey = questionRow.dataset.questionKey;
+    const config = getQuestionConfig(serviceSlug, questionKey);
+    const container = questionRow.querySelector("[data-question-detail-container]");
+    const hiddenInput = questionRow.querySelector("[data-question-detail-field]");
+    if (!config || !container || !hiddenInput) return;
+
+    const savedDetails = (() => {
+        if (hiddenInput.value) {
+            try { return JSON.parse(hiddenInput.value); } catch (e) {}
+        }
+        return getSavedServiceAnswer(serviceSlug, `${questionKey}__details`) || {};
+    })();
+
+    const selectedValues = getSelectedQuestionValues(questionRow);
+    const html = [];
+    questionRow.querySelectorAll("[data-option-inline-container]").forEach((container) => {
+        container.innerHTML = "";
+    });
+
+    selectedValues.forEach((selectedValue) => {
+        const optionConfig = (config.options || []).find((opt) => String(opt.value || opt.label || opt) === String(selectedValue));
+        if (!optionConfig) return;
+        const hasFollowups = optionConfig.followup_questions && Object.keys(optionConfig.followup_questions).length;
+        const hasQuantity = false;
+        if (!hasFollowups && !hasQuantity) return;
+
+        const optionKey = String(optionConfig.value || optionConfig.label || selectedValue);
+        const savedOption = savedDetails?.[optionKey] || {};
+        const quantity = Math.max(1, Number(savedOption.quantity || 1));
+
+        const detailMarkup = `
+          <div class="option-detail-card" data-option-detail-card data-option-value="${escapeDetailHtml(optionKey)}">
+            <h6>${escapeDetailHtml(optionConfig.label || optionKey)}</h6>
+            ${hasQuantity ? `
+              <div class="option-detail-grid">
+                <div class="option-detail-field" data-detail-field-wrap>
+                  <label>Quantity</label>
+                  <input type="number" min="1" step="1" value="${quantity}" data-detail-quantity>
+                </div>
+              </div>
+            ` : ""}
+            ${(hasFollowups ? Object.entries(optionConfig.followup_questions).map(([subKey, subQuestion]) => `
+              <div class="option-detail-grid" data-followup-question-key="${escapeDetailHtml(subKey)}">
+                ${buildDetailFieldHtml(subKey, subQuestion, (savedOption.answers || {})[subKey], `detail_${serviceSlug}_${questionKey}_${optionKey}_${subKey}`)}
+              </div>
+            `).join("") : "")}
+          </div>
+        `;
+
+        const inlineContainer = Array.from(questionRow.querySelectorAll("[data-option-inline-container]")).find(
+            (node) => String(node.dataset.optionValue || "") === String(optionKey)
+        );
+        if (inlineContainer) {
+            inlineContainer.innerHTML = detailMarkup;
+        } else {
+            html.push(detailMarkup);
+        }
+    });
+
+    container.innerHTML = html.join("");
+    hiddenInput.value = Object.keys(savedDetails || {}).length ? JSON.stringify(savedDetails) : "";
+    bindQuestionDetailEvents(questionRow);
+    syncQuestionDetailState(questionRow, pushRemote);
+}
+
+function restoreMainServiceAnswers() {
+    document.querySelectorAll("[data-service-question]").forEach((questionRow) => {
+        const serviceSlug = questionRow.dataset.serviceQuestion;
+        const questionKey = questionRow.dataset.questionKey;
+        const savedAnswer = getSavedServiceAnswer(serviceSlug, questionKey);
+        if (savedAnswer === undefined || savedAnswer === null) {
+            renderQuestionDetailBlocks(questionRow);
+            return;
+        }
+        const inputs = questionRow.querySelectorAll(`[name="${serviceSlug}__${questionKey}"]`);
+        if (!inputs.length) {
+            renderQuestionDetailBlocks(questionRow);
+            return;
+        }
+        const first = inputs[0];
+        if (first.tagName === "SELECT" && first.multiple && Array.isArray(savedAnswer)) {
+            Array.from(first.options).forEach((option) => {
+                option.selected = savedAnswer.map(String).includes(String(option.value));
+            });
+        } else if (first.type === "checkbox" && Array.isArray(savedAnswer)) {
+            inputs.forEach((input) => {
+                input.checked = savedAnswer.map(String).includes(String(input.value));
+            });
+        } else if (first.type === "radio") {
+            inputs.forEach((input) => {
+                input.checked = String(savedAnswer) === String(input.value);
+            });
+        } else {
+            first.value = savedAnswer;
+        }
+        renderQuestionDetailBlocks(questionRow, false);
+    });
 }
 
 
@@ -606,6 +1333,38 @@ document.querySelectorAll("select, input, textarea").forEach(el => {
         updateAnswer(service, field, this.value);
     });
 });
+
+document.querySelectorAll("[data-service-question]").forEach((questionRow) => {
+    questionRow.querySelectorAll(`[name^="${questionRow.dataset.serviceQuestion}__${questionRow.dataset.questionKey}"]`).forEach((input) => {
+        if (input.matches("[data-question-detail-field]")) return;
+        input.addEventListener("change", () => renderQuestionDetailBlocks(questionRow, true));
+        if (input.type !== "radio" && input.type !== "checkbox" && !(input.tagName === "SELECT")) {
+            input.addEventListener("input", () => renderQuestionDetailBlocks(questionRow, true));
+        }
+    });
+});
+
+document.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const questionRow = target.closest("[data-service-question]");
+    if (!questionRow) return;
+    if (!target.getAttribute("name") || !target.getAttribute("name").includes("__")) return;
+    if (target.hasAttribute("data-question-detail-field")) return;
+    renderQuestionDetailBlocks(questionRow, true);
+});
+
+document.addEventListener("click", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const input = target.closest('label.option-item input[type="checkbox"], label.option-item input[type="radio"]');
+    if (!input) return;
+    const questionRow = input.closest("[data-service-question]");
+    if (!questionRow) return;
+    requestAnimationFrame(() => renderQuestionDetailBlocks(questionRow, true));
+});
+
+restoreMainServiceAnswers();
 </script>
 
 
@@ -629,9 +1388,29 @@ function validateMainQuestions() {
     let valid = true;
     let firstError = null;
 
+    document.querySelectorAll("[data-service-mode-panel='standard-cleaning']").forEach((panel) => {
+        if (!panel.classList.contains("is-active") || panel.dataset.mode !== "by_room") return;
+        const roomInputs = Array.from(panel.querySelectorAll("[data-room-input]"));
+        const totalRooms = roomInputs.reduce((sum, input) => sum + Number(input.value || 0), 0);
+        if (totalRooms <= 0) {
+            valid = false;
+            firstError = firstError || roomInputs[0] || panel;
+            roomInputs.forEach((input) => {
+                input.closest(".room-card")?.classList.add("is-error");
+            });
+        } else {
+            roomInputs.forEach((input) => {
+                input.closest(".room-card")?.classList.remove("is-error");
+            });
+        }
+    });
+
     document.querySelectorAll("[name]").forEach(el => {
         // ??? ????? ??????? (service__question)
         if (!el.name.includes("__")) return;
+
+        const panel = el.closest(".booking-tab-panel");
+        if (panel && !panel.classList.contains("is-active")) return;
 
         // ????? hidden
         if (el.type === "hidden") return;
@@ -681,6 +1460,38 @@ function validateMainQuestions() {
             } else {
                 el.classList.remove("error");
             }
+        }
+    });
+
+    document.querySelectorAll("[data-option-detail-card]").forEach((card) => {
+        card.querySelectorAll("[data-detail-field-wrap]").forEach((wrap) => wrap.classList.remove("is-error"));
+        card.querySelectorAll("[data-followup-question-key]").forEach((questionBlock) => {
+            const subKey = questionBlock.dataset.followupQuestionKey;
+            const inputs = questionBlock.querySelectorAll(`[data-followup-key="${subKey}"]`);
+            if (!inputs.length) return;
+            let fieldValid = true;
+            const first = inputs[0];
+            if (first.tagName === "SELECT" && first.multiple) {
+                fieldValid = Array.from(first.selectedOptions).length > 0;
+            } else if (first.type === "checkbox") {
+                fieldValid = Array.from(inputs).some((input) => input.checked);
+            } else if (first.type === "radio") {
+                fieldValid = Array.from(inputs).some((input) => input.checked);
+            } else {
+                fieldValid = String(first.value || "").trim() !== "";
+            }
+            if (!fieldValid) {
+                valid = false;
+                firstError = firstError || first;
+                questionBlock.querySelector("[data-detail-field-wrap]")?.classList.add("is-error");
+            }
+        });
+
+        const quantityInput = card.querySelector("[data-detail-quantity]");
+        if (quantityInput && Number(quantityInput.value || 0) <= 0) {
+            valid = false;
+            firstError = firstError || quantityInput;
+            quantityInput.closest("[data-detail-field-wrap]")?.classList.add("is-error");
         }
     });
 
@@ -757,30 +1568,7 @@ if (useRotToggle) {
             body: fd
         })
         .then(r => r.json())
-        .then(data => {
-            const currency = String(data.currency || "sek").toUpperCase();
-            document.getElementById("sum_services").innerText = currency + " " + Number(data.services_total || 0).toFixed(2);
-            document.getElementById("sum_addons").innerText = currency + " " + Number(data.addons_total || 0).toFixed(2);
-            document.getElementById("sum_duration").innerText = formatDuration(data.duration_seconds || 0);
-            document.getElementById("sum_rot").innerText = (data.use_rot ? "-" : "") + currency + " " + Number(data.rot || 0).toFixed(2);
-            document.getElementById("sum_total").innerText = currency + " " + Number(data.final || 0).toFixed(2);
-            const rewardLabel = document.getElementById("sum_reward_label");
-            const rewardValue = document.getElementById("sum_reward");
-            if (rewardLabel && rewardValue) {
-                rewardLabel.innerText = data.reward_title ? `Reward: ${data.reward_title}` : "Reward";
-                rewardValue.innerText = (data.use_reward ? "-" : "") + currency + " " + Number(data.reward_discount || 0).toFixed(2);
-            }
-            const rotLabel = document.getElementById("sum_rot_label");
-            if (rotLabel) {
-                rotLabel.innerText = data.use_rot ? `ROT Deduction (${Number(data.rot_percent || 0).toFixed(1)}%)` : "ROT Deduction (not applied)";
-            }
-            const totalNote = document.getElementById("sum_total_note");
-            if (totalNote) {
-                totalNote.innerText = data.use_rot
-                    ? "Total includes VAT and ROT deduction."
-                    : "Total includes VAT. ROT deduction is not applied.";
-            }
-        })
+        .then(data => applySummaryData(data))
         .catch(() => updateSummary());
     });
 }
@@ -798,20 +1586,7 @@ if (useRewardToggle) {
             body: fd
         })
         .then(r => r.json())
-        .then(data => {
-            const currency = String(data.currency || "sek").toUpperCase();
-            document.getElementById("sum_services").innerText = currency + " " + Number(data.services_total || 0).toFixed(2);
-            document.getElementById("sum_addons").innerText = currency + " " + Number(data.addons_total || 0).toFixed(2);
-            document.getElementById("sum_duration").innerText = formatDuration(data.duration_seconds || 0);
-            document.getElementById("sum_rot").innerText = (data.use_rot ? "-" : "") + currency + " " + Number(data.rot || 0).toFixed(2);
-            document.getElementById("sum_total").innerText = currency + " " + Number(data.final || 0).toFixed(2);
-            const rewardLabel = document.getElementById("sum_reward_label");
-            const rewardValue = document.getElementById("sum_reward");
-            if (rewardLabel && rewardValue) {
-                rewardLabel.innerText = data.reward_title ? `Reward: ${data.reward_title}` : "Reward";
-                rewardValue.innerText = (data.use_reward ? "-" : "") + currency + " " + Number(data.reward_discount || 0).toFixed(2);
-            }
-        })
+        .then(data => applySummaryData(data))
         .catch(() => updateSummary());
     });
 }
@@ -820,16 +1595,49 @@ if (servicesForm) servicesForm.addEventListener("submit", handleServicesSubmit);
 </script>
 <script>
 const serviceBoxes = Array.from(document.querySelectorAll(".service-box"));
-const servicePreviewCards = Array.from(document.querySelectorAll(".service-preview-card"));
-const serviceDots = Array.from(document.querySelectorAll(".service-dot"));
+const categoryCards = Array.from(document.querySelectorAll(".category-card"));
+const categoryDots = Array.from(document.querySelectorAll(".service-dot"));
+const serviceChips = Array.from(document.querySelectorAll(".service-chip"));
+const categoryPanels = Array.from(document.querySelectorAll(".service-tab-group"));
 const servicePrevBtn = document.getElementById("servicePrevBtn");
 const serviceNextBtn = document.getElementById("serviceNextBtn");
+const categoryOrder = categoryCards.map(card => card.dataset.categoryTab);
 let activeServiceIndex = Math.max(0, serviceBoxes.findIndex(box => box.classList.contains("is-active")));
 if (activeServiceIndex < 0) activeServiceIndex = 0;
+let activeCategoryIndex = Math.max(0, categoryOrder.indexOf(serviceBoxes[activeServiceIndex]?.dataset.category || categoryOrder[0]));
+
+function setActiveCategory(categorySlug) {
+    categoryCards.forEach((card) => {
+        card.classList.toggle("is-active", card.dataset.categoryTab === categorySlug);
+    });
+
+    categoryDots.forEach((dot) => {
+        dot.classList.toggle("is-active", dot.dataset.categoryTab === categorySlug);
+    });
+
+    categoryPanels.forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.categoryPanel === categorySlug);
+    });
+
+    const firstChip = document.querySelector(`.service-tab-group[data-category-panel="${categorySlug}"] .service-chip`);
+    const activeBox = serviceBoxes.find(box => box.classList.contains("is-active"));
+    if (!activeBox || activeBox.dataset.category !== categorySlug) {
+        if (firstChip) {
+            const targetIndex = serviceBoxes.findIndex(box => box.dataset.service === firstChip.dataset.serviceJump);
+            if (targetIndex >= 0) {
+                setActiveService(targetIndex);
+                return;
+            }
+        }
+    }
+
+    activeCategoryIndex = Math.max(0, categoryOrder.indexOf(categorySlug));
+}
 
 function setActiveService(index) {
     if (!serviceBoxes.length) return;
     activeServiceIndex = Math.max(0, Math.min(index, serviceBoxes.length - 1));
+    const activeCategorySlug = serviceBoxes[activeServiceIndex]?.dataset.category;
 
     serviceBoxes.forEach((box, idx) => {
         const isActive = idx === activeServiceIndex;
@@ -839,16 +1647,25 @@ function setActiveService(index) {
         if (btn) btn.setAttribute("aria-expanded", isActive ? "true" : "false");
     });
 
-    servicePreviewCards.forEach((card, idx) => {
-        card.classList.toggle("is-active", idx === activeServiceIndex);
+    serviceChips.forEach((chip) => {
+        chip.classList.toggle("is-active", chip.dataset.serviceJump === serviceBoxes[activeServiceIndex]?.dataset.service);
     });
 
-    serviceDots.forEach((dot, idx) => {
-        dot.classList.toggle("is-active", idx === activeServiceIndex);
-    });
+    if (activeCategorySlug) {
+        categoryCards.forEach((card) => {
+            card.classList.toggle("is-active", card.dataset.categoryTab === activeCategorySlug);
+        });
+        categoryDots.forEach((dot) => {
+            dot.classList.toggle("is-active", dot.dataset.categoryTab === activeCategorySlug);
+        });
+        categoryPanels.forEach((panel) => {
+            panel.classList.toggle("is-active", panel.dataset.categoryPanel === activeCategorySlug);
+        });
+        activeCategoryIndex = Math.max(0, categoryOrder.indexOf(activeCategorySlug));
+    }
 
-    if (servicePrevBtn) servicePrevBtn.disabled = activeServiceIndex === 0;
-    if (serviceNextBtn) serviceNextBtn.disabled = activeServiceIndex === serviceBoxes.length - 1;
+    if (servicePrevBtn) servicePrevBtn.disabled = activeCategoryIndex === 0;
+    if (serviceNextBtn) serviceNextBtn.disabled = activeCategoryIndex === categoryOrder.length - 1;
 }
 
 document.querySelectorAll(".svc-toggle").forEach(btn => {
@@ -860,24 +1677,41 @@ document.querySelectorAll(".svc-toggle").forEach(btn => {
     });
 });
 
-servicePreviewCards.forEach((card) => {
+categoryCards.forEach((card) => {
     card.addEventListener("click", () => {
-        setActiveService(Number(card.dataset.serviceJump || 0));
+        setActiveCategory(card.dataset.categoryTab);
     });
 });
 
-serviceDots.forEach((dot) => {
+categoryDots.forEach((dot) => {
     dot.addEventListener("click", () => {
-        setActiveService(Number(dot.dataset.serviceJump || 0));
+        setActiveCategory(dot.dataset.categoryTab);
+    });
+});
+
+serviceChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+        const targetIndex = serviceBoxes.findIndex(box => box.dataset.service === chip.dataset.serviceJump);
+        if (targetIndex >= 0) {
+            setActiveService(targetIndex);
+        }
     });
 });
 
 if (servicePrevBtn) {
-    servicePrevBtn.addEventListener("click", () => setActiveService(activeServiceIndex - 1));
+    servicePrevBtn.addEventListener("click", () => {
+        const nextIndex = Math.max(0, activeCategoryIndex - 1);
+        const categorySlug = categoryOrder[nextIndex];
+        if (categorySlug) setActiveCategory(categorySlug);
+    });
 }
 
 if (serviceNextBtn) {
-    serviceNextBtn.addEventListener("click", () => setActiveService(activeServiceIndex + 1));
+    serviceNextBtn.addEventListener("click", () => {
+        const nextIndex = Math.min(categoryOrder.length - 1, activeCategoryIndex + 1);
+        const categorySlug = categoryOrder[nextIndex];
+        if (categorySlug) setActiveCategory(categorySlug);
+    });
 }
 
 setActiveService(activeServiceIndex);
@@ -890,6 +1724,76 @@ function setupCustomSelects() {
 }
 
 setupCustomSelects();
+</script>
+<script>
+function setServiceMode(serviceSlug, mode) {
+    const hidden = document.getElementById(`booking_mode_${serviceSlug}`);
+    if (hidden) hidden.value = mode;
+
+    document.querySelectorAll(`[data-service-mode-tab="${serviceSlug}"]`).forEach((tab) => {
+        tab.classList.toggle("is-active", tab.dataset.mode === mode);
+    });
+
+    document.querySelectorAll(`[data-service-mode-panel="${serviceSlug}"]`).forEach((panel) => {
+        panel.classList.toggle("is-active", panel.dataset.mode === mode);
+    });
+
+    updateAnswer(serviceSlug, "__mode", mode, { skipSummary: true }).then(() => updateSummary());
+}
+
+document.querySelectorAll("[data-service-mode-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+        setServiceMode(tab.dataset.serviceModeTab, tab.dataset.mode);
+    });
+});
+
+Object.entries(SERVICE_MODES || {}).forEach(([serviceSlug, mode]) => {
+    if (mode === "by_room" || mode === "all_area") {
+        setServiceMode(serviceSlug, mode);
+    }
+});
+
+function renderRoomCardTotal(input) {
+    if (!input) return;
+    const quantity = Number(input.value || 0);
+    const unitPrice = Number(input.dataset.roomPrice || 0);
+    const currency = input.dataset.roomCurrency || "USD";
+    const shownPrice = (quantity > 0 ? quantity : 1) * unitPrice;
+    const priceEl = input.closest(".room-card")?.querySelector(".room-price");
+    const valueEl = input.closest(".room-card")?.querySelector(".room-counter-value");
+    if (priceEl) priceEl.textContent = `${currency} ${shownPrice.toFixed(2)}`;
+    if (valueEl) valueEl.textContent = String(quantity);
+}
+
+document.querySelectorAll("[data-room-input]").forEach((input) => {
+    const serviceAnswers = SAVED_SERVICE_ANSWERS?.[input.dataset.service] || {};
+    const roomCounts = serviceAnswers?.__room_counts || {};
+    const parts = input.name.split("__room__");
+    const roomId = parts.length > 1 ? parts[1] : "";
+    if (roomId && roomCounts[roomId] !== undefined) {
+        input.value = Math.max(0, Number(roomCounts[roomId] || 0));
+    }
+    renderRoomCardTotal(input);
+});
+
+document.querySelectorAll(".room-stepper").forEach((button) => {
+    button.addEventListener("click", () => {
+        const input = button.parentElement.querySelector("[data-room-input]");
+        const step = Number(button.dataset.step || 0);
+        const current = Number(input.value || 0);
+        const next = Math.max(0, current + step);
+        input.value = next;
+        renderRoomCardTotal(input);
+
+        const serviceSlug = input.dataset.service;
+        const roomCounts = {};
+        document.querySelectorAll(`[data-room-input][data-service="${serviceSlug}"]`).forEach((roomInput) => {
+            const roomId = roomInput.name.split("__room__")[1];
+            roomCounts[roomId] = Number(roomInput.value || 0);
+        });
+        updateAnswer(serviceSlug, "__room_counts", JSON.stringify(roomCounts));
+    });
+});
 </script>
 
 {% include "home/includes/footer.html" %}

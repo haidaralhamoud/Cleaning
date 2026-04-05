@@ -533,3 +533,167 @@ textarea {
     width: 100%;
   }
 }
+
+/* ===== Final Zip Page Layout ===== */
+.hero {
+  height: 420px;
+  display: grid;
+  place-items: center;
+}
+
+.hero .overlay {
+  background: linear-gradient(180deg, rgba(8, 17, 28, 0.32) 0%, rgba(8, 17, 28, 0.5) 100%);
+}
+
+.hero h1 {
+  max-width: 900px;
+  padding: 0 24px;
+  font-size: clamp(44px, 5vw, 72px);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.28);
+}
+
+.zip-section {
+  padding: 72px 0 90px;
+}
+
+.zip-section h2 {
+  font-size: clamp(38px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  margin-bottom: 14px;
+}
+
+.zip-form {
+  padding: 26px;
+  border-radius: 28px;
+}
+
+.zip-form label {
+  margin-bottom: 14px;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.zip-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 14px;
+  align-items: center;
+}
+
+.zip-inputs input {
+  min-height: 62px;
+  border-radius: 18px;
+  padding: 0 20px;
+  font-size: 18px;
+}
+
+.zip-inputs button {
+  min-height: 62px;
+  width: 100%;
+  border-radius: 18px;
+  font-size: 17px;
+  font-weight: 800;
+  box-shadow: 0 16px 28px rgba(3, 159, 200, 0.22);
+}
+
+.not-served-box,
+.form-left {
+  max-width: 1020px;
+}
+
+.not-served-box {
+  margin: 34px 0 0;
+  padding: 30px 28px;
+  border-radius: 24px;
+  text-align: left;
+}
+
+.not-served-box p {
+  max-width: 760px;
+  line-height: 1.7;
+}
+
+.contact-form {
+  margin-top: 28px;
+}
+
+.form-left {
+  padding: 34px;
+  border-radius: 28px;
+}
+
+.form-grid {
+  gap: 22px;
+}
+
+.form-group label {
+  margin-bottom: 10px;
+  color: var(--ink-700);
+  font-size: 14px;
+}
+
+.form-group input,
+.form-group textarea {
+  min-height: 56px;
+  border-radius: 16px;
+  padding: 14px 16px;
+}
+
+.form-group textarea {
+  min-height: 148px;
+}
+
+.submit-btn {
+  min-height: 56px;
+  padding: 0 34px;
+  border-radius: 18px;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    height: 340px;
+  }
+
+  .zip-section {
+    padding: 54px 0 72px;
+  }
+
+  .zip-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .zip-form,
+  .form-left {
+    padding: 22px;
+    border-radius: 22px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero {
+    height: 300px;
+  }
+
+  .hero h1 {
+    font-size: 42px;
+  }
+
+  .zip-section h2 {
+    font-size: 34px;
+  }
+
+  .zip-lead {
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+
+  .zip-inputs input,
+  .zip-inputs button,
+  .submit-btn {
+    min-height: 54px;
+  }
+}

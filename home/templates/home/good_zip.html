@@ -218,6 +218,18 @@
 
     if (preferredDateUi) {
       preferredDateUi.addEventListener("change", updatePreferredDateTime);
+      preferredDateUi.addEventListener("click", () => {
+        if (preferredDateUi.showPicker) {
+          preferredDateUi.showPicker();
+        } else {
+          preferredDateUi.focus();
+        }
+      });
+      preferredDateUi.addEventListener("focus", () => {
+        if (preferredDateUi.showPicker) {
+          preferredDateUi.showPicker();
+        }
+      });
     }
 
     if (preferredTimeUi) {
@@ -231,6 +243,18 @@
 
     if (dateTrigger && preferredDateUi) {
       dateTrigger.addEventListener("click", () => {
+        if (preferredDateUi.showPicker) {
+          preferredDateUi.showPicker();
+        } else {
+          preferredDateUi.focus();
+        }
+      });
+    }
+
+    const dateFieldWrapper = preferredDateUi ? preferredDateUi.closest(".input-with-icon") : null;
+    if (dateFieldWrapper && preferredDateUi) {
+      dateFieldWrapper.addEventListener("click", (event) => {
+        if (event.target === preferredDateUi) return;
         if (preferredDateUi.showPicker) {
           preferredDateUi.showPicker();
         } else {

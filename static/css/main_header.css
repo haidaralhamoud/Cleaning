@@ -82,6 +82,10 @@ body {
   z-index: 999;
 }
 
+.services-mega-menu {
+  min-width: 240px;
+}
+
 .dropdown-menu a {
   display: block;
   padding: 10px 18px;
@@ -131,6 +135,84 @@ body {
   transform: translateX(10px);
   transition: all .25s ease;
   z-index: 1000;
+}
+
+.services-branch-link {
+  min-width: 230px;
+  font-weight: 700 !important;
+}
+
+.services-categories-menu {
+  min-width: 720px;
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  max-height: none;
+}
+
+.services-category-link {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 100%;
+  padding: 14px 18px !important;
+  border-radius: 0;
+}
+
+.services-categories-list {
+  background: #fbfdff;
+  border-right: 1px solid rgba(0, 163, 200, 0.12);
+  padding: 10px 0;
+}
+
+.services-all-link {
+  margin-bottom: 4px;
+}
+
+.services-preview-pane {
+  background: #fff;
+  padding: 14px 0;
+  max-height: min(68vh, 520px);
+  overflow-y: auto;
+}
+
+.services-preview-group {
+  display: none;
+}
+
+.services-preview-group.is-active {
+  display: block;
+}
+
+.services-preview-title {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 18px 14px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #00a3c8, #71b247);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 20px rgba(0, 163, 200, 0.18);
+}
+
+.services-category-link.is-active,
+.services-category-link:hover,
+.services-category-link:focus-visible {
+  background: #f2f7fa;
+  color: #00a3c8;
+}
+
+.services-empty-state {
+  display: block;
+  padding: 12px 18px;
+  color: #6b7280;
+  font-weight: 600;
 }
 
 .submenu-menu::-webkit-scrollbar {
@@ -491,6 +573,39 @@ body {
   .nav-links {
     order: 4;
     z-index: 3100;
+  }
+
+  .services-mega-menu,
+  .services-categories-menu,
+  .submenu-menu {
+    position: static;
+    width: 100%;
+    min-width: 100%;
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    padding: 6px 0 0;
+  }
+
+  .services-branch-link,
+  .services-category-link {
+    min-width: 100%;
+  }
+
+  .services-categories-menu {
+    grid-template-columns: 1fr;
+  }
+
+  .services-categories-list {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 163, 200, 0.12);
+  }
+
+  .services-preview-group {
+    display: block;
   }
 
   .auth-buttons {

@@ -27,7 +27,12 @@
     </section>
 
     <section class="content">
-      <p class="service-intro">{{ intro_text }}</p>
+      <section class="service-intro-card">
+        <span class="service-intro-eyebrow">Service Overview</span>
+        <div class="service-intro-layout">
+          <p class="service-intro">{{ intro_text }}</p>
+        </div>
+      </section>
 
       <div class="checklist-header">
         <span class="check-icon">&#10003;</span>
@@ -70,7 +75,7 @@
             <label for="estimateProperty">{{ estimate.property_label }}</label>
             <select id="estimateProperty">
               {% if estimate.property_options %}
-                <option value="" selected disabled>Select property size</option>
+                <option value="" selected disabled>Select {{ estimate.property_label|lower }}</option>
                 {% for option in estimate.property_options %}
                   <option value="{{ option.price }}">{{ option.label }}</option>
                 {% endfor %}
@@ -83,7 +88,7 @@
             <label for="estimateBedrooms">{{ estimate.bedrooms_label }}</label>
             <select id="estimateBedrooms">
               {% if estimate.bedrooms_options %}
-                <option value="" selected disabled>Select number of bedrooms</option>
+                <option value="" selected disabled>Select {{ estimate.bedrooms_label|lower }}</option>
                 {% for option in estimate.bedrooms_options %}
                   <option value="{{ option.price }}">{{ option.label }}</option>
                 {% endfor %}
@@ -120,6 +125,16 @@
           {% endfor %}
         </div>
       </section>
+
+      {% if service.background_image %}
+        <section class="detail-background-image-section" aria-label="Service background image">
+          <img
+            src="{{ service.background_image.url }}"
+            alt="{{ service.title }} background"
+            class="detail-background-image"
+          >
+        </section>
+      {% endif %}
 
       <div class="add-to-cart">
         <a class="primary-btn add-to-cart-btn" href="{% url 'home:private_cart_add' service.slug %}">

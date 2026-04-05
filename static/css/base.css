@@ -6,6 +6,18 @@
   --cart-icon-url: url("../images/cart-unified.svg");
 }
 
+input[type="date"] {
+  text-transform: uppercase;
+}
+
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  text-transform: uppercase;
+}
+
 /* Global box sizing + prevent horizontal overflow on mobile */
 *,
 *::before,

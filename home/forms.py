@@ -269,10 +269,13 @@ class EmailRequestForm(forms.ModelForm):
 class FeedbackRequestForm(forms.ModelForm):
     class Meta:
         model = FeedbackRequest
-        fields = ["customer_name", "feedback_text", "rating", "service_type", "request_details"]
+        fields = ["customer_name", "email", "feedback_text", "rating", "service_type", "request_details"]
         widgets = {
             "customer_name": forms.TextInput(attrs={
                 "placeholder": "Your name",
+            }),
+            "email": forms.EmailInput(attrs={
+                "placeholder": "Your email (optional)",
             }),
             "feedback_text": forms.Textarea(attrs={
                 "placeholder": "Share your experience, suggestions, or feedback...",

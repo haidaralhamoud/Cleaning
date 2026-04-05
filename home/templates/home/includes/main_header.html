@@ -19,20 +19,87 @@
       <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
         <span class="dropdown-label">SERVICES</span>
       </a>
-      <div class="dropdown-menu">
+      <div class="dropdown-menu services-mega-menu">
         <div class="dropdown-submenu">
-          <a href="{% url 'home:all_services_private' %}" class="submenu-toggle">
+          <a href="{% url 'home:all_services_private' %}" class="submenu-toggle services-branch-link">
             <span>Private Services</span>
             <span class="submenu-arrow" aria-hidden="true"></span>
           </a>
-          <div class="submenu-menu">
-            <a href="{% url 'home:all_services_private' %}" class="submenu-all">All Private Services</a>
-            {% for service in header_private_services %}
-              <a href="{% url 'accounts:service_detail' service.slug %}">{{ service.title }}</a>
-            {% endfor %}
+          <div class="submenu-menu services-categories-menu" data-services-categories-menu>
+            <div class="services-categories-list">
+              <a href="{% url 'home:all_services_private' %}" class="submenu-all services-all-link">All Private Services</a>
+              {% for category in header_private_categories %}
+                <a
+                  href="{% url 'home:all_services_private' %}#{{ category.slug }}"
+                  class="services-category-link{% if forloop.first %} is-active{% endif %}"
+                  data-category-target="{{ category.slug }}"
+                >
+                  <span>{{ category.title }}</span>
+                  <span class="submenu-arrow" aria-hidden="true"></span>
+                </a>
+              {% empty %}
+                <span class="services-empty-state">No categories yet</span>
+              {% endfor %}
+            </div>
+            <div class="services-preview-pane">
+              {% for category in header_private_categories %}
+                <div
+                  class="services-preview-group{% if forloop.first %} is-active{% endif %}"
+                  data-category-services="{{ category.slug }}"
+                >
+                  <div class="services-preview-title">{{ category.title }}</div>
+                  {% for service in category.header_services %}
+                    <a href="{% url 'accounts:service_detail' service.slug %}">{{ service.title }}</a>
+                  {% empty %}
+                    <span class="services-empty-state">No services yet</span>
+                  {% endfor %}
+                </div>
+              {% empty %}
+                <span class="services-empty-state">No categories yet</span>
+              {% endfor %}
+            </div>
           </div>
         </div>
-        <a href="{% url 'home:business_all_services' %}">Business Services</a>
+        <div class="dropdown-submenu">
+          <a href="{% url 'home:business_all_services' %}" class="submenu-toggle services-branch-link">
+            <span>Business Services</span>
+            <span class="submenu-arrow" aria-hidden="true"></span>
+          </a>
+          <div class="submenu-menu services-categories-menu" data-services-categories-menu>
+            <div class="services-categories-list">
+              <a href="{% url 'home:business_all_services' %}" class="submenu-all services-all-link">All Business Services</a>
+              {% for category in header_business_categories %}
+                <a
+                  href="{% url 'home:business_all_services' %}#{{ category.slug }}"
+                  class="services-category-link{% if forloop.first %} is-active{% endif %}"
+                  data-category-target="{{ category.slug }}"
+                >
+                  <span>{{ category.title }}</span>
+                  <span class="submenu-arrow" aria-hidden="true"></span>
+                </a>
+              {% empty %}
+                <span class="services-empty-state">No categories yet</span>
+              {% endfor %}
+            </div>
+            <div class="services-preview-pane">
+              {% for category in header_business_categories %}
+                <div
+                  class="services-preview-group{% if forloop.first %} is-active{% endif %}"
+                  data-category-services="{{ category.slug }}"
+                >
+                  <div class="services-preview-title">{{ category.title }}</div>
+                  {% for service in category.header_services %}
+                    <a href="{% url 'home:business_service_detail' service.id %}">{{ service.title }}</a>
+                  {% empty %}
+                    <span class="services-empty-state">No services yet</span>
+                  {% endfor %}
+                </div>
+              {% empty %}
+                <span class="services-empty-state">No categories yet</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     <a href="{% url 'home:contact' %}">CONTACT</a>

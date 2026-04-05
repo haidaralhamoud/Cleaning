@@ -22,10 +22,37 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   initCustomSelects();
+  initHeaderServiceMegaMenu();
   initFormValidation();
   initHemblaCalendar();
   flushDjangoMessagesToToast();
 });
+
+const initHeaderServiceMegaMenu = () => {
+  if (window.matchMedia("(max-width: 768px)").matches) return;
+
+  document.querySelectorAll("[data-services-categories-menu]").forEach((menu) => {
+    const categoryLinks = Array.from(menu.querySelectorAll("[data-category-target]"));
+    const previewGroups = Array.from(menu.querySelectorAll("[data-category-services]"));
+    if (!categoryLinks.length || !previewGroups.length) return;
+
+    const activateCategory = (slug) => {
+      categoryLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.dataset.categoryTarget === slug);
+      });
+      previewGroups.forEach((group) => {
+        group.classList.toggle("is-active", group.dataset.categoryServices === slug);
+      });
+    };
+
+    activateCategory(categoryLinks[0].dataset.categoryTarget);
+
+    categoryLinks.forEach((link) => {
+      link.addEventListener("mouseenter", () => activateCategory(link.dataset.categoryTarget));
+      link.addEventListener("focus", () => activateCategory(link.dataset.categoryTarget));
+    });
+  });
+};
 
 const initCustomSelects = () => {
   const selects = Array.from(document.querySelectorAll("select")).filter((select) => {
@@ -286,7 +313,8 @@ const initHemblaCalendar = () => {
     (input) =>
       !input.hasAttribute("data-native-date") &&
       !input.hasAttribute("data-no-calendar") &&
-      !input.classList.contains("hidden")
+      !input.classList.contains("hidden") &&
+      input.dataset.hemblaCalendarBound !== "1"
   );
 
   if (!inputs.length) return;
@@ -456,6 +484,7 @@ const initHemblaCalendar = () => {
   inputs.forEach((input) => {
     input.setAttribute("autocomplete", "off");
     input.readOnly = true;
+    input.dataset.hemblaCalendarBound = "1";
     input.addEventListener("focus", () => openCalendar(input));
     input.addEventListener("click", () => openCalendar(input));
   });
@@ -483,3 +512,5 @@ const initHemblaCalendar = () => {
     if (state.activeInput) positionCalendar(state.activeInput);
   });
 };
+
+window.initHemblaCalendar = initHemblaCalendar;

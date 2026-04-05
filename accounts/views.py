@@ -3558,21 +3558,22 @@ def service_detail(request, slug):
         "price_label": "Starting from",
         "price_value": getattr(pricing_obj, "price_value", "") or service.starting_price,
         "price_note": getattr(pricing_obj, "price_note", ""),
-        "description": "The final price depends on the size of your property and its condition. We provide a firm quote after a quick assessment.",
+        "description": "Your final price depends on your selected service and details. You'll always see the full cost before confirming your booking.",
         "cta_text": "BOOK NOW",
         "cta_url": start_booking_url,
     }
 
     estimate_obj = getattr(service, "estimate", None)
     estimate = {
-        "title": "Get a Quick Estimate",
+        "title": getattr(estimate_obj, "title", None) or "Get a Quick Estimate",
         "property_label": "Property Size (m²)",
-        "bedrooms_label": "Number of Bedrooms",
-        "cta_text": "Calculate Estimate",
-        "note": "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition.",
+        "bedrooms_label": getattr(estimate_obj, "bedrooms_label", None) or "Number of Bedrooms",
+        "cta_text": getattr(estimate_obj, "cta_text", None) or "Calculate Estimate",
+        "note": getattr(estimate_obj, "note", None) or "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition.",
         "property_options": getattr(estimate_obj, "property_options", None) or [],
         "bedrooms_options": getattr(estimate_obj, "bedrooms_options", None) or [],
     }
+    estimate["property_label"] = getattr(estimate_obj, "property_label", None) or "Property Size (m²)"
 
     eco = {
         "title": "Our Eco-Friendly Promise",

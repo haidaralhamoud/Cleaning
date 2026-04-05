@@ -66,7 +66,7 @@
       <div class="service-card fade-in"
            data-title="{{ service.title|lower|escape }}"
            data-description="{{ service.description|lower|escape }}"
-           data-recommended="{% if service.recommended %}true{% else %}false{% endif %}"
+           data-recommended="{% if service.show_recommended_badge %}true{% else %}false{% endif %}"
            data-slug="{{ service.slug }}"
            data-title-display="{{ service.title|escape }}"
            data-book-url="{% url 'home:private_zip_step1' service.slug %}{% if urgent_selected %}?urgent=1{% endif %}"
@@ -85,14 +85,14 @@
                 {{ service.title }}
               </a>
             </h2>
-            {% if service.recommended %}
+            {% if service.show_recommended_badge %}
               <span class="rec-badge">Recommended</span>
             {% endif %}
           </div>
           <p>{{ service.description }}</p>
 
-          {% if service.recommended %}
-            <span class="rec-note">{{ service.recommended }}</span>
+          {% if service.recommended_note %}
+            <span class="rec-note">{{ service.recommended_note }}</span>
           {% endif %}
         </div>
 
@@ -140,7 +140,6 @@
         </div>
 
         <div class="cart-sidebar-actions">
-          <a href="{% url 'home:private_cart' %}" class="cart-secondary">Open full cart</a>
           <a href="{% url 'home:private_cart' %}" class="cart-primary">Review and continue</a>
         </div>
       </div>
@@ -160,7 +159,11 @@ const SERVICE_CATALOG = {
 };
 
 function addToCart(slug, buttonEl) {
-    fetch(`/private/cart/add/${slug}/`)
+    fetch(`/private/cart/add/${slug}/`, {
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
         .then(r => r.json())
         .then(data => {
             if (data.count !== undefined) {
@@ -212,7 +215,11 @@ function addSidebarCartItem(slug) {
 }
 
 function removeFromSidebarCart(slug, buttonEl) {
-    fetch(`/private/cart/remove/${slug}/`)
+    fetch(`/private/cart/remove-json/${slug}/`, {
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
         .then(r => r.json())
         .then(data => {
             const card = buttonEl ? buttonEl.closest(".cart-mini-card") : document.querySelector(`[data-cart-slug="${slug}"]`);

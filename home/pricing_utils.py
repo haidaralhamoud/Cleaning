@@ -3,6 +3,7 @@ from django.conf import settings
 from .models import (
     PrivateService,
     PrivateAddon,
+    ServiceRoomOption,
     ScheduleRule,
     PrivateBooking,
     DateSurcharge,
@@ -92,14 +93,80 @@ def _normalize_answers(value):
         return value
     return [value]
 
-def _options_price(options, answers, source_currency, target_currency, currency_rates):
+def _normalize_option_key(option):
+    if not isinstance(option, dict):
+        return str(option or "")
+    return str(option.get("value") or option.get("label") or "")
+
+
+def _normalize_detail_map(details):
+    return details if isinstance(details, dict) else {}
+
+
+def _question_option_details(answer_map, question_key):
+    if not isinstance(answer_map, dict):
+        return {}
+    return _normalize_detail_map(answer_map.get(f"{question_key}__details"))
+
+
+def _coerce_positive_int(value, default=1):
+    try:
+        parsed = int(value)
+    except Exception:
+        return default
+    return parsed if parsed > 0 else default
+
+
+def _questions_price(questions, answers, source_currency, target_currency, currency_rates):
+    total = Decimal("0.00")
+    if not questions:
+        return total
+    answer_map = answers if isinstance(answers, dict) else {}
+    for q_key, q_info in questions.items():
+        if not q_info:
+            continue
+        options = q_info.get("options") or []
+        if not options:
+            continue
+        total += _options_price(
+            options,
+            answer_map.get(q_key),
+            source_currency,
+            target_currency,
+            currency_rates,
+            details=_question_option_details(answer_map, q_key),
+        )
+    return total
+
+
+def _questions_duration(questions, answers):
+    total = Decimal("0.00")
+    if not questions:
+        return total
+    answer_map = answers if isinstance(answers, dict) else {}
+    for q_key, q_info in questions.items():
+        if not q_info:
+            continue
+        options = q_info.get("options") or []
+        if not options:
+            continue
+        total += _options_duration(
+            options,
+            answer_map.get(q_key),
+            details=_question_option_details(answer_map, q_key),
+        )
+    return total
+
+
+def _options_price(options, answers, source_currency, target_currency, currency_rates, details=None):
     total = Decimal("0.00")
     if not options:
         return total
+    details = _normalize_detail_map(details)
     answer_set = set(str(a) for a in _normalize_answers(answers))
     for opt in options:
         if isinstance(opt, dict):
-            value_key = str(opt.get("value") or opt.get("label") or "")
+            value_key = _normalize_option_key(opt)
             if value_key and value_key in answer_set:
                 total += _convert_currency(
                     opt.get("price", 0),
@@ -107,18 +174,44 @@ def _options_price(options, answers, source_currency, target_currency, currency_
                     target_currency,
                     currency_rates,
                 )
+                option_details = _normalize_detail_map(details.get(value_key))
+                unit_price = opt.get("unit_price", "")
+                if unit_price not in ("", None):
+                    total += _convert_currency(
+                        _coerce_decimal(unit_price) * _coerce_positive_int(option_details.get("quantity"), default=1),
+                        source_currency,
+                        target_currency,
+                        currency_rates,
+                    )
+                followup_questions = opt.get("followup_questions") or {}
+                if followup_questions:
+                    total += _questions_price(
+                        followup_questions,
+                        option_details.get("answers") or {},
+                        source_currency,
+                        target_currency,
+                        currency_rates,
+                    )
     return total
 
-def _options_duration(options, answers):
+def _options_duration(options, answers, details=None):
     total = Decimal("0.00")
     if not options:
         return total
+    details = _normalize_detail_map(details)
     answer_set = set(str(a) for a in _normalize_answers(answers))
     for opt in options:
         if isinstance(opt, dict):
-            value_key = str(opt.get("value") or opt.get("label") or "")
+            value_key = _normalize_option_key(opt)
             if value_key and value_key in answer_set:
                 total += _coerce_decimal(opt.get("duration", 0))
+                followup_questions = opt.get("followup_questions") or {}
+                if followup_questions:
+                    option_details = _normalize_detail_map(details.get(value_key))
+                    total += _questions_duration(
+                        followup_questions,
+                        option_details.get("answers") or {},
+                    )
     return total
 
 
@@ -157,6 +250,46 @@ def calculate_booking_price(booking):
         price = _convert_currency(service.price, source_currency, target_currency, currency_rates)
         answers = (booking.service_answers or {}).get(service.slug, {})
         service_duration = Decimal("0.00")
+        service_mode = (getattr(booking, "service_modes", {}) or {}).get(service.slug) or "all_area"
+
+        if service.slug == "standard-cleaning" and service_mode == "by_room":
+            room_counts = answers.get("__room_counts") or {}
+            room_ids = []
+            for room_id, qty in room_counts.items():
+                try:
+                    if int(qty or 0) > 0:
+                        room_ids.append(int(room_id))
+                except (TypeError, ValueError):
+                    continue
+
+            room_options = {
+                room.id: room
+                for room in ServiceRoomOption.objects.filter(
+                    service=service,
+                    is_active=True,
+                    id__in=room_ids,
+                )
+            }
+            price = Decimal("0.00")
+            for room_id, qty in room_counts.items():
+                try:
+                    quantity = int(qty or 0)
+                    option_id = int(room_id)
+                except (TypeError, ValueError):
+                    continue
+                if quantity <= 0:
+                    continue
+                room = room_options.get(option_id)
+                if room is None:
+                    continue
+                room_currency = getattr(room, "price_currency", source_currency)
+                price += _convert_currency(room.unit_price, room_currency, target_currency, currency_rates) * quantity
+
+            if price > 0:
+                service_duration = default_service_duration
+                duration_minutes += service_duration
+            services_total += price
+            continue
 
         questions = service.questions or {}
         for q_key, q_info in questions.items():
@@ -165,8 +298,9 @@ def calculate_booking_price(booking):
             options = q_info.get("options") or []
             if not options:
                 continue
-            price += _options_price(options, answers.get(q_key), source_currency, target_currency, currency_rates)
-            service_duration += _options_duration(options, answers.get(q_key))
+            details = _question_option_details(answers, q_key)
+            price += _options_price(options, answers.get(q_key), source_currency, target_currency, currency_rates, details=details)
+            service_duration += _options_duration(options, answers.get(q_key), details=details)
 
         if service_duration <= 0:
             service_duration = default_service_duration
@@ -198,8 +332,9 @@ def calculate_booking_price(booking):
                 options = q_info.get("options") or []
                 if not options:
                     continue
-                price += _options_price(options, fields.get(q_key), source_currency, target_currency, currency_rates)
-                duration_minutes += _options_duration(options, fields.get(q_key))
+                details = _question_option_details(fields, q_key)
+                price += _options_price(options, fields.get(q_key), source_currency, target_currency, currency_rates, details=details)
+                duration_minutes += _options_duration(options, fields.get(q_key), details=details)
 
             if addon.price_per_unit > 0:
                 for _, val in fields.items():

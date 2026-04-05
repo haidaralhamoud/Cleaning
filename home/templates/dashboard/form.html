@@ -151,10 +151,47 @@
                   {% endfor %}
                 </div>
               {% endif %}
+            {% elif field.name == "recommended" and item.slug == "private-services" or field.name == "recommended" and item.slug == "business-services" %}
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Recommended</label>
+                <div class="recommended-builder" data-recommended-builder>
+                  <label class="form-check mb-2">
+                    <input type="checkbox" class="form-check-input" data-recommended-badge-toggle>
+                    <span class="form-check-label">Show recommended badge</span>
+                  </label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    data-recommended-note
+                    placeholder="Optional note, for example: Recommended: Daily or 3–5 times a week."
+                  >
+                  <div class="form-text">
+                    Turn on the badge if you want the green Recommended label. The note below is optional and appears as plain text.
+                  </div>
+                  <div class="d-none">{{ field }}</div>
+                </div>
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
             {% else %}
               <div class="col-md-6 mb-3">
                 <label class="form-label">{{ field.label }}</label>
                 {{ field }}
+                {% if field.field.widget.input_type == "file" and field.name == "icon" or field.field.widget.input_type == "file" and field.name == "image" or field.field.widget.input_type == "file" and field.name == "hero_image" or field.field.widget.input_type == "file" and field.name == "photo" or field.field.widget.input_type == "file" and field.name == "profile_photo" %}
+                  {% with current_file=object|attr:field.name %}
+                    {% if current_file %}
+                      <div class="mt-2">
+                        <div class="small text-muted mb-1">Current image preview</div>
+                        <img
+                          src="{{ current_file.url }}"
+                          alt="{{ field.label }}"
+                          style="width: 140px; height: 100px; object-fit: cover; border-radius: 12px; border: 1px solid #dbe5ef;"
+                        >
+                      </div>
+                    {% endif %}
+                  {% endwith %}
+                {% endif %}
                 {% if field.help_text %}
                   <div class="form-text">{{ field.help_text }}</div>
                 {% endif %}
@@ -295,6 +332,60 @@
               </div>
             {% else %}
               <div class="text-muted small">No cards yet for this service.</div>
+            {% endif %}
+          </div>
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Room Options for By-Room View</h6>
+              <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{% url 'home:dashboard_model_create' 'service-room-options' %}?service_id={{ object.pk }}">
+                  <i class="fa-solid fa-plus"></i> Add Room Option
+                </a>
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'home:dashboard_model_list' 'service-room-options' %}?service_id={{ object.pk }}">
+                  View Options
+                </a>
+              </div>
+            </div>
+            {% if room_options_for_service and room_options_for_service|length %}
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Short</th>
+                      <th>Title</th>
+                      <th>Image</th>
+                      <th>Order</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for option in room_options_for_service %}
+                      <tr>
+                        <td>{{ option.short_label }}</td>
+                        <td>{{ option.title }}</td>
+                        <td>{% if option.image %}Yes{% else %}No{% endif %}</td>
+                        <td>{{ option.display_order }}</td>
+                        <td>{% if option.is_active %}Active{% else %}Hidden{% endif %}</td>
+                        <td class="text-end">
+                          <a class="btn btn-sm btn-outline-secondary"
+                             href="{% url 'home:dashboard_model_edit' 'service-room-options' option.pk %}">
+                            Edit
+                          </a>
+                          <a class="btn btn-sm btn-outline-danger"
+                             href="{% url 'home:dashboard_model_delete' 'service-room-options' option.pk %}">
+                            Delete
+                          </a>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-muted small">No room options yet for this service.</div>
             {% endif %}
           </div>
         {% endif %}
@@ -525,7 +616,155 @@
         return `q${i}`;
       };
 
+      const nextFollowupKey = (row) => {
+        let i = 1;
+        while (row.querySelector(`[data-followup-key-input][value="f${i}"]`)) {
+          i += 1;
+        }
+        return `f${i}`;
+      };
+
       const buildOptions = (opts = []) => opts;
+
+      const toggleFollowupOptions = (card) => {
+        const type = card.querySelector("[data-followup-type]").value;
+        const wrap = card.querySelector("[data-followup-options-wrap]");
+        wrap.classList.toggle("d-none", !TYPES_WITH_OPTIONS.has(type));
+      };
+
+      const syncFollowupBuilder = (row) => {
+        const hidden = row.querySelector("[data-q-opt-followups]");
+        const payload = collectFollowupPayload(row);
+        hidden.value = Object.keys(payload).length ? JSON.stringify(payload, null, 2) : "";
+      };
+
+      const collectFollowupPayload = (row) => {
+        const cards = row.querySelectorAll("[data-followup-card]");
+        const payload = {};
+
+        cards.forEach((card) => {
+          const key = card.querySelector("[data-followup-key-input]").value.trim();
+          const label = card.querySelector("[data-followup-label]").value.trim();
+          const type = card.querySelector("[data-followup-type]").value;
+          if (!key || !label) return;
+
+          const question = { label, type };
+          if (TYPES_WITH_OPTIONS.has(type)) {
+            const options = [];
+            card.querySelectorAll("[data-followup-option-row]").forEach((optRow) => {
+              const optLabel = optRow.querySelector("[data-followup-opt-label]").value.trim();
+              const optPriceRaw = optRow.querySelector("[data-followup-opt-price]").value.trim();
+              if (!optLabel) return;
+              const option = { label: optLabel };
+              const parsedPrice = Number(optPriceRaw);
+              option.price = Number.isFinite(parsedPrice) ? parsedPrice : 0;
+              options.push(option);
+            });
+            question.options = options;
+          }
+          payload[key] = question;
+        });
+
+        return payload;
+      };
+
+      const addFollowupOptionRow = (followupCard, data = {}) => {
+        const listEl = followupCard.querySelector("[data-followup-options-list]");
+        const row = document.createElement("div");
+        row.className = "followup-option-row";
+        row.setAttribute("data-followup-option-row", "");
+        row.innerHTML = `
+          <input type="text" class="form-control" placeholder="Option label" data-followup-opt-label value="${escapeHtml(data.label || "")}">
+          <input type="number" step="0.01" min="-9999999" class="form-control" placeholder="Price change" data-followup-opt-price value="${escapeHtml(data.price ?? "")}">
+          <button type="button" class="btn btn-sm btn-outline-danger" data-followup-opt-remove>
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        `;
+        row.querySelector("[data-followup-opt-remove]").addEventListener("click", () => {
+          row.remove();
+          syncFollowupBuilder(followupCard.closest(".qs-option-row"));
+          syncToTextarea();
+        });
+        row.querySelectorAll("input").forEach((el) => {
+          el.addEventListener("input", () => {
+            syncFollowupBuilder(followupCard.closest(".qs-option-row"));
+            syncToTextarea();
+          });
+        });
+        listEl.appendChild(row);
+      };
+
+      const addFollowupQuestionCard = (row, data = {}) => {
+        const listEl = row.querySelector("[data-followup-list]");
+        const card = document.createElement("div");
+        card.className = "border rounded p-3 mt-2";
+        card.setAttribute("data-followup-card", "");
+        const type = data.type || "select";
+        const followupKey = data.key || nextFollowupKey(row);
+        card.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Follow-up question</strong>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-followup-remove>
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <input type="hidden" data-followup-key-input value="${escapeHtml(followupKey)}">
+          <div>
+            <label class="form-label">Type</label>
+            <select class="form-select" data-followup-type>
+              ${TYPE_OPTIONS.map((opt) => `<option value="${opt.value}" ${opt.value === type ? "selected" : ""}>${opt.label}</option>`).join("")}
+            </select>
+          </div>
+          <div class="mt-2">
+            <label class="form-label">Question label</label>
+            <input type="text" class="form-control" data-followup-label value="${escapeHtml(data.label || "")}">
+          </div>
+          <div class="mt-2" data-followup-options-wrap>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label mb-0">Options</label>
+              <button type="button" class="btn btn-sm btn-outline-primary" data-followup-add-option>
+                <i class="fa-solid fa-plus"></i> Add Option
+              </button>
+            </div>
+            <div data-followup-options-list></div>
+          </div>
+        `;
+        listEl.appendChild(card);
+
+        card.querySelector("[data-followup-remove]").addEventListener("click", () => {
+          card.remove();
+          syncFollowupBuilder(row);
+          syncToTextarea();
+        });
+        card.querySelector("[data-followup-add-option]").addEventListener("click", () => {
+          addFollowupOptionRow(card);
+          syncFollowupBuilder(row);
+          syncToTextarea();
+        });
+        card.querySelectorAll("input, select").forEach((el) => {
+          el.addEventListener("input", () => {
+            syncFollowupBuilder(row);
+            syncToTextarea();
+          });
+          el.addEventListener("change", () => {
+            if (el.matches("[data-followup-type]")) {
+              toggleFollowupOptions(card);
+            }
+            syncFollowupBuilder(row);
+            syncToTextarea();
+          });
+        });
+
+        (Array.isArray(data.options) ? data.options : []).forEach((opt) => {
+          addFollowupOptionRow(card, opt || {});
+        });
+
+        if (TYPES_WITH_OPTIONS.has(type) && !card.querySelector("[data-followup-option-row]")) {
+          addFollowupOptionRow(card);
+        }
+
+        toggleFollowupOptions(card);
+      };
 
       const addOptionRow = (card, data = {}) => {
         const listEl = card.querySelector("[data-q-options-list]");
@@ -534,22 +773,65 @@
         const label = data.label || "";
         const price = data.price !== undefined && data.price !== null ? data.price : "";
         const duration = data.duration !== undefined && data.duration !== null ? data.duration : "";
+        const hasFollowupQuestions =
+          data.followup_questions &&
+          typeof data.followup_questions === "object" &&
+          Object.keys(data.followup_questions).length > 0;
+        const followupQuestions = hasFollowupQuestions
+          ? JSON.stringify(data.followup_questions, null, 2)
+          : "";
         row.innerHTML = `
-          <input type="text" class="form-control" placeholder="Option label" data-q-opt-label value="${escapeHtml(label)}">
-          <input type="number" step="0.01" class="form-control" placeholder="Price" data-q-opt-price value="${escapeHtml(price)}">
-          <input type="number" step="1" min="0" class="form-control" placeholder="Duration (min)" data-q-opt-duration value="${escapeHtml(duration)}">
-          <button type="button" class="btn btn-sm btn-outline-danger" data-q-opt-remove>
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <div class="w-100">
+            <input type="text" class="form-control" placeholder="Option label" data-q-opt-label value="${escapeHtml(label)}">
+          </div>
+          <div>
+            <input type="number" step="0.01" min="-9999999" class="form-control" placeholder="Price change (+/-)" data-q-opt-price value="${escapeHtml(price)}">
+          </div>
+            <div>
+              <input type="number" step="1" min="-9999999" class="form-control" placeholder="Duration change (+/- min)" data-q-opt-duration value="${escapeHtml(duration)}">
+            </div>
+            <div class="w-100">
+              <div class="border rounded p-3 bg-light-subtle">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="form-text m-0">Follow-up questions for this option</div>
+                <button type="button" class="btn btn-sm btn-outline-primary" data-followup-add-question>
+                  <i class="fa-solid fa-plus"></i> Add Follow-up Question
+                </button>
+              </div>
+              <div data-followup-list></div>
+              <textarea class="d-none" data-q-opt-followups>${escapeHtml(followupQuestions)}</textarea>
+            </div>
+          </div>
+          <div>
+            <button type="button" class="btn btn-sm btn-outline-danger" data-q-opt-remove>
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         `;
         row.querySelector("[data-q-opt-remove]").addEventListener("click", () => {
           row.remove();
           syncToTextarea();
         });
-        row.querySelectorAll("input").forEach((el) => {
+        row.querySelector("[data-followup-add-question]").addEventListener("click", () => {
+          addFollowupQuestionCard(row);
+          syncFollowupBuilder(row);
+          syncToTextarea();
+        });
+        row.querySelectorAll("input, textarea").forEach((el) => {
           el.addEventListener("input", syncToTextarea);
         });
         listEl.appendChild(row);
+        if (hasFollowupQuestions) {
+          Object.entries(data.followup_questions || {}).forEach(([followupKey, followupValue]) => {
+            addFollowupQuestionCard(row, {
+              key: followupKey,
+              label: followupValue?.label || "",
+              type: followupValue?.type || "select",
+              options: Array.isArray(followupValue?.options) ? followupValue.options : [],
+            });
+          });
+          syncFollowupBuilder(row);
+        }
         updateCurrencyHint();
       };
 
@@ -598,13 +880,13 @@
           </div>
           <div class="mt-2" data-q-options-wrap>
             <div class="qs-options-head">
-              <label class="form-label mb-0">Options + Price + Duration</label>
+              <label class="form-label mb-0">Options + Price + Follow-up</label>
               <button type="button" class="btn btn-sm btn-outline-primary" data-q-add-option>
                 <i class="fa-solid fa-plus"></i> Add Option
               </button>
             </div>
             <div class="qs-options-list" data-q-options-list></div>
-            <div class="form-text">Each option can have its own price change.</div>
+            <div class="form-text">Each option can have its own price and optional follow-up questions. Negative values are allowed.</div>
           </div>
         `;
 
@@ -618,11 +900,12 @@
         });
         buildOptions(options).forEach((opt) => {
           if (opt && typeof opt === "object") {
-            addOptionRow(wrapper, {
-              label: opt.label || "",
-              price: opt.price || "",
-              duration: opt.duration || "",
-            });
+              addOptionRow(wrapper, {
+                label: opt.label || "",
+                price: opt.price || "",
+                duration: opt.duration || "",
+                followup_questions: opt.followup_questions || {},
+              });
           } else {
             addOptionRow(wrapper, { label: opt });
           }
@@ -664,6 +947,11 @@
       };
 
       const syncToTextarea = () => {
+        list.querySelectorAll(".qs-option-row").forEach((row) => {
+          if (row.querySelector("[data-q-opt-followups]")) {
+            syncFollowupBuilder(row);
+          }
+        });
         const data = {};
         list.querySelectorAll(".qs-card").forEach((card) => {
           const key = card.querySelector("[data-q-key]").value.trim();
@@ -672,12 +960,16 @@
           const type = card.querySelector("[data-q-type]").value;
           const entry = { label, type };
           if (TYPES_WITH_OPTIONS.has(type)) {
-            const optionRows = card.querySelectorAll("[data-q-options-list] .qs-option-row");
+            const optionRows = Array.from(card.querySelector("[data-q-options-list]")?.children || []).filter(
+              (row) => row.classList.contains("qs-option-row")
+            );
             const options = [];
             optionRows.forEach((row) => {
+              syncFollowupBuilder(row);
               const optLabel = row.querySelector("[data-q-opt-label]").value.trim();
               const optPriceRaw = row.querySelector("[data-q-opt-price]").value.trim();
               const optDurationRaw = row.querySelector("[data-q-opt-duration]").value.trim();
+              const optFollowupsRaw = row.querySelector("[data-q-opt-followups]").value.trim();
               if (!optLabel) return;
               const opt = { label: optLabel };
               if (optPriceRaw !== "") {
@@ -691,6 +983,19 @@
                 opt.duration = Number.isFinite(parsedDuration) ? parsedDuration : 0;
               } else {
                 opt.duration = 0;
+              }
+              const followupPayload = collectFollowupPayload(row);
+              if (Object.keys(followupPayload).length) {
+                opt.followup_questions = followupPayload;
+              } else if (optFollowupsRaw) {
+                try {
+                  const parsedFollowups = JSON.parse(optFollowupsRaw);
+                  if (parsedFollowups && typeof parsedFollowups === "object") {
+                    opt.followup_questions = parsedFollowups;
+                  }
+                } catch (err) {
+                  // Keep validation responsible for reporting JSON problems.
+                }
               }
               options.push(opt);
             });
@@ -724,6 +1029,22 @@
             return false;
           }
           keys.add(key);
+          for (const row of card.querySelectorAll(".qs-option-row")) {
+            const followupsRaw = row.querySelector("[data-q-opt-followups]")?.value.trim();
+            if (!followupsRaw) continue;
+            try {
+              const parsed = JSON.parse(followupsRaw);
+              if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+                warning.textContent = "Follow-up questions JSON must be an object keyed by question id.";
+                warning.classList.remove("d-none");
+                return false;
+              }
+            } catch (err) {
+              warning.textContent = "One of the option follow-up question JSON blocks is invalid.";
+              warning.classList.remove("d-none");
+              return false;
+            }
+          }
         }
         return true;
       };
@@ -758,6 +1079,11 @@
       updateCurrencyHint();
 
       form.addEventListener("submit", (e) => {
+        list.querySelectorAll(".qs-option-row").forEach((row) => {
+          if (row.querySelector("[data-q-opt-followups]")) {
+            syncFollowupBuilder(row);
+          }
+        });
         syncToTextarea();
         if (!validate()) {
           e.preventDefault();
@@ -766,8 +1092,44 @@
     });
   </script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const ruleType = document.getElementById("id_rule_type");
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[data-recommended-builder]").forEach((builder) => {
+      const hiddenField = builder.querySelector('input[name="recommended"], textarea[name="recommended"]');
+      const badgeToggle = builder.querySelector("[data-recommended-badge-toggle]");
+      const noteField = builder.querySelector("[data-recommended-note]");
+      if (!hiddenField || !badgeToggle || !noteField) return;
+
+      const marker = "__recommended__";
+      const rawValue = (hiddenField.value || "").trim();
+
+      if (rawValue === marker) {
+        badgeToggle.checked = true;
+      } else if (rawValue.startsWith(`${marker}|`)) {
+        badgeToggle.checked = true;
+        noteField.value = rawValue.slice(marker.length + 1).trim();
+      } else if (["1", "true", "yes", "on", "recommended", "badge"].includes(rawValue.toLowerCase())) {
+        badgeToggle.checked = true;
+      } else {
+        noteField.value = rawValue;
+      }
+
+      const syncRecommendedField = () => {
+        const note = (noteField.value || "").trim();
+        if (badgeToggle.checked && note) {
+          hiddenField.value = `${marker}|${note}`;
+        } else if (badgeToggle.checked) {
+          hiddenField.value = marker;
+        } else {
+          hiddenField.value = note;
+        }
+      };
+
+      badgeToggle.addEventListener("change", syncRecommendedField);
+      noteField.addEventListener("input", syncRecommendedField);
+      syncRecommendedField();
+    });
+
+    const ruleType = document.getElementById("id_rule_type");
       if (!ruleType) return;
 
       const weekday = document.getElementById("id_weekday");

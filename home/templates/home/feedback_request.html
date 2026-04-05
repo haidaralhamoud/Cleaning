@@ -32,6 +32,10 @@
             {{ form.customer_name }}
           </div>
           <div class="field-group">
+            <label for="id_email">{% trans "Your Email" %} ({% trans "optional" %})</label>
+            {{ form.email }}
+          </div>
+          <div class="field-group">
             <label for="id_feedback_text">{% trans "Your Feedback" %}</label>
             {{ form.feedback_text }}
           </div>

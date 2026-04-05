@@ -64,8 +64,10 @@
 
       <p>{{ s.description }}</p>
 
-      {% if s.recommended %}
-      <span class="recommended">{{ s.recommended }}</span>
+      {% if s.show_recommended_badge %}
+      <span class="recommended">Recommended</span>
+      {% elif s.recommended_note %}
+      <span class="recommended">{{ s.recommended_note }}</span>
       {% endif %}
     </div>
 

@@ -802,13 +802,37 @@ class Application(models.Model):
 # BUSINESS
 # =====================================================================
 
+class BusinessMainCategory(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True)
+
+    class Meta:
+        ordering = ["title"]
+
+    def __str__(self):
+        return self.title
+
+
 class BusinessService(models.Model):
+    category = models.ForeignKey(
+        BusinessMainCategory,
+        on_delete=models.SET_NULL,
+        related_name="services",
+        blank=True,
+        null=True,
+    )
     title = models.CharField(max_length=200)
     description = models.TextField()
     detail_description = models.TextField(blank=True, null=True)
     recommended = models.CharField(max_length=200, blank=True, null=True)
     image = models.ImageField(upload_to="business_services/")
     hero_image = models.ImageField(upload_to="business_services/hero/", blank=True, null=True)
+    background_image = models.ImageField(
+        upload_to="business_services/background/",
+        blank=True,
+        null=True,
+        verbose_name="Image for background",
+    )
     icon = models.ImageField(upload_to="services/")
     description_service_aviable = models.TextField()
 
@@ -977,6 +1001,12 @@ class PrivateService(models.Model):
     image = models.ImageField(upload_to="private/services/", blank=True, null=True)
     slug = models.SlugField(unique=True, max_length=255)
     hero_image = models.ImageField(upload_to="private/hero/", blank=True, null=True)
+    background_image = models.ImageField(
+        upload_to="private/background/",
+        blank=True,
+        null=True,
+        verbose_name="Image for background",
+    )
     hero_subtitle = models.CharField(max_length=255, blank=True)
     hero_cta_text = models.CharField(max_length=60, blank=True)
     hero_cta_url = models.URLField(blank=True)
@@ -1089,6 +1119,32 @@ class ServiceCard(models.Model):
 
     def items(self):
         return [line.strip() for line in self.body.splitlines() if line.strip()]
+
+
+class ServiceRoomOption(models.Model):
+    service = models.ForeignKey(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="room_options",
+    )
+    short_label = models.CharField(max_length=10, help_text="Short badge like BR, KT, BT")
+    title = models.CharField(max_length=120)
+    subtitle = models.CharField(max_length=150, default="Per room setup", blank=True)
+    image = models.ImageField(upload_to="private/room_options/", blank=True, null=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    price_currency = models.CharField(
+        max_length=3,
+        choices=PRICE_CURRENCY_CHOICES,
+        default="USD",
+    )
+    display_order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["display_order", "title"]
+
+    def __str__(self):
+        return f"{self.service.title} - {self.title}"
 
 
 class FAQCategory(models.Model):
@@ -1310,6 +1366,7 @@ class FeedbackRequest(models.Model):
     ]
 
     customer_name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(blank=True, null=True)
     feedback_text = models.TextField()
     rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, default=5)
     service_type = models.CharField(max_length=100, blank=True)
@@ -1328,7 +1385,13 @@ class BookingFormDocument(models.Model):
 
 
 class PrivateAddon(models.Model):
-    service = models.ForeignKey(PrivateService, on_delete=models.CASCADE, related_name="addons_list")
+    service = models.ForeignKey(
+        PrivateService,
+        on_delete=models.CASCADE,
+        related_name="addons_list",
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255)
     icon = models.ImageField(upload_to="private/addons/", blank=True, null=True)
@@ -1364,9 +1427,6 @@ class PrivateAddon(models.Model):
             def opt_display(opt):
                 if isinstance(opt, dict):
                     base = opt.get("label", "")
-                    duration = opt.get("duration", 0)
-                    if duration:
-                        return f"{base} ({duration} min)"
                     return base
                 return str(opt)
 

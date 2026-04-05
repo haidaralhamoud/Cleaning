@@ -8,7 +8,13 @@ import re
 import stripe
 
 from accounts.models import DiscountCode
-from .pricing_utils import calculate_booking_price
+from .pricing_utils import (
+    calculate_booking_price,
+    _build_currency_rates,
+    _convert_currency,
+    _question_option_details,
+    _questions_price,
+)
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import (
     ContactForm, ApplicationForm, BusinessCompanyInfoForm, OfficeSetupForm , ZipCheckForm, NotAvailableZipForm,CallRequestForm, FeedbackRequestForm
@@ -19,10 +25,11 @@ from django.db import IntegrityError, transaction
 from django.urls import reverse
 
 from .models import (
-    BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
+    BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessMainCategory, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
     BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
     Contact, FAQCategory, FAQItem, StripeWebhookEvent, ServiceCard, ServicePricing, ServiceEstimate,
+    ServiceRoomOption,
     ScheduleRule,
 )
 from accounts.models import (
@@ -126,6 +133,24 @@ def _get_private_booking_customer_snapshot(customer):
     }
 
 
+def _split_recommended_content(value):
+    raw = (value or "").strip()
+    if not raw:
+        return False, ""
+
+    marker = "__recommended__"
+    if raw == marker:
+        return True, ""
+    if raw.startswith(f"{marker}|"):
+        return True, raw[len(marker) + 1 :].strip()
+
+    badge_tokens = {"1", "true", "yes", "on", "recommended", "badge"}
+    normalized = raw.lower()
+    if normalized in badge_tokens:
+        return True, ""
+    return False, raw
+
+
 def _get_user_points_balance(user):
     if not user or not user.is_authenticated:
         return 0
@@ -202,6 +227,7 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.main_category = draft.get("main_category")
     booking.selected_services = draft.get("selected_services") or []
     booking.service_answers = draft.get("service_answers") or {}
+    booking.service_modes = draft.get("service_modes") or {}
     booking.addons_selected = draft.get("addons_selected") or {}
     booking.service_schedules = draft.get("service_schedules") or {}
     booking.schedule_mode = draft.get("schedule_mode") or "same"
@@ -227,6 +253,71 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.selected_reward_id = draft.get("selected_reward_id")
     booking.use_reward = _is_truthy(draft.get("use_reward"), default=False)
     return booking
+
+
+def _service_question_config_payload(services):
+    return {
+        service.slug: (service.questions or {})
+        for service in services
+    }
+
+
+def _parse_json_field(value, default):
+    if not value:
+        return default
+    try:
+        return json.loads(value)
+    except Exception:
+        return default
+
+
+def _normalize_option_key(option):
+    if not isinstance(option, dict):
+        return str(option or "")
+    return str(option.get("value") or option.get("label") or "")
+
+
+def _validate_nested_question_answers(question_defs, answers):
+    if not question_defs:
+        return True
+    answer_map = answers if isinstance(answers, dict) else {}
+    for nested_key, nested_info in question_defs.items():
+        q_type = (nested_info or {}).get("type")
+        nested_answer = answer_map.get(nested_key)
+        if q_type in ("multiselect", "checkbox"):
+            if not nested_answer:
+                return False
+        else:
+            if nested_answer in (None, "", []):
+                return False
+    return True
+
+
+def _question_details_are_valid(question_info, answer_value, detail_map):
+    options = (question_info or {}).get("options") or []
+    answer_list = answer_value if isinstance(answer_value, list) else [answer_value]
+    selected_values = {str(item) for item in answer_list if item not in (None, "", [])}
+    details = detail_map if isinstance(detail_map, dict) else {}
+
+    for option in options:
+        if not isinstance(option, dict):
+            continue
+        option_key = _normalize_option_key(option)
+        if not option_key or option_key not in selected_values:
+            continue
+        option_details = details.get(option_key) or {}
+        if option.get("unit_price", "") not in ("", None):
+            try:
+                if int(option_details.get("quantity") or 0) <= 0:
+                    return False
+            except (TypeError, ValueError):
+                return False
+        if (option.get("followup_questions") or {}) and not _validate_nested_question_answers(
+            option.get("followup_questions") or {},
+            option_details.get("answers") or {},
+        ):
+            return False
+    return True
 
 
 def _stripe_amount_from_decimal(amount):
@@ -1631,6 +1722,20 @@ class PrivateBookingDashboardForm(forms.ModelForm):
         return provider
 
 
+class PrivateMainCategoryDashboardForm(forms.ModelForm):
+    class Meta:
+        model = PrivateMainCategory
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "icon" in self.fields:
+            self.fields["icon"].label = "Category Image"
+            self.fields["icon"].help_text = (
+                "Upload the image that should appear on the category card in the private booking services page."
+            )
+
+
 EMOJI_OPTIONS = [
     "🧹", "🧽", "🧼", "🧴", "🧺", "🧻", "🧤", "🪣", "🪟", "🧯",
     "🧪", "🧫", "🧷", "🪤", "🧰", "🪛", "🔧", "🧲", "🚽", "🚿",
@@ -1654,6 +1759,18 @@ class BusinessAddonDashboardForm(forms.ModelForm):
         fields = "__all__"
 
 
+class PrivateAddonDashboardForm(forms.ModelForm):
+    class Meta:
+        model = PrivateAddon
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "service" in self.fields:
+            self.fields["service"].required = False
+            self.fields["service"].empty_label = "All services"
+
+
 class ServicePricingDashboardForm(forms.ModelForm):
     class Meta:
         model = ServicePricing
@@ -1674,22 +1791,30 @@ class ServicePricingDashboardForm(forms.ModelForm):
 
 
 class ServiceEstimateDashboardForm(forms.ModelForm):
+    property_label = forms.CharField(required=False, label="Question 1 label")
+    bedrooms_label = forms.CharField(required=False, label="Question 2 label")
     property_options_text = forms.CharField(
         required=False,
-        label="Property Size options",
+        label="Question 1 options",
         widget=forms.Textarea(attrs={"rows": 6}),
         help_text="One option per line in this format: Label | Price. Example: 0-50 m² | 0",
     )
     bedrooms_options_text = forms.CharField(
         required=False,
-        label="Bedrooms options",
+        label="Question 2 options",
         widget=forms.Textarea(attrs={"rows": 6}),
         help_text="One option per line in this format: Label | Price. Example: 1 bedroom | 150",
     )
 
     class Meta:
         model = ServiceEstimate
-        fields = ("service", "property_options_text", "bedrooms_options_text")
+        fields = (
+            "service",
+            "property_label",
+            "bedrooms_label",
+            "property_options_text",
+            "bedrooms_options_text",
+        )
 
     @staticmethod
     def _parse_options(raw_value, field_name):
@@ -1756,9 +1881,10 @@ class ServiceEstimateDashboardForm(forms.ModelForm):
         instance = super().save(commit=False)
         instance.title = "Get a Quick Estimate"
         instance.property_label = "Property Size (m²)"
-        instance.bedrooms_label = "Number of Bedrooms"
+        instance.bedrooms_label = (self.cleaned_data.get("bedrooms_label") or "Number of Bedrooms").strip()
         instance.cta_text = "Calculate Estimate"
         instance.note = "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition."
+        instance.property_label = (self.cleaned_data.get("property_label") or instance.property_label or "Property Size (m²)").strip()
         instance.property_options = self.cleaned_data.get("property_options", [])
         instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
         if commit:
@@ -2029,6 +2155,7 @@ def dashboard_model_list(request, model):
         "private-services": ["title", "display_order", "category", "price", "recommended", "image"],
         "private-addons": ["title", "service", "price", "price_per_unit", "icon"],
         "service-cards": ["service", "title", "order"],
+        "service-room-options": ["service", "short_label", "title", "image", "unit_price", "price_currency", "display_order", "is_active"],
         "service-pricing": ["service", "price_value", "price_note"],
         "service-estimates": ["service", "property_options", "bedrooms_options"],
     }
@@ -2036,7 +2163,7 @@ def dashboard_model_list(request, model):
 
     service_obj = None
     if service_id:
-        if item.slug in {"service-cards", "service-pricing", "service-estimates"}:
+        if item.slug in {"service-cards", "service-room-options", "service-pricing", "service-estimates"}:
             service_obj = PrivateService.objects.filter(id=service_id).first()
         if item.slug == "business-service-cards":
             service_obj = BusinessService.objects.filter(id=service_id).first()
@@ -2063,6 +2190,8 @@ def dashboard_model_create(request, model):
 
     if item.model == BusinessBundle:
         Form = BusinessBundleDashboardForm
+    elif item.model == PrivateMainCategory:
+        Form = PrivateMainCategoryDashboardForm
     elif item.model == BusinessBooking:
         Form = modelform_factory(
             item.model,
@@ -2077,6 +2206,8 @@ def dashboard_model_create(request, model):
         )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
+    elif item.model == PrivateAddon:
+        Form = PrivateAddonDashboardForm
     elif item.model == ServicePricing:
         Form = ServicePricingDashboardForm
     elif item.model == ServiceEstimate:
@@ -2112,6 +2243,10 @@ def dashboard_model_create(request, model):
             if service_id:
                 initial["service"] = service_id
         if item.model == ServiceCard:
+            service_id = request.GET.get("service_id")
+            if service_id:
+                initial["service"] = service_id
+        if item.model == ServiceRoomOption:
             service_id = request.GET.get("service_id")
             if service_id:
                 initial["service"] = service_id
@@ -2156,6 +2291,8 @@ def dashboard_model_edit(request, model, pk):
         prev_status = getattr(obj, "status", None)
     if item.model == BusinessBundle:
         Form = BusinessBundleDashboardForm
+    elif item.model == PrivateMainCategory:
+        Form = PrivateMainCategoryDashboardForm
     elif item.model == BusinessBooking:
         Form = modelform_factory(
             item.model,
@@ -2170,6 +2307,8 @@ def dashboard_model_edit(request, model, pk):
         )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
+    elif item.model == PrivateAddon:
+        Form = PrivateAddonDashboardForm
     elif item.model == ServicePricing:
         Form = ServicePricingDashboardForm
     elif item.model == ServiceEstimate:
@@ -2209,11 +2348,13 @@ def dashboard_model_edit(request, model, pk):
 
     addon_form_preview = None
     addons_for_service = None
+    room_options_for_service = None
     business_cards_for_service = None
     if item.model.__name__ == "PrivateAddon" and obj.form_html:
         addon_form_preview = mark_safe(obj.form_html)
     if item.model == PrivateService:
         addons_for_service = PrivateAddon.objects.filter(service=obj).order_by("title")
+        room_options_for_service = ServiceRoomOption.objects.filter(service=obj).order_by("display_order", "title")
     if item.model == BusinessService:
         business_cards_for_service = BusinessServiceCard.objects.filter(service=obj).order_by("order", "title")
 
@@ -2233,6 +2374,7 @@ def dashboard_model_edit(request, model, pk):
         "json_readonly": json_readonly,
         "addon_form_preview": addon_form_preview,
         "addons_for_service": addons_for_service,
+        "room_options_for_service": room_options_for_service,
         "business_cards_for_service": business_cards_for_service,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
@@ -2251,6 +2393,8 @@ def dashboard_model_view(request, model, pk):
     obj = get_object_or_404(item.model, pk=pk)
     if item.model == BusinessBundle:
         Form = BusinessBundleDashboardForm
+    elif item.model == PrivateMainCategory:
+        Form = PrivateMainCategoryDashboardForm
     elif item.model == BusinessBooking:
         Form = modelform_factory(
             item.model,
@@ -2265,6 +2409,8 @@ def dashboard_model_view(request, model, pk):
         )
     elif item.model == BusinessAddon:
         Form = BusinessAddonDashboardForm
+    elif item.model == PrivateAddon:
+        Form = PrivateAddonDashboardForm
     elif item.model == DateSurcharge:
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
@@ -2429,6 +2575,8 @@ def apply_page(request, job_id=None):
 # ================================
 def all_services_business(request):
     services = BusinessService.objects.all()
+    for service in services:
+        service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
     urgent_selected = request.GET.get("urgent") == "1"
     return render(request, "home/AllServicesBusiness.html", {
         "services": services,
@@ -2438,11 +2586,38 @@ def all_services_business(request):
 
 def business_service_detail(request, service_id):
     service = get_object_or_404(BusinessService.objects.prefetch_related("cards"), id=service_id)
+    service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
     urgent_selected = request.GET.get("urgent") == "1"
+    eco = {
+        "title": "Our Eco-Friendly Promise",
+        "subtitle": (
+            "We are committed to protecting our planet while providing a spotless home for you. "
+            "Our cleaning methods are kind to the environment as they are tough on dirt."
+        ),
+        "points": [
+            {
+                "icon": "eco-products",
+                "title": "Environmentally Safe Products",
+                "body": (
+                    "We use high-quality, plant-based cleaning solutions that are biodegradable "
+                    "and free from harsh chemicals. Safe for your family, pets, and the earth."
+                ),
+            },
+            {
+                "icon": "sustainable-methods",
+                "title": "Sustainable Methods",
+                "body": (
+                    "We use high-quality, plant-based cleaning solutions that are biodegradable "
+                    "and free from harsh chemicals. Safe for your family, pets, and the earth."
+                ),
+            },
+        ],
+    }
     return render(request, "home/business_service_detail.html", {
         "service": service,
         "cards": list(service.cards.all()),
         "urgent_selected": urgent_selected,
+        "eco": eco,
     })
 
 
@@ -2972,6 +3147,8 @@ def business_thank_you(request, booking_id):
 # ================================================================================================================
 def all_services(request):
     services = PrivateService.objects.all().order_by("display_order", "title", "id")
+    for service in services:
+        service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
     cart = request.session.get("private_cart", [])
     cart_lookup = {
         service.slug: service
@@ -3161,8 +3338,8 @@ def private_booking_checkout(request):
         and completed_bookings == 0
     )
 
-    display_address = None
-    if customer:
+    display_address = draft.get("address")
+    if not display_address and customer:
         display_address = customer.display_address()
     if not display_address:
         display_address = "Not provided"
@@ -3240,6 +3417,63 @@ def private_booking_checkout(request):
     reward_applied = bool(payment_summary.get("reward_applied"))
     points_balance = int(payment_summary.get("points_balance", 0) or 0)
 
+    addons_breakdown = []
+    selected_addons = draft.get("addons_selected") or {}
+    if selected_addons:
+        currency_rates = _build_currency_rates(stripe_currency)
+        addon_slugs = [
+            addon_slug
+            for service_addons in selected_addons.values()
+            if isinstance(service_addons, dict)
+            for addon_slug in service_addons.keys()
+        ]
+        addons_by_slug = {
+            addon.slug: addon
+            for addon in PrivateAddon.objects.filter(slug__in=addon_slugs)
+        }
+
+        for _, service_addons in selected_addons.items():
+            if not isinstance(service_addons, dict):
+                continue
+            for addon_slug, fields in service_addons.items():
+                addon = addons_by_slug.get(addon_slug)
+                if addon is None:
+                    continue
+
+                source_currency = getattr(addon, "price_currency", stripe_currency)
+                addon_total = _convert_currency(addon.price, source_currency, stripe_currency, currency_rates)
+
+                questions = addon.questions or {}
+                for q_key, q_info in questions.items():
+                    if not q_info:
+                        continue
+                    options = q_info.get("options") or []
+                    if not options:
+                        continue
+                    details = _question_option_details(fields, q_key)
+                    addon_total += _questions_price(
+                        questions={q_key: q_info},
+                        answers=fields,
+                        source_currency=source_currency,
+                        target_currency=stripe_currency,
+                        currency_rates=currency_rates,
+                    )
+
+                if addon.price_per_unit > 0 and isinstance(fields, dict):
+                    for _, val in fields.items():
+                        if str(val).isdigit():
+                            addon_total += _convert_currency(
+                                addon.price_per_unit * int(val),
+                                source_currency,
+                                stripe_currency,
+                                currency_rates,
+                            )
+
+                addons_breakdown.append({
+                    "title": addon.title,
+                    "amount": addon_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+                })
+
     draft["payment_summary"] = payment_summary_data
     _save_private_draft_data(request, draft)
 
@@ -3248,6 +3482,12 @@ def private_booking_checkout(request):
     # ==========================
     if request.method == "POST":
         form_type = request.POST.get("form_type")
+
+        if form_type == "update_address":
+            draft["address"] = (request.POST.get("address") or "").strip()
+            _save_private_draft_data(request, draft)
+            messages.success(request, "Address updated.")
+            return redirect("home:private_booking_checkout")
 
         # 🎟 APPLY DISCOUNT (Preview only)
         if form_type == "discount":
@@ -3290,6 +3530,7 @@ def private_booking_checkout(request):
             "amount_cents": payment_summary_data["amount_cents"],
             "currency": payment_summary_data["currency"],
             "selected_services": selected_slugs,
+            "addons_selected": draft.get("addons_selected") or {},
             "discount_code_id": draft.get("discount_code_id"),
             "selected_reward_id": draft.get("selected_reward_id"),
             "use_reward": _is_truthy(draft.get("use_reward"), default=False),
@@ -3454,6 +3695,7 @@ def private_booking_checkout(request):
         "pricing": pricing,
         "services_total": services_total,
         "addons_total": addons_total,
+        "addons_breakdown": addons_breakdown,
         "schedule_extra": schedule_extra,
         "date_surcharge": date_surcharge,
         "subtotal": subtotal,
@@ -3849,26 +4091,66 @@ def private_booking_start(request, service_slug):
 
 def private_booking_services(request):
     draft = _get_private_draft_data(request)
+    service_modes = draft.get("service_modes") or {}
 
     selected_slugs = draft.get("selected_services") or []
     if not selected_slugs:
         return redirect("home:all_services_private")
 
-    services = (
+    services = list(
         PrivateService.objects
         .filter(slug__in=selected_slugs)
         .select_related("category")
         .prefetch_related("addons_list")
     )
+    global_addons = list(
+        PrivateAddon.objects
+        .filter(service__isnull=True)
+        .order_by("title")
+    )
+    grouped_categories = []
+    categories_map = {}
+    for service in services:
+        service.booking_addons = list(service.addons_list.all()) + global_addons
+        service.by_room_options = list(
+            ServiceRoomOption.objects.filter(service=service, is_active=True).order_by("display_order", "title")
+        )
+        category = service.category
+        bucket = categories_map.get(category.slug)
+        if bucket is None:
+            bucket = {
+                "slug": category.slug,
+                "title": category.title,
+                "icon_url": category.icon.url if category.icon else "",
+                "services": [],
+            }
+            categories_map[category.slug] = bucket
+            grouped_categories.append(bucket)
+        bucket["services"].append(service)
 
     if request.method == "POST":
         draft["use_rot"] = _is_truthy(request.POST.get("use_rot"), default=True)
+        service_modes = draft.get("service_modes") or {}
         # 1) جمع إجابات الأسئلة
         service_answers = draft.get("service_answers") or {}
 
         for service in services:
             s_key = service.slug
             service_answers.setdefault(s_key, {})
+            current_mode = request.POST.get(f"booking_mode_{s_key}", service_modes.get(s_key) or "all_area")
+            service_modes[s_key] = current_mode
+
+            if service.slug == "standard-cleaning" and current_mode == "by_room":
+                room_counts = {}
+                for room in service.by_room_options:
+                    field_name = f"{s_key}__room__{room.id}"
+                    try:
+                        qty = int(request.POST.get(field_name, 0) or 0)
+                    except (TypeError, ValueError):
+                        qty = 0
+                    room_counts[str(room.id)] = max(0, qty)
+                service_answers[s_key]["__room_counts"] = room_counts
+                continue
 
             if service.questions:
                 for q_key, q_info in service.questions.items():
@@ -3878,21 +4160,39 @@ def private_booking_services(request):
                         service_answers[s_key][q_key] = request.POST.getlist(field_name)
                     else:
                         service_answers[s_key][q_key] = request.POST.get(field_name, "")
+                    details_field = f"{field_name}__details"
+                    details_value = _parse_json_field(request.POST.get(details_field), {})
+                    if details_value:
+                        service_answers[s_key][f"{q_key}__details"] = details_value
+                    else:
+                        service_answers[s_key].pop(f"{q_key}__details", None)
 
         draft["service_answers"] = service_answers
+        draft["service_modes"] = service_modes
 
-        # 2) الـ Add-ons
         addons_json = request.POST.get("addons_selected") or "{}"
-
         try:
             raw_addons = json.loads(addons_json)
-        except:
+        except Exception:
             raw_addons = {}
 
+        # 2) الـ Add-ons
         # Server-side validation: all service questions required
         missing = []
         for service in services:
             s_key = service.slug
+            current_mode = service_modes.get(s_key) or "all_area"
+            if service.slug == "standard-cleaning" and current_mode == "by_room":
+                room_counts = service_answers.get(s_key, {}).get("__room_counts") or {}
+                total_rooms = 0
+                for value in room_counts.values():
+                    try:
+                        total_rooms += int(value or 0)
+                    except (TypeError, ValueError):
+                        continue
+                if total_rooms <= 0:
+                    missing.append(f"{s_key}__room_counts")
+                continue
             if not service.questions:
                 continue
             for q_key, q_info in service.questions.items():
@@ -3904,6 +4204,12 @@ def private_booking_services(request):
                 else:
                     if not answer:
                         missing.append(f"{s_key}__{q_key}")
+                if answer and not _question_details_are_valid(
+                    q_info,
+                    answer,
+                    service_answers.get(s_key, {}).get(f"{q_key}__details") or {},
+                ):
+                    missing.append(f"{s_key}__{q_key}__details")
 
         if missing:
             messages.error(request, "Please answer all required service questions before continuing.")
@@ -3918,11 +4224,15 @@ def private_booking_services(request):
             return render(request, "home/YourServicesBooking.html", {
                 "booking": temp_booking,
                 "services": services,
-                "saved_addons": json.dumps(raw_addons or {}),
+                "grouped_categories": grouped_categories,
+                "service_question_config": _service_question_config_payload(services),
+                "service_modes": service_modes,
+                "service_modes_json": json.dumps(service_modes),
+                "service_answers_json": json.dumps(draft.get("service_answers") or {}),
+                "saved_addons": json.dumps(raw_addons or draft.get("addons_selected") or {}),
                 "pricing": pricing,
                 "reward_context": reward_context,
             })
-
 
         final_addons = {}
 
@@ -4001,6 +4311,11 @@ def private_booking_services(request):
     return render(request, "home/YourServicesBooking.html", {
         "booking": temp_booking,
         "services": services,
+        "grouped_categories": grouped_categories,
+        "service_question_config": _service_question_config_payload(services),
+        "service_modes": service_modes,
+        "service_modes_json": json.dumps(service_modes),
+        "service_answers_json": json.dumps(draft.get("service_answers") or {}),
         "saved_addons": json.dumps(draft.get("addons_selected") or {}),
         "pricing": pricing,
         "reward_context": reward_context,
@@ -4094,6 +4409,12 @@ def private_booking_schedule(request):
     min_booking_date = timezone.localdate()
 
     def _render_schedule_page(temp_booking, pricing):
+        reward_context = _get_private_reward_context(
+            request.user,
+            selected_reward_id=draft.get("selected_reward_id"),
+            use_reward=_is_truthy(draft.get("use_reward"), default=False),
+            amount=pricing.get("final", 0),
+        )
         initial_schedule_state = {
             "mode": temp_booking.schedule_mode or ("same" if len(services) <= 1 else ""),
             "appointment_date": temp_booking.appointment_date.isoformat() if hasattr(temp_booking.appointment_date, "isoformat") else (temp_booking.appointment_date or ""),
@@ -4110,6 +4431,7 @@ def private_booking_schedule(request):
             "date_rules": date_rules_json,
             "schedule_rules": schedule_rules_json,
             "pricing": pricing,
+            "reward_context": reward_context,
             "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
             "min_booking_date": min_booking_date.isoformat(),
         })
@@ -4564,6 +4886,55 @@ def private_update_answer_api(request):
     if not field or not service_slug:
         return JsonResponse({"error": "Missing data"}, status=400)
 
+    def _summary_payload_from_draft(current_draft, pricing):
+        reward_context = _get_private_reward_context(
+            request.user,
+            selected_reward_id=current_draft.get("selected_reward_id"),
+            use_reward=_is_truthy(current_draft.get("use_reward"), default=False),
+            amount=pricing.get("final", 0),
+        )
+        reward_discount = reward_context["reward_discount"]
+        final_total = max(Decimal("0.00"), Decimal(str(pricing.get("final", 0) or 0)) - reward_discount)
+        return {
+            "success": True,
+            "services_total": pricing.get("services_total", 0),
+            "addons_total": pricing.get("addons_total", 0),
+            "subtotal": pricing.get("subtotal", 0),
+            "schedule_extra": pricing.get("schedule_extra", 0),
+            "rot": pricing.get("rot", 0),
+            "rot_percent": pricing.get("rot_percent", 0),
+            "use_rot": pricing.get("use_rot", True),
+            "use_reward": reward_context["use_reward"],
+            "reward_available": reward_context["has_rewards"],
+            "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
+            "reward_discount": float(reward_discount),
+            "points_balance": reward_context["points_balance"],
+            "vat_included": pricing.get("vat_included", True),
+            "final": float(final_total),
+            "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+            "duration_hours": pricing.get("duration_hours", 0),
+            "duration_seconds": pricing.get("duration_seconds", 0),
+        }
+
+    if field == "__mode":
+        service_modes = draft.get("service_modes") or {}
+        service_modes[service_slug] = value or "all_area"
+        draft["service_modes"] = service_modes
+        temp_booking = _build_private_booking_from_draft(draft, request.user)
+        pricing = calculate_booking_price(temp_booking)
+        duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
+        hours = duration_seconds // 3600
+        minutes = (duration_seconds % 3600) // 60
+        seconds = duration_seconds % 60
+        draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
+        draft["pricing_details"] = pricing
+        draft["subtotal"] = pricing.get("subtotal", 0) or 0
+        draft["total_price"] = pricing.get("final", 0) or 0
+        draft["rot_discount"] = pricing.get("rot", 0) or 0
+        _save_private_draft_data(request, draft)
+        return JsonResponse(_summary_payload_from_draft(draft, pricing))
+
     parsed_value = value
     if value:
         trimmed = value.strip()
@@ -4587,9 +4958,12 @@ def private_update_answer_api(request):
     draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
     draft["pricing_details"] = pricing
+    draft["subtotal"] = pricing.get("subtotal", 0) or 0
+    draft["total_price"] = pricing.get("final", 0) or 0
+    draft["rot_discount"] = pricing.get("rot", 0) or 0
     _save_private_draft_data(request, draft)
 
-    return JsonResponse({"success": True})
+    return JsonResponse(_summary_payload_from_draft(draft, pricing))
 
 
 

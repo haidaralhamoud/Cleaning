@@ -1,6 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
-  <path d="M22 14L16 8" stroke="#71b247" stroke-width="4" stroke-linecap="round"/>
-  <path d="M42 14L48 8" stroke="#71b247" stroke-width="4" stroke-linecap="round"/>
-  <path d="M46 46c-8 4-18 2-25-5-7-7-9-17-5-25l8 8c-2 3-1 8 3 12 4 4 9 5 12 3l7 7z" stroke="#00a3c8" stroke-width="3" fill="none"/>
-  <path d="M39 39l7 7" stroke="#00a3c8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M23.74 17.79C24.76 16.77 26.41 16.77 27.43 17.79L31.61 21.97C32.55 22.91 32.62 24.38 31.77 25.4L29.4 28.27C28.97 28.8 28.91 29.55 29.27 30.14C31.88 34.41 35.59 38.12 39.86 40.73C40.45 41.09 41.2 41.03 41.73 40.6L44.6 38.23C45.62 37.38 47.09 37.45 48.03 38.39L52.21 42.57C53.23 43.59 53.23 45.24 52.21 46.26L49.78 48.69C47.96 50.51 45.25 51.29 42.74 50.72C34.49 48.83 27.17 41.51 25.28 33.26C24.71 30.75 25.49 28.04 27.31 26.22L29.02 24.51" stroke="#0AA4CB" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M39.5 18C43.46 18.77 46.65 21.96 47.42 25.92" stroke="#71B247" stroke-width="3" stroke-linecap="round"/>
+  <path d="M38 25C40.03 25.47 41.53 26.97 42 29" stroke="#71B247" stroke-width="3" stroke-linecap="round"/>
 </svg>

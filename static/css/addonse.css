@@ -91,15 +91,21 @@ body {
   text-align: center;
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  min-height: 240px;
 }
 .addon-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
+.addon-card.is-selected {
+  border: 2px solid #039FC8;
+  box-shadow: 0 10px 24px rgba(3,159,200,0.22);
+}
 .addon-card img {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 10px;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  margin-bottom: 14px;
 }
 .addon-card p {
   font-size: 18px;

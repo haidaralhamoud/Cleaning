@@ -91,6 +91,15 @@
               <a href="http://127.0.0.1:8000/business/services/">{% trans "Business Booking" %}</a>
             </div>
           </div>
+          <a
+            class="btn btn-electric"
+            href="https://rwmel.se/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span class="btn-electric__icon" aria-hidden="true">⚡</span>
+            {% trans "Electrical Services" %}
+          </a>
           {% if user.is_authenticated %}
             {% if user.is_superuser %}
               <a class="btn btn-secondary" href="{% url 'home:dashboard_home' %}">{% trans "Admin Dashboard" %}</a>

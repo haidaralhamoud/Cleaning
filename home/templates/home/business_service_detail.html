@@ -18,15 +18,20 @@
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <h1>{{ service.title }}</h1>
-        {% if service.recommended %}
-          <p class="hero-subtitle">{{ service.recommended }}</p>
+        {% if service.recommended_note %}
+          <p class="hero-subtitle">{{ service.recommended_note }}</p>
         {% endif %}
         <a href="{% url 'home:business_start_booking' %}?service={{ service.title }}{% if urgent_selected %}&urgent=1{% endif %}" class="hero-cta">Request Quote</a>
       </div>
     </section>
 
     <section class="content">
-      <p class="service-intro">{{ service.detail_description|default:service.description }}</p>
+      <section class="service-intro-card">
+        <span class="service-intro-eyebrow">Service Overview</span>
+        <div class="service-intro-layout">
+          <p class="service-intro">{{ service.detail_description|default:service.description }}</p>
+        </div>
+      </section>
 
       <div class="checklist-header">
         <span class="check-icon">&#10003;</span>
@@ -58,6 +63,39 @@
           </article>
         {% endfor %}
       </div>
+
+      <section class="eco-section">
+        <h2>{{ eco.title }}</h2>
+        <p class="eco-subtitle">{{ eco.subtitle }}</p>
+        <div class="eco-grid">
+          {% for point in eco.points %}
+            <article class="eco-item">
+              <div class="eco-item-header">
+                <span class="eco-icon-wrap eco-icon-{{ point.icon }}" aria-hidden="true">
+                  {% if point.icon == "eco-products" %}
+                    <span class="eco-sprout">🌱</span>
+                    <span class="eco-drops">💧</span>
+                  {% elif point.icon == "sustainable-methods" %}
+                    <span class="eco-recycle">♻</span>
+                  {% endif %}
+                </span>
+                <h3>{{ point.title }}</h3>
+              </div>
+              <p>{{ point.body }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+
+      {% if service.background_image %}
+        <section class="detail-background-image-section" aria-label="Service background image">
+          <img
+            src="{{ service.background_image.url }}"
+            alt="{{ service.title }} background"
+            class="detail-background-image"
+          >
+        </section>
+      {% endif %}
 
       <section class="contact-section">
         <h2>Have a question</h2>

@@ -33,15 +33,95 @@
 
         <div class="service-list">
           {% for s in services %}
-          <div class="service">
-            <div>
-              <h3>{{ s.title }}</h3>
-              <p>{{ s.category.title }}</p>
+            <div class="service-line">
+              <div class="service-line__media" aria-hidden="true">{{ s.title|first|upper }}</div>
+              <div class="service-line__copy">
+                <h3>{{ s.title }}</h3>
+                <p>{{ s.category.title }}</p>
+              </div>
+              <span class="service-line__price">+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
             </div>
-            <span>+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
-          </div>
           {% endfor %}
         </div>
+
+        <div class="services-breakdown">
+          {% if addons_total %}
+            <div class="services-total-line">
+              <span>Add-ons</span>
+              <span>+{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+            {% for addon in addons_breakdown %}
+              <div class="services-total-line services-total-line--subitem">
+                <span>{{ addon.title }}</span>
+                <span>+{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          {% if schedule_extra %}
+            <div class="services-total-line">
+              <span>Schedule</span>
+              <span>+{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
+
+          {% if date_surcharge and date_surcharge != 0 %}
+            <div class="services-total-line">
+              <span>Date surcharge</span>
+              <span>+{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
+
+          <div class="services-total-line">
+            <span>Subtotal</span>
+            <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
+
+          <div class="services-total-line">
+            <span>
+              {% if booking.use_rot %}
+                ROT
+              {% else %}
+                ROT
+              {% endif %}
+            </span>
+            <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
+
+          {% if booking.discount_code %}
+            <div class="services-total-line discount">
+              <span>Discount Code</span>
+              <span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
+
+          {% if referral_discount_applied %}
+            <div class="services-total-line discount">
+              <span>Referral</span>
+              <span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
+
+          {% if reward_applied and reward %}
+            <div class="services-total-line discount">
+              <span>Reward</span>
+              <span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
+
+          <div class="services-total-line services-total-line--grand">
+            <span>Total</span>
+            <span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
+        </div>
+
+        <p class="services-note">
+          {% if booking.use_rot %}
+            This price includes your ROT deduction. You only pay the reduced amount.
+          {% else %}
+            This price includes VAT. ROT deduction is not applied.
+          {% endif %}
+        </p>
 
         {% if messages %}
           <div class="flash-stack">
@@ -120,9 +200,24 @@
           <div class="summary-card">
             <div class="summary-card-head">
               <h4>Location / Address</h4>
-              <a href="#" class="edit-btn">Edit</a>
+              <button type="button" class="edit-btn js-address-edit">Edit</button>
             </div>
-            <p class="summary-detail">{{ display_address }}</p>
+            <div class="address-editor" data-open="false">
+              <p class="summary-detail address-display">{{ display_address }}</p>
+              <form method="POST" class="address-edit-form is-hidden">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="update_address">
+                <div class="address-edit-row">
+                  <input
+                    type="text"
+                    name="address"
+                    class="address-input"
+                    value="{% if display_address != 'Not provided' %}{{ display_address }}{% endif %}"
+                    placeholder="Enter your address">
+                  <button type="submit" class="address-save-btn">Save</button>
+                </div>
+              </form>
+            </div>
           </div>
 
           <div class="summary-card">
@@ -156,6 +251,12 @@
             <span>Add-ons</span>
             <span>{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
+          {% for addon in addons_breakdown %}
+            <div class="summary-line summary-line--subitem">
+              <span>{{ addon.title }}</span>
+              <span>{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endfor %}
           <div class="summary-line">
             <span>Schedule</span>
             <span>{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
@@ -291,6 +392,29 @@
 </div>
 {% include "home/includes/footer.html" %}
 
+<script>
+  (function () {
+    var addressEditButton = document.querySelector(".js-address-edit");
+    var addressEditor = document.querySelector(".address-editor");
+    if (addressEditButton && addressEditor) {
+      var addressDisplay = addressEditor.querySelector(".address-display");
+      var addressForm = addressEditor.querySelector(".address-edit-form");
+      var addressInput = addressEditor.querySelector(".address-input");
+
+      addressEditButton.addEventListener("click", function () {
+        if (!addressForm || !addressInput) return;
+        if (addressDisplay) {
+          addressDisplay.style.display = "none";
+        }
+        addressForm.classList.remove("is-hidden");
+        addressEditor.setAttribute("data-open", "true");
+        addressEditButton.style.display = "none";
+        addressInput.focus();
+        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);
+      });
+    }
+  })();
+</script>
 <script>
   (function () {
     var form = document.getElementById("paymentForm");

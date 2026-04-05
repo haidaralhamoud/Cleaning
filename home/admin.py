@@ -11,6 +11,7 @@ from .models import (
     Contact,
     Job,
     Application,
+    BusinessMainCategory,
     BusinessService,
     BusinessServiceCard,
     BusinessBooking,
@@ -31,6 +32,7 @@ from .models import (
     BookingStatusHistory,
     NoShowReport,
     ServiceCard,
+    ServiceRoomOption,
     ServicePricing,
     ServiceEstimate,
     CurrencyRate,
@@ -49,22 +51,30 @@ User = get_user_model()
 
 
 class ServiceEstimateAdminForm(forms.ModelForm):
+    property_label = forms.CharField(required=False, label="Question 1 label")
+    bedrooms_label = forms.CharField(required=False, label="Question 2 label")
     property_options_text = forms.CharField(
         required=False,
-        label="Property Size options",
+        label="Question 1 options",
         widget=forms.Textarea(attrs={"rows": 5}),
         help_text="One option per line: Label | Price",
     )
     bedrooms_options_text = forms.CharField(
         required=False,
-        label="Bedrooms options",
+        label="Question 2 options",
         widget=forms.Textarea(attrs={"rows": 5}),
         help_text="One option per line: Label | Price",
     )
 
     class Meta:
         model = ServiceEstimate
-        fields = ("service", "property_options_text", "bedrooms_options_text")
+        fields = (
+            "service",
+            "property_label",
+            "bedrooms_label",
+            "property_options_text",
+            "bedrooms_options_text",
+        )
 
     @staticmethod
     def _parse_options(raw_value, field_name):
@@ -129,9 +139,10 @@ class ServiceEstimateAdminForm(forms.ModelForm):
         instance = super().save(commit=False)
         instance.title = "Get a Quick Estimate"
         instance.property_label = "Property Size (m²)"
-        instance.bedrooms_label = "Number of Bedrooms"
+        instance.bedrooms_label = (self.cleaned_data.get("bedrooms_label") or "Number of Bedrooms").strip()
         instance.cta_text = "Calculate Estimate"
         instance.note = "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition."
+        instance.property_label = (self.cleaned_data.get("property_label") or instance.property_label or "Property Size (m²)").strip()
         instance.property_options = self.cleaned_data.get("property_options", [])
         instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
         if commit:
@@ -668,6 +679,13 @@ class PrivateMainCategoryAdmin(admin.ModelAdmin):
     search_fields = ("title",)
 
 
+@admin.register(BusinessMainCategory)
+class BusinessMainCategoryAdmin(admin.ModelAdmin):
+    list_display = ("id", "title")
+    search_fields = ("title",)
+    prepopulated_fields = {"slug": ("title",)}
+
+
 # ================================
 # 2. PRIVATE SERVICE
 # ================================
@@ -690,6 +708,12 @@ class ServiceCardInline(admin.StackedInline):
     fields = ("title", "icon", "body", "order")
 
 
+class ServiceRoomOptionInline(admin.StackedInline):
+    model = ServiceRoomOption
+    extra = 0
+    fields = ("short_label", "title", "image", "subtitle", "unit_price", "price_currency", "display_order", "is_active")
+
+
 class ServicePricingInline(admin.StackedInline):
     model = ServicePricing
     extra = 0
@@ -700,7 +724,12 @@ class ServiceEstimateInline(admin.StackedInline):
     model = ServiceEstimate
     form = ServiceEstimateAdminForm
     extra = 0
-    fields = ("property_options_text", "bedrooms_options_text")
+    fields = (
+        "property_label",
+        "bedrooms_label",
+        "property_options_text",
+        "bedrooms_options_text",
+    )
 
 
 class BusinessServiceCardInline(admin.StackedInline):
@@ -711,18 +740,20 @@ class BusinessServiceCardInline(admin.StackedInline):
 
 @admin.register(BusinessService)
 class BusinessServiceAdmin(admin.ModelAdmin):
-    list_display = ("id", "title")
+    list_display = ("id", "title", "category")
     search_fields = ("title",)
     inlines = [BusinessServiceCardInline]
     fieldsets = (
         ("Basic Info", {
             "fields": (
+                "category",
                 "title",
                 "description",
                 "detail_description",
                 "recommended",
                 "image",
                 "hero_image",
+                "background_image",
                 "icon",
                 "description_service_aviable",
             )
@@ -758,6 +789,7 @@ class PrivateServiceAdmin(admin.ModelAdmin):
         ("Hero / Introduction", {
             "fields": (
                 "hero_image",
+                "background_image",
                 "hero_subtitle",
                 "intro_text",
                 "starting_price",
@@ -775,6 +807,7 @@ class PrivateServiceAdmin(admin.ModelAdmin):
         PrivateAddonInline,
         ServiceQuestionRuleInline,
         ServiceCardInline,
+        ServiceRoomOptionInline,
         ServicePricingInline,
         ServiceEstimateInline,
     ]
@@ -783,6 +816,14 @@ class PrivateServiceAdmin(admin.ModelAdmin):
 @admin.register(ServiceCard)
 class ServiceCardAdmin(admin.ModelAdmin):
     list_display = ("service", "title", "order")
+
+
+@admin.register(ServiceRoomOption)
+class ServiceRoomOptionAdmin(admin.ModelAdmin):
+    list_display = ("service", "short_label", "title", "unit_price", "price_currency", "display_order", "is_active")
+    fields = ("service", "short_label", "title", "image", "subtitle", "unit_price", "price_currency", "display_order", "is_active")
+    list_filter = ("service", "is_active")
+    ordering = ("service", "display_order", "title")
 
 
 @admin.register(BusinessServiceCard)
@@ -800,7 +841,16 @@ class ServicePricingAdmin(admin.ModelAdmin):
 class ServiceEstimateAdmin(admin.ModelAdmin):
     form = ServiceEstimateAdminForm
     list_display = ("service", "title")
-    fields = ("service", "property_options_text", "bedrooms_options_text")
+    fields = (
+        "service",
+        "title",
+        "property_label",
+        "bedrooms_label",
+        "cta_text",
+        "note",
+        "property_options_text",
+        "bedrooms_options_text",
+    )
 
 
 # ================================

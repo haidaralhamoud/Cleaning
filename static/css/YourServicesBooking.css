@@ -651,6 +651,7 @@ a.btn-blue {
 
 .summary .btn-blue {
   width: 100%;
+  min-height: 48px;
 }
 
 .option-group{
@@ -670,17 +671,34 @@ a.btn-blue {
 }
 
 .btn-blue {
-  background: #00a3c8;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
+    background: #00a3c8;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
   border-radius: 12px;
   font-weight: 700;
-  cursor: pointer;
-  margin-top: 12px;
-}
+    cursor: pointer;
+    margin-top: 12px;
+  }
 .btn-blue:hover {
-  background: #0289ad;
+    background: #0289ad;
+  }
+
+.btn-blue__icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s ease;
+}
+
+.btn-blue:hover .btn-blue__icon,
+.btn-blue:focus-visible .btn-blue__icon {
+  transform: translateX(3px);
 }
 .services-slider {
   position: relative;
