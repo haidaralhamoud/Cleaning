@@ -168,6 +168,14 @@ const initMobileHeaderMenus = (syncMobileNavState = () => {}) => {
     const previewPane = menu.querySelector(".services-preview-pane");
     if (!categoryLinks.length || !previewGroups.length) return;
 
+    const deactivateCategories = () => {
+      categoryLinks.forEach((link) => link.classList.remove("is-active"));
+      previewGroups.forEach((group) => group.classList.remove("is-active"));
+      if (previewPane && mobileQuery.matches) {
+        previewPane.remove();
+      }
+    };
+
     const activateCategory = (slug) => {
       const activeLink = categoryLinks.find((link) => link.dataset.categoryTarget === slug);
 
@@ -189,6 +197,11 @@ const initMobileHeaderMenus = (syncMobileNavState = () => {}) => {
       link.addEventListener("click", (event) => {
         if (!mobileQuery.matches) return;
         event.preventDefault();
+        const isAlreadyActive = link.classList.contains("is-active");
+        if (isAlreadyActive) {
+          deactivateCategories();
+          return;
+        }
         activateCategory(link.dataset.categoryTarget);
       });
     });
