@@ -1,11 +1,32 @@
 document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("menu-toggle");
   const navLinks = document.getElementById("nav-links");
+  const mobileOverlay = document.getElementById("mobile-nav-overlay");
   const cartCount = document.getElementById("cartCount");
+
+  const syncMobileNavState = (isOpen) => {
+    if (toggleBtn) {
+      toggleBtn.setAttribute("aria-expanded", String(isOpen));
+    }
+    document.body.classList.toggle("mobile-nav-open", isOpen);
+
+    if (mobileOverlay) {
+      mobileOverlay.hidden = !isOpen;
+      mobileOverlay.classList.toggle("is-active", isOpen);
+    }
+  };
 
   if (toggleBtn && navLinks) {
     toggleBtn.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
+      const isOpen = navLinks.classList.toggle("active");
+      syncMobileNavState(isOpen);
+    });
+  }
+
+  if (mobileOverlay && navLinks) {
+    mobileOverlay.addEventListener("click", () => {
+      navLinks.classList.remove("active");
+      syncMobileNavState(false);
     });
   }
 
@@ -23,6 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initCustomSelects();
   initHeaderServiceMegaMenu();
+  initMobileHeaderMenus(syncMobileNavState);
   initFormValidation();
   initHemblaCalendar();
   flushDjangoMessagesToToast();
@@ -51,6 +73,154 @@ const initHeaderServiceMegaMenu = () => {
       link.addEventListener("mouseenter", () => activateCategory(link.dataset.categoryTarget));
       link.addEventListener("focus", () => activateCategory(link.dataset.categoryTarget));
     });
+  });
+};
+
+const initMobileHeaderMenus = (syncMobileNavState = () => {}) => {
+  const mobileQuery = window.matchMedia("(max-width: 768px)");
+  const navLinks = document.getElementById("nav-links");
+  const navDropdowns = Array.from(document.querySelectorAll(".nav-links .nav-dropdown"));
+  const branchDropdowns = Array.from(document.querySelectorAll(".nav-links .dropdown-submenu"));
+  const categoryMenus = Array.from(document.querySelectorAll("[data-services-categories-menu]"));
+
+  if (!navLinks || (!navDropdowns.length && !branchDropdowns.length)) return;
+
+  const setExpanded = (trigger, expanded) => {
+    if (trigger) {
+      trigger.setAttribute("aria-expanded", String(expanded));
+    }
+  };
+
+  const closeBranchDropdowns = (scope) => {
+    const branches = scope
+      ? Array.from(scope.querySelectorAll(".dropdown-submenu"))
+      : branchDropdowns;
+
+    branches.forEach((branch) => {
+      branch.classList.remove("is-open");
+      setExpanded(branch.querySelector(":scope > .submenu-toggle"), false);
+    });
+  };
+
+  const closeNavDropdowns = () => {
+    navDropdowns.forEach((dropdown) => {
+      dropdown.classList.remove("is-open");
+      setExpanded(dropdown.querySelector(":scope > .dropdown-toggle"), false);
+      closeBranchDropdowns(dropdown);
+    });
+  };
+
+  const closeEntireMenu = () => {
+    closeNavDropdowns();
+    navLinks.classList.remove("active");
+    syncMobileNavState(false);
+  };
+
+  navDropdowns.forEach((dropdown) => {
+    const trigger = dropdown.querySelector(":scope > .dropdown-toggle");
+    if (!trigger) return;
+
+    trigger.addEventListener("click", (event) => {
+      if (!mobileQuery.matches) return;
+
+      event.preventDefault();
+      const willOpen = !dropdown.classList.contains("is-open");
+
+      closeNavDropdowns();
+
+      if (willOpen) {
+        dropdown.classList.add("is-open");
+        setExpanded(trigger, true);
+      }
+    });
+  });
+
+  branchDropdowns.forEach((branch) => {
+    const trigger = branch.querySelector(":scope > .submenu-toggle");
+    const menu = branch.querySelector(":scope > .submenu-menu");
+    if (!trigger || !menu) return;
+
+    trigger.addEventListener("click", (event) => {
+      if (!mobileQuery.matches) return;
+
+      event.preventDefault();
+      const parentDropdown = trigger.closest(".nav-dropdown");
+      const siblingBranches = parentDropdown
+        ? Array.from(parentDropdown.querySelectorAll(":scope .dropdown-submenu"))
+        : branchDropdowns;
+      const willOpen = !branch.classList.contains("is-open");
+
+      siblingBranches.forEach((item) => {
+        item.classList.remove("is-open");
+        setExpanded(item.querySelector(":scope > .submenu-toggle"), false);
+      });
+
+      if (willOpen) {
+        branch.classList.add("is-open");
+        setExpanded(trigger, true);
+      }
+    });
+  });
+
+  categoryMenus.forEach((menu) => {
+    const categoryLinks = Array.from(menu.querySelectorAll("[data-category-target]"));
+    const previewGroups = Array.from(menu.querySelectorAll("[data-category-services]"));
+    const previewPane = menu.querySelector(".services-preview-pane");
+    if (!categoryLinks.length || !previewGroups.length) return;
+
+    const activateCategory = (slug) => {
+      const activeLink = categoryLinks.find((link) => link.dataset.categoryTarget === slug);
+
+      categoryLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.dataset.categoryTarget === slug);
+      });
+      previewGroups.forEach((group) => {
+        group.classList.toggle("is-active", group.dataset.categoryServices === slug);
+      });
+
+      if (mobileQuery.matches && previewPane && activeLink) {
+        activeLink.insertAdjacentElement("afterend", previewPane);
+      }
+    };
+
+    activateCategory(categoryLinks[0].dataset.categoryTarget);
+
+    categoryLinks.forEach((link) => {
+      link.addEventListener("click", (event) => {
+        if (!mobileQuery.matches) return;
+        event.preventDefault();
+        activateCategory(link.dataset.categoryTarget);
+      });
+    });
+  });
+
+  navLinks.querySelectorAll("a, button").forEach((item) => {
+    if (
+      item.matches(".dropdown-toggle") ||
+      item.matches(".submenu-toggle") ||
+      item.matches("[data-category-target]")
+    ) {
+      return;
+    }
+
+    item.addEventListener("click", () => {
+      if (!mobileQuery.matches) return;
+      closeEntireMenu();
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!mobileQuery.matches) return;
+    if (event.target.closest(".main-header")) return;
+    if (event.target.closest(".mobile-nav-overlay")) return;
+    closeEntireMenu();
+  });
+
+  window.addEventListener("resize", () => {
+    if (mobileQuery.matches) return;
+    closeNavDropdowns();
+    navLinks.classList.remove("active");
+    syncMobileNavState(false);
   });
 };
 

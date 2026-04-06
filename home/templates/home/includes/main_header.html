@@ -8,7 +8,7 @@
 
   
 
-  <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open menu">
+  <button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open menu" aria-controls="nav-links" aria-expanded="false">
     <span class="menu-icon" aria-hidden="true"></span>
   </button>
 
@@ -18,10 +18,11 @@
     <div class="nav-dropdown">
       <a href="#" class="dropdown-toggle" aria-haspopup="true" aria-expanded="false">
         <span class="dropdown-label">SERVICES</span>
+        <span class="submenu-arrow nav-dropdown-arrow" aria-hidden="true"></span>
       </a>
       <div class="dropdown-menu services-mega-menu">
         <div class="dropdown-submenu">
-          <a href="{% url 'home:all_services_private' %}" class="submenu-toggle services-branch-link">
+          <a href="{% url 'home:all_services_private' %}" class="submenu-toggle services-branch-link" aria-haspopup="true" aria-expanded="false">
             <span>Private Services</span>
             <span class="submenu-arrow" aria-hidden="true"></span>
           </a>
@@ -53,6 +54,7 @@
                   {% empty %}
                     <span class="services-empty-state">No services yet</span>
                   {% endfor %}
+                  <a href="{% url 'home:all_services_private' %}#{{ category.slug }}" class="services-category-view-link">Browse {{ category.title }}</a>
                 </div>
               {% empty %}
                 <span class="services-empty-state">No categories yet</span>
@@ -61,7 +63,7 @@
           </div>
         </div>
         <div class="dropdown-submenu">
-          <a href="{% url 'home:business_all_services' %}" class="submenu-toggle services-branch-link">
+          <a href="{% url 'home:business_all_services' %}" class="submenu-toggle services-branch-link" aria-haspopup="true" aria-expanded="false">
             <span>Business Services</span>
             <span class="submenu-arrow" aria-hidden="true"></span>
           </a>
@@ -93,6 +95,7 @@
                   {% empty %}
                     <span class="services-empty-state">No services yet</span>
                   {% endfor %}
+                  <a href="{% url 'home:business_all_services' %}#{{ category.slug }}" class="services-category-view-link">Browse {{ category.title }}</a>
                 </div>
               {% empty %}
                 <span class="services-empty-state">No categories yet</span>
@@ -219,6 +222,7 @@
     {% endif %}
   </div>
 </header>
+<div class="mobile-nav-overlay" id="mobile-nav-overlay" hidden></div>
 
 {% if messages %}
   <div id="django-message-data" hidden>
