@@ -47,7 +47,7 @@
             <div class="icon-circle"><img src="{% static 'images/calendar-unified.svg' %}" alt="Calendar icon"></div>
             <h4>Book Online Now</h4>
             <p>Choose your service, pick a date and time, then confirm your booking instantly when you're ready to go.</p>
-<a href="{% url 'home:private_booking_start' service.slug %}" class="btn">Book Now</a>
+<a href="{{ continue_booking_url }}" class="btn">Book Now</a>
 
           </div>
 

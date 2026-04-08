@@ -21,13 +21,6 @@
         <h1>All Services</h1>
         <p class="section-subtitle">Search by name, description, or focus on recommended services.</p>
       </div>
-      <div class="header-actions">
-        <a href="{% url 'home:private_cart' %}" class="cart-link cart-box" aria-label="View cart">
-          <span class="cart-icon" aria-hidden="true"></span>
-          <span>Cart</span>
-          <span class="cart-count" id="cart-count">0</span>
-        </a>
-      </div>
     </div>
 
     <div class="urgent-banner">
@@ -67,7 +60,6 @@
 
     <hr />
 
-    <div class="services-layout" id="servicesLayout">
     <div class="services-list" id="servicesList">
 
       {% for service in services %}
@@ -114,47 +106,23 @@
       {% endfor %}
 
     </div>
-    <aside class="cart-sidebar" id="cartSidebar">
-      <div class="cart-sidebar-inner">
-        <div class="cart-sidebar-head">
-          <div>
-            <p class="cart-eyebrow">Live Cart</p>
-            <h2>Your Selection</h2>
-          </div>
-          <span class="cart-badge" id="cart-sidebar-count">{{ cart_services|length }}</span>
-        </div>
-        <p class="cart-sidebar-copy">Items you add here stay visible while you browse services.</p>
-
-        <div class="cart-sidebar-list" id="cartSidebarList">
-          {% for service in cart_services %}
-            <article class="cart-mini-card" data-cart-slug="{{ service.slug }}">
-              <button type="button" class="cart-mini-remove" aria-label="Remove {{ service.title }}" onclick="removeFromSidebarCart('{{ service.slug }}', this)">×</button>
-              <div class="cart-mini-media">
-                {% if service.image %}
-                  <img src="{{ service.image.url }}" alt="{{ service.title }}">
-                {% else %}
-                  <span>{{ service.title|first }}</span>
-                {% endif %}
-              </div>
-              <div class="cart-mini-copy">
-                <strong>{{ service.title }}</strong>
-                <a href="{% url 'home:private_zip_step1' service.slug %}{% if urgent_selected %}?urgent=1{% endif %}">Book this service</a>
-              </div>
-            </article>
-          {% endfor %}
-        </div>
-
-        <div class="cart-sidebar-empty{% if cart_services %} is-hidden{% endif %}" id="cartSidebarEmpty">
-          Add services to build your cart. You can review everything before checkout.
-        </div>
-
-        <div class="cart-sidebar-actions">
-          <a href="{% url 'home:private_cart' %}" class="cart-primary">Review and continue</a>
-        </div>
-      </div>
-    </aside>
-    </div>
 </main>
+
+<a href="{% url 'home:private_cart' %}" class="floating-cart-fab{% if not cart_services %} is-hidden{% endif %}" id="floatingCartFab" aria-label="Review cart">
+  <span class="floating-cart-glow" aria-hidden="true"></span>
+  <span class="floating-cart-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M3 5h2l2.1 9.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8L21 7H7.2"></path>
+      <circle cx="10" cy="19" r="1.6"></circle>
+      <circle cx="18" cy="19" r="1.6"></circle>
+    </svg>
+  </span>
+  <span class="floating-cart-copy">
+    <strong>Your cart</strong>
+    <small>Review and continue</small>
+  </span>
+  <span class="floating-cart-count" id="floating-cart-count">{{ cart_services|length }}</span>
+</a>
 
 <script>
 const SERVICE_CATALOG = {
@@ -176,9 +144,7 @@ function addToCart(slug, buttonEl) {
         .then(r => r.json())
         .then(data => {
             if (data.count !== undefined) {
-                document.getElementById("cart-count").innerText = data.count;
-                syncSidebarCartCount(data.count);
-                addSidebarCartItem(slug);
+                syncCartUI(data.count);
                 if (buttonEl) {
                     const oldLabel = buttonEl.innerText;
                     buttonEl.innerText = "Added";
@@ -192,57 +158,16 @@ function addToCart(slug, buttonEl) {
         });
 }
 
-function syncSidebarCartCount(count) {
-    const el = document.getElementById("cart-sidebar-count");
-    if (el) el.innerText = count;
-}
-
-function addSidebarCartItem(slug) {
-    const list = document.getElementById("cartSidebarList");
-    const empty = document.getElementById("cartSidebarEmpty");
-    if (!list || !SERVICE_CATALOG[slug]) return;
-    if (list.querySelector(`[data-cart-slug="${slug}"]`)) {
-        if (empty) empty.classList.add("is-hidden");
-        return;
+function syncCartUI(count) {
+    const fab = document.getElementById("floatingCartFab");
+    const badge = document.getElementById("floating-cart-count");
+    if (badge) badge.innerText = count;
+    if (!fab) return;
+    fab.classList.toggle("is-hidden", !count);
+    fab.classList.remove("is-bumped");
+    if (count) {
+        window.requestAnimationFrame(() => fab.classList.add("is-bumped"));
     }
-    const service = SERVICE_CATALOG[slug];
-    const card = document.createElement("article");
-    card.className = "cart-mini-card";
-    card.dataset.cartSlug = slug;
-    card.innerHTML = `
-      <button type="button" class="cart-mini-remove" aria-label="Remove ${service.title}" onclick="removeFromSidebarCart('${slug}', this)">×</button>
-      <div class="cart-mini-media">
-        ${service.image ? `<img src="${service.image}" alt="${service.title}">` : `<span>${service.title.charAt(0)}</span>`}
-      </div>
-      <div class="cart-mini-copy">
-        <strong>${service.title}</strong>
-        <a href="${service.bookUrl}">Book this service</a>
-      </div>
-    `;
-    list.prepend(card);
-    if (empty) empty.classList.add("is-hidden");
-}
-
-function removeFromSidebarCart(slug, buttonEl) {
-    fetch(`/private/cart/remove-json/${slug}/`, {
-        headers: {
-            "X-Requested-With": "XMLHttpRequest"
-        }
-    })
-        .then(r => r.json())
-        .then(data => {
-            const card = buttonEl ? buttonEl.closest(".cart-mini-card") : document.querySelector(`[data-cart-slug="${slug}"]`);
-            if (card) card.remove();
-            if (data.count !== undefined) {
-                document.getElementById("cart-count").innerText = data.count;
-                syncSidebarCartCount(data.count);
-            }
-            const list = document.getElementById("cartSidebarList");
-            const empty = document.getElementById("cartSidebarEmpty");
-            if (list && empty && !list.querySelector(".cart-mini-card")) {
-                empty.classList.remove("is-hidden");
-            }
-        });
 }
 
 function refreshCartCount() {
@@ -250,8 +175,7 @@ function refreshCartCount() {
         .then(r => r.json())
         .then(data => {
             if (data.count !== undefined) {
-                document.getElementById("cart-count").innerText = data.count;
-                syncSidebarCartCount(data.count);
+                syncCartUI(data.count);
             }
         })
         .catch(err => console.log("Cart Refresh Error:", err));
@@ -325,56 +249,8 @@ if (applyButton) {
 if (categoryFilter) {
     categoryFilter.addEventListener("change", applyFilters);
 }
-
-const servicesLayout = document.getElementById("servicesLayout");
-const cartSidebar = document.getElementById("cartSidebar");
-const cartSidebarInner = cartSidebar ? cartSidebar.querySelector(".cart-sidebar-inner") : null;
-
-function syncFloatingCart() {
-    if (!servicesLayout || !cartSidebar || !cartSidebarInner) return;
-
-    if (window.innerWidth <= 900) {
-        cartSidebar.classList.remove("is-fixed", "is-bottom");
-        cartSidebarInner.style.left = "";
-        cartSidebarInner.style.width = "";
-        return;
-    }
-
-    const topOffset = 118;
-    const layoutRect = servicesLayout.getBoundingClientRect();
-    const sidebarRect = cartSidebar.getBoundingClientRect();
-    const sidebarWidth = cartSidebar.offsetWidth;
-    const layoutTop = window.scrollY + layoutRect.top;
-    const layoutBottom = layoutTop + servicesLayout.offsetHeight;
-    const innerHeight = cartSidebarInner.offsetHeight;
-    const startStickAt = layoutTop - topOffset;
-    const stopStickAt = layoutBottom - innerHeight - topOffset;
-
-    if (window.scrollY < startStickAt) {
-        cartSidebar.classList.remove("is-fixed", "is-bottom");
-        cartSidebarInner.style.left = "";
-        cartSidebarInner.style.width = "";
-        return;
-    }
-
-    if (window.scrollY >= stopStickAt) {
-        cartSidebar.classList.remove("is-fixed");
-        cartSidebar.classList.add("is-bottom");
-        cartSidebarInner.style.left = "";
-        cartSidebarInner.style.width = "";
-        return;
-    }
-
-    cartSidebar.classList.remove("is-bottom");
-    cartSidebar.classList.add("is-fixed");
-    cartSidebarInner.style.left = `${sidebarRect.left}px`;
-    cartSidebarInner.style.width = `${sidebarWidth}px`;
-}
-
-window.addEventListener("scroll", syncFloatingCart, { passive: true });
-window.addEventListener("resize", syncFloatingCart);
 document.addEventListener("DOMContentLoaded", applyFilters);
-document.addEventListener("DOMContentLoaded", syncFloatingCart);
+document.addEventListener("DOMContentLoaded", () => syncCartUI({{ cart_services|length }}));
 </script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>

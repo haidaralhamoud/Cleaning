@@ -80,9 +80,9 @@
           <div class="services-total-line">
             <span>
               {% if booking.use_rot %}
-                ROT
+                RUT
               {% else %}
-                ROT
+                RUT
               {% endif %}
             </span>
             <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
@@ -117,9 +117,9 @@
 
         <p class="services-note">
           {% if booking.use_rot %}
-            This price includes your ROT deduction. You only pay the reduced amount.
+            This price includes your RUT deduction. You only pay the reduced amount.
           {% else %}
-            This price includes VAT. ROT deduction is not applied.
+            This price includes VAT. RUT deduction is not applied.
           {% endif %}
         </p>
 
@@ -275,9 +275,9 @@
           <div class="summary-line">
             <span>
               {% if booking.use_rot %}
-                ROT Deduction ({{ rot_percent|default:"0" }}%)
+                RUT Deduction ({{ rot_percent|default:"0" }}%)
               {% else %}
-                ROT Deduction (not applied)
+                RUT Deduction (not applied)
               {% endif %}
             </span>
             <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
@@ -308,13 +308,14 @@
           </div>
           <p class="note">
             {% if booking.use_rot %}
-              This total includes VAT and your ROT deduction.
+              This total includes VAT and your RUT deduction.
             {% else %}
-              This total includes VAT. ROT deduction is not applied.
+              This total includes VAT. RUT deduction is not applied.
             {% endif %}
           </p>
           </div>
         </div>
+
       </section>
 
       <section class="card payment-card">
@@ -379,13 +380,20 @@
       </section>
     </div>
 
-    <aside class="card invoice-card">
-      <div class="card-header">
-        <h2>Helpful Tips</h2>
-      </div>
-      <hr>
-      <p class="summary-note">Review your booking details and invoice in the summary card above.</p>
-      <p class="summary-note">ROT and discount changes will update the total immediately.</p>
+    <aside class="checkout-sidebar">
+      <section class="card invoice-card">
+        <div class="card-header">
+          <h2>Cash Invoice</h2>
+        </div>
+        <hr>
+        <p class="summary-note">Download a clean PDF invoice if the customer wants to pay cash at service time.</p>
+        <p class="summary-note">The file includes the current services, add-ons, schedule details, and total due.</p>
+        <a href="{{ cash_invoice_download_url }}" class="cash-invoice-btn">Download PDF Invoice</a>
+        <div class="cash-invoice-meta">
+          <span>Format: PDF</span>
+          <span>Status: Pending cash payment</span>
+        </div>
+      </section>
     </aside>
   </div>
 

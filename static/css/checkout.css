@@ -61,6 +61,159 @@ h1 {
   gap: 22px;
 }
 
+.checkout-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.checkout-sidebar .summary {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(3, 159, 200, 0.12);
+  box-shadow: var(--shadow);
+  position: sticky;
+  top: 20px;
+}
+
+.checkout-sidebar .summary h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.checkout-sidebar .summary .item {
+  display: flex;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+
+.checkout-sidebar .rot-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 14px;
+  margin: 0 0 14px;
+  border: 1px solid rgba(113, 178, 71, 0.22);
+  border-radius: 14px;
+  background: #f8fdf4;
+}
+
+.checkout-sidebar .rot-toggle-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkout-sidebar .rot-toggle-copy strong {
+  font-size: 14px;
+}
+
+.checkout-sidebar .rot-toggle-copy small {
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.checkout-sidebar .rot-toggle-row input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #71b247;
+  cursor: pointer;
+}
+
+.checkout-sidebar .summary-discount-panel {
+  margin: 0 0 16px;
+  padding: 14px;
+  border: 1px solid rgba(3, 159, 200, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #f8fdff 0%, #f1fbff 100%);
+}
+
+.checkout-sidebar .summary-discount-head {
+  margin-bottom: 10px;
+}
+
+.checkout-sidebar .summary-discount-head span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkout-sidebar .summary-discount-head strong {
+  font-size: 14px;
+}
+
+.checkout-sidebar .summary-discount-head small {
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.checkout-sidebar .summary-discount-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.checkout-sidebar .summary-discount-controls input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid #cfe7f3;
+  padding: 0 14px;
+  font-size: 14px;
+}
+
+.checkout-sidebar .summary-discount-controls input[readonly] {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.checkout-sidebar .summary-discount-btn {
+  height: 44px;
+  border: 0;
+  border-radius: 12px;
+  padding: 0 18px;
+  background: #11a2cf;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.checkout-sidebar .summary-discount-btn--ghost {
+  background: #e8f4fa;
+  color: #0b6e8b;
+}
+
+.checkout-sidebar .summary-discount-feedback {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.checkout-sidebar .summary-discount-feedback.is-error {
+  color: #dc2626;
+}
+
+.checkout-sidebar .summary .total {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.checkout-sidebar .summary-note {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #64748b;
+}
+
+.checkout-sidebar .summary .btn-blue {
+  width: 100%;
+  min-height: 48px;
+}
+
 .card {
   background: var(--card);
   border: 1px solid rgba(3, 159, 200, 0.15);
@@ -575,9 +728,47 @@ hr {
 }
 
 .invoice-card {
-  position: sticky;
-  top: 20px;
+  position: static;
   height: fit-content;
+}
+
+.cash-invoice-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #11a2cf 0%, #078fbd 100%);
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 12px 24px rgba(7, 143, 189, 0.2);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cash-invoice-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(7, 143, 189, 0.24);
+}
+
+.cash-invoice-meta {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f7fbff;
+  border: 1px solid rgba(3, 159, 200, 0.14);
+}
+
+.cash-invoice-meta span {
+  display: block;
+  color: var(--ink-600);
+  font-size: 13px;
+}
+
+.cash-invoice-meta span + span {
+  margin-top: 6px;
 }
 
 .invoice-inline {
@@ -674,14 +865,14 @@ hr {
   .checkout-grid {
     grid-template-columns: 1fr;
   }
-  .invoice-card {
-    position: static;
-  }
   .input-row {
     flex-direction: column;
   }
   .summary-grid {
     grid-template-columns: 1fr;
+  }
+  .checkout-sidebar {
+    order: -1;
   }
 }
 

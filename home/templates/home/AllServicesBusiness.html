@@ -86,16 +86,35 @@
   <div class="filter-modal" id="filterModal" aria-hidden="true">
     <div class="filter-card" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
       <div class="filter-head">
-        <h3 id="filterTitle">Filter Services</h3>
-        <button class="filter-close" id="filterClose" aria-label="Close">&times;</button>
+        <div>
+          <p class="filter-eyebrow">Smart Filter</p>
+          <h3 id="filterTitle">Filter Services</h3>
+          <p class="filter-copy">Narrow the list by service name or business category.</p>
+        </div>
+        <button class="filter-close" id="filterClose" aria-label="Close filter">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <input class="filter-input" id="filterInput" type="text" placeholder="Search by name or description">
-      <select class="filter-select" id="filterCategory">
-        <option value="all">All categories</option>
+      <div class="filter-field">
+        <label class="filter-label" for="filterInput">Search</label>
+        <input class="filter-input" id="filterInput" type="text" placeholder="Search by name or description">
+      </div>
+      <div class="filter-field">
+        <label class="filter-label" for="filterCategory">Category</label>
+        <select class="filter-select" id="filterCategory">
+          <option value="all">All categories</option>
+          {% for category in categories %}
+            <option value="{{ category.slug }}">{{ category.title }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-chip-row" id="filterCategoryChips">
+        <button type="button" class="filter-chip is-active" data-category-chip="all">All</button>
         {% for category in categories %}
-          <option value="{{ category.slug }}">{{ category.title }}</option>
+          <button type="button" class="filter-chip" data-category-chip="{{ category.slug }}">{{ category.title }}</button>
         {% endfor %}
-      </select>
+      </div>
+      <div class="filter-status" id="filterStatus">Showing all services.</div>
       <div class="filter-actions">
         <button class="reset" id="filterReset">Reset</button>
         <button class="apply" id="filterApply">Apply</button>
@@ -111,15 +130,53 @@
     const resetBtn = document.getElementById("filterReset");
     const filterInput = document.getElementById("filterInput");
     const filterCategory = document.getElementById("filterCategory");
+    const filterStatus = document.getElementById("filterStatus");
+    const categoryChips = document.querySelectorAll("[data-category-chip]");
     const cards = document.querySelectorAll(".service-card");
 
     const openModal = () => {
       modal.classList.add("open");
       modal.setAttribute("aria-hidden", "false");
+      filterInput.focus();
     };
     const closeModal = () => {
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
+      btn.focus();
+    };
+
+    const syncCategoryChips = (value) => {
+      categoryChips.forEach((chip) => {
+        chip.classList.toggle("is-active", chip.dataset.categoryChip === value);
+      });
+    };
+
+    const applyFilters = () => {
+      const q = filterInput.value.trim().toLowerCase();
+      const category = filterCategory.value;
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const title = card.dataset.title || "";
+        const desc = card.dataset.desc || "";
+        const cardCategory = card.dataset.category || "";
+        const matchesQuery = !q || title.includes(q) || desc.includes(q);
+        const matchesCategory = category === "all" || cardCategory === category;
+        const isVisible = matchesQuery && matchesCategory;
+        card.style.display = isVisible ? "" : "none";
+        if (isVisible) visibleCount += 1;
+      });
+
+      const categoryLabel = filterCategory.options[filterCategory.selectedIndex]?.text || "All categories";
+      if (!q && category === "all") {
+        filterStatus.textContent = `Showing all ${visibleCount} services.`;
+      } else if (q && category !== "all") {
+        filterStatus.textContent = `${visibleCount} services match "${filterInput.value.trim()}" in ${categoryLabel}.`;
+      } else if (q) {
+        filterStatus.textContent = `${visibleCount} services match "${filterInput.value.trim()}".`;
+      } else {
+        filterStatus.textContent = `${visibleCount} services in ${categoryLabel}.`;
+      }
     };
 
     btn.addEventListener("click", openModal);
@@ -127,26 +184,34 @@
     modal.addEventListener("click", (e) => {
       if (e.target === modal) closeModal();
     });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.classList.contains("open")) closeModal();
+    });
 
     resetBtn.addEventListener("click", () => {
       filterInput.value = "";
       filterCategory.value = "all";
-      cards.forEach((card) => card.style.display = "");
+      syncCategoryChips("all");
+      applyFilters();
+    });
+
+    categoryChips.forEach((chip) => {
+      chip.addEventListener("click", () => {
+        filterCategory.value = chip.dataset.categoryChip;
+        syncCategoryChips(chip.dataset.categoryChip);
+      });
+    });
+
+    filterCategory.addEventListener("change", () => {
+      syncCategoryChips(filterCategory.value);
     });
 
     applyBtn.addEventListener("click", () => {
-      const q = filterInput.value.trim().toLowerCase();
-      const category = filterCategory.value;
-      cards.forEach((card) => {
-        const title = card.dataset.title || "";
-        const desc = card.dataset.desc || "";
-        const cardCategory = card.dataset.category || "";
-        const matchesQuery = !q || title.includes(q) || desc.includes(q);
-        const matchesCategory = category === "all" || cardCategory === category;
-        card.style.display = (matchesQuery && matchesCategory) ? "" : "none";
-      });
+      applyFilters();
       closeModal();
     });
+
+    applyFilters();
   </script>
 <script src="{% static 'js/main_header.js' %}"></script>
 </body>

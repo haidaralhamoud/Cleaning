@@ -165,12 +165,22 @@ path(
     views.private_update_reward_api,
     name="private_update_reward_api"
 ),
+path(
+    "private/api/booking/update-discount/",
+    views.private_update_discount_api,
+    name="private_update_discount_api"
+),
 
 # Checkout page
 path(
     "booking/checkout/",
     views.private_booking_checkout,
     name="private_booking_checkout"
+),
+path(
+    "booking/checkout/cash-invoice.pdf",
+    views.private_booking_cash_invoice_pdf,
+    name="private_booking_cash_invoice_pdf"
 ),
 path(
     "booking/payment/complete/",

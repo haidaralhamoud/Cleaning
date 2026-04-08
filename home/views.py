@@ -4,8 +4,10 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date
 import logging
 from datetime import timedelta
+from io import BytesIO
 import re
 import stripe
+from PIL import Image, ImageDraw, ImageFont
 
 from accounts.models import DiscountCode
 from .pricing_utils import (
@@ -23,6 +25,7 @@ from django.views.decorators.http import require_POST
 from django.conf import settings
 from django.db import IntegrityError, transaction
 from django.urls import reverse
+from urllib.parse import urlencode
 
 from .models import (
     BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessMainCategory, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
@@ -77,6 +80,235 @@ User = get_user_model()
 DRAFT_SESSION_KEY = "private_booking_draft"
 
 
+def _cash_invoice_font(size=20, bold=False):
+    font_candidates = []
+    if bold:
+        font_candidates.extend([
+            "C:/Windows/Fonts/arialbd.ttf",
+            "C:/Windows/Fonts/calibrib.ttf",
+        ])
+    else:
+        font_candidates.extend([
+            "C:/Windows/Fonts/arial.ttf",
+            "C:/Windows/Fonts/calibri.ttf",
+        ])
+
+    for font_path in font_candidates:
+        try:
+            return ImageFont.truetype(font_path, size=size)
+        except Exception:
+            continue
+    return ImageFont.load_default()
+
+
+def _cash_invoice_wrap(draw, text, font, max_width):
+    words = str(text or "").split()
+    if not words:
+        return [""]
+
+    lines = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        if draw.textlength(candidate, font=font) <= max_width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    lines.append(current)
+    return lines
+
+
+def _build_cash_invoice_pdf(branding, meta_rows, charge_rows, footer_lines=None):
+    page_width = 1240
+    page_height = 1754
+    margin_x = 84
+    top_margin = 72
+    bottom_margin = 90
+    header_height = 210
+    section_gap = 26
+    card_padding = 26
+
+    colors = {
+        "bg": "#F4F8FB",
+        "panel": "#FFFFFF",
+        "brand": "#11A2CF",
+        "brand_dark": "#0C5170",
+        "ink": "#102534",
+        "muted": "#587083",
+        "line": "#D8E7F0",
+        "soft": "#EAF7FC",
+        "accent": "#EAF6EF",
+        "accent_text": "#23754B",
+    }
+
+    title_font = _cash_invoice_font(56, bold=True)
+    subtitle_font = _cash_invoice_font(24, bold=False)
+    heading_font = _cash_invoice_font(28, bold=True)
+    label_font = _cash_invoice_font(22, bold=True)
+    value_font = _cash_invoice_font(22, bold=False)
+    small_font = _cash_invoice_font(18, bold=False)
+    small_bold_font = _cash_invoice_font(18, bold=True)
+    total_font = _cash_invoice_font(30, bold=True)
+
+    pages = []
+
+    def new_page():
+        image = Image.new("RGB", (page_width, page_height), colors["bg"])
+        draw = ImageDraw.Draw(image)
+
+        draw.rounded_rectangle(
+            [(32, 24), (page_width - 32, page_height - 24)],
+            radius=32,
+            fill=colors["panel"],
+        )
+        draw.rounded_rectangle(
+            [(32, 24), (page_width - 32, header_height)],
+            radius=32,
+            fill=colors["soft"],
+        )
+        draw.rectangle(
+            [(32, header_height - 32), (page_width - 32, header_height)],
+            fill=colors["soft"],
+        )
+
+        logo_x = margin_x
+        logo_y = top_margin
+        logo_path = branding.get("logo_path")
+        if logo_path:
+            try:
+                logo = Image.open(logo_path).convert("RGBA")
+                max_logo_w = 180
+                max_logo_h = 110
+                logo.thumbnail((max_logo_w, max_logo_h))
+                image.paste(logo, (logo_x, logo_y), logo)
+            except Exception:
+                pass
+
+        brand_name = branding.get("brand_name") or "Hembla experten"
+        brand_tagline = branding.get("tagline") or "Professional home services"
+        draw.text((280, 78), brand_name, font=title_font, fill=colors["brand_dark"])
+        draw.text((282, 138), brand_tagline, font=subtitle_font, fill=colors["muted"])
+
+        status_box = (page_width - 350, 74, page_width - margin_x, 138)
+        draw.rounded_rectangle(status_box, radius=20, fill=colors["accent"])
+        draw.text((status_box[0] + 24, status_box[1] + 12), "PAYMENT STATUS", font=small_bold_font, fill=colors["accent_text"])
+        draw.text((status_box[0] + 24, status_box[1] + 34), "Pending cash payment", font=small_font, fill=colors["accent_text"])
+
+        draw.text((margin_x, 250), branding.get("document_title") or "Cash Payment Invoice", font=heading_font, fill=colors["ink"])
+        draw.text((page_width - 360, 254), branding.get("document_code") or "", font=small_bold_font, fill=colors["brand"])
+        draw.line((margin_x, 304, page_width - margin_x, 304), fill=colors["line"], width=3)
+
+        return image, draw, 336
+
+    image, draw, current_y = new_page()
+
+    def ensure_space(height_needed):
+        nonlocal image, draw, current_y
+        if current_y + height_needed > page_height - bottom_margin:
+            pages.append(image)
+            image, draw, current_y = new_page()
+
+    def draw_info_card(title, rows):
+        nonlocal current_y
+        line_gap = 16
+        value_width = page_width - (margin_x * 2) - 360
+        row_blocks = []
+        total_height = card_padding * 2 + 42
+        for label, value in rows:
+            wrapped = _cash_invoice_wrap(draw, value, value_font, value_width)
+            row_height = max(34, len(wrapped) * 28)
+            row_blocks.append((label, wrapped, row_height))
+            total_height += row_height + line_gap
+
+        ensure_space(total_height + section_gap)
+        card_top = current_y
+        card_bottom = current_y + total_height
+        draw.rounded_rectangle(
+            [(margin_x, card_top), (page_width - margin_x, card_bottom)],
+            radius=24,
+            fill=colors["panel"],
+            outline=colors["line"],
+            width=2,
+        )
+        draw.text((margin_x + card_padding, card_top + 20), title, font=label_font, fill=colors["brand_dark"])
+
+        row_y = card_top + 74
+        for label, wrapped, row_height in row_blocks:
+            draw.text((margin_x + card_padding, row_y), label, font=small_bold_font, fill=colors["muted"])
+            text_y = row_y
+            for line in wrapped:
+                draw.text((margin_x + 360, text_y), line, font=value_font, fill=colors["ink"])
+                text_y += 28
+            row_y += row_height + line_gap
+
+        current_y = card_bottom + section_gap
+
+    def draw_charge_table(title, rows):
+        nonlocal current_y
+        left_x = margin_x
+        right_x = page_width - margin_x
+        label_x = left_x + 24
+        value_x = right_x - 24
+        row_height = 40
+        total_height = 88 + (len(rows) * row_height) + 34
+        ensure_space(total_height + section_gap)
+
+        card_top = current_y
+        card_bottom = current_y + total_height
+        draw.rounded_rectangle(
+            [(left_x, card_top), (right_x, card_bottom)],
+            radius=24,
+            fill=colors["panel"],
+            outline=colors["line"],
+            width=2,
+        )
+        draw.text((left_x + 24, card_top + 20), title, font=label_font, fill=colors["brand_dark"])
+
+        header_y = card_top + 68
+        draw.rounded_rectangle(
+            [(left_x + 18, header_y), (right_x - 18, header_y + 44)],
+            radius=16,
+            fill=colors["soft"],
+        )
+        draw.text((label_x, header_y + 10), "Description", font=small_bold_font, fill=colors["brand_dark"])
+        header_amount_w = draw.textlength("Amount", font=small_bold_font)
+        draw.text((value_x - header_amount_w, header_y + 10), "Amount", font=small_bold_font, fill=colors["brand_dark"])
+
+        cursor_y = header_y + 58
+        for index, (label, value, is_total) in enumerate(rows):
+            if index % 2 == 0:
+                draw.rounded_rectangle(
+                    [(left_x + 18, cursor_y - 6), (right_x - 18, cursor_y + 28)],
+                    radius=12,
+                    fill="#FAFCFE",
+                )
+            current_label_font = total_font if is_total else value_font
+            current_value_font = total_font if is_total else value_font
+            current_fill = colors["brand_dark"] if is_total else colors["ink"]
+            draw.text((label_x, cursor_y), label, font=current_label_font, fill=current_fill)
+            value_width = draw.textlength(value, font=current_value_font)
+            draw.text((value_x - value_width, cursor_y), value, font=current_value_font, fill=current_fill)
+            cursor_y += row_height
+
+        current_y = card_bottom + section_gap
+
+    draw_info_card("Customer & Booking Details", meta_rows)
+    draw_charge_table("Invoice Summary", charge_rows)
+
+    if footer_lines:
+        footer_rows = [("Note", line) for line in footer_lines]
+        draw_info_card("Payment Notes", footer_rows)
+
+    draw.text((margin_x, page_height - 58), "Generated by Hembla experten", font=small_font, fill=colors["muted"])
+    pages.append(image)
+
+    output = BytesIO()
+    rgb_pages = [page.convert("RGB") for page in pages]
+    rgb_pages[0].save(output, format="PDF", resolution=150, save_all=True, append_images=rgb_pages[1:])
+    return output.getvalue()
+
+
 def _get_private_draft_data(request):
     data = request.session.get(DRAFT_SESSION_KEY)
     if not isinstance(data, dict):
@@ -115,6 +347,12 @@ def _parse_optional_date(value):
     if hasattr(value, "year") and hasattr(value, "month") and hasattr(value, "day"):
         return value
     return parse_date(str(value))
+
+
+def _pricing_duration_seconds_for_display(pricing):
+    if pricing.get("duration_is_estimated"):
+        return 0
+    return int(pricing.get("duration_seconds", 0) or 0)
 
 
 def _date_is_before_today(value):
@@ -250,6 +488,7 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.zip_code = draft.get("zip_code") or customer_snapshot.get("zip_code")
     booking.zip_is_available = bool(draft.get("zip_is_available"))
     booking.scheduled_at = _parse_iso_datetime(draft.get("scheduled_at"))
+    booking.discount_code_id = draft.get("discount_code_id")
     booking.selected_reward_id = draft.get("selected_reward_id")
     booking.use_reward = _is_truthy(draft.get("use_reward"), default=False)
     return booking
@@ -415,7 +654,9 @@ def _calculate_private_payment_summary(booking, currency):
 
     final_amount = base_total
     discount_code = None
+    discount_amount = Decimal("0.00")
     referral_discount_applied = False
+    referral_discount_amount = Decimal("0.00")
     reward_discount = Decimal("0.00")
     reward = None
 
@@ -453,12 +694,68 @@ def _calculate_private_payment_summary(booking, currency):
         "amount_cents": _stripe_amount_from_decimal(final_amount),
         "currency": (currency or "").lower(),
         "discount_code": discount_code,
+        "discount_amount": discount_amount,
         "referral_discount_applied": referral_discount_applied,
+        "referral_discount_amount": referral_discount_amount,
         "reward": reward,
         "reward_discount": reward_discount,
         "reward_applied": reward_context["use_reward"],
         "points_balance": reward_context["points_balance"],
         "customer": customer,
+    }
+
+
+def _store_private_draft_pricing(draft, pricing, payment_summary=None):
+    duration_seconds = _pricing_duration_seconds_for_display(pricing)
+    hours = duration_seconds // 3600
+    minutes = (duration_seconds % 3600) // 60
+    seconds = duration_seconds % 60
+    draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+    draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
+    draft["pricing_details"] = pricing
+    draft["subtotal"] = pricing.get("subtotal", 0) or 0
+    draft["rot_discount"] = pricing.get("rot", 0) or 0
+    if payment_summary is not None:
+        draft["total_price"] = float(payment_summary.get("amount", 0) or 0)
+    else:
+        draft["total_price"] = pricing.get("final", 0) or 0
+
+
+def _private_booking_summary_payload(request, draft, booking=None, pricing=None):
+    booking = booking or _build_private_booking_from_draft(draft, request.user)
+    payment_summary = _calculate_private_payment_summary(
+        booking,
+        (pricing or {}).get("currency") or (settings.STRIPE_CURRENCY or "sek").lower(),
+    )
+    pricing = pricing or payment_summary["pricing"]
+    reward = payment_summary.get("reward")
+    reward_discount = Decimal(str(payment_summary.get("reward_discount", 0) or 0))
+    discount_code = payment_summary.get("discount_code")
+    discount_amount = Decimal(str(payment_summary.get("discount_amount", 0) or 0))
+    referral_discount_amount = Decimal(str(payment_summary.get("referral_discount_amount", 0) or 0))
+    return {
+        "services_total": pricing.get("services_total", 0),
+        "addons_total": pricing.get("addons_total", 0),
+        "subtotal": pricing.get("subtotal", 0),
+        "schedule_extra": pricing.get("schedule_extra", 0),
+        "rot": pricing.get("rot", 0),
+        "rot_percent": pricing.get("rot_percent", 0),
+        "use_rot": pricing.get("use_rot", True),
+        "use_reward": bool(payment_summary.get("reward_applied")),
+        "reward_available": reward is not None,
+        "reward_title": reward.title if reward else "",
+        "reward_discount": float(reward_discount),
+        "points_balance": payment_summary.get("points_balance", 0),
+        "vat_included": pricing.get("vat_included", True),
+        "final": float(payment_summary.get("amount", 0) or 0),
+        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+        "duration_hours": pricing.get("duration_hours", 0),
+        "duration_seconds": _pricing_duration_seconds_for_display(pricing),
+        "discount_code": discount_code.code if discount_code else "",
+        "discount_percent": int(getattr(discount_code, "percent", 0) or 0),
+        "discount_amount": float(discount_amount),
+        "referral_discount_applied": bool(payment_summary.get("referral_discount_applied")),
+        "referral_discount_amount": float(referral_discount_amount),
     }
 
 
@@ -2051,6 +2348,8 @@ def _exclude_fields_for_form(model):
             excluded.append(f.name)
     if model.__name__ == "PrivateAddon" and f.name == "form_html":
         excluded.append(f.name)
+    if model.__name__ == "ServiceRoomOption":
+        excluded.append("short_label")
     return list(dict.fromkeys(excluded))
 
 
@@ -2155,7 +2454,7 @@ def dashboard_model_list(request, model):
         "private-services": ["title", "display_order", "category", "price", "recommended", "image"],
         "private-addons": ["title", "service", "price", "price_per_unit", "icon"],
         "service-cards": ["service", "title", "order"],
-        "service-room-options": ["service", "short_label", "title", "image", "unit_price", "price_currency", "display_order", "is_active"],
+        "service-room-options": ["service", "title", "image", "unit_price", "price_currency", "display_order", "is_active"],
         "service-pricing": ["service", "price_value", "price_note"],
         "service-estimates": ["service", "property_options", "bedrooms_options"],
     }
@@ -3181,44 +3480,18 @@ def all_services(request):
 
 
 
-AVAILABLE_ZIP_RANGES = [
-    (10000, 12999),  # Stockholm City
-    (13100, 13199),  # Nacka
-    (13200, 13299),
-    (13300, 13399),
-    (13500, 13599),  # Tyreso
-    (13600, 13699),  # Haninge
-    (14100, 14199),  # Huddinge
-    (14200, 14299),
-    (14500, 14599),  # Botkyrka
-    (14600, 14699),
-    (14700, 14799),
-    (16900, 16999),  # Solna
-    (17100, 17199),
-    (17200, 17299),  # Sundbyberg
-    (17400, 17499),
-    (17500, 17599),  # Jarfalla
-    (17700, 17799),
-    (17800, 17899),  # Ekero
-    (18100, 18199),  # Lidingo
-    (18200, 18299),  # Danderyd
-    (18300, 18399),  # Tabby
-    (18600, 18699),  # Vallentuna
-]
-
-
 def _normalize_zip(zip_code_value):
     digits = "".join(ch for ch in str(zip_code_value) if ch.isdigit())
     if len(digits) != 5:
         return None
-    return int(digits)
+    return digits
 
 
 def _is_zip_available(zip_code_value):
-    numeric = _normalize_zip(zip_code_value)
-    if numeric is None:
+    normalized = _normalize_zip(zip_code_value)
+    if normalized is None:
         return False
-    return any(start <= numeric <= end for start, end in AVAILABLE_ZIP_RANGES)
+    return AvailableZipCode.objects.filter(code=normalized).exists()
 
 
 def private_zip_step1(request, service_slug):
@@ -3313,7 +3586,7 @@ def private_booking_checkout(request):
     subtotal = Decimal(str(pricing["subtotal"]))
     base_total = Decimal(str(pricing["final"]))
     date_surcharge = Decimal(str(pricing.get("date_surcharge", 0) or 0))
-    duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
+    duration_seconds = _pricing_duration_seconds_for_display(pricing)
 
     rot_value = Decimal(str(pricing.get("rot", 0) or 0))
     rot_percent = pricing.get("rot_percent", 0) or 0
@@ -3484,6 +3757,18 @@ def private_booking_checkout(request):
 
     draft["payment_summary"] = payment_summary_data
     _save_private_draft_data(request, draft)
+    reward_context = _get_private_reward_context(
+        request.user,
+        selected_reward_id=draft.get("selected_reward_id"),
+        use_reward=_is_truthy(draft.get("use_reward"), default=False),
+        amount=pricing.get("final", 0),
+    )
+    summary_data = _private_booking_summary_payload(
+        request,
+        draft,
+        booking=temp_booking,
+        pricing=pricing,
+    )
 
     # ==========================
     # 📨 POST
@@ -3721,7 +4006,156 @@ def private_booking_checkout(request):
         "payment_complete_url": reverse("home:private_booking_payment_complete"),
         "payment_return_url": request.build_absolute_uri(reverse("home:private_booking_payment_complete")),
         "payment_failed_url": reverse("home:payment_failed"),
+        "cash_invoice_download_url": reverse("home:private_booking_cash_invoice_pdf"),
+        "reward_context": reward_context,
+        "summary_data": summary_data,
     })
+
+
+@login_required
+def private_booking_cash_invoice_pdf(request):
+    draft = _get_private_draft_data(request)
+    selected_slugs = draft.get("selected_services") or []
+    if not selected_slugs:
+        return redirect("home:private_booking_checkout")
+
+    services = list(
+        PrivateService.objects.filter(slug__in=selected_slugs).select_related("category")
+    )
+    if not services:
+        messages.error(request, "No booking details found for invoice download.")
+        return redirect("home:private_booking_checkout")
+
+    temp_booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(temp_booking)
+    payment_summary = _calculate_private_payment_summary(
+        temp_booking,
+        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+    )
+
+    customer = Customer.objects.filter(user=request.user).first()
+    customer_name = (request.user.get_full_name() or request.user.username or "").strip()
+    customer_email = (request.user.email or "").strip()
+    customer_phone = ""
+    customer_address = (draft.get("address") or "").strip()
+    customer_area = (draft.get("area") or "").strip()
+    customer_zip = (draft.get("zip_code") or "").strip()
+
+    if customer:
+        customer_name = customer_name or f"{customer.first_name} {customer.last_name}".strip()
+        customer_email = customer_email or (customer.email or "").strip()
+        customer_phone = (customer.phone or "").strip()
+        customer_address = customer_address or customer.display_address()
+        customer_area = customer_area or customer.display_city()
+        customer_zip = customer_zip or customer.display_postal_code()
+
+    appointment_date = draft.get("appointment_date") or "To be confirmed"
+    appointment_time = draft.get("appointment_time_window") or "To be confirmed"
+    schedule_mode = draft.get("schedule_mode") or "same"
+    if schedule_mode == "per_service":
+        appointment_summary = "Separate schedule per service"
+    else:
+        appointment_summary = f"{appointment_date} / {appointment_time}"
+
+    currency = payment_summary.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()).upper()
+    reference_number = f"CASH-{timezone.now().strftime('%Y%m%d-%H%M%S')}"
+    issued_at = timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M")
+
+    meta_rows = [
+        ("Reference", reference_number),
+        ("Issued At", issued_at),
+        ("Customer", customer_name or "N/A"),
+        ("Email", customer_email or "N/A"),
+        ("Phone", customer_phone or "N/A"),
+        ("Address", customer_address or "Not provided"),
+        ("Area / Zip", " / ".join(filter(None, [customer_area, customer_zip])) or "Not provided"),
+        ("Booking Time", appointment_summary),
+    ]
+
+    charge_rows = []
+    for index, service in enumerate(services, start=1):
+        charge_rows.append(
+            (
+                f"Service {index}: {service.title} ({service.category.title})",
+                f"{Decimal(str(service.price or 0)):.2f} {currency}",
+                False,
+            )
+        )
+
+    selected_addons = draft.get("addons_selected") or {}
+    for service_slug, service_addons in selected_addons.items():
+        if not isinstance(service_addons, dict):
+            continue
+        for addon_data in service_addons.values():
+            if not isinstance(addon_data, dict):
+                continue
+            addon_title = addon_data.get("title") or "Add-on"
+            addon_qty = int(addon_data.get("quantity") or 1)
+            addon_price = Decimal(str(addon_data.get("price") or 0))
+            charge_rows.append(
+                (
+                    f"Add-on: {addon_title} x{addon_qty}",
+                    f"{addon_price:.2f} {currency}",
+                    False,
+                )
+            )
+
+    charge_rows.extend([
+        ("Services Total", f"{Decimal(str(pricing.get('services_total', 0) or 0)):.2f} {currency}", False),
+        ("Add-ons Total", f"{Decimal(str(pricing.get('addons_total', 0) or 0)):.2f} {currency}", False),
+        ("Schedule Extra", f"{Decimal(str(pricing.get('schedule_extra', 0) or 0)):.2f} {currency}", False),
+        ("Date Surcharge", f"{Decimal(str(pricing.get('date_surcharge', 0) or 0)):.2f} {currency}", False),
+        (
+            "RUT Deduction",
+            f"-{Decimal(str(pricing.get('rot', 0) or 0)):.2f} {currency}" if temp_booking.use_rot else f"0.00 {currency}",
+            False,
+        ),
+    ])
+
+    if draft.get("discount_code_id"):
+        charge_rows.append((
+            "Discount Code",
+            f"-{Decimal(str(payment_summary.get('discount_amount', 0) or 0)):.2f} {currency}",
+            False,
+        ))
+    if payment_summary.get("reward_applied"):
+        charge_rows.append((
+            "Reward Discount",
+            f"-{Decimal(str(payment_summary.get('reward_discount', 0) or 0)):.2f} {currency}",
+            False,
+        ))
+
+    charge_rows.append((
+        "Total Due",
+        f"{Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}",
+        True,
+    ))
+
+    footer_lines = [
+        "This document can be used for cash payment at service time.",
+        "Payment is still pending until received and confirmed by Hembla experten.",
+    ]
+    if temp_booking.use_rot:
+        footer_lines.append("The total shown includes VAT and the selected RUT deduction.")
+    else:
+        footer_lines.append("The total shown includes VAT. RUT deduction is not applied.")
+
+    logo_path = str(settings.BASE_DIR / "static" / "images" / "logo.png")
+    pdf_bytes = _build_cash_invoice_pdf(
+        {
+            "brand_name": "Hembla experten",
+            "tagline": "Because Home Shouldn't Be Work",
+            "document_title": "Cash Payment Invoice",
+            "document_code": reference_number,
+            "logo_path": logo_path,
+        },
+        meta_rows,
+        charge_rows,
+        footer_lines=footer_lines,
+    )
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{reference_number}.pdf"'
+    return response
 
 @login_required
 def private_booking_payment_complete(request):
@@ -3964,6 +4398,11 @@ def stripe_webhook(request):
 
 def private_zip_available(request, service_slug):
     service = get_object_or_404(PrivateService, slug=service_slug)
+    booking_start_url = reverse("home:private_booking_start", args=[service.slug])
+    if request.user.is_authenticated:
+        continue_booking_url = booking_start_url
+    else:
+        continue_booking_url = f"{reverse('login')}?{urlencode({'next': booking_start_url})}"
 
     call_success = False
     email_success = False
@@ -3993,6 +4432,7 @@ def private_zip_available(request, service_slug):
     return render(request, "home/good_zip.html", {
         "service": service,
         "service_slug": service_slug,
+        "continue_booking_url": continue_booking_url,
         "call_success": call_success,
         "email_success": email_success,
         "stripe_currency": (settings.STRIPE_CURRENCY or "sek").lower(),
@@ -4240,6 +4680,12 @@ def private_booking_services(request):
                 "saved_addons": json.dumps(raw_addons or draft.get("addons_selected") or {}),
                 "pricing": pricing,
                 "reward_context": reward_context,
+                "summary_data": _private_booking_summary_payload(
+                    request,
+                    draft,
+                    booking=temp_booking,
+                    pricing=pricing,
+                ),
             })
 
         final_addons = {}
@@ -4288,16 +4734,11 @@ def private_booking_services(request):
         temp_booking = _build_private_booking_from_draft(draft, request.user)
         pricing = calculate_booking_price(temp_booking)
 
-        duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
-        hours = duration_seconds // 3600
-        minutes = (duration_seconds % 3600) // 60
-        seconds = duration_seconds % 60
-        draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-        draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
-        draft["pricing_details"] = pricing
-        draft["subtotal"] = pricing.get("subtotal", 0) or 0
-        draft["rot_discount"] = pricing.get("rot", 0) or 0
-        draft["total_price"] = pricing.get("final", 0) or 0
+        payment_summary = _calculate_private_payment_summary(
+            temp_booking,
+            pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+        )
+        _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
         _save_private_draft_data(request, draft)
 
         # لو الطلب AJAX → رجّع JSON
@@ -4327,6 +4768,12 @@ def private_booking_services(request):
         "saved_addons": json.dumps(draft.get("addons_selected") or {}),
         "pricing": pricing,
         "reward_context": reward_context,
+        "summary_data": _private_booking_summary_payload(
+            request,
+            draft,
+            booking=temp_booking,
+            pricing=pricing,
+        ),
     })
 
 def private_cart_continue(request):
@@ -4423,6 +4870,12 @@ def private_booking_schedule(request):
             use_reward=_is_truthy(draft.get("use_reward"), default=False),
             amount=pricing.get("final", 0),
         )
+        summary_data = _private_booking_summary_payload(
+            request,
+            draft,
+            booking=temp_booking,
+            pricing=pricing,
+        )
         initial_schedule_state = {
             "mode": temp_booking.schedule_mode or ("same" if len(services) <= 1 else ""),
             "appointment_date": temp_booking.appointment_date.isoformat() if hasattr(temp_booking.appointment_date, "isoformat") else (temp_booking.appointment_date or ""),
@@ -4439,6 +4892,7 @@ def private_booking_schedule(request):
             "date_rules": date_rules_json,
             "schedule_rules": schedule_rules_json,
             "pricing": pricing,
+            "summary_data": summary_data,
             "reward_context": reward_context,
             "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
             "min_booking_date": min_booking_date.isoformat(),
@@ -4617,11 +5071,12 @@ def private_booking_schedule(request):
         else:
             draft["scheduled_at"] = None
 
+        payment_summary = _calculate_private_payment_summary(
+            temp_booking,
+            pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+        )
         draft["quoted_duration_minutes"] = duration_minutes
-        draft["pricing_details"] = pricing
-        draft["total_price"] = pricing["final"]
-        draft["subtotal"] = pricing["subtotal"]
-        draft["rot_discount"] = pricing["rot"]
+        _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
 
         _save_private_draft_data(request, draft)
 
@@ -4705,34 +5160,7 @@ def private_price_api(request):
     # -----------------------------------------------
 
     pricing = calculate_booking_price(booking)
-    reward_context = _get_private_reward_context(
-        request.user,
-        selected_reward_id=draft.get("selected_reward_id"),
-        use_reward=_is_truthy(getattr(booking, "use_reward", False), default=False),
-        amount=pricing.get("final", 0),
-    )
-    reward_discount = reward_context["reward_discount"]
-    final_total = max(Decimal("0.00"), Decimal(str(pricing["final"])) - reward_discount)
-
-    return JsonResponse({
-        "services_total": pricing["services_total"],
-        "addons_total": pricing["addons_total"],
-        "subtotal": pricing["subtotal"],
-        "schedule_extra": pricing["schedule_extra"],
-        "rot": pricing["rot"],
-        "rot_percent": pricing.get("rot_percent", 0),
-        "use_rot": pricing.get("use_rot", True),
-        "use_reward": reward_context["use_reward"],
-        "reward_available": reward_context["has_rewards"],
-        "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
-        "reward_discount": float(reward_discount),
-        "points_balance": reward_context["points_balance"],
-        "vat_included": pricing.get("vat_included", True),
-        "final": float(final_total),
-        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
-        "duration_hours": pricing.get("duration_hours", 0),
-        "duration_seconds": pricing.get("duration_seconds", 0),
-    })
+    return JsonResponse(_private_booking_summary_payload(request, draft, booking=booking, pricing=pricing))
 
 
 @require_POST
@@ -4742,39 +5170,15 @@ def private_update_rot_api(request):
 
     booking = _build_private_booking_from_draft(draft, request.user)
     pricing = calculate_booking_price(booking)
-    reward_context = _get_private_reward_context(
-        request.user,
-        selected_reward_id=draft.get("selected_reward_id"),
-        use_reward=_is_truthy(draft.get("use_reward"), default=False),
-        amount=pricing.get("final", 0),
+    payment_summary = _calculate_private_payment_summary(
+        booking,
+        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
     )
-    reward_discount = reward_context["reward_discount"]
-    final_total = max(Decimal("0.00"), Decimal(str(pricing.get("final", 0) or 0)) - reward_discount)
-
-    draft["rot_discount"] = pricing.get("rot", 0) or 0
-    draft["pricing_details"] = pricing
-    draft["total_price"] = float(final_total)
-    draft["subtotal"] = pricing.get("subtotal", 0) or 0
+    _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
     _save_private_draft_data(request, draft)
-
-    return JsonResponse({
-        "success": True,
-        "services_total": pricing.get("services_total", 0),
-        "addons_total": pricing.get("addons_total", 0),
-        "subtotal": pricing.get("subtotal", 0),
-        "schedule_extra": pricing.get("schedule_extra", 0),
-        "rot": pricing.get("rot", 0),
-        "rot_percent": pricing.get("rot_percent", 0),
-        "use_rot": pricing.get("use_rot", True),
-        "use_reward": reward_context["use_reward"],
-        "reward_discount": float(reward_discount),
-        "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
-        "vat_included": pricing.get("vat_included", True),
-        "final": float(final_total),
-        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
-        "duration_hours": pricing.get("duration_hours", 0),
-        "duration_seconds": pricing.get("duration_seconds", 0),
-    })
+    payload = _private_booking_summary_payload(request, draft, booking=booking, pricing=pricing)
+    payload["success"] = True
+    return JsonResponse(payload)
 
 
 @require_POST
@@ -4784,41 +5188,75 @@ def private_update_reward_api(request):
 
     booking = _build_private_booking_from_draft(draft, request.user)
     pricing = calculate_booking_price(booking)
-    reward_context = _get_private_reward_context(
-        request.user,
-        selected_reward_id=draft.get("selected_reward_id"),
-        use_reward=_is_truthy(draft.get("use_reward"), default=False),
-        amount=pricing.get("final", 0),
+    payment_summary = _calculate_private_payment_summary(
+        booking,
+        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
     )
-    reward_discount = reward_context["reward_discount"]
-    final_total = max(Decimal("0.00"), Decimal(str(pricing.get("final", 0) or 0)) - reward_discount)
-
-    draft["pricing_details"] = pricing
-    draft["total_price"] = float(final_total)
-    draft["subtotal"] = pricing.get("subtotal", 0) or 0
-    draft["rot_discount"] = pricing.get("rot", 0) or 0
-    if reward_context["selected_reward"] is not None:
-        draft["selected_reward_id"] = reward_context["selected_reward"].id
+    _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
+    if payment_summary["reward"] is not None:
+        draft["selected_reward_id"] = payment_summary["reward"].id
     else:
         draft.pop("selected_reward_id", None)
     _save_private_draft_data(request, draft)
+    payload = _private_booking_summary_payload(request, draft, booking=booking, pricing=pricing)
+    payload["success"] = True
+    return JsonResponse(payload)
 
-    return JsonResponse({
-        "success": True,
-        "services_total": pricing.get("services_total", 0),
-        "addons_total": pricing.get("addons_total", 0),
-        "subtotal": pricing.get("subtotal", 0),
-        "rot": pricing.get("rot", 0),
-        "rot_percent": pricing.get("rot_percent", 0),
-        "use_rot": pricing.get("use_rot", True),
-        "use_reward": reward_context["use_reward"],
-        "reward_available": reward_context["has_rewards"],
-        "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
-        "reward_discount": float(reward_discount),
-        "final": float(final_total),
-        "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
-        "duration_seconds": pricing.get("duration_seconds", 0),
-    })
+
+@require_POST
+def private_update_discount_api(request):
+    draft = _get_private_draft_data(request)
+    remove_discount = _is_truthy(request.POST.get("remove"), default=False)
+
+    if remove_discount:
+        draft.pop("discount_code_id", None)
+        booking = _build_private_booking_from_draft(draft, request.user)
+        pricing = calculate_booking_price(booking)
+        payment_summary = _calculate_private_payment_summary(
+            booking,
+            pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+        )
+        _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
+        _save_private_draft_data(request, draft)
+        payload = _private_booking_summary_payload(request, draft, booking=booking, pricing=pricing)
+        payload["success"] = True
+        payload["message"] = "Discount code removed."
+        return JsonResponse(payload)
+
+    code_input = (request.POST.get("discount_code") or "").strip()
+    if not code_input:
+        payload = _private_booking_summary_payload(request, draft)
+        payload["success"] = False
+        payload["error"] = "Enter a discount code."
+        return JsonResponse(payload)
+
+    dc = DiscountCode.objects.filter(code__iexact=code_input).first()
+    if dc is None:
+        payload = _private_booking_summary_payload(request, draft)
+        payload["success"] = False
+        payload["error"] = "Invalid discount code."
+        return JsonResponse(payload)
+
+    is_valid, reason = dc.validate(user=request.user)
+    if not is_valid:
+        payload = _private_booking_summary_payload(request, draft)
+        payload["success"] = False
+        payload["error"] = reason or "Discount code is not valid."
+        return JsonResponse(payload)
+
+    draft["discount_code_id"] = dc.id
+    booking = _build_private_booking_from_draft(draft, request.user)
+    pricing = calculate_booking_price(booking)
+    payment_summary = _calculate_private_payment_summary(
+        booking,
+        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+    )
+    _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
+    _save_private_draft_data(request, draft)
+    payload = _private_booking_summary_payload(request, draft, booking=booking, pricing=pricing)
+    payload["success"] = True
+    payload["message"] = "Discount code applied."
+    return JsonResponse(payload)
 
 
 def private_provider_availability_api(request):
@@ -4894,35 +5332,15 @@ def private_update_answer_api(request):
     if not field or not service_slug:
         return JsonResponse({"error": "Missing data"}, status=400)
 
-    def _summary_payload_from_draft(current_draft, pricing):
-        reward_context = _get_private_reward_context(
-            request.user,
-            selected_reward_id=current_draft.get("selected_reward_id"),
-            use_reward=_is_truthy(current_draft.get("use_reward"), default=False),
-            amount=pricing.get("final", 0),
+    def _summary_payload_from_draft(current_draft, booking, pricing):
+        payload = _private_booking_summary_payload(
+            request,
+            current_draft,
+            booking=booking,
+            pricing=pricing,
         )
-        reward_discount = reward_context["reward_discount"]
-        final_total = max(Decimal("0.00"), Decimal(str(pricing.get("final", 0) or 0)) - reward_discount)
-        return {
-            "success": True,
-            "services_total": pricing.get("services_total", 0),
-            "addons_total": pricing.get("addons_total", 0),
-            "subtotal": pricing.get("subtotal", 0),
-            "schedule_extra": pricing.get("schedule_extra", 0),
-            "rot": pricing.get("rot", 0),
-            "rot_percent": pricing.get("rot_percent", 0),
-            "use_rot": pricing.get("use_rot", True),
-            "use_reward": reward_context["use_reward"],
-            "reward_available": reward_context["has_rewards"],
-            "reward_title": reward_context["selected_reward"].title if reward_context["selected_reward"] else "",
-            "reward_discount": float(reward_discount),
-            "points_balance": reward_context["points_balance"],
-            "vat_included": pricing.get("vat_included", True),
-            "final": float(final_total),
-            "currency": pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
-            "duration_hours": pricing.get("duration_hours", 0),
-            "duration_seconds": pricing.get("duration_seconds", 0),
-        }
+        payload["success"] = True
+        return payload
 
     if field == "__mode":
         service_modes = draft.get("service_modes") or {}
@@ -4930,18 +5348,13 @@ def private_update_answer_api(request):
         draft["service_modes"] = service_modes
         temp_booking = _build_private_booking_from_draft(draft, request.user)
         pricing = calculate_booking_price(temp_booking)
-        duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
-        hours = duration_seconds // 3600
-        minutes = (duration_seconds % 3600) // 60
-        seconds = duration_seconds % 60
-        draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-        draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
-        draft["pricing_details"] = pricing
-        draft["subtotal"] = pricing.get("subtotal", 0) or 0
-        draft["total_price"] = pricing.get("final", 0) or 0
-        draft["rot_discount"] = pricing.get("rot", 0) or 0
+        payment_summary = _calculate_private_payment_summary(
+            temp_booking,
+            pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+        )
+        _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
         _save_private_draft_data(request, draft)
-        return JsonResponse(_summary_payload_from_draft(draft, pricing))
+        return JsonResponse(_summary_payload_from_draft(draft, temp_booking, pricing))
 
     parsed_value = value
     if value:
@@ -4959,19 +5372,14 @@ def private_update_answer_api(request):
     draft["service_answers"] = answers
     temp_booking = _build_private_booking_from_draft(draft, request.user)
     pricing = calculate_booking_price(temp_booking)
-    duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
-    hours = duration_seconds // 3600
-    minutes = (duration_seconds % 3600) // 60
-    seconds = duration_seconds % 60
-    draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
-    draft["pricing_details"] = pricing
-    draft["subtotal"] = pricing.get("subtotal", 0) or 0
-    draft["total_price"] = pricing.get("final", 0) or 0
-    draft["rot_discount"] = pricing.get("rot", 0) or 0
+    payment_summary = _calculate_private_payment_summary(
+        temp_booking,
+        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+    )
+    _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
     _save_private_draft_data(request, draft)
 
-    return JsonResponse(_summary_payload_from_draft(draft, pricing))
+    return JsonResponse(_summary_payload_from_draft(draft, temp_booking, pricing))
 
 
 
@@ -4992,16 +5400,11 @@ def private_update_addons_api(request):
     draft["addons_selected"] = addons
     temp_booking = _build_private_booking_from_draft(draft, request.user)
     pricing = calculate_booking_price(temp_booking)
-    duration_seconds = int(pricing.get("duration_seconds", 0) or 0)
-    hours = duration_seconds // 3600
-    minutes = (duration_seconds % 3600) // 60
-    seconds = duration_seconds % 60
-    draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
-    draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
-    draft["subtotal"] = pricing.get("subtotal", 0) or 0
-    draft["total_price"] = pricing.get("final", 0) or 0
-    draft["rot_discount"] = pricing.get("rot", 0) or 0
-    draft["pricing_details"] = pricing
+    payment_summary = _calculate_private_payment_summary(
+        temp_booking,
+        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
+    )
+    _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
     _save_private_draft_data(request, draft)
 
     return JsonResponse({
@@ -5012,7 +5415,7 @@ def private_update_addons_api(request):
             "subtotal": pricing.get("subtotal", 0),
             "rot": pricing.get("rot", 0),
             "final": pricing.get("final", 0),
-            "duration_seconds": pricing.get("duration_seconds", 0),
+            "duration_seconds": _pricing_duration_seconds_for_display(pricing),
         },
     })
 

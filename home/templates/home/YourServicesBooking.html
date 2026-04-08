@@ -95,6 +95,77 @@
       font-size: 14px;
     }
 
+    .by-room-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 0 0 22px;
+      padding: 18px 20px;
+      border-left: 5px solid #11a2cf;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(17, 162, 207, 0.14) 0%, rgba(17, 162, 207, 0.08) 100%);
+      color: #12779b;
+      box-shadow: 0 10px 22px rgba(17, 162, 207, 0.08);
+    }
+
+    .by-room-note.is-error {
+      border-left-color: #e74c3c;
+      background: linear-gradient(180deg, rgba(231, 76, 60, 0.14) 0%, rgba(231, 76, 60, 0.08) 100%);
+      color: #b63b2f;
+      box-shadow: 0 12px 26px rgba(231, 76, 60, 0.16);
+      animation: by-room-note-shake 0.36s ease-in-out 2;
+    }
+
+    .by-room-note-icon {
+      flex: 0 0 26px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #11a2cf 0%, #078fbd 100%);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+      text-align: center;
+      box-shadow: 0 8px 18px rgba(7, 143, 189, 0.22);
+    }
+
+    .by-room-note.is-error .by-room-note-icon {
+      background: linear-gradient(135deg, #ef6355 0%, #d93f31 100%);
+      box-shadow: 0 8px 18px rgba(217, 63, 49, 0.24);
+    }
+
+    .by-room-note strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 15px;
+      font-weight: 800;
+      color: #155070;
+    }
+
+    .by-room-note span {
+      display: block;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #34627a;
+    }
+
+    .by-room-note.is-error strong,
+    .by-room-note.is-error span {
+      color: #b63b2f;
+    }
+
+    @keyframes by-room-note-shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-7px); }
+      40% { transform: translateX(7px); }
+      60% { transform: translateX(-5px); }
+      80% { transform: translateX(5px); }
+    }
+
     .by-room-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -111,18 +182,22 @@
     }
 
     .room-card .room-icon {
-      width: 58px;
-      height: 58px;
-      margin: 0 auto 12px;
+      width: 100%;
+      height: 120px;
+      margin: 0 0 14px;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
+      border-radius: 16px;
+      background: #f4fbfe;
     }
 
     .room-card .room-icon img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: contain;
+      display: block;
     }
 
     .room-card .room-icon-fallback {
@@ -393,7 +468,7 @@
     <h2>Your Selected Services</h2>
     <h3>What can we help with</h3>
 
-    <form method="post" data-skip-validate onsubmit="return handleServicesSubmit(event);">
+    <form id="private-booking-services-form" method="post" data-skip-validate onsubmit="return handleServicesSubmit(event);">
       {% csrf_token %}
       <input type="hidden" name="use_rot" id="use_rot_input" value="{% if booking.use_rot %}1{% else %}0{% endif %}">
 
@@ -604,6 +679,13 @@
               <h6>Select Room</h6>
               <p>Choose the specific rooms you want us to clean. This section is visual for now and the room-by-room pricing logic will be wired next.</p>
             </div>
+            <div class="by-room-note" data-by-room-note>
+              <span class="by-room-note-icon">i</span>
+              <div>
+                <strong>Customize your cleaning</strong>
+                <span>When selecting 'By room', please choose at least 5 rooms to proceed.</span>
+              </div>
+            </div>
             <div class="by-room-grid">
               {% for room in service.by_room_options %}
               <div class="room-card">
@@ -739,6 +821,52 @@ function persistAddonsSelection() {
     return sendAddonsUpdate();
 }
 
+function collectAddonFormData(popupBody) {
+    const fields = popupBody.querySelectorAll("input, textarea, select");
+    const data = {};
+    const radioGroups = {};
+
+    fields.forEach(f => {
+        if (!f.name) return;
+
+        if (f.type === "radio") {
+            radioGroups[f.name] = radioGroups[f.name] || { any: false };
+            if (f.checked) {
+                radioGroups[f.name].any = true;
+                data[f.name] = f.value;
+            }
+        } else if (f.type === "checkbox") {
+            radioGroups[f.name] = radioGroups[f.name] || { any: false };
+            if (f.checked) {
+                radioGroups[f.name].any = true;
+                data[f.name] = data[f.name] || [];
+                data[f.name].push(f.value);
+            }
+        } else if (f.tagName === "SELECT" && f.multiple) {
+            data[f.name] = Array.from(f.selectedOptions).map(o => o.value).filter(Boolean);
+        } else {
+            data[f.name] = (f.value || "").trim();
+        }
+    });
+
+    return { data, radioGroups, fields };
+}
+
+function saveAddonDraftAnswers(serviceSlug, addonKey) {
+    const popupBody = document.getElementById("popupBody");
+    if (!popupBody || !serviceSlug || !addonKey) return;
+
+    const { data } = collectAddonFormData(popupBody);
+    ensureAddonSelected(serviceSlug, addonKey);
+    ADDONS_DATA[serviceSlug][addonKey] = data;
+    document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
+}
+
+function ensureAddonSelected(serviceSlug, addonKey) {
+    ADDONS_DATA[serviceSlug] = ADDONS_DATA[serviceSlug] || {};
+    ADDONS_DATA[serviceSlug][addonKey] = ADDONS_DATA[serviceSlug][addonKey] || {};
+}
+
 function toggleAddonSelection(serviceSlug, addonKey) {
     const serviceAddons = ADDONS_DATA[serviceSlug] || {};
     const isSelected = Object.prototype.hasOwnProperty.call(serviceAddons, addonKey);
@@ -755,8 +883,7 @@ function toggleAddonSelection(serviceSlug, addonKey) {
         return;
     }
 
-    ADDONS_DATA[serviceSlug] = ADDONS_DATA[serviceSlug] || {};
-    ADDONS_DATA[serviceSlug][addonKey] = ADDONS_DATA[serviceSlug][addonKey] || {};
+    ensureAddonSelected(serviceSlug, addonKey);
     persistAddonsSelection();
 
     if (addonRequiresConfig(serviceSlug, addonKey)) {
@@ -765,6 +892,29 @@ function toggleAddonSelection(serviceSlug, addonKey) {
     }
 
     renderAddonsGrid(serviceSlug);
+}
+
+function handleAddonCardToggle(event, serviceSlug, addonKey) {
+    event.stopPropagation();
+    toggleAddonSelection(serviceSlug, addonKey);
+}
+
+function handleAddonCardOpen(serviceSlug, addonKey) {
+    if (!addonRequiresConfig(serviceSlug, addonKey)) {
+        if (!addonHasSavedData(serviceSlug, addonKey)) {
+            ensureAddonSelected(serviceSlug, addonKey);
+            persistAddonsSelection();
+        }
+        renderAddonsGrid(serviceSlug);
+        return;
+    }
+
+    if (!addonHasSavedData(serviceSlug, addonKey)) {
+        ensureAddonSelected(serviceSlug, addonKey);
+        persistAddonsSelection();
+    }
+
+    openAddonForm(serviceSlug, addonKey);
 }
 
 function renderAddonsGrid(serviceSlug) {
@@ -786,10 +936,17 @@ function renderAddonsGrid(serviceSlug) {
         const isChecked = addonHasSavedData(serviceSlug, key);
 
         html += `
-          <div class="addon-card${isChecked ? ' is-selected' : ''}" onclick="toggleAddonSelection('${serviceSlug}','${key}')">
-            <img src="${ad.icon}" class="addon-icon">
-            <p>${ad.label}</p>
-            <div class="check-box ${isChecked ? 'checked' : ''}"></div>
+          <div class="addon-card${isChecked ? ' is-selected' : ''}">
+            <button type="button" class="addon-card-main" onclick="handleAddonCardOpen('${serviceSlug}','${key}')">
+              <img src="${ad.icon}" class="addon-icon">
+              <p>${ad.label}</p>
+            </button>
+            <button
+              type="button"
+              class="check-box ${isChecked ? 'checked' : ''}"
+              onclick="handleAddonCardToggle(event,'${serviceSlug}','${key}')"
+              aria-label="${isChecked ? 'Remove add-on' : 'Select add-on'}"
+            ></button>
           </div>
         `;
     }
@@ -802,6 +959,10 @@ function renderAddonsGrid(serviceSlug) {
 
 // فتح قائمة Add-ons
 function openAddonsPopup(serviceSlug) {
+    if (CURRENT_SERVICE && CURRENT_ADDON) {
+        saveAddonDraftAnswers(CURRENT_SERVICE, CURRENT_ADDON);
+        persistAddonsSelection();
+    }
     CURRENT_SERVICE = serviceSlug;
     CURRENT_ADDON = null;
     renderAddonsGrid(serviceSlug);
@@ -855,10 +1016,15 @@ function openAddonForm(serviceSlug, addonKey) {
                     }
                 } else {
                     f.value = saved[f.name];
+                    if (f.tagName === "SELECT") {
+                        f.dispatchEvent(new Event("change", { bubbles: true }));
+                    }
                 }
             }
         });
     }
+
+    setupCustomSelects(popupBody);
 }
 
 
@@ -973,15 +1139,60 @@ function applySummaryData(data) {
         rewardLabel.innerText = data.reward_title ? `Reward: ${data.reward_title}` : "Reward";
         rewardValue.innerText = (data.use_reward ? "-" : "") + currency + " " + Number(data.reward_discount || 0).toFixed(2);
     }
+    const discountRow = document.getElementById("sum_discount_row");
+    const discountLabel = document.getElementById("sum_discount_label");
+    const discountValue = document.getElementById("sum_discount");
+    const discountInput = document.getElementById("discountCodeInput");
+    const discountApplyBtn = document.getElementById("discountApplyBtn");
+    const discountRemoveBtn = document.getElementById("discountRemoveBtn");
+    const discountFeedback = document.getElementById("discountFeedback");
+    const hasDiscountCode = Boolean(data.discount_code);
+    const hasReferralDiscount = Boolean(data.referral_discount_applied);
+    const discountAmount = hasDiscountCode ? Number(data.discount_amount || 0) : Number(data.referral_discount_amount || 0);
+    if (discountRow && discountLabel && discountValue) {
+        discountRow.hidden = !hasDiscountCode && !hasReferralDiscount;
+        discountLabel.innerText = hasDiscountCode
+            ? `Discount (${data.discount_code})`
+            : (hasReferralDiscount ? "Referral Discount" : "Discount");
+        discountValue.innerText = "-" + currency + " " + discountAmount.toFixed(2);
+    }
+    if (discountInput && discountApplyBtn && discountRemoveBtn) {
+        if (hasDiscountCode) {
+            discountInput.value = data.discount_code;
+            discountInput.setAttribute("readonly", "readonly");
+            discountApplyBtn.hidden = true;
+            discountRemoveBtn.hidden = false;
+        } else {
+            discountInput.removeAttribute("readonly");
+            discountApplyBtn.hidden = false;
+            discountRemoveBtn.hidden = true;
+        }
+    }
+    if (discountFeedback) {
+        discountFeedback.classList.toggle("is-error", Boolean(data.error));
+        if (data.error) {
+            discountFeedback.innerText = data.error;
+        } else if (hasDiscountCode) {
+            discountFeedback.innerText = `Code ${data.discount_code} applied for ${Number(data.discount_percent || 0)}% off.`;
+        } else if (hasReferralDiscount) {
+            discountFeedback.innerText = "Referral discount is currently applied.";
+        } else if (data.message) {
+            discountFeedback.innerText = data.message;
+        } else {
+            discountFeedback.innerText = "No discount code applied yet.";
+        }
+    }
     const rotLabel = document.getElementById("sum_rot_label");
     if (rotLabel) {
-        rotLabel.innerText = data.use_rot ? `ROT Deduction (${Number(data.rot_percent || 0).toFixed(1)}%)` : "ROT Deduction (not applied)";
+        const rotPercent = Number(data.rot_percent || 0);
+        const rotPercentText = rotPercent.toFixed(2);
+        rotLabel.innerText = data.use_rot ? `RUT Deduction (${rotPercentText}%)` : "RUT Deduction (not applied)";
     }
     const totalNote = document.getElementById("sum_total_note");
     if (totalNote) {
         totalNote.innerText = data.use_rot
-            ? "Total includes VAT and ROT deduction."
-            : "Total includes VAT. ROT deduction is not applied.";
+            ? "Total includes VAT and RUT deduction."
+            : "Total includes VAT. RUT deduction is not applied.";
     }
 }
 
@@ -1384,21 +1595,38 @@ function sendAddonsUpdate() {
 
 
 <script>
+const MIN_BY_ROOM_SELECTION = 5;
+
+function getByRoomTotal(panel) {
+    const roomInputs = Array.from(panel.querySelectorAll("[data-room-input]"));
+    const totalRooms = roomInputs.reduce((sum, input) => sum + Number(input.value || 0), 0);
+    return { roomInputs, totalRooms };
+}
+
+function setByRoomNoteState(panel, isError) {
+    const note = panel.querySelector("[data-by-room-note]");
+    if (!note) return;
+    note.classList.toggle("is-error", isError);
+}
+
 function validateMainQuestions() {
     let valid = true;
     let firstError = null;
+    let byRoomMinimumFailed = false;
 
     document.querySelectorAll("[data-service-mode-panel='standard-cleaning']").forEach((panel) => {
         if (!panel.classList.contains("is-active") || panel.dataset.mode !== "by_room") return;
-        const roomInputs = Array.from(panel.querySelectorAll("[data-room-input]"));
-        const totalRooms = roomInputs.reduce((sum, input) => sum + Number(input.value || 0), 0);
-        if (totalRooms <= 0) {
+        const { roomInputs, totalRooms } = getByRoomTotal(panel);
+        if (totalRooms < MIN_BY_ROOM_SELECTION) {
             valid = false;
+            byRoomMinimumFailed = true;
             firstError = firstError || roomInputs[0] || panel;
+            setByRoomNoteState(panel, true);
             roomInputs.forEach((input) => {
                 input.closest(".room-card")?.classList.add("is-error");
             });
         } else {
+            setByRoomNoteState(panel, false);
             roomInputs.forEach((input) => {
                 input.closest(".room-card")?.classList.remove("is-error");
             });
@@ -1509,7 +1737,10 @@ function validateMainQuestions() {
         firstError.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
-    return valid;
+    return {
+        valid,
+        byRoomMinimumFailed,
+    };
 }</script>
 <script>
 function validateAddons() {
@@ -1519,12 +1750,22 @@ function validateAddons() {
 
 <script>
 function handleServicesSubmit(e) {
-    if (!validateMainQuestions()) {
+    const validation = validateMainQuestions();
+    if (!validation.valid) {
         if (e) e.preventDefault();
         if (window.showToast) {
-            window.showToast("Missing answers", "Please answer all required service questions before continuing.");
+            window.showToast(
+                validation.byRoomMinimumFailed ? "Minimum rooms required" : "Missing answers",
+                validation.byRoomMinimumFailed
+                    ? `When selecting 'By room', please choose at least ${MIN_BY_ROOM_SELECTION} rooms to proceed.`
+                    : "Please answer all required service questions before continuing."
+            );
         } else {
-            alert("Please answer all required service questions before continuing.");
+            alert(
+                validation.byRoomMinimumFailed
+                    ? `When selecting 'By room', please choose at least ${MIN_BY_ROOM_SELECTION} rooms to proceed.`
+                    : "Please answer all required service questions before continuing."
+            );
         }
         return false;
     }
@@ -1537,11 +1778,31 @@ function handleServicesSubmit(e) {
     return true;
 }
 
-const servicesForm = document.querySelector('form[method="post"]');
+const servicesForm = document.getElementById("private-booking-services-form");
 const summaryContinue = document.querySelector(".js-summary-continue");
 const useRotToggle = document.getElementById("useRotToggle");
 const useRewardToggle = document.getElementById("useRewardToggle");
 const useRotInput = document.getElementById("use_rot_input");
+const discountCodeInput = document.getElementById("discountCodeInput");
+const discountApplyBtn = document.getElementById("discountApplyBtn");
+const discountRemoveBtn = document.getElementById("discountRemoveBtn");
+
+function submitDiscountAction(formData) {
+    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || "";
+    return fetch(`/private/api/booking/update-discount/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": csrfToken
+        },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        applySummaryData(data);
+        return data;
+    });
+}
+
 if (summaryContinue && servicesForm) {
     summaryContinue.addEventListener("click", (e) => {
         e.preventDefault();
@@ -1588,6 +1849,39 @@ if (useRewardToggle) {
         .then(r => r.json())
         .then(data => applySummaryData(data))
         .catch(() => updateSummary());
+    });
+}
+
+if (discountApplyBtn && discountCodeInput) {
+    discountApplyBtn.addEventListener("click", () => {
+        const code = (discountCodeInput.value || "").trim();
+        if (!code) {
+            const discountFeedback = document.getElementById("discountFeedback");
+            if (discountFeedback) {
+                discountFeedback.classList.add("is-error");
+                discountFeedback.innerText = "Enter a discount code.";
+            }
+            return;
+        }
+        const fd = new FormData();
+        fd.append("discount_code", code);
+        submitDiscountAction(fd).then((data) => {
+            if (!data.discount_code && !data.error) {
+                discountCodeInput.value = code;
+            }
+        }).catch(() => updateSummary());
+    });
+}
+
+if (discountRemoveBtn) {
+    discountRemoveBtn.addEventListener("click", () => {
+        const fd = new FormData();
+        fd.append("remove", "1");
+        submitDiscountAction(fd)
+            .then(() => {
+                if (discountCodeInput) discountCodeInput.value = "";
+            })
+            .catch(() => updateSummary());
     });
 }
 
@@ -1787,10 +2081,22 @@ document.querySelectorAll(".room-stepper").forEach((button) => {
 
         const serviceSlug = input.dataset.service;
         const roomCounts = {};
-        document.querySelectorAll(`[data-room-input][data-service="${serviceSlug}"]`).forEach((roomInput) => {
+        const serviceRoomInputs = document.querySelectorAll(`[data-room-input][data-service="${serviceSlug}"]`);
+        serviceRoomInputs.forEach((roomInput) => {
             const roomId = roomInput.name.split("__room__")[1];
             roomCounts[roomId] = Number(roomInput.value || 0);
         });
+
+        const panel = input.closest('[data-service-mode-panel][data-mode="by_room"]');
+        if (panel) {
+            const { totalRooms } = getByRoomTotal(panel);
+            const isInvalid = totalRooms < MIN_BY_ROOM_SELECTION;
+            setByRoomNoteState(panel, isInvalid);
+            serviceRoomInputs.forEach((roomInput) => {
+                roomInput.closest(".room-card")?.classList.toggle("is-error", isInvalid);
+            });
+        }
+
         updateAnswer(serviceSlug, "__room_counts", JSON.stringify(roomCounts));
     });
 });

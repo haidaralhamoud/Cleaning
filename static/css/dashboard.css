@@ -888,9 +888,10 @@ textarea.form-control:focus{
 .json-empty{font-size:12px;color:#6b7280}
 .json-nested{width:100%}
 .qs-builder{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px}
-.qs-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.qs-toolbar{display:flex;justify-content:flex-start;align-items:center;margin-bottom:12px}
 .qs-title{font-weight:700;color:#0b6b88}
 .qs-list{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+.qs-actions{display:flex;justify-content:flex-end;margin-bottom:10px}
 .qs-card{border:1px solid #e8edf3;border-radius:12px;padding:12px;background:#f9fbfd}
 .qs-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
 .qs-card-title{font-weight:700}

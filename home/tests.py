@@ -135,6 +135,7 @@ class BookingPricingDurationTests(TestCase):
         pricing = calculate_booking_price(booking)
 
         self.assertEqual(pricing["duration_minutes"], 120.0)
+        self.assertTrue(pricing["duration_is_estimated"])
 
     def test_multiple_services_without_option_durations_stack_default_duration(self):
         service_one = PrivateService.objects.create(
@@ -157,6 +158,7 @@ class BookingPricingDurationTests(TestCase):
         pricing = calculate_booking_price(booking)
 
         self.assertEqual(pricing["duration_minutes"], 240.0)
+        self.assertTrue(pricing["duration_is_estimated"])
 
 
 @override_settings(

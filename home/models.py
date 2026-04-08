@@ -1143,6 +1143,16 @@ class ServiceRoomOption(models.Model):
     class Meta:
         ordering = ["display_order", "title"]
 
+    def save(self, *args, **kwargs):
+        if not (self.short_label or "").strip():
+            words = [part for part in re.split(r"[\s_\-]+", (self.title or "").strip()) if part]
+            if len(words) >= 2:
+                derived = "".join(word[0].upper() for word in words[:3])
+            else:
+                derived = (self.title or "").strip()[:10]
+            self.short_label = (derived or "ROOM")[:10]
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.service.title} - {self.title}"
 
@@ -1323,6 +1333,27 @@ class StripeWebhookEvent(models.Model):
 
 class AvailableZipCode(models.Model):
     code = models.CharField(max_length=20, unique=True)
+
+    class Meta:
+        ordering = ["code"]
+        verbose_name = "Available Zip Code"
+        verbose_name_plural = "Available Zip Codes"
+
+    @staticmethod
+    def normalize_code(value):
+        return "".join(ch for ch in str(value or "") if ch.isdigit())
+
+    def clean(self):
+        super().clean()
+        normalized = self.normalize_code(self.code)
+        if len(normalized) != 5:
+            raise ValidationError({"code": "Zip code must contain exactly 5 digits."})
+        self.code = normalized
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return self.code
 
@@ -1336,6 +1367,15 @@ class NotAvailableZipRequest(models.Model):
     phone = models.CharField(max_length=50)
     message = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Unavailable Zip Request"
+        verbose_name_plural = "Unavailable Zip Requests"
+
+    def __str__(self):
+        service_label = self.service.title if self.service_id else "No service"
+        return f"{self.zip_code} - {self.first_name} ({service_label})"
 
 
 class CallRequest(models.Model):

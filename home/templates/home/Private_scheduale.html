@@ -258,13 +258,12 @@
 
         <label class="rot-toggle-row" for="scheduleUseRotToggle">
             <span class="rot-toggle-copy">
-                <strong>Use ROT deduction</strong>
+                <strong>Use RUT deduction</strong>
                 <small>Available for eligible private customers in Sweden.</small>
             </span>
             <input type="checkbox" id="scheduleUseRotToggle" {% if booking.use_rot %}checked{% endif %}>
         </label>
 
-        {% if request.user.is_authenticated %}
         <label class="rot-toggle-row" for="scheduleUseRewardToggle">
             <span class="rot-toggle-copy">
                 <strong>Use reward</strong>
@@ -287,7 +286,49 @@
                 {% if not reward_context.selected_reward %}disabled{% endif %}
             >
         </label>
-        {% endif %}
+
+        <div class="summary-discount-panel">
+            <div class="summary-discount-head">
+                <span>
+                    <strong>Discount code</strong>
+                    <small>Apply a code here to preview the updated invoice.</small>
+                </span>
+            </div>
+            <div class="summary-discount-controls">
+                <input
+                    type="text"
+                    id="scheduleDiscountCodeInput"
+                    value="{{ summary_data.discount_code|default:'' }}"
+                    placeholder="Enter discount code"
+                    {% if summary_data.discount_code %}readonly{% endif %}
+                >
+                <button
+                    type="button"
+                    class="summary-discount-btn"
+                    id="scheduleDiscountApplyBtn"
+                    {% if summary_data.discount_code %}hidden{% endif %}
+                >
+                    Apply
+                </button>
+                <button
+                    type="button"
+                    class="summary-discount-btn summary-discount-btn--ghost"
+                    id="scheduleDiscountRemoveBtn"
+                    {% if not summary_data.discount_code %}hidden{% endif %}
+                >
+                    Remove
+                </button>
+            </div>
+            <p class="summary-discount-feedback" id="scheduleDiscountFeedback">
+                {% if summary_data.discount_code %}
+                  Code {{ summary_data.discount_code }} applied for {{ summary_data.discount_percent }}% off.
+                {% elif summary_data.referral_discount_applied %}
+                  Referral discount is currently applied.
+                {% else %}
+                  No discount code applied yet.
+                {% endif %}
+            </p>
+        </div>
 
         <div class="summary-item">
             <span>Services</span>
@@ -305,29 +346,42 @@
         </div>
 
         <div class="summary-item">
-            <span id="sum_rot_label">ROT Deduction{% if pricing.use_rot %} ({{ pricing.rot_percent|floatformat:1 }}%){% else %} (not applied){% endif %}</span>
+            <span id="sum_rot_label">RUT Deduction{% if pricing.use_rot %} ({{ pricing.rot_percent|floatformat:2 }}%){% else %} (not applied){% endif %}</span>
             <span id="sum_rot">{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:0|floatformat:2 }}</span>
         </div>
 
-        {% if request.user.is_authenticated %}
+        <div class="summary-item" id="sum_discount_row" {% if not summary_data.discount_code and not summary_data.referral_discount_applied %}hidden{% endif %}>
+            <span id="sum_discount_label">
+                {% if summary_data.discount_code %}
+                  Discount ({{ summary_data.discount_code }})
+                {% elif summary_data.referral_discount_applied %}
+                  Referral Discount
+                {% else %}
+                  Discount
+                {% endif %}
+            </span>
+            <span id="sum_discount">
+                -{{ pricing.currency|default:"sek"|upper }} {% if summary_data.discount_code %}{{ summary_data.discount_amount|floatformat:2 }}{% else %}{{ summary_data.referral_discount_amount|floatformat:2 }}{% endif %}
+            </span>
+        </div>
+
         <div class="summary-item">
             <span id="sum_reward_label">Reward{% if reward_context.selected_reward %}: {{ reward_context.selected_reward.title }}{% else %} (not available){% endif %}</span>
             <span id="sum_reward">{% if reward_context.use_reward %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ reward_context.reward_discount|default:"0"|floatformat:2 }}</span>
         </div>
-        {% endif %}
 
         <div class="line"></div>
 
         <div class="summary-item total">
             <span>Total</span>
-            <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ pricing.final|default:0|floatformat:2 }}</span>
+            <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.final|default:0|floatformat:2 }}</span>
         </div>
 
         <p class="summary-note" id="sum_total_note">
             {% if booking.use_rot %}
-              Total includes VAT and ROT deduction.
+              Total includes VAT and RUT deduction.
             {% else %}
-              Total includes VAT. ROT deduction is not applied.
+              Total includes VAT. RUT deduction is not applied.
             {% endif %}
         </p>
 
@@ -347,7 +401,7 @@
 {{ date_rules|json_script:"dateRules" }}
 {{ schedule_rules|json_script:"scheduleRules" }}
 {{ initial_schedule_state|json_script:"initialScheduleState" }}
-{{ pricing|json_script:"initialPricingData" }}
+{{ summary_data|json_script:"initialPricingData" }}
 <script>
 let DATE_RULES = JSON.parse(document.getElementById("dateRules").textContent);
 if (typeof DATE_RULES === "string") {
@@ -502,6 +556,9 @@ const scheduleUseRotToggle = document.getElementById("scheduleUseRotToggle");
 const scheduleUseRotInput = document.getElementById("schedule_use_rot_input");
 const scheduleUseRewardToggle = document.getElementById("scheduleUseRewardToggle");
 const scheduleUseRewardInput = document.getElementById("schedule_use_reward_input");
+const scheduleDiscountCodeInput = document.getElementById("scheduleDiscountCodeInput");
+const scheduleDiscountApplyBtn = document.getElementById("scheduleDiscountApplyBtn");
+const scheduleDiscountRemoveBtn = document.getElementById("scheduleDiscountRemoveBtn");
 const scheduleMessages = document.getElementById("scheduleMessages");
 
 const sameArea       = document.getElementById("sameScheduleArea");
@@ -786,16 +843,72 @@ function setSummaryValues(data) {
     rewardLabel.textContent = data.reward_title ? `Reward: ${data.reward_title}` : "Reward";
     rewardValue.textContent = (data.use_reward ? "-" : "") + currency + " " + Number(data.reward_discount || 0).toFixed(2);
   }
+  const discountRow = document.getElementById("sum_discount_row");
+  const discountLabel = document.getElementById("sum_discount_label");
+  const discountValue = document.getElementById("sum_discount");
+  const discountFeedback = document.getElementById("scheduleDiscountFeedback");
+  const hasDiscountCode = Boolean(data.discount_code);
+  const hasReferralDiscount = Boolean(data.referral_discount_applied);
+  const discountAmount = hasDiscountCode ? Number(data.discount_amount || 0) : Number(data.referral_discount_amount || 0);
+  if (discountRow && discountLabel && discountValue) {
+    discountRow.hidden = !hasDiscountCode && !hasReferralDiscount;
+    discountLabel.textContent = hasDiscountCode
+      ? `Discount (${data.discount_code})`
+      : (hasReferralDiscount ? "Referral Discount" : "Discount");
+    discountValue.textContent = "-" + currency + " " + discountAmount.toFixed(2);
+  }
+  if (scheduleDiscountCodeInput && scheduleDiscountApplyBtn && scheduleDiscountRemoveBtn) {
+    if (hasDiscountCode) {
+      scheduleDiscountCodeInput.value = data.discount_code;
+      scheduleDiscountCodeInput.setAttribute("readonly", "readonly");
+      scheduleDiscountApplyBtn.hidden = true;
+      scheduleDiscountRemoveBtn.hidden = false;
+    } else {
+      scheduleDiscountCodeInput.removeAttribute("readonly");
+      scheduleDiscountApplyBtn.hidden = false;
+      scheduleDiscountRemoveBtn.hidden = true;
+    }
+  }
+  if (discountFeedback) {
+    discountFeedback.classList.toggle("is-error", Boolean(data.error));
+    if (data.error) {
+      discountFeedback.textContent = data.error;
+    } else if (hasDiscountCode) {
+      discountFeedback.textContent = `Code ${data.discount_code} applied for ${Number(data.discount_percent || 0)}% off.`;
+    } else if (hasReferralDiscount) {
+      discountFeedback.textContent = "Referral discount is currently applied.";
+    } else if (data.message) {
+      discountFeedback.textContent = data.message;
+    } else {
+      discountFeedback.textContent = "No discount code applied yet.";
+    }
+  }
   const rotLabel = document.getElementById("sum_rot_label");
   if (rotLabel) {
-    rotLabel.textContent = data.use_rot ? `ROT Deduction (${Number(data.rot_percent || 0).toFixed(1)}%)` : "ROT Deduction (not applied)";
+    rotLabel.textContent = data.use_rot ? `RUT Deduction (${Number(data.rot_percent || 0).toFixed(2)}%)` : "RUT Deduction (not applied)";
   }
   const totalNote = document.getElementById("sum_total_note");
   if (totalNote) {
     totalNote.textContent = data.use_rot
-      ? "Total includes VAT and ROT deduction."
-      : "Total includes VAT. ROT deduction is not applied.";
+      ? "Total includes VAT and RUT deduction."
+      : "Total includes VAT. RUT deduction is not applied.";
   }
+}
+
+function submitScheduleDiscountAction(formData) {
+  const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || "";
+  return fetch(`/private/api/booking/update-discount/`, {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": csrfToken
+    },
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    setSummaryValues(data);
+    return data;
+  });
 }
 
 function showScheduleMessage(message) {
@@ -1202,6 +1315,33 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(res => res.json())
       .then(data => setSummaryValues(data))
       .catch(() => updateScheduleSummary());
+    });
+  }
+  if (scheduleDiscountApplyBtn && scheduleDiscountCodeInput) {
+    scheduleDiscountApplyBtn.addEventListener("click", () => {
+      const code = (scheduleDiscountCodeInput.value || "").trim();
+      if (!code) {
+        const feedback = document.getElementById("scheduleDiscountFeedback");
+        if (feedback) {
+          feedback.classList.add("is-error");
+          feedback.textContent = "Enter a discount code.";
+        }
+        return;
+      }
+      const fd = new FormData();
+      fd.append("discount_code", code);
+      submitScheduleDiscountAction(fd).catch(() => updateScheduleSummary());
+    });
+  }
+  if (scheduleDiscountRemoveBtn) {
+    scheduleDiscountRemoveBtn.addEventListener("click", () => {
+      const fd = new FormData();
+      fd.append("remove", "1");
+      submitScheduleDiscountAction(fd)
+        .then(() => {
+          if (scheduleDiscountCodeInput) scheduleDiscountCodeInput.value = "";
+        })
+        .catch(() => updateScheduleSummary());
     });
   }
 });

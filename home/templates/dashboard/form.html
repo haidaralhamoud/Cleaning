@@ -121,11 +121,13 @@
                 <div class="qs-builder" data-questions-builder data-field-id="{{ field.id_for_label }}">
                   <div class="qs-toolbar">
                     <div class="qs-title">Build questions without JSON</div>
+                  </div>
+                  <div class="qs-list" data-q-list></div>
+                  <div class="qs-actions">
                     <button type="button" class="btn btn-sm btn-outline-primary" data-q-add>
                       <i class="fa-solid fa-plus"></i> Add Question
                     </button>
                   </div>
-                  <div class="qs-list" data-q-list></div>
                   <div class="form-text">
                     Add the question, select a type, and (if needed) add options with a price for each answer.
                   </div>
@@ -353,7 +355,6 @@
                 <table class="table table-sm align-middle">
                   <thead>
                     <tr>
-                      <th>Short</th>
                       <th>Title</th>
                       <th>Image</th>
                       <th>Order</th>
@@ -364,7 +365,6 @@
                   <tbody>
                     {% for option in room_options_for_service %}
                       <tr>
-                        <td>{{ option.short_label }}</td>
                         <td>{{ option.title }}</td>
                         <td>{% if option.image %}Yes{% else %}No{% endif %}</td>
                         <td>{{ option.display_order }}</td>

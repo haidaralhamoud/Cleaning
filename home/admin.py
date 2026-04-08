@@ -711,7 +711,7 @@ class ServiceCardInline(admin.StackedInline):
 class ServiceRoomOptionInline(admin.StackedInline):
     model = ServiceRoomOption
     extra = 0
-    fields = ("short_label", "title", "image", "subtitle", "unit_price", "price_currency", "display_order", "is_active")
+    fields = ("title", "image", "subtitle", "unit_price", "price_currency", "display_order", "is_active")
 
 
 class ServicePricingInline(admin.StackedInline):
@@ -820,8 +820,8 @@ class ServiceCardAdmin(admin.ModelAdmin):
 
 @admin.register(ServiceRoomOption)
 class ServiceRoomOptionAdmin(admin.ModelAdmin):
-    list_display = ("service", "short_label", "title", "unit_price", "price_currency", "display_order", "is_active")
-    fields = ("service", "short_label", "title", "image", "subtitle", "unit_price", "price_currency", "display_order", "is_active")
+    list_display = ("service", "title", "unit_price", "price_currency", "display_order", "is_active")
+    fields = ("service", "title", "image", "subtitle", "unit_price", "price_currency", "display_order", "is_active")
     list_filter = ("service", "is_active")
     ordering = ("service", "display_order", "title")
 
@@ -1123,6 +1123,22 @@ class CallRequestAdmin(admin.ModelAdmin):
 class AddonRuleInline(admin.TabularInline):
     model = AddonRule
     extra = 1
+
+
+@admin.register(AvailableZipCode)
+class AvailableZipCodeAdmin(admin.ModelAdmin):
+    list_display = ("code",)
+    search_fields = ("code",)
+    ordering = ("code",)
+
+
+@admin.register(NotAvailableZipRequest)
+class NotAvailableZipRequestAdmin(admin.ModelAdmin):
+    list_display = ("zip_code", "first_name", "last_name", "email", "phone", "service", "created_at")
+    list_filter = ("service", "created_at")
+    search_fields = ("zip_code", "first_name", "last_name", "email", "phone")
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at",)
 
 
 

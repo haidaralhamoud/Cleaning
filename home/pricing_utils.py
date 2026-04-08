@@ -219,6 +219,7 @@ def calculate_booking_price(booking):
     services_total = Decimal("0.00")
     addons_total = Decimal("0.00")
     duration_minutes = Decimal("0.00")
+    duration_is_estimated = False
     target_currency = _normalize_currency(getattr(settings, "STRIPE_CURRENCY", "SEK"))
     currency_rates = _build_currency_rates(target_currency)
 
@@ -287,6 +288,7 @@ def calculate_booking_price(booking):
 
             if price > 0:
                 service_duration = default_service_duration
+                duration_is_estimated = True
                 duration_minutes += service_duration
             services_total += price
             continue
@@ -304,6 +306,7 @@ def calculate_booking_price(booking):
 
         if service_duration <= 0:
             service_duration = default_service_duration
+            duration_is_estimated = True
 
         duration_minutes += service_duration
 
@@ -452,4 +455,5 @@ def calculate_booking_price(booking):
         "duration_minutes": float(duration_minutes),
         "duration_hours": float(duration_hours),
         "duration_seconds": duration_seconds,
+        "duration_is_estimated": duration_is_estimated,
     }
