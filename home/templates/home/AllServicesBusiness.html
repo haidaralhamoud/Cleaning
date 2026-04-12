@@ -108,12 +108,6 @@
           {% endfor %}
         </select>
       </div>
-      <div class="filter-chip-row" id="filterCategoryChips">
-        <button type="button" class="filter-chip is-active" data-category-chip="all">All</button>
-        {% for category in categories %}
-          <button type="button" class="filter-chip" data-category-chip="{{ category.slug }}">{{ category.title }}</button>
-        {% endfor %}
-      </div>
       <div class="filter-status" id="filterStatus">Showing all services.</div>
       <div class="filter-actions">
         <button class="reset" id="filterReset">Reset</button>
@@ -131,7 +125,6 @@
     const filterInput = document.getElementById("filterInput");
     const filterCategory = document.getElementById("filterCategory");
     const filterStatus = document.getElementById("filterStatus");
-    const categoryChips = document.querySelectorAll("[data-category-chip]");
     const cards = document.querySelectorAll(".service-card");
 
     const openModal = () => {
@@ -143,12 +136,6 @@
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
       btn.focus();
-    };
-
-    const syncCategoryChips = (value) => {
-      categoryChips.forEach((chip) => {
-        chip.classList.toggle("is-active", chip.dataset.categoryChip === value);
-      });
     };
 
     const applyFilters = () => {
@@ -191,19 +178,7 @@
     resetBtn.addEventListener("click", () => {
       filterInput.value = "";
       filterCategory.value = "all";
-      syncCategoryChips("all");
       applyFilters();
-    });
-
-    categoryChips.forEach((chip) => {
-      chip.addEventListener("click", () => {
-        filterCategory.value = chip.dataset.categoryChip;
-        syncCategoryChips(chip.dataset.categoryChip);
-      });
-    });
-
-    filterCategory.addEventListener("change", () => {
-      syncCategoryChips(filterCategory.value);
     });
 
     applyBtn.addEventListener("click", () => {
