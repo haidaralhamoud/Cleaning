@@ -4579,12 +4579,57 @@ def private_zip_available(request, service_slug):
 
     # معالجة إرسال الإيميل
     if request.method == "POST" and request.POST.get("form_type") == "email_request":
+        email_from = (request.POST.get("email_from") or "").strip()
+        subject = (request.POST.get("subject") or "").strip()
+        message_text = (request.POST.get("message") or "").strip()
+        attachment = request.FILES.get("attachment")
+
         EmailRequest.objects.create(
-            email_from=request.POST.get("email_from", ""),
-            subject=request.POST.get("subject", ""),
-            message=request.POST.get("message", ""),
-            attachment=request.FILES.get("attachment")
+            email_from=email_from,
+            subject=subject,
+            message=message_text,
+            attachment=attachment
         )
+
+        support_email = getattr(settings, "CONTACT_SUPPORT_EMAIL", settings.DEFAULT_FROM_EMAIL)
+        support_subject = f"[Private Booking Email] {subject or service.title}"
+        support_body = (
+            f"New email request received for service: {service.title}\n\n"
+            f"Customer email: {email_from or '-'}\n"
+            f"Subject: {subject or '-'}\n\n"
+            f"Message:\n{message_text or '-'}\n"
+        )
+        support_message = EmailMultiAlternatives(
+            support_subject,
+            support_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [support_email],
+            reply_to=[email_from] if email_from else None,
+        )
+        if attachment:
+            attachment.seek(0)
+            support_message.attach(attachment.name, attachment.read(), attachment.content_type)
+        support_message.send(fail_silently=False)
+
+        if email_from:
+            customer_message = EmailMultiAlternatives(
+                "We received your request",
+                (
+                    "Hello,\n\n"
+                    "We have received your request and our support team will review it shortly.\n\n"
+                    f"Service: {service.title}\n"
+                    f"Subject: {subject or '-'}\n\n"
+                    "Your message:\n"
+                    f"{message_text or '-'}\n\n"
+                    f"If you need anything else, you can contact us at {support_email}.\n\n"
+                    "Best regards,\n"
+                    "Hembla Experten"
+                ),
+                settings.DEFAULT_FROM_EMAIL,
+                [email_from],
+            )
+            customer_message.send(fail_silently=False)
+
         email_success = True
 
     return render(request, "home/good_zip.html", {

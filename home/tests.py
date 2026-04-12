@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from home.models import BusinessBooking, PrivateBooking, PrivateMainCategory, PrivateService
+from home.models import BusinessBooking, EmailRequest, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer
 from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes
@@ -276,3 +276,41 @@ class BookingEmailSignalTests(TestCase):
 
         success_response = self.client.get(f"{reverse('home:contact')}?submitted=1")
         self.assertContains(success_response, "Thank You! We&#x27;ve Got Your Message", html=False)
+
+    def test_private_zip_available_email_request_sends_support_and_customer_emails(self):
+        category = PrivateMainCategory.objects.create(title="Home")
+        service = PrivateService.objects.create(
+            category=category,
+            title="Standard Cleaning",
+            slug="standard-cleaning",
+            price=100,
+        )
+
+        response = self.client.post(
+            reverse("home:private_zip_available", args=[service.slug]),
+            data={
+                "form_type": "email_request",
+                "email_from": "customer@example.com",
+                "subject": "Need help with booking",
+                "message": "Please contact me back.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(EmailRequest.objects.filter(email_from="customer@example.com").exists())
+
+        support_emails = [
+            email for email in mail.outbox
+            if "support@hembla-experten.se" in email.to
+        ]
+        self.assertEqual(len(support_emails), 1)
+        self.assertIn("Need help with booking", support_emails[0].subject)
+        self.assertIn("customer@example.com", support_emails[0].body)
+
+        customer_emails = [
+            email for email in mail.outbox
+            if "customer@example.com" in email.to and email.subject == "We received your request"
+        ]
+        self.assertEqual(len(customer_emails), 1)
+        self.assertIn("We have received your request", customer_emails[0].body)
+        self.assertIn("Standard Cleaning", customer_emails[0].body)

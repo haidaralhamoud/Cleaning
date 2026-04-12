@@ -46,24 +46,24 @@ if env_path.exists():
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 
-ALLOWED_HOSTS = [
-    'hembla-experten.se',
-    'www.hembla-experten.se',
-    '45.93.137.166',
-]
+# ALLOWED_HOSTS = [
+#     'hembla-experten.se',
+#     'www.hembla-experten.se',
+#     '45.93.137.166',
+# ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "https://hembla-experten.se",
-    "https://www.hembla-experten.se",
-]
+# CSRF_TRUSTED_ORIGINS = [
+#     "https://hembla-experten.se",
+#     "https://www.hembla-experten.se",
+# ]
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_SSL_REDIRECT = True
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
 SITE_ID = 1
@@ -171,26 +171,26 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
-#         'USER': os.getenv('POSTGRES_USER', 'cleaning'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-#         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-#     },
-# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hembla_db',
-        'USER': 'hembla_user',
-        'PASSWORD': 'Hembla123456789@',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+        'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
+        'USER': os.getenv('POSTGRES_USER', 'cleaning'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+    },
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'hembla_db',
+#         'USER': 'hembla_user',
+#         'PASSWORD': 'Hembla123456789@',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 if "test" in sys.argv:
     DATABASES = {
