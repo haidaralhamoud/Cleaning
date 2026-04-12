@@ -2,7 +2,7 @@
     <h3>Booking Summary</h3>
     <hr>
 
-    <label class="rot-toggle-row" for="useRotToggle">
+    <label class="rot-toggle-row summary-block summary-block--rut" for="useRotToggle">
         <span class="rot-toggle-copy">
             <strong>Use RUT deduction</strong>
             <small>Available for eligible private customers in Sweden.</small>
@@ -10,7 +10,7 @@
         <input type="checkbox" id="useRotToggle" {% if booking.use_rot %}checked{% endif %}>
     </label>
 
-    <label class="rot-toggle-row" for="useRewardToggle">
+    <label class="rot-toggle-row summary-block summary-block--reward" for="useRewardToggle">
         <span class="rot-toggle-copy">
             <strong>Use reward</strong>
             {% if reward_context.selected_reward %}
@@ -33,7 +33,7 @@
         >
     </label>
 
-    <div class="summary-discount-panel">
+    <div class="summary-discount-panel summary-block summary-block--discount">
         <div class="summary-discount-head">
             <span>
                 <strong>Discount code</strong>
@@ -76,70 +76,69 @@
         </p>
     </div>
 
-    <div class="item">
-        <span>Services</span>
-        <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:"0" }}</span>
+    <div class="summary-breakdown summary-block summary-block--breakdown">
+        <p class="summary-breakdown-label">Detailed Breakdown</p>
+
+        <div class="item">
+            <span>Services</span>
+            <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:"0" }}</span>
+        </div>
+
+        <div class="item">
+            <span>Add-ons</span>
+            <span id="sum_addons">{{ pricing.currency|default:"sek"|upper }} {{ pricing.addons_total|default:"0" }}</span>
+        </div>
+
+        <div class="item">
+            <span>Duration</span>
+            <span id="sum_duration">00:00:00</span>
+        </div>
+
+        <div class="item">
+            <span>Service fee</span>
+            <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:"0"|floatformat:2 }}</span>
+        </div>
+
+        <div class="item item--accent">
+            <span id="sum_rot_label">RUT Deduction ({{ pricing.rot_percent|default:"0"|floatformat:2 }}%)</span>
+            <span id="sum_rot">{% if booking.use_rot %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0"|floatformat:2 }}</span>
+        </div>
+
+        <div class="item item--muted" id="sum_discount_row" {% if not summary_data.discount_code and not summary_data.referral_discount_applied %}hidden{% endif %}>
+            <span id="sum_discount_label">
+                {% if summary_data.discount_code %}
+                  Discount ({{ summary_data.discount_code }})
+                {% elif summary_data.referral_discount_applied %}
+                  Referral Discount
+                {% else %}
+                  Discount
+                {% endif %}
+            </span>
+            <span id="sum_discount">
+                -{{ pricing.currency|default:"sek"|upper }} {% if summary_data.discount_code %}{{ summary_data.discount_amount|floatformat:2 }}{% else %}{{ summary_data.referral_discount_amount|floatformat:2 }}{% endif %}
+            </span>
+        </div>
+
+        <div class="item item--muted">
+            <span id="sum_reward_label">Reward{% if reward_context.selected_reward %}: {{ reward_context.selected_reward.title }}{% else %} (not available){% endif %}</span>
+            <span id="sum_reward">{% if reward_context.use_reward %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ reward_context.reward_discount|default:"0" }}</span>
+        </div>
+
+        <div class="summary-total-card">
+            <div class="item total">
+                <span>Total</span>
+                <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.final|default:"0"|floatformat:2 }}</span>
+            </div>
+
+            <p class="summary-note" id="sum_total_note">
+                {% if booking.use_rot %}
+                  VAT is included in the service prices. Total includes RUT deduction.
+                {% else %}
+                  VAT is included in the service prices. Total shown without RUT deduction.
+                {% endif %}
+            </p>
+        </div>
     </div>
-
-    <div class="item">
-        <span>Add-ons</span>
-        <span id="sum_addons">{{ pricing.currency|default:"sek"|upper }} {{ pricing.addons_total|default:"0" }}</span>
-    </div>
-
-    <div class="item">
-        <span>Duration</span>
-        <span id="sum_duration">00:00:00</span>
-    </div>
-
-    <div class="item">
-        <span>Service fee</span>
-        <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:"0"|floatformat:2 }}</span>
-    </div>
-
-    <div class="item">
-        <span>VAT ({{ summary_data.vat_percent|default:"25"|floatformat:0 }}%)</span>
-        <span id="sum_vat">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.vat_amount|default:"0"|floatformat:2 }}</span>
-    </div>
-
-    <div class="item">
-        <span id="sum_rot_label">RUT Deduction ({{ pricing.rot_percent|default:"0"|floatformat:2 }}%)</span>
-        <span id="sum_rot">{% if booking.use_rot %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0"|floatformat:2 }}</span>
-    </div>
-
-    <div class="item" id="sum_discount_row" {% if not summary_data.discount_code and not summary_data.referral_discount_applied %}hidden{% endif %}>
-        <span id="sum_discount_label">
-            {% if summary_data.discount_code %}
-              Discount ({{ summary_data.discount_code }})
-            {% elif summary_data.referral_discount_applied %}
-              Referral Discount
-            {% else %}
-              Discount
-            {% endif %}
-        </span>
-        <span id="sum_discount">
-            -{{ pricing.currency|default:"sek"|upper }} {% if summary_data.discount_code %}{{ summary_data.discount_amount|floatformat:2 }}{% else %}{{ summary_data.referral_discount_amount|floatformat:2 }}{% endif %}
-        </span>
-    </div>
-
-    <div class="item">
-        <span id="sum_reward_label">Reward{% if reward_context.selected_reward %}: {{ reward_context.selected_reward.title }}{% else %} (not available){% endif %}</span>
-        <span id="sum_reward">{% if reward_context.use_reward %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ reward_context.reward_discount|default:"0" }}</span>
-    </div>
-
-    <hr>
-
-    <div class="item total">
-        <span>Total</span>
-        <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.final|default:"0"|floatformat:2 }}</span>
-    </div>
-
-    <p class="summary-note" id="sum_total_note">
-        {% if booking.use_rot %}
-          Total includes VAT and RUT deduction.
-        {% else %}
-          Total includes VAT. RUT deduction is not applied.
-        {% endif %}
-    </p>
 
     {% if show_summary_continue|default:True %}
     <button type="button" class="btn-blue js-summary-continue">

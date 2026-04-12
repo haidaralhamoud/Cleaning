@@ -76,12 +76,70 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 16px 18px;
+  padding: 18px 18px;
   margin: 0 0 16px;
-  border: 1px solid rgba(113, 178, 71, 0.18);
-  border-radius: 20px;
-  background: linear-gradient(180deg, #fbfef8 0%, #f4fbef 100%);
-  box-shadow: 0 16px 30px rgba(113, 178, 71, 0.08);
+  border: 1px solid rgba(203, 231, 243, 0.9);
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.summary-block::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  border-radius: 999px;
+  background: rgba(14, 165, 198, 0.45);
+}
+
+.summary-block--rut {
+  border-color: rgba(113, 178, 71, 0.18);
+  background: linear-gradient(135deg, #ddf8e2 0%, #c9f0d0 100%);
+  box-shadow: 0 18px 30px rgba(113, 178, 71, 0.12);
+}
+
+.summary-block--rut::before {
+  background: #17853d;
+}
+
+.summary-block--reward {
+  border-color: rgba(110, 193, 230, 0.22);
+  background: linear-gradient(135deg, #ffffff 0%, #f1fbff 100%);
+  box-shadow: 0 16px 28px rgba(17, 162, 207, 0.08);
+}
+
+.summary-block--reward::before {
+  background: #71c6e6;
+}
+
+.summary-block--discount {
+  border-color: rgba(92, 190, 226, 0.18);
+  background:
+    radial-gradient(circle at top right, rgba(133, 214, 244, 0.26), transparent 42%),
+    linear-gradient(180deg, #dff5ff 0%, #d3effb 100%);
+  box-shadow: 0 18px 34px rgba(77, 168, 204, 0.12);
+}
+
+.summary-block--discount::before {
+  background: #4fa6c7;
+}
+
+.summary-block--breakdown {
+  padding: 20px;
+  border: 1px solid rgba(173, 216, 238, 0.3);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.34), transparent 30%),
+    linear-gradient(180deg, #d8eefb 0%, #cae6f6 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 18px 34px rgba(98, 162, 196, 0.14);
+  position: relative;
+}
+
+.summary-block--breakdown::before {
+  background: #5d9fc0;
 }
 
 .rot-toggle-copy {
@@ -92,32 +150,65 @@ body {
 
 .rot-toggle-copy strong {
   font-size: 1.1rem;
-  color: #0f172a;
+  color: #123047;
 }
 
 .rot-toggle-copy small {
-  color: var(--ink-500);
+  color: rgba(18, 48, 71, 0.72);
   line-height: 1.4;
-  font-size: 1rem;
+  font-size: 0.95rem;
 }
 
 .rot-toggle-row input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  accent-color: var(--accent);
+  width: 42px;
+  height: 24px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(18, 48, 71, 0.12);
   cursor: pointer;
   flex: 0 0 auto;
+  position: relative;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rot-toggle-row input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 4px 8px rgba(15, 23, 42, 0.16);
+  transition: transform 0.2s ease;
+}
+
+.rot-toggle-row input[type="checkbox"]:checked {
+  background: #0a7c33;
+  box-shadow: none;
+}
+
+.summary-block--reward input[type="checkbox"]:checked {
+  background: #8fd7f1;
+}
+
+.rot-toggle-row input[type="checkbox"]:checked::after {
+  transform: translateX(18px);
+}
+
+.rot-toggle-row input[type="checkbox"]:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .summary-discount-panel {
   margin: 0 0 16px;
   padding: 18px;
-  border: 1px solid rgba(3, 159, 200, 0.14);
   border-radius: 22px;
-  background:
-    radial-gradient(circle at top right, rgba(17, 162, 207, 0.12), transparent 38%),
-    linear-gradient(180deg, #fbfeff 0%, #eef9ff 100%);
-  box-shadow: 0 18px 34px rgba(17, 162, 207, 0.08);
 }
 
 .summary-discount-head {
@@ -132,11 +223,11 @@ body {
 
 .summary-discount-head strong {
   font-size: 1.08rem;
-  color: #082f49;
+  color: #184763;
 }
 
 .summary-discount-head small {
-  color: var(--ink-500);
+  color: rgba(24, 71, 99, 0.72);
   line-height: 1.4;
   font-size: 0.98rem;
 }
@@ -151,32 +242,32 @@ body {
   flex: 1;
   min-width: 0;
   height: 52px;
-  border-radius: 16px;
-  border: 1px solid #cfe7f3;
-  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(120, 188, 215, 0.35);
+  padding: 0 18px;
   font-size: 1rem;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
 }
 
 .summary-discount-controls input[readonly] {
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.86);
   color: #334155;
 }
 
 .summary-discount-btn {
   height: 52px;
   border: 0;
-  border-radius: 16px;
-  padding: 0 24px;
-  background: linear-gradient(135deg, #11a2cf 0%, #028bb0 100%);
-  color: #fff;
+  border-radius: 999px;
+  padding: 0 22px;
+  background: linear-gradient(135deg, #72d0ee 0%, #4caccd 100%);
+  color: #114760;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 16px 26px rgba(17, 162, 207, 0.2);
+  box-shadow: 0 14px 24px rgba(79, 166, 199, 0.2);
 }
 
 .summary-discount-btn--ghost {
-  background: #e8f4fa;
+  background: rgba(255, 255, 255, 0.64);
   color: #0b6e8b;
   box-shadow: none;
 }
@@ -185,7 +276,7 @@ body {
   margin: 12px 0 0;
   font-size: 0.92rem;
   line-height: 1.5;
-  color: var(--ink-500);
+  color: rgba(24, 71, 99, 0.78);
 }
 
 .summary-discount-feedback.is-error {
@@ -882,7 +973,7 @@ body {
 /* Summary */
 .right h3 {
   text-align: center;
-  font-size: 2rem;
+  font-size: 1.9rem;
   line-height: 1.1;
   font-weight: 700;
   margin-bottom: 14px;
@@ -900,57 +991,91 @@ body {
 .summary-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   gap: 14px;
   margin: 0 0 10px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid rgba(203, 231, 243, 0.9);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.04);
+  padding: 10px 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(92, 159, 192, 0.18);
+  box-shadow: none;
   font-size: 0.98rem;
 }
 
 .summary-item span:first-child {
-  color: #334155;
-  font-weight: 600;
+  color: #35556a;
+  font-weight: 500;
 }
 
 .summary-item span:last-child {
-  color: #0f172a;
+  color: #163548;
   font-weight: 700;
   text-align: right;
 }
 
+.summary-breakdown-label {
+  margin: 0 0 14px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: rgba(48, 89, 110, 0.9);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.summary-item--accent span {
+  color: #157c34;
+}
+
+.summary-item--muted span:first-child {
+  color: rgba(53, 85, 106, 0.58);
+}
+
+.summary-item--muted span:last-child {
+  color: rgba(22, 53, 72, 0.62);
+}
+
 .summary-item.total {
-  margin-top: 14px;
-  padding: 16px 18px;
+  margin: 0;
+  padding: 0;
   border-radius: 20px;
-  border: 1px solid rgba(8, 47, 73, 0.08);
-  background: linear-gradient(135deg, #082f49 0%, #0f4c75 100%);
-  box-shadow: 0 22px 34px rgba(8, 47, 73, 0.22);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
   font-size: 1.22rem;
   font-weight: 700;
 }
 
-.summary-item.total span {
-  color: #ffffff;
-}
-
-.summary-item.total span:first-child,
-.summary-item.total span:last-child {
-  color: #ffffff;
-}
-
 .summary-note {
-  margin-top: 14px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: linear-gradient(180deg, #fff9e8 0%, #fff4d6 100%);
-  border: 1px solid rgba(245, 158, 11, 0.18);
-  font-size: 0.94rem;
-  line-height: 1.6;
-  color: #8a5a00;
+  margin-top: 10px;
+  font-size: 0.83rem;
+  line-height: 1.45;
+  color: rgba(50, 79, 96, 0.78);
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.summary-total-card {
+  margin-top: 18px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 14px 28px rgba(78, 135, 166, 0.16);
+}
+
+.summary-total-card .summary-item {
+  border-bottom: 0;
+}
+
+.summary-total-card .summary-item.total span:first-child {
+  color: #0f172a;
+}
+
+.summary-total-card .summary-item.total span:last-child {
+  color: #0d6f8f;
+  font-size: 1.9rem;
+  line-height: 1;
 }
 
 .checkout-wrapper {
