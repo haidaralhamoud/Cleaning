@@ -23,7 +23,7 @@ body {
 }
 
 .hero {
-  background: url('../images/hero.png') center/cover no-repeat;
+  background: url('../images/hero.webp') center/cover no-repeat;
   height: 50vh;
   min-height: 320px;
   position: relative;

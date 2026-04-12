@@ -16,8 +16,7 @@ class DashboardItem:
 def get_dashboard_items() -> List[DashboardItem]:
     return [
         # Home app
-        DashboardItem("private-contacts", home_models.Contact, "Private Contacts", "fa-solid fa-envelope"),
-        DashboardItem("business-contacts", home_models.Contact, "Business Contacts", "fa-solid fa-building-circle-check"),
+        DashboardItem("contacts", home_models.Contact, "Contacts", "fa-solid fa-envelope"),
         DashboardItem("feedback", home_models.FeedbackRequest, "Feedback", "fa-solid fa-comment-dots"),
         DashboardItem("jobs", home_models.Job, "Jobs", "fa-solid fa-briefcase"),
         DashboardItem("applications", home_models.Application, "Applications", "fa-solid fa-file-lines"),
@@ -79,6 +78,8 @@ def get_dashboard_items() -> List[DashboardItem]:
 
 
 def get_item_by_slug(slug: str):
+    if slug in {"private-contacts", "business-contacts"}:
+        slug = "contacts"
     for item in get_dashboard_items():
         if item.slug == slug:
             return item

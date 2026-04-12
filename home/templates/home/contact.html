@@ -19,7 +19,7 @@
 
    </style>
 </head>
-<body>
+<body{% if show_popup %} class="contact-popup-open"{% endif %}>
   <!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
 
@@ -35,15 +35,23 @@
   <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
+    {% if form.non_field_errors %}
+      <div class="form-errors">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+
     <div class="form-row">
       <div class="form-group">
         <label>{% trans "First Name" %} <span>*</span></label>
         {{ form.first_name }}
+        {{ form.first_name.errors }}
       </div>
 
       <div class="form-group">
         <label>{% trans "Last Name" %} <span>*</span></label>
         {{ form.last_name }}
+        {{ form.last_name.errors }}
       </div>
     </div>
 
@@ -51,11 +59,13 @@
       <div class="form-group">
         <label>{% trans "Email" %} <span>*</span></label>
         {{ form.email }}
+        {{ form.email.errors }}
       </div>
 
       <div class="form-group">
         <label>{% trans "Country Code" %} <span>*</span></label>
         {{ form.country_code }}
+        {{ form.country_code.errors }}
       </div>
     </div>
 
@@ -63,36 +73,41 @@
       <div class="form-group">
         <label>{% trans "Phone Number" %}</label>
         {{ form.phone }}
+        {{ form.phone.errors }}
       </div>
     </div>
 
     <div class="form-group">
       <label>{% trans "Message" %}</label>
       {{ form.message }}
+      {{ form.message.errors }}
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label>{% trans "Inquiry Type" %}</label>
         {{ form.inquiry_type }}
+        {{ form.inquiry_type.errors }}
       </div>
 
       <div class="form-group">
         <label>{% trans "Attach file" %}</label>
         {{ form.file }}
+        {{ form.file.errors }}
       </div>
     </div>
 
     <div class="form-group">
       <label>{% trans "Preferred Contact Method" %}</label>
       {{ form.preferred_method }}
+      {{ form.preferred_method.errors }}
     </div>
 
     <div class="agreement">
       <label>
         <input type="checkbox" id="agree_terms" />
         {% trans "I agree to the Processing of my data in accordance with the" %}
-        <a href="#">{% trans "privacy policy" %}</a>
+        <a href="{% url 'home:Privacy_Policy' %}">{% trans "privacy policy" %}</a>
       </label>
     </div>
 
@@ -104,35 +119,39 @@
         <!-- Right: Contact Info -->
         <div class="contact-info">
           <h2>{% trans "Our Contact Information" %}</h2>
-          <p>&#128205; {% trans "123 Clean Street, AnyTown" %}</p>
-          <p>&#128222; {% trans "(555) 123-4567" %}</p>
+          <p>&#128205; {{ contact_address }}</p>
+          {% if contact_phone %}
+          <p>&#128222; {{ contact_phone }}</p>
+          {% endif %}
           <p>&#128231; {{ support_email }}</p>
         </div>
       </div>
     </div>
   </div>
   {% if show_popup %}
-<div class="thankyou-popup">
-  <div class="popup-content">
-    <img src="{% static 'images/vector0.svg'%}" alt="Success Icon" class="popup-icon">
-
-    <h2 class="popup-title">{% trans "Thank You! We've Got Your Message" %}</h2>
-    <p class="popup-text">{% trans "We appreciate you reaching out to Hembla experten. Our team will review your message and get back to you within 24 hours." %}</p>
-
-    <div class="popup-buttons">
-      <button onclick="closePopup()" class="btn btn-green">{% trans "Close" %}</button>
-      <a href="{% url 'home:home' %}" class="btn btn-green">{% trans "Back to Home" %}</a>
+  <div class="contact-success-overlay" id="contactSuccessPopup" aria-modal="true" role="dialog">
+    <div class="contact-success-card">
+      <div class="contact-success-icon" aria-hidden="true">
+        <span class="contact-success-icon-ring">
+          <span class="contact-success-icon-core">
+            <span class="contact-success-check"></span>
+          </span>
+        </span>
+      </div>
+      <h2 class="contact-success-title">{% trans "Thank You! We've Got Your Message" %}</h2>
+      <p class="contact-success-text">
+        {% trans "We appreciate you reaching out to Hembla experten. Our team will review your message and get back to you within 24 hours." %}
+      </p>
+      <p class="contact-success-text">
+        {% trans "In the meantime, feel free to explore our services or browse our FAQs for quick answers." %}
+      </p>
+      <div class="contact-success-actions">
+        <a href="{% url 'home:home' %}" class="contact-success-button">{% trans "Back to Home" %}</a>
+        <a href="{% url 'home:all_services_private' %}" class="contact-success-button">{% trans "Explore Services" %}</a>
+      </div>
     </div>
   </div>
-</div>
-
-<script>
-function closePopup() {
-  document.querySelector('.thankyou-popup').style.display = 'none';
-}
-</script>
-{% endif %}
-
+  {% endif %}
 {% include "home/includes/footer.html" %}
 
 

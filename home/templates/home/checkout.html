@@ -19,12 +19,12 @@
 
   <header>
     <h1>Checkout</h1>
-    <p class="subtitle">One step to a hassle-free day. Confirm your booking and let us take it from here.</p>
   </header>
 
   <div class="checkout-grid">
     <div class="checkout-main">
       <section class="card services-card">
+        <p class="subtitle">One step to a hassle-free day. Confirm your booking and let us take it from here.</p>
         <div class="card-header">
           <h2>Selected Services</h2>
           <a href="{% url 'home:private_booking_services' %}" class="edit-btn">Edit</a>
@@ -75,6 +75,16 @@
           <div class="services-total-line">
             <span>Subtotal</span>
             <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
+
+          <div class="services-total-line">
+            <span>Service fee</span>
+            <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
+
+          <div class="services-total-line">
+            <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
+            <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
 
           <div class="services-total-line">
@@ -271,6 +281,14 @@
             <span>Subtotal</span>
             <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
+          <div class="summary-line">
+            <span>Service fee</span>
+            <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
+          <div class="summary-line">
+            <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
+            <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+          </div>
 
           <div class="summary-line">
             <span>
@@ -330,26 +348,45 @@
               data-stripe-payment-intent="{{ stripe_payment_intent_id }}"
               data-stripe-complete-url="{{ payment_complete_url }}"
               data-stripe-return-url="{{ payment_return_url }}"
+              data-cash-invoice-url="{{ cash_invoice_download_url }}"
               data-stripe-ready="{{ stripe_ready|yesno:'1,0' }}"
               data-stripe-currency="{{ stripe_currency }}"
               data-stripe-failure-url="{{ payment_failed_url }}">
           {% csrf_token %}
           <input type="hidden" name="form_type" value="payment">
 
-          <div class="payment-options payment-options--static">
-            <div class="payment-option is-active">
+          <div class="payment-options payment-options--static" role="radiogroup" aria-label="Payment method">
+            <label class="payment-option payment-choice is-active" data-payment-option="card">
+              <input type="radio" name="payment_option" value="card" checked>
               <span class="payment-logo">
                 <img src="{% static 'images/payment-method-visa0.svg' %}" alt="Stripe Payment Element">
               </span>
-              <span class="payment-label">Secure card payment</span>
-            </div>
+              <span class="payment-copy">
+                <strong>Credit/Debit Card</strong>
+                <small>Pay now</small>
+              </span>
+            </label>
+            <label class="payment-option payment-choice" data-payment-option="invoice">
+              <input type="radio" name="payment_option" value="invoice">
+              <span class="payment-logo payment-logo--icon" aria-hidden="true">
+                <i class="fa-regular fa-file-lines"></i>
+              </span>
+              <span class="payment-copy">
+                <strong>Cash Invoice</strong>
+                <small>Send by email</small>
+              </span>
+            </label>
           </div>
 
-          <div class="payment-method-note">
+          <div class="payment-method-note" data-payment-panel="card">
             Pay securely by card in {{ stripe_currency|upper }}.
           </div>
 
-          <div class="payment-inputs">
+          <div class="payment-method-note payment-method-note--invoice payment-panel-hidden" data-payment-panel="invoice">
+            Choose this option to send the cash invoice to the customer's email.
+          </div>
+
+          <div class="payment-inputs" data-payment-panel="card">
             <div id="payment-element" class="stripe-card-element"></div>
             <div id="card-errors" class="card-errors" role="alert"></div>
           </div>
@@ -379,22 +416,6 @@
         </ul>
       </section>
     </div>
-
-    <aside class="checkout-sidebar">
-      <section class="card invoice-card">
-        <div class="card-header">
-          <h2>Cash Invoice</h2>
-        </div>
-        <hr>
-        <p class="summary-note">Download a clean PDF invoice if the customer wants to pay cash at service time.</p>
-        <p class="summary-note">The file includes the current services, add-ons, schedule details, and total due.</p>
-        <a href="{{ cash_invoice_download_url }}" class="cash-invoice-btn">Download PDF Invoice</a>
-        <div class="cash-invoice-meta">
-          <span>Format: PDF</span>
-          <span>Status: Pending cash payment</span>
-        </div>
-      </section>
-    </aside>
   </div>
 
 </div>
@@ -428,12 +449,51 @@
     var form = document.getElementById("paymentForm");
     var checkbox = document.getElementById("agreeTerms");
     var button = document.getElementById("confirmPayment");
-    if (!checkbox || !button) return;
+    var optionInputs = form ? form.querySelectorAll('input[name="payment_option"]') : [];
+    var optionCards = form ? form.querySelectorAll("[data-payment-option]") : [];
+    var cardPanels = form ? form.querySelectorAll('[data-payment-panel="card"]') : [];
+    var invoicePanels = form ? form.querySelectorAll('[data-payment-panel="invoice"]') : [];
+    if (!form || !checkbox || !button || !optionInputs.length) return;
     var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";
-    var toggle = function () {
-      button.disabled = !checkbox.checked || !stripeReady;
+    var selectedOption = function () {
+      for (var i = 0; i < optionInputs.length; i += 1) {
+        if (optionInputs[i].checked) return optionInputs[i].value;
+      }
+      return "card";
     };
+    var syncOptionCards = function () {
+      var value = selectedOption();
+      for (var i = 0; i < optionCards.length; i += 1) {
+        optionCards[i].classList.toggle("is-active", optionCards[i].getAttribute("data-payment-option") === value);
+      }
+      for (var j = 0; j < cardPanels.length; j += 1) {
+        cardPanels[j].classList.toggle("payment-panel-hidden", value !== "card");
+        cardPanels[j].hidden = value !== "card";
+        cardPanels[j].setAttribute("aria-hidden", value !== "card" ? "true" : "false");
+      }
+      for (var k = 0; k < invoicePanels.length; k += 1) {
+        invoicePanels[k].classList.toggle("payment-panel-hidden", value !== "invoice");
+        invoicePanels[k].hidden = value !== "invoice";
+        invoicePanels[k].setAttribute("aria-hidden", value !== "invoice" ? "true" : "false");
+      }
+      var errorBox = document.getElementById("card-errors");
+      if (value === "invoice" && errorBox) {
+        errorBox.textContent = "";
+      }
+      button.textContent = value === "invoice" ? "Send Cash Invoice by Email" : "Confirm Payment";
+    };
+    var toggle = function () {
+      var needsStripe = selectedOption() === "card";
+      button.disabled = !checkbox.checked || (needsStripe && !stripeReady);
+    };
+    for (var i = 0; i < optionInputs.length; i += 1) {
+      optionInputs[i].addEventListener("change", function () {
+        syncOptionCards();
+        toggle();
+      });
+    }
     checkbox.addEventListener("change", toggle);
+    syncOptionCards();
     toggle();
   })();
 </script>

@@ -22,6 +22,10 @@ body {
   overflow-x: hidden;
 }
 
+body.career-popup-open {
+  overflow: hidden;
+}
+
 .career-no-opening {
   width: min(1240px, calc(100% - 48px));
   margin: 0 auto;
@@ -208,6 +212,14 @@ body {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
 }
 
+.career-conditional-input[hidden] {
+  display: none !important;
+}
+
+.career-conditional-input {
+  margin-top: 12px;
+}
+
 .career-form input::placeholder,
 .career-form textarea::placeholder {
   color: #7e96a8;
@@ -237,6 +249,78 @@ body {
   -moz-appearance: none;
   padding-right: 58px;
   cursor: pointer;
+}
+
+.select-wrap:has(.custom-select)::after {
+  display: none;
+}
+
+.career-form .custom-select-toggle {
+  width: 100%;
+  border: 1.5px solid var(--career-line);
+  background: #fbfeff;
+  border-radius: 20px;
+  padding: 17px 20px;
+  min-height: 61px;
+  font: inherit;
+  color: #16374b;
+  box-shadow: none;
+}
+
+.career-form .custom-select.open .custom-select-toggle,
+.career-form .custom-select-toggle:focus {
+  border-color: var(--career-accent);
+  box-shadow: 0 0 0 5px rgba(22, 158, 195, 0.14);
+  background: #ffffff;
+}
+
+.career-form .custom-select-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.career-form .custom-select-arrow {
+  width: 16px;
+  height: 16px;
+  border-right: 2.5px solid var(--career-accent-dark);
+  border-bottom: 2.5px solid var(--career-accent-dark);
+  transform: rotate(45deg);
+  margin-left: 16px;
+  flex: 0 0 auto;
+}
+
+.career-form .custom-select.open .custom-select-arrow {
+  transform: rotate(-135deg);
+}
+
+.career-form .custom-select-menu {
+  top: calc(100% + 8px);
+  border-radius: 20px;
+  border: 1.5px solid var(--career-line);
+  box-shadow: 0 20px 40px rgba(15, 70, 98, 0.16);
+  padding: 10px;
+  z-index: 120;
+}
+
+.career-form .custom-select-option {
+  border-radius: 14px;
+  background: #f5fbfe;
+  color: #17354b;
+  padding: 12px 14px;
+  font-size: 0.98rem;
+}
+
+.career-form .custom-select-option:hover {
+  background: #e9f7fc;
+  color: var(--career-accent-dark);
+  border-color: rgba(22, 158, 195, 0.2);
+}
+
+.career-form .custom-select-option.is-selected {
+  background: #dff4fb;
+  color: var(--career-accent-dark);
+  border-color: rgba(22, 158, 195, 0.32);
 }
 
 .select-wrap::after {
@@ -455,6 +539,96 @@ body {
   transform: none;
 }
 
+.career-success-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(11, 31, 43, 0.52);
+  backdrop-filter: blur(4px);
+  z-index: 100000;
+}
+
+.career-success-popup {
+  width: min(100%, 520px);
+  padding: 46px 34px 30px;
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(246,251,253,0.95) 100%);
+  box-shadow: 0 28px 70px rgba(7, 50, 72, 0.25);
+  text-align: center;
+}
+
+.career-success-badge {
+  width: 78px;
+  height: 78px;
+  margin: 0 auto 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(125, 194, 66, 0.14);
+}
+
+.career-success-badge-core {
+  width: 58px;
+  height: 58px;
+  position: relative;
+  display: block;
+  border-radius: 18px;
+  background: #86cb48;
+  border: 4px solid #fff;
+  transform: rotate(45deg);
+  box-shadow: 0 10px 24px rgba(125, 194, 66, 0.28);
+}
+
+.career-success-badge-check {
+  position: absolute;
+  left: 15px;
+  top: 8px;
+  width: 11px;
+  height: 22px;
+  border-right: 4px solid #fff;
+  border-bottom: 4px solid #fff;
+}
+
+.career-success-popup h2 {
+  margin: 0 0 14px;
+  color: var(--career-accent-dark);
+  font-size: clamp(1.5rem, 2vw, 2rem);
+}
+
+.career-success-popup p {
+  margin: 0 auto;
+  max-width: 34ch;
+  color: var(--career-muted);
+  line-height: 1.8;
+}
+
+.career-success-actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.career-success-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #16a6c8 0%, #1084a8 100%);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 800;
+  box-shadow: 0 16px 30px rgba(16, 132, 168, 0.24);
+}
+
+.career-success-btn:hover {
+  transform: translateY(-1px);
+}
+
 @media (max-width: 1100px) {
   .hero,
   .form-container {
@@ -504,6 +678,15 @@ body {
 
   .file-trigger,
   .submit-btn {
+    width: 100%;
+  }
+
+  .career-success-popup {
+    padding: 34px 22px 24px;
+    border-radius: 22px;
+  }
+
+  .career-success-btn {
     width: 100%;
   }
 }

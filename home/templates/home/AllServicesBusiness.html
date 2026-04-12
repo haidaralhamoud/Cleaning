@@ -52,7 +52,7 @@
   <div class="service-card" data-title="{{ s.title|lower }}" data-desc="{{ s.description|default:''|lower }}" data-category="{{ s.category.slug|default:'' }}">
     
     <a class="service-image-link" href="{% url 'home:business_service_detail' s.id %}{% if urgent_selected %}?urgent=1{% endif %}">
-      <img src="{{ s.image.url }}" alt="{{ s.title }}">
+      <img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
     </a>
 
     <div class="service-content">

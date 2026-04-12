@@ -28,6 +28,115 @@ body {
   display: flex;
 }
 
+.call-success-open {
+  overflow: hidden;
+}
+
+.call-success-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 1200;
+}
+
+.call-success-card {
+  position: relative;
+  width: min(500px, 100%);
+  padding: 34px 28px 28px;
+  border-radius: 28px;
+  background: #fff;
+  box-shadow: 0 26px 70px rgba(15, 23, 42, 0.24);
+  text-align: center;
+}
+
+.call-success-card--email {
+  width: min(420px, 100%);
+  padding-top: 30px;
+}
+
+.call-success-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: #12a4ca;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.call-success-icon {
+  width: 104px;
+  height: 104px;
+  margin: 10px auto 20px;
+  border-radius: 24px;
+  background: #19f000;
+  display: grid;
+  place-items: center;
+}
+
+.call-success-icon img {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+}
+
+.call-success-icon--email {
+  background: transparent;
+  width: 132px;
+  height: 132px;
+  margin-bottom: 10px;
+}
+
+.call-success-icon--email img {
+  width: 118px;
+  height: 118px;
+  filter: none;
+}
+
+.call-success-card h3 {
+  margin: 0 0 18px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.call-success-card p {
+  margin: 0 0 12px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.call-success-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px 22px;
+  border: none;
+  border-radius: 18px;
+  background: #12a4ca;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 16px 28px rgba(18, 164, 202, 0.22);
+}
+
+.call-success-btn:hover {
+  background: #0f95b8;
+}
+
 .popup {
   background: #fff;
   border-radius: 28px;
@@ -86,8 +195,10 @@ body {
 }
 
 .call-form input,
+.call-form select,
 .call-form textarea,
 #call-overlay input,
+#call-overlay select,
 #call-overlay textarea {
   width: 100%;
   border: 1px solid var(--border);
@@ -107,10 +218,26 @@ body {
 }
 
 #call-overlay input:focus,
+#call-overlay select:focus,
 #call-overlay textarea:focus {
   border-color: var(--brand);
   box-shadow: 0 0 0 3px rgba(3, 159, 200, 0.15);
   background: #ffffff;
+}
+
+.call-form select {
+  appearance: none;
+  background:
+    linear-gradient(45deg, transparent 50%, #5b6b79 50%),
+    linear-gradient(135deg, #5b6b79 50%, transparent 50%),
+    linear-gradient(to right, transparent, transparent);
+  background-position:
+    calc(100% - 22px) calc(50% - 3px),
+    calc(100% - 16px) calc(50% - 3px),
+    100% 0;
+  background-size: 6px 6px, 6px 6px, 2.5em 2.5em;
+  background-repeat: no-repeat;
+  padding-right: 48px;
 }
 
 .call-form textarea {

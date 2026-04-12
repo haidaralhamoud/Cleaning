@@ -10,7 +10,7 @@
 
   <style>
     .hero {
-        background-image: url("{% static 'images/hero.png' %}");
+        background-image: url("{% static 'images/hero.webp' %}");
     }
     .zip-shell {
       max-width: 1120px;
@@ -42,7 +42,7 @@
 
   </style>
 </head>
-<body>
+<body{% if show_success_popup %} class="zip-popup-open"{% endif %}>
 
   <!-- ===== HERO SECTION ===== -->
   <section class="hero">
@@ -69,6 +69,13 @@
         {{ zip_form.zip }}
         <button type="submit" name="zip-submit">Check Availability</button>
       </div>
+      {% if zip_form.zip.errors %}
+        <div class="zip-error">
+          {% for error in zip_form.zip.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
     </form>
 
     <!-- ظٹط¸ظ‡ط± ظپظ‚ط· ط¥ط°ط§ ط§ظ„ظ…ظ†ط·ظ‚ط© ط؛ظٹط± ظ…طھط§ط­ط© -->
@@ -122,6 +129,29 @@
 
   </section>
 
+  {% if show_success_popup %}
+    <div class="zip-success-overlay" id="zipSuccessPopup" role="dialog" aria-modal="true" aria-labelledby="zipSuccessTitle">
+      <div class="zip-success-card">
+        <button type="button" class="zip-success-close" aria-label="Close" data-zip-popup-close>&times;</button>
+        <div class="zip-success-mark" aria-hidden="true">
+          <span class="zip-success-mark-ring"></span>
+          <span class="zip-success-mark-check">&#10003;</span>
+        </div>
+        <p class="zip-success-kicker">Request Received</p>
+        <h3 id="zipSuccessTitle">Thanks for your request!</h3>
+        <p class="zip-success-text">
+          We received your details and will review coverage for your area. Our team will contact you
+          as soon as expansion becomes available.
+        </p>
+        <div class="zip-success-status">In Review</div>
+        <div class="zip-success-actions">
+          <a href="{% url 'home:home' %}" class="zip-success-btn zip-success-btn--primary">Back to Home</a>
+          <button type="button" class="zip-success-btn zip-success-btn--ghost" data-zip-popup-close>Stay Here</button>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
   <!-- ظ„ظˆ ط­ط§ط¨ط¨ طھط±ط¬ط¹ ط³ظƒط±ط¨طھ ط§ظ„ط£ظ†ظٹظ…ظٹط´ظ† ط¨طھط­ط·ظ'ظ‡ ظ‡ظˆظ† -->
      <!-- ===== SCROLL REVEAL SCRIPT ===== -->
   <script>
@@ -145,6 +175,32 @@
     });
   })();
   </script>
+
+  {% if show_success_popup %}
+  <script>
+    (function () {
+      const popup = document.getElementById("zipSuccessPopup");
+      if (!popup) return;
+
+      const closePopup = () => {
+        popup.style.display = "none";
+        document.body.classList.remove("zip-popup-open");
+      };
+
+      popup.querySelectorAll("[data-zip-popup-close]").forEach((node) => {
+        node.addEventListener("click", closePopup);
+      });
+
+      popup.addEventListener("click", (event) => {
+        if (event.target === popup) closePopup();
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closePopup();
+      });
+    })();
+  </script>
+  {% endif %}
 
 </body>
 </html>

@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
   <link rel="stylesheet" href="{% static 'css/send_email.css' %}">
 </head>
-<body>
+<body{% if call_success %} class="call-success-open"{% endif %}>
 {% include "home/includes/main_header.html" %}
   <div class="confetti" aria-hidden="true">
     <span></span><span></span><span></span><span></span><span></span>
@@ -123,7 +123,12 @@
         <textarea name="message" rows="4" placeholder="Write your message..."></textarea>
 
         <label>Preferred Language</label>
-        <input type="text" name="language" placeholder="Preferred language">
+        <select name="language" required>
+          <option value="" selected disabled>Select preferred language</option>
+          <option value="Swedish">Swedish</option>
+          <option value="Arabic">Arabic</option>
+          <option value="English">English</option>
+        </select>
 
         <button type="submit" class="submit-btn">Request a Call</button>
       </form>
@@ -171,6 +176,35 @@
     </div>
   </div>
 
+  {% if call_success %}
+    <div class="call-success-overlay" id="callSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="callSuccessTitle">
+      <div class="call-success-card">
+        <button type="button" class="call-success-close" aria-label="Close" data-call-success-close>&times;</button>
+        <div class="call-success-icon" aria-hidden="true">
+          <img src="{% static 'images/icon-phone.svg' %}" alt="">
+        </div>
+        <h3 id="callSuccessTitle">Request Received!</h3>
+        <p>Thank you for your request.</p>
+        <p>One of our team members will call you at your preferred time.</p>
+        <p>We look forward to speaking with you!</p>
+        <button type="button" class="call-success-btn" data-call-success-close>Continue</button>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if email_success %}
+    <div class="call-success-overlay" id="emailSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="emailSuccessTitle">
+      <div class="call-success-card call-success-card--email">
+        <button type="button" class="call-success-close" aria-label="Close" data-email-success-close>&times;</button>
+        <div class="call-success-icon call-success-icon--email" aria-hidden="true">
+          <img src="{% static 'images/icon-mail.svg' %}" alt="">
+        </div>
+        <h3 id="emailSuccessTitle">Email sent. We'll get back to you shortly</h3>
+        <button type="button" class="call-success-btn" data-email-success-close>Continue</button>
+      </div>
+    </div>
+  {% endif %}
+
   <script>
     function openCallPopup() {
       document.getElementById("call-overlay").classList.add("show");
@@ -186,6 +220,47 @@
       document.getElementById("email-overlay").classList.remove("show");
     }
   </script>
+  {% if call_success %}
+  <script>
+    (function () {
+      const overlay = document.getElementById("callSuccessOverlay");
+      if (!overlay) return;
+
+      const closeOverlay = () => {
+        overlay.style.display = "none";
+        document.body.classList.remove("call-success-open");
+      };
+
+      overlay.querySelectorAll("[data-call-success-close]").forEach((node) => {
+        node.addEventListener("click", closeOverlay);
+      });
+
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) closeOverlay();
+      });
+    })();
+  </script>
+  {% endif %}
+  {% if email_success %}
+  <script>
+    (function () {
+      const overlay = document.getElementById("emailSuccessOverlay");
+      if (!overlay) return;
+
+      const closeOverlay = () => {
+        overlay.style.display = "none";
+      };
+
+      overlay.querySelectorAll("[data-email-success-close]").forEach((node) => {
+        node.addEventListener("click", closeOverlay);
+      });
+
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) closeOverlay();
+      });
+    })();
+  </script>
+  {% endif %}
   <script>
     const preferredDateUi = document.getElementById("preferredDateUi");
     const preferredDateTime = document.getElementById("preferredDateTime");
@@ -218,18 +293,6 @@
 
     if (preferredDateUi) {
       preferredDateUi.addEventListener("change", updatePreferredDateTime);
-      preferredDateUi.addEventListener("click", () => {
-        if (preferredDateUi.showPicker) {
-          preferredDateUi.showPicker();
-        } else {
-          preferredDateUi.focus();
-        }
-      });
-      preferredDateUi.addEventListener("focus", () => {
-        if (preferredDateUi.showPicker) {
-          preferredDateUi.showPicker();
-        }
-      });
     }
 
     if (preferredTimeUi) {
@@ -242,19 +305,8 @@
     }
 
     if (dateTrigger && preferredDateUi) {
-      dateTrigger.addEventListener("click", () => {
-        if (preferredDateUi.showPicker) {
-          preferredDateUi.showPicker();
-        } else {
-          preferredDateUi.focus();
-        }
-      });
-    }
-
-    const dateFieldWrapper = preferredDateUi ? preferredDateUi.closest(".input-with-icon") : null;
-    if (dateFieldWrapper && preferredDateUi) {
-      dateFieldWrapper.addEventListener("click", (event) => {
-        if (event.target === preferredDateUi) return;
+      dateTrigger.addEventListener("click", (event) => {
+        event.preventDefault();
         if (preferredDateUi.showPicker) {
           preferredDateUi.showPicker();
         } else {
@@ -269,8 +321,8 @@
 
     if (fileInput && fileName) {
       fileInput.addEventListener("change", () => {
-        fileName.textContent = fileInput.files.length
-           fileInput.files[0].name
+        fileName.textContent = fileInput.files && fileInput.files.length
+          ? fileInput.files[0].name
           : "No file chosen";
       });
     }

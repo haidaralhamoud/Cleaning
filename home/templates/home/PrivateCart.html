@@ -31,7 +31,7 @@
         <div class="cart-item" id="item-{{ s.slug }}">
 
             {% if s.image %}
-                <img src="{{ s.image.url }}" alt="{{ s.title }}">
+                <img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
             {% else %}
                 <div class="cart-image placeholder" aria-hidden="true">{{ s.title|first }}</div>
             {% endif %}

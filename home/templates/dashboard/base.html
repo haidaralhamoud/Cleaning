@@ -55,6 +55,8 @@
               <div class="dash-bell-summary">
                 <span>New bookings (24h): <b id="dashNotifNew">{{ dashboard_new_bookings }}</b></span>
                 <span>Pending no-shows: <b id="dashNotifNoShow">{{ dashboard_pending_no_show }}</b></span>
+                <span>Call requests: <b id="dashNotifCalls">{{ dashboard_new_call_requests|default:0 }}</b></span>
+                <span>Email requests: <b id="dashNotifEmails">{{ dashboard_new_email_requests|default:0 }}</b></span>
                 <span>New customers: <b id="dashNotifCustomers">{{ dashboard_new_customers }}</b></span>
                 <span>Incidents reported: <b id="dashNotifIncidents">{{ dashboard_new_incidents }}</b></span>
               </div>
@@ -193,10 +195,14 @@
 
         const newEl = document.getElementById("dashNotifNew");
         const noShowEl = document.getElementById("dashNotifNoShow");
+        const callsEl = document.getElementById("dashNotifCalls");
+        const emailsEl = document.getElementById("dashNotifEmails");
         const customersEl = document.getElementById("dashNotifCustomers");
         const incidentsEl = document.getElementById("dashNotifIncidents");
         if (newEl) newEl.textContent = data.new_bookings || 0;
         if (noShowEl) noShowEl.textContent = data.pending_no_show || 0;
+        if (callsEl) callsEl.textContent = data.new_call_requests || 0;
+        if (emailsEl) emailsEl.textContent = data.new_email_requests || 0;
         if (customersEl) customersEl.textContent = data.new_customers || 0;
         if (incidentsEl) incidentsEl.textContent = data.new_incidents || 0;
 

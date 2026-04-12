@@ -290,54 +290,124 @@ input[type="file"]::file-selector-button:hover{
   outline:none !important;
 }
 
-/* ===== Modal ===== */
-.thankyou-popup{
+/* ===== Success Modal ===== */
+body.contact-popup-open{
+  overflow:hidden;
+}
+.contact-success-overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.5);
   display:flex;
-  justify-content:center;
   align-items:center;
-  z-index:999;
-  animation:fadeIn 0.4s ease forwards;
+  justify-content:center;
+  padding:24px;
+  background:rgba(18, 36, 48, 0.58);
+  backdrop-filter:blur(3px);
+  z-index:100000;
+  animation:fadeIn 0.25s ease-out forwards;
 }
-.popup-content{
-  background:linear-gradient(
-    180deg,
-    rgba(255,255,255,1) 0%,
-    rgba(255,255,255,0.85) 50%,
-    rgba(255,255,255,0.7) 100%
-  );
-  border-radius:20px;
-  padding:60px 50px;
-  width:600px;
-  max-width:90%;
+.contact-success-card{
+  width:min(100%, 560px);
+  min-height:410px;
+  padding:52px 40px 34px;
+  border-radius:8px;
   text-align:center;
-  position:relative;
-  animation:slideUp 0.5s ease forwards;
-  box-shadow:0 6px 25px rgba(0,0,0,0.25);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.97) 0%, rgba(246,248,250,0.92) 100%);
+  box-shadow:0 24px 60px rgba(0,0,0,0.24);
+  animation:slideUp 0.32s ease-out forwards;
 }
-.popup-icon{width:80px; height:80px; margin-bottom:30px}
-.popup-title{color:var(--teal); font-size:22px; font-weight:700; margin-bottom:15px}
-.popup-text{color:#000; font-size:18px; line-height:1.7; font-weight:600; margin-bottom:10px}
-.popup-buttons{
+.contact-success-icon{
+  width:64px;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0 auto 18px;
+}
+.contact-success-icon-ring{
+  width:64px;
+  height:64px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#ffffff;
+  border-radius:50%;
+  box-shadow:0 8px 18px rgba(125,194,66,0.18);
+}
+.contact-success-icon-core{
+  width:48px;
+  height:48px;
+  position:relative;
+  background:#8ccf4d;
+  border:4px solid #ffffff;
+  border-radius:14px;
+  transform:rotate(45deg);
+  box-shadow:0 6px 14px rgba(125,194,66,0.28);
+}
+.contact-success-check{
+  position:absolute;
+  left:12px;
+  top:8px;
+  width:10px;
+  height:20px;
+  border-right:4px solid #ffffff;
+  border-bottom:4px solid #ffffff;
+  transform:rotate(0deg);
+}
+.contact-success-title{
+  margin:0 0 18px;
+  color:#11a9d4;
+  font-family:"VesperLibre-Bold",serif;
+  font-size:14px;
+  line-height:1.35;
+}
+.contact-success-text{
+  max-width:355px;
+  margin:0 auto 8px;
+  color:#111827;
+  font-family:"VesperLibre-Medium",serif;
+  font-size:13px;
+  line-height:1.85;
+}
+.contact-success-actions{
   display:flex;
   justify-content:center;
+  gap:12px;
+  margin-top:28px;
   flex-wrap:wrap;
-  gap:15px;
-  margin-top:40px;
 }
-.btn{
-  padding:14px 40px;
-  border:none;
-  border-radius:12px;
-  cursor:pointer;
-  font-size:17px;
+.contact-success-button{
+  min-width:122px;
+  padding:10px 16px;
+  border-radius:4px;
+  background:#7dc242;
+  color:#fff;
+  text-decoration:none;
+  font-size:10px;
   font-weight:700;
-  transition:0.3s ease;
+  transition:background-color 0.2s ease, transform 0.2s ease;
 }
-.btn-green{background-color:#71b247; color:#fff}
-.btn-green:hover{background-color:#5a9437; transform:translateY(-2px)}
+.contact-success-button:hover{
+  background:#6ab032;
+  transform:translateY(-1px);
+}
+.form-errors,
+.errorlist{
+  margin:0 0 14px;
+  padding:10px 14px;
+  border-radius:10px;
+  background:#fff1f2;
+  border:1px solid #fecdd3;
+  color:#b91c1c;
+  list-style:none;
+}
+.errorlist{
+  margin-top:8px;
+}
+.errorlist li{
+  margin:0;
+}
 
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -382,8 +452,21 @@ input[type="file"]::file-selector-button:hover{
     font-size:17px;
     border-radius:12px;
   }
-  .popup-content{padding:40px 25px}
-  .popup-title{font-size:20px}
-  .popup-text{font-size:16px}
-  .btn{width:100%; font-size:16px}
+  .contact-success-card{
+    min-height:auto;
+    padding:36px 22px 28px;
+  }
+  .contact-success-title{
+    font-size:14px;
+  }
+  .contact-success-text{
+    font-size:12px;
+  }
+  .contact-success-actions{
+    gap:10px;
+  }
+  .contact-success-button{
+    width:100%;
+    max-width:220px;
+  }
 }

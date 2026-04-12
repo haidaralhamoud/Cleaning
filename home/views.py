@@ -63,6 +63,7 @@ from .availability_utils import (
 )
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.mail import EmailMultiAlternatives
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash, get_user_model
@@ -78,6 +79,8 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 DRAFT_SESSION_KEY = "private_booking_draft"
+PRIVATE_BOOKING_SERVICE_FEE = Decimal("50.00")
+PRIVATE_BOOKING_VAT_PERCENT = Decimal("25.00")
 
 
 def _cash_invoice_font(size=20, bold=False):
@@ -633,6 +636,11 @@ def _calculate_private_payment_summary(booking, currency):
     base_total = Decimal(str(fresh_pricing.get("final", 0) or 0))
     subtotal = Decimal(str(fresh_pricing.get("subtotal", 0) or 0))
     rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
+    service_fee = PRIVATE_BOOKING_SERVICE_FEE
+    vat_percent = PRIVATE_BOOKING_VAT_PERCENT
+    vat_base = base_total + service_fee
+    vat_amount = (vat_base * (vat_percent / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_before_discounts = vat_base + vat_amount
 
     customer = None
     if booking.user_id:
@@ -652,7 +660,7 @@ def _calculate_private_payment_summary(booking, currency):
         and completed_bookings == 0
     )
 
-    final_amount = base_total
+    final_amount = total_before_discounts
     discount_code = None
     discount_amount = Decimal("0.00")
     referral_discount_applied = False
@@ -664,13 +672,13 @@ def _calculate_private_payment_summary(booking, currency):
         dc = booking.discount_code
         is_valid, _ = dc.validate(user=booking.user)
         if is_valid:
-            discount_amount = base_total * Decimal(dc.percent) / Decimal(100)
-            final_amount = base_total - discount_amount
+            discount_amount = total_before_discounts * Decimal(dc.percent) / Decimal(100)
+            final_amount = total_before_discounts - discount_amount
             discount_code = dc
 
     if referral_discount_eligible and discount_code is None:
-        referral_discount_amount = base_total * Decimal(referral_discount_percent) / Decimal(100)
-        final_amount = base_total - referral_discount_amount
+        referral_discount_amount = total_before_discounts * Decimal(referral_discount_percent) / Decimal(100)
+        final_amount = total_before_discounts - referral_discount_amount
         referral_discount_applied = True
 
     reward_context = _get_private_reward_context(
@@ -690,6 +698,10 @@ def _calculate_private_payment_summary(booking, currency):
         "base_total": base_total,
         "subtotal": subtotal,
         "rot_discount": rot_discount,
+        "service_fee": service_fee,
+        "vat_percent": vat_percent,
+        "vat_amount": vat_amount,
+        "total_before_discounts": total_before_discounts,
         "amount": final_amount,
         "amount_cents": _stripe_amount_from_decimal(final_amount),
         "currency": (currency or "").lower(),
@@ -741,6 +753,10 @@ def _private_booking_summary_payload(request, draft, booking=None, pricing=None)
         "rot": pricing.get("rot", 0),
         "rot_percent": pricing.get("rot_percent", 0),
         "use_rot": pricing.get("use_rot", True),
+        "service_fee": float(payment_summary.get("service_fee", 0) or 0),
+        "vat_percent": float(payment_summary.get("vat_percent", 0) or 0),
+        "vat_amount": float(payment_summary.get("vat_amount", 0) or 0),
+        "total_before_discounts": float(payment_summary.get("total_before_discounts", 0) or 0),
         "use_reward": bool(payment_summary.get("reward_applied")),
         "reward_available": reward is not None,
         "reward_title": reward.title if reward else "",
@@ -1050,13 +1066,17 @@ def T_C(request):
 
 def feedback_request(request):
     form = FeedbackRequestForm()
+    show_success_popup = request.GET.get("submitted") == "1"
     if request.method == "POST":
         form = FeedbackRequestForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, "Thank you! We received your message.")
-            return redirect("home:feedback_request")
-    return render(request, "home/feedback_request.html", {"form": form})
+            return redirect(f"{reverse('home:feedback_request')}?submitted=1")
+    return render(
+        request,
+        "home/feedback_request.html",
+        {"form": form, "show_success_popup": show_success_popup},
+    )
 
 
 @require_POST
@@ -1134,6 +1154,8 @@ def _dashboard_notifications():
     new_private = PrivateBooking.objects.filter(created_at__gte=since).count()
     new_business = BusinessBooking.objects.filter(created_at__gte=since).count()
     new_contacts = Contact.objects.filter(created_at__gte=since).count()
+    new_call_requests = CallRequest.objects.filter(created_at__gte=since).count()
+    new_email_requests = EmailRequest.objects.filter(created_at__gte=since).count()
     new_incidents = Incident.objects.filter(created_at__gte=since).count()
     new_reviews = ServiceReview.objects.filter(created_at__gte=since).count()
     new_messages = ChatMessage.objects.filter(created_at__gte=since).count()
@@ -1162,6 +1184,14 @@ def _dashboard_notifications():
     )
     recent_contacts = list(
         Contact.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_call_requests = list(
+        CallRequest.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_email_requests = list(
+        EmailRequest.objects.filter(created_at__gte=since)
         .order_by("-created_at")[:6]
     )
     recent_customers = list(
@@ -1237,6 +1267,20 @@ def _dashboard_notifications():
             "time": contact.created_at,
             "url": "/dashboard/contacts/",
         })
+    for call_request in recent_call_requests:
+        items.append({
+            "title": f"Call Request: {call_request.full_name}".strip() or f"Call Request #{call_request.id}",
+            "detail": call_request.phone or call_request.email or "New call request",
+            "time": call_request.created_at,
+            "url": "/dashboard/call-requests/",
+        })
+    for email_request in recent_email_requests:
+        items.append({
+            "title": f"Email Request: {email_request.subject}".strip() or f"Email Request #{email_request.id}",
+            "detail": email_request.email_from or "New email request",
+            "time": email_request.created_at,
+            "url": "/dashboard/email-requests/",
+        })
     for customer in recent_customers:
         customer_name = f"{customer.first_name} {customer.last_name}".strip() or customer.email or str(customer)
         items.append({
@@ -1295,6 +1339,8 @@ def _dashboard_notifications():
         new_private
         + new_business
         + new_contacts
+        + new_call_requests
+        + new_email_requests
         + new_incidents
         + new_reviews
         + new_messages
@@ -1316,6 +1362,8 @@ def _dashboard_notifications():
         "dashboard_new_incidents": new_incidents,
         "dashboard_new_reviews": new_reviews,
         "dashboard_new_messages": new_messages,
+        "dashboard_new_call_requests": new_call_requests,
+        "dashboard_new_email_requests": new_email_requests,
     }
 
 
@@ -1375,6 +1423,9 @@ def _dashboard_booking_customer_label(booking):
 
 def _dashboard_booking_service_label(booking):
     if isinstance(booking, BusinessBooking):
+        selected_items = booking.services_needed or []
+        if isinstance(selected_items, list) and selected_items:
+            return ", ".join(str(value) for value in selected_items[:2])
         return booking.selected_service or booking.selected_bundle or "Business service"
     selected = booking.selected_services or []
     if isinstance(selected, list) and selected:
@@ -1681,6 +1732,8 @@ def dashboard_notifications_api(request):
         "new_incidents": data.get("dashboard_new_incidents", 0),
         "new_reviews": data.get("dashboard_new_reviews", 0),
         "new_messages": data.get("dashboard_new_messages", 0),
+        "new_call_requests": data.get("dashboard_new_call_requests", 0),
+        "new_email_requests": data.get("dashboard_new_email_requests", 0),
         "items": [
             {
                 "title": i["title"],
@@ -1728,6 +1781,11 @@ def dashboard_home(request):
     }
     context.update(_dashboard_notifications())
     return render(request, "dashboard/index.html", context)
+
+
+@user_passes_test(_staff_required)
+def dashboard_contacts_redirect(request):
+    return redirect("home:dashboard_model_list", model="contacts")
 
 
 @user_passes_test(_staff_required)
@@ -2409,11 +2467,6 @@ def dashboard_model_list(request, model):
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
 
     qs = item.model.objects.all()
-    if item.model == Contact:
-        if item.slug == "private-contacts":
-            qs = qs.filter(source="private")
-        elif item.slug == "business-contacts":
-            qs = qs.filter(source="business")
     service_id = request.GET.get("service_id")
     if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "BusinessServiceCard"}:
         qs = qs.filter(service_id=service_id)
@@ -2444,8 +2497,7 @@ def dashboard_model_list(request, model):
     page = paginator.get_page(request.GET.get("page"))
 
     display_fields_map = {
-        "private-contacts": ["first_name", "last_name", "email", "phone", "source"],
-        "business-contacts": ["first_name", "last_name", "email", "phone", "source"],
+        "contacts": ["first_name", "last_name", "email", "phone", "source"],
         "provider-profiles": ["user", "city", "region", "area", "nearby_areas", "is_active"],
         "business-services": ["title", "recommended", "detail_description", "image", "hero_image"],
         "business-service-cards": ["service", "title", "order"],
@@ -2813,21 +2865,35 @@ def dashboard_date_surcharge_quick_weekend(request):
 # CONTACT
 # ================================
 def contact(request):
-    show_popup = False
+    show_popup = request.GET.get("submitted") == "1"
 
     if request.method == "POST":
         form = ContactForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            show_popup = True
+            contact_message = form.save(commit=False)
+            contact_message.source = "private"
+            contact_message.save()
+            return redirect(f"{reverse('home:contact')}?submitted=1")
     else:
-        form = ContactForm()
+        form = ContactForm(initial={"preferred_method": ""})
 
     return render(request, "home/contact.html", {
         "form": form,
         "show_popup": show_popup,
-        "support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", "support@hembla-experten.se"),
+        "support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", "Support@hembla-experte.se"),
+        "contact_address": "kikarvägen 18, 175 46 Järfälla stockholm",
+        "contact_phone": "",
     })
+
+
+def contact_success(request):
+    return render(
+        request,
+        "home/contact_success.html",
+        {
+            "support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", "Support@hembla-experte.se"),
+        },
+    )
 
 
 # ================================
@@ -2837,22 +2903,35 @@ def careers_home(request):
     jobs = Job.objects.filter(is_active=True)
 
     if jobs.exists():
-        return render(request, "home/career_page.html", {"jobs": jobs})
+        return render(
+            request,
+            "home/career_page.html",
+            {"jobs": jobs, "show_success_popup": request.GET.get("submitted") == "1"},
+        )
 
     if request.method == "POST":
+        availability = (request.POST.get("availability") or "").strip()
+        availability_custom = (request.POST.get("availability_custom") or "").strip()
+        if availability.lower() == "other" and availability_custom:
+            availability = availability_custom
+
         Application.objects.create(
             full_name=request.POST.get("full_name"),
             email=request.POST.get("email"),
             phone=request.POST.get("phone"),
             area=request.POST.get("area"),
-            availability=request.POST.get("availability"),
+            availability=availability,
             message=request.POST.get("message"),
             cv=request.FILES.get("cv"),
             job=None,
         )
-        return render(request, "home/success_appy.html")
+        return redirect(f"{reverse('home:careers_home')}?submitted=1")
 
-    return render(request, "home/career_page_no opining.html")
+    return render(
+        request,
+        "home/career_page_no opining.html",
+        {"show_success_popup": request.GET.get("submitted") == "1"},
+    )
 
 
 def apply_page(request, job_id=None):
@@ -2862,11 +2941,19 @@ def apply_page(request, job_id=None):
         form = ApplicationForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return render(request, "home/success_appy.html")
+            return redirect(f"{reverse('home:apply_page', args=[job.id])}?submitted=1")
     else:
         form = ApplicationForm(initial={"job": job})
 
-    return render(request, "home/career_page_available.html", {"form": form, "job": job})
+    return render(
+        request,
+        "home/career_page_available.html",
+        {
+            "form": form,
+            "job": job,
+            "show_success_popup": request.GET.get("submitted") == "1",
+        },
+    )
 
 
 # ================================
@@ -2959,10 +3046,10 @@ def _set_business_path_type(request, path_type):
     data = _get_business_draft(request)
     data["path_type"] = path_type
     if path_type == "bundle":
-        data.pop("services_needed", None)
         data.pop("addons", None)
     elif path_type == "custom":
         data.pop("selected_bundle_id", None)
+        data.pop("selected_bundle_ids", None)
     request.session["business_booking_draft"] = data
     request.session.modified = True
 
@@ -3006,7 +3093,8 @@ def _draft_booking_from_session(request):
     ):
         if field in data:
             setattr(booking, field, data.get(field))
-    bundle_id = data.get("selected_bundle_id")
+    bundle_ids = data.get("selected_bundle_ids") or []
+    bundle_id = data.get("selected_bundle_id") or (bundle_ids[0] if bundle_ids else None)
     if bundle_id:
         booking.selected_bundle_id = bundle_id
     return booking
@@ -3136,28 +3224,53 @@ def business_bundles(request, booking_id):
     total_steps = 7
     range_steps = range(1, total_steps + 1)
     bundles = BusinessBundle.objects.all()
+    selected_bundle_ids = [str(value) for value in (draft.get("selected_bundle_ids") or [])]
 
     if request.method == "POST":
-        bundle_id = request.POST.get("bundle_id")
-        if bundle_id:
-            bundle = BusinessBundle.objects.filter(id=bundle_id).first()
-            if bundle is None:
-                return render(request, "home/business_bundles.html", {
-                    "booking": booking,
-                    "bundles": bundles,
-                    "step": 3,
-                    "step_items": _build_business_step_items("bundle", 3),
-                    "total_steps": total_steps,
-                    "range_total_steps": range_steps,
-                    "booking_id": 0,
-                    "error": "Selected bundle is not valid.",
-                })
-            _update_business_draft(request, {"selected_bundle_id": bundle.id})
+        raw_bundle_ids = request.POST.get("selected_bundle_ids", "[]")
+        try:
+            parsed_bundle_ids = json.loads(raw_bundle_ids)
+        except json.JSONDecodeError:
+            parsed_bundle_ids = []
+
+        if not isinstance(parsed_bundle_ids, list):
+            parsed_bundle_ids = []
+
+        normalized_ids = []
+        for value in parsed_bundle_ids:
+            try:
+                normalized_ids.append(int(value))
+            except (TypeError, ValueError):
+                continue
+
+        selected_bundles = list(BusinessBundle.objects.filter(id__in=normalized_ids))
+        selected_by_id = {bundle.id: bundle for bundle in selected_bundles}
+        ordered_bundles = [selected_by_id[bundle_id] for bundle_id in normalized_ids if bundle_id in selected_by_id]
+
+        if not ordered_bundles:
+            return render(request, "home/business_bundles.html", {
+                "booking": booking,
+                "bundles": bundles,
+                "selected_bundle_ids": [],
+                "step": 3,
+                "step_items": _build_business_step_items("bundle", 3),
+                "total_steps": total_steps,
+                "range_total_steps": range_steps,
+                "booking_id": 0,
+                "error": "Please add at least one bundle before continuing.",
+            })
+
+        _update_business_draft(request, {
+            "selected_bundle_id": ordered_bundles[0].id,
+            "selected_bundle_ids": [bundle.id for bundle in ordered_bundles],
+            "services_needed": [bundle.title for bundle in ordered_bundles],
+        })
         return redirect("home:business_frequency", booking_id=0)
 
     return render(request, "home/business_bundles.html", {
         "booking": booking,
         "bundles": bundles,
+        "selected_bundle_ids": selected_bundle_ids,
         "step": 3,
         "step_items": _build_business_step_items("bundle", 3),
         "total_steps": total_steps,
@@ -3367,7 +3480,7 @@ def business_scheduling(request, booking_id):
             floors=draft.get("floors"),
             restrooms=draft.get("restrooms"),
             kitchen_cleaning=bool(draft.get("kitchen_cleaning")),
-            services_needed=draft.get("services_needed") if path_type == "custom" else None,
+            services_needed=draft.get("services_needed") or None,
             addons=draft.get("addons") if path_type == "custom" else None,
             frequency=draft.get("frequency") or {},
             start_date=start_date,
@@ -3503,6 +3616,7 @@ def private_zip_step1(request, service_slug):
     zip_form = ZipCheckForm()
     not_available_form = None
     show_not_available = False
+    show_success_popup = request.GET.get("submitted") == "1"
     zip_code_value = None
 
     if request.method == "POST":
@@ -3545,13 +3659,7 @@ def private_zip_step1(request, service_slug):
                 obj = not_available_form.save(commit=False)
                 obj.service = service
                 obj.save()
-
-                messages.success(
-                    request,
-                    "Thank you! We'll contact you as soon as we expand to your area."
-                )
-                return redirect("home:private_zip_step1",
-                                service_slug=service_slug)
+                return redirect(f"{reverse('home:private_zip_step1', kwargs={'service_slug': service_slug})}?submitted=1")
 
     if not not_available_form and show_not_available:
         not_available_form = NotAvailableZipForm()
@@ -3561,6 +3669,7 @@ def private_zip_step1(request, service_slug):
         "zip_form": zip_form,
         "show_not_available": show_not_available,
         "not_available_form": not_available_form,
+        "show_success_popup": show_success_popup,
     })
 
 @login_required
@@ -3692,6 +3801,9 @@ def private_booking_checkout(request):
 
     payment_summary = _calculate_private_payment_summary(temp_booking, stripe_currency)
     final_preview_price = payment_summary["amount"]
+    service_fee = Decimal(str(payment_summary.get("service_fee", 0) or 0))
+    vat_amount = Decimal(str(payment_summary.get("vat_amount", 0) or 0))
+    vat_percent = Decimal(str(payment_summary.get("vat_percent", 0) or 0))
     payment_summary_data = _serialize_private_payment_summary(payment_summary)
     reward = payment_summary.get("reward")
     reward_discount_amount = Decimal(str(payment_summary.get("reward_discount", 0) or 0))
@@ -3993,6 +4105,9 @@ def private_booking_checkout(request):
         "date_surcharge": date_surcharge,
         "subtotal": subtotal,
         "base_total": base_total,
+        "service_fee": service_fee,
+        "vat_amount": vat_amount,
+        "vat_percent": vat_percent,
         "rot_value": rot_value,
         "display_address": display_address,
         "display_area": display_area,
@@ -4048,6 +4163,10 @@ def private_booking_cash_invoice_pdf(request):
         customer_address = customer_address or customer.display_address()
         customer_area = customer_area or customer.display_city()
         customer_zip = customer_zip or customer.display_postal_code()
+
+    if not customer_email:
+        messages.error(request, "No customer email was found for sending the cash invoice.")
+        return redirect("home:private_booking_checkout")
 
     appointment_date = draft.get("appointment_date") or "To be confirmed"
     appointment_time = draft.get("appointment_time_window") or "To be confirmed"
@@ -4105,6 +4224,12 @@ def private_booking_cash_invoice_pdf(request):
         ("Add-ons Total", f"{Decimal(str(pricing.get('addons_total', 0) or 0)):.2f} {currency}", False),
         ("Schedule Extra", f"{Decimal(str(pricing.get('schedule_extra', 0) or 0)):.2f} {currency}", False),
         ("Date Surcharge", f"{Decimal(str(pricing.get('date_surcharge', 0) or 0)):.2f} {currency}", False),
+        ("Service Fee", f"{Decimal(str(payment_summary.get('service_fee', 0) or 0)):.2f} {currency}", False),
+        (
+            f"VAT ({Decimal(str(payment_summary.get('vat_percent', 0) or 0)):.0f}%)",
+            f"{Decimal(str(payment_summary.get('vat_amount', 0) or 0)):.2f} {currency}",
+            False,
+        ),
         (
             "RUT Deduction",
             f"-{Decimal(str(pricing.get('rot', 0) or 0)):.2f} {currency}" if temp_booking.use_rot else f"0.00 {currency}",
@@ -4153,9 +4278,42 @@ def private_booking_cash_invoice_pdf(request):
         charge_rows,
         footer_lines=footer_lines,
     )
-    response = HttpResponse(pdf_bytes, content_type="application/pdf")
-    response["Content-Disposition"] = f'attachment; filename="{reference_number}.pdf"'
-    return response
+    subject = f"Your cash invoice {reference_number}"
+    text_body = (
+        f"Hello {customer_name or 'Customer'},\n\n"
+        "Your cash invoice is attached as a PDF.\n"
+        f"Reference: {reference_number}\n"
+        f"Amount due: {Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}\n"
+        f"Booking time: {appointment_summary}\n\n"
+        "Please keep this invoice and present it at service time if needed.\n\n"
+        "Hembla experten"
+    )
+    html_body = (
+        f"<p>Hello {customer_name or 'Customer'},</p>"
+        "<p>Your cash invoice is attached as a PDF.</p>"
+        f"<p><strong>Reference:</strong> {reference_number}<br>"
+        f"<strong>Amount due:</strong> {Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}<br>"
+        f"<strong>Booking time:</strong> {appointment_summary}</p>"
+        "<p>Please keep this invoice and present it at service time if needed.</p>"
+        "<p>Hembla experten</p>"
+    )
+    message = EmailMultiAlternatives(
+        subject,
+        text_body,
+        settings.DEFAULT_FROM_EMAIL,
+        [customer_email],
+    )
+    message.attach_alternative(html_body, "text/html")
+    message.attach(f"{reference_number}.pdf", pdf_bytes, "application/pdf")
+    try:
+        message.send(fail_silently=False)
+    except Exception:
+        logger.exception("Failed to send cash invoice email to %s", customer_email)
+        messages.error(request, "Could not send the cash invoice email. Please try again.")
+        return redirect("home:private_booking_checkout")
+
+    messages.success(request, f"Cash invoice sent to {customer_email}.")
+    return redirect("home:private_booking_checkout")
 
 @login_required
 def private_booking_payment_complete(request):

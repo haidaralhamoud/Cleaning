@@ -82,7 +82,7 @@
 
     {% for job in jobs %}
     <div class="job-card">
-      <img src="{{ job.image.url }}" alt="{{ job.title }}">
+      <img src="{{ job.image.url }}" alt="{{ job.title }}" loading="lazy" decoding="async">
       <div class="job-content">
         <h3>{{ job.title }}</h3>
         <p>{{ job.description }}</p>
@@ -106,14 +106,14 @@
         <p><strong>Because here, you're not just an employee,</strong><br>
         you're part of a family that believes in trust, respect, and kindness. We celebrate small wins, support each other through challenges, and always strive to make life a little easier for our customers, and for each other.</p>
       </div>
-      <img src="{% static 'images/frame-16865528320.png'%}" alt="Team Meeting">
+      <img src="{% static 'images/frame-16865528320.webp'%}" alt="Team Meeting" loading="lazy" decoding="async">
     </div>
   </section>
 
   <section class="growth-section fade-in">
     <h2>Your Growth Matters</h2>
     <div class="growth-container">
-      <img src="{% static 'images/frame-16865528330.png'%}" alt="Team Growth">
+      <img src="{% static 'images/frame-16865528330.webp'%}" alt="Team Growth" loading="lazy" decoding="async">
       <div class="growth-text">
         <p>We want you to grow with us, not just as a professional, but as a person. At Hembla experten, you'll find encouragement to learn, space to be creative, and support to reach your full potential.</p>
       </div>

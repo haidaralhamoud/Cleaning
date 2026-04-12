@@ -7,6 +7,7 @@ from datetime import timedelta
 import secrets
 import uuid
 
+from home.image_optimization import optimize_uploaded_image_fields
 
 User = settings.AUTH_USER_MODEL
 
@@ -103,6 +104,10 @@ class Customer(models.Model):
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
 
     accepted_terms = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["profile_photo"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
 
     def primary_location_obj(self):
         return self.locations.filter(is_primary=True).first()
@@ -788,6 +793,10 @@ class Promotion(models.Model):
     class Meta:
         ordering = ["-start_date"]
 
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["image"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.title} (x{self.points_multiplier})"
 
@@ -876,6 +885,10 @@ class BookingRequestFixAttachment(models.Model):
     )
     file = models.ImageField(upload_to="request_fixes/")
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["file"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"RequestFixAttachment #{self.id}"
@@ -1172,6 +1185,10 @@ class ProviderProfile(models.Model):
     nearby_areas = models.JSONField(default=list, blank=True)
 
     is_active = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["photo"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Provider Profile - {self.user}"

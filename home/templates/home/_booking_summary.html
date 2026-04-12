@@ -92,6 +92,16 @@
     </div>
 
     <div class="item">
+        <span>Service fee</span>
+        <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:"0"|floatformat:2 }}</span>
+    </div>
+
+    <div class="item">
+        <span>VAT ({{ summary_data.vat_percent|default:"25"|floatformat:0 }}%)</span>
+        <span id="sum_vat">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.vat_amount|default:"0"|floatformat:2 }}</span>
+    </div>
+
+    <div class="item">
         <span id="sum_rot_label">RUT Deduction ({{ pricing.rot_percent|default:"0"|floatformat:2 }}%)</span>
         <span id="sum_rot">{% if booking.use_rot %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0"|floatformat:2 }}</span>
     </div>

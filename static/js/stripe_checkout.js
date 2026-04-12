@@ -6,10 +6,18 @@
   var clientSecret = form.getAttribute("data-stripe-client-secret") || "";
   var completeUrl = form.getAttribute("data-stripe-complete-url") || "";
   var returnUrl = form.getAttribute("data-stripe-return-url") || completeUrl;
+  var cashInvoiceUrl = form.getAttribute("data-cash-invoice-url") || "";
   var failureUrl = form.getAttribute("data-stripe-failure-url") || "";
   var stripeReady = form.getAttribute("data-stripe-ready") === "1";
   var button = document.getElementById("confirmPayment");
   var errorEl = document.getElementById("card-errors");
+  var paymentOptionInputs = form.querySelectorAll('input[name="payment_option"]');
+  function getSelectedPaymentOption() {
+    for (var i = 0; i < paymentOptionInputs.length; i += 1) {
+      if (paymentOptionInputs[i].checked) return paymentOptionInputs[i].value;
+    }
+    return "card";
+  }
   function setError(message) {
     if (errorEl) errorEl.textContent = message || "";
   }
@@ -23,52 +31,46 @@
     return parts.join(" | ") || fallbackMessage || "Payment failed.";
   }
 
-  if (typeof Stripe === "undefined") {
-    if (button) button.disabled = true;
-    setError("Payment service failed to load.");
-    return;
-  }
+  var stripe = null;
+  var elements = null;
+  var paymentElement = null;
+  var cardReady = false;
 
-  if (!stripeReady || !publishableKey || !clientSecret || !completeUrl) {
-    if (button) button.disabled = true;
+  if (typeof Stripe !== "undefined" && stripeReady && publishableKey && clientSecret && completeUrl) {
+    try {
+      stripe = Stripe(publishableKey);
+      elements = stripe.elements({
+        clientSecret: clientSecret,
+        appearance: {
+          theme: "stripe",
+          variables: {
+            colorText: "#0f172a",
+            colorDanger: "#c0392b",
+            fontFamily: "\"Inter\", sans-serif"
+          }
+        }
+      });
+      paymentElement = elements.create("payment", {
+        layout: "tabs"
+      });
+      paymentElement.mount("#payment-element");
+      paymentElement.on("change", function (event) {
+        setError(event.error ? event.error.message : "");
+      });
+      cardReady = true;
+    } catch (err) {
+      console.error("[Stripe] payment element mount failed", err);
+      setError((err && err.message) || "Payment form failed to initialize.");
+    }
+  } else if (getSelectedPaymentOption() === "card") {
     var missing = [];
+    if (typeof Stripe === "undefined") missing.push("stripe.js");
     if (!stripeReady) missing.push("stripe not ready");
     if (!publishableKey) missing.push("publishable key");
     if (!clientSecret) missing.push("client secret");
     if (!completeUrl) missing.push("complete url");
     setError("Payment form is not ready: " + missing.join(", ") + ".");
-    return;
   }
-
-  var stripe = Stripe(publishableKey);
-  var elements;
-  var paymentElement;
-  try {
-    elements = stripe.elements({
-      clientSecret: clientSecret,
-      appearance: {
-        theme: "stripe",
-        variables: {
-          colorText: "#0f172a",
-          colorDanger: "#c0392b",
-          fontFamily: "\"Inter\", sans-serif"
-        }
-      }
-    });
-    paymentElement = elements.create("payment", {
-      layout: "tabs"
-    });
-    paymentElement.mount("#payment-element");
-  } catch (err) {
-    console.error("[Stripe] payment element mount failed", err);
-    if (button) button.disabled = true;
-    setError((err && err.message) || "Payment form failed to initialize.");
-    return;
-  }
-
-  paymentElement.on("change", function (event) {
-    setError(event.error ? event.error.message : "");
-  });
 
   function sendCompletion(paymentIntentId, originalText) {
     var csrfTokenInput = form.querySelector("input[name=csrfmiddlewaretoken]");
@@ -101,6 +103,20 @@
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     if (!button) return;
+    if (getSelectedPaymentOption() === "invoice") {
+      setError("");
+      if (cashInvoiceUrl) {
+        window.location.href = cashInvoiceUrl;
+        return;
+      }
+      setError("Cash invoice is not available.");
+      return;
+    }
+
+    if (!cardReady || !stripe || !elements) {
+      setError("Payment form is not ready.");
+      return;
+    }
 
     button.disabled = true;
     var originalText = button.textContent;

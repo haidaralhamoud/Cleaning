@@ -7,7 +7,7 @@
   --bg:#f7fafc;
   --panel:rgba(255,255,255,.78);
   --soft-blue:rgba(26,135,195,.12);
-  --solid-blue:#bfe4f4;
+  --solid-blue:#78c5e4;
   --shadow-soft:0 18px 40px rgba(16,18,20,.12);
   --shadow-tight:0 8px 20px rgba(16,18,20,.12);
   --radius-xl:26px;
@@ -290,6 +290,8 @@ img{display:block;max-width:100%;height:auto}
 }
 .card.soft{background:var(--soft-blue)}
 .card.solid{background:var(--solid-blue)}
+.card.solid h3,
+.card.solid p{color:#fff}
 .card:nth-child(2){animation-delay:.08s}
 .card:nth-child(3){animation-delay:.16s}
 .card:nth-child(4){animation-delay:.24s}

@@ -254,3 +254,25 @@ class BookingEmailSignalTests(TestCase):
             if "support@hembla-experten.se" in email.to and email.subject == "New Contact Message"
         ]
         self.assertEqual(len(support_emails), 1)
+
+    def test_contact_form_post_redirects_to_success_page(self):
+        response = self.client.post(
+            reverse("home:contact"),
+            data={
+                "first_name": "Lama",
+                "last_name": "Hassan",
+                "email": "lama@example.com",
+                "country_code": "+46",
+                "phone": "123456",
+                "message": "Need help",
+                "inquiry_type": "general",
+                "preferred_method": "email",
+            },
+        )
+
+        self.assertRedirects(response, f"{reverse('home:contact')}?submitted=1")
+        self.assertTrue(Contact.objects.filter(email="lama@example.com").exists())
+        self.assertEqual(Contact.objects.get(email="lama@example.com").source, "private")
+
+        success_response = self.client.get(f"{reverse('home:contact')}?submitted=1")
+        self.assertContains(success_response, "Thank You! We&#x27;ve Got Your Message", html=False)

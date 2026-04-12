@@ -246,8 +246,9 @@ def notify_business_booking(sender, instance, created, **kwargs):
 def notify_contact(sender, instance, created, **kwargs):
     if not created:
         return
+    dashboard_link = "/dashboard/contacts/"
     subject = "New Contact Message"
-    body = f"New contact received.\n\nName: {instance.first_name} {instance.last_name}\nEmail: {instance.email}\nType: {instance.inquiry_type}\nLink: /dashboard/contacts/"
+    body = f"New contact received.\n\nName: {instance.first_name} {instance.last_name}\nEmail: {instance.email}\nType: {instance.inquiry_type}\nLink: {dashboard_link}"
     recipient = _contact_support_email()
     if not recipient:
         return

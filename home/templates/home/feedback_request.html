@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="{% static 'css/feedback_request.css' %}">
   <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body{% if show_success_popup %} class="feedback-popup-open"{% endif %}>
   {% include "home/includes/main_header.html" %}
 
   <main class="feedback-page">
@@ -27,6 +27,11 @@
 
         <form method="post">
           {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="feedback-form-errors">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
           <div class="field-group">
             <label for="id_customer_name">{% trans "Your Name" %}</label>
             {{ form.customer_name }}
@@ -34,10 +39,12 @@
           <div class="field-group">
             <label for="id_email">{% trans "Your Email" %} ({% trans "optional" %})</label>
             {{ form.email }}
+            {{ form.email.errors }}
           </div>
           <div class="field-group">
             <label for="id_feedback_text">{% trans "Your Feedback" %}</label>
             {{ form.feedback_text }}
+            {{ form.feedback_text.errors }}
           </div>
           <div class="field-group">
             <label>{% trans "Rating" %}</label>
@@ -66,10 +73,12 @@
             <div class="field-group">
               <label for="id_service_type">{% trans "Service Type" %}</label>
               {{ form.service_type }}
+              {{ form.service_type.errors }}
             </div>
             <div class="field-group">
               <label for="id_request_details">{% trans "Describe Your Request" %}</label>
               {{ form.request_details }}
+              {{ form.request_details.errors }}
             </div>
           </div>
 
@@ -79,7 +88,64 @@
     </section>
   </main>
 
+  {% if show_success_popup %}
+  <div class="feedback-success-overlay" id="feedbackSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="feedbackSuccessTitle">
+    <div class="feedback-success-popup">
+      <button type="button" class="feedback-success-close" id="feedbackSuccessClose" aria-label="{% trans 'Close' %}">&times;</button>
+      <div class="feedback-success-icon" aria-hidden="true">
+        <svg
+          class="feedback-success-icon-svg"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          role="presentation"
+          focusable="false"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+          <path d="M11 19h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v6" />
+          <path d="M3 7l9 6l9 -6" />
+          <path d="M15 19l2 2l4 -4" />
+        </svg>
+      </div>
+      <h2 id="feedbackSuccessTitle">{% trans "Submission Received!" %}</h2>
+      <p class="feedback-success-lead">
+        {% trans "Thanks for reaching out to us. We've received your request and our team is already on it." %}
+      </p>
+      <div class="feedback-success-copy">
+        <strong>{% trans "What Happens Next?" %}</strong>
+        <p>{% trans "We'll review your details and get back to you within 48 hours. If a call is needed, we'll suggest a time that works best for you." %}</p>
+        <p>{% trans "We're here to make things easy, sit back and we'll take care of the rest." %}</p>
+      </div>
+      <div class="feedback-success-actions">
+        <a href="{% url 'home:all_services_private' %}" class="feedback-success-btn feedback-success-btn--blue">{% trans "Back to Services" %}</a>
+        <a href="{% url 'home:home' %}" class="feedback-success-btn feedback-success-btn--green">{% trans "Go to Homepage" %}</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   {% include "home/includes/footer.html" %}
+  <script>
+    (function () {
+      const overlay = document.getElementById("feedbackSuccessOverlay");
+      const closeBtn = document.getElementById("feedbackSuccessClose");
+      if (!overlay || !closeBtn) return;
+
+      const closePopup = () => {
+        overlay.style.display = "none";
+        document.body.classList.remove("feedback-popup-open");
+        const url = new URL(window.location.href);
+        url.searchParams.delete("submitted");
+        window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+      };
+
+      closeBtn.addEventListener("click", closePopup);
+    })();
+  </script>
   <script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

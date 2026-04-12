@@ -614,6 +614,10 @@ const initHemblaCalendar = () => {
 
   const positionCalendar = (input) => {
     const rect = input.getBoundingClientRect();
+    if (rect.width === 0 && rect.height === 0) {
+      closeCalendar();
+      return;
+    }
     const top = rect.bottom + window.scrollY + 10;
     let left = rect.left + window.scrollX;
     const calendarWidth = 320;
@@ -691,9 +695,15 @@ const initHemblaCalendar = () => {
   window.addEventListener("resize", () => {
     if (state.activeInput) positionCalendar(state.activeInput);
   });
-  window.addEventListener("scroll", () => {
-    if (state.activeInput) positionCalendar(state.activeInput);
-  });
+  document.addEventListener("scroll", () => {
+    if (!state.activeInput) return;
+    const rect = state.activeInput.getBoundingClientRect();
+    if (rect.bottom < 0 || rect.top > window.innerHeight) {
+      closeCalendar();
+      return;
+    }
+    positionCalendar(state.activeInput);
+  }, true);
 };
 
 window.initHemblaCalendar = initHemblaCalendar;

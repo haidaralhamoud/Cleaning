@@ -4,18 +4,28 @@ from .models import Contact ,Application, Job , BusinessBooking,NotAvailableZipR
 class ContactForm(forms.ModelForm):
     class Meta:
         model = Contact
-        fields = "__all__"
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "country_code",
+            "phone",
+            "message",
+            "inquiry_type",
+            "preferred_method",
+            "file",
+        ]
         widgets = {
-            'first_name': forms.TextInput(attrs={'class': 'hembla-field'}),
-            'last_name': forms.TextInput(attrs={'class': 'hembla-field'}),
+              'first_name': forms.TextInput(attrs={'class': 'hembla-field'}),
+              'last_name': forms.TextInput(attrs={'class': 'hembla-field'}),
             'email': forms.EmailInput(attrs={'class': 'hembla-field'}),
             'country_code': forms.TextInput(attrs={'class': 'hembla-field'}),
-            'phone': forms.TextInput(attrs={'class': 'hembla-field'}),
-            'message': forms.Textarea(attrs={'class': 'hembla-field'}),
-            'inquiry_type': forms.Select(attrs={'class': 'hembla-field'}),
+              'phone': forms.TextInput(attrs={'class': 'hembla-field'}),
+              'message': forms.Textarea(attrs={'class': 'hembla-field'}),
+              'inquiry_type': forms.Select(attrs={'class': 'hembla-field'}),
             'preferred_method': forms.TextInput(attrs={'class': 'hembla-field'}),
-            'file': forms.ClearableFileInput(attrs={'class': 'hembla-field'}),
-        }
+              'file': forms.ClearableFileInput(attrs={'class': 'hembla-field'}),
+          }
 
 class ApplicationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -267,6 +277,43 @@ class EmailRequestForm(forms.ModelForm):
 
 
 class FeedbackRequestForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["email"].required = False
+        self.fields["feedback_text"].required = False
+        self.fields["service_type"].required = False
+        self.fields["request_details"].required = False
+
+        for field_name in ("email", "feedback_text", "service_type", "request_details"):
+            existing_classes = self.fields[field_name].widget.attrs.get("class", "")
+            self.fields[field_name].widget.attrs["data-optional"] = "1"
+            self.fields[field_name].widget.attrs["class"] = existing_classes.strip()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        feedback_text = (cleaned_data.get("feedback_text") or "").strip()
+        service_type = (cleaned_data.get("service_type") or "").strip()
+        request_details = (cleaned_data.get("request_details") or "").strip()
+
+        has_feedback = bool(feedback_text)
+        has_service_request = bool(service_type or request_details)
+
+        if not has_feedback and not has_service_request:
+            raise forms.ValidationError(
+                "Please enter feedback or describe the service you need."
+            )
+
+        if has_service_request and not service_type:
+            self.add_error("service_type", "Please enter the service type.")
+
+        if has_service_request and not request_details:
+            self.add_error("request_details", "Please describe your request.")
+
+        if not feedback_text and has_service_request:
+            cleaned_data["feedback_text"] = f"Service request only: {request_details or service_type}"
+
+        return cleaned_data
+
     class Meta:
         model = FeedbackRequest
         fields = ["customer_name", "email", "feedback_text", "rating", "service_type", "request_details"]

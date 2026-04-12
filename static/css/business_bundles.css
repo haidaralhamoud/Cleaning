@@ -39,6 +39,16 @@ body {
   letter-spacing: 0.3px;
 }
 
+.bundle-error {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #9f1239;
+  font-weight: 600;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -193,8 +203,23 @@ body {
 
 .selected-plan {
   outline: 3px solid #00a3c8;
-  background: #eafdff;
+  background: linear-gradient(135deg, #008fb2, #00a9cf);
+  color: #fff;
   box-shadow: 0 0 12px rgba(0, 163, 200, 0.4);
+}
+
+.confirm-btn button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+  transform: none;
+}
+
+#bundleSelectionForm .next:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  box-shadow: none;
+  transform: none;
 }
 
 .disabled-plan {

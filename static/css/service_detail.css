@@ -307,11 +307,38 @@ body.service-detail-page {
   cursor: pointer;
 }
 
-.estimate-result {
+.estimate-result-card {
+  width: min(420px, 100%);
+  margin-top: 8px;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #d8e6f2;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  text-align: left;
+}
+
+.estimate-result-row,
+.estimate-result-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.estimate-result-row {
+  padding: 8px 0;
+  font-size: 14px;
+  color: #475569;
+}
+
+.estimate-result-total {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
   font-size: 18px;
   font-weight: 700;
   color: #111827;
-  margin: 4px 0 0;
 }
 
 .estimate-note {

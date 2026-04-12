@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" href="{% static 'css/career_page_no opining.css'%}" />
 </head>
-<body>
+<body{% if show_success_popup %} class="career-popup-open"{% endif %}>
   <!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
   <section class="career-no-opening fade-in">
@@ -86,7 +86,7 @@
             <div class="field-group">
               <label for="career_area">Preferred Role / Area of Interest</label>
               <div class="select-wrap">
-                <select id="career_area" name="area" data-no-custom required>
+                <select id="career_area" name="area" required>
                   <option value="" disabled selected>Select an area</option>
                   <option>Electrician</option>
                   <option>Customer Service</option>
@@ -99,12 +99,21 @@
             <div class="field-group">
               <label for="career_availability">Availability</label>
               <div class="select-wrap">
-                <select id="career_availability" name="availability" data-no-custom required>
+                <select id="career_availability" name="availability" required>
                   <option value="" disabled selected>Select availability</option>
                   <option>Immediately</option>
                   <option>1–3 months</option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
+              <input
+                id="career_availability_custom"
+                class="career-conditional-input"
+                type="text"
+                name="availability_custom"
+                placeholder="Write your availability"
+                hidden
+              />
             </div>
           </div>
 
@@ -113,7 +122,7 @@
 
         <aside class="form-aside">
           <div class="aside-visual zoom-in">
-            <img src="{% static 'images/frame-16865528070.png'%}" alt="Application Form" />
+            <img src="{% static 'images/frame-16865528070.webp'%}" alt="Application Form" loading="lazy" decoding="async" />
           </div>
           <div class="aside-note fade-in">
             <h3>Why send an open application?</h3>
@@ -130,28 +139,44 @@
       <h2>What You'll Find at Hembla experten</h2>
       <div class="benefits-grid">
         <div class="benefit-card">
-          <img src="{% static 'images/Work that has meaning.jpg' %}" alt="Work that has meaning" class="zoom-in"/>
+          <img src="{% static 'images/Work that has meaning.webp' %}" alt="Work that has meaning" class="zoom-in" loading="lazy" decoding="async"/>
           <h3>Work that has meaning</h3>
           <p>Helping people in their homes and workplaces every day</p>
         </div>
         <div class="benefit-card">
-          <img src="{% static 'images/A team that feels like family.jpg' %}" alt="A team that feels like family" />
+          <img src="{% static 'images/A team that feels like family.webp' %}" alt="A team that feels like family" loading="lazy" decoding="async" />
           <h3>A team that feels like family</h3>
           <p>Where your voice is heard and your efforts are valued</p>
         </div>
         <div class="benefit-card">
-          <img src="{% static 'images/Our Commitment to You.jpg' %}" alt="Our Commitment to You" />
+          <img src="{% static 'images/Our Commitment to You.webp' %}" alt="Our Commitment to You" loading="lazy" decoding="async" />
           <h3>Our Commitment to You</h3>
           <p>Fair pay, flexibility, and benefits that support your well-being</p>
         </div>
         <div class="benefit-card">
-          <img src="{% static 'images/What We Do.jpg' %}" alt="What We Do" />
+          <img src="{% static 'images/What We Do.webp' %}" alt="What We Do" loading="lazy" decoding="async" />
           <h3>What We Do</h3>
           <p>Helping people in their homes and workplaces every day</p>
         </div>
       </div>
     </div>
   </section>
+  {% if show_success_popup %}
+  <div class="career-success-overlay" role="dialog" aria-modal="true" aria-labelledby="careerSuccessTitle">
+    <div class="career-success-popup">
+      <div class="career-success-badge" aria-hidden="true">
+        <span class="career-success-badge-core">
+          <span class="career-success-badge-check"></span>
+        </span>
+      </div>
+      <h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
+      <p>We will contact you if your profile matches the job requirements.</p>
+      <div class="career-success-actions">
+        <a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
   {% include "home/includes/footer.html" %}
 <script>
   // Sections fade-in + zoom-in
@@ -184,6 +209,22 @@
         ? fileInput.files[0].name
         : "No file selected yet";
     });
+  }
+
+  const availabilitySelect = document.getElementById("career_availability");
+  const availabilityCustom = document.getElementById("career_availability_custom");
+  const toggleAvailabilityCustom = () => {
+    if (!availabilitySelect || !availabilityCustom) return;
+    const isOther = availabilitySelect.value === "Other";
+    availabilityCustom.hidden = !isOther;
+    availabilityCustom.required = isOther;
+    if (!isOther) {
+      availabilityCustom.value = "";
+    }
+  };
+  if (availabilitySelect && availabilityCustom) {
+    availabilitySelect.addEventListener("change", toggleAvailabilityCustom);
+    toggleAvailabilityCustom();
   }
 </script>
 

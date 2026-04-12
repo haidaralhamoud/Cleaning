@@ -98,7 +98,20 @@
             </select>
           </div>
           <button type="button" class="primary-btn" id="estimateCalcBtn">{{ estimate.cta_text }}</button>
-          <p class="estimate-result" id="estimateResult"></p>
+          <div class="estimate-result-card" id="estimateResultCard" hidden>
+            <div class="estimate-result-row">
+              <span id="estimatePropertyLabel">-</span>
+              <strong id="estimatePropertyPrice">0 SEK</strong>
+            </div>
+            <div class="estimate-result-row">
+              <span id="estimateBedroomsLabel">-</span>
+              <strong id="estimateBedroomsPrice">0 SEK</strong>
+            </div>
+            <div class="estimate-result-total">
+              <span>Estimated total</span>
+              <strong id="estimateResult">0 SEK</strong>
+            </div>
+          </div>
           <p class="estimate-note">{{ estimate.note }}</p>
         </div>
       </section>
@@ -184,9 +197,14 @@
     (function () {
       const propertySelect = document.getElementById("estimateProperty");
       const bedroomsSelect = document.getElementById("estimateBedrooms");
+      const resultCard = document.getElementById("estimateResultCard");
       const resultEl = document.getElementById("estimateResult");
+      const propertyLabelEl = document.getElementById("estimatePropertyLabel");
+      const propertyPriceEl = document.getElementById("estimatePropertyPrice");
+      const bedroomsLabelEl = document.getElementById("estimateBedroomsLabel");
+      const bedroomsPriceEl = document.getElementById("estimateBedroomsPrice");
       const button = document.getElementById("estimateCalcBtn");
-      if (!propertySelect || !bedroomsSelect || !resultEl || !button) return;
+      if (!propertySelect || !bedroomsSelect || !resultCard || !resultEl || !button) return;
 
       const parsePriceRange = (value) => {
         const normalized = String(value || "").trim().replace(/\s+/g, "");
@@ -216,25 +234,32 @@
         }).format(value);
       };
 
+      const formatRange = ({ min, max }) => {
+        return min === max
+          ? `${formatPrice(min)} SEK`
+          : `${formatPrice(min)}-${formatPrice(max)} SEK`;
+      };
+
       const updateEstimate = () => {
         if (!propertySelect.value || !bedroomsSelect.value) {
-          resultEl.textContent = "Estimated total: 0 SEK";
+          resultCard.hidden = true;
           return;
         }
         const propertyPrice = parsePriceRange(propertySelect.value);
         const bedroomsPrice = parsePriceRange(bedroomsSelect.value);
         const totalMin = propertyPrice.min + bedroomsPrice.min;
         const totalMax = propertyPrice.max + bedroomsPrice.max;
-        const totalText = totalMin === totalMax
-          ? formatPrice(totalMin)
-          : `${formatPrice(totalMin)}-${formatPrice(totalMax)}`;
-        resultEl.textContent = `Estimated total: ${totalText} SEK`;
+        propertyLabelEl.textContent = propertySelect.options[propertySelect.selectedIndex].text;
+        propertyPriceEl.textContent = formatRange(propertyPrice);
+        bedroomsLabelEl.textContent = bedroomsSelect.options[bedroomsSelect.selectedIndex].text;
+        bedroomsPriceEl.textContent = formatRange(bedroomsPrice);
+        resultEl.textContent = totalMin === totalMax
+          ? `${formatPrice(totalMin)} SEK`
+          : `${formatPrice(totalMin)}-${formatPrice(totalMax)} SEK`;
+        resultCard.hidden = false;
       };
 
       button.addEventListener("click", updateEstimate);
-      propertySelect.addEventListener("change", updateEstimate);
-      bedroomsSelect.addEventListener("change", updateEstimate);
-      updateEstimate();
     })();
   </script>
   <script src="{% static 'js/main_header.js' %}"></script>

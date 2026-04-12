@@ -33,12 +33,16 @@
   </section>
 
   <main class="container">
+    {% if error %}
+      <p class="bundle-error">{{ error }}</p>
+    {% endif %}
+
     <div class="grid">
       {% for b in bundles %}
         <article class="bundle">
           <div class="bundle__media">
             {% if b.image %}
-              <img src="{{ b.image.url }}" alt="{{ b.title }}">
+              <img src="{{ b.image.url }}" alt="{{ b.title }}" loading="lazy" decoding="async">
             {% endif %}
 
             {% if b.discount %}
@@ -71,11 +75,12 @@
                 data-discount="{{ b.discount }}"
               >Learn More</button>
 
-              <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="bundle_id" value="{{ b.id }}">
-                <button type="submit" class="btn btn-primary choose-plan" data-type="bundle">Add to booking</button>
-              </form>
+              <button
+                type="button"
+                class="btn btn-primary choose-plan{% if b.id|stringformat:'s' in selected_bundle_ids %} selected-plan{% endif %}"
+                data-bundle-id="{{ b.id }}"
+                data-bundle-title="{{ b.title }}"
+              >{% if b.id|stringformat:'s' in selected_bundle_ids %}Added{% else %}Add to booking{% endif %}</button>
             </div>
           </div>
         </article>
@@ -99,12 +104,20 @@
       </article>
     </div>
 
-    <br>
-    <div>
+    <div class="buttons">
       <a onclick="window.history.back();" class="back-btn">
         <span class="back-icon">&larr;</span>
         Back
       </a>
+
+      <form method="POST" id="bundleSelectionForm">
+        {% csrf_token %}
+        <input type="hidden" name="selected_bundle_ids" id="selectedBundleIds" value='[{% for id in selected_bundle_ids %}"{{ id }}"{% if not forloop.last %},{% endif %}{% endfor %}]'>
+        <button type="submit" id="continueBundlesBtn" class="next" {% if not selected_bundle_ids %}disabled{% endif %}>
+          Continue
+          <span class="next-icon">&rarr;</span>
+        </button>
+      </form>
     </div>
   </main>
 
@@ -114,11 +127,6 @@
   <br>
 
   {% include "home/includes/footer.html" %}
-
-  <form id="modalBundleForm" method="POST" style="display:none;">
-    {% csrf_token %}
-    <input type="hidden" name="bundle_id" id="modal_bundle_id">
-  </form>
 
   <div id="bundleModal" class="modal">
     <div class="modal-content">
@@ -139,8 +147,6 @@
         const addons = btn.dataset.addons.split("||");
         const notes = btn.dataset.notes;
         const discount = btn.dataset.discount || "10%";
-
-        document.getElementById("modal_bundle_id").value = bundleId;
 
         const html = `
           <h2><strong>${title}</strong></h2>
@@ -186,7 +192,11 @@
         document.getElementById("bundleModal").style.display = "block";
 
         document.getElementById("modalAddBtn").onclick = () => {
-          document.getElementById("modalBundleForm").submit();
+          const targetButton = document.querySelector(`.choose-plan[data-bundle-id="${bundleId}"]`);
+          if (targetButton) {
+            toggleBundle(targetButton);
+          }
+          document.getElementById("bundleModal").style.display = "none";
         };
       });
     });
@@ -203,42 +213,40 @@
   </script>
 
   <script>
-    let choice = null;
-
     const buttons = document.querySelectorAll(".choose-plan");
+    const selectedBundleIdsInput = document.getElementById("selectedBundleIds");
+    const continueBundlesBtn = document.getElementById("continueBundlesBtn");
+    const selectedBundles = new Set(JSON.parse(selectedBundleIdsInput.value || "[]"));
+
+    function syncSelectedBundles() {
+      selectedBundleIdsInput.value = JSON.stringify(Array.from(selectedBundles));
+      continueBundlesBtn.disabled = selectedBundles.size === 0;
+    }
+
+    function updateButtonState(btn) {
+      const bundleId = btn.dataset.bundleId;
+      const isSelected = selectedBundles.has(bundleId);
+      btn.classList.toggle("selected-plan", isSelected);
+      btn.textContent = isSelected ? "Added" : "Add to booking";
+    }
+
+    function toggleBundle(btn) {
+      const bundleId = btn.dataset.bundleId;
+      if (selectedBundles.has(bundleId)) {
+        selectedBundles.delete(bundleId);
+      } else {
+        selectedBundles.add(bundleId);
+      }
+      updateButtonState(btn);
+      syncSelectedBundles();
+    }
 
     buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const type = btn.dataset.type;
-
-        if (choice === type) {
-          choice = null;
-          resetAll();
-          return;
-        }
-
-        choice = type;
-        resetAll();
-        highlight(btn);
-      });
+      updateButtonState(btn);
+      btn.addEventListener("click", () => toggleBundle(btn));
     });
 
-    function resetAll() {
-      buttons.forEach((b) => {
-        b.classList.remove("selected-plan");
-        b.classList.remove("disabled-plan");
-      });
-    }
-
-    function highlight(activeBtn) {
-      activeBtn.classList.add("selected-plan");
-
-      buttons.forEach((b) => {
-        if (b !== activeBtn) {
-          b.classList.add("disabled-plan");
-        }
-      });
-    }
+    syncSelectedBundles();
   </script>
 
   <script src="{% static 'js/main_header.js' %}"></script>

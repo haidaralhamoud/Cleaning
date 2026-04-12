@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from accounts.models import ChatThread, DiscountCode
+from .image_optimization import optimize_uploaded_image_fields
 User = get_user_model()
 
 PRICE_CURRENCY_CHOICES = [
@@ -779,6 +780,10 @@ class Job(models.Model):
     image = models.ImageField(upload_to="jobs/", blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["image"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
@@ -836,6 +841,14 @@ class BusinessService(models.Model):
     icon = models.ImageField(upload_to="services/")
     description_service_aviable = models.TextField()
 
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(
+            self,
+            ["image", "hero_image", "background_image", "icon"],
+            update_fields=kwargs.get("update_fields"),
+        )
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
@@ -873,6 +886,10 @@ class BusinessBundle(models.Model):
     addons = models.JSONField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to="bundles/", blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["image"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -984,6 +1001,10 @@ class PrivateMainCategory(models.Model):
     icon = models.ImageField(upload_to="private/categories/", blank=True, null=True)
     slug = models.SlugField(unique=True)
 
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["icon"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return self.title
 
@@ -1019,6 +1040,14 @@ class PrivateService(models.Model):
         default="USD",
     )
     questions = models.JSONField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(
+            self,
+            ["image", "hero_image", "background_image"],
+            update_fields=kwargs.get("update_fields"),
+        )
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -1144,6 +1173,7 @@ class ServiceRoomOption(models.Model):
         ordering = ["display_order", "title"]
 
     def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["image"], update_fields=kwargs.get("update_fields"))
         if not (self.short_label or "").strip():
             words = [part for part in re.split(r"[\s_\-]+", (self.title or "").strip()) if part]
             if len(words) >= 2:
@@ -1527,9 +1557,10 @@ class PrivateAddon(models.Model):
         return "".join(rows)
 
     def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["icon"], update_fields=kwargs.get("update_fields"))
         if self.questions:
             self.form_html = self.build_form_html_from_questions()
-        super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
 
 class ServiceQuestionRule(models.Model):
@@ -1776,6 +1807,10 @@ class BookingMedia(models.Model):
 
     def __str__(self):
         return f"{self.booking_type} #{self.booking_id} {self.phase}"
+
+    def save(self, *args, **kwargs):
+        optimize_uploaded_image_fields(self, ["file"], update_fields=kwargs.get("update_fields"))
+        return super().save(*args, **kwargs)
 
     def get_booking(self):
         if self.booking_type == "private":

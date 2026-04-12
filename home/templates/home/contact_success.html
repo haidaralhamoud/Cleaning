@@ -1,34 +1,32 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Thank You</title>
+  <title>{% trans "Thank You" %}</title>
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
   <link rel="stylesheet" href="{% static 'css/contact_success.css' %}">
 </head>
 <body>
   <div class="thankyou-popup">
     <div class="popup-content">
-      <img src="{% static 'vector0.svg'%}" alt="Success Icon" class="popup-icon">
-
-      <h2 class="popup-title">Thank You! We've Got Your Message</h2>
+      <img src="{% static 'images/vector0.svg' %}" alt="Success Icon" class="popup-icon">
+      <h2 class="popup-title">{% trans "Thank You! We've Got Your Message" %}</h2>
       <p class="popup-text">
-        We appreciate you reaching out to Hembla experten. Our team will review your message<br>
-        and get back to you within 24 hours.
+        {% trans "We appreciate you reaching out to Hembla experten. Our team will review your message and get back to you within 24 hours." %}
       </p>
-      <p class="popup-text">In the meantime, feel free to explore our services or browse our FAQs for quick answers.</p>
-
+      <p class="popup-text">
+        {% blocktrans %}If you need anything else, you can also reach us at {{ support_email }}.{% endblocktrans %}
+      </p>
       <div class="popup-buttons">
-        <button class="btn btn-green">Back to Home</button>
-        <button class="btn btn-green">Explore Services</button>
+        <a href="{% url 'home:home' %}" class="btn btn-green">{% trans "Back to Home" %}</a>
+        <a href="{% url 'home:all_services_private' %}" class="btn btn-green">{% trans "Explore Services" %}</a>
       </div>
     </div>
   </div>
 </body>
 </html>
-
-
