@@ -233,6 +233,65 @@ body {
   background: #71b247;
 }
 
+.category-card {
+  position: relative;
+}
+
+.card-close-chip {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #537087;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  line-height: 1;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.card-close-chip:hover {
+  background: #ff5e5e;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
+.service-chip {
+  position: relative;
+  padding-right: 42px;
+}
+
+.service-chip__close {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  color: currentColor;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.service-chip__close:hover {
+  background: #ff5e5e;
+  color: #ffffff;
+}
+
 .summary {
   flex: 1;
   position: sticky;

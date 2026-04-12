@@ -4970,6 +4970,29 @@ def private_cart_remove_json(request, service_slug):
     request.session["private_cart"] = cart
     request.session.modified = True
 
+    draft = _get_private_draft_data(request)
+    selected_services = list(draft.get("selected_services") or [])
+    if service_slug in selected_services:
+        selected_services = [slug for slug in selected_services if slug != service_slug]
+        draft["selected_services"] = selected_services
+
+    service_answers = draft.get("service_answers") or {}
+    if service_slug in service_answers:
+        service_answers.pop(service_slug, None)
+        draft["service_answers"] = service_answers
+
+    service_modes = draft.get("service_modes") or {}
+    if service_slug in service_modes:
+        service_modes.pop(service_slug, None)
+        draft["service_modes"] = service_modes
+
+    addons_selected = draft.get("addons_selected") or {}
+    if service_slug in addons_selected:
+        addons_selected.pop(service_slug, None)
+        draft["addons_selected"] = addons_selected
+
+    _save_private_draft_data(request, draft)
+
     return JsonResponse({
         "success": True,
         "count": len(cart)
