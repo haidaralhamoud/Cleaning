@@ -79,8 +79,43 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 DRAFT_SESSION_KEY = "private_booking_draft"
+SEEN_NO_SHOW_SESSION_KEY = "dashboard_seen_no_show_ids"
 PRIVATE_BOOKING_SERVICE_FEE = Decimal("50.00")
 PRIVATE_BOOKING_VAT_PERCENT = Decimal("25.00")
+
+
+def _dashboard_seen_no_show_ids(request):
+    raw_ids = request.session.get(SEEN_NO_SHOW_SESSION_KEY, [])
+    if not isinstance(raw_ids, list):
+        return set()
+    seen_ids = set()
+    for value in raw_ids:
+        try:
+            seen_ids.add(int(value))
+        except (TypeError, ValueError):
+            continue
+    return seen_ids
+
+
+def _dashboard_mark_no_show_seen(request, report_ids):
+    seen_ids = _dashboard_seen_no_show_ids(request)
+    before = set(seen_ids)
+    for report_id in report_ids:
+        try:
+            seen_ids.add(int(report_id))
+        except (TypeError, ValueError):
+            continue
+    if seen_ids != before:
+        request.session[SEEN_NO_SHOW_SESSION_KEY] = sorted(seen_ids)
+        request.session.modified = True
+
+
+def _dashboard_handle_seen_no_show(request, item_slug=None):
+    if item_slug != "no-show":
+        return
+    seen_no_show_id = (request.GET.get("seen_no_show") or "").strip()
+    if seen_no_show_id:
+        _dashboard_mark_no_show_seen(request, [seen_no_show_id])
 
 
 def _cash_invoice_font(size=20, bold=False):
@@ -1122,7 +1157,7 @@ def _staff_required(user):
     return user.is_authenticated and user.is_staff
 
 
-def _dashboard_notifications():
+def _dashboard_notifications(request=None):
     def _booking_dashboard_url(booking_type, booking_id):
         if booking_type == "business":
             slug = "business-bookings"
@@ -1161,7 +1196,10 @@ def _dashboard_notifications():
     new_messages = ChatMessage.objects.filter(created_at__gte=since).count()
     new_customers = Customer.objects.filter(user__date_joined__gte=since).count()
     new_providers = ProviderProfile.objects.filter(user__date_joined__gte=since).count()
-    pending_no_show = NoShowReport.objects.filter(decision="PENDING").count()
+    pending_no_show_qs = NoShowReport.objects.filter(decision="PENDING")
+    if request is not None:
+        pending_no_show_qs = pending_no_show_qs.exclude(id__in=_dashboard_seen_no_show_ids(request))
+    pending_no_show = pending_no_show_qs.count()
     open_request_fixes = BookingRequestFix.objects.filter(status="OPEN").count()
     updated_customer_notes = CustomerNote.objects.filter(updated_at__gte=since).count()
 
@@ -1178,8 +1216,7 @@ def _dashboard_notifications():
         .order_by("-created_at")[:6]
     )
     recent_pending_no_show = list(
-        NoShowReport.objects.filter(decision="PENDING")
-        .select_related("provider")
+        pending_no_show_qs.select_related("provider")
         .order_by("-created_at")[:6]
     )
     recent_contacts = list(
@@ -1258,7 +1295,7 @@ def _dashboard_notifications():
             "title": f"Pending No-Show #{report.id}",
             "detail": f"{report.booking_type.title()} booking #{report.booking_id} - {provider_name}",
             "time": report.created_at,
-            "url": "/dashboard/no-show-reports/",
+            "url": f"{reverse('home:dashboard_model_list', args=['no-show'])}?{urlencode({'seen_no_show': report.id})}",
         })
     for contact in recent_contacts:
         items.append({
@@ -1723,7 +1760,7 @@ def _dashboard_unified_inbox(now):
 
 @user_passes_test(_staff_required)
 def dashboard_notifications_api(request):
-    data = _dashboard_notifications()
+    data = _dashboard_notifications(request)
     return JsonResponse({
         "count": data["dashboard_notif_count"],
         "new_bookings": data["dashboard_new_bookings"],
@@ -1779,7 +1816,7 @@ def dashboard_home(request):
         "today_queue_summary": today_queue["summary"],
         "unified_inbox": _dashboard_unified_inbox(now),
     }
-    context.update(_dashboard_notifications())
+    context.update(_dashboard_notifications(request))
     return render(request, "dashboard/index.html", context)
 
 
@@ -2465,6 +2502,7 @@ def dashboard_model_list(request, model):
     item = get_item_by_slug(model)
     if not item:
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+    _dashboard_handle_seen_no_show(request, item.slug)
 
     qs = item.model.objects.all()
     service_id = request.GET.get("service_id")
@@ -2529,7 +2567,7 @@ def dashboard_model_list(request, model):
         "service_obj": service_obj,
         "use_view_mode": _dashboard_uses_view_mode(item),
     }
-    context.update(_dashboard_notifications())
+    context.update(_dashboard_notifications(request))
     return render(request, "dashboard/list.html", context)
 
 
@@ -2626,7 +2664,7 @@ def dashboard_model_create(request, model):
         "mode": "create",
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
-    context.update(_dashboard_notifications())
+    context.update(_dashboard_notifications(request))
     return render(request, "dashboard/form.html", context)
 
 
@@ -2635,6 +2673,7 @@ def dashboard_model_edit(request, model, pk):
     item = get_item_by_slug(model)
     if not item:
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+    _dashboard_handle_seen_no_show(request, item.slug)
 
     obj = get_object_or_404(item.model, pk=pk)
     prev_status = None
@@ -2731,7 +2770,7 @@ def dashboard_model_edit(request, model, pk):
     }
     if item.model in {BusinessBooking, PrivateBooking}:
         context["provider_debug"] = _provider_debug_payload(obj)
-    context.update(_dashboard_notifications())
+    context.update(_dashboard_notifications(request))
     return render(request, "dashboard/form.html", context)
 
 
@@ -2740,6 +2779,7 @@ def dashboard_model_view(request, model, pk):
     item = get_item_by_slug(model)
     if not item:
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
+    _dashboard_handle_seen_no_show(request, item.slug)
 
     obj = get_object_or_404(item.model, pk=pk)
     if item.model == BusinessBundle:
@@ -2811,7 +2851,7 @@ def dashboard_model_view(request, model, pk):
     }
     if item.model in {BusinessBooking, PrivateBooking}:
         context["provider_debug"] = _provider_debug_payload(obj)
-    context.update(_dashboard_notifications())
+    context.update(_dashboard_notifications(request))
     return render(request, "dashboard/form.html", context)
 
 
@@ -2831,7 +2871,7 @@ def dashboard_model_delete(request, model, pk):
         "item": item,
         "object": obj,
     }
-    context.update(_dashboard_notifications())
+    context.update(_dashboard_notifications(request))
     return render(request, "dashboard/confirm_delete.html", context)
 
 

@@ -44,7 +44,7 @@
         <div class="methods-grid">
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/calendar-unified.svg' %}" alt="Calendar icon"></div>
+            <div class="icon-circle"><img src="{% static 'images/calendar-vibrant.png' %}" alt="Calendar icon"></div>
             <h4>Book Online Now</h4>
             <p>Choose your service, pick a date and time, then confirm your booking instantly when you're ready to go.</p>
 <a href="{{ continue_booking_url }}" class="btn">Book Now</a>
@@ -52,14 +52,14 @@
           </div>
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/icon-phone.svg' %}" alt="Phone icon"></div>
+            <div class="icon-circle"><img src="{% static 'images/phone-call.png' %}" alt="Phone icon"></div>
             <h4>Schedule a Call</h4>
             <p>Not sure what you need, or want service details first? Leave us your number and a time that suits you.</p>
             <button class="btn" onclick="openCallPopup()">Request a Call</button>
           </div>
 
           <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/icon-email.svg' %}" alt="Email icon"></div>
+            <div class="icon-circle"><img src="{% static 'images/received-email.png' %}" alt="Email icon"></div>
             <h4>Send an Email</h4>
             <p>Prefer to write things down? Send your request and we'll get back to you with a personalized response.</p>
             <button class="btn" onclick="openEmailPopup()">Send Email</button>
@@ -76,7 +76,10 @@
     <div class="popup">
       <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
 
-      <h2>Request a Call</h2>
+      <div class="popup-header">
+        <img src="{% static 'images/phone-call.png' %}" class="call-icon" alt="Phone">
+        <h2>Request a Call</h2>
+      </div>
       <p class="subtitle">Let's find the best time to call you!</p>
 
       <form id="call-request-form" class="call-form" method="POST">
@@ -95,7 +98,7 @@
         <label>Preferred Date</label>
         <div class="input-with-icon">
           <input type="date" id="preferredDateUi" required>
-          <img src="{% static 'images/calendar-unified.svg' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
+          <img src="{% static 'images/calendar-vibrant.png' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
         </div>
 
         <label>Preferred Time</label>
@@ -141,7 +144,7 @@
       <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeEmailPopup()" alt="Close">
 
       <div class="popup-header">
-        <img src="{% static 'images/icon-mail.svg' %}" class="send-icon" alt="Email">
+        <img src="{% static 'images/received-email.png' %}" class="send-icon" alt="Email">
         <h2>Send Email</h2>
       </div>
 
@@ -197,7 +200,7 @@
       <div class="call-success-card call-success-card--email">
         <button type="button" class="call-success-close" aria-label="Close" data-email-success-close>&times;</button>
         <div class="call-success-icon call-success-icon--email" aria-hidden="true">
-          <img src="{% static 'images/icon-mail.svg' %}" alt="">
+          <img src="{% static 'images/received-email.png' %}" alt="">
         </div>
         <h3 id="emailSuccessTitle">Email sent. We'll get back to you shortly</h3>
         <button type="button" class="call-success-btn" data-email-success-close>Continue</button>

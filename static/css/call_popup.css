@@ -172,6 +172,20 @@ body {
   color: var(--ink-900);
 }
 
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.popup-header .call-icon {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
 .subtitle {
   text-align: center;
   color: var(--ink-700);

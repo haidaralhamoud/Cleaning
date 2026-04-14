@@ -111,10 +111,13 @@ body {
   box-shadow: 0 10px 24px rgba(3,159,200,0.22);
 }
 .addon-card img {
-  width: 140px;
-  height: 140px;
-  object-fit: contain;
-  margin-bottom: 14px;
+  width: calc(100% - 36px);
+  height: 160px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  margin: 0 auto 16px;
+  border-radius: 18px;
 }
 .addon-card p {
   font-size: 18px;

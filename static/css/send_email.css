@@ -73,8 +73,9 @@
 }
 
 .email-overlay .send-icon {
-  width: 30px;
-  height: 30px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
 }
 
 .email-overlay h2 {
