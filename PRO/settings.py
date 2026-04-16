@@ -331,3 +331,9 @@ logger.info("EMAIL_USE_SSL=%s", EMAIL_USE_SSL)
 
 ##################################################################SERVER
 
+# source venv/bin/activate   # إذا مو مفعّل
+# pip install -r requirements.txt
+# python manage.py migrate
+# python manage.py collectstatic --noinput
+# sudo systemctl restart hembla
+#cp -r /var/www/hembla/Cleaning/media /root/media_backup

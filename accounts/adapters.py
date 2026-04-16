@@ -1,6 +1,7 @@
 import logging
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from django.conf import settings
 
 from .email_utils import verification_email_connection, verification_from_email
 
