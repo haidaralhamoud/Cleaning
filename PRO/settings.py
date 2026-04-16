@@ -70,6 +70,8 @@ SITE_ID = 1
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "accounts.adapters.SocialAccountLoggingAdapter"
 ACCOUNT_ADAPTER = "accounts.adapters.VerificationEmailAccountAdapter"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
@@ -103,8 +105,6 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'social_django',
-    
 ]
 
 JAZZMIN_SETTINGS = {
@@ -153,8 +153,6 @@ AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailPhoneUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
-    'social_core.backends.google.GoogleOAuth2',
-
 ]
 ROOT_URLCONF = 'PRO.urls'
 
