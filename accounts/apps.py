@@ -1,5 +1,8 @@
 from django.apps import AppConfig
 from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class AccountsConfig(AppConfig):
@@ -24,7 +27,24 @@ class AccountsConfig(AppConfig):
             return
 
         try:
-            app, _ = SocialApp.objects.get_or_create(provider="google")
+            apps = list(SocialApp.objects.filter(provider="google").order_by("id"))
+            matched_app = None
+
+            for app in apps:
+                if (app.client_id or "").strip() == client_id.strip():
+                    matched_app = app
+                    break
+
+            if matched_app is None:
+                for app in apps:
+                    if site in app.sites.all():
+                        matched_app = app
+                        break
+
+            if matched_app is None:
+                matched_app = SocialApp(provider="google")
+
+            app = matched_app
             app.name = "Google"
             app.client_id = client_id
             app.secret = client_secret
@@ -32,4 +52,5 @@ class AccountsConfig(AppConfig):
             app.save()
             app.sites.add(site)
         except Exception:
+            logger.exception("Failed to sync Google SocialApp for site_id=%s", settings.SITE_ID)
             return

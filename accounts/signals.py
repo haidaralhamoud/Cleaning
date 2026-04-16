@@ -7,9 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 @receiver(social_account_error)
-def log_social_login_error(request, provider, error, exception, **kwargs):
+def log_social_login_error(request=None, provider=None, error=None, exception=None, **kwargs):
     try:
-        redirect_uri = request.build_absolute_uri()
+        redirect_uri = request.build_absolute_uri() if request else None
     except Exception:
         redirect_uri = None
 

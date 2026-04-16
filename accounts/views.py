@@ -802,12 +802,10 @@ def google_login_start(request):
         request.session.modified = True
 
     try:
-        from allauth.socialaccount.models import SocialApp
-        has_google = SocialApp.objects.filter(provider="google").exists()
+        from allauth.socialaccount.adapter import get_adapter as get_socialaccount_adapter
+        get_socialaccount_adapter(request).get_app(request, "google")
     except Exception:
-        has_google = False
-
-    if not has_google:
+        logger.exception("Google login requested but no valid Google SocialApp is available for the current site")
         messages.error(request, "Google login is not configured yet.")
         return redirect("login")
 
