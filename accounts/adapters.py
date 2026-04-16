@@ -1,4 +1,5 @@
 import logging
+import json
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialApp
@@ -8,6 +9,23 @@ from django.conf import settings
 from .email_utils import verification_email_connection, verification_from_email
 
 logger = logging.getLogger(__name__)
+
+
+def _format_auth_exception(exc):
+    if exc is None:
+        return None
+    text = str(exc)
+    marker = "Error retrieving access token:"
+    if marker in text:
+        payload = text.split(marker, 1)[1].strip()
+        if payload.startswith("b'") or payload.startswith('b"'):
+            payload = payload[2:-1]
+        try:
+            decoded = json.loads(payload)
+            return decoded
+        except Exception:
+            return payload
+    return text
 
 
 class VerificationEmailAccountAdapter(DefaultAccountAdapter):
@@ -82,7 +100,7 @@ class SocialAccountLoggingAdapter(DefaultSocialAccountAdapter):
                 "Social login error: provider=%s error=%s exception=%s redirect_uri=%s client_id=%s",
                 provider_id,
                 error,
-                exception,
+                _format_auth_exception(exception),
                 redirect_uri,
                 getattr(settings, "GOOGLE_CLIENT_ID", None),
             )
