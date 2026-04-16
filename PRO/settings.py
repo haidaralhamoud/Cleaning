@@ -75,6 +75,16 @@ ACCOUNT_ADAPTER = "accounts.adapters.VerificationEmailAccountAdapter"
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
+# Keep the current allauth flow as the active implementation.
+# These settings are added only for parity with external OAuth guidance.
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_CLIENT_SECRET
+SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+SOCIAL_AUTH_TRAILING_SLASH = True
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = "/"
+SOCIAL_AUTH_LOGIN_ERROR_URL = "/login/"
+SOCIAL_AUTH_URL_NAMESPACE = "social"
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -93,6 +103,7 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'social_django',
     
 ]
 
@@ -142,6 +153,8 @@ AUTHENTICATION_BACKENDS = [
     'accounts.backends.EmailPhoneUsernameBackend',
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
+    'social_core.backends.google.GoogleOAuth2',
+
 ]
 ROOT_URLCONF = 'PRO.urls'
 
@@ -327,6 +340,59 @@ logger.info("EMAIL_BACKEND=%s", EMAIL_BACKEND)
 logger.info("EMAIL_HOST=%s", EMAIL_HOST)
 logger.info("EMAIL_PORT=%s", EMAIL_PORT)
 logger.info("EMAIL_USE_SSL=%s", EMAIL_USE_SSL)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "accounts": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "allauth": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "social": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "social_core": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
 
 
 ##################################################################SERVER
