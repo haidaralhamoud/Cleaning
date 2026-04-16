@@ -1,7 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.utils.dateparse import parse_date
+from django.utils.dateparse import parse_date, parse_datetime
 import logging
 from datetime import timedelta
 from io import BytesIO
@@ -82,6 +82,48 @@ DRAFT_SESSION_KEY = "private_booking_draft"
 SEEN_NO_SHOW_SESSION_KEY = "dashboard_seen_no_show_ids"
 PRIVATE_BOOKING_SERVICE_FEE = Decimal("50.00")
 PRIVATE_BOOKING_VAT_PERCENT = Decimal("25.00")
+
+
+def _format_call_request_preferred_time(preferred_time):
+    if not preferred_time:
+        return "To be confirmed"
+    if isinstance(preferred_time, str):
+        preferred_time = parse_datetime(preferred_time.replace(" ", "T")) or parse_datetime(preferred_time)
+    if not preferred_time:
+        return "To be confirmed"
+    if timezone.is_aware(preferred_time):
+        preferred_time = timezone.localtime(preferred_time)
+    return preferred_time.strftime("%B %d, %Y at %H:%M")
+
+
+def _send_call_request_confirmation_email(call_request, service_title=None):
+    customer_email = (call_request.email or "").strip()
+    if not customer_email:
+        return
+
+    preferred_time_text = _format_call_request_preferred_time(call_request.preferred_time)
+    service_line = f"Service: {service_title}\n" if service_title else ""
+    subject = "Your call request has been received"
+    body = (
+        f"Hello {call_request.full_name or 'Customer'},\n\n"
+        "We have received your call request.\n"
+        f"{service_line}"
+        f"Preferred call time: {preferred_time_text}\n"
+        f"Phone number: {call_request.phone or '-'}\n"
+        f"Preferred language: {call_request.language or '-'}\n\n"
+        "Our team will review your request and contact you as soon as possible.\n\n"
+        "Best regards,\n"
+        "Hembla Experten"
+    )
+    try:
+        EmailMultiAlternatives(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [customer_email],
+        ).send(fail_silently=False)
+    except Exception:
+        logger.exception("Failed to send call request confirmation email to %s", customer_email)
 
 
 def _dashboard_seen_no_show_ids(request):
@@ -671,11 +713,11 @@ def _calculate_private_payment_summary(booking, currency):
     base_total = Decimal(str(fresh_pricing.get("final", 0) or 0))
     subtotal = Decimal(str(fresh_pricing.get("subtotal", 0) or 0))
     rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
-    service_fee = PRIVATE_BOOKING_SERVICE_FEE
+    service_fee = PRIVATE_BOOKING_SERVICE_FEE if base_total > 0 else Decimal("0.00")
     vat_percent = PRIVATE_BOOKING_VAT_PERCENT
     vat_base = base_total + service_fee
-    vat_amount = (vat_base * (vat_percent / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    total_before_discounts = vat_base + vat_amount
+    vat_amount = Decimal("0.00")
+    total_before_discounts = vat_base
 
     customer = None
     if booking.user_id:
@@ -4266,16 +4308,20 @@ def private_booking_cash_invoice_pdf(request):
         ("Date Surcharge", f"{Decimal(str(pricing.get('date_surcharge', 0) or 0)):.2f} {currency}", False),
         ("Service Fee", f"{Decimal(str(payment_summary.get('service_fee', 0) or 0)):.2f} {currency}", False),
         (
-            f"VAT ({Decimal(str(payment_summary.get('vat_percent', 0) or 0)):.0f}%)",
-            f"{Decimal(str(payment_summary.get('vat_amount', 0) or 0)):.2f} {currency}",
-            False,
-        ),
-        (
             "RUT Deduction",
             f"-{Decimal(str(pricing.get('rot', 0) or 0)):.2f} {currency}" if temp_booking.use_rot else f"0.00 {currency}",
             False,
         ),
     ])
+    if Decimal(str(payment_summary.get("vat_amount", 0) or 0)) > 0:
+        charge_rows.insert(
+            len(charge_rows) - 1,
+            (
+                f"VAT ({Decimal(str(payment_summary.get('vat_percent', 0) or 0)):.0f}%)",
+                f"{Decimal(str(payment_summary.get('vat_amount', 0) or 0)):.2f} {currency}",
+                False,
+            ),
+        )
 
     if draft.get("discount_code_id"):
         charge_rows.append((
@@ -4602,20 +4648,26 @@ def private_zip_available(request, service_slug):
     else:
         continue_booking_url = f"{reverse('login')}?{urlencode({'next': booking_start_url})}"
 
-    call_success = False
-    email_success = False
+    call_success = request.session.pop("private_zip_call_success", False)
+    email_success = request.session.pop("private_zip_email_success", False)
 
     # معالجة طلب المكالمة
     if request.method == "POST" and request.POST.get("form_type") == "call_request":
-        CallRequest.objects.create(
+        preferred_time_raw = request.POST.get("preferred_time", None)
+        preferred_time = parse_datetime((preferred_time_raw or "").replace(" ", "T")) if preferred_time_raw else None
+        if preferred_time and timezone.is_naive(preferred_time):
+            preferred_time = timezone.make_aware(preferred_time, timezone.get_current_timezone())
+        call_request = CallRequest.objects.create(
             full_name=request.POST.get("name", ""),
             phone=request.POST.get("phone", ""),
             email=request.POST.get("email", ""),
-            preferred_time=request.POST.get("preferred_time", None),
+            preferred_time=preferred_time,
             message=request.POST.get("message", ""),
             language=request.POST.get("language", ""),
         )
-        call_success = True
+        _send_call_request_confirmation_email(call_request, service_title=service.title)
+        request.session["private_zip_call_success"] = True
+        return redirect("home:private_zip_available", service_slug=service.slug)
 
     # معالجة إرسال الإيميل
     if request.method == "POST" and request.POST.get("form_type") == "email_request":
@@ -4670,7 +4722,8 @@ def private_zip_available(request, service_slug):
             )
             customer_message.send(fail_silently=False)
 
-        email_success = True
+        request.session["private_zip_email_success"] = True
+        return redirect("home:private_zip_available", service_slug=service.slug)
 
     return render(request, "home/good_zip.html", {
         "service": service,
@@ -4743,7 +4796,8 @@ def submit_call_request(request):
     if request.method == "POST":
         form = CallRequestForm(request.POST)
         if form.is_valid():
-            form.save()
+            call_request = form.save()
+            _send_call_request_confirmation_email(call_request)
             return JsonResponse({"success": True})
 
         return JsonResponse({"success": False, "errors": form.errors})

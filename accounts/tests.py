@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.core import mail
 from datetime import timedelta
 
-from .models import PasswordResetOTP
+from .models import Customer, PasswordResetOTP
 
 
 User = get_user_model()
@@ -182,3 +182,64 @@ class PasswordResetFlowTests(TestCase):
             PasswordResetOTP.objects.filter(email="test@example.com", is_used=False).count(),
             0,
         )
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    SECURE_SSL_REDIRECT=False,
+    VERIFICATION_FROM_EMAIL="Hembla Experten Verification <verification@hembla-experten.se>",
+    VERIFICATION_EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    VERIFICATION_EMAIL_HOST_USER="verification@hembla-experten.se",
+    VERIFICATION_EMAIL_HOST_PASSWORD="secret",
+    DATABASES={
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": ":memory:",
+        }
+    },
+)
+class SignUpVerificationFlowTests(TestCase):
+    def _signup_payload(self, **overrides):
+        data = {
+            "personal_identity_number": "19991231-1234",
+            "first_name": "Test",
+            "last_name": "User",
+            "phone": "123456789",
+            "email": "newuser@example.com",
+            "country": "Sweden",
+            "city": "Stockholm",
+            "postal_code": "12345",
+            "house_num": "10",
+            "full_address": "Main Street 10",
+            "password": "NewPassword123",
+            "confirm_password": "NewPassword123",
+            "accepted_terms": "on",
+        }
+        data.update(overrides)
+        return data
+
+    def test_signup_creates_inactive_account_and_sends_code(self):
+        response = self.client.post(reverse("accounts:sign_up"), self._signup_payload())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, reverse("accounts:signup_verify"))
+        user = User.objects.get(email="newuser@example.com")
+        self.assertFalse(user.is_active)
+        self.assertTrue(Customer.objects.filter(user=user).exists())
+        self.assertTrue(PasswordResetOTP.objects.filter(email="newuser@example.com").exists())
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_signup_verify_activates_account(self):
+        self.client.post(reverse("accounts:sign_up"), self._signup_payload())
+        otp = PasswordResetOTP.objects.filter(email="newuser@example.com").latest("created_at")
+
+        otp.otp_hash = make_password("123456")
+        otp.save(update_fields=["otp_hash"])
+
+        response = self.client.post(reverse("accounts:signup_verify"), {"code": "123456"})
+
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(email="newuser@example.com")
+        otp.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertTrue(otp.is_used)

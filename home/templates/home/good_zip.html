@@ -26,7 +26,7 @@
 
   <section class="hero">
     <div class="overlay">
-      <h1 class="hero-title animate">Booking your cleaning</h1>
+      <h1 class="hero-title animate">Proceed to booking</h1>
     </div>
   </section>
 
@@ -115,9 +115,37 @@
             <button type="button" class="time-chip" data-time="17:00">17:00</button>
             <button type="button" class="time-chip" data-time="18:00">18:00</button>
           </div>
-          <div class="time-input">
-            <input type="time" id="preferredTimeUi" aria-label="Enter time manually">
-            <span class="time-hint">Manual</span>
+          <div class="time-input time-input--custom">
+            <button type="button" class="manual-time-trigger" id="manualTimeTrigger" aria-expanded="false" aria-controls="manualTimePanel">
+              <span id="manualTimeValue">Choose custom time</span>
+              <img src="{% static 'images/clock0.png' %}" class="manual-time-icon" alt="">
+            </button>
+            <div class="manual-time-panel" id="manualTimePanel" hidden>
+              <div class="manual-time-panel-head">
+                <span class="manual-time-panel-title">Custom Time</span>
+              </div>
+              <div class="manual-time-group">
+                <span class="manual-time-label">Time</span>
+                <div class="manual-time-freeform">
+                  <label class="manual-time-field">
+                    <span>Hour</span>
+                    <input type="text" id="manualHourInput" maxlength="2" placeholder="1-12" inputmode="numeric" pattern="[0-9]*">
+                  </label>
+                  <label class="manual-time-field">
+                    <span>Minute</span>
+                    <input type="text" id="manualMinuteInput" maxlength="2" placeholder="00-59" inputmode="numeric" pattern="[0-9]*">
+                  </label>
+                </div>
+              </div>
+              <div class="manual-time-group">
+                <span class="manual-time-label">Period</span>
+                <div class="manual-time-options manual-time-options--period" id="manualPeriodOptions">
+                  <button type="button" class="manual-time-chip" data-period="AM">AM</button>
+                  <button type="button" class="manual-time-chip" data-period="PM">PM</button>
+                </div>
+              </div>
+            </div>
+            <span class="time-hint">Hembla custom picker</span>
           </div>
         </div>
         <input type="hidden" name="preferred_time" id="preferredDateTime" required>
@@ -190,7 +218,7 @@
         <p>Thank you for your request.</p>
         <p>One of our team members will call you at your preferred time.</p>
         <p>We look forward to speaking with you!</p>
-        <button type="button" class="call-success-btn" data-call-success-close>Continue</button>
+        <a href="{% url 'home:home' %}" class="call-success-btn">Go to Home</a>
       </div>
     </div>
   {% endif %}
@@ -203,7 +231,7 @@
           <img src="{% static 'images/received-email.png' %}" alt="">
         </div>
         <h3 id="emailSuccessTitle">Email sent. We'll get back to you shortly</h3>
-        <button type="button" class="call-success-btn" data-email-success-close>Continue</button>
+        <a href="{% url 'home:home' %}" class="call-success-btn">Go to Home</a>
       </div>
     </div>
   {% endif %}
@@ -268,16 +296,47 @@
     const preferredDateUi = document.getElementById("preferredDateUi");
     const preferredDateTime = document.getElementById("preferredDateTime");
     const timeGrid = document.getElementById("timeGrid");
-    const preferredTimeUi = document.getElementById("preferredTimeUi");
+    const manualTimeTrigger = document.getElementById("manualTimeTrigger");
+    const manualTimePanel = document.getElementById("manualTimePanel");
+    const manualTimeValue = document.getElementById("manualTimeValue");
+    const manualHourInput = document.getElementById("manualHourInput");
+    const manualMinuteInput = document.getElementById("manualMinuteInput");
+    const manualPeriodOptions = document.getElementById("manualPeriodOptions");
     const dateTrigger = document.querySelector("[data-date-trigger]");
+    const callRequestForm = document.getElementById("call-request-form");
+    const manualTimeState = { hour: "", minute: "", period: "" };
+
+    function to24HourTime(hour, minute, period) {
+      if (!hour || !minute || !period) return "";
+      let hourNum = Number(hour);
+      if (period === "AM") {
+        hourNum = hourNum === 12 ? 0 : hourNum;
+      } else {
+        hourNum = hourNum === 12 ? 12 : hourNum + 12;
+      }
+      return `${String(hourNum).padStart(2, "0")}:${minute}`;
+    }
+
+    function syncManualTimeLabel() {
+      if (!manualTimeValue) return;
+      if (manualTimeState.hour && manualTimeState.minute && manualTimeState.period) {
+        manualTimeValue.textContent = `${manualTimeState.hour}:${manualTimeState.minute} ${manualTimeState.period}`;
+      } else {
+        manualTimeValue.textContent = "Choose custom time";
+      }
+    }
 
     function updatePreferredDateTime() {
       if (!preferredDateUi || !preferredDateTime) return;
       const dateVal = preferredDateUi.value;
       const activeTime = timeGrid ? timeGrid.querySelector(".time-chip.is-active") : null;
-      const timeVal = activeTime ? activeTime.dataset.time : (preferredTimeUi ? preferredTimeUi.value : "");
+      const timeVal = activeTime
+        ? activeTime.dataset.time
+        : to24HourTime(manualTimeState.hour, manualTimeState.minute, manualTimeState.period);
       if (dateVal && timeVal) {
         preferredDateTime.value = `${dateVal}T${timeVal}`;
+      } else {
+        preferredDateTime.value = "";
       }
     }
 
@@ -287,9 +346,13 @@
         if (!target) return;
         timeGrid.querySelectorAll(".time-chip").forEach((btn) => btn.classList.remove("is-active"));
         target.classList.add("is-active");
-        if (preferredTimeUi) {
-          preferredTimeUi.value = target.dataset.time || "";
-        }
+        manualTimeState.hour = "";
+        manualTimeState.minute = "";
+        manualTimeState.period = "";
+        if (manualHourInput) manualHourInput.value = "";
+        if (manualMinuteInput) manualMinuteInput.value = "";
+        manualPeriodOptions?.querySelectorAll(".manual-time-chip").forEach((btn) => btn.classList.remove("is-active"));
+        syncManualTimeLabel();
         updatePreferredDateTime();
       });
     }
@@ -298,12 +361,70 @@
       preferredDateUi.addEventListener("change", updatePreferredDateTime);
     }
 
-    if (preferredTimeUi) {
-      preferredTimeUi.addEventListener("input", () => {
-        if (timeGrid) {
-          timeGrid.querySelectorAll(".time-chip").forEach((btn) => btn.classList.remove("is-active"));
+    function clampAndPad(value, min, max) {
+      if (value === "" || value === null || value === undefined) return "";
+      const numeric = Number(value);
+      if (Number.isNaN(numeric)) return "";
+      const clamped = Math.min(max, Math.max(min, numeric));
+      return String(clamped).padStart(2, "0");
+    }
+
+    function bindManualInput(input, key, min, max) {
+      if (!input) return;
+      const sync = () => {
+        manualTimeState[key] = clampAndPad(input.value, min, max);
+        if (input.value !== "" && manualTimeState[key]) {
+          input.value = String(Number(manualTimeState[key]));
         }
+        if (timeGrid) {
+          timeGrid.querySelectorAll(".time-chip").forEach((chip) => chip.classList.remove("is-active"));
+        }
+        syncManualTimeLabel();
         updatePreferredDateTime();
+      };
+
+      input.addEventListener("input", sync);
+      input.addEventListener("change", sync);
+      input.addEventListener("blur", sync);
+    }
+
+    function bindManualPeriod(container, key) {
+      if (!container) return;
+      container.addEventListener("click", (event) => {
+        const button = event.target.closest(".manual-time-chip");
+        if (!button) return;
+        container.querySelectorAll(".manual-time-chip").forEach((chip) => chip.classList.remove("is-active"));
+        button.classList.add("is-active");
+        manualTimeState[key] = button.dataset[key] || "";
+        if (timeGrid) {
+          timeGrid.querySelectorAll(".time-chip").forEach((chip) => chip.classList.remove("is-active"));
+        }
+        syncManualTimeLabel();
+        updatePreferredDateTime();
+      });
+    }
+
+    bindManualInput(manualHourInput, "hour", 1, 12);
+    bindManualInput(manualMinuteInput, "minute", 0, 59);
+    bindManualPeriod(manualPeriodOptions, "period");
+
+    if (manualTimeTrigger && manualTimePanel) {
+      manualTimeTrigger.addEventListener("click", () => {
+        const isOpen = !manualTimePanel.hasAttribute("hidden");
+        if (isOpen) {
+          manualTimePanel.setAttribute("hidden", "");
+          manualTimeTrigger.setAttribute("aria-expanded", "false");
+        } else {
+          manualTimePanel.removeAttribute("hidden");
+          manualTimeTrigger.setAttribute("aria-expanded", "true");
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        if (!manualTimePanel.hasAttribute("hidden") && !event.target.closest(".time-input--custom")) {
+          manualTimePanel.setAttribute("hidden", "");
+          manualTimeTrigger.setAttribute("aria-expanded", "false");
+        }
       });
     }
 
@@ -314,6 +435,20 @@
           preferredDateUi.showPicker();
         } else {
           preferredDateUi.focus();
+        }
+      });
+    }
+
+    if (callRequestForm) {
+      callRequestForm.addEventListener("submit", (event) => {
+        updatePreferredDateTime();
+        if (!preferredDateTime.value) {
+          event.preventDefault();
+          if (manualTimeTrigger) {
+            manualTimePanel?.removeAttribute("hidden");
+            manualTimeTrigger.setAttribute("aria-expanded", "true");
+            manualTimeTrigger.focus();
+          }
         }
       });
     }

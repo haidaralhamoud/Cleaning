@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+  <title>Verify Email | Hembla experten</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+{% include "home/includes/main_header.html" %}
+
+<main class="signin-container">
+  <div class="signin-box reset-box">
+    <img src="{% static 'images/confetti0.png'%}" alt="Confetti" class="confetti">
+
+    <h1 class="title">Verify your email</h1>
+    <p class="subtitle">We sent a 6-digit code to <strong>{{ email }}</strong></p>
+
+    <div class="form-messages">
+      {% for message in messages %}
+        <div class="alert-success">{{ message }}</div>
+      {% empty %}
+        <div class="alert-info">Enter the code we sent to your email to activate your account.</div>
+      {% endfor %}
+    </div>
+
+    <form method="post" class="otp-form{% if form.code.errors %} otp-has-error{% endif %}">
+      {% csrf_token %}
+      <input type="hidden" name="code" id="otp-code" value="">
+
+      <div class="otp-inputs" data-otp-inputs>
+        <input class="otp-digit" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="1" aria-label="Digit 1" autofocus>
+        <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+        <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+        <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+        <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+        <input class="otp-digit" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+      </div>
+
+      {% if form.code.errors %}
+        <div class="field-error">{{ form.code.errors|striptags }}</div>
+      {% endif %}
+
+      <button type="submit" class="btn-login">Verify Email</button>
+    </form>
+
+    <form method="post" class="resend-form">
+      {% csrf_token %}
+      <input type="hidden" name="resend" value="1">
+      <button type="submit" class="resend-btn" id="resend-btn" {% if cooldown_seconds > 0 %}disabled{% endif %}>
+        Resend code <span id="resend-timer">{% if cooldown_seconds > 0 %}({{ cooldown_seconds }}s){% endif %}</span>
+      </button>
+    </form>
+
+    <p class="form-footer">Entered the wrong email? <a href="{% url 'accounts:sign_up' %}">Back to sign up</a></p>
+  </div>
+</main>
+
+{% include "home/includes/footer.html" %}
+
+<script src="{% static 'js/main_header.js' %}"></script>
+<script>
+  const digits = Array.from(document.querySelectorAll(".otp-digit"));
+  const hidden = document.getElementById("otp-code");
+  const resendBtn = document.getElementById("resend-btn");
+  const resendTimer = document.getElementById("resend-timer");
+  const container = document.querySelector("[data-otp-inputs]");
+  let cooldown = {{ cooldown_seconds|default:0 }};
+
+  function syncCode() {
+    hidden.value = digits.map((d) => d.value).join("");
+  }
+
+  digits.forEach((input, idx) => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/\D/g, "");
+      if (input.value && idx < digits.length - 1) {
+        digits[idx + 1].focus();
+      }
+      syncCode();
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !input.value && idx > 0) {
+        digits[idx - 1].focus();
+      }
+    });
+  });
+
+  container.addEventListener("paste", (e) => {
+    const paste = (e.clipboardData || window.clipboardData).getData("text");
+    const clean = paste.replace(/\D/g, "").slice(0, 6);
+    if (!clean.length) {
+      return;
+    }
+    e.preventDefault();
+    clean.split("").forEach((ch, i) => {
+      if (digits[i]) {
+        digits[i].value = ch;
+      }
+    });
+    if (digits[Math.min(clean.length, digits.length) - 1]) {
+      digits[Math.min(clean.length, digits.length) - 1].focus();
+    }
+    syncCode();
+  });
+
+  if (cooldown > 0) {
+    const interval = setInterval(() => {
+      cooldown -= 1;
+      resendTimer.textContent = cooldown > 0 ? `(${cooldown}s)` : "";
+      if (cooldown <= 0) {
+        resendBtn.removeAttribute("disabled");
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+</script>
+</body>
+</html>

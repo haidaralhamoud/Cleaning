@@ -10,6 +10,7 @@ body {
   background: #fff;
   color: #000;
   overflow-x: hidden;
+  font-size: 15px;
 }
 
 /* ====== HEADER ====== */
@@ -44,7 +45,7 @@ body {
   color: #000;
   text-decoration: none;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   position: relative;
 }
 
@@ -61,7 +62,7 @@ body {
   border-radius: 30px;
   padding: 8px 20px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -96,21 +97,21 @@ body {
 
 .title {
   text-align: center;
-  font-size: 40px;
+  font-size: 34px;
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
 .update-date {
   text-align: center;
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 600;
   margin-bottom: 1rem;
 }
 
 .intro {
   text-align: center;
-  font-size: 18px;
+  font-size: 16px;
   color: rgba(0, 0, 0, 0.8);
   line-height: 1.6;
   margin: 0 auto 2rem auto;
@@ -127,13 +128,13 @@ body {
 }
 
 .section-card h2 {
-  font-size: 22px;
+  font-size: 19px;
   font-weight: 700;
   margin-bottom: 1rem;
 }
 
 .section-card p {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.8);
   margin-bottom: 1rem;
@@ -146,7 +147,7 @@ body {
 }
 
 .section-card li {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   color: rgba(0, 0, 0, 0.6);
   margin: 0.6rem 0;

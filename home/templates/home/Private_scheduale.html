@@ -105,6 +105,7 @@
               <div class="time-option" data-time="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</div>
               <div class="time-option" data-time="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</div>
               <div class="time-option" data-time="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</div>
+              <div class="time-option" data-time="Night (22:00 - 06:00)">Night (22:00 - 06:00)</div>
             </div>
           </div>
         </div>
@@ -186,6 +187,7 @@
                     <option value="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</option>
                     <option value="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</option>
                     <option value="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</option>
+                    <option value="Night (22:00 - 06:00)">Night (22:00 - 06:00)</option>
                   </select>
                 </div>
               </div>
@@ -223,7 +225,7 @@
                   <label class="svc-label">End Date (optional)</label>
                   <div class="svc-end-row">
                     <span class="muted-note">Leave empty for ongoing booking.</span>
-                    <input type="date" class="svc-input svc-end-date" min="{{ min_booking_date }}">
+                    <input type="date" class="svc-input svc-end-date" min="{{ min_booking_date }}" aria-required="false">
                   </div>
                 </div>
               </div>
@@ -1237,7 +1239,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
         alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
         return;
       }
-      notify("Please complete all schedule fields for each service.");
+      notify("Please complete the required schedule fields for each service: date, time window, frequency, and preferred days.");
       return;
     }
 
@@ -1284,6 +1286,11 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".svc-end-date").forEach((input) => {
+    input.required = false;
+    input.removeAttribute("required");
+    input.setAttribute("aria-required", "false");
+  });
   if (typeof window.initHemblaCalendar === "function") {
     window.initHemblaCalendar();
   }

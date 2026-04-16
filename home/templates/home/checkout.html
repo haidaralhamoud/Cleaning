@@ -82,10 +82,12 @@
             <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
 
-          <div class="services-total-line">
-            <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
-            <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
+          {% if vat_amount %}
+            <div class="services-total-line">
+              <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
+              <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
 
           <div class="services-total-line">
             <span>
@@ -285,10 +287,12 @@
             <span>Service fee</span>
             <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
           </div>
-          <div class="summary-line">
-            <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
-            <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
+          {% if vat_amount %}
+            <div class="summary-line">
+              <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
+              <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+            </div>
+          {% endif %}
 
           <div class="summary-line">
             <span>
@@ -372,7 +376,7 @@
                 <i class="fa-regular fa-file-lines"></i>
               </span>
               <span class="payment-copy">
-                <strong>Cash Invoice</strong>
+                <strong>Invoice</strong>
                 <small>Send by email</small>
               </span>
             </label>
@@ -476,7 +480,7 @@
       if (value === "invoice" && errorBox) {
         errorBox.textContent = "";
       }
-      button.textContent = value === "invoice" ? "Send Cash Invoice by Email" : "Confirm Payment";
+      button.textContent = value === "invoice" ? "Send Invoice by Email" : "Confirm Payment";
     };
     var toggle = function () {
       var needsStripe = selectedOption() === "card";

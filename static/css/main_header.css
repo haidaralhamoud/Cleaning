@@ -6,13 +6,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
-  padding: 8px 5%;
+  gap: 20px;
+  padding: 6px 5%;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 3000;
-  min-height: 88px;
+  min-height: 82px;
 }
 
 .logo {
@@ -22,7 +22,7 @@
 }
 
 .logo img {
-  width: 150px;
+  width: 138px;
   height: auto;
   display: block;
 }
@@ -30,14 +30,14 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 30px;
+  gap: 24px;
 }
 
 .main-header .nav-links a {
   text-decoration: none;
   color: #000;
   font-family: "Vesper Libre", serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   transition: color 0.25s ease;
 }
@@ -64,7 +64,7 @@
 }
 
 body {
-  padding-top: 100px;
+  padding-top: 94px;
 }
 
 body.mobile-nav-open {

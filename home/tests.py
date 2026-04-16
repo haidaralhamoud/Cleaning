@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from home.models import BusinessBooking, EmailRequest, PrivateBooking, PrivateMainCategory, PrivateService
+from home.models import BusinessBooking, CallRequest, EmailRequest, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer
 from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes
@@ -159,6 +159,15 @@ class BookingPricingDurationTests(TestCase):
 
         self.assertEqual(pricing["duration_minutes"], 240.0)
         self.assertTrue(pricing["duration_is_estimated"])
+
+    def test_night_time_window_parses_to_22_00_start(self):
+        booking = PrivateBooking(appointment_time_window="Night (22:00 - 06:00)")
+
+        candidates = booking._parse_time_candidates(booking.appointment_time_window)
+
+        self.assertEqual(len(candidates), 2)
+        self.assertEqual(candidates[0].strftime("%H:%M"), "22:00")
+        self.assertEqual(candidates[1].strftime("%H:%M"), "06:00")
 
 
 @override_settings(
@@ -314,3 +323,38 @@ class BookingEmailSignalTests(TestCase):
         self.assertEqual(len(customer_emails), 1)
         self.assertIn("We have received your request", customer_emails[0].body)
         self.assertIn("Standard Cleaning", customer_emails[0].body)
+
+    def test_private_zip_available_call_request_sends_customer_confirmation_email(self):
+        category = PrivateMainCategory.objects.create(title="Home")
+        service = PrivateService.objects.create(
+            category=category,
+            title="Appliance Installation Support",
+            slug="appliance-installation-support",
+            price=100,
+        )
+
+        response = self.client.post(
+            reverse("home:private_zip_available", args=[service.slug]),
+            data={
+                "form_type": "call_request",
+                "name": "Lama Hassan",
+                "phone": "123456789",
+                "email": "customer@example.com",
+                "preferred_time": "2026-04-20 14:30",
+                "message": "Please call after lunch.",
+                "language": "Arabic",
+            },
+            follow=True,
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(CallRequest.objects.filter(email="customer@example.com").exists())
+
+        customer_emails = [
+            email for email in mail.outbox
+            if "customer@example.com" in email.to and email.subject == "Your call request has been received"
+        ]
+        self.assertEqual(len(customer_emails), 1)
+        self.assertIn("Appliance Installation Support", customer_emails[0].body)
+        self.assertIn("April 20, 2026 at 14:30", customer_emails[0].body)
+        self.assertIn("123456789", customer_emails[0].body)

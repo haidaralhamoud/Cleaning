@@ -138,6 +138,21 @@ body {
   margin-bottom: 2rem;
 }
 
+.form-messages {
+  margin-bottom: 1.2rem;
+}
+
+.alert-error {
+  margin-bottom: 0.75rem;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #f2a3a3;
+  background: #ffe9e9;
+  color: #b42318;
+  font-weight: 700;
+  font-size: 14px;
+}
+
 .form-group {
   margin-bottom: 1rem;
   width: 100%;
@@ -153,6 +168,17 @@ label {
 
 .req {
   color: #e53935;
+}
+
+.field-error {
+  margin-top: 0.45rem;
+  color: #b42318;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field-error--checkbox {
+  margin-top: 0.5rem;
 }
 
 input,
@@ -249,27 +275,49 @@ textarea {
 }
 
 /* Checkboxes */
-.checkbox-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem 1.6rem;
-  margin-bottom: 1rem;
-  color: rgba(10, 10, 10, 0.8);
-}
-
 .checkbox-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }
 
-.checkbox-group input[type="checkbox"] {
+.checkbox-item input[type="checkbox"] {
   width: 18px;
   height: 18px;
   accent-color: var(--brand);
+}
+
+.desired-services-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(240px, 1fr));
+  gap: 1rem 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.service-card {
+  min-height: 58px;
+  padding: 14px 16px;
+  border: 1px solid rgba(3, 159, 200, 0.16);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 251, 254, 0.96));
+  box-shadow: 0 10px 24px rgba(3, 159, 200, 0.08);
+}
+
+.service-card--addons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkbox-item--addons {
+  min-width: 170px;
+}
+
+.service-card--addons input[type="text"] {
+  flex: 1;
 }
 
 .section-title {
@@ -310,6 +358,7 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-bottom: 0.75rem;
 }
 
 .addons-inline {
@@ -324,12 +373,8 @@ textarea {
 
 .addons-field {
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 10px;
-}
-
-.addons-field input {
-  flex: 1;
 }
 
 .add-btn {
@@ -446,6 +491,24 @@ textarea {
   accent-color: var(--brand);
 }
 
+.checkbox-agree label {
+  margin-bottom: 0;
+  font-weight: 600;
+  color: rgba(10, 10, 10, 0.86);
+  line-height: 1.5;
+}
+
+.legal-link {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.legal-link:hover {
+  color: var(--brand-strong);
+  text-decoration: underline;
+}
+
 .login-text {
   text-align: center;
   margin-top: 1rem;
@@ -522,20 +585,25 @@ textarea {
     padding: 12px;
   }
 
-  .checkbox-group {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    padding-left: 6px;
+  .desired-services-grid {
+    grid-template-columns: 1fr;
   }
 
   .addons-field {
-    flex-direction: column;
-    align-items: stretch;
+    justify-content: stretch;
   }
 
   .add-btn {
     width: 100%;
+  }
+
+  .service-card--addons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .checkbox-item--addons {
+    min-width: 0;
   }
 }
 

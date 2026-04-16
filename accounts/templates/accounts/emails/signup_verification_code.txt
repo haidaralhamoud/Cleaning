@@ -1,0 +1,3 @@
+Your Hembla experten verification code: {{ code }}
+
+This code expires in {{ ttl }} minutes.

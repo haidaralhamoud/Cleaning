@@ -23,6 +23,7 @@ body {
               linear-gradient(120deg, #f7fbff 0%, #ffffff 60%, #f0f7fb 100%);
   color: var(--ink-900);
   padding: 40px 20px;
+  font-size: 15px;
 }
 
 .checkout-container {
@@ -38,7 +39,7 @@ header {
 
 h1 {
   font-family: "Vesper Libre", serif;
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 700;
 }
 
@@ -96,7 +97,7 @@ h1 {
 .checkout-sidebar .summary h3 {
   text-align: center;
   margin-bottom: 14px;
-  font-size: 2rem;
+  font-size: 1.75rem;
   line-height: 1.1;
   color: #082f49;
   letter-spacing: -0.03em;
@@ -146,14 +147,14 @@ h1 {
 }
 
 .checkout-sidebar .rot-toggle-copy strong {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #0f172a;
 }
 
 .checkout-sidebar .rot-toggle-copy small {
   color: #64748b;
   line-height: 1.4;
-  font-size: 1rem;
+  font-size: 0.92rem;
 }
 
 .checkout-sidebar .rot-toggle-row input[type="checkbox"] {
@@ -186,14 +187,14 @@ h1 {
 }
 
 .checkout-sidebar .summary-discount-head strong {
-  font-size: 1.08rem;
+  font-size: 1rem;
   color: #082f49;
 }
 
 .checkout-sidebar .summary-discount-head small {
   color: #64748b;
   line-height: 1.4;
-  font-size: 0.98rem;
+  font-size: 0.9rem;
 }
 
 .checkout-sidebar .summary-discount-controls {
@@ -209,7 +210,7 @@ h1 {
   border-radius: 16px;
   border: 1px solid #cfe7f3;
   padding: 0 16px;
-  font-size: 1rem;
+  font-size: 0.95rem;
   background: rgba(255, 255, 255, 0.94);
 }
 
@@ -255,7 +256,7 @@ h1 {
   background: linear-gradient(135deg, #082f49 0%, #0f4c75 100%);
   box-shadow: 0 22px 34px rgba(8, 47, 73, 0.22);
   font-weight: 700;
-  font-size: 1.22rem;
+  font-size: 1.08rem;
 }
 
 .checkout-sidebar .summary .total span {
@@ -312,7 +313,7 @@ h1 {
 
 .card-header h2 {
   font-family: "Vesper Libre", serif;
-  font-size: 20px;
+  font-size: 18px;
 }
 
 .edit-btn {
@@ -382,7 +383,7 @@ hr {
 }
 
 .service-line h3 {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   margin-bottom: 4px;
   color: var(--ink-900);
@@ -390,12 +391,12 @@ hr {
 
 .service-line p {
   color: #607086;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .service-line__price {
   flex: 0 0 auto;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   color: #083344;
   padding: 10px 14px;
@@ -415,7 +416,7 @@ hr {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--ink-700);
 }
 
@@ -426,7 +427,7 @@ hr {
 .services-total-line--subitem,
 .summary-line--subitem {
   padding-left: 18px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-500);
 }
 
@@ -434,7 +435,7 @@ hr {
   margin-top: 4px;
   padding-top: 12px;
   border-top: 1px solid rgba(2, 132, 199, 0.15);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--ink-900);
 }
@@ -446,7 +447,7 @@ hr {
   background: #fdf7e8;
   border-left: 4px solid #f0c419;
   color: #5b4a16;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -484,7 +485,7 @@ hr {
   padding: 10px 12px;
   border-radius: 10px;
   border: 1px solid var(--border);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .apply-btn {
@@ -527,13 +528,13 @@ hr {
 
 .summary-item h4 {
   font-family: "Vesper Libre", serif;
-  font-size: 16px;
+  font-size: 15px;
   margin-bottom: 4px;
 }
 
 .summary-item p {
   color: var(--ink-500);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .summary-grid {
@@ -701,13 +702,13 @@ hr {
 
 .payment-copy strong {
   color: #0f172a;
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.2;
 }
 
 .payment-copy small {
   color: #64748b;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1.2;
 }
 
@@ -749,7 +750,7 @@ hr {
 .payment-method-note {
   margin-bottom: 12px;
   color: #475569;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .payment-method-note--invoice {
@@ -770,7 +771,7 @@ hr {
 
 .card-errors {
   color: #c0392b;
-  font-size: 13px;
+  font-size: 12px;
   min-height: 18px;
 }
 
@@ -778,7 +779,7 @@ hr {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .input-row {

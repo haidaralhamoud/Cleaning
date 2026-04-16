@@ -1,5 +1,7 @@
+import re
+
 from django import forms
-from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference, ServiceComment, ServiceReview, ProviderProfile
+from .models import Customer, Service, CustomerLocation , Incident , CustomerNote , PaymentMethod , CommunicationPreference, ServiceComment, ServiceReview, ProviderProfile, SERVICE_CHOICES
 from home.models import PrivateBooking, BusinessBooking
 import json
 from django.contrib.auth.forms import AuthenticationForm
@@ -7,8 +9,8 @@ from django.contrib.auth.models import User
 class CustomerForm(forms.ModelForm):
     
     # Checkbox list للـ Services
-    desired_services = forms.ModelMultipleChoiceField(
-        queryset=Service.objects.all(),
+    desired_services = forms.MultipleChoiceField(
+        choices=SERVICE_CHOICES,
         widget=forms.CheckboxSelectMultiple,
         required=False
     )
@@ -38,16 +40,53 @@ class CustomerForm(forms.ModelForm):
             "personal_identity_number", "first_name", "last_name",
             "phone", "email", "country", "city",
             "postal_code", "house_num", "full_address",
-            "desired_services", "custom_addons", "optional_note",
+            "custom_addons", "optional_note",
             "preferred_language", "profile_photo", "password", "accepted_terms"
         ]
 
     def __init__(self, *args, **kwargs):
         self.locked_email = kwargs.pop("locked_email", None)
         super().__init__(*args, **kwargs)
+        self._desired_service_keys = []
+        optional_fields = [
+            "region",
+            "contact_name",
+            "contact_phone",
+            "entry_code",
+            "parking_notes",
+            "desired_services",
+            "optional_note",
+            "preferred_language",
+        ]
+        for field_name in optional_fields:
+            if field_name in self.fields:
+                self.fields[field_name].required = False
+                self.fields[field_name].widget.attrs.pop("required", None)
+        self.fields["personal_identity_number"].widget = forms.TextInput(attrs={
+            "class": "input",
+            "placeholder": "yyyymmdd-xxxx",
+            "inputmode": "numeric",
+            "autocomplete": "off",
+            "maxlength": "13",
+            "pattern": r"[0-9]{8}-[0-9]{4}",
+            "title": "Use the format yyyymmdd-xxxx",
+        })
         if self.locked_email:
             self.fields["email"].initial = self.locked_email
             self.fields["email"].disabled = True
+
+    def clean_desired_services(self):
+        selected_keys = self.cleaned_data.get("desired_services") or []
+        allowed_keys = {key for key, _ in SERVICE_CHOICES}
+        if any(key not in allowed_keys for key in selected_keys):
+            raise forms.ValidationError("Select valid desired services.")
+        return selected_keys
+
+    def clean_personal_identity_number(self):
+        value = (self.cleaned_data.get("personal_identity_number") or "").strip()
+        if not re.fullmatch(r"\d{8}-\d{4}", value):
+            raise forms.ValidationError("Personal identity number must be in the format yyyymmdd-xxxx.")
+        return value
 
     def clean(self):
         cleaned = super().clean()
@@ -71,7 +110,28 @@ class CustomerForm(forms.ModelForm):
         except:
             cleaned["custom_addons"] = []
 
+        self._desired_service_keys = cleaned.get("desired_services") or []
         return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        self.save_m2m = self._save_desired_services_m2m
+        if commit:
+            instance.save()
+            self.save_m2m()
+        return instance
+
+    def _save_desired_services_m2m(self):
+        if not self.instance.pk:
+            return
+
+        services_by_key = {
+            key: Service.objects.get_or_create(key=key, defaults={"label": label})[0]
+            for key, label in SERVICE_CHOICES
+        }
+        self.instance.desired_services.set(
+            [services_by_key[key] for key in self._desired_service_keys if key in services_by_key]
+        )
 
 
 class CustomerBasicInfoForm(forms.ModelForm):

@@ -55,9 +55,9 @@
         {% endif %}
         {% if next and not messages %}
           {% if user.is_authenticated %}
-            <div class="alert-info">Your account does not have access to this page.</div>
+            <div class="alert-info auth-hint">Your account does not have access to this page.</div>
           {% else %}
-            <div class="alert-info">Please sign in to continue.</div>
+            <div class="alert-info auth-hint">Please sign in to continue.</div>
           {% endif %}
         {% endif %}
         <div class="form-options">

@@ -20,6 +20,7 @@ body{
   margin:0;
   font-family:"Inter",sans-serif;
   color:var(--ink);
+  font-size:15px;
   background:
     radial-gradient(1100px 600px at 10% -10%, rgba(26,135,195,.15), transparent 60%),
     radial-gradient(800px 500px at 90% 0%, rgba(74,169,108,.12), transparent 55%),
@@ -35,14 +36,14 @@ img{display:block;max-width:100%;height:auto}
   font-family:"Vesper Libre",serif;
   font-weight:700;
   color:var(--green);
-  font-size:clamp(28px, 3.2vw, 40px);
+  font-size:clamp(24px, 2.8vw, 34px);
   text-align:center;
   margin:0 0 8px;
 }
 .lead{
   font-family:"Vesper Libre",serif;
   font-weight:700;
-  font-size:clamp(18px, 2vw, 22px);
+  font-size:clamp(16px, 1.7vw, 19px);
   line-height:1.7;
   text-align:center;
   margin:8px auto 32px;
@@ -134,17 +135,17 @@ img{display:block;max-width:100%;height:auto}
 .hero-inner{position:relative; display:flex; align-items:center; min-height:inherit; z-index:2}
 .hero-copy{max-width:700px; animation:fadeUp .8s ease both}
 .hero-copy h1{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(34px, 4.2vw, 54px);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(30px, 3.7vw, 46px);
   margin:0 0 12px; color:var(--ink); letter-spacing:.2px;
 }
 .hero-copy p{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(18px, 2.2vw, 24px); line-height:1.7; margin:0 0 22px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(16px, 1.8vw, 20px); line-height:1.7; margin:0 0 22px;
   color:var(--muted);
 }
 .hero-buttons{display:flex; gap:14px; flex-wrap:wrap}
 .btn{
     display:inline-flex; align-items:center; justify-content:center;
-    min-height:56px; padding:12px 28px; border-radius:999px; font-weight:700; text-decoration:none;
+    min-height:52px; padding:11px 24px; border-radius:999px; font-weight:700; font-size:15px; text-decoration:none;
     transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
     box-shadow:var(--shadow-tight);
   }
@@ -224,9 +225,10 @@ img{display:block;max-width:100%;height:auto}
 
 .same-day-menu a {
   display: block;
-  padding: 10px 12px;
+  padding: 9px 12px;
   border-radius: 10px;
   font-weight: 700;
+  font-size: 14px;
   color: var(--ink);
   text-decoration: none;
 }
@@ -269,10 +271,10 @@ img{display:block;max-width:100%;height:auto}
 .services-modal__close{
   position:absolute; right:14px; top:10px; width:32px; height:32px;
   border-radius:50%; background:rgba(26,135,195,.08); color:var(--ink);
-  font-size:20px; line-height:1; cursor:pointer;
+  font-size:18px; line-height:1; cursor:pointer;
 }
 .services-modal h3{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:24px; margin:4px 0 6px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:21px; margin:4px 0 6px;
 }
 .services-modal p{color:var(--muted); font-weight:600; margin:0 0 16px}
 .services-modal__actions{display:grid; gap:10px}
@@ -301,10 +303,10 @@ img{display:block;max-width:100%;height:auto}
 }
 .card .card-icon img{width:76px; height:76px; object-fit:contain}
 .card h3{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:20px; margin:10px 0 6px; color:var(--ink);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; margin:10px 0 6px; color:var(--ink);
 }
 .card p{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:16px; line-height:1.6; color:var(--muted);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; line-height:1.6; color:var(--muted);
 }
 .card .white{color:#fff}
 
@@ -340,9 +342,9 @@ img{display:block;max-width:100%;height:auto}
 }
 .mini-badge img{width:90px; height:90px; border-radius:50%; object-fit:cover}
 .mini h4{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:19px; margin:10px 0 6px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:17px; margin:10px 0 6px;
 }
-.mini p{font-family:"Vesper Libre",serif; font-weight:700; font-size:16px; color:var(--muted)}
+.mini p{font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; color:var(--muted)}
 
 /* ===== HOW IT WORKS ===== */
 .how{background:linear-gradient(180deg, rgba(26,135,195,.12), rgba(26,135,195,.04)); padding:46px 0}
@@ -362,10 +364,10 @@ img{display:block;max-width:100%;height:auto}
   font-size:30px; font-weight:700; margin:0 auto 10px; box-shadow:var(--shadow-tight);
 }
 .step h3{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:20px; margin:12px 0 6px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; margin:12px 0 6px;
 }
 .step p{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:16px; line-height:1.7; color:var(--muted);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; line-height:1.7; color:var(--muted);
 }
 
 /* ===== TESTIMONIALS ===== */
@@ -381,9 +383,9 @@ img{display:block;max-width:100%;height:auto}
 .t-card.is-visible{display:block}
 .t-card.raised{transform:translateY(-6px)}
 .t-name{
-  color:var(--blue); font-family:"Vesper Libre",serif; font-weight:700; font-size:20px; margin:0 0 8px;
+  color:var(--blue); font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; margin:0 0 8px;
 }
-.t-text{font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; line-height:1.6; color:var(--muted)}
+.t-text{font-family:"Vesper Libre",serif; font-weight:700; font-size:14px; line-height:1.6; color:var(--muted)}
 
 .testimonials .lead-paginator{
   display:block;
@@ -422,10 +424,10 @@ img{display:block;max-width:100%;height:auto}
   display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1.3fr; gap:22px; padding:26px 0;
 }
 .f-about .logo{width:200px; height:200px; object-fit:cover}
-.f-about p{font-weight:600; font-size:16px; margin:6px 0 14px; color:var(--muted)}
+.f-about p{font-weight:600; font-size:15px; margin:6px 0 14px; color:var(--muted)}
 .f-about h5,
 .f-col h5,
-.f-app h5{color:var(--green); font-size:18px; margin:8px 0}
+.f-app h5{color:var(--green); font-size:17px; margin:8px 0}
 .social{display:flex; gap:10px; align-items:center; margin-bottom:14px}
 .social img{width:34px; height:34px; object-fit:cover}
 .lang{
@@ -434,7 +436,7 @@ img{display:block;max-width:100%;height:auto}
 }
 .lang img{width:22px; height:22px}
 .f-col a{
-  display:block; color:var(--ink); font-weight:600; font-size:16px;
+  display:block; color:var(--ink); font-weight:600; font-size:15px;
   text-decoration:none; margin:6px 0;
 }
 .f-col a:hover{color:var(--green)}

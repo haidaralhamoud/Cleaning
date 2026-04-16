@@ -30,6 +30,10 @@ body {
   overflow-x: hidden;
 }
 
+html {
+  font-size: 15px;
+}
+
 /* ====== HEADER BASE ====== */
 .main-header {
   width: 100%;
@@ -62,7 +66,7 @@ body {
   text-decoration: none;
   color: #000;
   font-family: "Vesper Libre", serif;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   transition: color 0.3s ease;
 }
@@ -77,7 +81,7 @@ body {
   padding: 10px 20px;
   border-radius: 25px;
   font-family: "Vesper Libre", serif;
-  font-size: 16px;
+  font-size: 15px;
   white-space: nowrap;
 }
 
@@ -127,6 +131,8 @@ body {
 body {
   padding-top: 85px; /* كان 90، خففناه شوي */
   font-family: "Vesper Libre", serif;
+  font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 body:lang(ar),
@@ -179,7 +185,7 @@ button:lang(ar) {
 
 .footer-col.about p {
   color: #000;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 1.6;
   margin-bottom: 5px;
@@ -198,7 +204,7 @@ button:lang(ar) {
 }
 .bottom-left h4 {
   color: #71b247;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -221,7 +227,7 @@ button:lang(ar) {
 /* الأعمدة التانية */
 .footer-col h4 {
   color: #71b247;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -235,7 +241,7 @@ button:lang(ar) {
 .footer-col ul li a {
   text-decoration: none;
   color: #000;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
 }
 .footer-col ul li a:hover {

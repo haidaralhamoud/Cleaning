@@ -20,6 +20,7 @@ body {
               linear-gradient(120deg, #f7fbff 0%, #ffffff 60%, #f0f7fb 100%);
   overflow-x: hidden;
   color: var(--ink-900);
+  font-size: 15px;
 }
 
 .hero {
@@ -40,7 +41,7 @@ body {
 
 .hero-title {
   color: white;
-  font-size: 3rem;
+  font-size: 2.5rem;
   text-align: center;
   letter-spacing: 0.5px;
   text-shadow: 0 10px 24px rgba(0,0,0,0.35);
@@ -62,7 +63,7 @@ body {
 
 .step {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 16px;
   color: var(--ink-700);
   margin-bottom: 12px;
 }
@@ -88,7 +89,7 @@ body {
 
 .booking-method h3 {
   text-align: center;
-  font-size: 26px;
+  font-size: 22px;
   margin-bottom: 12px;
   color: var(--ink-900);
 }
@@ -99,6 +100,7 @@ body {
   margin: 0 auto 24px;
   max-width: 520px;
   line-height: 1.65;
+  font-size: 14px;
 }
 
 .methods-grid {
@@ -147,13 +149,13 @@ body {
 }
 
 .method-card h4 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .method-card p {
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   color: #5b6b78;
   margin-bottom: 20px;
   line-height: 1.7;
@@ -166,6 +168,7 @@ body {
   padding: 10px 22px;
   border-radius: 12px;
   font-weight: 700;
+  font-size: 14px;
   cursor: pointer;
   transition: 0.25s;
   text-decoration: none;
@@ -191,7 +194,7 @@ body {
 }
 
 .summary-card h3 {
-  font-size: 22px;
+  font-size: 19px;
   text-align: center;
   margin-bottom: 10px;
 }

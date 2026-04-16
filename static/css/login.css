@@ -220,6 +220,10 @@ body {
   box-shadow: 0 8px 18px rgba(30, 58, 138, 0.06);
 }
 
+.auth-hint {
+  margin: 0.35rem 0 1.1rem;
+}
+
 .otp-inputs {
   display: flex;
   justify-content: center;

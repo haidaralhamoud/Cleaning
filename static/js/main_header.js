@@ -434,6 +434,7 @@ const initFormValidation = () => {
         if (field.type === "hidden") return;
         if (field.type === "submit" || field.type === "button") return;
         if (field.type === "file" && !field.required) return;
+        if (!field.required && field.type !== "radio" && field.type !== "checkbox") return;
 
         if (field.type === "radio") {
           radioGroups.set(field.name, radioGroups.get(field.name) || []);
@@ -463,11 +464,15 @@ const initFormValidation = () => {
       });
 
       radioGroups.forEach((group) => {
+        const groupRequired = group.some((field) => field.required && !field.disabled);
+        if (!groupRequired) return;
         const anyChecked = group.some((field) => field.checked);
         if (!anyChecked) invalid.push(group[0]);
       });
 
       checkboxGroups.forEach((group) => {
+        const groupRequired = group.some((field) => field.required && !field.disabled);
+        if (!groupRequired) return;
         const anyChecked = group.some((field) => field.checked);
         if (!anyChecked) invalid.push(group[0]);
       });

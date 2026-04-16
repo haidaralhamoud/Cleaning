@@ -615,6 +615,54 @@ def _send_reset_code(email, user, request):
     return True
 
 
+def _send_signup_code(email, user, request):
+    now = timezone.now()
+    ip_address = _get_client_ip(request)
+    if _is_locked_for(email, ip_address):
+        return False
+
+    latest_email = PasswordResetOTP.objects.filter(email=email).order_by("-created_at").first()
+    latest_ip = (
+        PasswordResetOTP.objects.filter(ip_address=ip_address).order_by("-created_at").first()
+        if ip_address
+        else None
+    )
+    if latest_email and latest_email.last_sent_at and (now - latest_email.last_sent_at).total_seconds() < OTP_RESEND_COOLDOWN_SECONDS:
+        return False
+    if latest_ip and latest_ip.last_sent_at and (now - latest_ip.last_sent_at).total_seconds() < OTP_RESEND_COOLDOWN_SECONDS:
+        return False
+
+    PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
+    otp_obj, code = PasswordResetOTP.create_otp(
+        email=email,
+        user=user,
+        ip_address=ip_address,
+        ttl_minutes=OTP_TTL_MINUTES,
+    )
+
+    subject = _("Email verification code")
+    context = {"code": code, "ttl": OTP_TTL_MINUTES}
+    text_body = render_to_string("accounts/emails/signup_verification_code.txt", context)
+    html_body = render_to_string("accounts/emails/signup_verification_code.html", context)
+    message = EmailMultiAlternatives(
+        subject,
+        text_body,
+        verification_from_email(),
+        [email],
+        connection=verification_email_connection(),
+    )
+    message.attach_alternative(html_body, "text/html")
+    try:
+        connection = verification_email_connection()
+        connection.open()
+        connection.close()
+        message.send(fail_silently=False)
+    except SMTPException:
+        logger.exception("SMTP error while sending signup verification code to %s", email)
+        raise
+    return True
+
+
 def password_reset_request(request):
     form = PasswordResetRequestForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
@@ -787,20 +835,26 @@ def sign_up(request):
         form = CustomerForm(request.POST, request.FILES, locked_email=locked_email)
 
         if form.is_valid():
-            email = form.cleaned_data["email"]
+            email = _normalize_email(form.cleaned_data["email"])
             password = form.cleaned_data["password"]
 
             # 1️⃣ إنشاء User
-            if User.objects.filter(username=email).exists():
+            existing_user = User.objects.filter(email__iexact=email).first()
+            if existing_user and existing_user.is_active:
                 form.add_error("email", "Email is already registered.")
                 return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
+            if existing_user and not existing_user.is_active:
+                existing_user.delete()
+
             try:
-                user = User.objects.create_user(
-                    username=email,
-                    email=email,
-                    password=password,
-                )
+                with transaction.atomic():
+                    user = User.objects.create_user(
+                        username=email,
+                        email=email,
+                        password=password,
+                        is_active=False,
+                    )
             except IntegrityError:
                 form.add_error("email", "Email is already registered.")
                 return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
@@ -808,6 +862,7 @@ def sign_up(request):
             # 2️⃣ إنشاء Customer
             customer = form.save(commit=False)
             customer.user = user
+            customer.email = email
             customer.save()
             form.save_m2m()
 
@@ -852,16 +907,103 @@ def sign_up(request):
                     customer.has_referral_discount = True
                     customer.save(update_fields=["has_referral_discount"])
 
-            login_url = reverse("login")
-            query_data = {"email": email}
-            if next_url:
-                query_data["next"] = next_url
-            query = urlencode(query_data)
-            return redirect(f"{login_url}?{query}")
+            try:
+                _send_signup_code(email, user, request)
+            except SMTPException:
+                user.delete()
+                messages.error(request, "Could not send the verification code right now. Please try again.")
+                return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
+
+            request.session["signup_verification_email"] = email
+            request.session["signup_next_url"] = next_url
+            messages.success(request, _("We sent a verification code to your email."))
+            return redirect("accounts:signup_verify")
     else:
         form = CustomerForm(locked_email=locked_email)
 
     return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
+
+
+def signup_verify(request):
+    email = _normalize_email(request.session.get("signup_verification_email"))
+    next_url = request.session.get("signup_next_url") or ""
+    if not email:
+        return redirect("accounts:sign_up")
+
+    user = User.objects.filter(email__iexact=email, is_active=False).first()
+    if not user:
+        request.session.pop("signup_verification_email", None)
+        request.session.pop("signup_next_url", None)
+        messages.info(request, "This account is already verified. Please sign in.")
+        login_url = reverse("login")
+        query_data = {"email": email}
+        if next_url:
+            query_data["next"] = next_url
+        return redirect(f"{login_url}?{urlencode(query_data)}")
+
+    form = OTPVerifyForm(request.POST or None)
+    if request.method == "POST":
+        if _is_locked_for(email, _get_client_ip(request)):
+            form.add_error("code", _("Too many attempts. Please try again later."))
+            return render(
+                request,
+                "accounts/signup_verify.html",
+                {"form": form, "email": email, "cooldown_seconds": 0},
+            )
+
+        if request.POST.get("resend") == "1":
+            try:
+                _send_signup_code(email, user, request)
+            except SMTPException:
+                messages.error(request, _("Could not send the verification code right now."))
+            else:
+                messages.success(request, _("We sent a verification code to your email."))
+            return redirect("accounts:signup_verify")
+
+        if form.is_valid():
+            otp = _get_latest_active_otp(email)
+            if not otp:
+                latest = PasswordResetOTP.objects.filter(email=email, is_used=False).order_by("-created_at").first()
+                if latest and latest.is_locked():
+                    form.add_error("code", _("Too many attempts. Please try again later."))
+                elif latest and latest.is_expired():
+                    latest.is_used = True
+                    latest.save(update_fields=["is_used"])
+                    form.add_error("code", _("Code is invalid or expired."))
+                else:
+                    form.add_error("code", _("Code is invalid or expired."))
+            elif not otp.check_code(form.cleaned_data["code"]):
+                otp.attempts += 1
+                if otp.attempts >= OTP_MAX_ATTEMPTS:
+                    otp.locked_until = timezone.now() + datetime.timedelta(minutes=OTP_LOCK_MINUTES)
+                otp.save(update_fields=["attempts", "locked_until"])
+                form.add_error("code", _("Incorrect code. Please try again."))
+            else:
+                otp.is_used = True
+                otp.save(update_fields=["is_used"])
+                PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
+                user.is_active = True
+                user.save(update_fields=["is_active"])
+                request.session.pop("signup_verification_email", None)
+                request.session.pop("signup_next_url", None)
+                messages.success(request, _("Your email has been verified. You can sign in now."))
+                login_url = reverse("login")
+                query_data = {"email": email}
+                if next_url:
+                    query_data["next"] = next_url
+                return redirect(f"{login_url}?{urlencode(query_data)}")
+
+    latest = PasswordResetOTP.objects.filter(email=email).order_by("-created_at").first()
+    cooldown_seconds = 0
+    if latest and latest.last_sent_at:
+        elapsed = (timezone.now() - latest.last_sent_at).total_seconds()
+        cooldown_seconds = max(0, OTP_RESEND_COOLDOWN_SECONDS - int(elapsed))
+
+    return render(
+        request,
+        "accounts/signup_verify.html",
+        {"form": form, "email": email, "cooldown_seconds": cooldown_seconds},
+    )
 
 
 

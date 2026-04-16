@@ -11,6 +11,7 @@ body {
               linear-gradient(120deg, #f8fbff 0%, #ffffff 55%, #f0f7fb 100%);
   color: #000;
   overflow-x: hidden;
+  font-size: 15px;
 }
 
 /* ====== HEADER ====== */
@@ -44,7 +45,7 @@ body {
 .navbar .logo-text h2 {
   font-family: "Inter", sans-serif;
   font-weight: 700;
-  font-size: 20px;
+  font-size: 18px;
   color: #039fc8;
 }
 
@@ -62,7 +63,7 @@ body {
   font-family: "Inter", sans-serif;
   font-weight: 700;
   color: #000;
-  font-size: 16px;
+  font-size: 15px;
   position: relative;
   transition: color 0.3s ease;
 }
@@ -91,7 +92,7 @@ body {
   border-radius: 30px;
   font-family: "Inter", sans-serif;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
   width: 100px;
   height: 36px;
   cursor: pointer;
@@ -140,13 +141,13 @@ body {
 }
 
 .section-header h1 {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 700;
   color: #000;
 }
 
 .section-subtitle {
-  font-size: 15px;
+  font-size: 14px;
   color: #4b5b68;
   margin-top: 6px;
   font-family: "Inter", sans-serif;
@@ -186,7 +187,7 @@ body {
 }
 
 .urgent-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   margin-bottom: 4px;
   color: #0b1f2a;
@@ -194,7 +195,7 @@ body {
 }
 
 .urgent-subtitle {
-  font-size: 13px;
+  font-size: 12px;
   color: #3a4a58;
   font-family: "Inter", sans-serif;
 }
@@ -531,14 +532,14 @@ hr {
 }
 
 .service-info h2 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #000;
   margin-bottom: 0;
 }
 
 .service-info p {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.6;
   color: #000;
   margin-bottom: 10px;
@@ -546,7 +547,7 @@ hr {
 
 .rec-badge {
   font-family: "Inter", sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 999px;
@@ -555,7 +556,7 @@ hr {
 }
 
 .rec-note {
-  font-size: 13px;
+  font-size: 12px;
   color: #6b7a88;
   font-family: "Inter", sans-serif;
 }
