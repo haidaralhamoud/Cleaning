@@ -55,7 +55,7 @@
 
 /* ===== HERO ===== */
 .hero {
-  background: url('frame-16865527220.png') center/cover no-repeat;
+  background: url('../images/frame-16865527220.png') center/cover no-repeat;
   height: 450px;
   position: relative;
   display: flex;

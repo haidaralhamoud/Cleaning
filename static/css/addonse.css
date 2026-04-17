@@ -35,7 +35,7 @@ body {
 /* ===== HERO ===== */
 .hero {
   position: relative;
-  background: url('frame-16865527220.png') center/cover no-repeat;
+  background: url('../images/frame-16865527220.png') center/cover no-repeat;
   height: 300px;
 }
 .hero .overlay {
