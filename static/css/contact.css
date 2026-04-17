@@ -263,7 +263,7 @@ input[type="file"]::file-selector-button:hover{
   display:block;
   width:48px;
   height:48px;
-  background:url("upload-to-cloud0.png") no-repeat center;
+  background:url("../images/icon-upload.svg") no-repeat center;
   background-size:contain;
   margin:0 auto 10px;
   opacity:0.8;
