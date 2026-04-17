@@ -2,16 +2,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Provider - Booking #{{ booking.id }}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8">
+<title>Provider - Booking #{{ booking.id }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
-
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
+<style>
     .container {
       max-width: 980px;
       margin: 40px auto;
@@ -271,15 +273,13 @@
 
   </style>
 </head>
-
 <body class="provider-portal">
 {% include "home/includes/main_header.html" %}
 <div class="container">
-  <div class="provider-card">
+<div class="provider-card">
 <div class="top-bar">
-  <a href="{% url 'accounts:provider_bookings' %}" class="back">Back to bookings</a>
-
-  <div style="display:flex; align-items:center; gap:14px;">
+<a href="{% url 'accounts:provider_bookings' %}" class="back">Back to bookings</a>
+<div style="display:flex; align-items:center; gap:14px;">
     {% if preferences_url %}
       <a href="{{ preferences_url }}" class="pref-btn">View Preferences</a>
     {% endif %}
@@ -289,29 +289,24 @@
        class="chat-btn"
        title="Message customer">
 <div class="chat-wrapper">
-  <span class="chat-icon">Chat</span>
+<span class="chat-icon">Chat</span>
 
   {% if unread_messages_count > 0 %}
     <span class="chat-badge">{{ unread_messages_count }}</span>
   {% endif %}
 </div>
-
-
-    </a>
-
-    <span class="badge status-{{ booking.status }}">
+</a>
+<span class="badge status-{{ booking.status }}">
       {{ booking.get_status_display }}
     </span>
-  </div>
 </div>
-
-    <h2>Booking #{{ booking.id }}</h2>
-    <p class="muted" style="font-weight:600;">Type: {{ booking_type|title }}</p>
-
-    <div class="summary-grid">
-      <div class="summary-card">
-        <div class="summary-label">Service</div>
-        <div class="summary-value">
+</div>
+<h2>Booking #{{ booking.id }}</h2>
+<p class="muted" style="font-weight:600;">Type: {{ booking_type|title }}</p>
+<div class="summary-grid">
+<div class="summary-card">
+<div class="summary-label">Service</div>
+<div class="summary-value">
           {% if booking_type == "private" %}
             {{ booking.selected_services.0|default:"Private Service" }}
           {% else %}
@@ -324,54 +319,54 @@
             {% endif %}
           {% endif %}
         </div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">Customer</div>
-        <div class="summary-value">
+</div>
+<div class="summary-card">
+<div class="summary-label">Customer</div>
+<div class="summary-value">
           {% if booking_type == "private" %}
             {{ booking.user.get_full_name|default:booking.user.username|default:"-" }}
           {% else %}
             {{ booking.contact_person|default:booking.company_name|default:"-" }}
           {% endif %}
         </div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">When</div>
-        <div class="summary-value">
+</div>
+<div class="summary-card">
+<div class="summary-label">When</div>
+<div class="summary-value">
           {% if booking_type == "private" %}
             {{ booking.appointment_date|date:"M d, Y"|default:"-" }}
           {% else %}
             {{ booking.start_date|date:"M d, Y"|default:"-" }}
           {% endif %}
         </div>
-      </div>
-      <div class="summary-card">
-        <div class="summary-label">Location</div>
-        <div class="summary-value">
+</div>
+<div class="summary-card">
+<div class="summary-label">Location</div>
+<div class="summary-value">
           {% if booking_type == "private" %}
             {{ booking.address|default:booking.area|default:"-" }}
           {% else %}
             {{ booking.office_address|default:"-" }}
           {% endif %}
         </div>
-      </div>
-    </div>
+</div>
+</div>
 
     {% for m in messages %}
       <div class="message">{{ m }}</div>
     {% endfor %}
     <div class="action-grid">
-      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+<form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="on_the_way">
-        <button class="action-btn" {% if booking.status != "ASSIGNED" and booking.status != "ORDERED" %}disabled{% endif %}>On the way</button>
-      </form>
-      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+<button class="action-btn" {% if booking.status != "ASSIGNED" and booking.status != "ORDERED" %}disabled{% endif %}>On the way</button>
+</form>
+<form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="started">
-        <button class="action-btn" {% if booking.status != "ON_THE_WAY" %}disabled{% endif %}>Start</button>
-      </form>
-      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+<button class="action-btn" {% if booking.status != "ON_THE_WAY" %}disabled{% endif %}>Start</button>
+</form>
+<form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="paused">
 <button class="action-btn"
@@ -381,21 +376,17 @@
 >
   Pause
 </button>
-
-
-
-      </form>
-      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+</form>
+<form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="resume">
-        <button class="action-btn resume"
+<button class="action-btn resume"
  {% if booking.status != "PAUSED" %}disabled{% endif %}
 >
   Resume
 </button>
-
-      </form>
-      <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
+</form>
+<form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
         {% csrf_token %}
         <input type="hidden" name="action" value="completed">
 <button class="action-btn complete"
@@ -405,9 +396,7 @@
 >
   Complete
 </button>
-
-
-      </form>
+</form>
 <form method="post" action="{% url 'accounts:provider_booking_action' booking_type booking.id %}">
   {% csrf_token %}
   <input type="hidden" name="action" value="report_no_show">
@@ -418,27 +407,25 @@
 >
   Customer Not Available
 </button>
-
-
 </form>
-
-    </div>
-    <div class="checklist-card">
-      <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
-        <h3 style="margin:0;">Checklist</h3>
-        <span class="progress-chip" id="providerChecklistSummary">{{ checklist_completed_count }}/{{ checklist_total_count }} completed</span>
-      </div>
-      <div class="checklist-progress">
-        <div class="progress-meta">
-          <span id="providerChecklistPercent">{{ checklist_progress_percent }}%</span>
-          <span class="progress-chip" id="providerChecklistState">
+</div>
+<div class="checklist-card">
+<div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+<h3 style="margin:0;">Checklist</h3>
+<span class="progress-chip" id="providerChecklistSummary">{{ checklist_completed_count }}/{{ checklist_total_count }} completed</span>
+</div>
+<div class="checklist-progress">
+<div class="progress-meta">
+<span id="providerChecklistPercent">{{ checklist_progress_percent }}%</span>
+<span class="progress-chip" id="providerChecklistState">
             {% if checklist_locked %}Locked after completion{% else %}Live progress{% endif %}
           </span>
-        </div>
-        <div class="progress-bar">
-          <span id="providerChecklistBar" style="width:{{ checklist_progress_percent }}%;"></span>
-        </div>
-      </div>
+</div>
+<div class="progress-bar">
+<span id="providerChecklistBar" style="width:{{ checklist_progress_percent }}%;">
+</span>
+</div>
+</div>
       {% if checklist_locked %}
         <p style="margin:0 0 14px; color:#5f7280; font-weight:600;">Checklist editing is disabled because this booking is completed.</p>
       {% endif %}
@@ -447,53 +434,52 @@
         <div id="providerChecklistRoot" data-locked="{% if checklist_locked %}1{% else %}0{% endif %}">
           {% for section in checklist_sections %}
             <div style="margin-bottom:16px;">
-              <h3 style="margin:0 0 12px;">{{ section.service_title }}</h3>
-              <div class="checklist-grid">
+<h3 style="margin:0 0 12px;">{{ section.service_title }}</h3>
+<div class="checklist-grid">
                 {% for group in section.groups %}
                   <div class="checklist-group">
-                    <h4>{{ group.group_title }}</h4>
+<h4>{{ group.group_title }}</h4>
                     {% for item in group.items %}
                       <label class="checklist-item" data-item-row="{{ item.id }}">
-                        <input
+<input
                           type="checkbox"
                           data-checklist-item="{{ item.id }}"
                           data-update-url="{% url 'accounts:provider_checklist_item_update' booking_type booking.id item.id %}"
                           {% if item.is_completed %}checked{% endif %}
                           {% if checklist_locked %}disabled{% endif %}>
-                        <span>
+<span>
                           {{ item.item_label }}
                           <small data-completed-at="{{ item.id }}">
                             {% if item.is_completed and item.completed_at %}
                               Completed {{ item.completed_at|date:"M d, Y h:i A" }}
                             {% endif %}
                           </small>
-                        </span>
-                      </label>
+</span>
+</label>
                     {% endfor %}
                   </div>
                 {% endfor %}
               </div>
-            </div>
+</div>
           {% endfor %}
         </div>
       {% else %}
         <p style="opacity:.7; margin:10px 0 0;">No checklist items available for this booking.</p>
       {% endif %}
     </div>
-    <div class="timeline">
-      <h3>Timeline</h3>
+<div class="timeline">
+<h3>Timeline</h3>
       {% for item in timeline %}
         <div class="timeline-item">
-          <b>{{ item.status }}</b>
-          <small>{{ item.created_at|date:"F d, Y - h:i A" }}</small>
+<b>{{ item.status }}</b>
+<small>{{ item.created_at|date:"F d, Y - h:i A" }}</small>
           {% if item.note %}<small>{{ item.note }}</small>{% endif %}
         </div>
       {% empty %}
         <p style="opacity:.6;">No history yet.</p>
       {% endfor %}
     </div>
-
-  </div>
+</div>
 </div>
 <script>
 (function () {
@@ -569,6 +555,7 @@
   });
 })();
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

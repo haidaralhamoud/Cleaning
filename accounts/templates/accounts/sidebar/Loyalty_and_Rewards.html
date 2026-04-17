@@ -1,275 +1,117 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Loyalty & Rewards</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/Loyalty_and_Rewards.css' %}" />
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Loyalty & Rewards</title>
+<link rel="stylesheet" href="{% static 'css/Loyalty_and_Rewards.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
 <body class="loyalty-rewards-view">
-<!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-  <div class="layout">
-
-    <!-- ===== Mobile Header ===== -->
-    <div class="menu-toggle-wrap">
-      <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-      
-    </div>
-
-    <!-- ===== Sidebar ===== -->
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-
-    <!-- ===== Main Content ===== -->
-    <main class="main">
-      <h1 class="page-title fade-in">Loyalty &amp; Rewards</h1>
-
-      {% if messages %}
-        <div class="messages-stack">
-          {% for message in messages %}
-            <div class="message {% if message.tags %}message--{{ message.tags }}{% endif %}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-
-      <section class="card fade-in" style="animation-delay:.05s">
-        <div class="banner-sky"></div>
-
+<!-- HEADER -->{% include "home/includes/main_header.html" %}  <div class="layout">
+<!-- ===== Mobile Header ===== -->
+<div class="menu-toggle-wrap">
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
+</div>
+<!-- ===== Sidebar ===== -->    {% include "accounts/includes/customer_sidebar.html" %}    <!-- ===== Main Content ===== -->
+<main class="main">
+<h1 class="page-title fade-in">Loyalty &amp; Rewards</h1>      {% if messages %}        <div class="messages-stack">          {% for message in messages %}            <div class="message {% if message.tags %}message--{{ message.tags }}{% endif %}">{{ message }}</div>          {% endfor %}        </div>      {% endif %}      <section class="card fade-in" style="animation-delay:.05s">
+<div class="banner-sky">
+</div>
 <!-- Points Balance -->
 <div class="points-box">
-  <div class="points-text">
-    <small>Points Balance</small>
-    <strong>{{ points_balance }}</strong>
-
-    {% if next_tier %}
-      <span>
-        You're only {{ next_tier_points }} pts away from {{ next_tier.name }} Tier
-        <img class="tier-icon" src="{% static 'images/tier-crown.svg' %}" alt="">
-      </span>
-    {% else %}
-      <span>
-        You're at the highest tier
-        <img class="tier-icon" src="{% static 'images/tier-crown.svg' %}" alt="">
-      </span>
-    {% endif %}
-  </div>
-
-  <div class="tier-pill">
-    {% if current_tier %}
-      <b>{{ current_tier.name }} Member</b>
-    {% endif %}
-  </div>
+<div class="points-text">
+<small>Points Balance</small>
+<strong>{{ points_balance }}</strong>    {% if next_tier %}      <span>        You're only {{ next_tier_points }} pts away from {{ next_tier.name }} Tier        <img class="tier-icon" src="{% static 'images/tier-crown.svg' %}" alt="">
+</span>    {% else %}      <span>        You're at the highest tier        <img class="tier-icon" src="{% static 'images/tier-crown.svg' %}" alt="">
+</span>    {% endif %}  </div>
+<div class="tier-pill">    {% if current_tier %}      <b>{{ current_tier.name }} Member</b>    {% endif %}  </div>
 </div>
-
-        <!-- Tiers -->
-        <h3 class="section-title">Tiers &amp; Status</h3>
-        <div class="tiers">
-          {% for tier in tiers %}
-            <div class="tier {{ tier.color }} {% if current_tier and tier.id == current_tier.id %}active{% endif %}">
-              <h4>{{ tier.name }}</h4>
-
-              {% if tier.max_points %}
-                <p>({{ tier.min_points }}-{{ tier.max_points }} pts)</p>
-              {% else %}
-                <p>(+ {{ tier.min_points }} pts)</p>
-              {% endif %}
-
-              <p>{{ tier.benefits }}</p>
-            </div>
-          {% endfor %}
-        </div>
-
-
-
-        <!-- Milestones -->
-            <h3 class="section-title">Milestone Tracker</h3>
-            <div class="milestones">
-
-              <!-- Book 5 cleanings -->
-              <div class="milestone">
-                <div class="row">
-                  <b>Book {{ book_5_target }} cleanings</b>
-                  <small>{{ book_5_done }}/{{ book_5_target }}</small>
-                </div>
-                <div class="progress">
-                  <span class="fill" data-pct="{{ book_5_percent }}"></span>
-                </div>
-
-                {% if book_5_done < book_5_target %}
-                  <div class="hint">
-                    Book {{ book_5_target|add:"-"|add:book_5_done }} more to unlock a free add-on.
-                  </div>
-                {% else %}
-                  <div class="hint success">Milestone completed.</div>
-                {% endif %}
-              </div>
-
-              <!-- Refer 3 friends -->
-              <div class="milestone">
-                <div class="row">
-                  <b>Refer {{ refer_target }} friends</b>
-                  <small>{{ refer_done }}/{{ refer_target }}</small>
-                </div>
-                <div class="progress">
-                  <span class="fill" data-pct="{{ refer_percent }}"></span>
-                </div>
-
-                {% if refer_done < refer_target %}
-                  <div class="hint">
-                    Invite {{ refer_target|add:"-"|add:refer_done }} more friends to unlock a free service.
-                  </div>
-                {% else %}
-                  <div class="hint success">Referral reward unlocked.</div>
-                {% endif %}
-              </div>
-
-            </div>
-
-
-        <!-- Rewards -->
-        <h3 class="section-title">Available Rewards</h3>
-        <div class="rewards">
-          {% for r in rewards %}
-            <div class="reward {% if not r.can_redeem %}locked{% endif %}">
-              <div class="sub"
-                  style="{% if r.can_redeem %}color:var(--sky-strong){% endif %}">
-                {{ r.points_required }} points
-              </div>
-
-              <h5>{{ r.title }}</h5>
-              <div class="desc">{{ r.description }}</div>
-
-              {% if r.can_redeem %}
-                <form method="post" action="{% url 'accounts:redeem_reward' r.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn">
-                      Redeem Now
-                    </button>
-                  </form>
-              {% else %}
-                <button class="btn lock" disabled>
-                  <img src="{% static 'images/lock0.png' %}" alt="">
-                  Earn {{ r.missing_points }} more points
-                </button>
-              {% endif %}
-            </div>
-          {% endfor %}
-
-        </div>
-
-        <!-- Refer -->
-        <div class="refer">
-          <b>Refer a Friend &amp; Earn Big!</b>
-          <div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">
-            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> and your friend gets 10% off their first booking.
-          </div>
-          <div class="share-row" data-referral-link="{{ referral_link }}">
-            <a class="share wa"
-               href="https://wa.me/?text=Join%20me%20on%20Hembla%20experten%20and%20get%2010%25%20off%20your%20first%20booking!%20{{ referral_link|urlencode }}"
-               target="_blank" rel="noopener">
-              <img src="{% static 'images/whats-app0.png' %}" alt="">WhatsApp
-            </a>
-            <a class="share fb"
-               href="https://www.facebook.com/sharer/sharer.php?u={{ referral_link|urlencode }}"
-               target="_blank" rel="noopener">
-              <img src="{% static 'images/facebook1.png' %}" alt="">Facebook
-            </a>
-            <button class="share lk" type="button" data-copy-referral>
-              <img src="{% static 'images/link0.png' %}" alt="">Copy Link
-            </button>
-          </div>
-        </div>
-
-        <!-- Activity -->
-        <div class="grid-2">
-          <div class="activity">
-            <h3 class="section-title" style="margin-top:0">Recent Activity</h3>
-
-            {% for t in transactions %}
-              <div class="item">
-                <div><b>{{ t.reason|default:"Points Update" }}</b></div>
-                <small>{{ t.created_at|date:"F d, Y" }}</small>
-                <div class="pts {% if t.amount > 0 %}green{% else %}red{% endif %}">
-                  {% if t.amount > 0 %}+{% endif %}{{ t.amount }} pts
-                </div>
-              </div>
-            {% empty %}
-              <div class="item">
-                <div><b>No Activity Yet</b></div>
-                <small>—</small>
-                <div class="pts">0 pts</div>
-              </div>
-            {% endfor %}
-          </div>
-
-            {% if promotion %}
-        <div class="promo">
-          <h3 class="section-title" style="margin-top:0">Promotions</h3>
-
-          {% if promotion.image %}
-            <img src="{{ promotion.image.url }}" alt="promotion">
-          {% endif %}
-
-          <h5>{{ promotion.title }}</h5>
-          <p>{{ promotion.description }}</p>
-
-          <button class="btn" type="button" disabled>
-            Earn x{{ promotion.points_multiplier }} points on eligible bookings
-          </button>
-        </div>
-
-            {% endif %}
-
-        </div>
-      </section>
-    </main>
-  </div>
-
-{% include "home/includes/footer.html" %}
-
-<script src="{% static 'js/main_header.js' %}"></script>
-  <script>
-    window.addEventListener('load', ()=>{
-      document.querySelectorAll('.progress .fill').forEach(el=>{
-        const pct = +el.getAttribute('data-pct') || 0;
-        requestAnimationFrame(()=> el.style.width = pct + '%');
-      });
-    });
-  </script>
-  <script>
-    const copyBtn = document.querySelector("[data-copy-referral]");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", async () => {
-        const wrap = copyBtn.closest("[data-referral-link]");
-        const link = wrap ? wrap.getAttribute("data-referral-link") : "";
-        if (!link) return;
-        try {
-          await navigator.clipboard.writeText(link);
-          copyBtn.classList.add("copied");
-          copyBtn.textContent = "Copied!";
-          setTimeout(() => {
-            copyBtn.classList.remove("copied");
-            copyBtn.innerHTML = `<img src="{% static 'images/link0.png' %}" alt="">Copy Link`;
-          }, 1500);
-        } catch (err) {
-          window.prompt("Copy this link:", link);
-        }
-      });
-    }
-  </script>
-
+<!-- Tiers -->
+<h3 class="section-title">Tiers &amp; Status</h3>
+<div class="tiers">          {% for tier in tiers %}            <div class="tier {{ tier.color }} {% if current_tier and tier.id == current_tier.id %}active{% endif %}">
+<h4>{{ tier.name }}</h4>              {% if tier.max_points %}                <p>({{ tier.min_points }}-{{ tier.max_points }} pts)</p>              {% else %}                <p>(+ {{ tier.min_points }} pts)</p>              {% endif %}              <p>{{ tier.benefits }}</p>
+</div>          {% endfor %}        </div>
+<!-- Milestones -->
+<h3 class="section-title">Milestone Tracker</h3>
+<div class="milestones">
+<!-- Book 5 cleanings -->
+<div class="milestone">
+<div class="row">
+<b>Book {{ book_5_target }} cleanings</b>
+<small>{{ book_5_done }}/{{ book_5_target }}</small>
+</div>
+<div class="progress">
+<span class="fill" data-pct="{{ book_5_percent }}">
+</span>
+</div>                {% if book_5_done < book_5_target %}                  <div class="hint">                    Book {{ book_5_target|add:"-"|add:book_5_done }} more to unlock a free add-on.                  </div>                {% else %}                  <div class="hint success">Milestone completed.</div>                {% endif %}              </div>
+<!-- Refer 3 friends -->
+<div class="milestone">
+<div class="row">
+<b>Refer {{ refer_target }} friends</b>
+<small>{{ refer_done }}/{{ refer_target }}</small>
+</div>
+<div class="progress">
+<span class="fill" data-pct="{{ refer_percent }}">
+</span>
+</div>                {% if refer_done < refer_target %}                  <div class="hint">                    Invite {{ refer_target|add:"-"|add:refer_done }} more friends to unlock a free service.                  </div>                {% else %}                  <div class="hint success">Referral reward unlocked.</div>                {% endif %}              </div>
+</div>
+<!-- Rewards -->
+<h3 class="section-title">Available Rewards</h3>
+<div class="rewards">          {% for r in rewards %}            <div class="reward {% if not r.can_redeem %}locked{% endif %}">
+<div class="sub"                  style="{% if r.can_redeem %}color:var(--sky-strong){% endif %}">                {{ r.points_required }} points              </div>
+<h5>{{ r.title }}</h5>
+<div class="desc">{{ r.description }}</div>              {% if r.can_redeem %}                <form method="post" action="{% url 'accounts:redeem_reward' r.id %}">                    {% csrf_token %}                    <button type="submit" class="btn">                      Redeem Now                    </button>
+</form>              {% else %}                <button class="btn lock" disabled>
+<img src="{% static 'images/lock0.png' %}" alt="">                  Earn {{ r.missing_points }} more points                </button>              {% endif %}            </div>          {% endfor %}        </div>
+<!-- Refer -->
+<div class="refer">
+<b>Refer a Friend &amp; Earn Big!</b>
+<div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> and your friend gets 10% off their first booking.          </div>
+<div class="share-row" data-referral-link="{{ referral_link }}">
+<a class="share wa"               href="https://wa.me/?text=Join%20me%20on%20Hembla%20experten%20and%20get%2010%25%20off%20your%20first%20booking!%20{{ referral_link|urlencode }}"               target="_blank" rel="noopener">
+<img src="{% static 'images/whats-app0.png' %}" alt="">WhatsApp            </a>
+<a class="share fb"               href="https://www.facebook.com/sharer/sharer.php?u={{ referral_link|urlencode }}"               target="_blank" rel="noopener">
+<img src="{% static 'images/facebook1.png' %}" alt="">Facebook            </a>
+<button class="share lk" type="button" data-copy-referral>
+<img src="{% static 'images/link0.png' %}" alt="">Copy Link            </button>
+</div>
+</div>
+<!-- Activity -->
+<div class="grid-2">
+<div class="activity">
+<h3 class="section-title" style="margin-top:0">Recent Activity</h3>            {% for t in transactions %}              <div class="item">
+<div>
+<b>{{ t.reason|default:"Points Update" }}</b>
+</div>
+<small>{{ t.created_at|date:"F d, Y" }}</small>
+<div class="pts {% if t.amount > 0 %}green{% else %}red{% endif %}">                  {% if t.amount > 0 %}+{% endif %}{{ t.amount }} pts                </div>
+</div>            {% empty %}              <div class="item">
+<div>
+<b>No Activity Yet</b>
+</div>
+<small>�</small>
+<div class="pts">0 pts</div>
+</div>            {% endfor %}          </div>            {% if promotion %}        <div class="promo">
+<h3 class="section-title" style="margin-top:0">Promotions</h3>          {% if promotion.image %}            <img src="{{ promotion.image.url }}" alt="promotion">          {% endif %}          <h5>{{ promotion.title }}</h5>
+<p>{{ promotion.description }}</p>
+<button class="btn" type="button" disabled>            Earn x{{ promotion.points_multiplier }} points on eligible bookings          </button>
+</div>            {% endif %}        </div>
+</section>
+</main>
+</div>{% include "home/includes/footer.html" %}<script src="{% static 'js/main_header.js' %}" defer>
+</script>
+<script>    window.addEventListener('load', ()=>{      document.querySelectorAll('.progress .fill').forEach(el=>{        const pct = +el.getAttribute('data-pct') || 0;        requestAnimationFrame(()=> el.style.width = pct + '%');      });    });  </script>
+<script>    const copyBtn = document.querySelector("[data-copy-referral]");    if (copyBtn) {      copyBtn.addEventListener("click", async () => {        const wrap = copyBtn.closest("[data-referral-link]");        const link = wrap ? wrap.getAttribute("data-referral-link") : "";        if (!link) return;        try {          await navigator.clipboard.writeText(link);          copyBtn.classList.add("copied");          copyBtn.textContent = "Copied!";          setTimeout(() => {            copyBtn.classList.remove("copied");            copyBtn.innerHTML = `<img src="{% static 'images/link0.png' %}" alt="">Copy Link`;          }, 1500);        } catch (err) {          window.prompt("Copy this link:", link);        }      });    }  </script>
 </body>
 </html>

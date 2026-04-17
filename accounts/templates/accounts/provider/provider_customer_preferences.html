@@ -2,17 +2,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Customer Preferences</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8">
+<title>Customer Preferences</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
-  <link rel="stylesheet" href="{% static 'css/Service_Preferences.css' %}">
-
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
+<link rel="stylesheet" href="{% static 'css/Service_Preferences.css' %}">
+<style>
     .pref-wrap {
       max-width: 1100px;
       margin: 30px auto 60px;
@@ -40,41 +42,40 @@
   {% include "home/includes/main_header.html" %}
 
   <div class="pref-wrap">
-    <a class="back-link" href="{% url 'accounts:provider_booking_detail' booking_type booking.id %}">Back to booking</a>
-    <div class="layout">
-      <main class="main">
-        <h1 class="page-title">Service Preferences</h1>
-        <p class="pref-note">Customer: {{ customer_name }} (ID {{ customer_id }})</p>
-
-        <div class="summary-card">
-          <div class="summary-top">
-            <div class="title-left">
-              <img src="{% static 'images/summary0.png' %}" alt="Summary icon" class="icon">
-              <h3 class="summary-title">Summary of preferences</h3>
-            </div>
-          </div>
-
-          <div class="summary-grid">
-            <div class="column">
-              <h4>Tasks</h4>
-              <div class="tags">
+<a class="back-link" href="{% url 'accounts:provider_booking_detail' booking_type booking.id %}">Back to booking</a>
+<div class="layout">
+<main class="main">
+<h1 class="page-title">Service Preferences</h1>
+<p class="pref-note">Customer: {{ customer_name }} (ID {{ customer_id }})</p>
+<div class="summary-card">
+<div class="summary-top">
+<div class="title-left">
+<img src="{% static 'images/summary0.png' %}" alt="Summary icon" class="icon">
+<h3 class="summary-title">Summary of preferences</h3>
+</div>
+</div>
+<div class="summary-grid">
+<div class="column">
+<h4>Tasks</h4>
+<div class="tags">
                 {% for task in selected_cleaning %}
                   <span class="tag blue">{{ task }}</span>
                 {% empty %}
                   <span class="tag yellow">No tasks selected</span>
                 {% endfor %}
               </div>
-              <p><strong>Product:</strong>
+<p>
+<strong>Product:</strong>
                 {% if selected_products %}{{ selected_products|length }} selected{% else %}0 selected{% endif %}
               </p>
-              <p><strong>Frequency:</strong>
+<p>
+<strong>Frequency:</strong>
                 {% if selected_frequency %}{{ selected_frequency }}{% else %}--{% endif %}
               </p>
-            </div>
-
-            <div class="column">
-              <h4>Priorities</h4>
-              <div class="tags">
+</div>
+<div class="column">
+<h4>Priorities</h4>
+<div class="tags">
                 {% for p in selected_priorities %}
                   <span class="tag green">{{ p }}</span>
                 {% empty %}
@@ -82,42 +83,41 @@
                 {% endfor %}
               </div>
               {% if priorities_custom %}
-                <p><strong>Custom priorities:</strong> {{ priorities_custom }}</p>
+                <p>
+<strong>Custom priorities:</strong> {{ priorities_custom }}</p>
               {% endif %}
 
               <p>
-                <strong>Lifestyle & Add-ons:</strong>
+<strong>Lifestyle & Add-ons:</strong>
                 {% if selected_lifestyle %}{{ selected_lifestyle|length }} selected{% else %}0 selected{% endif %}
               </p>
-              <p>
-                <strong>Assembly & Renovations:</strong>
+<p>
+<strong>Assembly & Renovations:</strong>
                 {% if selected_assembly %}{{ selected_assembly|length }} selected{% else %}0 selected{% endif %}
               </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="cards-grid">
-          <div class="card">
-            <div class="card-header">
-              <img src="{% static 'images/text-file0.png' %}" alt="">
-              <h3>Cleaning</h3>
-            </div>
-            <div class="tags">
+</div>
+</div>
+</div>
+<div class="cards-grid">
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/text-file0.png' %}" alt="">
+<h3>Cleaning</h3>
+</div>
+<div class="tags">
               {% for item in selected_cleaning %}
                 <span class="tag blue">{{ item }}</span>
               {% empty %}
                 <span class="tag yellow">No cleaning preferences</span>
               {% endfor %}
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <img src="{% static 'images/box0.png' %}" alt="">
-              <h3>Products</h3>
-            </div>
-            <div class="tags">
+</div>
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/box0.png' %}" alt="">
+<h3>Products</h3>
+</div>
+<div class="tags">
               {% for item in selected_products %}
                 <span class="tag sky">{{ item }}</span>
               {% empty %}
@@ -125,19 +125,20 @@
               {% endfor %}
             </div>
             {% if excluded_products %}
-              <p><strong>Excluded:</strong> {{ excluded_products|join:", " }}</p>
+              <p>
+<strong>Excluded:</strong> {{ excluded_products|join:", " }}</p>
             {% endif %}
             {% if products_custom %}
-              <p><strong>Custom products:</strong> {{ products_custom }}</p>
+              <p>
+<strong>Custom products:</strong> {{ products_custom }}</p>
             {% endif %}
           </div>
-
-          <div class="card">
-            <div class="card-header">
-              <img src="{% static 'images/clock0.png' %}" alt="">
-              <h3>Frequency</h3>
-            </div>
-            <div class="tags">
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/clock0.png' %}" alt="">
+<h3>Frequency</h3>
+</div>
+<div class="tags">
               {% if selected_frequency %}
                 <span class="tag green">{{ selected_frequency }}</span>
               {% else %}
@@ -145,54 +146,52 @@
               {% endif %}
             </div>
             {% if frequency_custom %}
-              <p><strong>Custom frequency:</strong> {{ frequency_custom }}</p>
+              <p>
+<strong>Custom frequency:</strong> {{ frequency_custom }}</p>
             {% endif %}
           </div>
-
-          <div class="card">
-            <div class="card-header">
-              <img src="{% static 'images/flag0.png' %}" alt="">
-              <h3>Priorities</h3>
-            </div>
-            <div class="tags">
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/flag0.png' %}" alt="">
+<h3>Priorities</h3>
+</div>
+<div class="tags">
               {% for item in selected_priorities %}
                 <span class="tag green">{{ item }}</span>
               {% empty %}
                 <span class="tag yellow">No priorities selected</span>
               {% endfor %}
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <img src="{% static 'images/leaf0.png' %}" alt="">
-              <h3>Lifestyle & Add-ons</h3>
-            </div>
-            <div class="tags">
+</div>
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/leaf0.png' %}" alt="">
+<h3>Lifestyle & Add-ons</h3>
+</div>
+<div class="tags">
               {% for item in selected_lifestyle %}
                 <span class="tag sky">{{ item }}</span>
               {% empty %}
                 <span class="tag yellow">No lifestyle add-ons</span>
               {% endfor %}
             </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <img src="{% static 'images/hammer0.png' %}" alt="">
-              <h3>Assembly & Renovations</h3>
-            </div>
-            <div class="tags">
+</div>
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/hammer0.png' %}" alt="">
+<h3>Assembly & Renovations</h3>
+</div>
+<div class="tags">
               {% for item in selected_assembly %}
                 <span class="tag red">{{ item }}</span>
               {% empty %}
                 <span class="tag yellow">No assembly preferences</span>
               {% endfor %}
             </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  </div>
+</div>
+</div>
+</main>
+</div>
+</div>
 </body>
 </html>

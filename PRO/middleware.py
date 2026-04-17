@@ -1,6 +1,7 @@
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib import messages
+from django.conf import settings
 from django.http import HttpResponseForbidden
 
 from accounts.models import UserAccessProfile
@@ -97,3 +98,47 @@ class LoginRedirectMessageMiddleware:
                 return message_text
 
         return ""
+
+
+class StaticAssetCacheMiddleware:
+    IMMUTABLE_EXTENSIONS = {
+        ".css",
+        ".js",
+        ".mjs",
+        ".png",
+        ".jpg",
+        ".jpeg",
+        ".webp",
+        ".gif",
+        ".svg",
+        ".ico",
+        ".woff",
+        ".woff2",
+        ".ttf",
+        ".otf",
+        ".eot",
+        ".mp3",
+        ".mp4",
+        ".webm",
+    }
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.static_url = getattr(settings, "STATIC_URL", "/static/") or "/static/"
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        path = request.path_info or ""
+        if not path.startswith(self.static_url):
+            return response
+
+        if response.has_header("Cache-Control"):
+            return response
+
+        lower_path = path.lower()
+        if any(lower_path.endswith(ext) for ext in self.IMMUTABLE_EXTENSIONS):
+            response["Cache-Control"] = "public, max-age=31536000, immutable"
+        else:
+            response["Cache-Control"] = "public, max-age=3600"
+
+        return response

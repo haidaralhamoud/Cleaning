@@ -3,202 +3,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Incident Report</title>
-  <link href="https://fonts.googleapis.com/css2family=Vesper+Libre:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/Incident_Report_order.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Incident Report</title>
+<link rel="stylesheet" href="{% static 'css/Incident_Report_order.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-
-<body>
-  {% include "home/includes/main_header.html" %}
-  <div class="layout">
-    <div class="mobile-header">
-      <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-    </div>
-
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-    <div class="main-content">
-      <div class="incident-container">
-        <section class="incident-hero">
-          <p class="incident-order">Order: #{{ incident.order }}</p>
-          <div class="incident-hero-row">
-            <h2>Incident #{{ incident.id }}</h2>
-            <span class="status-pill">{{ incident.get_status_display }}</span>
-          </div>
-          <p class="incident-hero-meta">
-            Customer: {{ incident.customer.get_full_name|default:incident.customer.username }}
-            {% if incident.involved_person %}| Provider: {{ incident.involved_person }}{% endif %}
-          </p>
-        </section>
-
-        <div class="status-panel">
-          <div class="status-chip">
-            <p class="status-label">Status</p>
-            <p class="status-value">{{ incident.get_status_display }}</p>
-          </div>
-          <div class="status-chip">
-            <p class="status-label">Submitted</p>
-            <p class="status-value">{{ incident.created_at|date:"F d, Y" }}</p>
-          </div>
-          <div class="status-chip">
-            <p class="status-label">Severity</p>
-            <p class="status-value">{{ incident.get_severity_display }}</p>
-          </div>
-        </div>
-
-        <div class="detail-stack">
-          <section class="card detail-card">
-            <header>
-              <h3>Details</h3>
-              <p class="card-subtitle">What we logged from your report</p>
-            </header>
-            <div class="detail-grid">
-              <div class="detail-item">
-                <span>Incident Type</span>
-                <strong>{{ incident.incident_type }}</strong>
-              </div>
-              <div class="detail-item">
-                <span>Date &amp; Time</span>
-                <strong>{{ incident.incident_datetime|date:"F d, Y H:i" }}</strong>
-              </div>
-              <div class="detail-item">
-                <span>Location</span>
-                <strong>{{ incident.location }}</strong>
-              </div>
-              <div class="detail-item">
-                <span>Provider / Involved</span>
-                <strong>{{ incident.involved_person|default:"-" }}</strong>
-              </div>
-              <div class="detail-item">
-                <span>Preferred Resolution</span>
-                <strong>{{ incident.preferred_resolution|default:"—" }}</strong>
-              </div>
-            </div>
-            <div class="detail-description">
-              <h4>Description</h4>
-              <p>{{ incident.description }}</p>
-            </div>
-          </section>
-
-          <section class="card communication-card">
-            <header>
-              <h3>Communications</h3>
-            </header>
-            <p class="communication-message">
-              <strong>{{ incident.customer.get_full_name|default:incident.customer.username }}</strong> &mdash; {{ incident.created_at|date:"F d, Y, H:i" }}
-            </p>
-            <p>Incident created by customer.</p>
-          </section>
-
-          <section class="card evidence-card">
-            <header>
-              <h3>Evidence</h3>
-            </header>
-            {% if incident.evidence %}
-              <div class="evidence-box">
-                <span class="evidence-icon">DOC</span>
-                <a href="{{ incident.evidence.url }}" target="_blank">View uploaded evidence</a>
-              </div>
-            {% else %}
-              <div class="evidence-box muted">No evidence uploaded</div>
-            {% endif %}
-          </section>
-          <div class="resolution-grid">
-            <section class="card resolution-card">
-              <header>
-                <h3>Resolution Timeline</h3>
-              </header>
-              <div class="timeline">
-                <div class="timeline-step complete">
-                  <span class="circle">1</span>
-                  <div class="content">
-                    <p>Reported</p>
-                    <small>{{ incident.created_at|date:"M d" }}</small>
-                  </div>
-                </div>
-                <div class="timeline-step pending">
-                  <span class="circle">2</span>
-                  <div class="content">
-                    <p>Under Review</p>
-                    <small>&mdash;</small>
-                  </div>
-                </div>
-                <div class="timeline-step pending">
-                  <span class="circle">3</span>
-                  <div class="content">
-                    <p>Action Taken</p>
-                    <small>&mdash;</small>
-                  </div>
-                </div>
-                <div class="timeline-step pending">
-                  <span class="circle">4</span>
-                  <div class="content">
-                    <p>Resolved</p>
-                    <small>&mdash;</small>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section class="card satisfaction-card">
-              <div class="satisfaction-header">
-                <div>
-                  <h3>Resolution Feedback</h3>
-                  <p class="card-subtitle">Let us know how it went</p>
-                </div>
-                <button class="close-btn" type="button" disabled aria-disabled="true">Close Incident</button>
-              </div>
-              <div id="satisfactionSection" class="satisfaction">
-                <p>Was this resolved to your satisfaction</p>
-                <div class="response-buttons">
-                  <button class="response-btn yes" type="button" disabled>Yes</button>
-                  <button class="response-btn no" type="button" disabled>No</button>
-                </div>
-                <h4>Add Comment</h4>
-                <textarea placeholder="Feedback submission will be available later." disabled></textarea>
-                <button class="save-btn" type="button" disabled>Save</button>
-              </div>
-            </section>
-          </div>
-
-
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="overlay customer-menu-overlay" id="menuOverlay"></div>
-  {% include "home/includes/footer.html" %}
-
-  <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.querySelector(".sidebar");
-    const overlay = document.getElementById("menuOverlay");
-    const arrow = document.querySelector(".menu-toggle .arrow");
-    if (toggle && sidebar) {
-      toggle.addEventListener("click", () => {
-        const open = sidebar.classList.toggle("open");
-        if (overlay) overlay.classList.toggle("show", open);
-        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";
-      });
-    }
-    if (overlay) {
-      overlay.addEventListener("click", () => {
-        if (sidebar) {
-          sidebar.classList.remove("open");
-        }
-        overlay.classList.remove("show");
-        if (arrow) arrow.style.transform = "rotate(0deg)";
-      });
-    }
-  </script>
-  <script src="{% static 'js/main_header.js' %}"></script>
+<body>  {% include "home/includes/main_header.html" %}  <div class="layout">
+<div class="mobile-header">
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
+</div>    {% include "accounts/includes/customer_sidebar.html" %}    <div class="main-content">
+<div class="incident-container">
+<section class="incident-hero">
+<p class="incident-order">Order: #{{ incident.order }}</p>
+<div class="incident-hero-row">
+<h2>Incident #{{ incident.id }}</h2>
+<span class="status-pill">{{ incident.get_status_display }}</span>
+</div>
+<p class="incident-hero-meta">            Customer: {{ incident.customer.get_full_name|default:incident.customer.username }}            {% if incident.involved_person %}| Provider: {{ incident.involved_person }}{% endif %}          </p>
+</section>
+<div class="status-panel">
+<div class="status-chip">
+<p class="status-label">Status</p>
+<p class="status-value">{{ incident.get_status_display }}</p>
+</div>
+<div class="status-chip">
+<p class="status-label">Submitted</p>
+<p class="status-value">{{ incident.created_at|date:"F d, Y" }}</p>
+</div>
+<div class="status-chip">
+<p class="status-label">Severity</p>
+<p class="status-value">{{ incident.get_severity_display }}</p>
+</div>
+</div>
+<div class="detail-stack">
+<section class="card detail-card">
+<header>
+<h3>Details</h3>
+<p class="card-subtitle">What we logged from your report</p>
+</header>
+<div class="detail-grid">
+<div class="detail-item">
+<span>Incident Type</span>
+<strong>{{ incident.incident_type }}</strong>
+</div>
+<div class="detail-item">
+<span>Date &amp; Time</span>
+<strong>{{ incident.incident_datetime|date:"F d, Y H:i" }}</strong>
+</div>
+<div class="detail-item">
+<span>Location</span>
+<strong>{{ incident.location }}</strong>
+</div>
+<div class="detail-item">
+<span>Provider / Involved</span>
+<strong>{{ incident.involved_person|default:"-" }}</strong>
+</div>
+<div class="detail-item">
+<span>Preferred Resolution</span>
+<strong>{{ incident.preferred_resolution|default:"—" }}</strong>
+</div>
+</div>
+<div class="detail-description">
+<h4>Description</h4>
+<p>{{ incident.description }}</p>
+</div>
+</section>
+<section class="card communication-card">
+<header>
+<h3>Communications</h3>
+</header>
+<p class="communication-message">
+<strong>{{ incident.customer.get_full_name|default:incident.customer.username }}</strong> &mdash; {{ incident.created_at|date:"F d, Y, H:i" }}            </p>
+<p>Incident created by customer.</p>
+</section>
+<section class="card evidence-card">
+<header>
+<h3>Evidence</h3>
+</header>            {% if incident.evidence %}              <div class="evidence-box">
+<span class="evidence-icon">DOC</span>
+<a href="{{ incident.evidence.url }}" target="_blank">View uploaded evidence</a>
+</div>            {% else %}              <div class="evidence-box muted">No evidence uploaded</div>            {% endif %}          </section>
+<div class="resolution-grid">
+<section class="card resolution-card">
+<header>
+<h3>Resolution Timeline</h3>
+</header>
+<div class="timeline">
+<div class="timeline-step complete">
+<span class="circle">1</span>
+<div class="content">
+<p>Reported</p>
+<small>{{ incident.created_at|date:"M d" }}</small>
+</div>
+</div>
+<div class="timeline-step pending">
+<span class="circle">2</span>
+<div class="content">
+<p>Under Review</p>
+<small>&mdash;</small>
+</div>
+</div>
+<div class="timeline-step pending">
+<span class="circle">3</span>
+<div class="content">
+<p>Action Taken</p>
+<small>&mdash;</small>
+</div>
+</div>
+<div class="timeline-step pending">
+<span class="circle">4</span>
+<div class="content">
+<p>Resolved</p>
+<small>&mdash;</small>
+</div>
+</div>
+</div>
+</section>
+<section class="card satisfaction-card">
+<div class="satisfaction-header">
+<div>
+<h3>Resolution Feedback</h3>
+<p class="card-subtitle">Let us know how it went</p>
+</div>
+<button class="close-btn" type="button" disabled aria-disabled="true">Close Incident</button>
+</div>
+<div id="satisfactionSection" class="satisfaction">
+<p>Was this resolved to your satisfaction</p>
+<div class="response-buttons">
+<button class="response-btn yes" type="button" disabled>Yes</button>
+<button class="response-btn no" type="button" disabled>No</button>
+</div>
+<h4>Add Comment</h4>
+<textarea placeholder="Feedback submission will be available later." disabled>
+</textarea>
+<button class="save-btn" type="button" disabled>Save</button>
+</div>
+</section>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="overlay customer-menu-overlay" id="menuOverlay">
+</div>  {% include "home/includes/footer.html" %}  <script>    const toggle = document.getElementById("menuToggle");    const sidebar = document.querySelector(".sidebar");    const overlay = document.getElementById("menuOverlay");    const arrow = document.querySelector(".menu-toggle .arrow");    if (toggle && sidebar) {      toggle.addEventListener("click", () => {        const open = sidebar.classList.toggle("open");        if (overlay) overlay.classList.toggle("show", open);        if (arrow) arrow.style.transform = open ? "rotate(180deg)" : "rotate(0deg)";      });    }    if (overlay) {      overlay.addEventListener("click", () => {        if (sidebar) {          sidebar.classList.remove("open");        }        overlay.classList.remove("show");        if (arrow) arrow.style.transform = "rotate(0deg)";      });    }  </script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

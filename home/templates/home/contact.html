@@ -1,16 +1,19 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% trans "Contact Us" %}</title>
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>{% trans "Contact Us" %}</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
 <style>
 *, *:before, *:after {
   box-sizing: border-box;
@@ -20,19 +23,18 @@
    </style>
 </head>
 <body{% if show_popup %} class="contact-popup-open"{% endif %}>
-  <!-- ' HEADER -->
+<!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
 
   <div class="contact-wrapper">
-    <div class="contact-section">
-      <h1 class="contact-title">{% trans "Contact Us" %}</h1>
-      <p class="contact-subtitle">{% trans "We love hearing from you! Let us know how we can make your experience even better." %}</p>
-
-      <div class="contact-content">
-        <!-- Left: Form -->
-    <!-- Left: Form -->
+<div class="contact-section">
+<h1 class="contact-title">{% trans "Contact Us" %}</h1>
+<p class="contact-subtitle">{% trans "We love hearing from you! Let us know how we can make your experience even better." %}</p>
+<div class="contact-content">
+<!-- Left: Form -->
+<!-- Left: Form -->
 <div class="contact-form">
-  <form method="POST" enctype="multipart/form-data">
+<form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -42,115 +44,108 @@
     {% endif %}
 
     <div class="form-row">
-      <div class="form-group">
-        <label>{% trans "First Name" %} <span>*</span></label>
+<div class="form-group">
+<label>{% trans "First Name" %} <span>*</span>
+</label>
         {{ form.first_name }}
         {{ form.first_name.errors }}
       </div>
-
-      <div class="form-group">
-        <label>{% trans "Last Name" %} <span>*</span></label>
+<div class="form-group">
+<label>{% trans "Last Name" %} <span>*</span>
+</label>
         {{ form.last_name }}
         {{ form.last_name.errors }}
       </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>{% trans "Email" %} <span>*</span></label>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>{% trans "Email" %} <span>*</span>
+</label>
         {{ form.email }}
         {{ form.email.errors }}
       </div>
-
-      <div class="form-group">
-        <label>{% trans "Country Code" %} <span>*</span></label>
+<div class="form-group">
+<label>{% trans "Country Code" %} <span>*</span>
+</label>
         {{ form.country_code }}
         {{ form.country_code.errors }}
       </div>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>{% trans "Phone Number" %}</label>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>{% trans "Phone Number" %}</label>
         {{ form.phone }}
         {{ form.phone.errors }}
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>{% trans "Message" %}</label>
+</div>
+<div class="form-group">
+<label>{% trans "Message" %}</label>
       {{ form.message }}
       {{ form.message.errors }}
     </div>
-
-    <div class="form-row">
-      <div class="form-group">
-        <label>{% trans "Inquiry Type" %}</label>
+<div class="form-row">
+<div class="form-group">
+<label>{% trans "Inquiry Type" %}</label>
         {{ form.inquiry_type }}
         {{ form.inquiry_type.errors }}
       </div>
-
-      <div class="form-group">
-        <label>{% trans "Attach file" %}</label>
+<div class="form-group">
+<label>{% trans "Attach file" %}</label>
         {{ form.file }}
         {{ form.file.errors }}
       </div>
-    </div>
-
-    <div class="form-group">
-      <label>{% trans "Preferred Contact Method" %}</label>
+</div>
+<div class="form-group">
+<label>{% trans "Preferred Contact Method" %}</label>
       {{ form.preferred_method }}
       {{ form.preferred_method.errors }}
     </div>
-
-    <div class="agreement">
-      <label>
-        <input type="checkbox" id="agree_terms" />
+<div class="agreement">
+<label>
+<input type="checkbox" id="agree_terms" />
         {% trans "I agree to the Processing of my data in accordance with the" %}
         <a href="{% url 'home:Privacy_Policy' %}">{% trans "privacy policy" %}</a>
-      </label>
-    </div>
-
-<button class="send-btn" id="sendMessageBtn" type="button" onclick="validateAndSubmit()" disabled>{% trans "Send Message" %}</button>
-  </form>
+</label>
 </div>
-
-
-        <!-- Right: Contact Info -->
-        <div class="contact-info">
-          <h2>{% trans "Our Contact Information" %}</h2>
-          <p>&#128205; {{ contact_address }}</p>
+<button class="send-btn" id="sendMessageBtn" type="button" onclick="validateAndSubmit()" disabled>{% trans "Send Message" %}</button>
+</form>
+</div>
+<!-- Right: Contact Info -->
+<div class="contact-info">
+<h2>{% trans "Our Contact Information" %}</h2>
+<p>&#128205; {{ contact_address }}</p>
           {% if contact_phone %}
           <p>&#128222; {{ contact_phone }}</p>
           {% endif %}
           <p>&#128231; {{ support_email }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
+</div>
+</div>
+</div>
   {% if show_popup %}
   <div class="contact-success-overlay" id="contactSuccessPopup" aria-modal="true" role="dialog">
-    <div class="contact-success-card">
-      <div class="contact-success-icon" aria-hidden="true">
-        <span class="contact-success-icon-ring">
-          <span class="contact-success-icon-core">
-            <span class="contact-success-check"></span>
-          </span>
-        </span>
-      </div>
-      <h2 class="contact-success-title">{% trans "Thank You! We've Got Your Message" %}</h2>
-      <p class="contact-success-text">
+<div class="contact-success-card">
+<div class="contact-success-icon" aria-hidden="true">
+<span class="contact-success-icon-ring">
+<span class="contact-success-icon-core">
+<span class="contact-success-check">
+</span>
+</span>
+</span>
+</div>
+<h2 class="contact-success-title">{% trans "Thank You! We've Got Your Message" %}</h2>
+<p class="contact-success-text">
         {% trans "We appreciate you reaching out to Hembla experten. Our team will review your message and get back to you within 24 hours." %}
       </p>
-      <p class="contact-success-text">
+<p class="contact-success-text">
         {% trans "In the meantime, feel free to explore our services or browse our FAQs for quick answers." %}
       </p>
-      <div class="contact-success-actions">
-        <a href="{% url 'home:home' %}" class="contact-success-button">{% trans "Back to Home" %}</a>
-        <a href="{% url 'home:all_services_private' %}" class="contact-success-button">{% trans "Explore Services" %}</a>
-      </div>
-    </div>
-  </div>
+<div class="contact-success-actions">
+<a href="{% url 'home:home' %}" class="contact-success-button">{% trans "Back to Home" %}</a>
+<a href="{% url 'home:all_services_private' %}" class="contact-success-button">{% trans "Explore Services" %}</a>
+</div>
+</div>
+</div>
   {% endif %}
 {% include "home/includes/footer.html" %}
 
@@ -189,7 +184,7 @@ function validateAndSubmit() {
         return;
     }
 
-    // ط¥ط°ط§ ظƒظ„ط´ظٹ طھظ…ط§ظ… ' ط£ط±ط³ظ„ ط§ظ„ظپظˆط±ظ…
+    // إذا كلشي تمام ' أرسل الفورم
     document.querySelector("form").submit();
 }
 
@@ -203,8 +198,8 @@ if (agreeBox && sendBtn) {
   toggleBtn();
 }
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

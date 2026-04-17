@@ -1,31 +1,31 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Sign Up | Hembla experten</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Sign Up | Hembla experten</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/sign_up.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/sign_up.css' %}">
 </head>
 <body>
-
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
 <main class="signup-container">
-  <div class="signup-box">
-    <img src="{% static 'images/add-user-male0.png'%}" alt="Add User Icon" class="add-icon">
-
-    <h1 class="title">Get started with Hembla experten</h1>
-    <p class="subtitle">Create an account to access our services</p>
-
-    <!-- FORM START -->
-    <form method="POST" enctype="multipart/form-data" novalidate>
+<div class="signup-box">
+<img src="{% static 'images/add-user-male0.png'%}" alt="Add User Icon" class="add-icon">
+<h1 class="title">Get started with Hembla experten</h1>
+<p class="subtitle">Create an account to access our services</p>
+<!-- FORM START -->
+<form method="POST" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       {% if next %}
         <input type="hidden" name="next" value="{{ next }}">
@@ -42,169 +42,166 @@
         </div>
       {% endif %}
 
-      <!-- ط§ظ„ط­ظ‚ظ„ ط§ظ„ظ…ط®ظپظٹ ط§ظ„ط°ظٹ ظٹظˆظ„ط¯ظ‡ Django ظپظ‚ط· -->
+      <!-- الحقل المخفي الذي يولده Django فقط -->
       {{ form.custom_addons }}
 
       <div class="form-group">
-        <label>Personal identity number <span class="req">*</span></label>
+<label>Personal identity number <span class="req">*</span>
+</label>
         {{ form.personal_identity_number }}
         {% if form.personal_identity_number.errors %}<div class="field-error">{{ form.personal_identity_number.errors|striptags }}</div>{% endif %}
       </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>First Name <span class="req">*</span></label>
+<div class="form-row">
+<div class="form-group">
+<label>First Name <span class="req">*</span>
+</label>
           {{ form.first_name }}
           {% if form.first_name.errors %}<div class="field-error">{{ form.first_name.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="form-group">
-          <label>Last Name <span class="req">*</span></label>
+<div class="form-group">
+<label>Last Name <span class="req">*</span>
+</label>
           {{ form.last_name }}
           {% if form.last_name.errors %}<div class="field-error">{{ form.last_name.errors|striptags }}</div>{% endif %}
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Phone Number <span class="req">*</span></label>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Phone Number <span class="req">*</span>
+</label>
           {{ form.phone }}
           {% if form.phone.errors %}<div class="field-error">{{ form.phone.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="form-group">
-          <label>Email Address <span class="req">*</span></label>
+<div class="form-group">
+<label>Email Address <span class="req">*</span>
+</label>
           {{ form.email }}
           {% if form.email.errors %}<div class="field-error">{{ form.email.errors|striptags }}</div>{% endif %}
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Country <span class="req">*</span></label>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Country <span class="req">*</span>
+</label>
           {{ form.country }}
           {% if form.country.errors %}<div class="field-error">{{ form.country.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="form-group">
-          <label>City <span class="req">*</span></label>
+<div class="form-group">
+<label>City <span class="req">*</span>
+</label>
           {{ form.city }}
           {% if form.city.errors %}<div class="field-error">{{ form.city.errors|striptags }}</div>{% endif %}
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Region / State</label>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Region / State</label>
           {{ form.region }}
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group small">
-          <label>Postal Code <span class="req">*</span></label>
+</div>
+<div class="form-row">
+<div class="form-group small">
+<label>Postal Code <span class="req">*</span>
+</label>
           {{ form.postal_code }}
           {% if form.postal_code.errors %}<div class="field-error">{{ form.postal_code.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="form-group small">
-          <label>House Num <span class="req">*</span></label>
+<div class="form-group small">
+<label>House Num <span class="req">*</span>
+</label>
           {{ form.house_num }}
           {% if form.house_num.errors %}<div class="field-error">{{ form.house_num.errors|striptags }}</div>{% endif %}
         </div>
-        <div class="form-group wide">
-          <label>Full Address <span class="req">*</span></label>
+<div class="form-group wide">
+<label>Full Address <span class="req">*</span>
+</label>
           {{ form.full_address }}
           {% if form.full_address.errors %}<div class="field-error">{{ form.full_address.errors|striptags }}</div>{% endif %}
         </div>
-      </div>
-
-      <h3 class="section-title">Access Details</h3>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Contact Name</label>
+</div>
+<h3 class="section-title">Access Details</h3>
+<div class="form-row">
+<div class="form-group">
+<label>Contact Name</label>
           {{ form.contact_name }}
         </div>
-        <div class="form-group">
-          <label>Contact Phone</label>
+<div class="form-group">
+<label>Contact Phone</label>
           {{ form.contact_phone }}
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Entry Code</label>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label>Entry Code</label>
           {{ form.entry_code }}
         </div>
-        <div class="form-group">
-          <label>Parking Notes</label>
+<div class="form-group">
+<label>Parking Notes</label>
           {{ form.parking_notes }}
         </div>
-      </div>
-
-      <h3 class="section-title">Desired Services</h3>
-
-      <div class="desired-services-grid">
+</div>
+<h3 class="section-title">Desired Services</h3>
+<div class="desired-services-grid">
         {% for service in form.desired_services %}
           <label class="checkbox-item service-card">
             {{ service.tag }}
             <span>{{ service.choice_label }}</span>
-          </label>
+</label>
         {% endfor %}
 
         <div class="service-card service-card--addons">
-          <label class="checkbox-item checkbox-item--addons">
-            <input type="checkbox" id="addonsToggle" data-optional="true">
-            <span>Special Add-Ons</span>
-          </label>
-          <input type="text" id="addonInput" placeholder="Add-Ons" data-optional="true">
-        </div>
-      </div>
-
-      <!-- ADD ONS INPUT -->
-      <div class="addons-wrapper">
-        <div class="addons-field">
-          <button type="button" id="addAddonBtn" class="add-btn">Add</button>
-        </div>
-      </div>
-
-      <div class="tags-container" id="tagsContainer"></div>
-
-      <div class="form-group">
-        <label>Optional Note</label>
+<label class="checkbox-item checkbox-item--addons">
+<input type="checkbox" id="addonsToggle" data-optional="true">
+<span>Special Add-Ons</span>
+</label>
+<input type="text" id="addonInput" placeholder="Add-Ons" data-optional="true">
+</div>
+</div>
+<!-- ADD ONS INPUT -->
+<div class="addons-wrapper">
+<div class="addons-field">
+<button type="button" id="addAddonBtn" class="add-btn">Add</button>
+</div>
+</div>
+<div class="tags-container" id="tagsContainer">
+</div>
+<div class="form-group">
+<label>Optional Note</label>
         {{ form.optional_note }}
       </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label>Preferred Language</label>
+<div class="form-row">
+<div class="form-group">
+<label>Preferred Language</label>
           {{ form.preferred_language }}
         </div>
-        <div class="form-group">
-          <label>Upload Profile Photo <span class="req">*</span></label>
-          <div class="file-input">
-            <input type="file" name="profile_photo" id="id_profile_photo" class="file-input__field">
-            <label for="id_profile_photo" class="file-input__label">
-              <span class="file-input__cta">Choose File</span>
-              <span class="file-input__name" id="profilePhotoName">No file chosen</span>
-            </label>
-          </div>
+<div class="form-group">
+<label>Upload Profile Photo <span class="req">*</span>
+</label>
+<div class="file-input">
+<input type="file" name="profile_photo" id="id_profile_photo" class="file-input__field">
+<label for="id_profile_photo" class="file-input__label">
+<span class="file-input__cta">Choose File</span>
+<span class="file-input__name" id="profilePhotoName">No file chosen</span>
+</label>
+</div>
           {% if form.profile_photo.errors %}<div class="field-error">{{ form.profile_photo.errors|striptags }}</div>{% endif %}
         </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group password-group">
-          <label>Password <span class="req">*</span></label>
+</div>
+<div class="form-row">
+<div class="form-group password-group">
+<label>Password <span class="req">*</span>
+</label>
           {{ form.password }}
           {% if form.password.errors %}<div class="field-error">{{ form.password.errors|striptags }}</div>{% endif %}
         </div>
-
-        <div class="form-group password-group">
-          <label>Confirm Password <span class="req">*</span></label>
+<div class="form-group password-group">
+<label>Confirm Password <span class="req">*</span>
+</label>
           {{ form.confirm_password }}
           {% if form.confirm_password.errors %}<div class="field-error">{{ form.confirm_password.errors|striptags }}</div>{% endif %}
         </div>
-      </div>
-
-      <div class="checkbox-agree">
+</div>
+<div class="checkbox-agree">
         {{ form.accepted_terms }}
         <label for="agreeTerms">
           I agree to the
@@ -212,16 +209,16 @@
           and
           <a href="{% url 'home:Privacy_Policy' %}" class="legal-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.
         </label>
-      </div>
+</div>
       {% if form.accepted_terms.errors %}<div class="field-error field-error--checkbox">{{ form.accepted_terms.errors|striptags }}</div>{% endif %}
 
       <button type="submit" class="btn-submit" id="signupSubmit">Create Account</button>
-
-      <p class="login-text">Already have an account <a href="{% url 'login' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Log in</a></p>
-    </form>
-    <!-- FORM END -->
-
-  </div>
+<p class="login-text">Already have an account <a href="{% url 'login' %}
+{% if next %}?next={{ next|urlencode }}{% endif %}">Log in</a>
+</p>
+</form>
+<!-- FORM END -->
+</div>
 </main>
 
 {% include "home/includes/footer.html" %}
@@ -276,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tag.textContent = value;
 
         const close = document.createElement("span");
-        close.textContent = "×";
+        close.textContent = "�";
         close.className = "tag-close";
         close.onclick = () => {
             addonsList = addonsList.filter(v => v !== value);
@@ -307,7 +304,6 @@ document.addEventListener("DOMContentLoaded", () => {
     syncAddonState();
 });
 </script>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const agree = document.getElementById("agreeTerms") || document.getElementById("id_accepted_terms");
@@ -325,7 +321,6 @@ document.addEventListener("DOMContentLoaded", () => {
   agree.addEventListener("change", updateState);
 });
 </script>
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const personalNumberInput = document.getElementById("id_personal_identity_number");
@@ -361,8 +356,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const firstError = document.querySelector(".alert-error, .field-error");

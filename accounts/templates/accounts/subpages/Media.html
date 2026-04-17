@@ -3,275 +3,131 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Customer Profile - Media Gallery</title>
-
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/Media.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Customer Profile - Media Gallery</title>
+<link rel="stylesheet" href="{% static 'css/Media.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-
 <body>
-
-    <!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-  <div class="layout">
-
-    <!-- ===== MOBILE HEADER ===== -->
-    <div class="mobile-header">
-      <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-        <span class="arrow">&#8250;</span>
-      </button>
-
-    </div>
-
-   <!-- Sidebar -->
-
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="content">
-      <h1 class="page-title">Media Gallery</h1>
-
-      {% if booking %}
-      <div class="media-actions">
-        <a class="back-link" href="{% url 'accounts:view_service_details' booking_type booking.id %}">
-          <span class="back-ico">&lsaquo;</span>
-          Back to Service Details
-        </a>
-      </div>
-      {% endif %}
-
-      <div class="service-meta">
-        <div class="service-name">
-          {% if booking %}
-            {{ booking_type|title }} Booking #{{ booking.id }}
-          {% else %}
-            Media Gallery
-          {% endif %}
-        </div>
-        <div class="date">
-          {% if booking and booking.created_at %}
-            {{ booking.created_at|date:"F d, Y" }}
-          {% else %}
-            &mdash;
-          {% endif %}
-        </div>
-        <p class="info-text">Uploaded media is visible only to you and your assigned provider</p>
-      </div>
-      {% if not booking %}
-        <p class="info-text">Open this page from a booking to upload media.</p>
-      {% endif %}
-
-      <!-- ===== BEFORE ===== -->
-      <div class="card media-section">
-        <div class="section-header"><h3>Before</h3></div>
-        <div class="slider">
-          <button class="nav prev">&lsaquo;</button>
-          <div class="track">
-            {% for media in media_by_phase.before %}
-              <div class="media-item">
-                <img src="{{ media.file.url }}" alt="Before photo">
-                <form method="post" class="delete-media-form">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="media_id" value="{{ media.id }}">
-                  <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
-                </form>
-              </div>
-            {% empty %}
-              <img src="{% static 'images/frame-16865526140.svg' %}" alt="">
-            {% endfor %}
-          </div>
-          <button class="nav next">&rsaquo;</button>
-        </div>
-        {% if booking %}
-          <form method="post" enctype="multipart/form-data" class="add-media-form">
-            {% csrf_token %}
-            <input type="hidden" name="phase" value="before">
-            <label class="file-pill">
-              <input type="file" name="file" accept="image/*" required>
-              <span>Choose file</span>
-            </label>
-            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
-          </form>
-        {% endif %}
-      </div>
-
-      <!-- ===== DURING ===== -->
-      <div class="card media-section">
-        <div class="section-header"><h3>During</h3></div>
-        <div class="slider">
-          <button class="nav prev">&lsaquo;</button>
-          <div class="track">
-            {% for media in media_by_phase.during %}
-              <div class="media-item">
-                <img src="{{ media.file.url }}" alt="During photo">
-                <form method="post" class="delete-media-form">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="media_id" value="{{ media.id }}">
-                  <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
-                </form>
-              </div>
-            {% empty %}
-              <img src="{% static 'images/frame-16865526141.svg' %}" alt="">
-            {% endfor %}
-          </div>
-          <button class="nav next">&rsaquo;</button>
-        </div>
-        {% if booking %}
-          <form method="post" enctype="multipart/form-data" class="add-media-form">
-            {% csrf_token %}
-            <input type="hidden" name="phase" value="during">
-            <label class="file-pill">
-              <input type="file" name="file" accept="image/*" required>
-              <span>Choose file</span>
-            </label>
-            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
-          </form>
-        {% endif %}
-      </div>
-
-      <!-- ===== AFTER ===== -->
-      <div class="card media-section">
-        <div class="section-header"><h3>After</h3></div>
-        <div class="slider">
-          <button class="nav prev">&lsaquo;</button>
-          <div class="track">
-            {% for media in media_by_phase.after %}
-              <div class="media-item">
-                <img src="{{ media.file.url }}" alt="After photo">
-                <form method="post" class="delete-media-form">
-                  {% csrf_token %}
-                  <input type="hidden" name="action" value="delete">
-                  <input type="hidden" name="media_id" value="{{ media.id }}">
-                  <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
-                </form>
-              </div>
-            {% empty %}
-              <img src="{% static 'images/frame-16865526142.svg' %}" alt="">
-            {% endfor %}
-          </div>
-          <button class="nav next">&rsaquo;</button>
-        </div>
-        {% if booking %}
-          <form method="post" enctype="multipart/form-data" class="add-media-form">
-            {% csrf_token %}
-            <input type="hidden" name="phase" value="after">
-            <label class="file-pill">
-              <input type="file" name="file" accept="image/*" required>
-              <span>Choose file</span>
-            </label>
-            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
-          </form>
-        {% endif %}
-      </div>
-
-      <!-- ===== ISSUES ===== -->
-      <div class="card issues-card">
-        <div class="section-header">
-          <h3>Issues</h3>
-          <button class="btn btn-primary">Report Issues</button>
-        </div>
-        <div class="issues-grid">
-          {% for media in media_by_phase.issue %}
-            <div class="media-item">
-              <img src="{{ media.file.url }}" alt="Issue">
-              <form method="post" class="delete-media-form">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="delete">
-                <input type="hidden" name="media_id" value="{{ media.id }}">
-                <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
-              </form>
-            </div>
-          {% empty %}
-            <img src="{% static 'images/frame-16865526200.svg' %}" alt="Issue 1">
-          {% endfor %}
-        </div>
-        {% if booking %}
-          <form method="post" enctype="multipart/form-data" class="add-media-form">
-            {% csrf_token %}
-            <input type="hidden" name="phase" value="issue">
-            <label class="file-pill">
-              <input type="file" name="file" accept="image/*" required>
-              <span>Choose file</span>
-            </label>
-            <button type="submit" class="btn btn-primary add-btn">Add Media</button>
-          </form>
-        {% endif %}
-      </div>
-
-    </main>
-  </div>
-{% include "home/includes/footer.html" %}
-
-<div class="image-lightbox" id="imageLightbox">
-  <div class="lightbox-content">
-    <button class="lightbox-close" id="lightboxClose">&times;</button>
-    <img id="lightboxImage" alt="Media preview">
-  </div>
+<!-- HEADER -->{% include "home/includes/main_header.html" %}  <div class="layout">
+<!-- ===== MOBILE HEADER ===== -->
+<div class="mobile-header">
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
 </div>
-
-<div class="overlay customer-menu-overlay" id="menuOverlay"></div>
-
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.getElementById("menuOverlay");
-  const arrow = document.querySelector(".customer-menu-toggle .arrow");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-    if (arrow) arrow.innerHTML = open &lsaquo; "&#8249;" : "&#8250;";
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-      if (arrow) arrow.innerHTML = "&#8250;";
-    });
-  }
-})();
+<!-- Sidebar -->    {% include "accounts/includes/customer_sidebar.html" %}    <!-- ===== MAIN CONTENT ===== -->
+<main class="content">
+<h1 class="page-title">Media Gallery</h1>      {% if booking %}      <div class="media-actions">
+<a class="back-link" href="{% url 'accounts:view_service_details' booking_type booking.id %}">
+<span class="back-ico">&lsaquo;</span>          Back to Service Details        </a>
+</div>      {% endif %}      <div class="service-meta">
+<div class="service-name">          {% if booking %}            {{ booking_type|title }} Booking #{{ booking.id }}          {% else %}            Media Gallery          {% endif %}        </div>
+<div class="date">          {% if booking and booking.created_at %}            {{ booking.created_at|date:"F d, Y" }}          {% else %}            &mdash;          {% endif %}        </div>
+<p class="info-text">Uploaded media is visible only to you and your assigned provider</p>
+</div>      {% if not booking %}        <p class="info-text">Open this page from a booking to upload media.</p>      {% endif %}      <!-- ===== BEFORE ===== -->
+<div class="card media-section">
+<div class="section-header">
+<h3>Before</h3>
+</div>
+<div class="slider">
+<button class="nav prev">&lsaquo;</button>
+<div class="track">            {% for media in media_by_phase.before %}              <div class="media-item">
+<img src="{{ media.file.url }}" alt="Before photo">
+<form method="post" class="delete-media-form">                  {% csrf_token %}                  <input type="hidden" name="action" value="delete">
+<input type="hidden" name="media_id" value="{{ media.id }}">
+<button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+</form>
+</div>            {% empty %}              <img src="{% static 'images/frame-16865526140.svg' %}" alt="">            {% endfor %}          </div>
+<button class="nav next">&rsaquo;</button>
+</div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="before">
+<label class="file-pill">
+<input type="file" name="file" accept="image/*" required>
+<span>Choose file</span>
+</label>
+<button type="submit" class="btn btn-primary add-btn">Add Media</button>
+</form>        {% endif %}      </div>
+<!-- ===== DURING ===== -->
+<div class="card media-section">
+<div class="section-header">
+<h3>During</h3>
+</div>
+<div class="slider">
+<button class="nav prev">&lsaquo;</button>
+<div class="track">            {% for media in media_by_phase.during %}              <div class="media-item">
+<img src="{{ media.file.url }}" alt="During photo">
+<form method="post" class="delete-media-form">                  {% csrf_token %}                  <input type="hidden" name="action" value="delete">
+<input type="hidden" name="media_id" value="{{ media.id }}">
+<button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+</form>
+</div>            {% empty %}              <img src="{% static 'images/frame-16865526141.svg' %}" alt="">            {% endfor %}          </div>
+<button class="nav next">&rsaquo;</button>
+</div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="during">
+<label class="file-pill">
+<input type="file" name="file" accept="image/*" required>
+<span>Choose file</span>
+</label>
+<button type="submit" class="btn btn-primary add-btn">Add Media</button>
+</form>        {% endif %}      </div>
+<!-- ===== AFTER ===== -->
+<div class="card media-section">
+<div class="section-header">
+<h3>After</h3>
+</div>
+<div class="slider">
+<button class="nav prev">&lsaquo;</button>
+<div class="track">            {% for media in media_by_phase.after %}              <div class="media-item">
+<img src="{{ media.file.url }}" alt="After photo">
+<form method="post" class="delete-media-form">                  {% csrf_token %}                  <input type="hidden" name="action" value="delete">
+<input type="hidden" name="media_id" value="{{ media.id }}">
+<button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+</form>
+</div>            {% empty %}              <img src="{% static 'images/frame-16865526142.svg' %}" alt="">            {% endfor %}          </div>
+<button class="nav next">&rsaquo;</button>
+</div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="after">
+<label class="file-pill">
+<input type="file" name="file" accept="image/*" required>
+<span>Choose file</span>
+</label>
+<button type="submit" class="btn btn-primary add-btn">Add Media</button>
+</form>        {% endif %}      </div>
+<!-- ===== ISSUES ===== -->
+<div class="card issues-card">
+<div class="section-header">
+<h3>Issues</h3>
+<button class="btn btn-primary">Report Issues</button>
+</div>
+<div class="issues-grid">          {% for media in media_by_phase.issue %}            <div class="media-item">
+<img src="{{ media.file.url }}" alt="Issue">
+<form method="post" class="delete-media-form">                {% csrf_token %}                <input type="hidden" name="action" value="delete">
+<input type="hidden" name="media_id" value="{{ media.id }}">
+<button type="submit" class="delete-media-btn" title="Delete">&times;</button>
+</form>
+</div>          {% empty %}            <img src="{% static 'images/frame-16865526200.svg' %}" alt="Issue 1">          {% endfor %}        </div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="issue">
+<label class="file-pill">
+<input type="file" name="file" accept="image/*" required>
+<span>Choose file</span>
+</label>
+<button type="submit" class="btn btn-primary add-btn">Add Media</button>
+</form>        {% endif %}      </div>
+</main>
+</div>{% include "home/includes/footer.html" %}<div class="image-lightbox" id="imageLightbox">
+<div class="lightbox-content">
+<button class="lightbox-close" id="lightboxClose">&times;</button>
+<img id="lightboxImage" alt="Media preview">
+</div>
+</div>
+<div class="overlay customer-menu-overlay" id="menuOverlay">
+</div>
+<script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.getElementById("menuOverlay");  const arrow = document.querySelector(".customer-menu-toggle .arrow");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);    if (arrow) arrow.innerHTML = open &lsaquo; "&#8249;" : "&#8250;";  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");      if (arrow) arrow.innerHTML = "&#8250;";    });  }})();</script>
+<script>(function () {  const lightbox = document.getElementById("imageLightbox");  const lightboxImg = document.getElementById("lightboxImage");  const lightboxClose = document.getElementById("lightboxClose");  document.querySelectorAll(".media-section .track img, .issues-grid img").forEach(img => {    img.addEventListener("click", () => {      if (!lightbox || !lightboxImg) return;      lightboxImg.src = img.src;      lightbox.classList.add("show");    });  });  function closeLightbox() {    if (!lightbox) return;    lightbox.classList.remove("show");    if (lightboxImg) lightboxImg.src = "";  }  if (lightboxClose) {    lightboxClose.addEventListener("click", closeLightbox);  }  if (lightbox) {    lightbox.addEventListener("click", (e) => {      if (e.target === lightbox) closeLightbox();    });  }})();</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-<script>
-(function () {
-  const lightbox = document.getElementById("imageLightbox");
-  const lightboxImg = document.getElementById("lightboxImage");
-  const lightboxClose = document.getElementById("lightboxClose");
-
-  document.querySelectorAll(".media-section .track img, .issues-grid img").forEach(img => {
-    img.addEventListener("click", () => {
-      if (!lightbox || !lightboxImg) return;
-      lightboxImg.src = img.src;
-      lightbox.classList.add("show");
-    });
-  });
-
-  function closeLightbox() {
-    if (!lightbox) return;
-    lightbox.classList.remove("show");
-    if (lightboxImg) lightboxImg.src = "";
-  }
-
-  if (lightboxClose) {
-    lightboxClose.addEventListener("click", closeLightbox);
-  }
-
-  if (lightbox) {
-    lightbox.addEventListener("click", (e) => {
-      if (e.target === lightbox) closeLightbox();
-    });
-  }
-})();
-</script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

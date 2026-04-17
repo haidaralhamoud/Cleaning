@@ -4,11 +4,14 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <title>Booking Schedule</title>
 
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+{% include 'home/includes/font_links.html' %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/private_scheduale.css' %}">
 <style>
 .schedule-messages {
@@ -36,239 +39,253 @@
   {% csrf_token %}
 
   <input type="hidden" name="appointment_date" id="appointment_date">
-  <input type="hidden" name="appointment_time_window" id="appointment_time_window">
-  <input type="hidden" name="day_work_best" id="day_work_best">
-  <input type="hidden" name="End_Date" id="End_Date">
-  <input type="hidden" name="frequency_type" id="frequency_type">
-  <input type="hidden" name="special_timing_requests" id="special_timing_requests">
-  <input type="hidden" name="schedule_mode" id="schedule_mode" value="">
-  <input type="hidden" name="schedules_json" id="schedules_json">
-  <input type="hidden" name="use_rot" id="schedule_use_rot_input" value="{% if booking.use_rot %}1{% else %}0{% endif %}">
-  <input type="hidden" name="use_reward" id="schedule_use_reward_input" value="{% if reward_context.use_reward %}1{% else %}0{% endif %}">
-
-  <div id="scheduleMessages" class="schedule-messages" {% if not messages %}hidden{% endif %}>
+<input type="hidden" name="appointment_time_window" id="appointment_time_window">
+<input type="hidden" name="day_work_best" id="day_work_best">
+<input type="hidden" name="End_Date" id="End_Date">
+<input type="hidden" name="frequency_type" id="frequency_type">
+<input type="hidden" name="special_timing_requests" id="special_timing_requests">
+<input type="hidden" name="schedule_mode" id="schedule_mode" value="">
+<input type="hidden" name="schedules_json" id="schedules_json">
+<input type="hidden" name="use_rot" id="schedule_use_rot_input" value="{% if booking.use_rot %}1{% else %}0{% endif %}">
+<input type="hidden" name="use_reward" id="schedule_use_reward_input" value="{% if reward_context.use_reward %}1{% else %}0{% endif %}">
+<div id="scheduleMessages" class="schedule-messages" {% if not messages %}hidden{% endif %}>
     {% if messages %}
       {% for message in messages %}
         <div class="schedule-message schedule-message-error">{{ message }}</div>
       {% endfor %}
     {% endif %}
   </div>
-
-  <div class="container">
-    <div class="left">
-      <div class="step-title">Step 3 of 4</div>
-      <div class="progress"></div>
-
-      <h2>When would you like your services</h2>
+<div class="container">
+<div class="left">
+<div class="step-title">Step 3 of 4</div>
+<div class="progress">
+</div>
+<h2>When would you like your services</h2>
 
       {% if services|length > 1 %}
         <p class="mode-caption">How would you like to schedule your services</p>
-
-        <div class="mode-row">
-            <div class="mode-card" data-mode="same">
-              <div class="mode-title">Use the same schedule for all services</div>
-              <small>We will apply this date, time window and frequency to every service in your cart.</small>
-              <span class="badge">Fast and easy</span>
-            </div>
-            <div class="mode-card" data-mode="per_service">
-              <div class="mode-title">Set a separate schedule for each service</div>
-              <small>Customize date and timing individually for each service.</small>
-              <span class="badge">More control</span>
-            </div>
-        </div>
+<div class="mode-row">
+<div class="mode-card" data-mode="same">
+<div class="mode-title">Use the same schedule for all services</div>
+<small>We will apply this date, time window and frequency to every service in your cart.</small>
+<span class="badge">Fast and easy</span>
+</div>
+<div class="mode-card" data-mode="per_service">
+<div class="mode-title">Set a separate schedule for each service</div>
+<small>Customize date and timing individually for each service.</small>
+<span class="badge">More control</span>
+</div>
+</div>
       {% else %}
         <input type="hidden" id="schedule_mode" name="schedule_mode" value="same">
       {% endif %}
 
       <div id="sameScheduleArea" class="hidden">
-        <p class="section-caption">Schedule for all services:</p>
-
-        <div class="q-row">
-          <div class="q-col">
-            <div class="calendar-container">
-              <div class="calendar-header">
-                <div class="month-nav" id="prevMonth">&#10094;</div>
-                <div class="month-title" id="monthTitle">Month</div>
-                <div class="month-nav" id="nextMonth">&#10095;</div>
-              </div>
-              <div class="days-of-week">
-                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
-              </div>
-              <div class="days-grid" id="calendarDays"></div>
-            </div>
-          </div>
-
-          <div class="q-col">
-            <div class="time-box">
-              <h3>Q2. Choose a Time Window</h3>
-              <div class="time-option" data-time="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</div>
-              <div class="time-option" data-time="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</div>
-              <div class="time-option" data-time="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</div>
-              <div class="time-option" data-time="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</div>
-              <div class="time-option" data-time="Night (22:00 - 06:00)">Night (22:00 - 06:00)</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="request-box">
-          <h3>Q3. Special Timing Requests (optional)</h3>
-          <textarea id="specialRequest" placeholder="Tell us if there is anything we should know..."></textarea>
-        </div>
-
-        <h2>Schedule and Frequency</h2>
-        <div class="freq-row">
-          <div class="freq-col">
-            <h3>Q1. How often would you like this service</h3>
-            <div class="freq-btn" data-freq="weekly">Weekly <span class="save-tag"></span></div>
-            <div class="freq-btn" data-freq="biweekly">Every 2 weeks <span class="save-tag"></span></div>
-            <div class="freq-btn" data-freq="monthly">Monthly <span class="save-tag"></span></div>
-          </div>
-
-          <div class="freq-col">
-            <h3>Q2. Which day(s) work best for you</h3>
-            <div class="days-grid2" id="weekDays">
-              <label class="day-check weekend"><input type="checkbox" data-day="Mon"/> Monday</label>
-              <label class="day-check"><input type="checkbox" data-day="Tue"/> Tuesday</label>
-              <label class="day-check"><input type="checkbox" data-day="Wed"/> Wednesday</label>
-              <label class="day-check"><input type="checkbox" data-day="Thu"/> Thursday</label>
-              <label class="day-check weekend"><input type="checkbox" data-day="Fri"/> Friday</label>
-              <label class="day-check weekend"><input type="checkbox" data-day="Sat"/> Saturday</label>
-              <label class="day-check weekend"><input type="checkbox" data-day="Sun"/> Sunday</label>
-            </div>
-          </div>
-        </div>
-
-        <div class="end-date">
-          <h3>Q3. End Date (optional)</h3>
-          <div class="end-date-buttons">
-            <div class="end-btn" id="noBtn">No, ongoing until further notice</div>
-            <div class="end-btn" id="yesBtn">Yes</div>
-          </div>
-          <input type="date" id="endDate" class="hidden" min="{{ min_booking_date }}">
-        </div>
-      </div>
-
-      <div id="perServiceArea" class="per-service-area hidden">
-        <h3 class="section-subtitle">Set a dedicated schedule for each service</h3>
+<p class="section-caption">Schedule for all services:</p>
+<div class="q-row">
+<div class="q-col">
+<div class="calendar-container">
+<div class="calendar-header">
+<div class="month-nav" id="prevMonth">&#10094;</div>
+<div class="month-title" id="monthTitle">Month</div>
+<div class="month-nav" id="nextMonth">&#10095;</div>
+</div>
+<div class="days-of-week">
+<div>S</div>
+<div>M</div>
+<div>T</div>
+<div>W</div>
+<div>T</div>
+<div>F</div>
+<div>S</div>
+</div>
+<div class="days-grid" id="calendarDays">
+</div>
+</div>
+</div>
+<div class="q-col">
+<div class="time-box">
+<h3>Q2. Choose a Time Window</h3>
+<div class="time-option" data-time="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</div>
+<div class="time-option" data-time="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</div>
+<div class="time-option" data-time="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</div>
+<div class="time-option" data-time="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</div>
+<div class="time-option" data-time="Night (22:00 - 06:00)">Night (22:00 - 06:00)</div>
+</div>
+</div>
+</div>
+<div class="request-box">
+<h3>Q3. Special Timing Requests (optional)</h3>
+<textarea id="specialRequest" placeholder="Tell us if there is anything we should know...">
+</textarea>
+</div>
+<h2>Schedule and Frequency</h2>
+<div class="freq-row">
+<div class="freq-col">
+<h3>Q1. How often would you like this service</h3>
+<div class="freq-btn" data-freq="weekly">Weekly <span class="save-tag">
+</span>
+</div>
+<div class="freq-btn" data-freq="biweekly">Every 2 weeks <span class="save-tag">
+</span>
+</div>
+<div class="freq-btn" data-freq="monthly">Monthly <span class="save-tag">
+</span>
+</div>
+</div>
+<div class="freq-col">
+<h3>Q2. Which day(s) work best for you</h3>
+<div class="days-grid2" id="weekDays">
+<label class="day-check weekend">
+<input type="checkbox" data-day="Mon"/> Monday</label>
+<label class="day-check">
+<input type="checkbox" data-day="Tue"/> Tuesday</label>
+<label class="day-check">
+<input type="checkbox" data-day="Wed"/> Wednesday</label>
+<label class="day-check">
+<input type="checkbox" data-day="Thu"/> Thursday</label>
+<label class="day-check weekend">
+<input type="checkbox" data-day="Fri"/> Friday</label>
+<label class="day-check weekend">
+<input type="checkbox" data-day="Sat"/> Saturday</label>
+<label class="day-check weekend">
+<input type="checkbox" data-day="Sun"/> Sunday</label>
+</div>
+</div>
+</div>
+<div class="end-date">
+<h3>Q3. End Date (optional)</h3>
+<div class="end-date-buttons">
+<div class="end-btn" id="noBtn">No, ongoing until further notice</div>
+<div class="end-btn" id="yesBtn">Yes</div>
+</div>
+<input type="date" id="endDate" class="hidden" min="{{ min_booking_date }}">
+</div>
+</div>
+<div id="perServiceArea" class="per-service-area hidden">
+<h3 class="section-subtitle">Set a dedicated schedule for each service</h3>
 
         {% for s in services %}
         <div class="service-acc" data-service="{{ s.slug }}">
-          <div class="acc-header">
-            <div class="acc-main-info">
+<div class="acc-header">
+<div class="acc-main-info">
               {% if s.image %}
               <img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
               {% endif %}
               <div>
-                <div class="acc-name">{{ s.title }}</div>
-                <div class="acc-cat">{{ s.category.name }}</div>
-              </div>
-            </div>
-            <button type="button" class="acc-toggle-btn">
-              <span>Schedule</span>
-              <span class="acc-toggle-icon" aria-hidden="true">
-                <svg viewBox="0 0 20 20" focusable="false">
-                  <path d="M6 8.5 10 12.5l4-4"></path>
-                </svg>
-              </span>
-            </button>
-          </div>
-          <div class="acc-body">
-            <div class="acc-inner">
-              <div class="svc-row">
-                <div class="svc-col">
-                  <label class="svc-label">Date</label>
-                  <input type="date" class="svc-input svc-date" min="{{ min_booking_date }}">
-                </div>
-                <div class="svc-col">
-                  <label class="svc-label">Time Window</label>
-                  <select class="svc-select svc-time">
-                    <option value="">Select</option>
-                    <option value="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</option>
-                    <option value="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</option>
-                    <option value="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</option>
-                    <option value="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</option>
-                    <option value="Night (22:00 - 06:00)">Night (22:00 - 06:00)</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="svc-row">
-                <div class="svc-col">
-                  <label class="svc-label">Frequency</label>
-                  <select class="svc-select svc-frequency">
-                    <option value="">One time only</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="biweekly">Every 2 weeks</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="seasonal">Seasonal</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="svc-row">
-                <div class="svc-col">
-                  <label class="svc-label">Preferred days</label>
-                  <div class="svc-days">
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Mon"> Mon</label>
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Tue"> Tue</label>
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Wed"> Wed</label>
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Thu"> Thu</label>
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Fri"> Fri</label>
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Sat"> Sat</label>
-                    <label class="svc-day-pill"><input type="checkbox" class="svc-day" value="Sun"> Sun</label>
-                  </div>
-                </div>
-              </div>
-
-              <div class="svc-row">
-                <div class="svc-col">
-                  <label class="svc-label">End Date (optional)</label>
-                  <div class="svc-end-row">
-                    <span class="muted-note">Leave empty for ongoing booking.</span>
-                    <input type="date" class="svc-input svc-end-date" min="{{ min_booking_date }}" aria-required="false">
-                  </div>
-                </div>
-              </div>
-
-              <div class="svc-row">
-                <div class="svc-col">
-                  <label class="svc-label">Special Timing Requests (optional)</label>
-                  <textarea class="svc-textarea svc-notes" placeholder="Anything we should know for this service"></textarea>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </div>
+<div class="acc-name">{{ s.title }}</div>
+<div class="acc-cat">{{ s.category.name }}</div>
+</div>
+</div>
+<button type="button" class="acc-toggle-btn">
+<span>Schedule</span>
+<span class="acc-toggle-icon" aria-hidden="true">
+<svg viewBox="0 0 20 20" focusable="false">
+<path d="M6 8.5 10 12.5l4-4">
+</path>
+</svg>
+</span>
+</button>
+</div>
+<div class="acc-body">
+<div class="acc-inner">
+<div class="svc-row">
+<div class="svc-col">
+<label class="svc-label">Date</label>
+<input type="date" class="svc-input svc-date" min="{{ min_booking_date }}">
+</div>
+<div class="svc-col">
+<label class="svc-label">Time Window</label>
+<select class="svc-select svc-time">
+<option value="">Select</option>
+<option value="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</option>
+<option value="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</option>
+<option value="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</option>
+<option value="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</option>
+<option value="Night (22:00 - 06:00)">Night (22:00 - 06:00)</option>
+</select>
+</div>
+</div>
+<div class="svc-row">
+<div class="svc-col">
+<label class="svc-label">Frequency</label>
+<select class="svc-select svc-frequency">
+<option value="">One time only</option>
+<option value="weekly">Weekly</option>
+<option value="biweekly">Every 2 weeks</option>
+<option value="monthly">Monthly</option>
+<option value="seasonal">Seasonal</option>
+</select>
+</div>
+</div>
+<div class="svc-row">
+<div class="svc-col">
+<label class="svc-label">Preferred days</label>
+<div class="svc-days">
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Mon"> Mon</label>
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Tue"> Tue</label>
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Wed"> Wed</label>
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Thu"> Thu</label>
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Fri"> Fri</label>
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Sat"> Sat</label>
+<label class="svc-day-pill">
+<input type="checkbox" class="svc-day" value="Sun"> Sun</label>
+</div>
+</div>
+</div>
+<div class="svc-row">
+<div class="svc-col">
+<label class="svc-label">End Date (optional)</label>
+<div class="svc-end-row">
+<span class="muted-note">Leave empty for ongoing booking.</span>
+<input type="date" class="svc-input svc-end-date" min="{{ min_booking_date }}" aria-required="false">
+</div>
+</div>
+</div>
+<div class="svc-row">
+<div class="svc-col">
+<label class="svc-label">Special Timing Requests (optional)</label>
+<textarea class="svc-textarea svc-notes" placeholder="Anything we should know for this service">
+</textarea>
+</div>
+</div>
+</div>
+</div>
+</div>
         {% endfor %}
       </div>
-
-      <div class="primary-action">
-        <button type="submit" class="checkout-btn checkout-primary">
-          <span>Continue</span>
-          <svg class="checkout-btn__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-            <path d="M4 10h11"></path>
-            <path d="M11 5.5 16 10l-5 4.5"></path>
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <div class="right">
-        <h3>Booking Summary</h3>
-        <div class="line"></div>
-
-        <label class="rot-toggle-row summary-block summary-block--rut" for="scheduleUseRotToggle">
-            <span class="rot-toggle-copy">
-                <strong>Use RUT deduction</strong>
-                <small>Available for eligible private customers in Sweden.</small>
-            </span>
-            <input type="checkbox" id="scheduleUseRotToggle" {% if booking.use_rot %}checked{% endif %}>
-        </label>
-
-        <label class="rot-toggle-row summary-block summary-block--reward" for="scheduleUseRewardToggle">
-            <span class="rot-toggle-copy">
-                <strong>Use reward</strong>
+<div class="primary-action">
+<button type="submit" class="checkout-btn checkout-primary">
+<span>Continue</span>
+<svg class="checkout-btn__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+<path d="M4 10h11">
+</path>
+<path d="M11 5.5 16 10l-5 4.5">
+</path>
+</svg>
+</button>
+</div>
+</div>
+<div class="right">
+<h3>Booking Summary</h3>
+<div class="line">
+</div>
+<label class="rot-toggle-row summary-block summary-block--rut" for="scheduleUseRotToggle">
+<span class="rot-toggle-copy">
+<strong>Use RUT deduction</strong>
+<small>Available for eligible private customers in Sweden.</small>
+</span>
+<input type="checkbox" id="scheduleUseRotToggle" {% if booking.use_rot %}checked{% endif %}>
+</label>
+<label class="rot-toggle-row summary-block summary-block--reward" for="scheduleUseRewardToggle">
+<span class="rot-toggle-copy">
+<strong>Use reward</strong>
                 {% if reward_context.selected_reward %}
                 <small>
                     {{ reward_context.selected_reward.title }}:
@@ -281,30 +298,29 @@
                 </small>
                 {% endif %}
             </span>
-            <input
+<input
                 type="checkbox"
                 id="scheduleUseRewardToggle"
                 {% if reward_context.use_reward %}checked{% endif %}
                 {% if not reward_context.selected_reward %}disabled{% endif %}
             >
-        </label>
-
-        <div class="summary-discount-panel summary-block summary-block--discount">
-            <div class="summary-discount-head">
-                <span>
-                    <strong>Discount code</strong>
-                    <small>Apply a code here to preview the updated invoice.</small>
-                </span>
-            </div>
-            <div class="summary-discount-controls">
-                <input
+</label>
+<div class="summary-discount-panel summary-block summary-block--discount">
+<div class="summary-discount-head">
+<span>
+<strong>Discount code</strong>
+<small>Apply a code here to preview the updated invoice.</small>
+</span>
+</div>
+<div class="summary-discount-controls">
+<input
                     type="text"
                     id="scheduleDiscountCodeInput"
                     value="{{ summary_data.discount_code|default:'' }}"
                     placeholder="Enter discount code"
                     {% if summary_data.discount_code %}readonly{% endif %}
                 >
-                <button
+<button
                     type="button"
                     class="summary-discount-btn"
                     id="scheduleDiscountApplyBtn"
@@ -312,7 +328,7 @@
                 >
                     Apply
                 </button>
-                <button
+<button
                     type="button"
                     class="summary-discount-btn summary-discount-btn--ghost"
                     id="scheduleDiscountRemoveBtn"
@@ -320,8 +336,8 @@
                 >
                     Remove
                 </button>
-            </div>
-            <p class="summary-discount-feedback" id="scheduleDiscountFeedback">
+</div>
+<p class="summary-discount-feedback" id="scheduleDiscountFeedback">
                 {% if summary_data.discount_code %}
                   Code {{ summary_data.discount_code }} applied for {{ summary_data.discount_percent }}% off.
                 {% elif summary_data.referral_discount_applied %}
@@ -330,38 +346,31 @@
                   No discount code applied yet.
                 {% endif %}
             </p>
-        </div>
-
-        <div class="summary-breakdown summary-block summary-block--breakdown">
-            <p class="summary-breakdown-label">Detailed Breakdown</p>
-
-            <div class="summary-item">
-                <span>Services</span>
-                <span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:0|floatformat:2 }}</span>
-            </div>
-
-            <div class="summary-item">
-                <span>Add-ons</span>
-                <span id="sum_addons">{{ pricing.currency|default:"sek"|upper }} {{ pricing.addons_total|default:0|floatformat:2 }}</span>
-            </div>
-
-            <div class="summary-item">
-                <span>Schedule</span>
-                <span id="sum_schedule">{{ pricing.currency|default:"sek"|upper }} {{ pricing.schedule_extra|default:0|floatformat:2 }}</span>
-            </div>
-
-            <div class="summary-item">
-                <span>Service fee</span>
-                <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:0|floatformat:2 }}</span>
-            </div>
-
-            <div class="summary-item summary-item--accent">
-                <span id="sum_rot_label">RUT Deduction{% if pricing.use_rot %} ({{ pricing.rot_percent|floatformat:2 }}%){% else %} (not applied){% endif %}</span>
-                <span id="sum_rot">{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:0|floatformat:2 }}</span>
-            </div>
-
-            <div class="summary-item summary-item--muted" id="sum_discount_row" {% if not summary_data.discount_code and not summary_data.referral_discount_applied %}hidden{% endif %}>
-                <span id="sum_discount_label">
+</div>
+<div class="summary-breakdown summary-block summary-block--breakdown">
+<p class="summary-breakdown-label">Detailed Breakdown</p>
+<div class="summary-item">
+<span>Services</span>
+<span id="sum_services">{{ pricing.currency|default:"sek"|upper }} {{ pricing.services_total|default:0|floatformat:2 }}</span>
+</div>
+<div class="summary-item">
+<span>Add-ons</span>
+<span id="sum_addons">{{ pricing.currency|default:"sek"|upper }} {{ pricing.addons_total|default:0|floatformat:2 }}</span>
+</div>
+<div class="summary-item">
+<span>Schedule</span>
+<span id="sum_schedule">{{ pricing.currency|default:"sek"|upper }} {{ pricing.schedule_extra|default:0|floatformat:2 }}</span>
+</div>
+<div class="summary-item">
+<span>Service fee</span>
+<span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:0|floatformat:2 }}</span>
+</div>
+<div class="summary-item summary-item--accent">
+<span id="sum_rot_label">RUT Deduction{% if pricing.use_rot %} ({{ pricing.rot_percent|floatformat:2 }}%){% else %} (not applied){% endif %}</span>
+<span id="sum_rot">{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:0|floatformat:2 }}</span>
+</div>
+<div class="summary-item summary-item--muted" id="sum_discount_row" {% if not summary_data.discount_code and not summary_data.referral_discount_applied %}hidden{% endif %}>
+<span id="sum_discount_label">
                     {% if summary_data.discount_code %}
                       Discount ({{ summary_data.discount_code }})
                     {% elif summary_data.referral_discount_applied %}
@@ -370,43 +379,41 @@
                       Discount
                     {% endif %}
                 </span>
-                <span id="sum_discount">
+<span id="sum_discount">
                     -{{ pricing.currency|default:"sek"|upper }} {% if summary_data.discount_code %}{{ summary_data.discount_amount|floatformat:2 }}{% else %}{{ summary_data.referral_discount_amount|floatformat:2 }}{% endif %}
                 </span>
-            </div>
-
-            <div class="summary-item summary-item--muted">
-                <span id="sum_reward_label">Reward{% if reward_context.selected_reward %}: {{ reward_context.selected_reward.title }}{% else %} (not available){% endif %}</span>
-                <span id="sum_reward">{% if reward_context.use_reward %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ reward_context.reward_discount|default:"0"|floatformat:2 }}</span>
-            </div>
-
-            <div class="summary-total-card">
-                <div class="summary-item total">
-                    <span>Total</span>
-                    <span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.final|default:0|floatformat:2 }}</span>
-                </div>
-
-                <p class="summary-note" id="sum_total_note">
+</div>
+<div class="summary-item summary-item--muted">
+<span id="sum_reward_label">Reward{% if reward_context.selected_reward %}: {{ reward_context.selected_reward.title }}{% else %} (not available){% endif %}</span>
+<span id="sum_reward">{% if reward_context.use_reward %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ reward_context.reward_discount|default:"0"|floatformat:2 }}</span>
+</div>
+<div class="summary-total-card">
+<div class="summary-item total">
+<span>Total</span>
+<span id="sum_total">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.final|default:0|floatformat:2 }}</span>
+</div>
+<p class="summary-note" id="sum_total_note">
                     {% if booking.use_rot %}
                       VAT is included in the service prices. Total includes RUT deduction.
                     {% else %}
                       VAT is included in the service prices. Total shown without RUT deduction.
                     {% endif %}
                 </p>
-            </div>
-        </div>
-
-        <div class="checkout-wrapper">
-            <button type="submit" class="checkout-btn">
-                <span>Continue</span>
-                <svg class="checkout-btn__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                    <path d="M4 10h11"></path>
-                    <path d="M11 5.5 16 10l-5 4.5"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
-  </div>
+</div>
+</div>
+<div class="checkout-wrapper">
+<button type="submit" class="checkout-btn">
+<span>Continue</span>
+<svg class="checkout-btn__icon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+<path d="M4 10h11">
+</path>
+<path d="M11 5.5 16 10l-5 4.5">
+</path>
+</svg>
+</button>
+</div>
+</div>
+</div>
 </form>
 
 {{ date_rules|json_script:"dateRules" }}
@@ -1366,8 +1373,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 {% include "home/includes/footer.html" %}
 </body>
 </html>

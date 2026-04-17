@@ -1,22 +1,23 @@
-﻿{% load static %}
+{% load static %}
 
 {% load bootstrap4 %}
 {% load socialaccount %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Sign Up | Hembla experten</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Sign Up | Hembla experten</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/login.css' %}">
-
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
-
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
@@ -24,13 +25,11 @@
 
   
   <main class="signin-container">
-    <div class="signin-box">
-      <img src="{% static 'images/confetti0.png'%}" alt="Confetti" class="confetti">
-
-      <h1 class="title">Welcome Back</h1>
-      <p class="subtitle">Login to your account</p>
-
-      <form method="post" action="{% url 'login' %}">
+<div class="signin-box">
+<img src="{% static 'images/confetti0.png'%}" alt="Confetti" class="confetti">
+<h1 class="title">Welcome Back</h1>
+<p class="subtitle">Login to your account</p>
+<form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         {% if next %}
           <input type="hidden" name="next" value="{{ next }}">
@@ -45,13 +44,13 @@
         {% endif %}
 
         <input type="text" name="username" placeholder="Email or Phone Number" class="input-field" value="{{ request.GET.email|default:'' }}" required>
-
-        <input type="password" name="password" placeholder="Password" class="input-field" required>
+<input type="password" name="password" placeholder="Password" class="input-field" required>
         {% if form.errors %}
           <div class="alert-error" role="alert">
-            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
-            <span>Your username and password didn't match. Please try again.</span>
-          </div>
+<i class="fa-solid fa-triangle-exclamation" aria-hidden="true">
+</i>
+<span>Your username and password didn't match. Please try again.</span>
+</div>
         {% endif %}
         {% if next and not messages %}
           {% if user.is_authenticated %}
@@ -61,28 +60,28 @@
           {% endif %}
         {% endif %}
         <div class="form-options">
-          <label><input type="checkbox" name="remember_me" data-optional> Remember me</label>
-          <a href="{% url 'password_reset' %}" class="forgot">Forgot Password</a>
-        </div>
-
-        <button type="submit" class="btn-login">Log In</button>
-
-        <div class="divider"><span>OR</span></div>
-
-        <a href="{% url 'accounts:google_login_start' %}{% if next %}?next={{ next|urlencode }}{% endif %}" class="btn-social google">
-          <img src="{% static 'images/google0.png'%}" alt="Google Icon"> Continue with Google
+<label>
+<input type="checkbox" name="remember_me" data-optional> Remember me</label>
+<a href="{% url 'password_reset' %}" class="forgot">Forgot Password</a>
+</div>
+<button type="submit" class="btn-login">Log In</button>
+<div class="divider">
+<span>OR</span>
+</div>
+<a href="{% url 'accounts:google_login_start' %}
+{% if next %}?next={{ next|urlencode }}{% endif %}" class="btn-social google">
+<img src="{% static 'images/google0.png'%}" alt="Google Icon"> Continue with Google
         </a>
-
-        <button type="button" class="btn-social bankid">
-          <img src="{% static 'images/attachment-6-10.png'%}" alt="BankID Icon"> Continue with BankID
+<button type="button" class="btn-social bankid">
+<img src="{% static 'images/attachment-6-10.png'%}" alt="BankID Icon"> Continue with BankID
         </button>
-
-        <p class="signup-text">
-          Don't have an account <a href="{% url 'accounts:sign_up' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Sign up</a>
-        </p>
-      </form>
-    </div>
-  </main>
+<p class="signup-text">
+          Don't have an account <a href="{% url 'accounts:sign_up' %}
+{% if next %}?next={{ next|urlencode }}{% endif %}">Sign up</a>
+</p>
+</form>
+</div>
+</main>
 
 
 
@@ -90,7 +89,8 @@
 
   {% include "home/includes/footer.html" %}
 
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

@@ -3,16 +3,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Frequency</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Frequency</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_frequency.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_frequency.css' %}">
+<link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
-
 <body>
   {% include "home/includes/main_header.html" %}
 
@@ -25,78 +27,67 @@
       {% endif %}
     {% endfor %}
   </div>
-
-  <div class="frequency-page">
-    <div class="title-wrap">
-      <span class="title-icon" aria-hidden="true">&#128467;</span>
-      <h2 class="title">Frequency</h2>
-    </div>
-
-    <form method="POST" class="frequency-card">
+<div class="frequency-page">
+<div class="title-wrap">
+<span class="title-icon" aria-hidden="true">&#128467;</span>
+<h2 class="title">Frequency</h2>
+</div>
+<form method="POST" class="frequency-card">
       {% csrf_token %}
       <input type="hidden" name="frequency_data" id="frequencyInput">
-
-      <p class="question">How often do you need cleaning</p>
-
-      <div class="options">
-        <button type="button" class="freq-card" data-type="daily">
-          <img src="{% static 'images/calendar0.png' %}" alt="Daily">
-          <span>Daily</span>
-        </button>
-
-        <button type="button" class="freq-card" data-type="times">
-          <img src="{% static 'images/calendar1.png' %}" alt="Times per week">
-          <div class="card-content">
-            <select class="times-select" id="timesSelect" aria-label="Times per week">
-              <option>1</option>
-              <option>2</option>
-              <option selected>3</option>
-              <option>4</option>
-              <option>5</option>
-            </select>
-            <span>times per week</span>
-          </div>
-        </button>
-
-        <button type="button" class="freq-card" data-type="weekly">
-          <img src="{% static 'images/calendar2.png' %}" alt="Weekly">
-          <span>Weekly</span>
-        </button>
-
-        <button type="button" class="freq-card" data-type="monthly">
-          <img src="{% static 'images/calendar3.png' %}" alt="Monthly">
-          <span>Monthly</span>
-        </button>
-
-        <button type="button" class="freq-card" data-type="ondemand">
-          <img src="{% static 'images/calendar4.png' %}" alt="On-demand">
-          <span>On-demand</span>
-        </button>
-
-        <button type="button" class="freq-card" data-type="yearly">
-          <img src="{% static 'images/calendar5.png' %}" alt="Yearly">
-          <span>Yearly</span>
-        </button>
-      </div>
-
-      <div class="form-error" id="frequencyError">Please select a frequency option.</div>
-      <div class="buttons form-actions">
-        <a onclick="window.history.back();" class="back-btn">
-          <span class="back-icon">&larr;</span>
+<p class="question">How often do you need cleaning</p>
+<div class="options">
+<button type="button" class="freq-card" data-type="daily">
+<img src="{% static 'images/calendar0.png' %}" alt="Daily">
+<span>Daily</span>
+</button>
+<button type="button" class="freq-card" data-type="times">
+<img src="{% static 'images/calendar1.png' %}" alt="Times per week">
+<div class="card-content">
+<select class="times-select" id="timesSelect" aria-label="Times per week">
+<option>1</option>
+<option>2</option>
+<option selected>3</option>
+<option>4</option>
+<option>5</option>
+</select>
+<span>times per week</span>
+</div>
+</button>
+<button type="button" class="freq-card" data-type="weekly">
+<img src="{% static 'images/calendar2.png' %}" alt="Weekly">
+<span>Weekly</span>
+</button>
+<button type="button" class="freq-card" data-type="monthly">
+<img src="{% static 'images/calendar3.png' %}" alt="Monthly">
+<span>Monthly</span>
+</button>
+<button type="button" class="freq-card" data-type="ondemand">
+<img src="{% static 'images/calendar4.png' %}" alt="On-demand">
+<span>On-demand</span>
+</button>
+<button type="button" class="freq-card" data-type="yearly">
+<img src="{% static 'images/calendar5.png' %}" alt="Yearly">
+<span>Yearly</span>
+</button>
+</div>
+<div class="form-error" id="frequencyError">Please select a frequency option.</div>
+<div class="buttons form-actions">
+<a onclick="window.history.back();" class="back-btn">
+<span class="back-icon">&larr;</span>
           Back
         </a>
-        <button type="submit" class="next-btn">
+<button type="submit" class="next-btn">
           Next
           <span class="next-icon">&rarr;</span>
-        </button>
-      </div>
-    </form>
-  </div>
-
-  <br>
-  <br>
-  <br>
-  <br>
+</button>
+</div>
+</form>
+</div>
+<br>
+<br>
+<br>
+<br>
 
   {% include "home/includes/footer.html" %}
 
@@ -133,7 +124,7 @@
       }
     });
   </script>
-  <script>
+<script>
     const frequencyForm = document.querySelector("form");
     frequencyForm.addEventListener("submit", (e) => {
       if (!document.getElementById("frequencyInput").value) {
@@ -142,7 +133,7 @@
       }
     });
   </script>
-
-  <script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

@@ -1,169 +1,158 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Terms and Conditions | Hembla experten</title>
-    <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/T&C.css'%}" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Terms and Conditions | Hembla experten</title>
+    {% include 'home/includes/font_links.html' %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/T&C.css'%}" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
 <body>
-    <!-- ' HEADER -->
+<!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
 
     </div>
-  </header>
-
-  <main class="terms-container">
-    <h1 class="title">Terms and Conditions</h1>
-    <p class="update-date">Last updated: 05/11/2025</p>
-    <p class="intro">These Terms and Conditions govern your use of Hembla experten services.
+</header>
+<main class="terms-container">
+<h1 class="title">Terms and Conditions</h1>
+<p class="update-date">Last updated: 05/11/2025</p>
+<p class="intro">These Terms and Conditions govern your use of Hembla experten services.
       By booking or using any of our services, you agree to comply with
       and be bound by these terms.</p>
-
-    <section class="section-card">
-      <h2>1. Scope of Services</h2>
-      <p>Hembla experten provides home and lifestyle services in Sweden, including but not limited to:</p>
-      <ul>
-        <li>Cleaning (standard, deep, specialised)</li>
-        <li>Repairs and maintenance</li>
-        <li>Childcare and babysitting</li>
-        <li>Errands and personal assistance</li>
-        <li>Event preparation and assistance</li>
-        <li>Same-day urgent services</li>
-      </ul>
-      <p>Service details, pricing, and availability are outlined on our website or agreed upon in writing prior to booking. We reserve the right to:</p>
-      <ul>
-        <li>Refuse service if the location is unsafe, unhygienic, or otherwise unsuitable.</li>
-        <li>Adjust pricing if the service requirements differ from the booking details.</li>
-        <li>Decline or terminate service if staff are subjected to unsafe, aggressive, or inappropriate behaviour.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>2. Payment Terms</h2>
-      <ul>
-        <li>Full payment is charged at the time of booking for all services.</li>
-        <li>Payments can be made via credit/debit card, Swish, or other approved payment platforms.</li>
-        <li>If a service cannot be fulfilled due to our fault, we will issue a full refund.</li>
-        <li>Refunds will not be issued for cancellations outside our stated cancellation policies.</li>
-        <li>Late payments may accrue interest under the Swedish Interest Act (Räntelagen).</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>3. Same-Day Service Policy</h2>
-      <ul>
-        <li>Same-day service aims to have staff arrive within 3 hours of booking confirmation.</li>
-        <li>Same-day services are non-cancellable and non-refundable once booked.</li>
-        <li>If we cannot provide the service within the promised timeframe due to our fault, you will receive a full refund.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>4. Cancellation & Rescheduling</h2>
-      <ul>
-        <li>Standard services may be cancelled or rescheduled up to 24 hours before the scheduled time without charge.</li>
-        <li>Cancellations within 24 hours of the scheduled time may incur a cancellation fee of up to 50% of the service cost.</li>
-        <li>If staff arrive and are unable to access the property or are refused entry, the full service fee will apply.</li>
-        <li>Persistent last-minute cancellations may lead to suspension of future bookings.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>5. Customer Responsibilities</h2>
-      <ul>
-        <li>Provide accurate and complete details of the property or service request at booking.</li>
-        <li>Ensure the property is accessible and safe for our staff.</li>
-        <li>Secure pets, valuables, and fragile items before service begins.</li>
-        <li>Disclose any known risks (e.g., hazardous materials, faulty wiring, structural instability) before work begins.</li>
-        <li>Ensure an adult is present when services require access to private areas or involve childcare.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>6. Liability Limitations</h2>
-      <ul>
-        <li>Our liability for any damage or loss is limited to the total amount paid for the specific service.</li>
-        <li>We are not liable for: Pre-existing damage or wear and tear. Damage to
+<section class="section-card">
+<h2>1. Scope of Services</h2>
+<p>Hembla experten provides home and lifestyle services in Sweden, including but not limited to:</p>
+<ul>
+<li>Cleaning (standard, deep, specialised)</li>
+<li>Repairs and maintenance</li>
+<li>Childcare and babysitting</li>
+<li>Errands and personal assistance</li>
+<li>Event preparation and assistance</li>
+<li>Same-day urgent services</li>
+</ul>
+<p>Service details, pricing, and availability are outlined on our website or agreed upon in writing prior to booking. We reserve the right to:</p>
+<ul>
+<li>Refuse service if the location is unsafe, unhygienic, or otherwise unsuitable.</li>
+<li>Adjust pricing if the service requirements differ from the booking details.</li>
+<li>Decline or terminate service if staff are subjected to unsafe, aggressive, or inappropriate behaviour.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>2. Payment Terms</h2>
+<ul>
+<li>Full payment is charged at the time of booking for all services.</li>
+<li>Payments can be made via credit/debit card, Swish, or other approved payment platforms.</li>
+<li>If a service cannot be fulfilled due to our fault, we will issue a full refund.</li>
+<li>Refunds will not be issued for cancellations outside our stated cancellation policies.</li>
+<li>Late payments may accrue interest under the Swedish Interest Act (R?ntelagen).</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>3. Same-Day Service Policy</h2>
+<ul>
+<li>Same-day service aims to have staff arrive within 3 hours of booking confirmation.</li>
+<li>Same-day services are non-cancellable and non-refundable once booked.</li>
+<li>If we cannot provide the service within the promised timeframe due to our fault, you will receive a full refund.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>4. Cancellation & Rescheduling</h2>
+<ul>
+<li>Standard services may be cancelled or rescheduled up to 24 hours before the scheduled time without charge.</li>
+<li>Cancellations within 24 hours of the scheduled time may incur a cancellation fee of up to 50% of the service cost.</li>
+<li>If staff arrive and are unable to access the property or are refused entry, the full service fee will apply.</li>
+<li>Persistent last-minute cancellations may lead to suspension of future bookings.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>5. Customer Responsibilities</h2>
+<ul>
+<li>Provide accurate and complete details of the property or service request at booking.</li>
+<li>Ensure the property is accessible and safe for our staff.</li>
+<li>Secure pets, valuables, and fragile items before service begins.</li>
+<li>Disclose any known risks (e.g., hazardous materials, faulty wiring, structural instability) before work begins.</li>
+<li>Ensure an adult is present when services require access to private areas or involve childcare.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>6. Liability Limitations</h2>
+<ul>
+<li>Our liability for any damage or loss is limited to the total amount paid for the specific service.</li>
+<li>We are not liable for: Pre-existing damage or wear and tear. Damage to
         fragile, unsecured, or improperly installed items. Losses caused by
         inaccurate or incomplete information provided by the customer. Indirect or
         consequential losses (e.g., loss of income, emotional distress).</li>
-        <li>Claims for damage must be reported within 24 hours of service completion.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>7. High-Value Item Waiver</h2>
-      <ul>
-        <li>Customers must inform us of any item valued at more than 10,000 SEK in the service area.</li>
-        <li>We reserve the right to refuse responsibility for high-value items not disclosed in advance.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>8. Service Quality & Complaints</h2>
-      <ul>
-        <li>Dissatisfaction must be reported within 24 hours of service completion for review.</li>
-        <li>We may offer a rework, partial refund, or other resolution at our discretion.</li>
-        <li>Complaints after 24 hours may not be eligible for compensation.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>9. Photographic Documentation</h2>
-      <ul>
-        <li>We may take before-and-after photos of work areas for quality control, proof of completion, and dispute resolution.</li>
-        <li>Photos will only capture the service area and will be stored securely in line with our Privacy Policy.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>10. Safety & Refusal of Work</h2>
-      <ul>
-        <li>We may refuse or discontinue work if the environment poses health or safety risks to our staff.</li>
-        <li>Hazardous materials are present without prior disclosure or illegal activities are observed on premises.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>11. Force Majeure</h2>
-      <ul>
-        <li>We are not responsible for delays or failures caused by events beyond our control, including but not limited to weather, strikes, or government restrictions.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>12. Privacy</h2>
-      <ul>
-        <li>We collect and process personal data in accordance with our Privacy Policy.</li>
-        <li>Data is stored only within Hembla experten and is not shared with other companies except where necessary to fulfil your service or as required by Swedish law.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>13. Governing Law & Disputes</h2>
-      <ul>
-        <li>These terms are governed by Swedish law. Any disputes should first be addressed directly with us.</li>
-        <li>If unresolved, they may be referred to the Swedish National Board for Consumer Disputes (ARN) or the Swedish courts.</li>
-      </ul>
-    </section>
-
-    <section class="section-card">
-      <h2>14. Amendments</h2>
-      <ul>
-        <li>Hembla experten reserves the right to update these Terms and Conditions at any time.</li>
-        <li>Updated terms will be published on our website and apply immediately to all future bookings.</li>
-      </ul>
-    </section>
-  </main>
+<li>Claims for damage must be reported within 24 hours of service completion.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>7. High-Value Item Waiver</h2>
+<ul>
+<li>Customers must inform us of any item valued at more than 10,000 SEK in the service area.</li>
+<li>We reserve the right to refuse responsibility for high-value items not disclosed in advance.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>8. Service Quality & Complaints</h2>
+<ul>
+<li>Dissatisfaction must be reported within 24 hours of service completion for review.</li>
+<li>We may offer a rework, partial refund, or other resolution at our discretion.</li>
+<li>Complaints after 24 hours may not be eligible for compensation.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>9. Photographic Documentation</h2>
+<ul>
+<li>We may take before-and-after photos of work areas for quality control, proof of completion, and dispute resolution.</li>
+<li>Photos will only capture the service area and will be stored securely in line with our Privacy Policy.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>10. Safety & Refusal of Work</h2>
+<ul>
+<li>We may refuse or discontinue work if the environment poses health or safety risks to our staff.</li>
+<li>Hazardous materials are present without prior disclosure or illegal activities are observed on premises.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>11. Force Majeure</h2>
+<ul>
+<li>We are not responsible for delays or failures caused by events beyond our control, including but not limited to weather, strikes, or government restrictions.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>12. Privacy</h2>
+<ul>
+<li>We collect and process personal data in accordance with our Privacy Policy.</li>
+<li>Data is stored only within Hembla experten and is not shared with other companies except where necessary to fulfil your service or as required by Swedish law.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>13. Governing Law & Disputes</h2>
+<ul>
+<li>These terms are governed by Swedish law. Any disputes should first be addressed directly with us.</li>
+<li>If unresolved, they may be referred to the Swedish National Board for Consumer Disputes (ARN) or the Swedish courts.</li>
+</ul>
+</section>
+<section class="section-card">
+<h2>14. Amendments</h2>
+<ul>
+<li>Hembla experten reserves the right to update these Terms and Conditions at any time.</li>
+<li>Updated terms will be published on our website and apply immediately to all future bookings.</li>
+</ul>
+</section>
+</main>
   {% include "home/includes/footer.html" %}
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

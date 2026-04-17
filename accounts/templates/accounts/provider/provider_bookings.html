@@ -1,18 +1,20 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Jobs | Hembla experten</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8">
+<title>My Jobs | Hembla experten</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
     /* ===== TOP BAR ===== */
     .top-bar {
       display: flex;
@@ -147,68 +149,61 @@
     }
   </style>
 </head>
-
 <body class="provider-portal">
 {% include "home/includes/main_header.html" %}
 
 <audio id="notifSound">
-  <source src="{% static 'sounds/notification.mp3' %}" type="audio/mpeg">
+<source src="{% static 'sounds/notification.mp3' %}" type="audio/mpeg">
 </audio>
-
 <div class="provider-wrap">
-
-  <!-- TOP BAR -->
-  <div class="provider-topbar">
-    <div>
-      <h2>My Orders</h2>
-      <div class="provider-subtitle">All jobs assigned to you</div>
-    </div>
-
-    <div class="top-actions">
-
-      <!-- Bell -->
-      <div class="bell" onclick="playSound()">
-        <i class="fa-solid fa-bell"></i>
+<!-- TOP BAR -->
+<div class="provider-topbar">
+<div>
+<h2>My Orders</h2>
+<div class="provider-subtitle">All jobs assigned to you</div>
+</div>
+<div class="top-actions">
+<!-- Bell -->
+<div class="bell" onclick="playSound()">
+<i class="fa-solid fa-bell">
+</i>
         {% if bookings %}
           <span>{{ bookings|length }}</span>
         {% endif %}
       </div>
-
-      <!-- Avatar -->
-      <div class="avatar" onclick="toggleMenu()">
+<!-- Avatar -->
+<div class="avatar" onclick="toggleMenu()">
         {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
 
         <div class="dropdown" id="menu">
 <a href="{% url 'accounts:provider_profile' %}">My Profile</a>
-          <a href="{% url 'accounts:logout' %}">Logout</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- BOOKINGS -->
+<a href="{% url 'accounts:logout' %}">Logout</a>
+</div>
+</div>
+</div>
+</div>
+<!-- BOOKINGS -->
   {% if bookings %}
     <div class="jobs">
       {% for b in bookings %}
         <a href="{% url 'accounts:provider_booking_detail' b.type b.id %}" class="list-item">
-          <div class="meta">
-            <div class="thread-title">{{ b.title }}</div>
-            <div class="thread-sub">#{{ b.id }}  {{ b.when|date:"M d, Y" }}</div>
-          </div>
-          <div class="status-pill status-{{ b.status }}">{{ b.status }}</div>
-        </a>
+<div class="meta">
+<div class="thread-title">{{ b.title }}</div>
+<div class="thread-sub">#{{ b.id }}  {{ b.when|date:"M d, Y" }}</div>
+</div>
+<div class="status-pill status-{{ b.status }}">{{ b.status }}</div>
+</a>
       {% endfor %}
     </div>
   {% else %}
     <div class="empty">
-      <i class="fa-solid fa-broom"></i>
-      <p>No assigned orders yet</p>
-    </div>
+<i class="fa-solid fa-broom">
+</i>
+<p>No assigned orders yet</p>
+</div>
   {% endif %}
 
 </div>
-
 <script>
   function toggleMenu() {
     const menu = document.getElementById("menu");
@@ -231,8 +226,8 @@
     }
   });
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
-
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

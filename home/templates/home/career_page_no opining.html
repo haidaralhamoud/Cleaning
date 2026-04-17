@@ -1,112 +1,109 @@
-﻿
+
 {% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>No Current Openings | Hembla experten</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>No Current Openings | Hembla experten</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-
-  <link rel="stylesheet" href="{% static 'css/career_page_no opining.css'%}" />
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/career_page_no opining.css'%}" />
 </head>
 <body{% if show_success_popup %} class="career-popup-open"{% endif %}>
-  <!-- ' HEADER -->
+<!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
   <section class="career-no-opening fade-in">
-    <div class="hero">
-      <div class="hero-copy fade-in">
-        <span class="hero-kicker">Open Application</span>
-        <h1>No Current Openings</h1>
-        <div class="hero-paragraphs">
-          <p>
+<div class="hero">
+<div class="hero-copy fade-in">
+<span class="hero-kicker">Open Application</span>
+<h1>No Current Openings</h1>
+<div class="hero-paragraphs">
+<p>
             At the moment, our Hembla experten family is complete, but families grow.
           </p>
-          <p>
+<p>
             If you feel connected to our mission, we would still love to hear from you. Send an open application and we can stay in touch until the right role opens up.
           </p>
-        </div>
-      </div>
-      <div class="hero-visual zoom-in">
-        <img src="{% static 'images/frame-16865528100.png'%}" alt="No Current Vacancies" />
-      </div>
-    </div>
-
-    <div class="form-section fade-in">
-      <div class="section-heading">
-        <div>
-          <h2>Submit Open Application</h2>
-          <p>Leave your details, preferred area, and a short motivation. We will keep your application on hand for future openings.</p>
-        </div>
-        <div class="section-chip">Talent Pool</div>
-      </div>
-      <div class="form-container">
-        <form method="POST" enctype="multipart/form-data" class="career-form">
+</div>
+</div>
+<div class="hero-visual zoom-in">
+<img src="{% static 'images/frame-16865528100.png'%}" alt="No Current Vacancies" width="504" height="276" loading="eager" decoding="async" fetchpriority="high" />
+</div>
+</div>
+<div class="form-section fade-in">
+<div class="section-heading">
+<div>
+<h2>Submit Open Application</h2>
+<p>Leave your details, preferred area, and a short motivation. We will keep your application on hand for future openings.</p>
+</div>
+<div class="section-chip">Talent Pool</div>
+</div>
+<div class="form-container">
+<form method="POST" enctype="multipart/form-data" class="career-form">
           {% csrf_token %}
 
           <div class="field-grid">
-            <div class="field-group">
-              <label for="career_full_name">Full Name</label>
-              <input id="career_full_name" type="text" name="full_name" placeholder="Your full name" required />
-            </div>
-
-            <div class="field-group">
-              <label for="career_email">Email</label>
-              <input id="career_email" type="email" name="email" placeholder="you@example.com" required />
-            </div>
-
-            <div class="field-group field-group--full">
-              <label for="career_phone">Phone Number</label>
-              <input id="career_phone" type="tel" name="phone" placeholder="+46 70 000 00 00" required />
-            </div>
-
-            <div class="field-group field-group--full">
-              <label for="career_message">Cover Letter / Short Motivation</label>
-              <textarea id="career_message" name="message" placeholder="Tell us what kind of role you are interested in, what you do best, and why you want to join Hembla experten."></textarea>
-            </div>
-
-            <div class="field-group field-group--full">
-              <label for="career_cv">CV / Resume <span class="field-hint">PDF or document file</span></label>
-              <div class="file-card">
-                <div class="file-meta">
-                  <div class="file-icon">CV</div>
-                  <div class="file-copy">
-                    <strong>Attach your resume</strong>
-                    <span id="careerFileName">No file selected yet</span>
-                  </div>
-                </div>
-                <label class="file-trigger" for="career_cv">Choose File</label>
-                <input id="career_cv" type="file" name="cv" class="file-input" />
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="career_area">Preferred Role / Area of Interest</label>
-              <div class="select-wrap">
-                <select id="career_area" name="area" required>
-                  <option value="" disabled selected>Select an area</option>
-                  <option>Electrician</option>
-                  <option>Customer Service</option>
-                  <option>Business Support</option>
-                  <option>Management</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field-group">
-              <label for="career_availability">Availability</label>
-              <div class="select-wrap">
-                <select id="career_availability" name="availability" required>
-                  <option value="" disabled selected>Select availability</option>
-                  <option>Immediately</option>
-                  <option>1–3 months</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <input
+<div class="field-group">
+<label for="career_full_name">Full Name</label>
+<input id="career_full_name" type="text" name="full_name" placeholder="Your full name" required />
+</div>
+<div class="field-group">
+<label for="career_email">Email</label>
+<input id="career_email" type="email" name="email" placeholder="you@example.com" required />
+</div>
+<div class="field-group field-group--full">
+<label for="career_phone">Phone Number</label>
+<input id="career_phone" type="tel" name="phone" placeholder="+46 70 000 00 00" required />
+</div>
+<div class="field-group field-group--full">
+<label for="career_message">Cover Letter / Short Motivation</label>
+<textarea id="career_message" name="message" placeholder="Tell us what kind of role you are interested in, what you do best, and why you want to join Hembla experten.">
+</textarea>
+</div>
+<div class="field-group field-group--full">
+<label for="career_cv">CV / Resume <span class="field-hint">PDF or document file</span>
+</label>
+<div class="file-card">
+<div class="file-meta">
+<div class="file-icon">CV</div>
+<div class="file-copy">
+<strong>Attach your resume</strong>
+<span id="careerFileName">No file selected yet</span>
+</div>
+</div>
+<label class="file-trigger" for="career_cv">Choose File</label>
+<input id="career_cv" type="file" name="cv" class="file-input" />
+</div>
+</div>
+<div class="field-group">
+<label for="career_area">Preferred Role / Area of Interest</label>
+<div class="select-wrap">
+<select id="career_area" name="area" required>
+<option value="" disabled selected>Select an area</option>
+<option>Electrician</option>
+<option>Customer Service</option>
+<option>Business Support</option>
+<option>Management</option>
+</select>
+</div>
+</div>
+<div class="field-group">
+<label for="career_availability">Availability</label>
+<div class="select-wrap">
+<select id="career_availability" name="availability" required>
+<option value="" disabled selected>Select availability</option>
+<option>Immediately</option>
+<option>13 months</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<input
                 id="career_availability_custom"
                 class="career-conditional-input"
                 type="text"
@@ -114,68 +111,81 @@
                 placeholder="Write your availability"
                 hidden
               />
-            </div>
-          </div>
-
-          <button class="submit-btn" type="submit">Send your request</button>
-        </form>
-
-        <aside class="form-aside">
-          <div class="aside-visual zoom-in">
-            <img src="{% static 'images/frame-16865528070.webp'%}" alt="Application Form" loading="lazy" decoding="async" />
-          </div>
-          <div class="aside-note fade-in">
-            <h3>Why send an open application?</h3>
-            <p>
+</div>
+</div>
+<button class="submit-btn" type="submit">Send your request</button>
+</form>
+<aside class="form-aside">
+<div class="aside-visual zoom-in">
+<picture>
+<source srcset="{% static 'images/frame-16865528070.webp' %}" type="image/webp">
+<img src="{% static 'images/frame-16865528070.png'%}" alt="Application Form" width="693" height="580" loading="lazy" decoding="async" />
+</picture>
+</div>
+<div class="aside-note fade-in">
+<h3>Why send an open application?</h3>
+<p>
               Even when there is no current opening, strong candidates can help shape future hiring.
               Share your profile now so we can reach out when a suitable role appears.
             </p>
-          </div>
-        </aside>
-      </div>
-    </div>
-
-    <div class="benefits-section fade-in">
-      <h2>What You'll Find at Hembla experten</h2>
-      <div class="benefits-grid">
-        <div class="benefit-card">
-          <img src="{% static 'images/Work that has meaning.webp' %}" alt="Work that has meaning" class="zoom-in" loading="lazy" decoding="async"/>
-          <h3>Work that has meaning</h3>
-          <p>Helping people in their homes and workplaces every day</p>
-        </div>
-        <div class="benefit-card">
-          <img src="{% static 'images/A team that feels like family.webp' %}" alt="A team that feels like family" loading="lazy" decoding="async" />
-          <h3>A team that feels like family</h3>
-          <p>Where your voice is heard and your efforts are valued</p>
-        </div>
-        <div class="benefit-card">
-          <img src="{% static 'images/Our Commitment to You.webp' %}" alt="Our Commitment to You" loading="lazy" decoding="async" />
-          <h3>Our Commitment to You</h3>
-          <p>Fair pay, flexibility, and benefits that support your well-being</p>
-        </div>
-        <div class="benefit-card">
-          <img src="{% static 'images/What We Do.webp' %}" alt="What We Do" loading="lazy" decoding="async" />
-          <h3>What We Do</h3>
-          <p>Helping people in their homes and workplaces every day</p>
-        </div>
-      </div>
-    </div>
-  </section>
+</div>
+</aside>
+</div>
+</div>
+<div class="benefits-section fade-in">
+<h2>What You'll Find at Hembla experten</h2>
+<div class="benefits-grid">
+<div class="benefit-card">
+<picture>
+<source srcset="{% static 'images/Work that has meaning.webp' %}" type="image/webp">
+<img src="{% static 'images/Work that has meaning.jpg' %}" alt="Work that has meaning" class="zoom-in" width="612" height="419" loading="lazy" decoding="async"/>
+</picture>
+<h3>Work that has meaning</h3>
+<p>Helping people in their homes and workplaces every day</p>
+</div>
+<div class="benefit-card">
+<picture>
+<source srcset="{% static 'images/A team that feels like family.webp' %}" type="image/webp">
+<img src="{% static 'images/A team that feels like family.jpg' %}" alt="A team that feels like family" width="612" height="402" loading="lazy" decoding="async" />
+</picture>
+<h3>A team that feels like family</h3>
+<p>Where your voice is heard and your efforts are valued</p>
+</div>
+<div class="benefit-card">
+<picture>
+<source srcset="{% static 'images/Our Commitment to You.webp' %}" type="image/webp">
+<img src="{% static 'images/Our Commitment to You.jpg' %}" alt="Our Commitment to You" width="612" height="408" loading="lazy" decoding="async" />
+</picture>
+<h3>Our Commitment to You</h3>
+<p>Fair pay, flexibility, and benefits that support your well-being</p>
+</div>
+<div class="benefit-card">
+<picture>
+<source srcset="{% static 'images/What We Do.webp' %}" type="image/webp">
+<img src="{% static 'images/What We Do.jpg' %}" alt="What We Do" width="612" height="408" loading="lazy" decoding="async" />
+</picture>
+<h3>What We Do</h3>
+<p>Helping people in their homes and workplaces every day</p>
+</div>
+</div>
+</div>
+</section>
   {% if show_success_popup %}
   <div class="career-success-overlay" role="dialog" aria-modal="true" aria-labelledby="careerSuccessTitle">
-    <div class="career-success-popup">
-      <div class="career-success-badge" aria-hidden="true">
-        <span class="career-success-badge-core">
-          <span class="career-success-badge-check"></span>
-        </span>
-      </div>
-      <h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
-      <p>We will contact you if your profile matches the job requirements.</p>
-      <div class="career-success-actions">
-        <a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
-      </div>
-    </div>
-  </div>
+<div class="career-success-popup">
+<div class="career-success-badge" aria-hidden="true">
+<span class="career-success-badge-core">
+<span class="career-success-badge-check">
+</span>
+</span>
+</div>
+<h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
+<p>We will contact you if your profile matches the job requirements.</p>
+<div class="career-success-actions">
+<a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
+</div>
+</div>
+</div>
   {% endif %}
   {% include "home/includes/footer.html" %}
 <script>
@@ -227,8 +237,8 @@
     toggleAvailabilityCustom();
   }
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

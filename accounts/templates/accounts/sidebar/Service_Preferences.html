@@ -3,607 +3,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Customize Your Cleaning Preferences</title>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="{% static 'css/Service_Preferences.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Customize Your Cleaning Preferences</title>
+<!-- Fonts -->
+<link rel="stylesheet" href="{% static 'css/Service_Preferences.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-
 <body class="service-preferences-view">
-
-<!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-
-<!-- ===== Mobile Header ===== -->
+<!-- HEADER -->{% include "home/includes/main_header.html" %}<!-- ===== Mobile Header ===== -->
 <div class="mobile-header">
-  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span>
-  </button>
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
 </div>
-
 <!-- ===== Layout ===== -->
 <div class="layout">
-
-  <!-- ===== Sidebar ===== -->
-  {% include "accounts/includes/customer_sidebar.html" %}
-
-
-  <!-- ===== Main Content ===== -->
-  <main class="main">
-
-    <h1 class="page-title">Customize Your Cleaning Preferences</h1>
-
-    <!-- ===== FORM: حفظ ضربة وحدة ===== -->
-    <form method="post" action="" data-skip-validate>
-      {% csrf_token %}
-
-      <!-- إذا بدك تربطها بكائن preferences موجود -->
-      {% if pref_id %}
-        <input type="hidden" name="pref_id" value="{{ pref_id }}">
-      {% endif %}
-
-      <!-- ===== Summary Box ===== -->
-      <div class="summary-card">
-        <div class="summary-top">
-          <div class="title-left">
-            <img src="{% static 'images/summary0.png' %}" alt="Summary Icon" class="icon">
-            <h3>summary of preferences</h3>
-          </div>
-          <img src="{% static 'images/edit-pencil0.png' %}" alt="Edit Icon" class="edit-icon">
-        </div>
-
-        <div class="summary-grid">
-
-          <div class="column">
-            <h4>Tasks</h4>
-            <p>
-              {% if selected_cleaning %}
-                {{ selected_cleaning|length }} selected ,
-              {% else %}
-                0 selected ,
-              {% endif %}
-            </p>
-
-            <div class="tags">
-              {% for item in selected_cleaning %}
-                <span class="tag blue">{{ item }}</span>
-              {% empty %}
-                <span class="tag sky">No tasks selected</span>
-              {% endfor %}
-            </div>
-
-            <p>
-              <strong>Product:</strong>
-              {% if selected_products %}{{ selected_products|length }} selected{% else %}0 selected{% endif %}
-              {% if excluded_products %}, {{ excluded_products|length }} excluded{% endif %}
-            </p>
-            {% if products_custom %}
-              <p><strong>Custom Product:</strong> {{ products_custom }}</p>
-            {% endif %}
-
-            <p>
-              <strong>Frequency:</strong>
-              {% if selected_frequency %}{{ selected_frequency }}{% else %}—{% endif %}
-            </p>
-            {% if frequency_custom %}
-              <p><strong>Custom Frequency:</strong> {{ frequency_custom }}</p>
-            {% endif %}
-          </div>
-
-          <div class="column">
-            <h4>Priorities</h4>
-            <div class="tags">
-              {% for p in selected_priorities %}
-                <span class="tag green">{{ p }}</span>
-              {% empty %}
-                <span class="tag yellow">No priorities</span>
-              {% endfor %}
-            </div>
-            {% if priorities_custom %}
-              <p><strong>Custom Priorities:</strong> {{ priorities_custom }}</p>
-            {% endif %}
-
-            <p>
-              <strong>Lifestyle & Add-ons Tab:</strong>
-              {% if selected_lifestyle %}{{ selected_lifestyle|length }} selected{% else %}0 selected{% endif %}
-            </p>
-
-            <p>
-              <strong>Assembly & Renovations:</strong>
-              {% if selected_assembly %}{{ selected_assembly|length }} selected{% else %}0 selected{% endif %}
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- ===== Cards Grid ===== -->
-      <div class="cards-grid">
-
-        <!-- Cleaning -->
-<div class="card">
-  <div class="card-header">
-    <img src="{% static 'images/text-file0.png' %}" alt="">
-    <h3>Cleaning</h3>
-  </div>
-
-  <label>
-    <input type="checkbox"
-           name="cleaning_types"
-           value="standard"
-           {% if "standard" in prefs.cleaning_types %}checked{% endif %}>
-    Standard Clean
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="cleaning_types"
-           value="deep"
-           {% if "deep" in prefs.cleaning_types %}checked{% endif %}>
-    Deep Clean
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="cleaning_types"
-           value="move"
-           {% if "move" in prefs.cleaning_types %}checked{% endif %}>
-    Move-in / Move-out
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="cleaning_types"
-           value="event"
-           {% if "event" in prefs.cleaning_types %}checked{% endif %}>
-    Event / Party (before & after)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="cleaning_types"
-           value="airbnb"
-           {% if "airbnb" in prefs.cleaning_types %}checked{% endif %}>
-    Airbnb / Short-stay
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="cleaning_types"
-           value="urgent"
-           {% if "urgent" in prefs.cleaning_types %}checked{% endif %}>
-    Emergency / Urgent
-  </label>
+<!-- ===== Sidebar ===== -->  {% include "accounts/includes/customer_sidebar.html" %}  <!-- ===== Main Content ===== -->
+<main class="main">
+<h1 class="page-title">Customize Your Cleaning Preferences</h1>
+<!-- ===== FORM: حفظ ضربة وحدة ===== -->
+<form method="post" action="" data-skip-validate>      {% csrf_token %}      <!-- إذا بدك تربطها بكائن preferences موجود -->      {% if pref_id %}        <input type="hidden" name="pref_id" value="{{ pref_id }}">      {% endif %}      <!-- ===== Summary Box ===== -->
+<div class="summary-card">
+<div class="summary-top">
+<div class="title-left">
+<img src="{% static 'images/summary0.png' %}" alt="Summary Icon" class="icon">
+<h3>summary of preferences</h3>
 </div>
-
-
-        <!-- Products -->
+<img src="{% static 'images/edit-pencil0.png' %}" alt="Edit Icon" class="edit-icon">
+</div>
+<div class="summary-grid">
+<div class="column">
+<h4>Tasks</h4>
+<p>              {% if selected_cleaning %}                {{ selected_cleaning|length }} selected ,              {% else %}                0 selected ,              {% endif %}            </p>
+<div class="tags">              {% for item in selected_cleaning %}                <span class="tag blue">{{ item }}</span>              {% empty %}                <span class="tag sky">No tasks selected</span>              {% endfor %}            </div>
+<p>
+<strong>Product:</strong>              {% if selected_products %}{{ selected_products|length }} selected{% else %}0 selected{% endif %}              {% if excluded_products %}, {{ excluded_products|length }} excluded{% endif %}            </p>            {% if products_custom %}              <p>
+<strong>Custom Product:</strong> {{ products_custom }}</p>            {% endif %}            <p>
+<strong>Frequency:</strong>              {% if selected_frequency %}{{ selected_frequency }}{% else %}—{% endif %}            </p>            {% if frequency_custom %}              <p>
+<strong>Custom Frequency:</strong> {{ frequency_custom }}</p>            {% endif %}          </div>
+<div class="column">
+<h4>Priorities</h4>
+<div class="tags">              {% for p in selected_priorities %}                <span class="tag green">{{ p }}</span>              {% empty %}                <span class="tag yellow">No priorities</span>              {% endfor %}            </div>            {% if priorities_custom %}              <p>
+<strong>Custom Priorities:</strong> {{ priorities_custom }}</p>            {% endif %}            <p>
+<strong>Lifestyle & Add-ons Tab:</strong>              {% if selected_lifestyle %}{{ selected_lifestyle|length }} selected{% else %}0 selected{% endif %}            </p>
+<p>
+<strong>Assembly & Renovations:</strong>              {% if selected_assembly %}{{ selected_assembly|length }} selected{% else %}0 selected{% endif %}            </p>
+</div>
+</div>
+</div>
+<!-- ===== Cards Grid ===== -->
+<div class="cards-grid">
+<!-- Cleaning -->
 <div class="card">
-  <div class="card-header">
-    <img src="{% static 'images/product0.png' %}" alt="">
-    <h3>Products</h3>
-  </div>
-
-  <label>
-    <input type="checkbox"
-           name="preferred_products"
-           value="eco"
-           {% if "eco" in prefs.preferred_products %}checked{% endif %}>
-    Eco-friendly
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="preferred_products"
-           value="standard"
-           {% if "standard" in prefs.preferred_products %}checked{% endif %}>
-    Standard
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="preferred_products"
-           value="fragrance_free"
-           {% if "fragrance_free" in prefs.preferred_products %}checked{% endif %}>
-    Fragrance-free
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="preferred_products"
-           value="disinfectant"
-           {% if "disinfectant" in prefs.preferred_products %}checked{% endif %}>
-    Disinfectant / Anti-bacterial
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="preferred_products"
-           value="customer_provided"
-           {% if "customer_provided" in prefs.preferred_products %}checked{% endif %}>
-    Customer-provided
-  </label>
-
+<div class="card-header">
+<img src="{% static 'images/text-file0.png' %}" alt="">
+<h3>Cleaning</h3>
+</div>
+<label>
+<input type="checkbox"           name="cleaning_types"           value="standard"           {% if "standard" in prefs.cleaning_types %}checked{% endif %}>    Standard Clean  </label>
+<label>
+<input type="checkbox"           name="cleaning_types"           value="deep"           {% if "deep" in prefs.cleaning_types %}checked{% endif %}>    Deep Clean  </label>
+<label>
+<input type="checkbox"           name="cleaning_types"           value="move"           {% if "move" in prefs.cleaning_types %}checked{% endif %}>    Move-in / Move-out  </label>
+<label>
+<input type="checkbox"           name="cleaning_types"           value="event"           {% if "event" in prefs.cleaning_types %}checked{% endif %}>    Event / Party (before & after)  </label>
+<label>
+<input type="checkbox"           name="cleaning_types"           value="airbnb"           {% if "airbnb" in prefs.cleaning_types %}checked{% endif %}>    Airbnb / Short-stay  </label>
+<label>
+<input type="checkbox"           name="cleaning_types"           value="urgent"           {% if "urgent" in prefs.cleaning_types %}checked{% endif %}>    Emergency / Urgent  </label>
+</div>
+<!-- Products -->
+<div class="card">
+<div class="card-header">
+<img src="{% static 'images/product0.png' %}" alt="">
+<h3>Products</h3>
+</div>
+<label>
+<input type="checkbox"           name="preferred_products"           value="eco"           {% if "eco" in prefs.preferred_products %}checked{% endif %}>    Eco-friendly  </label>
+<label>
+<input type="checkbox"           name="preferred_products"           value="standard"           {% if "standard" in prefs.preferred_products %}checked{% endif %}>    Standard  </label>
+<label>
+<input type="checkbox"           name="preferred_products"           value="fragrance_free"           {% if "fragrance_free" in prefs.preferred_products %}checked{% endif %}>    Fragrance-free  </label>
+<label>
+<input type="checkbox"           name="preferred_products"           value="disinfectant"           {% if "disinfectant" in prefs.preferred_products %}checked{% endif %}>    Disinfectant / Anti-bacterial  </label>
+<label>
+<input type="checkbox"           name="preferred_products"           value="customer_provided"           {% if "customer_provided" in prefs.preferred_products %}checked{% endif %}>    Customer-provided  </label>
 <div class="custom-field">
-  <input type="text"
-         class="custom-input"
-         name="products_custom"
-         placeholder="Customer provided products"
-         value="{{ products_custom|default:'' }}">
-
-  <button type="submit"
-          name="save_custom"
-          value="products"
-          class="btn-mini-save">
-    Save
-  </button>
+<input type="text"         class="custom-input"         name="products_custom"         placeholder="Customer provided products"         value="{{ products_custom|default:'' }}">
+<button type="submit"          name="save_custom"          value="products"          class="btn-mini-save">    Save  </button>
 </div>
-
-        </div>
-
-
-        <!-- Frequency (اختيار واحد غالباً) -->
+</div>
+<!-- Frequency (اختيار واحد غالباً) -->
 <div class="card">
-  <div class="card-header">
-    <h3>⏰ Frequency</h3>
-  </div>
-
-  <label>
-    <input type="radio"
-           name="frequency"
-           value="weekly"
-           {% if prefs.frequency == "weekly" %}checked{% endif %}>
-    Weekly
-  </label>
-
-  <label>
-    <input type="radio"
-           name="frequency"
-           value="bi_weekly"
-           {% if prefs.frequency == "bi_weekly" %}checked{% endif %}>
-    Bi-Weekly
-  </label>
-
-  <label>
-    <input type="radio"
-           name="frequency"
-           value="monthly"
-           {% if prefs.frequency == "monthly" %}checked{% endif %}>
-    Monthly
-  </label>
-
-  <label>
-    <input type="radio"
-           name="frequency"
-           value="one_time"
-           {% if prefs.frequency == "one_time" %}checked{% endif %}>
-    One-Time
-  </label>
-
-  <label>
-    <input type="radio"
-           name="frequency"
-           value="on_demand"
-           {% if prefs.frequency == "on_demand" %}checked{% endif %}>
-    On-Demand (urgent within 3h)
-  </label>
-
+<div class="card-header">
+<h3>⏰ Frequency</h3>
+</div>
+<label>
+<input type="radio"           name="frequency"           value="weekly"           {% if prefs.frequency == "weekly" %}checked{% endif %}>    Weekly  </label>
+<label>
+<input type="radio"           name="frequency"           value="bi_weekly"           {% if prefs.frequency == "bi_weekly" %}checked{% endif %}>    Bi-Weekly  </label>
+<label>
+<input type="radio"           name="frequency"           value="monthly"           {% if prefs.frequency == "monthly" %}checked{% endif %}>    Monthly  </label>
+<label>
+<input type="radio"           name="frequency"           value="one_time"           {% if prefs.frequency == "one_time" %}checked{% endif %}>    One-Time  </label>
+<label>
+<input type="radio"           name="frequency"           value="on_demand"           {% if prefs.frequency == "on_demand" %}checked{% endif %}>    On-Demand (urgent within 3h)  </label>
 <div class="custom-field">
-  <input type="text"
-         class="custom-input"
-         name="frequency_custom"
-         placeholder="Custom frequency details"
-         value="{{ frequency_custom|default:'' }}">
-
-  <button type="submit"
-          name="save_custom"
-          value="frequency"
-          class="btn-mini-save">
-    Save
-  </button>
+<input type="text"         class="custom-input"         name="frequency_custom"         placeholder="Custom frequency details"         value="{{ frequency_custom|default:'' }}">
+<button type="submit"          name="save_custom"          value="frequency"          class="btn-mini-save">    Save  </button>
 </div>
-
-
-        </div>
-
-
-        <!-- Priorities -->
+</div>
+<!-- Priorities -->
 <div class="card">
-  <div class="card-header">
-    <img src="{% static 'images/scrum0.png' %}" alt="">
-    <h3>Priorities</h3>
-  </div>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="kitchen"
-           {% if "kitchen" in prefs.priorities %}checked{% endif %}>
-    Kitchen
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="living_room"
-           {% if "living_room" in prefs.priorities %}checked{% endif %}>
-    Living Room
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="bedrooms"
-           {% if "bedrooms" in prefs.priorities %}checked{% endif %}>
-    Bedrooms
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="bathrooms"
-           {% if "bathrooms" in prefs.priorities %}checked{% endif %}>
-    Bathrooms
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="balcony_garden"
-           {% if "balcony_garden" in prefs.priorities %}checked{% endif %}>
-    Balcony / Garden
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="office"
-           {% if "office" in prefs.priorities %}checked{% endif %}>
-    Office
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="priorities"
-           value="storage"
-           {% if "storage" in prefs.priorities %}checked{% endif %}>
-    Storage
-  </label>
-
+<div class="card-header">
+<img src="{% static 'images/scrum0.png' %}" alt="">
+<h3>Priorities</h3>
+</div>
+<label>
+<input type="checkbox"           name="priorities"           value="kitchen"           {% if "kitchen" in prefs.priorities %}checked{% endif %}>    Kitchen  </label>
+<label>
+<input type="checkbox"           name="priorities"           value="living_room"           {% if "living_room" in prefs.priorities %}checked{% endif %}>    Living Room  </label>
+<label>
+<input type="checkbox"           name="priorities"           value="bedrooms"           {% if "bedrooms" in prefs.priorities %}checked{% endif %}>    Bedrooms  </label>
+<label>
+<input type="checkbox"           name="priorities"           value="bathrooms"           {% if "bathrooms" in prefs.priorities %}checked{% endif %}>    Bathrooms  </label>
+<label>
+<input type="checkbox"           name="priorities"           value="balcony_garden"           {% if "balcony_garden" in prefs.priorities %}checked{% endif %}>    Balcony / Garden  </label>
+<label>
+<input type="checkbox"           name="priorities"           value="office"           {% if "office" in prefs.priorities %}checked{% endif %}>    Office  </label>
+<label>
+<input type="checkbox"           name="priorities"           value="storage"           {% if "storage" in prefs.priorities %}checked{% endif %}>    Storage  </label>
 <div class="custom-field">
-  <input type="text"
-         class="custom-input"
-         name="priorities_custom"
-         placeholder="Custom priority notes"
-         value="{{ priorities_custom|default:'' }}">
-
-  <button type="submit"
-          name="save_custom"
-          value="priorities"
-          class="btn-mini-save">
-    Save
-  </button>
+<input type="text"         class="custom-input"         name="priorities_custom"         placeholder="Custom priority notes"         value="{{ priorities_custom|default:'' }}">
+<button type="submit"          name="save_custom"          value="priorities"          class="btn-mini-save">    Save  </button>
 </div>
-
-
-        </div>
-
-
-        <!-- Lifestyle -->
+</div>
+<!-- Lifestyle -->
 <div class="card">
-  <div class="card-header">
-    <h3>🌿 Lifestyle & Add-ons Tab</h3>
-  </div>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="event_staffing"
-           {% if "event_staffing" in prefs.lifestyle_addons %}checked{% endif %}>
-    Event staffing (setup, serving, after-cleaning)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="errand_services"
-           {% if "errand_services" in prefs.lifestyle_addons %}checked{% endif %}>
-    Errand services (package pickup, deliveries, groceries)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="elderly_assistance"
-           {% if "elderly_assistance" in prefs.lifestyle_addons %}checked{% endif %}>
-    Elderly assistance (non-medical)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="pet_care"
-           {% if "pet_care" in prefs.lifestyle_addons %}checked{% endif %}>
-    Pet care (feeding, walking, sitting)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="plant_care"
-           {% if "plant_care" in prefs.lifestyle_addons %}checked{% endif %}>
-    Plant care (watering, replanting)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="decluttering"
-           {% if "decluttering" in prefs.lifestyle_addons %}checked{% endif %}>
-    Decluttering & organizing assistance
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="house_sitting"
-           {% if "house_sitting" in prefs.lifestyle_addons %}checked{% endif %}>
-    House sitting (vacation care)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="babysitting"
-           {% if "babysitting" in prefs.lifestyle_addons %}checked{% endif %}>
-    Babysitting (child care, hourly)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="lifestyle_addons"
-           value="housemaid_hourly"
-           {% if "housemaid_hourly" in prefs.lifestyle_addons %}checked{% endif %}>
-    Housemaid per hour (general help beyond cleaning, flexible tasks)
-  </label>
+<div class="card-header">
+<h3>🌿 Lifestyle & Add-ons Tab</h3>
 </div>
-
-
-        <!-- Assembly -->
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="event_staffing"           {% if "event_staffing" in prefs.lifestyle_addons %}checked{% endif %}>    Event staffing (setup, serving, after-cleaning)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="errand_services"           {% if "errand_services" in prefs.lifestyle_addons %}checked{% endif %}>    Errand services (package pickup, deliveries, groceries)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="elderly_assistance"           {% if "elderly_assistance" in prefs.lifestyle_addons %}checked{% endif %}>    Elderly assistance (non-medical)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="pet_care"           {% if "pet_care" in prefs.lifestyle_addons %}checked{% endif %}>    Pet care (feeding, walking, sitting)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="plant_care"           {% if "plant_care" in prefs.lifestyle_addons %}checked{% endif %}>    Plant care (watering, replanting)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="decluttering"           {% if "decluttering" in prefs.lifestyle_addons %}checked{% endif %}>    Decluttering & organizing assistance  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="house_sitting"           {% if "house_sitting" in prefs.lifestyle_addons %}checked{% endif %}>    House sitting (vacation care)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="babysitting"           {% if "babysitting" in prefs.lifestyle_addons %}checked{% endif %}>    Babysitting (child care, hourly)  </label>
+<label>
+<input type="checkbox"           name="lifestyle_addons"           value="housemaid_hourly"           {% if "housemaid_hourly" in prefs.lifestyle_addons %}checked{% endif %}>    Housemaid per hour (general help beyond cleaning, flexible tasks)  </label>
+</div>
+<!-- Assembly -->
 <div class="card">
-  <div class="card-header">
-    <h3>🧰 Assembly & Renovations</h3>
-  </div>
-
-  <label>
-    <input type="checkbox"
-           name="assembly_services"
-           value="ikea_furniture"
-           {% if "ikea_furniture" in prefs.assembly_services %}checked{% endif %}>
-    IKEA & furniture assembly
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="assembly_services"
-           value="minor_renovations"
-           {% if "minor_renovations" in prefs.assembly_services %}checked{% endif %}>
-    Minor renovations (painting, flooring, repairs)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="assembly_services"
-           value="mounting"
-           {% if "mounting" in prefs.assembly_services %}checked{% endif %}>
-    Mounting (TVs, shelves, artwork)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="assembly_services"
-           value="light_repairs"
-           {% if "light_repairs" in prefs.assembly_services %}checked{% endif %}>
-    Light repairs (doors, seals, curtain rods)
-  </label>
-
-  <label>
-    <input type="checkbox"
-           name="assembly_services"
-           value="large_renovation"
-           {% if "large_renovation" in prefs.assembly_services %}checked{% endif %}>
-    Large renovation project
-  </label>
+<div class="card-header">
+<h3>🧰 Assembly & Renovations</h3>
 </div>
-
-
-      </div>
-
-      <!-- زر حفظ -->
-      <div style="margin-top:14px;">
-        <button type="submit" class="btn btn-primary">Save Preferences</button>
-      </div>
-
-    </form>
-  </main>
+<label>
+<input type="checkbox"           name="assembly_services"           value="ikea_furniture"           {% if "ikea_furniture" in prefs.assembly_services %}checked{% endif %}>    IKEA & furniture assembly  </label>
+<label>
+<input type="checkbox"           name="assembly_services"           value="minor_renovations"           {% if "minor_renovations" in prefs.assembly_services %}checked{% endif %}>    Minor renovations (painting, flooring, repairs)  </label>
+<label>
+<input type="checkbox"           name="assembly_services"           value="mounting"           {% if "mounting" in prefs.assembly_services %}checked{% endif %}>    Mounting (TVs, shelves, artwork)  </label>
+<label>
+<input type="checkbox"           name="assembly_services"           value="light_repairs"           {% if "light_repairs" in prefs.assembly_services %}checked{% endif %}>    Light repairs (doors, seals, curtain rods)  </label>
+<label>
+<input type="checkbox"           name="assembly_services"           value="large_renovation"           {% if "large_renovation" in prefs.assembly_services %}checked{% endif %}>    Large renovation project  </label>
 </div>
-
-<!-- FOOTER -->
-{% include "home/includes/footer.html" %}
-
-<!-- JS: Header menu -->
-
-
+</div>
+<!-- زر حفظ -->
+<div style="margin-top:14px;">
+<button type="submit" class="btn btn-primary">Save Preferences</button>
+</div>
+</form>
+</main>
+</div>
+<!-- FOOTER -->{% include "home/includes/footer.html" %}<!-- JS: Header menu -->
 <!-- JS: Sidebar -->
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector("#menuToggle .arrow");
-
-  if (toggle && sidebar && arrow) {
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";
-    });
-  }
+<script>  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const arrow = document.querySelector("#menuToggle .arrow");  if (toggle && sidebar && arrow) {    toggle.addEventListener("click", () => {      sidebar.classList.toggle("open");      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";    });  }</script>
+<script>function saveCustomField(fieldName, inputId) {    const input = document.getElementById(inputId);    const value = input.value.trim();    if (!value) {        alert("Please enter a value first");        return;    }    fetch("{% url 'accounts:Service_Preferences' %}", {        method: "POST",        headers: {            "X-CSRFToken": "{{ csrf_token }}",            "Content-Type": "application/json"        },        body: JSON.stringify({            field: fieldName,            value: value        })    })    .then(res => res.json())    .then(data => {        if (data.status === "ok") {            input.classList.add("saved");            setTimeout(() => input.classList.remove("saved"), 1500);        }    });}</script>
+<script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.querySelector(".customer-menu-overlay");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");    });  }})();</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-<script>
-function saveCustomField(fieldName, inputId) {
-    const input = document.getElementById(inputId);
-    const value = input.value.trim();
-
-    if (!value) {
-        alert("Please enter a value first");
-        return;
-    }
-
-    fetch("{% url 'accounts:Service_Preferences' %}", {
-        method: "POST",
-        headers: {
-            "X-CSRFToken": "{{ csrf_token }}",
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            field: fieldName,
-            value: value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.status === "ok") {
-            input.classList.add("saved");
-            setTimeout(() => input.classList.remove("saved"), 1500);
-        }
-    });
-}
-</script>
-
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
-  }
-})();
-</script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

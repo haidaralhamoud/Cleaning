@@ -1,0 +1,158 @@
+<style>
+  :root {
+    --green: #4aa96c;
+    --blue: #1a87c3;
+    --ink: #101214;
+    --muted: #56626e;
+    --bg: #f7fafc;
+    --panel: rgba(255, 255, 255, 0.78);
+    --shadow-tight: 0 8px 20px rgba(16, 18, 20, 0.12);
+    --shadow-soft: 0 18px 40px rgba(16, 18, 20, 0.12);
+  }
+
+  body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    color: var(--ink);
+    font-size: 15px;
+    background:
+      radial-gradient(1100px 600px at 10% -10%, rgba(26, 135, 195, 0.15), transparent 60%),
+      radial-gradient(800px 500px at 90% 0%, rgba(74, 169, 108, 0.12), transparent 55%),
+      var(--bg);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .container {
+    width: min(1200px, 92%);
+    margin-inline: auto;
+  }
+
+  .hero {
+    position: relative;
+    min-height: clamp(520px, 60vh, 660px);
+    overflow: visible;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    filter: saturate(105%) contrast(98%);
+  }
+
+  .hero-panel {
+    position: absolute;
+    inset: 0;
+    width: 56%;
+    background: var(--panel);
+    backdrop-filter: blur(6px);
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+  }
+
+  .hero-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: inherit;
+    z-index: 2;
+  }
+
+  .hero-copy {
+    max-width: 700px;
+  }
+
+  .hero-copy h1 {
+    margin: 0 0 12px;
+    font-family: "Vesper Libre", serif;
+    font-weight: 700;
+    font-size: clamp(30px, 3.7vw, 46px);
+    color: var(--ink);
+  }
+
+  .hero-copy p {
+    margin: 0 0 22px;
+    font-family: "Vesper Libre", serif;
+    font-weight: 700;
+    font-size: clamp(16px, 1.8vw, 20px);
+    line-height: 1.7;
+    color: var(--muted);
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 11px 24px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 15px;
+    text-decoration: none;
+    box-shadow: var(--shadow-tight);
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #fff;
+  }
+
+  .btn-secondary {
+    background: #fff;
+    color: var(--green);
+    border: 2px solid rgba(74, 169, 108, 0.5);
+  }
+
+  .btn-electric {
+    gap: 10px;
+    min-height: 56px;
+    background: linear-gradient(135deg, #12a7c8, #0e8fb0);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.58);
+    box-shadow:
+      0 14px 28px rgba(18, 167, 200, 0.24),
+      0 6px 14px rgba(74, 169, 108, 0.12),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  .same-day-dropdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  @media (max-width: 900px) {
+    .container {
+      width: 100%;
+      margin-inline: 0;
+      padding-inline: 16px;
+    }
+
+    .hero-panel {
+      width: 100%;
+      border-right: none;
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .hero-inner {
+      min-height: 520px;
+      padding: 32px 0 48px;
+    }
+
+    .hero-copy {
+      max-width: 100%;
+      text-align: center;
+    }
+
+    .hero-buttons {
+      justify-content: center;
+    }
+  }
+</style>

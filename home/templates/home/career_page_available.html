@@ -1,17 +1,20 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Available Positions - Hembla experten</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Available Positions - Hembla experten</title>
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/career_page_available.css'%}" />
-    <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/career_page_available.css'%}" />
+<style>
 *, *:before, *:after {
   box-sizing: border-box;
 }
@@ -96,23 +99,22 @@ html {
    </style>
 </head>
 <body{% if show_success_popup %} class="career-popup-open"{% endif %}>
-  <!-- ' HEADER -->
+<!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
   <section class="apply-section  fade-in">
-    <div class="available-banner zoom-in">
-      <img src="{% static 'images/avaiabe.webp'%}" alt="Available Now" loading="lazy" decoding="async" />
-    </div>
-
-    <div class="intro-box fade-in">
-      <p>Your journey starts here ' Apply now and be part of Hembla's family</p>
-    </div>
-
-    <h2 class="apply-title fade-in">Apply Now</h2>
-
-    <div class="apply-container fade-in">
-
-      <!-- ًں”¥ ط§ظ„ظپظˆط±ظ… ط§ظ„ط­ظ‚ظٹظ‚ظٹ -->
-      <form class="apply-form fade-in" method="POST" enctype="multipart/form-data">
+<div class="available-banner zoom-in">
+<picture>
+<source srcset="{% static 'images/avaiabe.webp' %}" type="image/webp">
+<img src="{% static 'images/avaiabe.png'%}" alt="Available Now" width="1099" height="324" loading="eager" decoding="async" fetchpriority="high" />
+</picture>
+</div>
+<div class="intro-box fade-in">
+<p>Your journey starts here ' Apply now and be part of Hembla's family</p>
+</div>
+<h2 class="apply-title fade-in">Apply Now</h2>
+<div class="apply-container fade-in">
+<!-- 🔥 الفورم الحقيقي -->
+<form class="apply-form fade-in" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         
         {{ form.full_name }}
@@ -123,28 +125,31 @@ html {
         {{ form.cv }}
 
         <button class="submit-btn" type="submit">Submit Application</button>
-      </form>
-
-      <div class="apply-image zoom-in">
-        <img src="{% static 'images/frame-16865528070.webp'%}" alt="Apply illustration" loading="lazy" decoding="async" />
-      </div>
-    </div>
-  </section>
+</form>
+<div class="apply-image zoom-in">
+<picture>
+<source srcset="{% static 'images/frame-16865528070.webp' %}" type="image/webp">
+<img src="{% static 'images/frame-16865528070.png'%}" alt="Apply illustration" width="693" height="580" loading="lazy" decoding="async" />
+</picture>
+</div>
+</div>
+</section>
   {% if show_success_popup %}
   <div class="career-success-overlay" role="dialog" aria-modal="true" aria-labelledby="careerSuccessTitle">
-    <div class="career-success-popup">
-      <div class="career-success-badge" aria-hidden="true">
-        <span class="career-success-badge-core">
-          <span class="career-success-badge-check"></span>
-        </span>
-      </div>
-      <h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
-      <p>We will contact you if your profile matches the job requirements.</p>
-      <div class="career-success-actions">
-        <a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
-      </div>
-    </div>
-  </div>
+<div class="career-success-popup">
+<div class="career-success-badge" aria-hidden="true">
+<span class="career-success-badge-core">
+<span class="career-success-badge-check">
+</span>
+</span>
+</div>
+<h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
+<p>We will contact you if your profile matches the job requirements.</p>
+<div class="career-success-actions">
+<a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
+</div>
+</div>
+</div>
   {% endif %}
   {% include "home/includes/footer.html" %}
 <script>
@@ -183,8 +188,8 @@ html {
 
   imageObserver.observe(rightImage);
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

@@ -2,16 +2,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Your Services Booking</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Your Services Booking</title>
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/YourServicesBooking.css' %}">
-  <link rel="stylesheet" href="{% static 'css/addonse.css' %}">
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/YourServicesBooking.css' %}">
+<link rel="stylesheet" href="{% static 'css/addonse.css' %}">
+<style>
     .error {
       border: 2px solid #e74c3c !important;
       background: #fff6f6;
@@ -503,43 +506,44 @@
 
 <!-- HERO -->
 <section class="hero" style="background-image: url('{% static 'images/hero.webp' %}');">
-  <div class="overlay"></div>
-  <h1>Proceed to booking</h1>
+<div class="overlay">
+</div>
+<h1>Proceed to booking</h1>
 </section>
-
 <!-- PROGRESS -->
 <section class="progress">
-  <p>Step 2 of 4</p>
-  <div class="bar"><div class="fill"></div></div>
+<p>Step 2 of 4</p>
+<div class="bar">
+<div class="fill">
+</div>
+</div>
 </section>
-
 <main class="content">
-
-  <!-- LEFT -->
-  <div class="left">
-    <h2>Your Selected Services</h2>
-    <h3>What can we help with</h3>
-
-    <form id="private-booking-services-form" method="post" data-skip-validate onsubmit="return handleServicesSubmit(event);">
+<!-- LEFT -->
+<div class="left">
+<h2>Your Selected Services</h2>
+<h3>What can we help with</h3>
+<form id="private-booking-services-form" method="post" data-skip-validate onsubmit="return handleServicesSubmit(event);">
       {% csrf_token %}
       <input type="hidden" name="use_rot" id="use_rot_input" value="{% if booking.use_rot %}1{% else %}0{% endif %}">
 
       {% if grouped_categories %}
       <div class="category-selector" aria-label="Selected service categories">
-        <button type="button" class="service-nav-arrow" id="servicePrevBtn" aria-label="Previous service">
-          <span>&lsaquo;</span>
-        </button>
-        <div class="category-track">
+<button type="button" class="service-nav-arrow" id="servicePrevBtn" aria-label="Previous service">
+<span>&lsaquo;</span>
+</button>
+<div class="category-track">
           {% for category in grouped_categories %}
           <button
             type="button"
             class="category-card{% if forloop.first %} is-active{% endif %}"
             data-category-tab="{{ category.slug }}"
-            data-category-services="{% for service in category.services %}{{ service.slug }}{% if not forloop.last %},{% endif %}{% endfor %}"
+            data-category-services="{% for service in category.services %}{{ service.slug }}{% if not forloop.last %},{% endif %}
+{% endfor %}"
             aria-label="Show {{ category.title }}"
           >
-            <span class="card-close-chip" data-remove-category="{{ category.slug }}" aria-label="Remove {{ category.title }}">&times;</span>
-            <div class="category-card-media">
+<span class="card-close-chip" data-remove-category="{{ category.slug }}" aria-label="Remove {{ category.title }}">&times;</span>
+<div class="category-card-media">
               {% if category.icon_url %}
                 <img src="{{ category.icon_url }}" alt="{{ category.title }}" loading="lazy" decoding="async">
               {% elif category.services.0.image %}
@@ -550,25 +554,26 @@
                 <img src="{% static 'images/hero.webp' %}" alt="{{ category.title }}" loading="lazy" decoding="async">
               {% endif %}
             </div>
-            <span>{{ category.title }}</span>
-          </button>
+<span>{{ category.title }}</span>
+</button>
           {% endfor %}
         </div>
-        <button type="button" class="service-nav-arrow" id="serviceNextBtn" aria-label="Next service">
-          <span>&rsaquo;</span>
-        </button>
-      </div>
-      <div class="service-pagination-dots" id="servicePaginationDots">
+<button type="button" class="service-nav-arrow" id="serviceNextBtn" aria-label="Next service">
+<span>&rsaquo;</span>
+</button>
+</div>
+<div class="service-pagination-dots" id="servicePaginationDots">
         {% for category in grouped_categories %}
           <button
             type="button"
             class="service-dot{% if forloop.first %} is-active{% endif %}"
             data-category-tab="{{ category.slug }}"
             aria-label="Show {{ category.title }}"
-          ></button>
+          >
+</button>
         {% endfor %}
       </div>
-      <div class="service-tab-groups">
+<div class="service-tab-groups">
         {% for category in grouped_categories %}
         <div class="service-tab-group{% if forloop.first %} is-active{% endif %}" data-category-panel="{{ category.slug }}">
           {% for service in category.services %}
@@ -577,7 +582,7 @@
             class="service-chip{% if forloop.first and forloop.parentloop.first %} is-active{% endif %}"
             data-service-jump="{{ service.slug }}"
           >
-            <span class="service-chip__close" data-remove-service="{{ service.slug }}" aria-label="Remove {{ service.title }}">&times;</span>
+<span class="service-chip__close" data-remove-service="{{ service.slug }}" aria-label="Remove {{ service.title }}">&times;</span>
             {{ service.title }}
           </button>
           {% endfor %}
@@ -588,8 +593,8 @@
 
       {% for service in services %}
       <div class="service-box{% if forloop.first %} open is-active{% endif %}" data-service="{{ service.slug }}" data-category="{{ service.category.slug }}" data-service-index="{{ forloop.counter0 }}">
-        <div class="service-banner">
-          <div class="service-banner-media">
+<div class="service-banner">
+<div class="service-banner-media">
             {% if service.image %}
               <img src="{{ service.image.url }}" alt="{{ service.title }}" loading="lazy" decoding="async">
             {% elif service.hero_image %}
@@ -598,44 +603,44 @@
               <img src="{% static 'images/hero.webp' %}" alt="{{ service.title }}" loading="lazy" decoding="async">
             {% endif %}
           </div>
-          <div class="service-banner-copy">
-            <p class="service-step">Service {{ forloop.counter }}{% if services|length > 1 %} of {{ services|length }}{% endif %}</p>
-            <h4>{{ service.title }}</h4>
-          </div>
-        </div>
-        <div class="service-head">
-          <h5>{{ forloop.counter }}. {{ service.title }}</h5>
-          <button type="button" class="svc-toggle" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
+<div class="service-banner-copy">
+<p class="service-step">Service {{ forloop.counter }}{% if services|length > 1 %} of {{ services|length }}{% endif %}</p>
+<h4>{{ service.title }}</h4>
+</div>
+</div>
+<div class="service-head">
+<h5>{{ forloop.counter }}. {{ service.title }}</h5>
+<button type="button" class="svc-toggle" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}">
             Questions
             <span class="chev">v</span>
-          </button>
-        </div>
-        <div class="service-body">
+</button>
+</div>
+<div class="service-body">
         {% if service.slug == "standard-cleaning" %}
           <input type="hidden" name="booking_mode_{{ service.slug }}" id="booking_mode_{{ service.slug }}" value="all_area">
-          <div class="booking-mode-tabs" data-mode-tabs="{{ service.slug }}">
-            <button type="button" class="booking-mode-tab is-active" data-service-mode-tab="{{ service.slug }}" data-mode="all_area">
-              <strong>All area</strong>
-              <span>Use the current full-home questions.</span>
-            </button>
-            <button type="button" class="booking-mode-tab" data-service-mode-tab="{{ service.slug }}" data-mode="by_room">
-              <strong>By room</strong>
-              <span>Show the room-by-room layout for Standard Cleaning.</span>
-            </button>
-          </div>
+<div class="booking-mode-tabs" data-mode-tabs="{{ service.slug }}">
+<button type="button" class="booking-mode-tab is-active" data-service-mode-tab="{{ service.slug }}" data-mode="all_area">
+<strong>All area</strong>
+<span>Use the current full-home questions.</span>
+</button>
+<button type="button" class="booking-mode-tab" data-service-mode-tab="{{ service.slug }}" data-mode="by_room">
+<strong>By room</strong>
+<span>Show the room-by-room layout for Standard Cleaning.</span>
+</button>
+</div>
         {% endif %}
 
         <div class="booking-tab-panel is-active" data-service-mode-panel="{{ service.slug }}" data-mode="all_area">
-        <!-- الأسئلة الأساسية الخاصة بالخدمة -->
+<!-- الأسئلة الأساسية الخاصة بالخدمة -->
         {% if service.questions %}
           {% for q_key, question in service.questions.items %}
           <div class="row" data-service-question="{{ service.slug }}" data-question-key="{{ q_key }}">
-            <div class="input-block">
-              <label>{{ question.label }}</label>
+<div class="input-block">
+<label>{{ question.label }}</label>
 
               {% if question.type == "select" %}
                 <select name="{{ service.slug }}__{{ q_key }}" class="js-custom-select">
-                  <option value="">Select...</option>
+<option value="">Select...</option>
                   {% for opt in question.options %}
                   <option value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
                       {% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}
@@ -647,17 +652,18 @@
                 <div class="option-group">
                   {% for opt in question.options %}
                     <div class="option-item-stack" data-option-inline-wrap>
-                      <label class="option-item">
-                        <input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
+<label class="option-item">
+<input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
                                value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                        <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
-                      </label>
-                      <div
+<span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
+</label>
+<div
                         class="service-option-inline-details"
                         data-option-inline-container
                         data-option-value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}"
-                      ></div>
-                    </div>
+                      >
+</div>
+</div>
                   {% endfor %}
                 </div>
 
@@ -665,17 +671,18 @@
                 <div class="option-group">
                   {% for opt in question.options %}
                     <div class="option-item-stack" data-option-inline-wrap>
-                      <label class="option-item">
-                        <input type="radio" name="{{ service.slug }}__{{ q_key }}"
+<label class="option-item">
+<input type="radio" name="{{ service.slug }}__{{ q_key }}"
                                value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                        <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
-                      </label>
-                      <div
+<span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
+</label>
+<div
                         class="service-option-inline-details"
                         data-option-inline-container
                         data-option-value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}"
-                      ></div>
-                    </div>
+                      >
+</div>
+</div>
                   {% endfor %}
                 </div>
 
@@ -683,45 +690,48 @@
                 <div class="option-group">
                   {% for opt in question.options %}
                     <div class="option-item-stack" data-option-inline-wrap>
-                      <label class="option-item">
-                        <input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
+<label class="option-item">
+<input type="checkbox" name="{{ service.slug }}__{{ q_key }}"
                                value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}">
-                        <span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
-                      </label>
-                      <div
+<span>{% if opt.label %}{{ opt.label }}{% elif opt.value %}{{ opt.value }}{% else %}{{ opt }}{% endif %}</span>
+</label>
+<div
                         class="service-option-inline-details"
                         data-option-inline-container
                         data-option-value="{% if opt.value %}{{ opt.value }}{% elif opt.label %}{{ opt.label }}{% else %}{{ opt }}{% endif %}"
-                      ></div>
-                    </div>
+                      >
+</div>
+</div>
                   {% endfor %}
                 </div>
 
               {% elif question.type == "yes_no" %}
                 <div class="option-group">
-                  <label class="option-item">
-                    <input type="radio" name="{{ service.slug }}__{{ q_key }}" value="Yes">
-                    <span>Yes</span>
-                  </label>
-                  <label class="option-item">
-                    <input type="radio" name="{{ service.slug }}__{{ q_key }}" value="No">
-                    <span>No</span>
-                  </label>
-                </div>
+<label class="option-item">
+<input type="radio" name="{{ service.slug }}__{{ q_key }}" value="Yes">
+<span>Yes</span>
+</label>
+<label class="option-item">
+<input type="radio" name="{{ service.slug }}__{{ q_key }}" value="No">
+<span>No</span>
+</label>
+</div>
 
               {% elif question.type == "number" %}
                 <input type="number" name="{{ service.slug }}__{{ q_key }}">
 
               {% elif question.type == "textarea" %}
-                <textarea name="{{ service.slug }}__{{ q_key }}"></textarea>
+                <textarea name="{{ service.slug }}__{{ q_key }}">
+</textarea>
 
               {% else %}
                 <input type="text" name="{{ service.slug }}__{{ q_key }}">
               {% endif %}
               <input type="hidden" name="{{ service.slug }}__{{ q_key }}__details" data-question-detail-field>
-              <div class="service-option-details" data-question-detail-container></div>
-            </div>
-          </div>
+<div class="service-option-details" data-question-detail-container>
+</div>
+</div>
+</div>
 {% endfor %}
         {% endif %}
 
@@ -729,33 +739,33 @@
 
         {% if service.slug == "standard-cleaning" %}
         <div class="booking-tab-panel" data-service-mode-panel="{{ service.slug }}" data-mode="by_room">
-          <div class="by-room-shell">
-            <div class="by-room-header">
-              <h6>Select Room</h6>
-              <p>Choose the specific rooms you want us to clean. This section is visual for now and the room-by-room pricing logic will be wired next.</p>
-            </div>
-            <div class="by-room-note" data-by-room-note>
-              <span class="by-room-note-icon">i</span>
-              <div>
-                <strong>Customize your cleaning</strong>
-                <span>When selecting 'By room', please choose at least 5 rooms to proceed.</span>
-              </div>
-            </div>
-            <div class="by-room-grid">
+<div class="by-room-shell">
+<div class="by-room-header">
+<h6>Select Room</h6>
+<p>Choose the specific rooms you want us to clean. This section is visual for now and the room-by-room pricing logic will be wired next.</p>
+</div>
+<div class="by-room-note" data-by-room-note>
+<span class="by-room-note-icon">i</span>
+<div>
+<strong>Customize your cleaning</strong>
+<span>When selecting 'By room', please choose at least 5 rooms to proceed.</span>
+</div>
+</div>
+<div class="by-room-grid">
               {% for room in service.by_room_options %}
               <div class="room-card">
-                <div class="room-icon">
+<div class="room-icon">
                   {% if room.image %}
                     <img src="{{ room.image.url }}" alt="{{ room.title }}" loading="lazy" decoding="async">
                   {% else %}
                     <span class="room-icon-fallback">{{ room.short_label }}</span>
                   {% endif %}
                 </div>
-                <h6>{{ room.title }}</h6>
-                <div class="room-price">{{ room.price_currency }} {{ room.unit_price|floatformat:2 }}</div>
-                <div class="room-counter">
-                  <button type="button" class="room-stepper" data-step="-1">-</button>
-                  <input
+<h6>{{ room.title }}</h6>
+<div class="room-price">{{ room.price_currency }} {{ room.unit_price|floatformat:2 }}</div>
+<div class="room-counter">
+<button type="button" class="room-stepper" data-step="-1">-</button>
+<input
                     type="text"
                     name="{{ service.slug }}__room__{{ room.id }}"
                     value="0"
@@ -765,64 +775,56 @@
                     data-room-price="{{ room.unit_price }}"
                     data-room-currency="{{ room.price_currency }}"
                   >
-                  <span class="room-counter-value">0</span>
-                  <button type="button" class="room-stepper" data-step="1">+</button>
-                </div>
-              </div>
+<span class="room-counter-value">0</span>
+<button type="button" class="room-stepper" data-step="1">+</button>
+</div>
+</div>
               {% empty %}
               <div class="by-room-footer" style="grid-column: 1 / -1; margin-top: 0;">
                 No room options are configured yet for this service. Add them from the dashboard.
               </div>
               {% endfor %}
             </div>
-          </div>
-        </div>
+</div>
+</div>
         {% endif %}
 
         <!-- زر add-ons -->
-        <button type="button"
+<button type="button"
                 class="btn-blue"
                 onclick="openAddonsPopup('{{ service.slug }}')">Add ons</button>
-        </div>
-
-      </div>
+</div>
+</div>
       {% endfor %}
 
       <!-- هنا يتخزن JSON تبع الـ Add-ons -->
-      <input type="hidden" name="addons_selected" id="addons_json">
-      <button type="submit" class="btn-blue" style="margin-top:20px;">Continue</button>
-    </form>
-  </div>
-
-  <!-- RIGHT SUMMARY (مؤقت ثابت) -->
+<input type="hidden" name="addons_selected" id="addons_json">
+<button type="submit" class="btn-blue" style="margin-top:20px;">Continue</button>
+</form>
+</div>
+<!-- RIGHT SUMMARY (مؤقت ثابت) -->
 {% include "home/_booking_summary.html" %}
 
 </main>
-
 <!-- ===== POPUP OVERLAY ===== -->
 <div class="popup-overlay" id="popup" style="display:none;">
-  <div class="popup-content">
-
-    <!-- HEADER -->
-    <div class="popup-header">
-      <h3 id="popupTitle">Add-ons</h3>
-      <button id="closePopup">×</button>
-    </div>
-
-    <!-- BODY -->
-    <div id="popupBody" class="popup-body">
-      <!-- هنا بيركب الجريد أو الفورم -->
-    </div>
-
-    <!-- BUTTONS -->
-    <div class="popup-buttons">
-      <button class="btn-outline" id="cancelPopup">Cancel</button>
-      <button class="btn-filled" id="savePopup">Save & Close</button>
-    </div>
-
-  </div>
+<div class="popup-content">
+<!-- HEADER -->
+<div class="popup-header">
+<h3 id="popupTitle">Add-ons</h3>
+<button id="closePopup">×</button>
 </div>
-
+<!-- BODY -->
+<div id="popupBody" class="popup-body">
+<!-- هنا بيركب الجريد أو الفورم -->
+</div>
+<!-- BUTTONS -->
+<div class="popup-buttons">
+<button class="btn-outline" id="cancelPopup">Cancel</button>
+<button class="btn-filled" id="savePopup">Save & Close</button>
+</div>
+</div>
+</div>
 <!-- =============== JS DATA من Django =============== -->
 <script>
 // جميع الـ Add-ons لكل خدمة
@@ -992,17 +994,18 @@ function renderAddonsGrid(serviceSlug) {
 
         html += `
           <div class="addon-card${isChecked ? ' is-selected' : ''}">
-            <button type="button" class="addon-card-main" onclick="handleAddonCardOpen('${serviceSlug}','${key}')">
-              <img src="${ad.icon}" class="addon-icon">
-              <p>${ad.label}</p>
-            </button>
-            <button
+<button type="button" class="addon-card-main" onclick="handleAddonCardOpen('${serviceSlug}','${key}')">
+<img src="${ad.icon}" class="addon-icon">
+<p>${ad.label}</p>
+</button>
+<button
               type="button"
               class="check-box ${isChecked ? 'checked' : ''}"
               onclick="handleAddonCardToggle(event,'${serviceSlug}','${key}')"
               aria-label="${isChecked ? 'Remove add-on' : 'Select add-on'}"
-            ></button>
-          </div>
+            >
+</button>
+</div>
         `;
     }
 
@@ -1038,9 +1041,9 @@ function openAddonForm(serviceSlug, addonKey) {
 
     popupBody.innerHTML = `
       <div class="addon-form-wrapper">
-        <div class="addon-form-grid">${addon.form}</div>
-      </div>
-      <button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">&larr; Back to Add-ons</button>
+<div class="addon-form-grid">${addon.form}</div>
+</div>
+<button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">&larr; Back to Add-ons</button>
     `;
 
     popupBody.querySelectorAll("option").forEach((option) => {
@@ -1175,9 +1178,6 @@ window.addEventListener("load", () => {
     updateSummary();
 });
 </script>
-
-
-
 <!-- =============  API FUNCTIONS (SUMMARY / UPDATE) ============= -->
 <script>
 // تحديث الفاتورة
@@ -1349,31 +1349,31 @@ function buildDetailFieldHtml(subKey, subQuestion, savedValue, inputNamePrefix) 
     if (subQuestion.type === "select") {
         return `
           <div class="option-detail-field" data-detail-field-wrap>
-            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
-            <select class="js-custom-select" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">
-              <option value="">Select...</option>
+<label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+<select class="js-custom-select" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">
+<option value="">Select...</option>
               ${(subQuestion.options || []).map((opt) => {
                 const value = escapeDetailHtml(opt.value || opt.label || opt);
                 const label = escapeDetailHtml(opt.label || opt.value || opt);
                 return `<option value="${value}" ${String(savedValue || "") === String(opt.value || opt.label || opt) ? "selected" : ""}>${label}</option>`;
               }).join("")}
             </select>
-          </div>
+</div>
         `;
     }
     if (subQuestion.type === "multiselect") {
         const selected = Array.isArray(savedValue) ? new Set(savedValue.map(String)) : new Set();
         return `
           <div class="option-detail-field" data-detail-field-wrap>
-            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
-            <select multiple data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">
+<label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+<select multiple data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">
               ${(subQuestion.options || []).map((opt) => {
                 const rawValue = String(opt.value || opt.label || opt);
                 const label = escapeDetailHtml(opt.label || opt.value || opt);
                 return `<option value="${escapeDetailHtml(rawValue)}" ${selected.has(rawValue) ? "selected" : ""}>${label}</option>`;
               }).join("")}
             </select>
-          </div>
+</div>
         `;
     }
     if (subQuestion.type === "radio" || subQuestion.type === "checkbox" || subQuestion.type === "yes_no") {
@@ -1384,8 +1384,8 @@ function buildDetailFieldHtml(subKey, subQuestion, savedValue, inputNamePrefix) 
         const inputType = subQuestion.type === "checkbox" ? "checkbox" : "radio";
         return `
           <div class="option-detail-field" data-detail-field-wrap>
-            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
-            <div class="option-group">
+<label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+<div class="option-group">
               ${options.map((opt) => {
                 const rawValue = String(opt.value || opt.label || opt);
                 const checked = subQuestion.type === "checkbox"
@@ -1393,29 +1393,29 @@ function buildDetailFieldHtml(subKey, subQuestion, savedValue, inputNamePrefix) 
                     : selected.has(rawValue);
                 return `
                   <label class="option-item">
-                    <input type="${inputType}" name="${escapeDetailHtml(inputNamePrefix)}" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}" value="${escapeDetailHtml(rawValue)}" ${checked ? "checked" : ""}>
-                    <span>${escapeDetailHtml(opt.label || opt.value || opt)}</span>
-                  </label>
+<input type="${inputType}" name="${escapeDetailHtml(inputNamePrefix)}" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}" value="${escapeDetailHtml(rawValue)}" ${checked ? "checked" : ""}>
+<span>${escapeDetailHtml(opt.label || opt.value || opt)}</span>
+</label>
                 `;
               }).join("")}
             </div>
-          </div>
+</div>
         `;
     }
     if (subQuestion.type === "textarea") {
         return `
           <div class="option-detail-field" data-detail-field-wrap>
-            <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
-            <textarea data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">${safeValue}</textarea>
-          </div>
+<label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+<textarea data-detail-input data-followup-key="${escapeDetailHtml(subKey)}">${safeValue}</textarea>
+</div>
         `;
     }
     const inputType = ["number", "date", "time"].includes(subQuestion.type) ? subQuestion.type : "text";
     return `
       <div class="option-detail-field" data-detail-field-wrap>
-        <label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
-        <input type="${inputType}" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}" value="${safeValue}">
-      </div>
+<label>${escapeDetailHtml(subQuestion.label || subKey)}</label>
+<input type="${inputType}" data-detail-input data-followup-key="${escapeDetailHtml(subKey)}" value="${safeValue}">
+</div>
     `;
 }
 
@@ -1506,14 +1506,14 @@ function renderQuestionDetailBlocks(questionRow, pushRemote = false) {
 
         const detailMarkup = `
           <div class="option-detail-card" data-option-detail-card data-option-value="${escapeDetailHtml(optionKey)}">
-            <h6>${escapeDetailHtml(optionConfig.label || optionKey)}</h6>
+<h6>${escapeDetailHtml(optionConfig.label || optionKey)}</h6>
             ${hasQuantity ? `
               <div class="option-detail-grid">
-                <div class="option-detail-field" data-detail-field-wrap>
-                  <label>Quantity</label>
-                  <input type="number" min="1" step="1" value="${quantity}" data-detail-quantity>
-                </div>
-              </div>
+<div class="option-detail-field" data-detail-field-wrap>
+<label>Quantity</label>
+<input type="number" min="1" step="1" value="${quantity}" data-detail-quantity>
+</div>
+</div>
             ` : ""}
             ${(hasFollowups ? Object.entries(optionConfig.followup_questions).map(([subKey, subQuestion]) => `
               <div class="option-detail-grid" data-followup-question-key="${escapeDetailHtml(subKey)}">
@@ -1636,8 +1636,6 @@ document.addEventListener("click", (event) => {
 
 restoreMainServiceAnswers();
 </script>
-
-
 <!-- =============  SEND ADD-ONS TO BACKEND ============= -->
 <script>
 function sendAddonsUpdate() {
@@ -1651,8 +1649,6 @@ function sendAddonsUpdate() {
     .then(() => updateSummary());
 }
 </script>
-
-
 <script>
 const MIN_BY_ROOM_SELECTION = 5;
 
@@ -1806,7 +1802,6 @@ function validateAddons() {
     return true;
 }
 </script>
-
 <script>
 function handleServicesSubmit(e) {
     const validation = validateMainQuestions();
@@ -2195,7 +2190,8 @@ document.querySelectorAll(".room-stepper").forEach((button) => {
 </script>
 
 {% include "home/includes/footer.html" %}
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

@@ -1,197 +1,89 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>My Bookings - Hembla experten</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>My Bookings - Hembla experten</title>
+<link rel="stylesheet" href="{% static 'css/my_bookimg.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
 <body class="my-bookings-view">
-<!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-
-  <div class="page">
-
-    <!-- ===== Mobile Header ===== -->
-    <div class="mobile-header">
+<!-- HEADER -->{% include "home/includes/main_header.html" %}  <div class="page">
+<!-- ===== Mobile Header ===== -->
+<div class="mobile-header">
 <!-- Floating Menu Button -->
 <button class="menu-toggle customer-menu-toggle" id="menuToggle">
-  <span class="arrow">&#8250;</span>
+<span class="arrow">&#8250;</span>
 </button>
-
- 
-    </div>
-
-    <!-- ===== Sidebar ===== -->
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-
-    <!-- ===== Main Content ===== -->
-    <main class="main">
-      <h1 class="page-title">My Bookings</h1>
-      <p class="subtitle">Your bookings, your history, your peace of mind</p>
-
-      <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab active" data-target="all">All</button>
-        <button class="tab" data-target="upcoming">Upcoming</button>
-        <button class="tab" data-target="ongoing">Ongoing</button>
-        <button class="tab" data-target="completed">Completed</button>
-        <button class="tab" data-target="cancelled">Cancelled</button>
-      </div>
-
-      <!-- Tables -->
-      <div class="tables">
-        <!-- All -->
-        <div class="table-container active" id="all">
-          <table>
-            <thead>
-              <tr>
-                <th>Order ID</th>
-                <th>Customer Name</th>
-                <th>Service Type</th>
-                <th>Date</th>
-                <th>Location</th>
-                <th>Status</th>
-                <th>View</th>
-              </tr>
-            </thead>
-<tbody>
-{% for b in bookings %}
-<tr data-status="{{ b.status_group }}">
-  <td data-label="Order ID">#{{ b.id }}</td>
-  <td data-label="Customer Name">{{ b.customer_name }}</td>
- <td data-label="Service Type">
-<a class="service-link" href="{% url 'accounts:view_service_details' b.type|lower b.id %}">
-    {{ b.service }}
-  </a>
-  <br>
-  <small style="opacity:.6;">({{ b.type }})</small>
-</td>
-  <td data-label="Date">{{ b.date|date:"F d, Y" }}</td>
-  <td data-label="Location">{{ b.location }}</td>
-  <td data-label="Status">
-    <span class="status status-{{ b.status|lower }}">
-  {{ b.status_label }}
-</span>
-
-  </td>
-<td data-label="View">
-  <div class="menu-wrap">
-    <button class="dots" type="button" aria-label="Open booking actions" aria-expanded="false">...</button>
-
-    <div class="dropdown">
-
-  {# ظپظ‚ط· ط¥ط°ط§ ط§ظ„ط­ط¬ط² ظ…ظˆ ظ…ظƒطھظ…ظ„ ظˆظ„ط§ ظ…ظ„ط؛ظٹ #}
-  <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-view">View booking</a>
-  {% if b.status_group != "completed" and b.status_group != "cancelled" %}
-    <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-reschedule">Manage booking</a>
-  {% endif %}
-
 </div>
-
-  </div>
-</td>
-
-</tr>
-{% empty %}
+<!-- ===== Sidebar ===== -->    {% include "accounts/includes/customer_sidebar.html" %}    <!-- ===== Main Content ===== -->
+<main class="main">
+<h1 class="page-title">My Bookings</h1>
+<p class="subtitle">Your bookings, your history, your peace of mind</p>
+<!-- Tabs -->
+<div class="tabs">
+<button class="tab active" data-target="all">All</button>
+<button class="tab" data-target="upcoming">Upcoming</button>
+<button class="tab" data-target="ongoing">Ongoing</button>
+<button class="tab" data-target="completed">Completed</button>
+<button class="tab" data-target="cancelled">Cancelled</button>
+</div>
+<!-- Tables -->
+<div class="tables">
+<!-- All -->
+<div class="table-container active" id="all">
+<table>
+<thead>
 <tr>
-  <td colspan="7" style="text-align:center;">
-    No bookings yet
-  </td>
+<th>Order ID</th>
+<th>Customer Name</th>
+<th>Service Type</th>
+<th>Date</th>
+<th>Location</th>
+<th>Status</th>
+<th>View</th>
 </tr>
-{% endfor %}
-<tr id="no-results" style="display:none;">
-  <td colspan="7" style="text-align:center; padding:20px; opacity:.6;">
-    No bookings found
-  </td>
+</thead>
+<tbody>{% for b in bookings %}<tr data-status="{{ b.status_group }}">
+<td data-label="Order ID">#{{ b.id }}</td>
+<td data-label="Customer Name">{{ b.customer_name }}</td>
+<td data-label="Service Type">
+<a class="service-link" href="{% url 'accounts:view_service_details' b.type|lower b.id %}">    {{ b.service }}  </a>
+<br>
+<small style="opacity:.6;">({{ b.type }})</small>
+</td>
+<td data-label="Date">{{ b.date|date:"F d, Y" }}</td>
+<td data-label="Location">{{ b.location }}</td>
+<td data-label="Status">
+<span class="status status-{{ b.status|lower }}">  {{ b.status_label }}</span>
+</td>
+<td data-label="View">
+<div class="menu-wrap">
+<button class="dots" type="button" aria-label="Open booking actions" aria-expanded="false">...</button>
+<div class="dropdown">  {# فقط إذا الحجز مو مكتمل ولا ملغي #}  <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-view">View booking</a>  {% if b.status_group != "completed" and b.status_group != "cancelled" %}    <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-reschedule">Manage booking</a>  {% endif %}</div>
+</div>
+</td>
+</tr>{% empty %}<tr>
+<td colspan="7" style="text-align:center;">    No bookings yet  </td>
+</tr>{% endfor %}<tr id="no-results" style="display:none;">
+<td colspan="7" style="text-align:center; padding:20px; opacity:.6;">    No bookings found  </td>
 </tr>
 </tbody>
-
-          </table>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <div class="overlay customer-menu-overlay" id="overlay"></div>
-{% include "home/includes/footer.html" %}
-
-
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const tabs = document.querySelectorAll(".tab");
-  const rows = document.querySelectorAll("tbody tr[data-status]");
-  const noResults = document.getElementById("no-results");
-
-  function filterRows(target) {
-    let visibleCount = 0;
-
-    rows.forEach(row => {
-      const status = row.dataset.status;
-
-      if (target === "all" || status === target) {
-        row.style.display = "";
-        visibleCount++;
-      } else {
-        row.style.display = "none";
-      }
-    });
-
-    // ط¥ط°ط§ ظ…ط§ ظپظٹ ظˆظ„ط§ طµظپ ط¸ط§ظ‡ط±
-    if (visibleCount === 0) {
-      noResults.style.display = "";
-    } else {
-      noResults.style.display = "none";
-    }
-  }
-
-  tabs.forEach(tab => {
-    tab.addEventListener("click", () => {
-      const target = tab.dataset.target;
-
-      tabs.forEach(t => t.classList.remove("active"));
-      tab.classList.add("active");
-
-      filterRows(target);
-    });
-  });
-
-  // طھط´ط؛ظٹظ„ ط§ظپطھط±ط§ط¶ظٹ ط¹ظ„ظ‰ All
-  filterRows("all");
-});
-
-document.querySelectorAll(".dots").forEach(btn => {
-  btn.addEventListener("click", e => {
-    e.stopPropagation();
-    const menuWrap = btn.closest(".menu-wrap");
-    const willOpen = !menuWrap.classList.contains("show");
-
-    document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-    document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));
-
-    menuWrap.classList.toggle("show", willOpen);
-    btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
-  });
-});
-
-document.addEventListener("click", () => {
-  document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));
-  document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));
-});
-
+</table>
+</div>
+</div>
+</main>
+</div>
+<div class="overlay customer-menu-overlay" id="overlay">
+</div>{% include "home/includes/footer.html" %}<script>document.addEventListener("DOMContentLoaded", () => {  const tabs = document.querySelectorAll(".tab");  const rows = document.querySelectorAll("tbody tr[data-status]");  const noResults = document.getElementById("no-results");  function filterRows(target) {    let visibleCount = 0;    rows.forEach(row => {      const status = row.dataset.status;      if (target === "all" || status === target) {        row.style.display = "";        visibleCount++;      } else {        row.style.display = "none";      }    });    // إذا ما في ولا صف ظاهر    if (visibleCount === 0) {      noResults.style.display = "";    } else {      noResults.style.display = "none";    }  }  tabs.forEach(tab => {    tab.addEventListener("click", () => {      const target = tab.dataset.target;      tabs.forEach(t => t.classList.remove("active"));      tab.classList.add("active");      filterRows(target);    });  });  // تشغيل افتراضي على All  filterRows("all");});document.querySelectorAll(".dots").forEach(btn => {  btn.addEventListener("click", e => {    e.stopPropagation();    const menuWrap = btn.closest(".menu-wrap");    const willOpen = !menuWrap.classList.contains("show");    document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));    document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));    menuWrap.classList.toggle("show", willOpen);    btn.setAttribute("aria-expanded", willOpen ? "true" : "false");  });});document.addEventListener("click", () => {  document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));  document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));});</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
-
-

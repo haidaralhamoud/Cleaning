@@ -1,22 +1,24 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Scheduling & Notes</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Scheduling & Notes</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/SchedulingNotes.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/SchedulingNotes.css' %}">
+<link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
-
 <body>
   {% include "home/includes/main_header.html" %}
 
   <main class="container schedule-page">
-    <div class="steps">
+<div class="steps">
       {% for item in step_items %}
         {% if item.clickable %}
           <a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
@@ -25,117 +27,111 @@
         {% endif %}
       {% endfor %}
     </div>
-
-    <form method="POST" id="scheduleForm">
+<form method="POST" id="scheduleForm">
       {% csrf_token %}
 
       <input type="hidden" name="start_date" id="start_date_input">
-      <input type="hidden" name="preferred_time" id="preferred_time_input">
-      <input type="hidden" name="days_type" id="days_type_input">
-      <input type="hidden" name="custom_date" id="custom_date_input">
-      <input type="hidden" name="custom_time" id="custom_time_input">
-      <input type="hidden" name="notes" id="notes_input">
+<input type="hidden" name="preferred_time" id="preferred_time_input">
+<input type="hidden" name="days_type" id="days_type_input">
+<input type="hidden" name="custom_date" id="custom_date_input">
+<input type="hidden" name="custom_time" id="custom_time_input">
+<input type="hidden" name="notes" id="notes_input">
 
       {% if error %}
         <div class="schedule-message schedule-message-error" style="margin-bottom:16px;">{{ error }}</div>
       {% endif %}
 
       <section class="card scheduling">
-        <div class="card-title">
-          <span class="title-icon" aria-hidden="true">&#128197;</span>
-          <h2>Scheduling</h2>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="start-date">Desired start date</label>
-            <div class="date-input">
-              <input type="date" id="start-date" name="start_date_tmp" required readonly min="{{ min_booking_date }}">
-              <button type="button" class="date-trigger" data-date-trigger="start-date" aria-label="Open calendar"></button>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="preferred-time">Preferred time</label>
-            <div class="custom-select" data-custom-select>
-              <select id="preferred-time" name="preferred_time_tmp" data-native-select required>
-                <option value="">Select...</option>
-                <option>Before office hours</option>
-                <option>During office hours</option>
-                <option>After office hours</option>
-              </select>
-              <button type="button" class="custom-select-toggle" data-select-toggle>
-                <span data-select-label>Select...</span>
-                <span class="custom-select-arrow"></span>
-              </button>
-              <div class="custom-select-menu" data-select-menu>
-                <button type="button" class="custom-select-option" data-select-option="">Select...</button>
-                <button type="button" class="custom-select-option" data-select-option="Before office hours">Before office hours</button>
-                <button type="button" class="custom-select-option" data-select-option="During office hours">During office hours</button>
-                <button type="button" class="custom-select-option" data-select-option="After office hours">After office hours</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="days">
-          <label>Days of week</label>
-
-          <div class="options">
-            <label class="option-pill">
-              <input type="radio" name="days" value="mon-fri">
-              <span>Mon–Fri</span>
-            </label>
-            <label class="option-pill">
-              <input type="radio" name="days" value="weekends">
-              <span>Weekends</span>
-            </label>
-          </div>
-
-          <div class="custom-wrapper">
-            <div class="custom-field">
-              <label class="option-pill">
-                <input type="radio" name="days" value="custom-date">
-                <span>Custom date</span>
-              </label>
-              <div class="date-input">
-                <input type="date" id="custom-date" name="custom_date_tmp" disabled readonly min="{{ min_booking_date }}">
-                <button type="button" class="date-trigger" data-date-trigger="custom-date" aria-label="Open calendar"></button>
-              </div>
-            </div>
-
-            <div class="custom-field">
-              <label class="option-pill">
-                <input type="radio" name="days" value="custom-time">
-                <span>Custom time</span>
-              </label>
-              <input type="time" id="custom-time" name="custom_time_tmp" disabled>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="card notes">
-        <div class="card-title">
-          <span class="title-icon" aria-hidden="true">&#128221;</span>
-          <h2>Notes</h2>
-        </div>
-
-        <textarea id="notes" rows="6" placeholder="Write your notes here..."></textarea>
-
-        <div class="buttons form-actions">
-          <a onclick="window.history.back();" class="back-btn">
-            <span class="back-icon">&larr;</span>
+<div class="card-title">
+<span class="title-icon" aria-hidden="true">&#128197;</span>
+<h2>Scheduling</h2>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="start-date">Desired start date</label>
+<div class="date-input">
+<input type="date" id="start-date" name="start_date_tmp" required readonly min="{{ min_booking_date }}">
+<button type="button" class="date-trigger" data-date-trigger="start-date" aria-label="Open calendar">
+</button>
+</div>
+</div>
+<div class="form-group">
+<label for="preferred-time">Preferred time</label>
+<div class="custom-select" data-custom-select>
+<select id="preferred-time" name="preferred_time_tmp" data-native-select required>
+<option value="">Select...</option>
+<option>Before office hours</option>
+<option>During office hours</option>
+<option>After office hours</option>
+</select>
+<button type="button" class="custom-select-toggle" data-select-toggle>
+<span data-select-label>Select...</span>
+<span class="custom-select-arrow">
+</span>
+</button>
+<div class="custom-select-menu" data-select-menu>
+<button type="button" class="custom-select-option" data-select-option="">Select...</button>
+<button type="button" class="custom-select-option" data-select-option="Before office hours">Before office hours</button>
+<button type="button" class="custom-select-option" data-select-option="During office hours">During office hours</button>
+<button type="button" class="custom-select-option" data-select-option="After office hours">After office hours</button>
+</div>
+</div>
+</div>
+</div>
+<div class="days">
+<label>Days of week</label>
+<div class="options">
+<label class="option-pill">
+<input type="radio" name="days" value="mon-fri">
+<span>Mon�Fri</span>
+</label>
+<label class="option-pill">
+<input type="radio" name="days" value="weekends">
+<span>Weekends</span>
+</label>
+</div>
+<div class="custom-wrapper">
+<div class="custom-field">
+<label class="option-pill">
+<input type="radio" name="days" value="custom-date">
+<span>Custom date</span>
+</label>
+<div class="date-input">
+<input type="date" id="custom-date" name="custom_date_tmp" disabled readonly min="{{ min_booking_date }}">
+<button type="button" class="date-trigger" data-date-trigger="custom-date" aria-label="Open calendar">
+</button>
+</div>
+</div>
+<div class="custom-field">
+<label class="option-pill">
+<input type="radio" name="days" value="custom-time">
+<span>Custom time</span>
+</label>
+<input type="time" id="custom-time" name="custom_time_tmp" disabled>
+</div>
+</div>
+</div>
+</section>
+<section class="card notes">
+<div class="card-title">
+<span class="title-icon" aria-hidden="true">&#128221;</span>
+<h2>Notes</h2>
+</div>
+<textarea id="notes" rows="6" placeholder="Write your notes here...">
+</textarea>
+<div class="buttons form-actions">
+<a onclick="window.history.back();" class="back-btn">
+<span class="back-icon">&larr;</span>
             Back
           </a>
-          <button type="submit" class="next-btn">
+<button type="submit" class="next-btn">
             Done
             <span class="next-icon">&rarr;</span>
-          </button>
-        </div>
-      </section>
-    </form>
-  </main>
+</button>
+</div>
+</section>
+</form>
+</main>
 
   {% include "home/includes/footer.html" %}
 
@@ -223,8 +219,7 @@
         document.getElementById("notes").value;
     });
   </script>
-
-  <script>
+<script>
     document.querySelectorAll("[data-custom-select]").forEach((selectWrap) => {
       const nativeSelect = selectWrap.querySelector("[data-native-select]");
       const toggle = selectWrap.querySelector("[data-select-toggle]");
@@ -255,7 +250,7 @@
       });
     });
   </script>
-
-  <script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

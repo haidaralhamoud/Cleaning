@@ -1,506 +1,242 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Checkout | Hembla experten</title>
-
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Checkout | Hembla experten</title>  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
 </head>
-
-<body>
-{% include "home/includes/main_header.html" %}
-<div class="checkout-container">
-
-  <header>
-    <h1>Checkout</h1>
-  </header>
-
-  <div class="checkout-grid">
-    <div class="checkout-main">
-      <section class="card services-card">
-        <p class="subtitle">One step to a hassle-free day. Confirm your booking and let us take it from here.</p>
-        <div class="card-header">
-          <h2>Selected Services</h2>
-          <a href="{% url 'home:private_booking_services' %}" class="edit-btn">Edit</a>
-        </div>
-        <hr>
-
-        <div class="service-list">
-          {% for s in services %}
-            <div class="service-line">
-              <div class="service-line__media" aria-hidden="true">{{ s.title|first|upper }}</div>
-              <div class="service-line__copy">
-                <h3>{{ s.title }}</h3>
-                <p>{{ s.category.title }}</p>
-              </div>
-              <span class="service-line__price">+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
-            </div>
-          {% endfor %}
-        </div>
-
-        <div class="services-breakdown">
-          {% if addons_total %}
-            <div class="services-total-line">
-              <span>Add-ons</span>
-              <span>+{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-            {% for addon in addons_breakdown %}
-              <div class="services-total-line services-total-line--subitem">
-                <span>{{ addon.title }}</span>
-                <span>+{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-              </div>
-            {% endfor %}
-          {% endif %}
-
-          {% if schedule_extra %}
-            <div class="services-total-line">
-              <span>Schedule</span>
-              <span>+{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          {% if date_surcharge and date_surcharge != 0 %}
-            <div class="services-total-line">
-              <span>Date surcharge</span>
-              <span>+{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          <div class="services-total-line">
-            <span>Subtotal</span>
-            <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-
-          <div class="services-total-line">
-            <span>Service fee</span>
-            <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-
-          {% if vat_amount %}
-            <div class="services-total-line">
-              <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
-              <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          <div class="services-total-line">
-            <span>
-              {% if booking.use_rot %}
-                RUT
-              {% else %}
-                RUT
-              {% endif %}
-            </span>
-            <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-
-          {% if booking.discount_code %}
-            <div class="services-total-line discount">
-              <span>Discount Code</span>
-              <span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          {% if referral_discount_applied %}
-            <div class="services-total-line discount">
-              <span>Referral</span>
-              <span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          {% if reward_applied and reward %}
-            <div class="services-total-line discount">
-              <span>Reward</span>
-              <span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          <div class="services-total-line services-total-line--grand">
-            <span>Total</span>
-            <span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-        </div>
-
-        <p class="services-note">
-          {% if booking.use_rot %}
-            This price includes your RUT deduction. You only pay the reduced amount.
-          {% else %}
-            This price includes VAT. RUT deduction is not applied.
-          {% endif %}
-        </p>
-
-        {% if messages %}
-          <div class="flash-stack">
-            {% for message in messages %}
-              <div class="flash {{ message.tags|default:'info' }}">
-                {{ message }}
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
-      </section>
-
-      <section class="card discount-card">
-        <div class="card-header">
-          <h2>Discount Code</h2>
-        </div>
-        <hr>
-
-        {% if booking.discount_code %}
-          <div class="discount-status success">
-            Applied code: <b>{{ booking.discount_code.code }}</b>
-          </div>
-
-          <form method="POST" class="discount-form">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="remove_discount">
-            <button type="submit" class="apply-btn muted">Remove code</button>
-          </form>
-        {% else %}
-          <form method="POST" class="discount-form">
-            {% csrf_token %}
-            <input type="hidden" name="form_type" value="discount">
-            <input type="text" name="discount_code" placeholder="Enter discount code">
-            <button type="submit" class="apply-btn">Apply</button>
-          </form>
-        {% endif %}
-
-        {% if booking.discount_code %}
-          <div class="discount-saved">
-            You saved <b>{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</b> with this code.
-          </div>
-        {% elif referral_discount_applied %}
-          <div class="discount-saved">
-            Referral discount applied: <b>{{ referral_discount_percent }}%</b>
-            (saved {{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).
-          </div>
-        {% elif reward_applied and reward %}
-          <div class="discount-saved">
-            Reward applied: <b>{{ reward.title }}</b>
-            (saved {{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).
-          </div>
-        {% endif %}
-      </section>
-
-      <section class="card booking-card">
-        <div class="card-header">
-          <h2>Booking Summary</h2>
-        </div>
-        <hr>
-
-        <div class="summary-grid">
-          <div class="summary-card">
-            <div class="summary-card-head">
-              <h4>Service Date & Time</h4>
-              <a href="{% url 'home:private_booking_schedule' %}" class="edit-btn">Edit</a>
-            </div>
-            {% if booking.schedule_mode == "same" %}
-              <p class="summary-detail">Date: {{ booking.appointment_date|default:"Not set" }}</p>
-              <p class="summary-detail">Time: {{ booking.appointment_time_window|default:"Not set" }}</p>
-              <p class="summary-detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>
-            {% else %}
-              <p class="summary-detail">Separate schedules per service</p>
-            {% endif %}
-          </div>
-
-          <div class="summary-card">
-            <div class="summary-card-head">
-              <h4>Location / Address</h4>
-              <button type="button" class="edit-btn js-address-edit">Edit</button>
-            </div>
-            <div class="address-editor" data-open="false">
-              <p class="summary-detail address-display">{{ display_address }}</p>
-              <form method="POST" class="address-edit-form is-hidden">
-                {% csrf_token %}
-                <input type="hidden" name="form_type" value="update_address">
-                <div class="address-edit-row">
-                  <input
-                    type="text"
-                    name="address"
-                    class="address-input"
-                    value="{% if display_address != 'Not provided' %}{{ display_address }}{% endif %}"
-                    placeholder="Enter your address">
-                  <button type="submit" class="address-save-btn">Save</button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <div class="summary-card">
-            <div class="summary-card-head">
-              <h4>Duration</h4>
-            </div>
-            <p class="summary-detail">{{ display_duration }}</p>
-          </div>
-
-          <div class="summary-card">
-            <div class="summary-card-head">
-              <h4>Service Area</h4>
-            </div>
-            <p class="summary-detail">{{ display_area }}</p>
-          </div>
-        </div>
-
-        <hr>
-
-        <div class="invoice-inline">
-          <div class="invoice-box">
-            <div class="invoice-head">
-              <h4>Invoice Summary</h4>
-              <span class="invoice-pill">Live</span>
-            </div>
-          <div class="summary-line">
-            <span>Services</span>
-            <span>{{ services_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-          <div class="summary-line">
-            <span>Add-ons</span>
-            <span>{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-          {% for addon in addons_breakdown %}
-            <div class="summary-line summary-line--subitem">
-              <span>{{ addon.title }}</span>
-              <span>{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endfor %}
-          <div class="summary-line">
-            <span>Schedule</span>
-            <span>{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-          {% if date_surcharge and date_surcharge != 0 %}
-            <div class="summary-line">
-              <span>Date surcharge</span>
-              <span>{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-          <div class="summary-line">
-            <span>Subtotal</span>
-            <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-          <div class="summary-line">
-            <span>Service fee</span>
-            <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-          {% if vat_amount %}
-            <div class="summary-line">
-              <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
-              <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          <div class="summary-line">
-            <span>
-              {% if booking.use_rot %}
-                RUT Deduction ({{ rot_percent|default:"0" }}%)
-              {% else %}
-                RUT Deduction (not applied)
-              {% endif %}
-            </span>
-            <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-
-          {% if booking.discount_code %}
-            <div class="summary-line discount-line">
-              <span>Discount</span>
-              <span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-          {% if referral_discount_applied %}
-            <div class="summary-line discount-line">
-              <span>Referral discount ({{ referral_discount_percent }}%)</span>
-              <span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-          {% if reward_applied and reward %}
-            <div class="summary-line discount-line">
-              <span>Reward: {{ reward.title }}</span>
-              <span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-            </div>
-          {% endif %}
-
-          <div class="summary-total">
-            <span>Total</span>
-            <span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
-          </div>
-          <p class="note">
-            {% if booking.use_rot %}
-              This total includes VAT and your RUT deduction.
-            {% else %}
-              This total includes VAT. RUT deduction is not applied.
-            {% endif %}
-          </p>
-          </div>
-        </div>
-
-      </section>
-
-      <section class="card payment-card">
-        <div class="card-header">
-          <h2>Payment Method</h2>
-        </div>
-        <hr>
-
-        <form method="POST" id="paymentForm"
-              data-stripe-publishable-key="{{ stripe_publishable_key }}"
-              data-stripe-client-secret="{{ stripe_client_secret }}"
-              data-stripe-payment-intent="{{ stripe_payment_intent_id }}"
-              data-stripe-complete-url="{{ payment_complete_url }}"
-              data-stripe-return-url="{{ payment_return_url }}"
-              data-cash-invoice-url="{{ cash_invoice_download_url }}"
-              data-stripe-ready="{{ stripe_ready|yesno:'1,0' }}"
-              data-stripe-currency="{{ stripe_currency }}"
-              data-stripe-failure-url="{{ payment_failed_url }}">
-          {% csrf_token %}
-          <input type="hidden" name="form_type" value="payment">
-
-          <div class="payment-options payment-options--static" role="radiogroup" aria-label="Payment method">
-            <label class="payment-option payment-choice is-active" data-payment-option="card">
-              <input type="radio" name="payment_option" value="card" checked>
-              <span class="payment-logo">
-                <img src="{% static 'images/payment-method-visa0.svg' %}" alt="Stripe Payment Element">
-              </span>
-              <span class="payment-copy">
-                <strong>Credit/Debit Card</strong>
-                <small>Pay now</small>
-              </span>
-            </label>
-            <label class="payment-option payment-choice" data-payment-option="invoice">
-              <input type="radio" name="payment_option" value="invoice">
-              <span class="payment-logo payment-logo--icon" aria-hidden="true">
-                <i class="fa-regular fa-file-lines"></i>
-              </span>
-              <span class="payment-copy">
-                <strong>Invoice</strong>
-                <small>Send by email</small>
-              </span>
-            </label>
-          </div>
-
-          <div class="payment-method-note" data-payment-panel="card">
-            Pay securely by card in {{ stripe_currency|upper }}.
-          </div>
-
-          <div class="payment-inputs" data-payment-panel="card">
-            <div id="payment-element" class="stripe-card-element"></div>
-            <div id="card-errors" class="card-errors" role="alert"></div>
-          </div>
-
-          <div class="terms">
-            <label class="agree">
-              <input type="checkbox" id="agreeTerms" required>
-              I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>.
-            </label>
-          </div>
-
-          {% if not stripe_ready %}
-            <div class="flash error" style="margin-top: 10px;">
-              Payment service is not configured. Please try again later.
-            </div>
-          {% endif %}
-
-          <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
-        </form>
-      </section>
-
-      <section class="checkout-bottom">
-        <h2>Cancellation Policy</h2>
-        <ul>
-          <li>Free cancellation up to 24 hours before start time.</li>
-          <li>Same-day bookings are non-refundable once confirmed.</li>
-        </ul>
-      </section>
-    </div>
-  </div>
-
+<body>{% include "home/includes/main_header.html" %}<div class="checkout-container">
+<header>
+<h1>Checkout</h1>
+</header>
+<div class="checkout-grid">
+<div class="checkout-main">
+<section class="card services-card">
+<p class="subtitle">One step to a hassle-free day. Confirm your booking and let us take it from here.</p>
+<div class="card-header">
+<h2>Selected Services</h2>
+<a href="{% url 'home:private_booking_services' %}" class="edit-btn">Edit</a>
 </div>
-{% include "home/includes/footer.html" %}
-
-<script>
-  (function () {
-    var addressEditButton = document.querySelector(".js-address-edit");
-    var addressEditor = document.querySelector(".address-editor");
-    if (addressEditButton && addressEditor) {
-      var addressDisplay = addressEditor.querySelector(".address-display");
-      var addressForm = addressEditor.querySelector(".address-edit-form");
-      var addressInput = addressEditor.querySelector(".address-input");
-
-      addressEditButton.addEventListener("click", function () {
-        if (!addressForm || !addressInput) return;
-        if (addressDisplay) {
-          addressDisplay.style.display = "none";
-        }
-        addressForm.classList.remove("is-hidden");
-        addressEditor.setAttribute("data-open", "true");
-        addressEditButton.style.display = "none";
-        addressInput.focus();
-        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);
-      });
-    }
-  })();
+<hr>
+<div class="service-list">          {% for s in services %}            <div class="service-line">
+<div class="service-line__media" aria-hidden="true">{{ s.title|first|upper }}</div>
+<div class="service-line__copy">
+<h3>{{ s.title }}</h3>
+<p>{{ s.category.title }}</p>
+</div>
+<span class="service-line__price">+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
+</div>          {% endfor %}        </div>
+<div class="services-breakdown">          {% if addons_total %}            <div class="services-total-line">
+<span>Add-ons</span>
+<span>+{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>            {% for addon in addons_breakdown %}              <div class="services-total-line services-total-line--subitem">
+<span>{{ addon.title }}</span>
+<span>+{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>            {% endfor %}          {% endif %}          {% if schedule_extra %}            <div class="services-total-line">
+<span>Schedule</span>
+<span>+{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          {% if date_surcharge and date_surcharge != 0 %}            <div class="services-total-line">
+<span>Date surcharge</span>
+<span>+{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          <div class="services-total-line">
+<span>Subtotal</span>
+<span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>
+<div class="services-total-line">
+<span>Service fee</span>
+<span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% if vat_amount %}            <div class="services-total-line">
+<span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
+<span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          <div class="services-total-line">
+<span>              {% if booking.use_rot %}                RUT              {% else %}                RUT              {% endif %}            </span>
+<span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% if booking.discount_code %}            <div class="services-total-line discount">
+<span>Discount Code</span>
+<span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          {% if referral_discount_applied %}            <div class="services-total-line discount">
+<span>Referral</span>
+<span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          {% if reward_applied and reward %}            <div class="services-total-line discount">
+<span>Reward</span>
+<span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          <div class="services-total-line services-total-line--grand">
+<span>Total</span>
+<span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>
+</div>
+<p class="services-note">          {% if booking.use_rot %}            This price includes your RUT deduction. You only pay the reduced amount.          {% else %}            This price includes VAT. RUT deduction is not applied.          {% endif %}        </p>        {% if messages %}          <div class="flash-stack">            {% for message in messages %}              <div class="flash {{ message.tags|default:'info' }}">                {{ message }}              </div>            {% endfor %}          </div>        {% endif %}      </section>
+<section class="card discount-card">
+<div class="card-header">
+<h2>Discount Code</h2>
+</div>
+<hr>        {% if booking.discount_code %}          <div class="discount-status success">            Applied code: <b>{{ booking.discount_code.code }}</b>
+</div>
+<form method="POST" class="discount-form">            {% csrf_token %}            <input type="hidden" name="form_type" value="remove_discount">
+<button type="submit" class="apply-btn muted">Remove code</button>
+</form>        {% else %}          <form method="POST" class="discount-form">            {% csrf_token %}            <input type="hidden" name="form_type" value="discount">
+<input type="text" name="discount_code" placeholder="Enter discount code">
+<button type="submit" class="apply-btn">Apply</button>
+</form>        {% endif %}        {% if booking.discount_code %}          <div class="discount-saved">            You saved <b>{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</b> with this code.          </div>        {% elif referral_discount_applied %}          <div class="discount-saved">            Referral discount applied: <b>{{ referral_discount_percent }}%</b>            (saved {{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).          </div>        {% elif reward_applied and reward %}          <div class="discount-saved">            Reward applied: <b>{{ reward.title }}</b>            (saved {{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).          </div>        {% endif %}      </section>
+<section class="card booking-card">
+<div class="card-header">
+<h2>Booking Summary</h2>
+</div>
+<hr>
+<div class="summary-grid">
+<div class="summary-card">
+<div class="summary-card-head">
+<h4>Service Date & Time</h4>
+<a href="{% url 'home:private_booking_schedule' %}" class="edit-btn">Edit</a>
+</div>            {% if booking.schedule_mode == "same" %}              <p class="summary-detail">Date: {{ booking.appointment_date|default:"Not set" }}</p>
+<p class="summary-detail">Time: {{ booking.appointment_time_window|default:"Not set" }}</p>
+<p class="summary-detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>            {% else %}              <p class="summary-detail">Separate schedules per service</p>            {% endif %}          </div>
+<div class="summary-card">
+<div class="summary-card-head">
+<h4>Location / Address</h4>
+<button type="button" class="edit-btn js-address-edit">Edit</button>
+</div>
+<div class="address-editor" data-open="false">
+<p class="summary-detail address-display">{{ display_address }}</p>
+<form method="POST" class="address-edit-form is-hidden">                {% csrf_token %}                <input type="hidden" name="form_type" value="update_address">
+<div class="address-edit-row">
+<input                    type="text"                    name="address"                    class="address-input"                    value="{% if display_address != 'Not provided' %}{{ display_address }}{% endif %}"                    placeholder="Enter your address">
+<button type="submit" class="address-save-btn">Save</button>
+</div>
+</form>
+</div>
+</div>
+<div class="summary-card">
+<div class="summary-card-head">
+<h4>Duration</h4>
+</div>
+<p class="summary-detail">{{ display_duration }}</p>
+</div>
+<div class="summary-card">
+<div class="summary-card-head">
+<h4>Service Area</h4>
+</div>
+<p class="summary-detail">{{ display_area }}</p>
+</div>
+</div>
+<hr>
+<div class="invoice-inline">
+<div class="invoice-box">
+<div class="invoice-head">
+<h4>Invoice Summary</h4>
+<span class="invoice-pill">Live</span>
+</div>
+<div class="summary-line">
+<span>Services</span>
+<span>{{ services_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>
+<div class="summary-line">
+<span>Add-ons</span>
+<span>{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% for addon in addons_breakdown %}            <div class="summary-line summary-line--subitem">
+<span>{{ addon.title }}</span>
+<span>{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endfor %}          <div class="summary-line">
+<span>Schedule</span>
+<span>{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% if date_surcharge and date_surcharge != 0 %}            <div class="summary-line">
+<span>Date surcharge</span>
+<span>{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          <div class="summary-line">
+<span>Subtotal</span>
+<span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>
+<div class="summary-line">
+<span>Service fee</span>
+<span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% if vat_amount %}            <div class="summary-line">
+<span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
+<span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          <div class="summary-line">
+<span>              {% if booking.use_rot %}                RUT Deduction ({{ rot_percent|default:"0" }}%)              {% else %}                RUT Deduction (not applied)              {% endif %}            </span>
+<span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% if booking.discount_code %}            <div class="summary-line discount-line">
+<span>Discount</span>
+<span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          {% if referral_discount_applied %}            <div class="summary-line discount-line">
+<span>Referral discount ({{ referral_discount_percent }}%)</span>
+<span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          {% if reward_applied and reward %}            <div class="summary-line discount-line">
+<span>Reward: {{ reward.title }}</span>
+<span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>          {% endif %}          <div class="summary-total">
+<span>Total</span>
+<span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>
+<p class="note">            {% if booking.use_rot %}              This total includes VAT and your RUT deduction.            {% else %}              This total includes VAT. RUT deduction is not applied.            {% endif %}          </p>
+</div>
+</div>
+</section>
+<section class="card payment-card">
+<div class="card-header">
+<h2>Payment Method</h2>
+</div>
+<hr>
+<form method="POST" id="paymentForm"              data-stripe-publishable-key="{{ stripe_publishable_key }}"              data-stripe-client-secret="{{ stripe_client_secret }}"              data-stripe-payment-intent="{{ stripe_payment_intent_id }}"              data-stripe-complete-url="{{ payment_complete_url }}"              data-stripe-return-url="{{ payment_return_url }}"              data-cash-invoice-url="{{ cash_invoice_download_url }}"              data-stripe-ready="{{ stripe_ready|yesno:'1,0' }}"              data-stripe-currency="{{ stripe_currency }}"              data-stripe-failure-url="{{ payment_failed_url }}">          {% csrf_token %}          <input type="hidden" name="form_type" value="payment">
+<div class="payment-options payment-options--static" role="radiogroup" aria-label="Payment method">
+<label class="payment-option payment-choice is-active" data-payment-option="card">
+<input type="radio" name="payment_option" value="card" checked>
+<span class="payment-logo">
+<img src="{% static 'images/payment-method-visa0.svg' %}" alt="Stripe Payment Element">
+</span>
+<span class="payment-copy">
+<strong>Credit/Debit Card</strong>
+<small>Pay now</small>
+</span>
+</label>
+<label class="payment-option payment-choice" data-payment-option="invoice">
+<input type="radio" name="payment_option" value="invoice">
+<span class="payment-logo payment-logo--icon" aria-hidden="true">
+<i class="fa-regular fa-file-lines">
+</i>
+</span>
+<span class="payment-copy">
+<strong>Invoice</strong>
+<small>Send by email</small>
+</span>
+</label>
+</div>
+<div class="payment-method-note" data-payment-panel="card">            Pay securely by card in {{ stripe_currency|upper }}.          </div>
+<div class="payment-inputs" data-payment-panel="card">
+<div id="payment-element" class="stripe-card-element">
+</div>
+<div id="card-errors" class="card-errors" role="alert">
+</div>
+</div>
+<div class="terms">
+<label class="agree">
+<input type="checkbox" id="agreeTerms" required>              I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>.            </label>
+</div>          {% if not stripe_ready %}            <div class="flash error" style="margin-top: 10px;">              Payment service is not configured. Please try again later.            </div>          {% endif %}          <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
+</form>
+</section>
+<section class="checkout-bottom">
+<h2>Cancellation Policy</h2>
+<ul>
+<li>Free cancellation up to 24 hours before start time.</li>
+<li>Same-day bookings are non-refundable once confirmed.</li>
+</ul>
+</section>
+</div>
+</div>
+</div>{% include "home/includes/footer.html" %}<script>  (function () {    var addressEditButton = document.querySelector(".js-address-edit");    var addressEditor = document.querySelector(".address-editor");    if (addressEditButton && addressEditor) {      var addressDisplay = addressEditor.querySelector(".address-display");      var addressForm = addressEditor.querySelector(".address-edit-form");      var addressInput = addressEditor.querySelector(".address-input");      addressEditButton.addEventListener("click", function () {        if (!addressForm || !addressInput) return;        if (addressDisplay) {          addressDisplay.style.display = "none";        }        addressForm.classList.remove("is-hidden");        addressEditor.setAttribute("data-open", "true");        addressEditButton.style.display = "none";        addressInput.focus();        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);      });    }  })();</script>
+<script>  (function () {    var form = document.getElementById("paymentForm");    var checkbox = document.getElementById("agreeTerms");    var button = document.getElementById("confirmPayment");    var optionInputs = form ? form.querySelectorAll('input[name="payment_option"]') : [];    var optionCards = form ? form.querySelectorAll("[data-payment-option]") : [];    var cardPanels = form ? form.querySelectorAll('[data-payment-panel="card"]') : [];    var invoicePanels = form ? form.querySelectorAll('[data-payment-panel="invoice"]') : [];    if (!form || !checkbox || !button || !optionInputs.length) return;    var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";    var selectedOption = function () {      for (var i = 0; i < optionInputs.length; i += 1) {        if (optionInputs[i].checked) return optionInputs[i].value;      }      return "card";    };    var syncOptionCards = function () {      var value = selectedOption();      for (var i = 0; i < optionCards.length; i += 1) {        optionCards[i].classList.toggle("is-active", optionCards[i].getAttribute("data-payment-option") === value);      }      for (var j = 0; j < cardPanels.length; j += 1) {        cardPanels[j].classList.toggle("payment-panel-hidden", value !== "card");        cardPanels[j].hidden = value !== "card";        cardPanels[j].setAttribute("aria-hidden", value !== "card" ? "true" : "false");      }      for (var k = 0; k < invoicePanels.length; k += 1) {        invoicePanels[k].classList.toggle("payment-panel-hidden", value !== "invoice");        invoicePanels[k].hidden = value !== "invoice";        invoicePanels[k].setAttribute("aria-hidden", value !== "invoice" ? "true" : "false");      }      var errorBox = document.getElementById("card-errors");      if (value === "invoice" && errorBox) {        errorBox.textContent = "";      }      button.textContent = value === "invoice" ? "Send Invoice by Email" : "Confirm Payment";    };    var toggle = function () {      var needsStripe = selectedOption() === "card";      button.disabled = !checkbox.checked || (needsStripe && !stripeReady);    };    for (var i = 0; i < optionInputs.length; i += 1) {      optionInputs[i].addEventListener("change", function () {        syncOptionCards();        toggle();      });    }    checkbox.addEventListener("change", toggle);    syncOptionCards();    toggle();  })();</script>
+<script src="https://js.stripe.com/v3/">
 </script>
-<script>
-  (function () {
-    var form = document.getElementById("paymentForm");
-    var checkbox = document.getElementById("agreeTerms");
-    var button = document.getElementById("confirmPayment");
-    var optionInputs = form ? form.querySelectorAll('input[name="payment_option"]') : [];
-    var optionCards = form ? form.querySelectorAll("[data-payment-option]") : [];
-    var cardPanels = form ? form.querySelectorAll('[data-payment-panel="card"]') : [];
-    var invoicePanels = form ? form.querySelectorAll('[data-payment-panel="invoice"]') : [];
-    if (!form || !checkbox || !button || !optionInputs.length) return;
-    var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";
-    var selectedOption = function () {
-      for (var i = 0; i < optionInputs.length; i += 1) {
-        if (optionInputs[i].checked) return optionInputs[i].value;
-      }
-      return "card";
-    };
-    var syncOptionCards = function () {
-      var value = selectedOption();
-      for (var i = 0; i < optionCards.length; i += 1) {
-        optionCards[i].classList.toggle("is-active", optionCards[i].getAttribute("data-payment-option") === value);
-      }
-      for (var j = 0; j < cardPanels.length; j += 1) {
-        cardPanels[j].classList.toggle("payment-panel-hidden", value !== "card");
-        cardPanels[j].hidden = value !== "card";
-        cardPanels[j].setAttribute("aria-hidden", value !== "card" ? "true" : "false");
-      }
-      for (var k = 0; k < invoicePanels.length; k += 1) {
-        invoicePanels[k].classList.toggle("payment-panel-hidden", value !== "invoice");
-        invoicePanels[k].hidden = value !== "invoice";
-        invoicePanels[k].setAttribute("aria-hidden", value !== "invoice" ? "true" : "false");
-      }
-      var errorBox = document.getElementById("card-errors");
-      if (value === "invoice" && errorBox) {
-        errorBox.textContent = "";
-      }
-      button.textContent = value === "invoice" ? "Send Invoice by Email" : "Confirm Payment";
-    };
-    var toggle = function () {
-      var needsStripe = selectedOption() === "card";
-      button.disabled = !checkbox.checked || (needsStripe && !stripeReady);
-    };
-    for (var i = 0; i < optionInputs.length; i += 1) {
-      optionInputs[i].addEventListener("change", function () {
-        syncOptionCards();
-        toggle();
-      });
-    }
-    checkbox.addEventListener("change", toggle);
-    syncOptionCards();
-    toggle();
-  })();
+<script src="{% static 'js/stripe_checkout.js' %}">
 </script>
-<script src="https://js.stripe.com/v3/"></script>
-<script src="{% static 'js/stripe_checkout.js' %}"></script>
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
-
-

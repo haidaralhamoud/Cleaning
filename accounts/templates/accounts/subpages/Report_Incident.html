@@ -3,346 +3,76 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Report Incident</title>
-  <link rel="stylesheet" href="{% static 'css/Report_Incident.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Report Incident</title>
+<link rel="stylesheet" href="{% static 'css/Report_Incident.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-<style>
-  /* ===== Pop-up Submitted ===== */
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.popup-content {
-  background: #fff;
-  border-radius: 15px;
-  padding: 40px 30px;
-  width: 90%;
-  max-width: 500px;
-  text-align: center;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-  animation: popupShow 0.4s ease;
-}
-
-.popup-img {
-  width: 120px;
-  margin-bottom: 20px;
-  animation: handshake 1.2s ease-in-out infinite;
-  transform-origin: center;
-}
-
-@keyframes handshake {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-6deg); }
-  50% { transform: rotate(6deg); }
-  75% { transform: rotate(-4deg); }
-}
-
-.popup-content h2 {
-  color: #d93025;
-  font-size: 22px;
-  margin-bottom: 20px;
-  font-weight: 700;
-}
-
-.popup-content p {
-  color: #000;
-  font-weight: 600;
-  margin: 8px 0;
-}
-
-/* === الأزرار === */
-.popup-buttons {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 25px;
-  flex-wrap: wrap;
-}
-
-.btn-outline,
-.btn-filled {
-  padding: 12px 25px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 15px;
-  transition: 0.3s;
-  min-width: 180px;
-}
-
-/* زر الإطار فقط */
-.btn-outline {
-  border: 2px solid #d93025;
-  color: #d93025;
-  background: #fff;
-}
-
-.btn-outline:hover {
-  background: #d93025;
-  color: #fff;
-}
-
-/* زر ممتلئ */
-.btn-filled {
-  background: #d93025;
-  color: #fff;
-  border: none;
-}
-
-.btn-filled:hover {
-  background: #b1241b;
-}
-
-/* حركة ظهور ناعمة */
-@keyframes popupShow {
-  from { transform: scale(0.7); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* Responsive */
-@media (max-width: 500px) {
-  .popup-content {
-    padding: 25px 20px;
-    width: 80%;
-  }
-
-  .popup-content h2 {
-    font-size: 18px;
-  }
-
-  .popup-buttons button {
-    width: 100%;
-  }
-}
-
-  .popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.popup-content {
-  background: #fff;
-  padding: 30px;
-  border-radius: 14px;
-  width: 420px;
-  text-align: center;
-}
-
-</style>
-
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<style>  /* ===== Pop-up Submitted ===== */.popup-overlay {  position: fixed;  inset: 0;  background: rgba(0, 0, 0, 0.4);  display: none;  align-items: center;  justify-content: center;  z-index: 2000;}.popup-content {  background: #fff;  border-radius: 15px;  padding: 40px 30px;  width: 90%;  max-width: 500px;  text-align: center;  box-shadow: 0 6px 20px rgba(0,0,0,0.2);  animation: popupShow 0.4s ease;}.popup-img {  width: 120px;  margin-bottom: 20px;  animation: handshake 1.2s ease-in-out infinite;  transform-origin: center;}@keyframes handshake {  0%, 100% { transform: rotate(0deg); }  25% { transform: rotate(-6deg); }  50% { transform: rotate(6deg); }  75% { transform: rotate(-4deg); }}.popup-content h2 {  color: #d93025;  font-size: 22px;  margin-bottom: 20px;  font-weight: 700;}.popup-content p {  color: #000;  font-weight: 600;  margin: 8px 0;}/* === الأزرار === */.popup-buttons {  display: flex;  gap: 15px;  justify-content: center;  margin-top: 25px;  flex-wrap: wrap;}.btn-outline,.btn-filled {  padding: 12px 25px;  border-radius: 12px;  font-weight: 600;  cursor: pointer;  font-size: 15px;  transition: 0.3s;  min-width: 180px;}/* زر الإطار فقط */.btn-outline {  border: 2px solid #d93025;  color: #d93025;  background: #fff;}.btn-outline:hover {  background: #d93025;  color: #fff;}/* زر ممتلئ */.btn-filled {  background: #d93025;  color: #fff;  border: none;}.btn-filled:hover {  background: #b1241b;}/* حركة ظهور ناعمة */@keyframes popupShow {  from { transform: scale(0.7); opacity: 0; }  to { transform: scale(1); opacity: 1; }}/* Responsive */@media (max-width: 500px) {  .popup-content {    padding: 25px 20px;    width: 80%;  }  .popup-content h2 {    font-size: 18px;  }  .popup-buttons button {    width: 100%;  }}  .popup-overlay {  position: fixed;  inset: 0;  background: rgba(0,0,0,.6);  display: flex;  align-items: center;  justify-content: center;  z-index: 9999;}.popup-content {  background: #fff;  padding: 30px;  border-radius: 14px;  width: 420px;  text-align: center;}</style>
 </head>
 <body>
-    <!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-  <div class="layout">
-    <!-- Sidebar -->
-     <!-- زر المينيو يظهر فقط بالموبايل -->
+<!-- HEADER -->{% include "home/includes/main_header.html" %}  <div class="layout">
+<!-- Sidebar -->
+<!-- زر المينيو يظهر فقط بالموبايل -->
 <div class="mobile-header">
-  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- › -->
-  </button>
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+<!-- › -->
+</button>
 </div>
-
-
-
-  <!-- Sidebar -->
-
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-
-  <!-- المحتوى الرئيسي -->
- <!-- MAIN CONTENT -->
-  <main class="main-content">
-    <div class="report-container">
-      <h1 class="title">Report Incident</h1>
-
-
-      <form method="post" enctype="multipart/form-data" class="form-section">
-        {% csrf_token %}
-
-        {% if form.errors %}
-        <div class="form-errors" style="margin-bottom:16px; padding:12px 14px; border-radius:12px; background:#fff1f0; color:#b42318; font-weight:600;">
-          Please review the highlighted fields and try again.
-          {{ form.non_field_errors }}
-        </div>
-        {% endif %}
-
-        <div class="input-group">
-          <label>Incident Type</label>
-          {{ form.incident_type.errors }}
-          {{ form.incident_type }}
-        </div>
-
-        <div class="input-group">
-          <label>Severity</label>
-          {{ form.severity.errors }}
-          {{ form.severity }}
-        </div>
-
-        <div class="input-group">
-          <label>Order</label>
-          {{ form.order.errors }}
-          {{ form.order }}
-        </div>
-
-        <div class="input-group">
-          <label>Date & Time</label>
-          {{ form.incident_datetime.errors }}
-          {{ form.incident_datetime }}
-        </div>
-
-        <div class="input-group">
-          <label>Location</label>
-          {{ form.location.errors }}
-          {{ form.location }}
-        </div>
-
-        <div class="input-group">
-          <label>Involved Person</label>
-          {{ form.involved_person.errors }}
-          {{ form.involved_person }}
-        </div>
-
-        <div class="input-group">
-          <label>Preferred Resolution</label>
-          {{ form.preferred_resolution.errors }}
-          {{ form.preferred_resolution }}
-        </div>
-
-        <div class="input-group">
-          <label>Description</label>
-          {{ form.description.errors }}
-          {{ form.description }}
-        </div>
-
-        <div class="input-group upload-box">
-          <label>Upload Evidence</label>
-          {{ form.evidence.errors }}
-          {{ form.evidence }}
-        </div>
-
-        <div class="confirmation">
-          {{ form.confirm }}
-          <label for="{{ form.confirm.id_for_label }}">
-            I confirm this report is accurate. False claims may affect account status.
-          </label>
-        </div>
-
-        <button type="submit" class="submit-btn">Submit</button>
-
-      </form>
-      {% if show_popup %}
-<div class="popup-overlay" id="popup">
-  <div class="popup-content">
-    <img src="{% static 'images/check.png' %}" class="popup-img" />
-
-    <h2>Incident Report Submitted</h2>
-
-    <p><strong>Reference ID:</strong> INC-{{ incident.id }}</p>
-
-    <p>
-      <strong>Linked Order:</strong>
-      {{ incident.order }}
-    </p>
-
-    <p>
-      <strong>Status:</strong>
-      {{ incident.get_status_display }}
-    </p>
-
-    <div class="popup-buttons">
-      <a href="{% url 'accounts:my_bookimg' %}" class="btn-outline">
-        Back to Orders
-      </a>
-
-      <a href="{% url 'accounts:incident' %}" class="btn-filled">
-        Track My Incident
-      </a>
-    </div>
-  </div>
+<!-- Sidebar -->    {% include "accounts/includes/customer_sidebar.html" %}  <!-- المحتوى الرئيسي -->
+<!-- MAIN CONTENT -->
+<main class="main-content">
+<div class="report-container">
+<h1 class="title">Report Incident</h1>
+<form method="post" enctype="multipart/form-data" class="form-section">        {% csrf_token %}        {% if form.errors %}        <div class="form-errors" style="margin-bottom:16px; padding:12px 14px; border-radius:12px; background:#fff1f0; color:#b42318; font-weight:600;">          Please review the highlighted fields and try again.          {{ form.non_field_errors }}        </div>        {% endif %}        <div class="input-group">
+<label>Incident Type</label>          {{ form.incident_type.errors }}          {{ form.incident_type }}        </div>
+<div class="input-group">
+<label>Severity</label>          {{ form.severity.errors }}          {{ form.severity }}        </div>
+<div class="input-group">
+<label>Order</label>          {{ form.order.errors }}          {{ form.order }}        </div>
+<div class="input-group">
+<label>Date & Time</label>          {{ form.incident_datetime.errors }}          {{ form.incident_datetime }}        </div>
+<div class="input-group">
+<label>Location</label>          {{ form.location.errors }}          {{ form.location }}        </div>
+<div class="input-group">
+<label>Involved Person</label>          {{ form.involved_person.errors }}          {{ form.involved_person }}        </div>
+<div class="input-group">
+<label>Preferred Resolution</label>          {{ form.preferred_resolution.errors }}          {{ form.preferred_resolution }}        </div>
+<div class="input-group">
+<label>Description</label>          {{ form.description.errors }}          {{ form.description }}        </div>
+<div class="input-group upload-box">
+<label>Upload Evidence</label>          {{ form.evidence.errors }}          {{ form.evidence }}        </div>
+<div class="confirmation">          {{ form.confirm }}          <label for="{{ form.confirm.id_for_label }}">            I confirm this report is accurate. False claims may affect account status.          </label>
 </div>
-{% endif %}
-
-    </div>
-  </main>
+<button type="submit" class="submit-btn">Submit</button>
+</form>      {% if show_popup %}<div class="popup-overlay" id="popup">
+<div class="popup-content">
+<img src="{% static 'images/check.png' %}" class="popup-img" />
+<h2>Incident Report Submitted</h2>
+<p>
+<strong>Reference ID:</strong> INC-{{ incident.id }}</p>
+<p>
+<strong>Linked Order:</strong>      {{ incident.order }}    </p>
+<p>
+<strong>Status:</strong>      {{ incident.get_status_display }}    </p>
+<div class="popup-buttons">
+<a href="{% url 'accounts:my_bookimg' %}" class="btn-outline">        Back to Orders      </a>
+<a href="{% url 'accounts:incident' %}" class="btn-filled">        Track My Incident      </a>
 </div>
-{% include "home/includes/footer.html" %}
-{% if show_popup %}
-<script>
-  const popup = document.getElementById("popup");
-  popup.addEventListener("click", (e) => {
-    if (e.target === popup) {
-      popup.style.display = "none";
-    }
-  });
+</div>
+</div>{% endif %}    </div>
+</main>
+</div>{% include "home/includes/footer.html" %}
+{% if show_popup %}<script>  const popup = document.getElementById("popup");  popup.addEventListener("click", (e) => {    if (e.target === popup) {      popup.style.display = "none";    }  });</script>{% endif %}<script>  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const arrow = document.querySelector(".menu-toggle .arrow");  toggle.addEventListener("click", () => {    sidebar.classList.toggle("open");    // لما تفتح القائمة السهم ينعكس    if (sidebar.classList.contains("open")) {      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار    } else {      arrow.innerHTML = "&#8250;"; // › سهم لليمين    }  });</script>
+<script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.querySelector(".customer-menu-overlay");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");    });  }})();</script>
+<script>(function () {  const confirmBox = document.querySelector(".confirmation input[type='checkbox']");  const submitBtn = document.querySelector(".submit-btn");  if (!confirmBox || !submitBtn) return;  const syncState = () => {    submitBtn.disabled = !confirmBox.checked;  };  syncState();  confirmBox.addEventListener("change", syncState);})();</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-{% endif %}
-
-
-<script>
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-
-  toggle.addEventListener("click", () => {
-    sidebar.classList.toggle("open");
-    // لما تفتح القائمة السهم ينعكس
-    if (sidebar.classList.contains("open")) {
-      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار
-    } else {
-      arrow.innerHTML = "&#8250;"; // › سهم لليمين
-    }
-  });
-</script>
-
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
-  }
-})();
-</script>
-<script>
-(function () {
-  const confirmBox = document.querySelector(".confirmation input[type='checkbox']");
-  const submitBtn = document.querySelector(".submit-btn");
-  if (!confirmBox || !submitBtn) return;
-  const syncState = () => {
-    submitBtn.disabled = !confirmBox.checked;
-  };
-  syncState();
-  confirmBox.addEventListener("change", syncState);
-})();
-</script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

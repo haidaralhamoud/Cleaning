@@ -1,96 +1,90 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Customer Notes | Hembla experten</title>
-
-  <link rel="stylesheet" href="{% static 'css/add_Customer_Notes.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Customer Notes | Hembla experten</title>
+<link rel="stylesheet" href="{% static 'css/add_Customer_Notes.css' %}" />
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-
 <body>
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
 <div class="layout">
-  <!-- ===== Mobile Header ===== -->
-  <div class="mobile-header">
-    <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-      <span class="arrow">&#8250;</span>
-    </button>
-  </div>
-
-  <!-- ===== Sidebar ===== -->
+<!-- ===== Mobile Header ===== -->
+<div class="mobile-header">
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
+</div>
+<!-- ===== Sidebar ===== -->
   {% include "accounts/includes/customer_sidebar.html" %}
 
 
   <!-- ===== Main Content ===== -->
-  <main class="content">
-    <h1>Customer Notes</h1>
-    <p class="subtitle">Add or edit notes for this customer</p>
-
-    <section class="form-box">
-      <form method="post">
+<main class="content">
+<h1>Customer Notes</h1>
+<p class="subtitle">Add or edit notes for this customer</p>
+<section class="form-box">
+<form method="post">
         {% csrf_token %}
         {% if form.non_field_errors %}
           <div class="field-error">{{ form.non_field_errors|striptags }}</div>
         {% endif %}
 
         <!-- =============== Key Handling =============== -->
-        <h2>Key Handling Instructions</h2>
-
-        <div class="option {% if form.instance.key_handling == 'mat' or not form.instance.key_handling %}active{% endif %}">
-          <label>
-            <input type="radio" name="key_handling" value="mat"
+<h2>Key Handling Instructions</h2>
+<div class="option {% if form.instance.key_handling == 'mat' or not form.instance.key_handling %}active{% endif %}">
+<label>
+<input type="radio" name="key_handling" value="mat"
               {% if form.instance.key_handling == 'mat' or not form.instance.key_handling %}checked{% endif %}>
-            <div>
-              <p class="title">Leave under mat</p>
-              <p class="desc">Leave the key under the doormat.</p>
-            </div>
-          </label>
-        </div>
-
-        <div class="option {% if form.instance.key_handling == 'garden' %}active{% endif %}">
-          <label>
-            <input type="radio" name="key_handling" value="garden"
+<div>
+<p class="title">Leave under mat</p>
+<p class="desc">Leave the key under the doormat.</p>
+</div>
+</label>
+</div>
+<div class="option {% if form.instance.key_handling == 'garden' %}active{% endif %}">
+<label>
+<input type="radio" name="key_handling" value="garden"
               {% if form.instance.key_handling == 'garden' %}checked{% endif %}>
-            <div>
-              <p class="title">Hide in the garden</p>
-              <p class="desc">Hide the key in a designated spot in the garden.</p>
-            </div>
-          </label>
-        </div>
-
-        <div class="option {% if form.instance.key_handling == 'hand' %}active{% endif %}">
-          <label>
-            <input type="radio" name="key_handling" value="hand"
+<div>
+<p class="title">Hide in the garden</p>
+<p class="desc">Hide the key in a designated spot in the garden.</p>
+</div>
+</label>
+</div>
+<div class="option {% if form.instance.key_handling == 'hand' %}active{% endif %}">
+<label>
+<input type="radio" name="key_handling" value="hand"
               {% if form.instance.key_handling == 'hand' %}checked{% endif %}>
-            <div>
-              <p class="title">Hand directly</p>
-              <p class="desc">Hand the key directly to the cleaner.</p>
-            </div>
-          </label>
-        </div>
-
-        <div class="option {% if form.instance.key_handling == 'custom' %}active{% endif %}">
-          <label>
-            <input type="radio" name="key_handling" value="custom"
+<div>
+<p class="title">Hand directly</p>
+<p class="desc">Hand the key directly to the cleaner.</p>
+</div>
+</label>
+</div>
+<div class="option {% if form.instance.key_handling == 'custom' %}active{% endif %}">
+<label>
+<input type="radio" name="key_handling" value="custom"
               {% if form.instance.key_handling == 'custom' %}checked{% endif %}>
-            <div>
-              <p class="title">Custom</p>
-              <p class="desc">Write your own instructions.</p>
-            </div>
-          </label>
-        </div>
-
-        <!-- custom instructions -->
-        <input
+<div>
+<p class="title">Custom</p>
+<p class="desc">Write your own instructions.</p>
+</div>
+</label>
+</div>
+<!-- custom instructions -->
+<input
           type="text"
           id="key_custom_instructions"
           name="key_custom_instructions"
@@ -103,8 +97,8 @@
         {% endif %}
 
         <!-- =============== Alarm Code =============== -->
-        <h2>Alarm Code</h2>
-        <input
+<h2>Alarm Code</h2>
+<input
           type="text"
           name="alarm_code"
           placeholder="Enter alarm code"
@@ -115,37 +109,35 @@
         {% endif %}
 
         <!-- =============== Products & Supplies =============== -->
-        <h2>Products & Supplies</h2>
-
-        <div class="option {% if form.instance.products_supplies == 'company' %}active{% endif %}">
-          <label>
-            <input type="radio" name="products_supplies" value="company"
+<h2>Products & Supplies</h2>
+<div class="option {% if form.instance.products_supplies == 'company' %}active{% endif %}">
+<label>
+<input type="radio" name="products_supplies" value="company"
               {% if form.instance.products_supplies == 'company' %}checked{% endif %}>
-            <div>
-              <p class="title">Company products</p>
-              <p class="desc">We will use our own cleaning supplies.</p>
-            </div>
-          </label>
-        </div>
-
-        <div class="option {% if form.instance.products_supplies == 'customer' or not form.instance.products_supplies %}active{% endif %}">
-          <label>
-            <input type="radio" name="products_supplies" value="customer"
+<div>
+<p class="title">Company products</p>
+<p class="desc">We will use our own cleaning supplies.</p>
+</div>
+</label>
+</div>
+<div class="option {% if form.instance.products_supplies == 'customer' or not form.instance.products_supplies %}active{% endif %}">
+<label>
+<input type="radio" name="products_supplies" value="customer"
               {% if form.instance.products_supplies == 'customer' or not form.instance.products_supplies %}checked{% endif %}>
-            <div>
-              <p class="title">Customer products</p>
-              <p class="desc">The customer will provide the cleaning supplies.</p>
-            </div>
-          </label>
-        </div>
+<div>
+<p class="title">Customer products</p>
+<p class="desc">The customer will provide the cleaning supplies.</p>
+</div>
+</label>
+</div>
 
         {% if form.products_supplies.errors %}
           <div class="field-error">{{ form.products_supplies.errors|striptags }}</div>
         {% endif %}
 
         <!-- =============== Location of materials =============== -->
-        <h2>Location of cleaning material or tools</h2>
-        <input
+<h2>Location of cleaning material or tools</h2>
+<input
           type="text"
           name="cleaning_material_location"
           placeholder="e.g., Under the kitchen sink"
@@ -156,23 +148,23 @@
         {% endif %}
 
         <!-- =============== Special Requests =============== -->
-        <h2>Special Requests</h2>
-        <textarea name="special_requests" placeholder="Enter any special requests...">{{ form.instance.special_requests|default:'' }}</textarea>
+<h2>Special Requests</h2>
+<textarea name="special_requests" placeholder="Enter any special requests...">{{ form.instance.special_requests|default:'' }}</textarea>
         {% if form.special_requests.errors %}
           <div class="field-error">{{ form.special_requests.errors|striptags }}</div>
         {% endif %}
 
         <!-- =============== General Notes =============== -->
-        <h2>General Notes</h2>
-        <textarea name="general_notes" placeholder="Enter general notes...">{{ form.instance.general_notes|default:'' }}</textarea>
+<h2>General Notes</h2>
+<textarea name="general_notes" placeholder="Enter general notes...">{{ form.instance.general_notes|default:'' }}</textarea>
         {% if form.general_notes.errors %}
           <div class="field-error">{{ form.general_notes.errors|striptags }}</div>
         {% endif %}
 
         <button class="save-btn" type="submit">Save</button>
-      </form>
-    </section>
-  </main>
+</form>
+</section>
+</main>
 </div>
 
 {% include "home/includes/footer.html" %}
@@ -217,8 +209,8 @@
     syncCustomKey();
   });
 </script>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

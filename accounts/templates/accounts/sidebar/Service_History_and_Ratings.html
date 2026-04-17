@@ -5,35 +5,37 @@
 <meta charset="UTF-8">
 <title>Service History & Ratings</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+{% include 'home/includes/font_links.html' %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/Service_History_and_Ratings.css' %}">
 </head>
-
 <body class="service-history-view">
 {% include "home/includes/main_header.html" %}
 <div class="mobile-header">
-  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span>
-  </button>
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
 </div>
 <div class="layout">
   {% include "accounts/includes/customer_sidebar.html" %}
   <main class="content">
-
-    <div class="page-header">
-      <div class="page-kicker">Your Customer Dashboard</div>
-      <h1 class="page-title">Service History & Ratings</h1>
-      <div class="page-chips">
-        <span class="chip">Trusted pros</span>
-        <span class="chip">Verified feedback</span>
-        <span class="chip">Smart insights</span>
-      </div>
-    </div>
+<div class="page-header">
+<div class="page-kicker">Your Customer Dashboard</div>
+<h1 class="page-title">Service History & Ratings</h1>
+<div class="page-chips">
+<span class="chip">Trusted pros</span>
+<span class="chip">Verified feedback</span>
+<span class="chip">Smart insights</span>
+</div>
+</div>
 
     {% if messages %}
       <div class="messages-stack">
@@ -44,133 +46,140 @@
     {% endif %}
 
     <div class="filters-wrapper">
-      <form class="filters-bar fade-up" method="get">
-        <div class="filters-row">
-          <div class="filter-item">
-            <input type="text" name="q" placeholder="Search service" value="{{ search_query }}">
-          </div>
-          <div class="filter-item">
-            <input type="date" name="from" value="{{ selected_from }}">
-          </div>
-          <div class="filter-item">
-            <input type="date" name="to" value="{{ selected_to }}">
-          </div>
-          <div class="filter-item is-select">
-            <select name="service">
-              <option value="">All Services</option>
+<form class="filters-bar fade-up" method="get">
+<div class="filters-row">
+<div class="filter-item">
+<input type="text" name="q" placeholder="Search service" value="{{ search_query }}">
+</div>
+<div class="filter-item">
+<input type="date" name="from" value="{{ selected_from }}">
+</div>
+<div class="filter-item">
+<input type="date" name="to" value="{{ selected_to }}">
+</div>
+<div class="filter-item is-select">
+<select name="service">
+<option value="">All Services</option>
               {% for s in service_types %}
                 <option value="{{ s }}" {% if s == selected_service %}selected{% endif %}>{{ s }}</option>
               {% endfor %}
             </select>
-          </div>
-          <div class="filter-item is-select">
-            <select name="provider">
-              <option value="">All Providers</option>
+</div>
+<div class="filter-item is-select">
+<select name="provider">
+<option value="">All Providers</option>
               {% for p in providers %}
                 <option value="{{ p.id }}" {% if selected_provider == p.id|stringformat:"s" %}selected{% endif %}>
                   {{ p.get_full_name|default:p.username }}
                 </option>
               {% endfor %}
             </select>
-          </div>
-        </div>
-        <div class="filters-actions">
-          <button class="filter-btn" type="submit">Apply</button>
-        </div>
-      </form>
-    </div>
-
-    <div class="dashboard">
-      <div class="page-sub">
+</div>
+</div>
+<div class="filters-actions">
+<button class="filter-btn" type="submit">Apply</button>
+</div>
+</form>
+</div>
+<div class="dashboard">
+<div class="page-sub">
         Manage your service feedback, highlight the best pros, and keep track of everything you have rated.
       </div>
-
-      <div class="grid">
-        <div class="card card--glow fade-up">
-          <b>Your Overall Experience</b>
-          <div class="overall-score">{{ summary.avg_overall|floatformat:1|default:"0.0" }}</div>
-          <div class="stars" style="--rating: {{ summary.avg_overall|default:0 }};">
-            <div class="stars-back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            <div class="stars-front">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-          </div>
-          <small>{{ summary.total|default:0 }} reviews</small>
+<div class="grid">
+<div class="card card--glow fade-up">
+<b>Your Overall Experience</b>
+<div class="overall-score">{{ summary.avg_overall|floatformat:1|default:"0.0" }}</div>
+<div class="stars" style="--rating: {{ summary.avg_overall|default:0 }};">
+<div class="stars-back">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+<div class="stars-front">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+</div>
+<small>{{ summary.total|default:0 }} reviews</small>
 
           {% for row in star_distribution %}
             <div class="star-row">
-              <span>{{ row.star }}</span>
-              <div class="progress"><div style="width:{{ row.percent }}%"></div></div>
-            </div>
+<span>{{ row.star }}</span>
+<div class="progress">
+<div style="width:{{ row.percent }}%">
+</div>
+</div>
+</div>
           {% endfor %}
         </div>
-
-        <div class="card card--metrics fade-up">
-          <b>Category Performance</b>
-
-          <div class="metric">
-            <b>Punctuality</b>
-            <div class="progress"><div style="width:{{ summary.avg_punctuality|default:0|floatformat:0 }}0%"></div></div>
+<div class="card card--metrics fade-up">
+<b>Category Performance</b>
+<div class="metric">
+<b>Punctuality</b>
+<div class="progress">
+<div style="width:{{ summary.avg_punctuality|default:0|floatformat:0 }}0%">
+</div>
+</div>
             {{ summary.avg_punctuality|floatformat:1|default:"0.0" }}
           </div>
-
-          <div class="metric">
-            <b>Professionalism</b>
-            <div class="progress"><div style="width:{{ summary.avg_professionalism|default:0|floatformat:0 }}0%"></div></div>
+<div class="metric">
+<b>Professionalism</b>
+<div class="progress">
+<div style="width:{{ summary.avg_professionalism|default:0|floatformat:0 }}0%">
+</div>
+</div>
             {{ summary.avg_professionalism|floatformat:1|default:"0.0" }}
           </div>
-
-          <div class="metric">
-            <b>Quality</b>
-            <div class="progress"><div style="width:{{ summary.avg_quality|default:0|floatformat:0 }}0%"></div></div>
+<div class="metric">
+<b>Quality</b>
+<div class="progress">
+<div style="width:{{ summary.avg_quality|default:0|floatformat:0 }}0%">
+</div>
+</div>
             {{ summary.avg_quality|floatformat:1|default:"0.0" }}
           </div>
-
-          <div class="metric">
-            <b>Value</b>
-            <div class="progress"><div style="width:{{ summary.avg_value|default:0|floatformat:0 }}0%"></div></div>
+<div class="metric">
+<b>Value</b>
+<div class="progress">
+<div style="width:{{ summary.avg_value|default:0|floatformat:0 }}0%">
+</div>
+</div>
             {{ summary.avg_value|floatformat:1|default:"0.0" }}
           </div>
-        </div>
-      </div>
-
-      <div class="top-rated fade-up">
-        <div class="top-rated-header">
-          <span class="top-rated-icon">&#127942;</span>
-          <h3>Top Rated Providers</h3>
-        </div>
-
-        <div class="top-rated-grid">
+</div>
+</div>
+<div class="top-rated fade-up">
+<div class="top-rated-header">
+<span class="top-rated-icon">&#127942;</span>
+<h3>Top Rated Providers</h3>
+</div>
+<div class="top-rated-grid">
           {% for p in top_providers %}
             <div class="top-rated-card rank-{{ forloop.counter }}">
-              <div class="top-rated-row">
-                <img
-                  src="{% if p.provider_profile.photo %}{{ p.provider_profile.photo.url }}{% else %}{% static 'images/avatar.png' %}{% endif %}"
+<div class="top-rated-row">
+<img
+                  src="{% if p.provider_profile.photo %}{{ p.provider_profile.photo.url }}{% else %}
+{% static 'images/avatar.png' %}
+{% endif %}"
                   class="top-rated-avatar"
                   alt="Provider avatar"
                 >
-                <div>
-                  <b>{{ p.get_full_name|default:p.username }}</b>
-                  <div class="top-rated-meta">
+<div>
+<b>{{ p.get_full_name|default:p.username }}</b>
+<div class="top-rated-meta">
                     &#9733; {{ p.avg_rating|floatformat:1 }} &middot; {{ p.total_reviews }} reviews
                   </div>
-                </div>
-              </div>
-              <p class="top-rated-quote">
+</div>
+</div>
+<p class="top-rated-quote">
                 &ldquo;Highly rated professional with consistent service quality.&rdquo;
               </p>
-            </div>
+</div>
           {% empty %}
             <p>No rated providers yet.</p>
           {% endfor %}
         </div>
-      </div>
-
-      <div class="past fade-up">
-        <h3>Past Services</h3>
+</div>
+<div class="past fade-up">
+<h3>Past Services</h3>
 
         {% for s in past_services %}
           <div class="service-item">
-            <div class="service-main">
-              <b>
+<div class="service-main">
+<b>
                 {{ s.service_title }}
                 {% if not s.can_leave_comment %}
                   <span class="tag reviewed">REVIEWED</span>
@@ -178,14 +187,14 @@
                   <span class="tag not-reviewed">NOT REVIEWED</span>
                 {% endif %}
               </b>
-              <div class="page-sub">
+<div class="page-sub">
                 {{ s.date|date:"F d, Y" }} &middot; {{ s.provider_name }}
               </div>
 
               {% if s.review %}
                 <div class="review-summary">
-                  <div class="review-score">Overall {{ s.review.overall_rating }}/5</div>
-                  <div class="review-breakdown">
+<div class="review-score">Overall {{ s.review.overall_rating }}/5</div>
+<div class="review-breakdown">
                     Punctuality {{ s.review.punctuality }}/5,
                     Professionalism {{ s.review.professionalism }}/5,
                     Quality {{ s.review.quality }}/5,
@@ -197,9 +206,8 @@
                 </div>
               {% endif %}
             </div>
-
-            <div class="service-actions">
-              <a href="{% url 'accounts:view_service_details' s.booking_type s.booking_id %}" class="btn btn-outline">View</a>
+<div class="service-actions">
+<a href="{% url 'accounts:view_service_details' s.booking_type s.booking_id %}" class="btn btn-outline">View</a>
               {% if s.can_leave_comment %}
                 <button class="btn btn-primary rating-toggle" type="button" data-target="rate-{{ s.booking_type }}-{{ s.booking_id }}">Rate</button>
               {% endif %}
@@ -209,92 +217,90 @@
               <form method="post" class="rating-panel hidden" id="rate-{{ s.booking_type }}-{{ s.booking_id }}">
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="rating">
-                <input type="hidden" name="booking_type" value="{{ s.booking_type }}">
-                <input type="hidden" name="booking_id" value="{{ s.booking_id }}">
-
-                <div class="rating-grid">
-                  <label class="star-field">
-                    <span>Overall</span>
-                    <input type="hidden" name="overall_rating" required>
-                    <div class="star-picker" data-input="overall_rating" data-label="Overall">
-                      <button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
-                    </div>
-                    <small class="star-value">Select a rating</small>
-                  </label>
-                  <label class="star-field">
-                    <span>Punctuality</span>
-                    <input type="hidden" name="punctuality" required>
-                    <div class="star-picker" data-input="punctuality" data-label="Punctuality">
-                      <button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
-                    </div>
-                    <small class="star-value">Select a rating</small>
-                  </label>
-                  <label class="star-field">
-                    <span>Quality</span>
-                    <input type="hidden" name="quality" required>
-                    <div class="star-picker" data-input="quality" data-label="Quality">
-                      <button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
-                    </div>
-                    <small class="star-value">Select a rating</small>
-                  </label>
-                  <label class="star-field">
-                    <span>Professionalism</span>
-                    <input type="hidden" name="professionalism" required>
-                    <div class="star-picker" data-input="professionalism" data-label="Professionalism">
-                      <button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
-                    </div>
-                    <small class="star-value">Select a rating</small>
-                  </label>
-                  <label class="star-field">
-                    <span>Value</span>
-                    <input type="hidden" name="value" required>
-                    <div class="star-picker" data-input="value" data-label="Value">
-                      <button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
-                      <button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
-                    </div>
-                    <small class="star-value">Select a rating</small>
-                  </label>
-                </div>
-
-                <label class="rating-feedback-label">
+<input type="hidden" name="booking_type" value="{{ s.booking_type }}">
+<input type="hidden" name="booking_id" value="{{ s.booking_id }}">
+<div class="rating-grid">
+<label class="star-field">
+<span>Overall</span>
+<input type="hidden" name="overall_rating" required>
+<div class="star-picker" data-input="overall_rating" data-label="Overall">
+<button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
+<button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
+</div>
+<small class="star-value">Select a rating</small>
+</label>
+<label class="star-field">
+<span>Punctuality</span>
+<input type="hidden" name="punctuality" required>
+<div class="star-picker" data-input="punctuality" data-label="Punctuality">
+<button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
+<button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
+</div>
+<small class="star-value">Select a rating</small>
+</label>
+<label class="star-field">
+<span>Quality</span>
+<input type="hidden" name="quality" required>
+<div class="star-picker" data-input="quality" data-label="Quality">
+<button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
+<button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
+</div>
+<small class="star-value">Select a rating</small>
+</label>
+<label class="star-field">
+<span>Professionalism</span>
+<input type="hidden" name="professionalism" required>
+<div class="star-picker" data-input="professionalism" data-label="Professionalism">
+<button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
+<button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
+</div>
+<small class="star-value">Select a rating</small>
+</label>
+<label class="star-field">
+<span>Value</span>
+<input type="hidden" name="value" required>
+<div class="star-picker" data-input="value" data-label="Value">
+<button type="button" class="star-btn" data-value="1" aria-label="1 star">&#9733;</button>
+<button type="button" class="star-btn" data-value="2" aria-label="2 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="3" aria-label="3 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="4" aria-label="4 stars">&#9733;</button>
+<button type="button" class="star-btn" data-value="5" aria-label="5 stars">&#9733;</button>
+</div>
+<small class="star-value">Select a rating</small>
+</label>
+</div>
+<label class="rating-feedback-label">
                   Feedback
-                  <textarea name="feedback" rows="3" placeholder="Share your experience"></textarea>
-                </label>
-
-                <div class="rating-actions">
-                  <button type="submit" class="btn btn-primary">Submit Rating</button>
-                </div>
-              </form>
+                  <textarea name="feedback" rows="3" placeholder="Share your experience">
+</textarea>
+</label>
+<div class="rating-actions">
+<button type="submit" class="btn btn-primary">Submit Rating</button>
+</div>
+</form>
             {% endif %}
           </div>
         {% empty %}
           <p>No past services found.</p>
         {% endfor %}
       </div>
-    </div>
-  </main>
 </div>
-<div class="overlay customer-menu-overlay" id="menuOverlay"></div>
-
+</main>
+</div>
+<div class="overlay customer-menu-overlay" id="menuOverlay">
+</div>
 <script>
 document.querySelectorAll(".rating-toggle").forEach(button => {
   button.addEventListener("click", () => {
@@ -334,7 +340,7 @@ document.querySelectorAll(".star-picker").forEach(picker => {
   paintStars(Number(hiddenInput?.value || 0));
 });
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
-
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

@@ -2,27 +2,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Available Services</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Available Services</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_services_needed.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_services_needed.css' %}">
+<link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
-
 <body>
-  <!-- Header -->
+<!-- Header -->
   {% include "home/includes/main_header.html" %}
 
   <br>
-  <br>
-  <br>
-  <br>
-
-  <div class="services-needed">
-    <div class="steps">
+<br>
+<br>
+<br>
+<div class="services-needed">
+<div class="steps">
       {% for item in step_items %}
         {% if item.clickable %}
           <a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
@@ -31,39 +32,37 @@
         {% endif %}
       {% endfor %}
     </div>
-
-    <div class="title">
-      <span class="icon" aria-hidden="true">&#129532;</span>
-      <h2>Available Services</h2>
-    </div>
-
-    <div class="services-grid">
+<div class="title">
+<span class="icon" aria-hidden="true">&#129532;</span>
+<h2>Available Services</h2>
+</div>
+<div class="services-grid">
       {% for s in services %}
         <div class="service-card" data-id="{{ s.id }}" data-name="{{ s.title }}">
-          <div class="checkmark"></div>
-          <span class="selected-pill">Selected</span>
-          <img class="service-icon" src="{{ s.icon.url }}" alt="{{ s.title }}">
-          <h3>{{ s.title }}</h3>
-          <div class="service-description">{{ s.description_service_aviable|format_service_available_description }}</div>
-        </div>
+<div class="checkmark">
+</div>
+<span class="selected-pill">Selected</span>
+<img class="service-icon" src="{{ s.icon.url }}" alt="{{ s.title }}">
+<h3>{{ s.title }}</h3>
+<div class="service-description">{{ s.description_service_aviable|format_service_available_description }}</div>
+</div>
       {% endfor %}
     </div>
-
-    <div class="form-actions buttons">
-      <a onclick="window.history.back();" class="back-btn">
-        <span class="back-icon">&larr;</span>
+<div class="form-actions buttons">
+<a onclick="window.history.back();" class="back-btn">
+<span class="back-icon">&larr;</span>
         Back
       </a>
-      <form method="POST" id="servicesForm" data-skip-validate>
+<form method="POST" id="servicesForm" data-skip-validate>
         {% csrf_token %}
         <input type="hidden" name="selected_services" id="selectedServicesInput">
-        <button type="submit" class="next-btn">
+<button type="submit" class="next-btn">
           Continue
           <span class="next-icon">&rarr;</span>
-        </button>
-      </form>
-    </div>
-  </div>
+</button>
+</form>
+</div>
+</div>
 
   {% include "home/includes/footer.html" %}
 
@@ -86,7 +85,7 @@
       });
     });
   </script>
-
-  <script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

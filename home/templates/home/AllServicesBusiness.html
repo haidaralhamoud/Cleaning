@@ -3,66 +3,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>All Services - Business</title>
-   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/AllServicesBusiness.css'%}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>All Services - Business</title>
+   {% include 'home/includes/font_links.html' %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/AllServicesBusiness.css'%}" />
 </head>
 <body>
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
   <main class="container">
-    <div class="header-row">
-      <div>
-        <h1 class="page-title">All Services</h1>
-        <div class="page-subtitle">Premium business cleaning packages tailored to your space.</div>
-      </div>
-
-      <!-- filter button -->
-      <div class="filter-wrapper">
-        <button id="filter-btn">
-          <img src="{% static 'images/filter0.png'%}" alt="Filter" />
-        </button>
-      </div>
-    </div>
-
-    <div class="urgent-banner">
-      <div class="urgent-copy">
-        <span class="urgent-icon" aria-hidden="true">!</span>
-        <div>
-          <p class="urgent-title">Need this urgently?</p>
-          <p class="urgent-subtitle">Select Yes for same-day priority. We will do our best to schedule the earliest available time.</p>
-        </div>
-      </div>
-      <div class="urgent-actions">
-        <a href="?urgent=0" class="urgent-btn {% if urgent_selected %}is-ghost{% else %}is-active{% endif %}">No</a>
-        <a href="?urgent=1" class="urgent-btn urgent-yes {% if urgent_selected %}is-active{% endif %}">Yes</a>
-      </div>
-    </div>
-
-    <hr class="divider" />
-
+<div class="header-row">
+<div>
+<h1 class="page-title">All Services</h1>
+<div class="page-subtitle">Premium business cleaning packages tailored to your space.</div>
+</div>
+<!-- filter button -->
+<div class="filter-wrapper">
+<button id="filter-btn">
+<img src="{% static 'images/filter0.png'%}" alt="Filter" />
+</button>
+</div>
+</div>
+<div class="urgent-banner">
+<div class="urgent-copy">
+<span class="urgent-icon" aria-hidden="true">!</span>
+<div>
+<p class="urgent-title">Need this urgently?</p>
+<p class="urgent-subtitle">Select Yes for same-day priority. We will do our best to schedule the earliest available time.</p>
+</div>
+</div>
+<div class="urgent-actions">
+<a href="?urgent=0" class="urgent-btn {% if urgent_selected %}is-ghost{% else %}is-active{% endif %}">No</a>
+<a href="?urgent=1" class="urgent-btn urgent-yes {% if urgent_selected %}is-active{% endif %}">Yes</a>
+</div>
+</div>
+<hr class="divider" />
 <div class="services-list">
 
   {% for s in services %}
   <div class="service-card" data-title="{{ s.title|lower }}" data-desc="{{ s.description|default:''|lower }}" data-category="{{ s.category.slug|default:'' }}">
-    
-    <a class="service-image-link" href="{% url 'home:business_service_detail' s.id %}{% if urgent_selected %}?urgent=1{% endif %}">
-      <img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
-    </a>
-
-    <div class="service-content">
-      <h2>
-        <a class="service-title-link" href="{% url 'home:business_service_detail' s.id %}{% if urgent_selected %}?urgent=1{% endif %}">
+<a class="service-image-link" href="{% url 'home:business_service_detail' s.id %}
+{% if urgent_selected %}?urgent=1{% endif %}">
+<img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
+</a>
+<div class="service-content">
+<h2>
+<a class="service-title-link" href="{% url 'home:business_service_detail' s.id %}
+{% if urgent_selected %}?urgent=1{% endif %}">
           {{ s.title }}
         </a>
-      </h2>
-
-      <p>{{ s.description }}</p>
+</h2>
+<p>{{ s.description }}</p>
 
       {% if s.show_recommended_badge %}
       <span class="recommended">Recommended</span>
@@ -70,51 +68,46 @@
       <span class="recommended">{{ s.recommended_note }}</span>
       {% endif %}
     </div>
-
-    <!-- زر بدء المسار -->
+<!-- زر بدء المسار -->
 <a href="{% url 'home:business_start_booking' %}?service={{ s.title }}{% if urgent_selected %}&urgent=1{% endif %}" 
    class="quote-btn">Request Quote</a>
-
-
-  </div>
+</div>
   {% endfor %}
 
 </div>
-
-  </main>
-
-  <div class="filter-modal" id="filterModal" aria-hidden="true">
-    <div class="filter-card" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
-      <div class="filter-head">
-        <div>
-          <p class="filter-eyebrow">Smart Filter</p>
-          <h3 id="filterTitle">Filter Services</h3>
-          <p class="filter-copy">Narrow the list by service name or business category.</p>
-        </div>
-        <button class="filter-close" id="filterClose" aria-label="Close filter">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="filter-field">
-        <label class="filter-label" for="filterInput">Search</label>
-        <input class="filter-input" id="filterInput" type="text" placeholder="Search by name or description">
-      </div>
-      <div class="filter-field">
-        <label class="filter-label" for="filterCategory">Category</label>
-        <select class="filter-select" id="filterCategory">
-          <option value="all">All categories</option>
+</main>
+<div class="filter-modal" id="filterModal" aria-hidden="true">
+<div class="filter-card" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
+<div class="filter-head">
+<div>
+<p class="filter-eyebrow">Smart Filter</p>
+<h3 id="filterTitle">Filter Services</h3>
+<p class="filter-copy">Narrow the list by service name or business category.</p>
+</div>
+<button class="filter-close" id="filterClose" aria-label="Close filter">
+<span aria-hidden="true">&times;</span>
+</button>
+</div>
+<div class="filter-field">
+<label class="filter-label" for="filterInput">Search</label>
+<input class="filter-input" id="filterInput" type="text" placeholder="Search by name or description">
+</div>
+<div class="filter-field">
+<label class="filter-label" for="filterCategory">Category</label>
+<select class="filter-select" id="filterCategory">
+<option value="all">All categories</option>
           {% for category in categories %}
             <option value="{{ category.slug }}">{{ category.title }}</option>
           {% endfor %}
         </select>
-      </div>
-      <div class="filter-status" id="filterStatus">Showing all services.</div>
-      <div class="filter-actions">
-        <button class="reset" id="filterReset">Reset</button>
-        <button class="apply" id="filterApply">Apply</button>
-      </div>
-    </div>
-  </div>
+</div>
+<div class="filter-status" id="filterStatus">Showing all services.</div>
+<div class="filter-actions">
+<button class="reset" id="filterReset">Reset</button>
+<button class="apply" id="filterApply">Apply</button>
+</div>
+</div>
+</div>
 {% include "home/includes/footer.html" %}
   <script>
     const btn = document.getElementById("filter-btn");
@@ -188,6 +181,7 @@
 
     applyFilters();
   </script>
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

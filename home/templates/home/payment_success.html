@@ -2,13 +2,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Booking Confirmed | Hembla Experten</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Booking Confirmed | Hembla Experten</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<style>
     .payment-status {
       max-width: 800px;
       margin: 40px auto;
@@ -44,10 +47,9 @@
 {% include "home/includes/main_header.html" %}
 
 <div class="payment-status">
-  <h1>Booking confirmed</h1>
-  <p>Your payment was verified and your booking has been created successfully.</p>
-  <a href="{{ fallback_url }}">View booking</a>
+<h1>Booking confirmed</h1>
+<p>Your payment was verified and your booking has been created successfully.</p>
+<a href="{{ fallback_url }}">View booking</a>
 </div>
-
 </body>
 </html>

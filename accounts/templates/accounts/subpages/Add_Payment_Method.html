@@ -3,45 +3,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <link rel="stylesheet" href="{% static 'css/Add_Payment_Method.css' %}" />
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<link rel="stylesheet" href="{% static 'css/Add_Payment_Method.css' %}" />
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  
-
-  <title>Add Payment Method</title>
-  
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<title>Add Payment Method</title>
 </head>
 <body>
-  <!-- HEADER -->
+<!-- HEADER -->
 {% include "home/includes/main_header.html" %}
   <!-- Overlay -->
-  <div class="layout">
-
- 
-      <!-- Sidebar --> 
+<div class="layout">
+<!-- Sidebar -->
 <div >
-  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- › -->
-  </button>
-  
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+<!-- › -->
+</button>
 </div>
-
-
-
-  <!-- ===== Sidebar ===== -->
+<!-- ===== Sidebar ===== -->
         {% include "accounts/includes/customer_sidebar.html" %}
 
     <!-- Main -->
 <main class="main">
-  <section class="card">
-    <h2>Add Payment Method</h2>
-
-    <form id="payment-form" method="post" data-skip-validate>
+<section class="card">
+<h2>Add Payment Method</h2>
+<form id="payment-form" method="post" data-skip-validate>
       {% csrf_token %}
       {% if form.errors %}
         <div class="form-errors">
@@ -57,89 +51,83 @@
       {% endif %}
 
       <!-- Cardholder -->
-      <div class="form-group">
-        <label>Cardholder Name</label>
-        <div class="input-wrap icon-user">
+<div class="form-group">
+<label>Cardholder Name</label>
+<div class="input-wrap icon-user">
           {{ form.cardholder_name }}
         </div>
-      </div>
-
-      <!-- Card Number -->
-      <div class="form-group">
-        <label>Card Number</label>
-        <div class="input-wrap icon-card">
-          <div class="stripe-host stripe-host--wide">
-            <div id="card-number-element" class="stripe-mount"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Expiry + CVV -->
-      <div class="form-row">
-        <div class="form-group">
-          <label>Expiration Date</label>
-          <div class="input-wrap icon-calendar">
-            <div class="stripe-host stripe-host--narrow">
-              <div id="card-expiry-element" class="stripe-mount"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>CVV</label>
-          <div class="input-wrap icon-lock">
-            <div class="stripe-host stripe-host-cvv">
-              <div id="card-cvc-element" class="stripe-mount"></div>
-            </div>
-          </div>
-          <p class="field-hint">3-digit code on the back of your card</p>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Card Type</label>
-        <div class="pills">
-          <button type="button" class="pill" data-type="visa">
-            <img src="{% static 'images/visa.png' %}" alt="Visa">
-            <span>Visa</span>
-          </button>
-          <button type="button" class="pill" data-type="mastercard">
-            <img src="{% static 'images/mastercard.png' %}" alt="MasterCard">
-            <span>MasterCard</span>
-          </button>
-          <button type="button" class="pill" data-type="amex">
-            <img src="{% static 'images/amex.svg' %}" alt="American Express">
-            <span>American Express</span>
-          </button>
-          <button type="button" class="pill" data-type="discover">
-            <img src="{% static 'images/discover.png' %}" alt="Discover">
-            <span>Discover</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Default -->
-      <div class="inline-check">
+</div>
+<!-- Card Number -->
+<div class="form-group">
+<label>Card Number</label>
+<div class="input-wrap icon-card">
+<div class="stripe-host stripe-host--wide">
+<div id="card-number-element" class="stripe-mount">
+</div>
+</div>
+</div>
+</div>
+<!-- Expiry + CVV -->
+<div class="form-row">
+<div class="form-group">
+<label>Expiration Date</label>
+<div class="input-wrap icon-calendar">
+<div class="stripe-host stripe-host--narrow">
+<div id="card-expiry-element" class="stripe-mount">
+</div>
+</div>
+</div>
+</div>
+<div class="form-group">
+<label>CVV</label>
+<div class="input-wrap icon-lock">
+<div class="stripe-host stripe-host-cvv">
+<div id="card-cvc-element" class="stripe-mount">
+</div>
+</div>
+</div>
+<p class="field-hint">3-digit code on the back of your card</p>
+</div>
+</div>
+<div class="form-group">
+<label>Card Type</label>
+<div class="pills">
+<button type="button" class="pill" data-type="visa">
+<img src="{% static 'images/visa.png' %}" alt="Visa">
+<span>Visa</span>
+</button>
+<button type="button" class="pill" data-type="mastercard">
+<img src="{% static 'images/mastercard.png' %}" alt="MasterCard">
+<span>MasterCard</span>
+</button>
+<button type="button" class="pill" data-type="amex">
+<img src="{% static 'images/amex.svg' %}" alt="American Express">
+<span>American Express</span>
+</button>
+<button type="button" class="pill" data-type="discover">
+<img src="{% static 'images/discover.png' %}" alt="Discover">
+<span>Discover</span>
+</button>
+</div>
+</div>
+<!-- Default -->
+<div class="inline-check">
         {{ form.is_default }}
         <label for="{{ form.is_default.id_for_label }}">
           Set as default payment method
         </label>
-      </div>
-
-      <input type="hidden" id="setupIntentId" name="setup_intent_id">
-
-      <div id="card-errors" class="form-errors" style="display:none"></div>
-
-      <button type="button" class="btn" id="save-payment-method-btn">Save Payment Method</button>
-
-    </form>
-  </section>
+</div>
+<input type="hidden" id="setupIntentId" name="setup_intent_id">
+<div id="card-errors" class="form-errors" style="display:none">
+</div>
+<button type="button" class="btn" id="save-payment-method-btn">Save Payment Method</button>
+</form>
+</section>
 </main>
 </div>
-
 <!-- ================= JS ================= -->
-
-<script src="https://js.stripe.com/v3/"></script>
+<script src="https://js.stripe.com/v3/">
+</script>
 <script>
 (function () {
   const publishableKey = "{{ stripe_publishable_key|escapejs }}";

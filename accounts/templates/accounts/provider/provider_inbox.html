@@ -1,18 +1,20 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Messages | Hembla experten</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8">
+<title>Messages | Hembla experten</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
     .inbox-header{
       display:flex;
       align-items:center;
@@ -68,42 +70,42 @@
     }
   </style>
 </head>
-
 <body class="provider-portal">
 {% include "home/includes/main_header.html" %}
 
 <div class="provider-wrap">
-  <div class="inbox-header">
-    <div>
-      <div class="inbox-title">Messages</div>
-      <div class="muted" style="font-weight:600;">Only your conversations</div>
-    </div>
-    <a class="pill primary" href="{% url 'accounts:provider_bookings' %}">
-      <i class="fa-solid fa-briefcase"></i> My Orders
+<div class="inbox-header">
+<div>
+<div class="inbox-title">Messages</div>
+<div class="muted" style="font-weight:600;">Only your conversations</div>
+</div>
+<a class="pill primary" href="{% url 'accounts:provider_bookings' %}">
+<i class="fa-solid fa-briefcase">
+</i> My Orders
     </a>
-  </div>
+</div>
 
   {% if threads %}
     <div class="list">
       {% for t in threads %}
         <a class="list-item" href="{% url 'accounts:booking_chat' t.booking_type t.booking_id %}">
-          <div class="thread-meta">
-            <div class="thread-title">
-              {{ t.title }} آ· #{{ t.booking_id }}
+<div class="thread-meta">
+<div class="thread-title">
+              {{ t.title }} · #{{ t.booking_id }}
             </div>
-            <div class="thread-sub">
-              {{ t.customer_name }} آ· {{ t.booking_type|title }}
-              {% if t.when %} آ· {{ t.when }}{% endif %}
+<div class="thread-sub">
+              {{ t.customer_name }} · {{ t.booking_type|title }}
+              {% if t.when %} · {{ t.when }}{% endif %}
             </div>
-            <div class="preview">
+<div class="preview">
               {% if t.last_text %}
                 {{ t.last_text }}
               {% else %}
                 No messages
               {% endif %}
             </div>
-          </div>
-          <div class="thread-right">
+</div>
+<div class="thread-right">
             {% if t.last_time %}
               <span class="muted" style="font-size:12px;">{{ t.last_time|date:"M d, h:i A" }}</span>
             {% endif %}
@@ -111,19 +113,20 @@
               <span class="unread">{{ t.unread }}</span>
             {% endif %}
           </div>
-        </a>
+</a>
       {% endfor %}
     </div>
   {% else %}
     <div class="provider-card empty-state">
-      <i class="fa-solid fa-envelope-open-text"></i>
-      <div style="font-weight:800;">No messages</div>
-      <div class="muted" style="margin-top:6px;">When a customer sends a message, it will appear here.</div>
-    </div>
+<i class="fa-solid fa-envelope-open-text">
+</i>
+<div style="font-weight:800;">No messages</div>
+<div class="muted" style="margin-top:6px;">When a customer sends a message, it will appear here.</div>
+</div>
   {% endif %}
 </div>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

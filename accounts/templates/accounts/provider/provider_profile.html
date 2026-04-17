@@ -1,20 +1,20 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Profile | Hembla experten</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8">
+<title>My Profile | Hembla experten</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/provider_portal.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-
 <body class="provider-portal">
 {% include "home/includes/main_header.html" %}
 
@@ -27,135 +27,130 @@
   {% endif %}
 
   <section class="hero-card">
-    <div class="avatar">
+<div class="avatar">
       {% if request.user.provider_profile.photo %}
         <img src="{{ request.user.provider_profile.photo.url }}" alt="Provider photo">
       {% else %}
         {{ request.user.first_name|slice:":1"|upper }}{{ request.user.last_name|slice:":1"|upper }}
       {% endif %}
     </div>
-    <div>
-      <div class="hero-title">{{ request.user.get_full_name|default:request.user.username }}</div>
-      <div class="hero-sub">Provider Profile</div>
-      <div class="meta hero-meta">
-        <span><i class="fa-solid fa-envelope"></i> {{ request.user.email|default:"'" }}</span>
-        <span><i class="fa-solid fa-id-badge"></i> Provider ID: {{ request.user.id }}</span>
-      </div>
-      <div class="hero-actions">
-        <a class="pill primary" href="{% url 'accounts:provider_bookings' %}">
-          <i class="fa-solid fa-briefcase"></i> My Orders
+<div>
+<div class="hero-title">{{ request.user.get_full_name|default:request.user.username }}</div>
+<div class="hero-sub">Provider Profile</div>
+<div class="meta hero-meta">
+<span>
+<i class="fa-solid fa-envelope">
+</i> {{ request.user.email|default:"'" }}</span>
+<span>
+<i class="fa-solid fa-id-badge">
+</i> Provider ID: {{ request.user.id }}</span>
+</div>
+<div class="hero-actions">
+<a class="pill primary" href="{% url 'accounts:provider_bookings' %}">
+<i class="fa-solid fa-briefcase">
+</i> My Orders
         </a>
-        <a class="pill" href="{% url 'accounts:provider_inbox' %}">
-          <i class="fa-solid fa-comments"></i> Messages
+<a class="pill" href="{% url 'accounts:provider_inbox' %}">
+<i class="fa-solid fa-comments">
+</i> Messages
         </a>
-      </div>
-    </div>
-  </section>
-
-  <section class="summary-grid">
-    <div class="summary-card">
-      <div class="summary-label">Active Orders</div>
-      <div class="summary-value">{{ active_orders }}</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">Completed</div>
-      <div class="summary-value">{{ completed_orders }}</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">Admin Messages</div>
-      <div class="summary-value">{{ unread_admin }}</div>
-    </div>
-    <div class="summary-card">
-      <div class="summary-label">Provider ID</div>
-      <div class="summary-value">#{{ request.user.id }}</div>
-    </div>
-  </section>
-
-  <section class="grid-2">
-    <div class="provider-card">
-      <div class="section-title provider-title">Personal Information</div>
-      <form method="post">
+</div>
+</div>
+</section>
+<section class="summary-grid">
+<div class="summary-card">
+<div class="summary-label">Active Orders</div>
+<div class="summary-value">{{ active_orders }}</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Completed</div>
+<div class="summary-value">{{ completed_orders }}</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Admin Messages</div>
+<div class="summary-value">{{ unread_admin }}</div>
+</div>
+<div class="summary-card">
+<div class="summary-label">Provider ID</div>
+<div class="summary-value">#{{ request.user.id }}</div>
+</div>
+</section>
+<section class="grid-2">
+<div class="provider-card">
+<div class="section-title provider-title">Personal Information</div>
+<form method="post">
         {% csrf_token %}
 
         <div class="field">
-          <label>First name</label>
+<label>First name</label>
           {{ form.first_name }}
         </div>
-
-        <div class="field">
-          <label>Last name</label>
+<div class="field">
+<label>Last name</label>
           {{ form.last_name }}
         </div>
-
-        <div class="field">
-          <label>Email</label>
+<div class="field">
+<label>Email</label>
           {{ form.email }}
         </div>
-
-        <div class="field">
-          <label>City</label>
+<div class="field">
+<label>City</label>
           {{ location_form.city }}
         </div>
-
-        <div class="field">
-          <label>Region</label>
+<div class="field">
+<label>Region</label>
           {{ location_form.region }}
         </div>
-
-        <div class="field">
-          <label>Area / District</label>
+<div class="field">
+<label>Area / District</label>
           {{ location_form.area }}
         </div>
-
-        <div class="field">
-          <label>Nearby Areas</label>
+<div class="field">
+<label>Nearby Areas</label>
           {{ location_form.nearby_areas_text }}
         </div>
-
-        <button class="btn">Save Changes</button>
-        <a href="{% url 'accounts:provider_change_password' %}" class="link-soft">
+<button class="btn">Save Changes</button>
+<a href="{% url 'accounts:provider_change_password' %}" class="link-soft">
           Change Password
         </a>
-      </form>
-    </div>
-
-    <div class="provider-card">
-      <div class="section-title provider-title">Quick Actions</div>
-      <div class="list">
-        <div class="list-item">
-          <div>
-            <b>My Orders</b>
-            <small>View and manage assigned jobs</small>
-          </div>
-          <a class="pill" href="{% url 'accounts:provider_bookings' %}">Open</a>
-        </div>
-        <div class="list-item">
-          <div>
-            <b>Messages</b>
-            <small>Chat with customers</small>
-          </div>
-          <a class="pill" href="{% url 'accounts:provider_inbox' %}">Open</a>
-        </div>
-        <div class="list-item">
-          <div>
-            <b>Security</b>
-            <small>Update password</small>
-          </div>
-          <a class="pill" href="{% url 'accounts:provider_change_password' %}">Open</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="provider-card" style="margin-top:18px;">
-    <div class="section-title provider-title">Admin Messages</div>
+</form>
+</div>
+<div class="provider-card">
+<div class="section-title provider-title">Quick Actions</div>
+<div class="list">
+<div class="list-item">
+<div>
+<b>My Orders</b>
+<small>View and manage assigned jobs</small>
+</div>
+<a class="pill" href="{% url 'accounts:provider_bookings' %}">Open</a>
+</div>
+<div class="list-item">
+<div>
+<b>Messages</b>
+<small>Chat with customers</small>
+</div>
+<a class="pill" href="{% url 'accounts:provider_inbox' %}">Open</a>
+</div>
+<div class="list-item">
+<div>
+<b>Security</b>
+<small>Update password</small>
+</div>
+<a class="pill" href="{% url 'accounts:provider_change_password' %}">Open</a>
+</div>
+</div>
+</div>
+</section>
+<section class="provider-card" style="margin-top:18px;">
+<div class="section-title provider-title">Admin Messages</div>
     {% if recent_admin_messages %}
       <div class="list">
         {% for msg in recent_admin_messages %}
           <div class="list-item">
-            <div class="meta">
-              <div class="thread-title">{{ msg.title }}</div>
-              <div class="thread-sub">{{ msg.created_at|date:"M d, Y h:i A" }}</div>
+<div class="meta">
+<div class="thread-title">{{ msg.title }}</div>
+<div class="thread-sub">{{ msg.created_at|date:"M d, Y h:i A" }}</div>
               {% if msg.body %}
                 <div class="muted" style="margin-top:6px;">{{ msg.body }}</div>
               {% endif %}
@@ -171,8 +166,8 @@
     {% endif %}
   </section>
 </div>
-<script src="{% static 'js/main_header.js' %}"></script>
-
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

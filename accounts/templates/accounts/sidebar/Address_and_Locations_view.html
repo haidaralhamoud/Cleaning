@@ -3,111 +3,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Customer Profile - Address & Locations</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/Address_and_Locations_view.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Customer Profile - Address & Locations</title>
+<link rel="stylesheet" href="{% static 'css/Address_and_Locations_view.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
 <body class="address-locations-view">
-<!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-
-   <div class="layout"> 
-    <!-- Sidebar -->
-     <!-- Ø²Ø± Ø§ÙÙÙÙÙÙ ÙØ¸ÙØ± ÙÙØ· Ø¨Ø§ÙÙÙØ¨Ø§ÙÙ -->
+<!-- HEADER -->{% include "home/includes/main_header.html" %}   <div class="layout">
+<!-- Sidebar -->
+<!-- Ø²Ø± Ø§ÙÙÙÙÙÙ ÙØ¸ÙØ± ÙÙØ· Ø¨Ø§ÙÙÙØ¨Ø§ÙÙ -->
 <div >
-  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- âº -->
-  </button>
-  
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+<!-- âº -->
+</button>
+</div>    {% include "accounts/includes/customer_sidebar.html" %}    <!-- Main content -->
+<main class="main">
+<h1>Address & Locations</h1>
+<h2>My addresses</h2>{% for location in locations %}<div class="card">
+<div class="left">
+<img src="{% static 'images/home2.png'%}" class="icon">
+<h3>      {{ location.get_address_type_display }}      {% if location.is_primary %}        <img src="{% static 'images/star0.png'%}" class="star">
+<span class="badge">Active</span>      {% endif %}    </h3>
+<p>      Address: {{ location.street_address }},      {{ location.city }},      {{ location.region }},      {{ location.postal_code }},      {{ location.country }}    </p>    {% if location.contact_name %}      <p>Contact: {{ location.contact_name }} · {{ location.contact_phone }}</p>    {% endif %}    {% if location.parking_notes or location.entry_code %}      <p>        Parking: {{ location.parking_notes|default:"" }}        · Entry: {{ location.entry_code|default:"" }}      </p>    {% endif %}  </div>
+<div class="right">    {% if not location.is_primary %}      <a href="{% url 'accounts:set_location_primary' location.id %}"         class="btn btn-default">        Set as default      </a>    {% endif %}    <a href="#" class="btn btn-ghost">View on Map</a>
+<a href="{% url 'accounts:edit_address_and_locations' location.id %}"       class="btn btn-ghost">Edit</a>
+<a href="{% url 'accounts:delete_location' location.id %}"       class="btn btn-danger"       onclick="return confirm('Delete this location')">      Remove    </a>
 </div>
-
-
-
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-
-    <!-- Main content -->
-    <main class="main">
-      <h1>Address & Locations</h1>
-      <h2>My addresses</h2>
-
-
-{% for location in locations %}
-<div class="card">
-
-  <div class="left">
-    <img src="{% static 'images/home2.png'%}" class="icon">
-
-    <h3>
-      {{ location.get_address_type_display }}
-
-      {% if location.is_primary %}
-        <img src="{% static 'images/star0.png'%}" class="star">
-        <span class="badge">Active</span>
-      {% endif %}
-    </h3>
-
-    <p>
-      Address: {{ location.street_address }},
-      {{ location.city }},
-      {{ location.region }},
-      {{ location.postal_code }},
-      {{ location.country }}
-    </p>
-
-    {% if location.contact_name %}
-      <p>Contact: {{ location.contact_name }} · {{ location.contact_phone }}</p>
-    {% endif %}
-
-    {% if location.parking_notes or location.entry_code %}
-      <p>
-        Parking: {{ location.parking_notes|default:"" }}
-        · Entry: {{ location.entry_code|default:"" }}
-      </p>
-    {% endif %}
-  </div>
-
-  <div class="right">
-    {% if not location.is_primary %}
-      <a href="{% url 'accounts:set_location_primary' location.id %}"
-         class="btn btn-default">
-        Set as default
-      </a>
-    {% endif %}
-
-    <a href="#" class="btn btn-ghost">View on Map</a>
-
-    <a href="{% url 'accounts:edit_address_and_locations' location.id %}"
-       class="btn btn-ghost">Edit</a>
-
-    <a href="{% url 'accounts:delete_location' location.id %}"
-       class="btn btn-danger"
-       onclick="return confirm('Delete this location')">
-      Remove
-    </a>
-  </div>
-
+</div>{% empty %}<p class="empty-state">  No addresses added yet.</p>{% endfor %}      <a href="{% url 'accounts:Add_Address_and_Locations' %}" class="btn btn-add">Add Location</a>
+</main>
 </div>
-{% empty %}
-<p class="empty-state">
-  No addresses added yet.
-</p>
-{% endfor %}
-
-
-      <a href="{% url 'accounts:Add_Address_and_Locations' %}" class="btn btn-add">Add Location</a>
-    </main>
-  </div>
-
-<div class="overlay customer-menu-overlay" id="menuOverlay"></div>
-
-<script src="{% static 'js/main_header.js' %}"></script>
+<div class="overlay customer-menu-overlay" id="menuOverlay">
+</div>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

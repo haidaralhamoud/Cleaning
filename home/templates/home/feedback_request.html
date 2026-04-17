@@ -1,153 +1,77 @@
-﻿{% load static %}
+{% load static %}
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% trans "Feedback | Hembla experten" %}</title>
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% trans "Feedback | Hembla experten" %}</title>
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/feedback_request.css' %}">
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@400;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/feedback_request.css' %}">
 </head>
-<body{% if show_success_popup %} class="feedback-popup-open"{% endif %}>
-  {% include "home/includes/main_header.html" %}
-
-  <main class="feedback-page">
-    <section class="feedback-shell">
-      <header class="feedback-head">
-        <h1>{% trans "Feedback" %}</h1>
-        <p>{% trans "Share your feedback or request a new service." %}</p>
-      </header>
-
-      <div class="feedback-card">
-        <p class="intro">{% trans "We want to hear from you. Tell us about your experience, suggest improvements, or request a new service. If it's something we don't currently offer, we can explore it." %}</p>
-
-        <form method="post">
-          {% csrf_token %}
-          {% if form.non_field_errors %}
-            <div class="feedback-form-errors">
-              {{ form.non_field_errors }}
-            </div>
-          {% endif %}
-          <div class="field-group">
-            <label for="id_customer_name">{% trans "Your Name" %}</label>
-            {{ form.customer_name }}
-          </div>
-          <div class="field-group">
-            <label for="id_email">{% trans "Your Email" %} ({% trans "optional" %})</label>
-            {{ form.email }}
-            {{ form.email.errors }}
-          </div>
-          <div class="field-group">
-            <label for="id_feedback_text">{% trans "Your Feedback" %}</label>
-            {{ form.feedback_text }}
-            {{ form.feedback_text.errors }}
-          </div>
-          <div class="field-group">
-            <label>{% trans "Rating" %}</label>
-            <div class="rating-stars" role="radiogroup" aria-label="Rating">
-              {% with current=form.rating.value|default:"5" %}
-                {% for i in "54321"|make_list %}
-                  <input
-                    type="radio"
-                    id="rating{{ i }}"
-                    name="rating"
-                    value="{{ i }}"
-                    {% if current == i %}checked{% endif %}
-                  >
-                  <label for="rating{{ i }}" title="{{ i }} stars"></label>
-                {% endfor %}
-              {% endwith %}
-            </div>
-          </div>
-
-          <div class="divider">
-            <span>{% trans "OR" %}</span>
-          </div>
-
-          <div class="request-block">
-            <h2>{% trans "Need a service we don't have" %}</h2>
-            <div class="field-group">
-              <label for="id_service_type">{% trans "Service Type" %}</label>
-              {{ form.service_type }}
-              {{ form.service_type.errors }}
-            </div>
-            <div class="field-group">
-              <label for="id_request_details">{% trans "Describe Your Request" %}</label>
-              {{ form.request_details }}
-              {{ form.request_details.errors }}
-            </div>
-          </div>
-
-          <button type="submit" class="submit-btn">{% trans "Send Feedback / Request Service" %}</button>
-        </form>
-      </div>
-    </section>
-  </main>
-
-  {% if show_success_popup %}
-  <div class="feedback-success-overlay" id="feedbackSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="feedbackSuccessTitle">
-    <div class="feedback-success-popup">
-      <button type="button" class="feedback-success-close" id="feedbackSuccessClose" aria-label="{% trans 'Close' %}">&times;</button>
-      <div class="feedback-success-icon" aria-hidden="true">
-        <svg
-          class="feedback-success-icon-svg"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          role="presentation"
-          focusable="false"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-          <path d="M11 19h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v6" />
-          <path d="M3 7l9 6l9 -6" />
-          <path d="M15 19l2 2l4 -4" />
-        </svg>
-      </div>
-      <h2 id="feedbackSuccessTitle">{% trans "Submission Received!" %}</h2>
-      <p class="feedback-success-lead">
-        {% trans "Thanks for reaching out to us. We've received your request and our team is already on it." %}
-      </p>
-      <div class="feedback-success-copy">
-        <strong>{% trans "What Happens Next?" %}</strong>
-        <p>{% trans "We'll review your details and get back to you within 48 hours. If a call is needed, we'll suggest a time that works best for you." %}</p>
-        <p>{% trans "We're here to make things easy, sit back and we'll take care of the rest." %}</p>
-      </div>
-      <div class="feedback-success-actions">
-        <a href="{% url 'home:all_services_private' %}" class="feedback-success-btn feedback-success-btn--blue">{% trans "Back to Services" %}</a>
-        <a href="{% url 'home:home' %}" class="feedback-success-btn feedback-success-btn--green">{% trans "Go to Homepage" %}</a>
-      </div>
-    </div>
-  </div>
-  {% endif %}
-
-  {% include "home/includes/footer.html" %}
-  <script>
-    (function () {
-      const overlay = document.getElementById("feedbackSuccessOverlay");
-      const closeBtn = document.getElementById("feedbackSuccessClose");
-      if (!overlay || !closeBtn) return;
-
-      const closePopup = () => {
-        overlay.style.display = "none";
-        document.body.classList.remove("feedback-popup-open");
-        const url = new URL(window.location.href);
-        url.searchParams.delete("submitted");
-        window.history.replaceState({}, "", url.pathname + url.search + url.hash);
-      };
-
-      closeBtn.addEventListener("click", closePopup);
-    })();
-  </script>
-  <script src="{% static 'js/main_header.js' %}"></script>
+<body{% if show_success_popup %} class="feedback-popup-open"{% endif %}>  {% include "home/includes/main_header.html" %}  <main class="feedback-page">
+<section class="feedback-shell">
+<header class="feedback-head">
+<h1>{% trans "Feedback" %}</h1>
+<p>{% trans "Share your feedback or request a new service." %}</p>
+</header>
+<div class="feedback-card">
+<p class="intro">{% trans "We want to hear from you. Tell us about your experience, suggest improvements, or request a new service. If it's something we don't currently offer, we can explore it." %}</p>
+<form method="post">          {% csrf_token %}          {% if form.non_field_errors %}            <div class="feedback-form-errors">              {{ form.non_field_errors }}            </div>          {% endif %}          <div class="field-group">
+<label for="id_customer_name">{% trans "Your Name" %}</label>            {{ form.customer_name }}          </div>
+<div class="field-group">
+<label for="id_email">{% trans "Your Email" %} ({% trans "optional" %})</label>            {{ form.email }}            {{ form.email.errors }}          </div>
+<div class="field-group">
+<label for="id_feedback_text">{% trans "Your Feedback" %}</label>            {{ form.feedback_text }}            {{ form.feedback_text.errors }}          </div>
+<div class="field-group">
+<label>{% trans "Rating" %}</label>
+<div class="rating-stars" role="radiogroup" aria-label="Rating">              {% with current=form.rating.value|default:"5" %}                {% for i in "54321"|make_list %}                  <input                    type="radio"                    id="rating{{ i }}"                    name="rating"                    value="{{ i }}"                    {% if current == i %}checked{% endif %}                  >
+<label for="rating{{ i }}" title="{{ i }} stars">
+</label>                {% endfor %}              {% endwith %}            </div>
+</div>
+<div class="divider">
+<span>{% trans "OR" %}</span>
+</div>
+<div class="request-block">
+<h2>{% trans "Need a service we don't have" %}</h2>
+<div class="field-group">
+<label for="id_service_type">{% trans "Service Type" %}</label>              {{ form.service_type }}              {{ form.service_type.errors }}            </div>
+<div class="field-group">
+<label for="id_request_details">{% trans "Describe Your Request" %}</label>              {{ form.request_details }}              {{ form.request_details.errors }}            </div>
+</div>
+<button type="submit" class="submit-btn">{% trans "Send Feedback / Request Service" %}</button>
+</form>
+</div>
+</section>
+</main>  {% if show_success_popup %}  <div class="feedback-success-overlay" id="feedbackSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="feedbackSuccessTitle">
+<div class="feedback-success-popup">
+<button type="button" class="feedback-success-close" id="feedbackSuccessClose" aria-label="{% trans 'Close' %}">&times;</button>
+<div class="feedback-success-icon" aria-hidden="true">
+<svg          class="feedback-success-icon-svg"          xmlns="http://www.w3.org/2000/svg"          viewBox="0 0 24 24"          fill="none"          stroke="currentColor"          stroke-width="2"          stroke-linecap="round"          stroke-linejoin="round"          role="presentation"          focusable="false"        >
+<path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+<path d="M11 19h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v6" />
+<path d="M3 7l9 6l9 -6" />
+<path d="M15 19l2 2l4 -4" />
+</svg>
+</div>
+<h2 id="feedbackSuccessTitle">{% trans "Submission Received!" %}</h2>
+<p class="feedback-success-lead">        {% trans "Thanks for reaching out to us. We've received your request and our team is already on it." %}      </p>
+<div class="feedback-success-copy">
+<strong>{% trans "What Happens Next?" %}</strong>
+<p>{% trans "We'll review your details and get back to you within 48 hours. If a call is needed, we'll suggest a time that works best for you." %}</p>
+<p>{% trans "We're here to make things easy, sit back and we'll take care of the rest." %}</p>
+</div>
+<div class="feedback-success-actions">
+<a href="{% url 'home:all_services_private' %}" class="feedback-success-btn feedback-success-btn--blue">{% trans "Back to Services" %}</a>
+<a href="{% url 'home:home' %}" class="feedback-success-btn feedback-success-btn--green">{% trans "Go to Homepage" %}</a>
+</div>
+</div>
+</div>  {% endif %}  {% include "home/includes/footer.html" %}  <script>    (function () {      const overlay = document.getElementById("feedbackSuccessOverlay");      const closeBtn = document.getElementById("feedbackSuccessClose");      if (!overlay || !closeBtn) return;      const closePopup = () => {        overlay.style.display = "none";        document.body.classList.remove("feedback-popup-open");        const url = new URL(window.location.href);        url.searchParams.delete("submitted");        window.history.replaceState({}, "", url.pathname + url.search + url.hash);      };      closeBtn.addEventListener("click", closePopup);    })();  </script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
-
-

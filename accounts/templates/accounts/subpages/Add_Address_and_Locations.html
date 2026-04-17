@@ -3,143 +3,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Add Address & Locations</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/Add_Address_and_Locations.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Add Address & Locations</title>
+<link rel="stylesheet" href="{% static 'css/Add_Address_and_Locations.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
 <body>
-  <!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-
-
-  <div class="layout">
+<!-- HEADER -->{% include "home/includes/main_header.html" %}  <div class="layout">
 <div class="mobile-header">
-  <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-    <span class="arrow">&#8250;</span> <!-- › -->
-  </button>
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+<!-- › -->
+</button>
 </div>
-
-
-
-  <!-- ===== Sidebar ===== -->
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-    <!-- Main Content -->
+<!-- ===== Sidebar ===== -->    {% include "accounts/includes/customer_sidebar.html" %}    <!-- Main Content -->
 <main class="content">
-<h1 class="page-title">
-  {% if is_edit %}
-    Edit Address & Location
-  {% else %}
-    Add Address & Location
-  {% endif %}
-</h1>
-  <form method="post" class="address-form">
-    {% csrf_token %}
-
-    <!-- Row 1 -->
-    <div class="form-row">
-      <div class="form-field">
-        <label>Address Type</label>
-        {{ form.address_type }}
-      </div>
-
-      <div class="form-field stretch">
-        <label>Street address</label>
-        {{ form.street_address }}
-      </div>
-    </div>
-
-    <!-- Row 2 -->
-    <div class="form-row three">
-      <div class="form-field">
-        <label>City</label>
-        {{ form.city }}
-      </div>
-
-      <div class="form-field">
-        <label>Region</label>
-        {{ form.region }}
-      </div>
-
-      <div class="form-field">
-        <label>Postal code</label>
-        {{ form.postal_code }}
-      </div>
-    </div>
-
-    <!-- Row 3 -->
-    <div class="form-row three">
-      <div class="form-field">
-        <label>Country</label>
-        {{ form.country }}
-      </div>
-
-      <div class="form-field">
-        <label>Contact at location</label>
-        {{ form.contact_name }}
-      </div>
-
-      <div class="form-field">
-        <label>Phone at location</label>
-        {{ form.contact_phone }}
-      </div>
-    </div>
-
-    <!-- Row 4 -->
-    <div class="form-row">
-      <div class="form-field map-field">
-        <label>Map</label>
-        <div class="map-box"></div>
-      </div>
-
-      <div class="form-field small">
-        <label>Entry code</label>
-        {{ form.entry_code }}
-      </div>
-
-      <div class="form-field small">
-        <label>Parking notes</label>
-        {{ form.parking_notes }}
-      </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary save-btn">
-      Save
-    </button>
-  </form>
+<h1 class="page-title">  {% if is_edit %}    Edit Address & Location  {% else %}    Add Address & Location  {% endif %}</h1>
+<form method="post" class="address-form">    {% csrf_token %}    <!-- Row 1 -->
+<div class="form-row">
+<div class="form-field">
+<label>Address Type</label>        {{ form.address_type }}      </div>
+<div class="form-field stretch">
+<label>Street address</label>        {{ form.street_address }}      </div>
+</div>
+<!-- Row 2 -->
+<div class="form-row three">
+<div class="form-field">
+<label>City</label>        {{ form.city }}      </div>
+<div class="form-field">
+<label>Region</label>        {{ form.region }}      </div>
+<div class="form-field">
+<label>Postal code</label>        {{ form.postal_code }}      </div>
+</div>
+<!-- Row 3 -->
+<div class="form-row three">
+<div class="form-field">
+<label>Country</label>        {{ form.country }}      </div>
+<div class="form-field">
+<label>Contact at location</label>        {{ form.contact_name }}      </div>
+<div class="form-field">
+<label>Phone at location</label>        {{ form.contact_phone }}      </div>
+</div>
+<!-- Row 4 -->
+<div class="form-row">
+<div class="form-field map-field">
+<label>Map</label>
+<div class="map-box">
+</div>
+</div>
+<div class="form-field small">
+<label>Entry code</label>        {{ form.entry_code }}      </div>
+<div class="form-field small">
+<label>Parking notes</label>        {{ form.parking_notes }}      </div>
+</div>
+<button type="submit" class="btn btn-primary save-btn">      Save    </button>
+</form>
 </main>
-
-  </div>
-{% include "home/includes/footer.html" %}
-
-
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  const arrow = document.querySelector(".menu-toggle .arrow");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-      if (arrow) arrow.innerHTML = "&#8250;";
-    });
-  }
-})();
+</div>{% include "home/includes/footer.html" %}<script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.querySelector(".customer-menu-overlay");  const arrow = document.querySelector(".menu-toggle .arrow");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);    if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");      if (arrow) arrow.innerHTML = "&#8250;";    });  }})();</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

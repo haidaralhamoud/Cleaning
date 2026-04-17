@@ -2,13 +2,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Payment Failed | Hembla Experten</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Payment Failed | Hembla Experten</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<style>
     .payment-status {
       max-width: 800px;
       margin: 40px auto;
@@ -45,10 +48,9 @@
 {% include "home/includes/main_header.html" %}
 
 <div class="payment-status">
-  <h1>Payment failed</h1>
-  <p>We could not complete your payment. Please try again or use a different card.</p>
-  <a href="{% url 'home:private_booking_checkout' %}">Try payment again</a>
+<h1>Payment failed</h1>
+<p>We could not complete your payment. Please try again or use a different card.</p>
+<a href="{% url 'home:private_booking_checkout' %}">Try payment again</a>
 </div>
-
 </body>
 </html>

@@ -3,7 +3,7 @@
 {% load i18n %}
 <header class="main-header">
   <a href="{% url 'home:home' %}" class="logo" aria-label="Go to home page">
-    <img src="{% static 'images/logo.png' %}" alt="Logo">
+    <img src="{% static 'images/logo.png' %}" alt="Logo" width="235" height="235" decoding="async" fetchpriority="high">
   </a>
 
   {% with url_name=request.resolver_match.url_name|default:'' path=request.path|default:'' %}

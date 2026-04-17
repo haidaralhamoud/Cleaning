@@ -1,239 +1,253 @@
-﻿{% load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Booking | Hembla experten</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Booking | Hembla experten</title>
 
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-
-  <!-- طھط±طھظٹط¨ ط§ظ„ط³طھظٹظ„ط§طھ: ط§ظ„ط£ط³ط§ط³ظٹطŒ ط¨ط¹ط¯ظٹظ† ط§ظ„ط¨ظˆط¨ ط£ط¨ -->
-  <link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
-  <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
-  <link rel="stylesheet" href="{% static 'css/send_email.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<!-- ترتيب الستيلات: الأساسي، بعدين البوب أب -->
+<link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
+<link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
+<link rel="stylesheet" href="{% static 'css/send_email.css' %}">
 </head>
 <body{% if call_success %} class="call-success-open"{% endif %}>
 {% include "home/includes/main_header.html" %}
   <div class="confetti" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-    <span></span><span></span><span></span><span></span><span></span>
-  </div>
-
-  <section class="hero">
-    <div class="overlay">
-      <h1 class="hero-title animate">Proceed to booking</h1>
-    </div>
-  </section>
-
-  <main class="content animate">
-
-    <div class="left-section">
-      <div class="step">Step 1 of 4</div>
-
-      <div class="notice">&#127881; Boom! Your area is covered. Please proceed with your booking.</div>
-
-      <section class="booking-method">
-        <h3>Choose Your Booking Method</h3>
-        <p>We offer flexible options to suit your needs. Select the one that works best for you.</p>
-
-        <div class="methods-grid">
-
-          <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/calendar-vibrant.png' %}" alt="Calendar icon"></div>
-            <h4>Book Online Now</h4>
-            <p>Choose your service, pick a date and time, then confirm your booking instantly when you're ready to go.</p>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+<span>
+</span>
+</div>
+<section class="hero">
+<div class="overlay">
+<h1 class="hero-title animate">Proceed to booking</h1>
+</div>
+</section>
+<main class="content animate">
+<div class="left-section">
+<div class="step">Step 1 of 4</div>
+<div class="notice">&#127881; Boom! Your area is covered. Please proceed with your booking.</div>
+<section class="booking-method">
+<h3>Choose Your Booking Method</h3>
+<p>We offer flexible options to suit your needs. Select the one that works best for you.</p>
+<div class="methods-grid">
+<div class="method-card">
+<div class="icon-circle">
+<img src="{% static 'images/calendar-vibrant.png' %}" alt="Calendar icon">
+</div>
+<h4>Book Online Now</h4>
+<p>Choose your service, pick a date and time, then confirm your booking instantly when you're ready to go.</p>
 <a href="{{ continue_booking_url }}" class="btn">Book Now</a>
-
-          </div>
-
-          <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/phone-call.png' %}" alt="Phone icon"></div>
-            <h4>Schedule a Call</h4>
-            <p>Not sure what you need, or want service details first? Leave us your number and a time that suits you.</p>
-            <button class="btn" onclick="openCallPopup()">Request a Call</button>
-          </div>
-
-          <div class="method-card">
-            <div class="icon-circle"><img src="{% static 'images/received-email.png' %}" alt="Email icon"></div>
-            <h4>Send an Email</h4>
-            <p>Prefer to write things down? Send your request and we'll get back to you with a personalized response.</p>
-            <button class="btn" onclick="openEmailPopup()">Send Email</button>
-          </div>
-
-        </div>
-      </section>
-    </div>
-
-  </main>
-
-  <!-- ===== POPUP REQUEST A CALL ===== -->
-  <div id="call-overlay" class="call-overlay">
-    <div class="popup">
-      <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
-
-      <div class="popup-header">
-        <img src="{% static 'images/phone-call.png' %}" class="call-icon" alt="Phone">
-        <h2>Request a Call</h2>
-      </div>
-      <p class="subtitle">Let's find the best time to call you!</p>
-
-      <form id="call-request-form" class="call-form" method="POST">
+</div>
+<div class="method-card">
+<div class="icon-circle">
+<img src="{% static 'images/phone-call.png' %}" alt="Phone icon">
+</div>
+<h4>Schedule a Call</h4>
+<p>Not sure what you need, or want service details first? Leave us your number and a time that suits you.</p>
+<button class="btn" onclick="openCallPopup()">Request a Call</button>
+</div>
+<div class="method-card">
+<div class="icon-circle">
+<img src="{% static 'images/received-email.png' %}" alt="Email icon">
+</div>
+<h4>Send an Email</h4>
+<p>Prefer to write things down? Send your request and we'll get back to you with a personalized response.</p>
+<button class="btn" onclick="openEmailPopup()">Send Email</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- ===== POPUP REQUEST A CALL ===== -->
+<div id="call-overlay" class="call-overlay">
+<div class="popup">
+<img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
+<div class="popup-header">
+<img src="{% static 'images/phone-call.png' %}" class="call-icon" alt="Phone">
+<h2>Request a Call</h2>
+</div>
+<p class="subtitle">Let's find the best time to call you!</p>
+<form id="call-request-form" class="call-form" method="POST">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="call_request">
-
-        <label>Full Name</label>
-        <input type="text" name="name" placeholder="Your full name" required>
-
-        <label>Phone Number</label>
-        <input type="text" name="phone" placeholder="Your phone number" required>
-
-        <label>Email</label>
-        <input type="email" name="email" placeholder="Your email" required>
-
-        <label>Preferred Date</label>
-        <div class="input-with-icon">
-          <input type="date" id="preferredDateUi" required>
-          <img src="{% static 'images/calendar-vibrant.png' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
-        </div>
-
-        <label>Preferred Time</label>
-        <div class="time-row">
-          <div class="time-grid" id="timeGrid" aria-label="Select a time">
-            <button type="button" class="time-chip" data-time="09:00">09:00</button>
-            <button type="button" class="time-chip" data-time="10:00">10:00</button>
-            <button type="button" class="time-chip" data-time="11:00">11:00</button>
-            <button type="button" class="time-chip" data-time="12:00">12:00</button>
-            <button type="button" class="time-chip" data-time="13:00">13:00</button>
-            <button type="button" class="time-chip" data-time="14:00">14:00</button>
-            <button type="button" class="time-chip" data-time="15:00">15:00</button>
-            <button type="button" class="time-chip" data-time="16:00">16:00</button>
-            <button type="button" class="time-chip" data-time="17:00">17:00</button>
-            <button type="button" class="time-chip" data-time="18:00">18:00</button>
-          </div>
-          <div class="time-input time-input--custom">
-            <button type="button" class="manual-time-trigger" id="manualTimeTrigger" aria-expanded="false" aria-controls="manualTimePanel">
-              <span id="manualTimeValue">Choose custom time</span>
-              <img src="{% static 'images/clock0.png' %}" class="manual-time-icon" alt="">
-            </button>
-            <div class="manual-time-panel" id="manualTimePanel" hidden>
-              <div class="manual-time-panel-head">
-                <span class="manual-time-panel-title">Custom Time</span>
-              </div>
-              <div class="manual-time-group">
-                <span class="manual-time-label">Time</span>
-                <div class="manual-time-freeform">
-                  <label class="manual-time-field">
-                    <span>Hour</span>
-                    <input type="text" id="manualHourInput" maxlength="2" placeholder="1-12" inputmode="numeric" pattern="[0-9]*">
-                  </label>
-                  <label class="manual-time-field">
-                    <span>Minute</span>
-                    <input type="text" id="manualMinuteInput" maxlength="2" placeholder="00-59" inputmode="numeric" pattern="[0-9]*">
-                  </label>
-                </div>
-              </div>
-              <div class="manual-time-group">
-                <span class="manual-time-label">Period</span>
-                <div class="manual-time-options manual-time-options--period" id="manualPeriodOptions">
-                  <button type="button" class="manual-time-chip" data-period="AM">AM</button>
-                  <button type="button" class="manual-time-chip" data-period="PM">PM</button>
-                </div>
-              </div>
-            </div>
-            <span class="time-hint">Hembla custom picker</span>
-          </div>
-        </div>
-        <input type="hidden" name="preferred_time" id="preferredDateTime" required>
-
-        <label>Message (Optional)</label>
-        <textarea name="message" rows="4" placeholder="Write your message..."></textarea>
-
-        <label>Preferred Language</label>
-        <select name="language" required>
-          <option value="" selected disabled>Select preferred language</option>
-          <option value="Swedish">Swedish</option>
-          <option value="Arabic">Arabic</option>
-          <option value="English">English</option>
-        </select>
-
-        <button type="submit" class="submit-btn">Request a Call</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- ===== POPUP SEND EMAIL ===== -->
-  <div id="email-overlay" class="email-overlay">
-    <div class="popup">
-      <img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeEmailPopup()" alt="Close">
-
-      <div class="popup-header">
-        <img src="{% static 'images/received-email.png' %}" class="send-icon" alt="Email">
-        <h2>Send Email</h2>
-      </div>
-
-      <p class="subtitle">A brief summary is included in your email</p>
-
-      <!-- â­گ ط£ظ‡ظ… طھط¹ط¯ظٹظ„ ظ‡ظˆظ†: class="email-form" -->
-      <form method="POST" enctype="multipart/form-data" class="email-form">
+<label>Full Name</label>
+<input type="text" name="name" placeholder="Your full name" required>
+<label>Phone Number</label>
+<input type="text" name="phone" placeholder="Your phone number" required>
+<label>Email</label>
+<input type="email" name="email" placeholder="Your email" required>
+<label>Preferred Date</label>
+<div class="input-with-icon">
+<input type="date" id="preferredDateUi" required>
+<img src="{% static 'images/calendar-vibrant.png' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
+</div>
+<label>Preferred Time</label>
+<div class="time-row">
+<div class="time-grid" id="timeGrid" aria-label="Select a time">
+<button type="button" class="time-chip" data-time="09:00">09:00</button>
+<button type="button" class="time-chip" data-time="10:00">10:00</button>
+<button type="button" class="time-chip" data-time="11:00">11:00</button>
+<button type="button" class="time-chip" data-time="12:00">12:00</button>
+<button type="button" class="time-chip" data-time="13:00">13:00</button>
+<button type="button" class="time-chip" data-time="14:00">14:00</button>
+<button type="button" class="time-chip" data-time="15:00">15:00</button>
+<button type="button" class="time-chip" data-time="16:00">16:00</button>
+<button type="button" class="time-chip" data-time="17:00">17:00</button>
+<button type="button" class="time-chip" data-time="18:00">18:00</button>
+</div>
+<div class="time-input time-input--custom">
+<button type="button" class="manual-time-trigger" id="manualTimeTrigger" aria-expanded="false" aria-controls="manualTimePanel">
+<span id="manualTimeValue">Choose custom time</span>
+<img src="{% static 'images/clock0.png' %}" class="manual-time-icon" alt="">
+</button>
+<div class="manual-time-panel" id="manualTimePanel" hidden>
+<div class="manual-time-panel-head">
+<span class="manual-time-panel-title">Custom Time</span>
+</div>
+<div class="manual-time-group">
+<span class="manual-time-label">Time</span>
+<div class="manual-time-freeform">
+<label class="manual-time-field">
+<span>Hour</span>
+<input type="text" id="manualHourInput" maxlength="2" placeholder="1-12" inputmode="numeric" pattern="[0-9]*">
+</label>
+<label class="manual-time-field">
+<span>Minute</span>
+<input type="text" id="manualMinuteInput" maxlength="2" placeholder="00-59" inputmode="numeric" pattern="[0-9]*">
+</label>
+</div>
+</div>
+<div class="manual-time-group">
+<span class="manual-time-label">Period</span>
+<div class="manual-time-options manual-time-options--period" id="manualPeriodOptions">
+<button type="button" class="manual-time-chip" data-period="AM">AM</button>
+<button type="button" class="manual-time-chip" data-period="PM">PM</button>
+</div>
+</div>
+</div>
+<span class="time-hint">Hembla custom picker</span>
+</div>
+</div>
+<input type="hidden" name="preferred_time" id="preferredDateTime" required>
+<label>Message (Optional)</label>
+<textarea name="message" rows="4" placeholder="Write your message...">
+</textarea>
+<label>Preferred Language</label>
+<select name="language" required>
+<option value="" selected disabled>Select preferred language</option>
+<option value="Swedish">Swedish</option>
+<option value="Arabic">Arabic</option>
+<option value="English">English</option>
+</select>
+<button type="submit" class="submit-btn">Request a Call</button>
+</form>
+</div>
+</div>
+<!-- ===== POPUP SEND EMAIL ===== -->
+<div id="email-overlay" class="email-overlay">
+<div class="popup">
+<img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeEmailPopup()" alt="Close">
+<div class="popup-header">
+<img src="{% static 'images/received-email.png' %}" class="send-icon" alt="Email">
+<h2>Send Email</h2>
+</div>
+<p class="subtitle">A brief summary is included in your email</p>
+<!-- ⭐ أهم تعديل هون: class="email-form" -->
+<form method="POST" enctype="multipart/form-data" class="email-form">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="email_request">
-
-        <label>From</label>
-        <input type="email" name="email_from" placeholder="Your email" required>
-
-        <label>Subject</label>
-        <input type="text" name="subject" placeholder="Email subject" required>
-
-        <label>Message</label>
-        <textarea name="message" placeholder="Write your message..." rows="4" required></textarea>
-
-        <label>Attachment (Optional)</label>
-        <div class="attachment-box">
-          <input type="file" name="attachment" id="emailAttachment">
-          <label for="emailAttachment" class="file-pill">
-            <span class="file-btn">Choose File</span>
-            <span class="file-name" id="fileName">No file chosen</span>
-            <img src="{% static 'images/icon-upload.svg' %}" class="upload-icon" alt="Upload">
-          </label>
-        </div>
-
-        <button type="submit" class="send-btn">Send Email</button>
-      </form>
-    </div>
-  </div>
+<label>From</label>
+<input type="email" name="email_from" placeholder="Your email" required>
+<label>Subject</label>
+<input type="text" name="subject" placeholder="Email subject" required>
+<label>Message</label>
+<textarea name="message" placeholder="Write your message..." rows="4" required>
+</textarea>
+<label>Attachment (Optional)</label>
+<div class="attachment-box">
+<input type="file" name="attachment" id="emailAttachment">
+<label for="emailAttachment" class="file-pill">
+<span class="file-btn">Choose File</span>
+<span class="file-name" id="fileName">No file chosen</span>
+<img src="{% static 'images/icon-upload.svg' %}" class="upload-icon" alt="Upload">
+</label>
+</div>
+<button type="submit" class="send-btn">Send Email</button>
+</form>
+</div>
+</div>
 
   {% if call_success %}
     <div class="call-success-overlay" id="callSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="callSuccessTitle">
-      <div class="call-success-card">
-        <button type="button" class="call-success-close" aria-label="Close" data-call-success-close>&times;</button>
-        <div class="call-success-icon" aria-hidden="true">
-          <img src="{% static 'images/icon-phone.svg' %}" alt="">
-        </div>
-        <h3 id="callSuccessTitle">Request Received!</h3>
-        <p>Thank you for your request.</p>
-        <p>One of our team members will call you at your preferred time.</p>
-        <p>We look forward to speaking with you!</p>
-        <a href="{% url 'home:home' %}" class="call-success-btn">Go to Home</a>
-      </div>
-    </div>
+<div class="call-success-card">
+<button type="button" class="call-success-close" aria-label="Close" data-call-success-close>&times;</button>
+<div class="call-success-icon" aria-hidden="true">
+<img src="{% static 'images/icon-phone.svg' %}" alt="">
+</div>
+<h3 id="callSuccessTitle">Request Received!</h3>
+<p>Thank you for your request.</p>
+<p>One of our team members will call you at your preferred time.</p>
+<p>We look forward to speaking with you!</p>
+<a href="{% url 'home:home' %}" class="call-success-btn">Go to Home</a>
+</div>
+</div>
   {% endif %}
 
   {% if email_success %}
     <div class="call-success-overlay" id="emailSuccessOverlay" role="dialog" aria-modal="true" aria-labelledby="emailSuccessTitle">
-      <div class="call-success-card call-success-card--email">
-        <button type="button" class="call-success-close" aria-label="Close" data-email-success-close>&times;</button>
-        <div class="call-success-icon call-success-icon--email" aria-hidden="true">
-          <img src="{% static 'images/received-email.png' %}" alt="">
-        </div>
-        <h3 id="emailSuccessTitle">Email sent. We'll get back to you shortly</h3>
-        <a href="{% url 'home:home' %}" class="call-success-btn">Go to Home</a>
-      </div>
-    </div>
+<div class="call-success-card call-success-card--email">
+<button type="button" class="call-success-close" aria-label="Close" data-email-success-close>&times;</button>
+<div class="call-success-icon call-success-icon--email" aria-hidden="true">
+<img src="{% static 'images/received-email.png' %}" alt="">
+</div>
+<h3 id="emailSuccessTitle">Email sent. We'll get back to you shortly</h3>
+<a href="{% url 'home:home' %}" class="call-success-btn">Go to Home</a>
+</div>
+</div>
   {% endif %}
 
   <script>
@@ -453,7 +467,7 @@
       });
     }
   </script>
-  <script>
+<script>
     const fileInput = document.getElementById("emailAttachment");
     const fileName = document.getElementById("fileName");
 
@@ -465,8 +479,8 @@
       });
     }
   </script>
-
-  <script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 {% include "home/includes/footer.html" %}
 </body>
 </html>

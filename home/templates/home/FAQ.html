@@ -1,16 +1,19 @@
-﻿{% load static %}
+{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Hembla experten | FAQ</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Hembla experten | FAQ</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/faq.css' %}" />
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/faq.css' %}" />
+<style>
 *, *:before, *:after {
   box-sizing: border-box;
 }
@@ -23,22 +26,24 @@
 {% include "home/includes/main_header.html" %}
 
   <main class="faq-section">
-    <h1>&#10067; FAQ</h1>
-    <div class="faq-search-wrap">
-      <label class="faq-search" for="faqSearchInput">
-        <span class="faq-search-icon" aria-hidden="true"></span>
-        <input type="text" id="faqSearchInput" placeholder="Search questions or answers">
-      </label>
-      <p class="faq-search-note" id="faqSearchNote">Start typing to find answers faster.</p>
-    </div>
+<h1>&#10067; FAQ</h1>
+<div class="faq-search-wrap">
+<label class="faq-search" for="faqSearchInput">
+<span class="faq-search-icon" aria-hidden="true">
+</span>
+<input type="text" id="faqSearchInput" placeholder="Search questions or answers">
+</label>
+<p class="faq-search-note" id="faqSearchNote">Start typing to find answers faster.</p>
+</div>
 
     {% if faq_categories %}
       {% for category in faq_categories %}
         <div class="faq-category" data-faq-category>
-          <h2>
+<h2>
             {% if category.icon %}
               {% if "fa-" in category.icon %}
-                <i class="{{ category.icon }}"></i>
+                <i class="{{ category.icon }}">
+</i>
               {% else %}
                 <span class="faq-emoji">{{ category.icon }}</span>
               {% endif %}
@@ -48,40 +53,41 @@
 
           {% for item in category.items.all %}
             <div class="faq-item" data-faq-item data-search-text="{{ item.question|lower }} {% for line in item.answer_lines %} {{ line|lower }} {% endfor %}">
-              <div class="faq-question">Q: {{ item.question }}<span class="toggle-icon">+</span></div>
+<div class="faq-question">Q: {{ item.question }}<span class="toggle-icon">+</span>
+</div>
               {% for line in item.answer_lines %}
                 <div class="faq-answer">{{ line }}</div>
               {% endfor %}
             </div>
           {% empty %}
             <div class="faq-item open">
-              <div class="faq-question">Q: No questions available<span class="toggle-icon">+</span></div>
-              <div class="faq-answer">Please check back soon.</div>
-            </div>
+<div class="faq-question">Q: No questions available<span class="toggle-icon">+</span>
+</div>
+<div class="faq-answer">Please check back soon.</div>
+</div>
           {% endfor %}
         </div>
       {% endfor %}
     {% else %}
       <div class="faq-category">
-        <div class="faq-item open">
-          <div class="faq-question">Q: No FAQs available<span class="toggle-icon">+</span></div>
-          <div class="faq-answer">Please check back soon.</div>
-        </div>
-      </div>
+<div class="faq-item open">
+<div class="faq-question">Q: No FAQs available<span class="toggle-icon">+</span>
+</div>
+<div class="faq-answer">Please check back soon.</div>
+</div>
+</div>
     {% endif %}
 
     <div class="faq-empty-state" id="faqEmptyState" hidden>
-      <strong>No matching FAQs.</strong>
-      <span>Try another keyword or contact us for help.</span>
-    </div>
-
-    <p class="footer-fun">
+<strong>No matching FAQs.</strong>
+<span>Try another keyword or contact us for help.</span>
+</div>
+<p class="footer-fun">
       &#129300; Still confused Don't worry ' even we get confused sometimes!  
       <a href="{% url 'home:contact' %}">Contact us</a> and we'll help you sort it out. &#128516;
     </p>
-  </main>
-
-  <script>
+</main>
+<script>
     // toggle animation
     document.querySelectorAll(".faq-question").forEach(q => {
       q.addEventListener("click", () => {
@@ -127,12 +133,12 @@
       faqSearchInput.addEventListener("input", applyFaqSearch);
     }
   </script>
-
 <!-- ============================================================================================= -->
 
 {% include "home/includes/footer.html" %}
 
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

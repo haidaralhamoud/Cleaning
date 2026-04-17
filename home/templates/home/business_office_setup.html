@@ -2,26 +2,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Office Setup</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Office Setup</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_office_setup.css' %}">
-  <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_office_setup.css' %}">
+<link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
-
 <body>
-  <!-- Header -->
+<!-- Header -->
   {% include "home/includes/main_header.html" %}
   <br>
-  <br>
-  <br>
-  <br>
-
-  <section class="office-setup">
-    <div class="steps">
+<br>
+<br>
+<br>
+<section class="office-setup">
+<div class="steps">
       {% for item in step_items %}
         {% if item.clickable %}
           <a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
@@ -30,13 +31,11 @@
         {% endif %}
       {% endfor %}
     </div>
-
-    <div class="title">
-      <span class="icon" aria-hidden="true">&#127970;</span>
-      <h2>Office Setup</h2>
-    </div>
-
-    <form method="POST" class="form-card" id="officeSetupForm">
+<div class="title">
+<span class="icon" aria-hidden="true">&#127970;</span>
+<h2>Office Setup</h2>
+</div>
+<form method="POST" class="form-card" id="officeSetupForm">
       {% csrf_token %}
 
       <label>Office size</label>
@@ -49,45 +48,39 @@
       {{ form.floors }}
 
       <label>Number of restrooms</label>
-
-      <input type="hidden" id="restrooms_input" name="restrooms"
+<input type="hidden" id="restrooms_input" name="restrooms"
              value="{{ form.instance.restrooms }}">
-
-      <div class="restroom-options" id="restroomGroup">
-        <div class="restroom-btn" data-val="1">1</div>
-        <div class="restroom-btn" data-val="2">2</div>
-        <div class="restroom-btn" data-val="3">3</div>
-        <div class="restroom-btn" data-val="4+">4+</div>
-      </div>
-
-      <div class="kitchen-option">
-        <img src="{% static 'images/frame-16865527071.png' %}" alt="Kitchen">
-
-        <div class="text">
-          <p class="title">Kitchen / pantry</p>
-          <p class="subtitle">Does this area need cleaning</p>
-        </div>
-
-        <label class="switch">
+<div class="restroom-options" id="restroomGroup">
+<div class="restroom-btn" data-val="1">1</div>
+<div class="restroom-btn" data-val="2">2</div>
+<div class="restroom-btn" data-val="3">3</div>
+<div class="restroom-btn" data-val="4+">4+</div>
+</div>
+<div class="kitchen-option">
+<img src="{% static 'images/frame-16865527071.png' %}" alt="Kitchen">
+<div class="text">
+<p class="title">Kitchen / pantry</p>
+<p class="subtitle">Does this area need cleaning</p>
+</div>
+<label class="switch">
           {{ form.kitchen_cleaning }}
-          <span class="slider"></span>
-        </label>
-      </div>
-
-      <div class="form-error" id="officeSetupError">Please fill in all required fields.</div>
-      <div class="form-actions">
-        <a onclick="window.history.back();" class="back-btn">
-          <span class="back-icon">&larr;</span>
+          <span class="slider">
+</span>
+</label>
+</div>
+<div class="form-error" id="officeSetupError">Please fill in all required fields.</div>
+<div class="form-actions">
+<a onclick="window.history.back();" class="back-btn">
+<span class="back-icon">&larr;</span>
           Back
         </a>
-
-        <button type="submit" class="next-btn">
+<button type="submit" class="next-btn">
           Next
           <span class="next-icon">&rarr;</span>
-        </button>
-      </div>
-    </form>
-  </section>
+</button>
+</div>
+</form>
+</section>
 
   {% include "home/includes/footer.html" %}
 
@@ -113,7 +106,7 @@
       });
     });
   </script>
-  <script>
+<script>
     const kitchenToggle = document.getElementById("id_kitchen_cleaning");
     if (kitchenToggle) {
       kitchenToggle.removeAttribute("required");
@@ -121,7 +114,7 @@
       kitchenToggle.setAttribute("data-optional", "true");
     }
   </script>
-  <script>
+<script>
     const officeForm = document.getElementById("officeSetupForm");
     const officeError = document.getElementById("officeSetupError");
     const officeFields = [
@@ -166,7 +159,7 @@
       }
     });
   </script>
-
-  <script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>

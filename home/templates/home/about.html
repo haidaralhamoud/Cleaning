@@ -1,19 +1,21 @@
-﻿
+
 {% load static %}
 {% load bootstrap4 %}
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>{% trans "About Us - Hembla experten" %}</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>{% trans "About Us - Hembla experten" %}</title>
+  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
-  <link rel="stylesheet" href="{% static 'css/about.css' %}">
-
-  <style>
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+<style>
     /* ====== RESET ====== */
     * {
       margin: 0;
@@ -390,50 +392,17 @@
       }
     }
   </style>
-    <style>
-   a,
-   button,
-   input,
-   select,
-   h1,
-   h2,
-   h3,
-   h4,
-   h5,
-   * {
-       box-sizing: border-box;
-       margin: 0;
-       padding: 0;
-       border: none;
-       text-decoration: none;
-       background: none;
-   
-       -webkit-font-smoothing: antialiased;
-   }
-   
-   menu, ol, ul {
-       list-style-type: none;
-       margin: 0;
-       padding: 0;
-   }
-
-  .hero-bg {
-    background-image: url("{% static 'images/image-home0.webp' %}");
-  }   
-   </style>
 </head>
-
 <body>
-  <!-- ' HEADER -->
+<!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
 
 <!-- ============================================================================================= -->
-
-  <!-- ====== INTRO ====== -->
-  <section class="intro-section">
-    <div class="intro-text">
-      <h2 class="Hembla-experten-title">{% trans "Hembla experten Is Here for Your Real Life" %}</h2>
-      <p class="Hembla-experten-description">
+<!-- ====== INTRO ====== -->
+<section class="intro-section">
+<div class="intro-text">
+<h2 class="Hembla-experten-title">{% trans "Hembla experten Is Here for Your Real Life" %}</h2>
+<p class="Hembla-experten-description">
         {% blocktrans %}
         Life doesn't happen in perfect, polished moments. It's kids running through
         the hallway, a chair breaking before dinner guests arrive, the dog tracking
@@ -444,137 +413,133 @@
         at you.
         {% endblocktrans %}
       </p>
-      
-    </div>
-
-
-  </section>
-
-  <!-- ====== WHAT GUIDES US ====== -->
-  <section class="guides-section">
-    
-    <div class="guides-container">
-      <div class="guides-image">
-        <img src="{% static 'images/frame-16865525060.webp'%}" alt="{% trans 'Guides illustration' %}" loading="lazy" decoding="async" />
-      </div>
-      <div class="guides-content">
-        <h3 class="section-title">{% trans "What Guides Us" %}</h3>
-    <p class="Hembla-experten-subtext">
+</div>
+</section>
+<!-- ====== WHAT GUIDES US ====== -->
+<section class="guides-section">
+<div class="guides-container">
+<div class="guides-image">
+<picture>
+<source srcset="{% static 'images/frame-16865525060.webp' %}" type="image/webp">
+<img src="{% static 'images/frame-16865525060.png'%}" alt="{% trans 'Guides illustration' %}" width="624" height="663" loading="lazy" decoding="async" fetchpriority="low" />
+</picture>
+</div>
+<div class="guides-content">
+<h3 class="section-title">{% trans "What Guides Us" %}</h3>
+<p class="Hembla-experten-subtext">
         {% blocktrans %}
         We're not here to be the biggest, we're here to be the one you trust enough
         to call again and again.
         {% endblocktrans %}
       </p>
-        <div class="guide-item">
-          <img src="{% static 'images/guide-precision.svg'%}" alt="{% trans 'precision icon' %}" />
-          <div>
-            <h4>{% trans "Do it right, every time." %}</h4>
-            <p>{% trans "We remember your preferences, your routines, and that little thing you mentioned last time." %}</p>
-          </div>
-        </div>
-
-        <div class="guide-item">
-          <img src="{% static 'images/guide-personal.svg'%}" alt="{% trans 'personal icon' %}" />
-          <div>
-            <h4>{% trans "Make it personal." %}</h4>
-            <p>{% trans "We remember your preferences, your routines, and that little thing you mentioned last time." %}</p>
-          </div>
-        </div>
-
-        <div class="guide-item">
-          <img src="{% static 'images/guide-care.svg'%}" alt="{% trans 'care icon' %}" />
-          <div>
-            <h4>{% trans "Care for the bigger picture." %}</h4>
-            <p>{% trans "Eco-friendly choices, fair treatment of our team, and services that fit into your life, not the other way around." %}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ====== WHERE WE'RE GOING ====== -->
-  <section class="future-section">
-    <div class="future-text">
-      <h3>{% trans "Where We're Going" %}</h3>
-      <p>
+<div class="guide-item">
+<img src="{% static 'images/guide-precision.svg'%}" alt="{% trans 'precision icon' %}" loading="lazy" decoding="async" />
+<div>
+<h4>{% trans "Do it right, every time." %}</h4>
+<p>{% trans "We remember your preferences, your routines, and that little thing you mentioned last time." %}</p>
+</div>
+</div>
+<div class="guide-item">
+<img src="{% static 'images/guide-personal.svg'%}" alt="{% trans 'personal icon' %}" loading="lazy" decoding="async" />
+<div>
+<h4>{% trans "Make it personal." %}</h4>
+<p>{% trans "We remember your preferences, your routines, and that little thing you mentioned last time." %}</p>
+</div>
+</div>
+<div class="guide-item">
+<img src="{% static 'images/guide-care.svg'%}" alt="{% trans 'care icon' %}" loading="lazy" decoding="async" />
+<div>
+<h4>{% trans "Care for the bigger picture." %}</h4>
+<p>{% trans "Eco-friendly choices, fair treatment of our team, and services that fit into your life, not the other way around." %}</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- ====== WHERE WE'RE GOING ====== -->
+<section class="future-section">
+<div class="future-text">
+<h3>{% trans "Where We're Going" %}</h3>
+<p>
         {% blocktrans %}
         We're building a future where every household can get help with anything,
         in minutes, from one trusted place.
         {% endblocktrans %}
 
-        <br><br>
+        <br>
+<br>
 
         {% blocktrans %}
         Not just cleaning. Not just repairs. Not just childcare. All of it, all
         connected, all simple.
         {% endblocktrans %}
 
-        <br><br>
+        <br>
+<br>
 
         {% blocktrans %}
         We want you to spend less time stressing over your to-do list and more
         time living in the home you love.
         {% endblocktrans %}
       </p>
-      <a href="{% url 'home:all_services_private' %}" class="cta-btn">{% trans "See How We Can Help Today" %}</a>
-    </div>
-    <div class="future-image">
-      <img src="{% static 'images/frame-16865525070.webp'%}" alt="{% trans 'Future section image' %}" loading="lazy" decoding="async" />
-    </div>
-  </section>
-
-  <!-- ====== OUR GOALS ====== -->
-  <section class="goals-section">
-    <h3>{% trans "Our Goals" %}</h3>
-    <p>
+<a href="{% url 'home:all_services_private' %}" class="cta-btn">{% trans "See How We Can Help Today" %}</a>
+</div>
+<div class="future-image">
+<picture>
+<source srcset="{% static 'images/frame-16865525070.webp' %}" type="image/webp">
+<img src="{% static 'images/frame-16865525070.png'%}" alt="{% trans 'Future section image' %}" width="579" height="355" loading="lazy" decoding="async" fetchpriority="low" />
+</picture>
+</div>
+</section>
+<!-- ====== OUR GOALS ====== -->
+<section class="goals-section">
+<h3>{% trans "Our Goals" %}</h3>
+<p>
       {% blocktrans %}
       We're building Hembla experten to be more than just a service, we want to be part
       of people's lives, helping them feel more at home every day.
       {% endblocktrans %}
 
-      <br><br>
+      <br>
+<br>
       {% trans "Here's what we're working toward" %}
     </p>
-
-    <div class="goals-container">
-      <div class="goal-box">
-        <div class="icon-bg">
-          <img src="{% static 'images/satisfaction0.png'%}" alt="{% trans 'icon' %}" />
-        </div>
-        <h4>{% trans "Earn Your Trust, Every Time" %}</h4>
-        <p>{% trans "We aim to keep our satisfaction rate near perfect by listening, improving, and showing up for our customers in every service we provide." %}</p>
-      </div>
-
-      <div class="goal-box">
-        <div class="icon-bg">
-          <img src="{% static 'images/fit-to-page0.png'%}" alt="{% trans 'icon' %}" />
-        </div>
-        <h4>{% trans "Reach More Communities" %}</h4>
-        <p>{% trans "Bring Hembla's trusted home and lifestyle services, from cleaning to childcare to repairs, to 5 new cities in the next 3 years." %}</p>
-      </div>
-
-      <div class="goal-box">
-        <div class="icon-bg">
-          <img src="{% static 'images/property0.png'%}" alt="{% trans 'icon' %}" />
-        </div>
-        <h4>{% trans "Help 10,000 Homes Thrive" %}</h4>
-        <p>{% trans "Reach 10,000 homes served, creating cleaner, safer, and more comfortable spaces for thousands of people." %}</p>
-      </div>
-    </div>
-
-    <div class="circle-row">
-      <img src="{% static 'images/ellipse-18650.png'%}" alt="{% trans 'circle' %}" />
-      <img src="{% static 'images/ellipse-18660.png'%}" alt="{% trans 'circle' %}" />
-      <img src="{% static 'images/ellipse-18670.png'%}" alt="{% trans 'circle' %}" />
-    </div>
-  </section>
-
+<div class="goals-container">
+<div class="goal-box">
+<div class="icon-bg">
+<img src="{% static 'images/satisfaction0.png'%}" alt="{% trans 'icon' %}" loading="lazy" decoding="async" />
+</div>
+<h4>{% trans "Earn Your Trust, Every Time" %}</h4>
+<p>{% trans "We aim to keep our satisfaction rate near perfect by listening, improving, and showing up for our customers in every service we provide." %}</p>
+</div>
+<div class="goal-box">
+<div class="icon-bg">
+<img src="{% static 'images/fit-to-page0.png'%}" alt="{% trans 'icon' %}" loading="lazy" decoding="async" />
+</div>
+<h4>{% trans "Reach More Communities" %}</h4>
+<p>{% trans "Bring Hembla's trusted home and lifestyle services, from cleaning to childcare to repairs, to 5 new cities in the next 3 years." %}</p>
+</div>
+<div class="goal-box">
+<div class="icon-bg">
+<img src="{% static 'images/property0.png'%}" alt="{% trans 'icon' %}" loading="lazy" decoding="async" />
+</div>
+<h4>{% trans "Help 10,000 Homes Thrive" %}</h4>
+<p>{% trans "Reach 10,000 homes served, creating cleaner, safer, and more comfortable spaces for thousands of people." %}</p>
+</div>
+</div>
+<div class="circle-row">
+<img src="{% static 'images/ellipse-18650.png'%}" alt="{% trans 'circle' %}" width="200" height="200" loading="lazy" decoding="async" />
+<img src="{% static 'images/ellipse-18660.png'%}" alt="{% trans 'circle' %}" width="200" height="200" loading="lazy" decoding="async" />
+<img src="{% static 'images/ellipse-18670.png'%}" alt="{% trans 'circle' %}" width="200" height="200" loading="lazy" decoding="async" />
+</div>
+</section>
 <!-- ============================================================================================= -->
 
 {% include "home/includes/footer.html" %}
 
 
-<script src="{% static 'js/main_header.js' %}"></script>
+<script src="{% static 'js/main_header.js' %}" defer>
+</script>
 </body>
 </html>
 

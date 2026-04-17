@@ -3,147 +3,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Customer Profile – Chat</title>
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2family=Inter:wght@500;700&family=Vesper+Libre:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{% static 'css/chat.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Customer Profile – Chat</title>
+<!-- Fonts -->
+<link rel="stylesheet" href="{% static 'css/chat.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-
 <body >
-    <!-- HEADER -->
-{% include "home/includes/main_header.html" %}
-<div class="layout">
-  <!-- ===== المينيو للموبايل ===== -->
-  <div class="mobile-header">
-    <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-      <span class="arrow">&#8250;</span>
-    </button>
-    
-  </div>
-
-  <!-- ===== Sidebar ===== -->
-    {% include "accounts/includes/customer_sidebar.html" %}
-
-
-  <!-- ===== الصفحة ===== -->
-  <div class="page container">
-    <main class="content">
-      <section class="page-head">
-        <h1>Chat With Provider Assigned</h1>
-        <p class="subline">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
-        <p class="booking-line">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
-      </section>
-
-      <!-- ===== بطاقة المحادثة ===== -->
+<!-- HEADER -->{% include "home/includes/main_header.html" %}<div class="layout">
+<!-- ===== المينيو للموبايل ===== -->
+<div class="mobile-header">
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
+</div>
+<!-- ===== Sidebar ===== -->    {% include "accounts/includes/customer_sidebar.html" %}  <!-- ===== الصفحة ===== -->
+<div class="page container">
+<main class="content">
+<section class="page-head">
+<h1>Chat With Provider Assigned</h1>
+<p class="subline">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
+<p class="booking-line">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
+</section>
+<!-- ===== بطاقة المحادثة ===== -->
 <!-- ===== بطاقة المحادثة ===== -->
 <section class="chat-card">
-
-  <!-- زر الرجوع -->
-  <button class="back-btn" onclick="history.back()">
-    <span class="back-icon">←</span>
-    <span class="back-text">Back</span>
-  </button>
-
-  <!-- عنوان الطلب -->
-  <h2>Order #12345 · Deep Clean · Today 10AM</h2>
-
-  <!-- سطر فاصل بسيط -->
-  <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;" />
-
-  <!-- محتوى المحادثة -->
-  <div class="chat-thread">
-
-    <!-- Incoming -->
-    <article class="message message--in">
-      <div class="message__row">
-        <img class="message__avatar" src="{% static 'images/ellipse-18580.png'%}" alt="Customer" />
-        <div class="message__bubble">
-          <p>Hi Sophia, just a reminder about the deep clean in the kitchen and bathroom. Thanks!</p>
-        </div>
-      </div>
-      <div class="message__meta">
-        <span class="from">Customer</span>
-        <time class="time">10:00 AM</time>
-      </div>
-    </article>
-
-    <!-- Outgoing -->
-    <article class="message message--out">
-      <div class="message__row">
-        <div class="message__bubble">
-          <p>Got it! Make sure to pay extra attention to those areas.</p>
-        </div>
-        <img class="message__avatar" src="{% static 'images/ellipse-18590.png'%}" alt="Sophia Carter" />
-      </div>
-      <div class="message__meta">
-        <time class="time">11:00 AM</time>
-        <span class="from">Sophia Carter</span>
-      </div>
-    </article>
-
-  </div>
-
-  <!-- Composer -->
-  <form class="composer" onsubmit="return false" aria-label="Message composer">
-    <label class="upload-btn" for="fileUpload" aria-label="Attach file">
-      <img src="{% static 'images/vector1.svg'%}" alt="Attach file" />
-      <input type="file" id="fileUpload" hidden />
-    </label>
-
-    <label class="composer__field">
-      <input type="text" placeholder="Type a message..." aria-label="Type a message" />
-      <img src="{% static 'images/happy0.png'%}" alt="" class="emoji" />
-    </label>
-
-    <button class="send-btn" type="submit" aria-label="Send message">
-      <span>Send</span>
-      <img src="{% static 'images/paper-plane0.png'%}" alt="" />
-    </button>
-  </form>
-
+<!-- زر الرجوع -->
+<button class="back-btn" onclick="history.back()">
+<span class="back-icon">←</span>
+<span class="back-text">Back</span>
+</button>
+<!-- عنوان الطلب -->
+<h2>Order #12345 · Deep Clean · Today 10AM</h2>
+<!-- سطر فاصل بسيط -->
+<hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;" />
+<!-- محتوى المحادثة -->
+<div class="chat-thread">
+<!-- Incoming -->
+<article class="message message--in">
+<div class="message__row">
+<img class="message__avatar" src="{% static 'images/ellipse-18580.png'%}" alt="Customer" />
+<div class="message__bubble">
+<p>Hi Sophia, just a reminder about the deep clean in the kitchen and bathroom. Thanks!</p>
+</div>
+</div>
+<div class="message__meta">
+<span class="from">Customer</span>
+<time class="time">10:00 AM</time>
+</div>
+</article>
+<!-- Outgoing -->
+<article class="message message--out">
+<div class="message__row">
+<div class="message__bubble">
+<p>Got it! Make sure to pay extra attention to those areas.</p>
+</div>
+<img class="message__avatar" src="{% static 'images/ellipse-18590.png'%}" alt="Sophia Carter" />
+</div>
+<div class="message__meta">
+<time class="time">11:00 AM</time>
+<span class="from">Sophia Carter</span>
+</div>
+</article>
+</div>
+<!-- Composer -->
+<form class="composer" onsubmit="return false" aria-label="Message composer">
+<label class="upload-btn" for="fileUpload" aria-label="Attach file">
+<img src="{% static 'images/vector1.svg'%}" alt="Attach file" />
+<input type="file" id="fileUpload" hidden />
+</label>
+<label class="composer__field">
+<input type="text" placeholder="Type a message..." aria-label="Type a message" />
+<img src="{% static 'images/happy0.png'%}" alt="" class="emoji" />
+</label>
+<button class="send-btn" type="submit" aria-label="Send message">
+<span>Send</span>
+<img src="{% static 'images/paper-plane0.png'%}" alt="" />
+</button>
+</form>
 </section>
-
 </div>
-</div>
-{% include "home/includes/footer.html" %}
-
-  <!-- ===== JS ===== -->
-  <script>
-    const toggle = document.getElementById("menuToggle");
-    const sidebar = document.getElementById("sidebar");
-    const arrow = document.querySelector(".menu-toggle .arrow");
-
-    toggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";
-    });
-  </script>
-  
-<script>
-(function () {
-  const toggle = document.getElementById("menuToggle");
-  const sidebar = document.querySelector(".sidebar");
-  const overlay = document.querySelector(".customer-menu-overlay");
-  if (!toggle || !sidebar) return;
-  toggle.addEventListener("click", () => {
-    const open = sidebar.classList.toggle("open");
-    if (overlay) overlay.classList.toggle("show", open);
-  });
-  if (overlay) {
-    overlay.addEventListener("click", () => {
-      sidebar.classList.remove("open");
-      overlay.classList.remove("show");
-    });
-  }
-})();
+</div>{% include "home/includes/footer.html" %}  <!-- ===== JS ===== -->
+<script>    const toggle = document.getElementById("menuToggle");    const sidebar = document.getElementById("sidebar");    const arrow = document.querySelector(".menu-toggle .arrow");    toggle.addEventListener("click", () => {      sidebar.classList.toggle("open");      arrow.innerHTML = sidebar.classList.contains("open")  "&#8249;" : "&#8250;";    });  </script>
+<script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.querySelector(".customer-menu-overlay");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");    });  }})();</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>

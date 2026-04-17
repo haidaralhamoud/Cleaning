@@ -3,195 +3,115 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-  <title>Customer Notes</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="{% static 'css/Customer_Notes.css' %}" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+<title>Customer Notes</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="{% static 'css/Customer_Notes.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
-  <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
-  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+<link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
+{% include 'home/includes/critical_header_css.html' %}
+<link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-<body class="customer-notes-view">
-{% include "home/includes/main_header.html" %}
-
-<div class="layout">
-  <div>
-    <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
-      <span class="arrow">&#8250;</span>
-    </button>
-  </div>
-
-  {% include "accounts/includes/customer_sidebar.html" %}
-
-  <main class="main">
-    <h1>Customer Notes</h1>
-    <h2>Add or edit notes for this customer</h2>
-
-    {% if notes %}
-      <div class="card">
-        <div class="row">
-          <div class="column">
-            <h3>
-              Key Handling Instructions
-              <div class="icons">
-                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
-                  <i class="fa-solid fa-pen icon"></i>
-                </a>
-              </div>
-            </h3>
-            <p>
-              {% if notes.key_handling == "mat" %}
-                Leave under mat
-              {% elif notes.key_handling == "garden" %}
-                Hide in the garden
-              {% elif notes.key_handling == "hand" %}
-                Hand directly
-              {% elif notes.key_handling == "custom" %}
-                {{ notes.key_custom_instructions|default:"Custom" }}
-              {% else %}
-                —
-              {% endif %}
-            </p>
-          </div>
-
-          <div class="column">
-            <h3>
-              Alarm Code
-              <div class="icons">
-                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
-                  <i class="fa-solid fa-pen icon"></i>
-                </a>
-              </div>
-            </h3>
-
-            <div class="alarm-wrap">
-              {% if notes.alarm_code %}
-                <span id="alarmMasked" class="alarm-text muted">••••••••</span>
-                <span id="alarmReal" class="alarm-text hidden">{{ notes.alarm_code }}</span>
-                <button type="button" class="icon-btn" id="toggleAlarm" aria-label="Show alarm code">
-                  <i class="fa-solid fa-eye icon view"></i>
-                </button>
-              {% else %}
-                <span class="alarm-text muted">—</span>
-              {% endif %}
-            </div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="column">
-            <h3>
-              Products & Supplies
-              <div class="icons">
-                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
-                  <i class="fa-solid fa-pen icon"></i>
-                </a>
-              </div>
-            </h3>
-            <p>
-              {% if notes.products_supplies == "company" %}
-                Company products
-              {% elif notes.products_supplies == "customer" %}
-                Customer products
-              {% else %}
-                —
-              {% endif %}
-            </p>
-          </div>
-
-          <div class="column">
-            <h3>
-              Location of cleaning material or tools
-              <div class="icons">
-                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
-                  <i class="fa-solid fa-pen icon"></i>
-                </a>
-              </div>
-            </h3>
-            <p>{{ notes.cleaning_material_location|default:"—" }}</p>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="column full">
-            <h3>
-              Special Requests
-              <div class="icons">
-                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
-                  <i class="fa-solid fa-pen icon"></i>
-                </a>
-              </div>
-            </h3>
-            <p>{{ notes.special_requests|default:"—" }}</p>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="column full">
-            <h3>
-              General Notes
-              <div class="icons">
-                <a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
-                  <i class="fa-solid fa-pen icon"></i>
-                </a>
-              </div>
-            </h3>
-            <p>{{ notes.general_notes|default:"—" }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="actions">
-        <a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
-          <i class="fa-solid fa-pen"></i> Edit Notes
-        </a>
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <h3>No notes yet</h3>
-        <p>This customer doesn't have notes. Add notes to help cleaners with access and preferences.</p>
-
-        <div class="actions">
-          <a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
-            <i class="fa-solid fa-plus"></i> Add Notes
-          </a>
-        </div>
-      </div>
-    {% endif %}
-  </main>
+<body class="customer-notes-view">{% include "home/includes/main_header.html" %}<div class="layout">
+<div>
+<button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
+<span class="arrow">&#8250;</span>
+</button>
+</div>  {% include "accounts/includes/customer_sidebar.html" %}  <main class="main">
+<h1>Customer Notes</h1>
+<h2>Add or edit notes for this customer</h2>    {% if notes %}      <div class="card">
+<div class="row">
+<div class="column">
+<h3>              Key Handling Instructions              <div class="icons">
+<a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+<i class="fa-solid fa-pen icon">
+</i>
+</a>
 </div>
-
-{% include "home/includes/footer.html" %}
-
-<script>
-  const alarmBtn = document.getElementById("toggleAlarm");
-
-  if (alarmBtn) {
-    alarmBtn.addEventListener("click", () => {
-      const masked = document.getElementById("alarmMasked");
-      const real = document.getElementById("alarmReal");
-      const icon = alarmBtn.querySelector("i");
-      const isShowing = !real.classList.contains("hidden");
-
-      if (isShowing) {
-        real.classList.add("hidden");
-        masked.classList.remove("hidden");
-        icon.classList.remove("fa-eye-slash");
-        icon.classList.add("fa-eye");
-      } else {
-        real.classList.remove("hidden");
-        masked.classList.add("hidden");
-        icon.classList.remove("fa-eye");
-        icon.classList.add("fa-eye-slash");
-      }
-    });
-  }
+</h3>
+<p>              {% if notes.key_handling == "mat" %}                Leave under mat              {% elif notes.key_handling == "garden" %}                Hide in the garden              {% elif notes.key_handling == "hand" %}                Hand directly              {% elif notes.key_handling == "custom" %}                {{ notes.key_custom_instructions|default:"Custom" }}              {% else %}                —              {% endif %}            </p>
+</div>
+<div class="column">
+<h3>              Alarm Code              <div class="icons">
+<a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+<i class="fa-solid fa-pen icon">
+</i>
+</a>
+</div>
+</h3>
+<div class="alarm-wrap">              {% if notes.alarm_code %}                <span id="alarmMasked" class="alarm-text muted">••••••••</span>
+<span id="alarmReal" class="alarm-text hidden">{{ notes.alarm_code }}</span>
+<button type="button" class="icon-btn" id="toggleAlarm" aria-label="Show alarm code">
+<i class="fa-solid fa-eye icon view">
+</i>
+</button>              {% else %}                <span class="alarm-text muted">—</span>              {% endif %}            </div>
+</div>
+</div>
+<div class="row">
+<div class="column">
+<h3>              Products & Supplies              <div class="icons">
+<a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+<i class="fa-solid fa-pen icon">
+</i>
+</a>
+</div>
+</h3>
+<p>              {% if notes.products_supplies == "company" %}                Company products              {% elif notes.products_supplies == "customer" %}                Customer products              {% else %}                —              {% endif %}            </p>
+</div>
+<div class="column">
+<h3>              Location of cleaning material or tools              <div class="icons">
+<a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+<i class="fa-solid fa-pen icon">
+</i>
+</a>
+</div>
+</h3>
+<p>{{ notes.cleaning_material_location|default:"—" }}</p>
+</div>
+</div>
+<div class="row">
+<div class="column full">
+<h3>              Special Requests              <div class="icons">
+<a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+<i class="fa-solid fa-pen icon">
+</i>
+</a>
+</div>
+</h3>
+<p>{{ notes.special_requests|default:"—" }}</p>
+</div>
+</div>
+<div class="row">
+<div class="column full">
+<h3>              General Notes              <div class="icons">
+<a href="{% url 'accounts:add_Customer_Notes' %}" title="Edit">
+<i class="fa-solid fa-pen icon">
+</i>
+</a>
+</div>
+</h3>
+<p>{{ notes.general_notes|default:"—" }}</p>
+</div>
+</div>
+</div>
+<div class="actions">
+<a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
+<i class="fa-solid fa-pen">
+</i> Edit Notes        </a>
+</div>    {% else %}      <div class="empty-state">
+<h3>No notes yet</h3>
+<p>This customer doesn't have notes. Add notes to help cleaners with access and preferences.</p>
+<div class="actions">
+<a class="details-link" href="{% url 'accounts:add_Customer_Notes' %}">
+<i class="fa-solid fa-plus">
+</i> Add Notes          </a>
+</div>
+</div>    {% endif %}  </main>
+</div>{% include "home/includes/footer.html" %}<script>  const alarmBtn = document.getElementById("toggleAlarm");  if (alarmBtn) {    alarmBtn.addEventListener("click", () => {      const masked = document.getElementById("alarmMasked");      const real = document.getElementById("alarmReal");      const icon = alarmBtn.querySelector("i");      const isShowing = !real.classList.contains("hidden");      if (isShowing) {        real.classList.add("hidden");        masked.classList.remove("hidden");        icon.classList.remove("fa-eye-slash");        icon.classList.add("fa-eye");      } else {        real.classList.remove("hidden");        masked.classList.add("hidden");        icon.classList.remove("fa-eye");        icon.classList.add("fa-eye-slash");      }    });  }</script>
+<script src="{% static 'js/main_header.js' %}" defer>
 </script>
-<script src="{% static 'js/main_header.js' %}"></script>
 </body>
 </html>
