@@ -62,13 +62,32 @@ def _active_bookings_for_provider(provider):
     return list(private_qs) + list(business_qs)
 
 
+def has_overlap(provider, start_dt, end_dt, exclude_booking=None):
+    if not provider or not start_dt or not end_dt:
+        return False
+
+    for booking in _active_bookings_for_provider(provider):
+        if exclude_booking and booking.__class__ == exclude_booking.__class__ and booking.pk == exclude_booking.pk:
+            continue
+        for other_start, other_end in booking.get_service_windows():
+            if not other_start or not other_end:
+                continue
+            if start_dt < other_end and end_dt > other_start:
+                return True
+    return False
+
+
+def booking_total_minutes(duration_minutes):
+    try:
+        base_minutes = int(duration_minutes or 0)
+    except (TypeError, ValueError):
+        base_minutes = 0
+    if base_minutes <= 0:
+        return 0
+    return base_minutes + 60
+
+
 def _booking_window_or_none(booking):
-    if booking.scheduled_at and booking.quoted_duration_minutes:
-        start = booking.scheduled_at
-        if timezone.is_naive(start):
-            start = timezone.make_aware(start, timezone.get_current_timezone())
-        end = start + timedelta(minutes=int(booking.quoted_duration_minutes))
-        return start, end
     start, end = booking.get_service_window()
     return (start, end) if start and end else (None, None)
 
@@ -82,7 +101,7 @@ def generate_slots(provider, date_obj, duration_minutes, slot_size_minutes=30,
     start_of_day = timezone.make_aware(datetime.combine(date_obj, day_start), tz)
     end_of_day = timezone.make_aware(datetime.combine(date_obj, day_end), tz)
 
-    duration = timedelta(minutes=int(duration_minutes))
+    duration = timedelta(minutes=booking_total_minutes(duration_minutes))
     slot_size = timedelta(minutes=int(slot_size_minutes))
 
     busy_windows = []
@@ -119,16 +138,8 @@ def earliest_available_slot(provider, date_obj, duration_minutes, slot_size_minu
 
 
 def select_nearest_provider(booking, date_obj, slot_size_minutes=30):
-    providers = (
-        User.objects.filter(provider_profile__is_active=True)
-        .select_related("provider_profile")
-        .order_by("username")
-    )
     matched = []
-    for provider in providers:
-        profile = getattr(provider, "provider_profile", None)
-        if not provider_matches_location(profile, booking):
-            continue
+    for provider in get_available_providers_for_booking(booking, date_obj=date_obj):
         earliest = earliest_available_slot(
             provider,
             date_obj,
@@ -138,6 +149,105 @@ def select_nearest_provider(booking, date_obj, slot_size_minutes=30):
         matched.append((provider, earliest))
     matched.sort(key=lambda item: item[1] or datetime.max.replace(tzinfo=timezone.get_current_timezone()))
     return matched
+
+
+def provider_distance_score(provider_profile, booking):
+    booking_locations = _booking_location_candidates(booking)
+    if not booking_locations:
+        return 0
+    if not provider_profile:
+        return 10_000
+
+    provider_values = [
+        provider_profile.area,
+        provider_profile.city,
+        provider_profile.region,
+    ] + (provider_profile.nearby_areas or [])
+    provider_values = [_normalize_location(v) for v in provider_values if v]
+    if not provider_values:
+        return 10_000
+
+    best_score = 10_000
+    for booking_loc in booking_locations:
+        for provider_loc in provider_values:
+            if booking_loc == provider_loc:
+                best_score = min(best_score, 0)
+            elif booking_loc in provider_loc or provider_loc in booking_loc:
+                best_score = min(best_score, 1)
+    return best_score
+
+
+def get_available_providers_for_booking(booking, *, date_obj=None, start_dt=None, end_dt=None, exclude_booking=None):
+    providers = (
+        User.objects.filter(provider_profile__is_active=True)
+        .select_related("provider_profile")
+        .order_by("username")
+    )
+    candidates = []
+    for provider in providers:
+        profile = getattr(provider, "provider_profile", None)
+        if not provider_matches_location(profile, booking):
+            continue
+        if start_dt and end_dt and has_overlap(provider, start_dt, end_dt, exclude_booking=exclude_booking or booking):
+            continue
+        candidates.append(provider)
+
+    candidates.sort(
+        key=lambda provider: (
+            provider_distance_score(getattr(provider, "provider_profile", None), booking),
+            (provider.get_full_name() or provider.username or "").strip().lower(),
+        )
+    )
+    return candidates
+
+
+def get_available_slots_for_booking(booking, date_obj, slot_size_minutes=30,
+                                    day_start=time(8, 0), day_end=time(20, 0)):
+    if not booking or not date_obj:
+        return []
+
+    duration_minutes = int(booking.quoted_duration_minutes or 0)
+    if duration_minutes <= 0:
+        return []
+
+    slot_providers = {}
+    for provider in get_available_providers_for_booking(booking, date_obj=date_obj):
+        provider_slots = generate_slots(
+            provider,
+            date_obj,
+            duration_minutes,
+            slot_size_minutes=slot_size_minutes,
+            day_start=day_start,
+            day_end=day_end,
+        )
+        for slot in provider_slots:
+            slot_providers.setdefault(slot, []).append(provider)
+
+    ordered = []
+    for slot in sorted(slot_providers.keys()):
+        providers = slot_providers[slot]
+        ordered.append({
+            "slot": slot,
+            "value": slot.strftime("%H:%M"),
+            "provider_ids": [provider.id for provider in providers],
+            "provider_count": len(providers),
+        })
+    return ordered
+
+
+def provider_can_take_booking(provider, booking, *, exclude_booking=None):
+    if not provider:
+        return True
+    profile = getattr(provider, "provider_profile", None)
+    if not profile or not getattr(profile, "is_active", False):
+        return False
+    if not provider_matches_location(profile, booking):
+        return False
+    start_dt = getattr(booking, "start_datetime", None)
+    end_dt = getattr(booking, "end_datetime", None)
+    if start_dt and end_dt and has_overlap(provider, start_dt, end_dt, exclude_booking=exclude_booking or booking):
+        return False
+    return True
 
 
 def provider_available_after_minutes(provider, now=None):

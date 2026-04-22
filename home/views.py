@@ -60,6 +60,11 @@ from .availability_utils import (
     generate_slots,
     select_nearest_provider,
     provider_available_after_minutes,
+    has_overlap,
+    provider_distance_score,
+    get_available_providers_for_booking,
+    get_available_slots_for_booking,
+    provider_can_take_booking,
 )
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
@@ -69,7 +74,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash, get_user_model
 from django import forms
 from django.forms import modelform_factory
-from django.db.models import Q, JSONField, Prefetch
+from django.db.models import Q, JSONField, Prefetch, Case, When, IntegerField
 from django.core.paginator import Paginator
 from django.utils.safestring import mark_safe
 
@@ -391,6 +396,19 @@ def _build_cash_invoice_pdf(branding, meta_rows, charge_rows, footer_lines=None)
 
 def _get_private_draft_data(request):
     data = request.session.get(DRAFT_SESSION_KEY)
+    if not isinstance(data, dict) or not data.get("selected_services"):
+        user = getattr(request, "user", None)
+        if user and getattr(user, "is_authenticated", False):
+            draft_record = (
+                PrivateBookingDraft.objects.filter(user=user)
+                .order_by("-updated_at")
+                .first()
+            )
+            payload = getattr(draft_record, "payload", None)
+            if isinstance(payload, dict) and payload:
+                data = payload
+                request.session[DRAFT_SESSION_KEY] = data
+                request.session.modified = True
     if not isinstance(data, dict):
         data = {}
     return data
@@ -399,6 +417,16 @@ def _get_private_draft_data(request):
 def _save_private_draft_data(request, data):
     request.session[DRAFT_SESSION_KEY] = data
     request.session.modified = True
+    user = getattr(request, "user", None)
+    if user and getattr(user, "is_authenticated", False):
+        draft_record = (
+            PrivateBookingDraft.objects.filter(user=user)
+            .order_by("-updated_at")
+            .first()
+        )
+        if draft_record:
+            draft_record.payload = data
+            draft_record.save(update_fields=["payload", "updated_at"])
 
 
 def _is_truthy(value, default=False):
@@ -427,6 +455,17 @@ def _parse_optional_date(value):
     if hasattr(value, "year") and hasattr(value, "month") and hasattr(value, "day"):
         return value
     return parse_date(str(value))
+
+
+def _parse_optional_time(value):
+    if not value:
+        return None
+    if hasattr(value, "hour") and hasattr(value, "minute"):
+        return value
+    try:
+        return datetime.strptime(str(value).strip(), "%H:%M").time()
+    except ValueError:
+        return None
 
 
 def _pricing_duration_seconds_for_display(pricing):
@@ -550,6 +589,7 @@ def _build_private_booking_from_draft(draft, user=None):
     booking.service_schedules = draft.get("service_schedules") or {}
     booking.schedule_mode = draft.get("schedule_mode") or "same"
     booking.appointment_date = _parse_optional_date(draft.get("appointment_date"))
+    booking.appointment_start_time = _parse_optional_time(draft.get("appointment_start_time"))
     booking.appointment_time_window = draft.get("appointment_time_window")
     booking.frequency_type = draft.get("frequency_type")
     booking.special_timing_requests = draft.get("special_timing_requests")
@@ -1060,20 +1100,22 @@ def _filtered_provider_queryset(booking):
     if not booking:
         return providers
 
-    booking_locations = _booking_location_candidates(booking)
-    allowed_ids = []
-    for provider in providers:
+    ordered_ids = []
+    for provider in get_available_providers_for_booking(booking, exclude_booking=booking):
         profile = getattr(provider, "provider_profile", None)
-        if not profile:
-            continue
-        if not booking.provider_is_available(provider):
-            continue
-        allowed_ids.append(provider.id)
+        ordered_ids.append((provider.id, provider_distance_score(profile, booking), provider.username.lower()))
 
-    if booking.provider_id and booking.provider_id not in allowed_ids:
-        allowed_ids.append(booking.provider_id)
+    ordered_ids.sort(key=lambda item: (item[1], item[2]))
+    allowed_ids = [item[0] for item in ordered_ids]
 
-    return User.objects.filter(id__in=allowed_ids).order_by("username")
+    if not allowed_ids:
+        return User.objects.none()
+
+    ordering = Case(
+        *[When(pk=pk, then=pos) for pos, pk in enumerate(allowed_ids)],
+        output_field=IntegerField(),
+    )
+    return User.objects.filter(id__in=allowed_ids).order_by(ordering)
 
 
 def _provider_debug_payload(booking):
@@ -1094,10 +1136,10 @@ def _provider_debug_payload(booking):
                 reasons.append("Profile inactive")
             if booking_locations and not _provider_matches_location(profile, booking_locations):
                 reasons.append("Location differs")
-        if profile and booking and not booking.provider_is_available(provider):
+        if profile and booking and not provider_can_take_booking(provider, booking, exclude_booking=booking):
             reasons.append("Overlapping booking")
 
-        blocking_reasons = [reason for reason in reasons if reason in {"No provider profile", "Profile inactive", "Overlapping booking"}]
+        blocking_reasons = [reason for reason in reasons if reason in {"No provider profile", "Profile inactive", "Location differs", "Overlapping booking"}]
         status = "Included" if not blocking_reasons else "Excluded"
         rows.append({
             "username": provider.get_full_name() or provider.username,
@@ -1517,7 +1559,8 @@ def _dashboard_booking_when(booking):
     if start_dt:
         return timezone.localtime(start_dt).strftime("%b %d, %I:%M %p")
     if isinstance(booking, PrivateBooking) and booking.appointment_date:
-        return f"{booking.appointment_date:%b %d, %Y} {booking.appointment_time_window or ''}".strip()
+        start_time = booking.appointment_start_time.strftime("%I:%M %p") if getattr(booking, "appointment_start_time", None) else ""
+        return f"{booking.appointment_date:%b %d, %Y} {start_time}".strip()
     if isinstance(booking, BusinessBooking):
         raw_date = booking.custom_date or booking.start_date
         raw_time = booking.custom_time or booking.preferred_time or ""
@@ -2112,8 +2155,8 @@ class BusinessBookingDashboardForm(forms.ModelForm):
         provider = self.cleaned_data.get("provider")
         if not provider:
             return provider
-        if self.instance and not self.instance.provider_is_available(provider):
-            raise forms.ValidationError("Provider is already assigned to an overlapping booking.")
+        if self.instance and not provider_can_take_booking(provider, self.instance, exclude_booking=self.instance):
+            raise forms.ValidationError("Provider must be active, in the booking area, and free for the full service window.")
         return provider
 
     def save(self, commit=True):
@@ -2151,8 +2194,8 @@ class PrivateBookingDashboardForm(forms.ModelForm):
         provider = self.cleaned_data.get("provider")
         if not provider:
             return provider
-        if self.instance and not self.instance.provider_is_available(provider):
-            raise forms.ValidationError("Provider is already assigned to an overlapping booking.")
+        if self.instance and not provider_can_take_booking(provider, self.instance, exclude_booking=self.instance):
+            raise forms.ValidationError("Provider must be active, in the booking area, and free for the full service window.")
         return provider
 
 
@@ -3754,7 +3797,6 @@ def private_zip_step1(request, service_slug):
         "show_success_popup": show_success_popup,
     })
 
-@login_required
 def private_booking_checkout(request):
     draft = _get_private_draft_data(request)
     selected_slugs = draft.get("selected_services") or []
@@ -3816,12 +3858,6 @@ def private_booking_checkout(request):
     if not display_address:
         display_address = "Not provided"
 
-    display_area = draft.get("area")
-    if not display_area and customer:
-        display_area = customer.display_city()
-    if not display_area:
-        display_area = "Not provided"
-
     customer_snapshot = _get_private_booking_customer_snapshot(customer)
     if customer_snapshot.get("address") and not draft.get("address"):
         draft["address"] = customer_snapshot["address"]
@@ -3830,6 +3866,19 @@ def private_booking_checkout(request):
     if customer_snapshot.get("zip_code") and not draft.get("zip_code"):
         draft["zip_code"] = customer_snapshot["zip_code"]
     _save_private_draft_data(request, draft)
+
+    display_city = (draft.get("area") or "").strip()
+    if not display_city and customer:
+        display_city = (customer.display_city() or "").strip()
+
+    display_zip_code = (draft.get("zip_code") or "").strip()
+    if not display_zip_code and customer:
+        display_zip_code = (customer.display_postal_code() or "").strip()
+
+    if display_city and display_zip_code:
+        display_area = f"{display_city} ({display_zip_code})"
+    else:
+        display_area = display_city or display_zip_code or "Not provided"
 
     if draft.get("duration_hours"):
         display_duration = draft.get("duration_hours")
@@ -3877,8 +3926,8 @@ def private_booking_checkout(request):
         final_preview_price = final_after_rot - referral_discount_amount
         referral_discount_applied = True
 
-    stripe_publishable_key = settings.STRIPE_PUBLISHABLE_KEY
-    stripe_secret_key = settings.STRIPE_SECRET_KEY
+    stripe_publishable_key = settings.STRIPE_PUBLISHABLE_KEY if request.user.is_authenticated else ""
+    stripe_secret_key = settings.STRIPE_SECRET_KEY if request.user.is_authenticated else ""
     stripe_currency = (settings.STRIPE_CURRENCY or "sek").lower()
 
     payment_summary = _calculate_private_payment_summary(temp_booking, stripe_currency)
@@ -3996,6 +4045,12 @@ def private_booking_checkout(request):
 
         # 💳 CONFIRM PAYMENT
         elif form_type == "payment":
+            selected_payment_option = (request.POST.get("payment_option") or "card").strip().lower()
+            if selected_payment_option == "invoice":
+                return redirect("home:private_booking_cash_invoice_pdf")
+            if not request.user.is_authenticated:
+                messages.info(request, "Please sign in to continue to payment.")
+                return redirect(f"{reverse('login')}?{urlencode({'next': request.get_full_path()})}")
             messages.error(request, "Please complete payment using the card form.")
             return redirect("home:private_booking_checkout")
 
@@ -4010,7 +4065,7 @@ def private_booking_checkout(request):
     # ==========================
     stripe_client_secret = draft.get("stripe_client_secret")
     stripe_payment_intent_id = draft.get("payment_intent_id")
-    stripe_ready = bool(stripe_publishable_key and stripe_secret_key)
+    stripe_ready = bool(request.user.is_authenticated and stripe_publishable_key and stripe_secret_key)
     payment_element_version = "payment_element_card_v1"
     current_payment_signature = json.dumps(
         {
@@ -4022,7 +4077,7 @@ def private_booking_checkout(request):
             "selected_reward_id": draft.get("selected_reward_id"),
             "use_reward": _is_truthy(draft.get("use_reward"), default=False),
             "appointment_date": draft.get("appointment_date"),
-            "appointment_time_window": draft.get("appointment_time_window"),
+            "appointment_start_time": draft.get("appointment_start_time"),
             "schedule_mode": draft.get("schedule_mode"),
         },
         sort_keys=True,
@@ -4079,7 +4134,7 @@ def private_booking_checkout(request):
                 "user_id": str(request.user.id),
                 "service_id": ",".join(selected_slugs),
                 "date": draft.get("appointment_date") or "",
-                "time": draft.get("appointment_time_window") or "",
+                "time": draft.get("appointment_start_time") or "",
                 "price": payment_summary_data["amount"],
                 "currency": payment_summary_data["currency"],
             }
@@ -4206,6 +4261,8 @@ def private_booking_checkout(request):
         "cash_invoice_download_url": reverse("home:private_booking_cash_invoice_pdf"),
         "reward_context": reward_context,
         "summary_data": summary_data,
+        "payment_login_url": f"{reverse('login')}?{urlencode({'next': request.get_full_path()})}",
+        "payment_signup_url": f"{reverse('accounts:sign_up')}?{urlencode({'next': request.get_full_path()})}",
     })
 
 
@@ -4251,7 +4308,7 @@ def private_booking_cash_invoice_pdf(request):
         return redirect("home:private_booking_checkout")
 
     appointment_date = draft.get("appointment_date") or "To be confirmed"
-    appointment_time = draft.get("appointment_time_window") or "To be confirmed"
+    appointment_time = draft.get("appointment_start_time") or "To be confirmed"
     schedule_mode = draft.get("schedule_mode") or "same"
     if schedule_mode == "per_service":
         appointment_summary = "Separate schedule per service"
@@ -4398,7 +4455,7 @@ def private_booking_cash_invoice_pdf(request):
         messages.error(request, "Could not send the cash invoice email. Please try again.")
         return redirect("home:private_booking_checkout")
 
-    messages.success(request, f"Cash invoice sent to {customer_email}.")
+    messages.success(request, f"Invoice sent to {customer_email}.")
     return redirect("home:private_booking_checkout")
 
 @login_required
@@ -4643,10 +4700,7 @@ def stripe_webhook(request):
 def private_zip_available(request, service_slug):
     service = get_object_or_404(PrivateService, slug=service_slug)
     booking_start_url = reverse("home:private_booking_start", args=[service.slug])
-    if request.user.is_authenticated:
-        continue_booking_url = booking_start_url
-    else:
-        continue_booking_url = f"{reverse('login')}?{urlencode({'next': booking_start_url})}"
+    continue_booking_url = booking_start_url
 
     call_success = request.session.pop("private_zip_call_success", False)
     email_success = request.session.pop("private_zip_email_success", False)
@@ -5199,7 +5253,7 @@ def private_booking_schedule(request):
         initial_schedule_state = {
             "mode": temp_booking.schedule_mode or ("same" if len(services) <= 1 else ""),
             "appointment_date": temp_booking.appointment_date.isoformat() if hasattr(temp_booking.appointment_date, "isoformat") else (temp_booking.appointment_date or ""),
-            "appointment_time_window": temp_booking.appointment_time_window or "",
+            "appointment_start_time": temp_booking.appointment_start_time.strftime("%H:%M") if getattr(temp_booking, "appointment_start_time", None) else "",
             "frequency_type": temp_booking.frequency_type or "",
             "day_work_best": temp_booking.day_work_best or [],
             "special_timing_requests": temp_booking.special_timing_requests or "",
@@ -5242,9 +5296,11 @@ def private_booking_schedule(request):
                 pricing = calculate_booking_price(temp_booking)
                 return _render_schedule_page(temp_booking, pricing)
             # وقت
-            time_window = request.POST.get("appointment_time_window")
-            draft["appointment_time_window"] = time_window
-            print(draft.get("appointment_time_window"))
+            start_time_raw = request.POST.get("appointment_start_time")
+            start_time_obj = _parse_optional_time(start_time_raw)
+            draft["appointment_start_time"] = start_time_obj.strftime("%H:%M") if start_time_obj else None
+            draft["appointment_time_window"] = None
+            print(draft.get("appointment_start_time"))
             # Frequency
             frequency = request.POST.get("frequency_type")
             draft["frequency_type"] = frequency
@@ -5316,6 +5372,7 @@ def private_booking_schedule(request):
 
             # تفريغ قيم المود "same"
             draft["appointment_date"] = None
+            draft["appointment_start_time"] = None
             draft["appointment_time_window"] = None
             draft["frequency_type"] = None
             draft["day_work_best"] = []
@@ -5337,6 +5394,7 @@ def private_booking_schedule(request):
         if duration_minutes <= 0:
             messages.error(request, "Please complete required options to calculate a valid duration.")
             return _render_schedule_page(temp_booking, pricing)
+        temp_booking.quoted_duration_minutes = duration_minutes
 
         if mode == "same":
             if not draft.get("appointment_date"):
@@ -5353,19 +5411,24 @@ def private_booking_schedule(request):
             if appointment_date_obj and end_date_obj and end_date_obj < appointment_date_obj:
                 messages.error(request, "End date cannot be earlier than your booking date.")
                 return _render_schedule_page(temp_booking, pricing)
-            time_hint = draft.get("appointment_time_window") or ""
-            time_candidates = temp_booking._parse_time_candidates(time_hint)
-            if not time_candidates:
-                messages.error(request, "Please select a valid time window.")
+            start_time_obj = _parse_optional_time(draft.get("appointment_start_time"))
+            if not start_time_obj:
+                messages.error(request, "Please select a valid start time.")
                 return _render_schedule_page(temp_booking, pricing)
-            start_time = time_candidates[0]
             tz = timezone.get_current_timezone()
             if appointment_date_obj:
                 scheduled_at = timezone.make_aware(
-                    datetime.combine(appointment_date_obj, start_time),
+                    datetime.combine(appointment_date_obj, start_time_obj),
                     tz
                 )
                 draft["scheduled_at"] = scheduled_at.isoformat()
+                available_slots = {
+                    item["value"]
+                    for item in get_available_slots_for_booking(temp_booking, appointment_date_obj)
+                }
+                if draft.get("appointment_start_time") not in available_slots:
+                    messages.error(request, "The selected time is no longer available. Please choose one of the available slots.")
+                    return _render_schedule_page(temp_booking, pricing)
             else:
                 draft["scheduled_at"] = None
         elif mode == "per_service":
@@ -5387,6 +5450,18 @@ def private_booking_schedule(request):
                     return _render_schedule_page(temp_booking, pricing)
                 if service_end_date and service_end_date < service_date:
                     messages.error(request, f"End date for {service.title} cannot be earlier than its booking date.")
+                    return _render_schedule_page(temp_booking, pricing)
+                service_start_time = _parse_optional_time(schedule.get("start_time") or schedule.get("time_window"))
+                if not service_start_time:
+                    messages.error(request, f"Please choose a valid start time for {service.title}.")
+                    return _render_schedule_page(temp_booking, pricing)
+                available_slots = {
+                    item["value"]
+                    for item in get_available_slots_for_booking(temp_booking, service_date)
+                }
+                selected_time_value = service_start_time.strftime("%H:%M")
+                if selected_time_value not in available_slots:
+                    messages.error(request, f"{service.title} no longer has provider availability at {selected_time_value}. Please choose one of the shown slots.")
                     return _render_schedule_page(temp_booking, pricing)
         else:
             draft["scheduled_at"] = None
@@ -5441,9 +5516,10 @@ def private_price_api(request):
     if date:
         booking.appointment_date = date
 
-    tw = request.GET.get("time_window")
-    if tw:
-        booking.appointment_time_window = tw
+    start_time = request.GET.get("start_time")
+    if start_time:
+        booking.appointment_start_time = _parse_optional_time(start_time)
+        booking.appointment_time_window = None
 
     freq = request.GET.get("frequency")
     if freq:
@@ -5607,11 +5683,12 @@ def private_provider_availability_api(request):
     booking.quoted_duration_minutes = duration_minutes
 
     try:
-        slot_size = int(request.GET.get("slot_size", 30))
+        slot_size = int(request.GET.get("slot_size", 60))
     except ValueError:
-        slot_size = 30
+        slot_size = 60
     slot_size = max(5, min(slot_size, 120))
 
+    available_slots = get_available_slots_for_booking(booking, date_obj, slot_size_minutes=slot_size)
     providers = select_nearest_provider(booking, date_obj, slot_size_minutes=slot_size)
 
     data = []
@@ -5633,6 +5710,18 @@ def private_provider_availability_api(request):
     return JsonResponse({
         "date": date_str,
         "duration_minutes": duration_minutes,
+        "buffer_minutes": 60,
+        "available_slots": [
+            {
+                "value": item["value"],
+                "label": item["slot"].strftime("%I:%M %p"),
+                "provider_count": item["provider_count"],
+                "provider_ids": item["provider_ids"],
+            }
+            for item in available_slots
+        ],
+        "has_slots": bool(available_slots),
+        "message": "" if available_slots else "No appointments are available for this day.",
         "slot_size_minutes": slot_size,
         "providers": data,
     })

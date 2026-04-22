@@ -176,7 +176,7 @@ def _send_private_booking_confirmation(booking):
         "booking": booking,
         "service_titles": _private_booking_service_titles(booking),
         "booking_date": booking.appointment_date,
-        "booking_time_window": booking.appointment_time_window or "",
+        "booking_time_window": booking.appointment_start_time.strftime("%H:%M") if getattr(booking, "appointment_start_time", None) else "",
         "booking_total": booking.payment_amount or booking.total_price,
         "booking_currency": (booking.payment_currency or "SEK").upper(),
         "booking_url": booking_url,

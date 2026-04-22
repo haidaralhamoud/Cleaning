@@ -192,7 +192,16 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 #         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
 #         'PORT': os.getenv('POSTGRES_PORT', '5432'),
 #     },
-# }
+# }  
+    
+
+      
+
+
+        
+
+
+           
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -203,7 +212,7 @@ DATABASES = {
         'PORT': '5432',
     }
 }
-
+   
 if "test" in sys.argv:
     DATABASES = {
         "default": {

@@ -50,6 +50,96 @@ h1 {
   line-height: 1.4;
 }
 
+.checkout-hero-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
+  gap: 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(113, 178, 71, 0.15), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(3, 159, 200, 0.14), transparent 34%),
+    linear-gradient(135deg, #fafdff 0%, #ffffff 48%, #f4fbf7 100%);
+}
+
+.checkout-kicker,
+.section-chip,
+.review-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.checkout-kicker {
+  margin-bottom: 12px;
+  background: rgba(8, 47, 73, 0.08);
+  color: #0f4c75;
+}
+
+.checkout-hero-card__copy h2 {
+  font-family: "Vesper Libre", serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  max-width: 12ch;
+}
+
+.checkout-hero-card__copy p {
+  max-width: 54ch;
+  margin-top: 14px;
+  color: var(--ink-700);
+  line-height: 1.7;
+}
+
+.checkout-hero-card__stats {
+  display: grid;
+  gap: 12px;
+}
+
+.checkout-stat {
+  padding: 18px 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(3, 159, 200, 0.14);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.06);
+}
+
+.checkout-stat--accent {
+  border-color: rgba(113, 178, 71, 0.18);
+  background: linear-gradient(135deg, #fbfef8 0%, #f4fbef 100%);
+}
+
+.checkout-stat--dark {
+  border-color: rgba(8, 47, 73, 0.08);
+  background: linear-gradient(135deg, #082f49 0%, #0f4c75 100%);
+}
+
+.checkout-stat__label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.checkout-stat strong {
+  font-size: 1.25rem;
+  color: var(--ink-900);
+  line-height: 1.2;
+}
+
+.checkout-stat--dark .checkout-stat__label,
+.checkout-stat--dark strong {
+  color: #fff;
+}
+
 .checkout-grid {
   display: grid;
   grid-template-columns: minmax(0, 1020px);
@@ -305,6 +395,12 @@ h1 {
   padding: 24px 24px;
 }
 
+.section-chip {
+  margin-bottom: 10px;
+  background: rgba(3, 159, 200, 0.1);
+  color: var(--brand-dark);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -346,6 +442,168 @@ hr {
   gap: 14px;
   padding: 4px 0 14px;
   border-bottom: 1px solid rgba(2, 132, 199, 0.15);
+}
+
+.service-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.service-showcase {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(3, 159, 200, 0.14);
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+  padding: 18px;
+}
+
+.service-showcase__media {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex: 0 0 96px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(3, 159, 200, 0.18), rgba(113, 178, 71, 0.18));
+}
+
+.service-showcase__media img,
+.service-showcase__fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.service-showcase__media img {
+  display: block;
+  object-fit: cover;
+}
+
+.service-showcase__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Vesper Libre", serif;
+  font-size: 4rem;
+  color: #fff;
+  background: linear-gradient(135deg, #11a2cf 0%, #71b247 100%);
+}
+
+.service-showcase__body {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.service-showcase__category {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(8, 47, 73, 0.08);
+  color: #0b6e8b;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.booking-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.review-card {
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(3, 159, 200, 0.14);
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.06);
+}
+
+.review-card--schedule {
+  background: linear-gradient(180deg, #f4fbff 0%, #ffffff 100%);
+}
+
+.review-card--addons {
+  background: linear-gradient(180deg, #f9fff2 0%, #ffffff 100%);
+  border-color: rgba(113, 178, 71, 0.2);
+}
+
+.review-card--address {
+  background: linear-gradient(180deg, #fff8ef 0%, #ffffff 100%);
+  border-color: rgba(245, 158, 11, 0.18);
+}
+
+.review-card--price {
+  background: linear-gradient(180deg, #f8faff 0%, #ffffff 100%);
+}
+
+.review-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.review-card__eyebrow {
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--ink-700);
+}
+
+.review-card h3 {
+  font-family: "Vesper Libre", serif;
+  font-size: 1.15rem;
+}
+
+.review-card__value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--ink-900);
+  line-height: 1.5;
+}
+
+.review-card__detail {
+  margin-top: 6px;
+  color: var(--ink-700);
+  line-height: 1.6;
+}
+
+.review-card__price {
+  margin-top: 16px;
+  width: fit-content;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(8, 47, 73, 0.08);
+  color: #082f49;
+  font-weight: 800;
+}
+
+.review-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.review-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 12px;
+  border-radius: 999px;
+  background: rgba(113, 178, 71, 0.12);
+  color: #3d6b20;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mini-price-list {
+  display: grid;
+  gap: 9px;
 }
 
 .service-line {
@@ -475,6 +733,74 @@ hr {
   color: #27ae60;
 }
 
+.checkout-message-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.3);
+}
+
+.checkout-message-modal__panel {
+  width: min(520px, 100%);
+  background: #fff;
+  border-radius: 18px;
+  padding: 22px 22px 18px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+  border: 1px solid rgba(3, 159, 200, 0.12);
+}
+
+.checkout-message-modal__panel h3 {
+  margin: 0 0 14px;
+  color: #0f172a;
+  font-family: "Vesper Libre", serif;
+  font-size: 24px;
+}
+
+.checkout-message-modal__body {
+  display: grid;
+  gap: 10px;
+}
+
+.checkout-message {
+  padding: 14px 16px;
+  border-radius: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  background: #eef5ff;
+  color: #2c3e50;
+}
+
+.checkout-message--error {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.checkout-message--success {
+  background: #e8fff1;
+  color: #1f8a4c;
+}
+
+.checkout-message--warning {
+  background: #fff7e6;
+  color: #b26a00;
+}
+
+.checkout-message-modal__close {
+  margin-top: 16px;
+  min-width: 120px;
+  height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: #12a4cc;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .discount-card .discount-form {
   display: flex;
   gap: 10px;
@@ -496,6 +822,36 @@ hr {
   border-radius: 10px;
   cursor: pointer;
   font-weight: 700;
+}
+
+.guest-payment-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.guest-payment-actions__primary,
+.guest-payment-actions__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.guest-payment-actions__primary {
+  width: 100%;
+}
+
+.guest-payment-actions__secondary {
+  min-width: 240px;
+  min-height: 56px;
+  padding: 0 28px;
+  border-radius: 16px;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 14px 26px rgba(17, 162, 207, 0.16);
 }
 
 .apply-btn.muted {
@@ -906,7 +1262,9 @@ hr {
   border: 1px solid rgba(3, 159, 200, 0.15);
   border-radius: 14px;
   padding: 16px;
-  background: #f7fbff;
+  background:
+    radial-gradient(circle at top right, rgba(3, 159, 200, 0.08), transparent 30%),
+    linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
 }
 
 .invoice-head {
@@ -992,6 +1350,10 @@ hr {
   .checkout-grid {
     grid-template-columns: 1fr;
   }
+  .checkout-hero-card,
+  .booking-review-grid {
+    grid-template-columns: 1fr;
+  }
   .input-row {
     flex-direction: column;
   }
@@ -1028,7 +1390,7 @@ hr {
   }
 
   .service-line__price {
-    margin-left: 72px;
+    margin-left: 0;
   }
 
   .address-edit-row {
@@ -1038,5 +1400,16 @@ hr {
 
   .address-save-btn {
     width: 100%;
+  }
+
+  .service-showcase__media {
+    width: 78px;
+    height: 78px;
+    flex-basis: 78px;
+  }
+
+  .service-showcase {
+    align-items: flex-start;
+    gap: 14px;
   }
 }

@@ -6,7 +6,7 @@
     <img src="{% static 'images/logo.png' %}" alt="Logo" width="235" height="235" decoding="async" fetchpriority="high">
   </a>
 
-  {% with url_name=request.resolver_match.url_name|default:'' path=request.path|default:'' %}
+  {% with url_name=request.resolver_match.url_name|default:'' path=request.path|default:'' next_path=request.GET.next|default:'' %}
 
   
 
@@ -18,7 +18,7 @@
     <a href="{% url 'home:home' %}" class="nav-link{% if url_name == 'home' %} is-active{% endif %}">HOME</a>
     <a href="{% url 'home:about' %}" class="nav-link{% if url_name == 'about' %} is-active{% endif %}">ABOUT</a>
     <div class="nav-dropdown">
-      <a href="#" class="dropdown-toggle nav-link{% if url_name == 'all_services_private' or url_name == 'business_all_services' or url_name == 'business_service_detail' or url_name == 'business_start_booking' or url_name == 'business_company_info' or url_name == 'business_office_setup' or url_name == 'business_bundles' or url_name == 'business_services_needed' or url_name == 'business_addons' or url_name == 'business_frequency' or url_name == 'business_scheduling' or url_name == 'business_thank_you' or url_name == 'private_zip_step1' or url_name == 'private_zip_available' or url_name == 'private_booking_start' or url_name == 'private_booking_services' or url_name == 'private_cart_continue' or url_name == 'private_cart' or url_name == 'private_cart_remove_json' or url_name == 'private_cart_add' or url_name == 'private_cart_count' or url_name == 'private_booking_schedule' or url_name == 'private_booking_checkout' or url_name == 'private_booking_payment_complete' or url_name == 'payment_success' or url_name == 'payment_failed' or url_name == 'service_detail' or url_name == 'view_service_details' or '/private/' in path or '/business/' in path or '/booking/' in path %} is-active{% endif %}" aria-haspopup="true" aria-expanded="false">
+      <a href="#" class="dropdown-toggle nav-link{% if url_name == 'all_services_private' or url_name == 'business_all_services' or url_name == 'business_service_detail' or url_name == 'business_start_booking' or url_name == 'business_company_info' or url_name == 'business_office_setup' or url_name == 'business_bundles' or url_name == 'business_services_needed' or url_name == 'business_addons' or url_name == 'business_frequency' or url_name == 'business_scheduling' or url_name == 'business_thank_you' or url_name == 'private_zip_step1' or url_name == 'private_zip_available' or url_name == 'private_booking_start' or url_name == 'private_booking_services' or url_name == 'private_cart_continue' or url_name == 'private_cart' or url_name == 'private_cart_remove_json' or url_name == 'private_cart_add' or url_name == 'private_cart_count' or url_name == 'private_booking_schedule' or url_name == 'private_booking_checkout' or url_name == 'private_booking_payment_complete' or url_name == 'payment_success' or url_name == 'payment_failed' or url_name == 'service_detail' or url_name == 'view_service_details' or '/private/' in path or '/business/' in path or '/booking/' in path or '/private/' in next_path or '/business/' in next_path or '/booking/' in next_path %} is-active{% endif %}" aria-haspopup="true" aria-expanded="false">
         <span class="dropdown-label">SERVICES</span>
       </a>
       <div class="dropdown-menu services-mega-menu">

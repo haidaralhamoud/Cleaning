@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from home.models import BusinessBooking, CallRequest, EmailRequest, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer
 from home.models import Contact
-from home.availability_utils import generate_slots, provider_available_after_minutes
+from home.availability_utils import generate_slots, provider_available_after_minutes, has_overlap
 from home.pricing_utils import calculate_booking_price
 
 
@@ -70,7 +70,7 @@ class ProviderAvailabilityTests(TestCase):
         self.assertNotIn("10:00", slot_times)
         self.assertNotIn("10:30", slot_times)
         self.assertIn("08:00", slot_times)
-        self.assertIn("11:00", slot_times)
+        self.assertNotIn("11:00", slot_times)
 
     def test_provider_available_after_minutes(self):
         now = timezone.now()
@@ -81,8 +81,8 @@ class ProviderAvailabilityTests(TestCase):
             status="ORDERED",
         )
         minutes = provider_available_after_minutes(self.provider, now=now)
-        self.assertGreaterEqual(minutes, 49)
-        self.assertLessEqual(minutes, 51)
+        self.assertGreaterEqual(minutes, 109)
+        self.assertLessEqual(minutes, 111)
 
     def test_extend_duration_conflict(self):
         date_obj = timezone.localdate()
@@ -108,7 +108,13 @@ class ProviderAvailabilityTests(TestCase):
 
 class BookingPricingDurationTests(TestCase):
     def setUp(self):
+        self.User = get_user_model()
+        self.provider = self.User.objects.create_user(username="provider2", password="pass123")
         self.category = PrivateMainCategory.objects.create(title="Home")
+
+    def _dt(self, date_obj, t):
+        tz = timezone.get_current_timezone()
+        return timezone.make_aware(datetime.combine(date_obj, t), tz)
 
     def test_service_without_option_durations_uses_default_duration(self):
         service = PrivateService.objects.create(
@@ -160,14 +166,32 @@ class BookingPricingDurationTests(TestCase):
         self.assertEqual(pricing["duration_minutes"], 240.0)
         self.assertTrue(pricing["duration_is_estimated"])
 
-    def test_night_time_window_parses_to_22_00_start(self):
-        booking = PrivateBooking(appointment_time_window="Night (22:00 - 06:00)")
+    def test_start_time_builds_service_window_with_buffer(self):
+        booking = PrivateBooking(
+            appointment_date=timezone.localdate(),
+            appointment_start_time=time(9, 0),
+            quoted_duration_minutes=120,
+        )
 
-        candidates = booking._parse_time_candidates(booking.appointment_time_window)
+        start_dt, end_dt = booking.get_service_window()
 
-        self.assertEqual(len(candidates), 2)
-        self.assertEqual(candidates[0].strftime("%H:%M"), "22:00")
-        self.assertEqual(candidates[1].strftime("%H:%M"), "06:00")
+        self.assertIsNotNone(start_dt)
+        self.assertIsNotNone(end_dt)
+        self.assertEqual(start_dt.strftime("%H:%M"), "09:00")
+        self.assertEqual(end_dt.strftime("%H:%M"), "12:00")
+
+    def test_has_overlap_uses_start_and_end_datetimes(self):
+        date_obj = timezone.localdate()
+        now_start = self._dt(date_obj, time(9, 0))
+        PrivateBooking.objects.create(
+            provider=self.provider,
+            scheduled_at=now_start,
+            quoted_duration_minutes=120,
+            status="ASSIGNED",
+        )
+
+        self.assertTrue(has_overlap(self.provider, self._dt(date_obj, time(10, 0)), self._dt(date_obj, time(11, 0))))
+        self.assertFalse(has_overlap(self.provider, self._dt(date_obj, time(13, 30)), self._dt(date_obj, time(14, 30))))
 
 
 @override_settings(
@@ -205,7 +229,7 @@ class BookingEmailSignalTests(TestCase):
             user=user,
             selected_services=[service.slug],
             appointment_date=timezone.localdate(),
-            appointment_time_window="09:00 - 12:00",
+            appointment_start_time=time(9, 0),
             total_price=Decimal("249.00"),
             payment_amount=Decimal("249.00"),
             payment_currency="sek",
@@ -220,7 +244,7 @@ class BookingEmailSignalTests(TestCase):
         self.assertEqual(customer_email.from_email, "Hembla Experten <services@hembla-experten.se>")
         self.assertIn("Your booking is confirmed", customer_email.subject)
         self.assertIn("Standard Cleaning", customer_email.body)
-        self.assertIn("09:00 - 12:00", customer_email.body)
+        self.assertIn("09:00", customer_email.body)
 
     def test_business_booking_creation_sends_customer_confirmation_email(self):
         BusinessBooking.objects.create(

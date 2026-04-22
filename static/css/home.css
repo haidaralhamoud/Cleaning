@@ -133,7 +133,11 @@ img{display:block;max-width:100%;height:auto}
   border-right:1px solid rgba(255,255,255,.6);
 }
 .hero-inner{position:relative; display:flex; align-items:center; min-height:inherit; z-index:2}
-.hero-copy{max-width:700px; animation:fadeUp .8s ease both}
+.hero-copy{
+  max-width:700px;
+  margin-left:-44px;
+  animation:fadeUp .8s ease both;
+}
 .hero-copy h1{
   font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(30px, 3.7vw, 46px);
   margin:0 0 12px; color:var(--ink); letter-spacing:.2px;

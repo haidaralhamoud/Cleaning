@@ -1455,7 +1455,7 @@ def view_service_details(request, booking_type, booking_id):
         ).first()
         service_title = ", ".join(booking.selected_services or []) or "Private Service" if booking else "Private Service"
         booking_date = getattr(booking, "appointment_date", None)
-        booking_time = getattr(booking, "appointment_time_window", "") or ""
+        booking_time = booking.appointment_start_time.strftime("%H:%M") if booking and getattr(booking, "appointment_start_time", None) else ""
         location_text = getattr(booking, "address", None) or getattr(booking, "area", None) or "-"
         payment_method = getattr(booking, "payment_method", "") or "-"
         order_type_label = "Private"
@@ -3552,7 +3552,11 @@ def reschedule_booking(request, booking_type, booking_id):
         booking.preferred_time = new_time
     else:
         booking.appointment_date = new_date
-        booking.appointment_time_window = new_time
+        try:
+            booking.appointment_start_time = datetime.datetime.strptime(new_time, "%H:%M").time() if new_time else None
+        except ValueError:
+            booking.appointment_start_time = None
+        booking.appointment_time_window = None
 
     # (اختياري) رجّع الحالة Scheduled
     booking.status = "SCHEDULED"

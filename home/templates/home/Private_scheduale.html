@@ -39,7 +39,7 @@
   {% csrf_token %}
 
   <input type="hidden" name="appointment_date" id="appointment_date">
-<input type="hidden" name="appointment_time_window" id="appointment_time_window">
+<input type="hidden" name="appointment_start_time" id="appointment_start_time">
 <input type="hidden" name="day_work_best" id="day_work_best">
 <input type="hidden" name="End_Date" id="End_Date">
 <input type="hidden" name="frequency_type" id="frequency_type">
@@ -67,7 +67,7 @@
 <div class="mode-row">
 <div class="mode-card" data-mode="same">
 <div class="mode-title">Use the same schedule for all services</div>
-<small>We will apply this date, time window and frequency to every service in your cart.</small>
+<small>We will apply this date, start time and frequency to every service in your cart.</small>
 <span class="badge">Fast and easy</span>
 </div>
 <div class="mode-card" data-mode="per_service">
@@ -105,12 +105,16 @@
 </div>
 <div class="q-col">
 <div class="time-box">
-<h3>Q2. Choose a Time Window</h3>
-<div class="time-option" data-time="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</div>
-<div class="time-option" data-time="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</div>
-<div class="time-option" data-time="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</div>
-<div class="time-option" data-time="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</div>
-<div class="time-option" data-time="Night (22:00 - 06:00)">Night (22:00 - 06:00)</div>
+<h3>Q2. Choose a Start Time</h3>
+<p class="time-box__intro">Choose from real appointment slots only. We show times where at least one provider is free in your area for the full service window.</p>
+<div class="time-preview-card" id="timePreviewCard">
+<span class="time-preview-card__label">Selected Start</span>
+<strong id="timePreviewValue">Not set yet</strong>
+</div>
+<div class="time-slots-status" id="timeSlotsStatus">Select a date to see real availability.</div>
+<select id="timeSlotsSelect" class="time-slots-select" disabled>
+<option value="">Select a date first</option>
+</select>
 </div>
 </div>
 </div>
@@ -195,15 +199,14 @@
 <input type="date" class="svc-input svc-date" min="{{ min_booking_date }}">
 </div>
 <div class="svc-col">
-<label class="svc-label">Time Window</label>
-<select class="svc-select svc-time">
-<option value="">Select</option>
-<option value="Morning (08:00 - 12:00)">Morning (08:00 - 12:00)</option>
-<option value="Midday (12:00 - 16:00)">Midday (12:00 - 16:00)</option>
-<option value="Afternoon (16:00 - 20:00)">Afternoon (16:00 - 20:00)</option>
-<option value="Evening (20:00 - 22:00)">Evening (20:00 - 22:00)</option>
-<option value="Night (22:00 - 06:00)">Night (22:00 - 06:00)</option>
+<label class="svc-label">Start Time</label>
+<input type="hidden" class="svc-time">
+<div class="svc-slot-box">
+<div class="svc-slot-status">Choose a date first to load available slots.</div>
+<select class="svc-slot-select" disabled>
+<option value="">Choose a date first</option>
 </select>
+</div>
 </div>
 </div>
 <div class="svc-row">
@@ -565,7 +568,11 @@ function getRuleForDate(dateObj){
 }
 
 const inputDate    = document.getElementById("appointment_date");
-const inputWindow  = document.getElementById("appointment_time_window");
+const inputStartTime  = document.getElementById("appointment_start_time");
+const timePreviewValue  = document.getElementById("timePreviewValue");
+const timePreviewCard  = document.getElementById("timePreviewCard");
+const timeSlotsSelect = document.getElementById("timeSlotsSelect");
+const timeSlotsStatus = document.getElementById("timeSlotsStatus");
 const inputFreq    = document.getElementById("frequency_type");
 const inputSpecial = document.getElementById("special_timing_requests");
 const inputMode    = document.getElementById("schedule_mode");
@@ -589,6 +596,7 @@ let currentYear  = new Date().getFullYear();
 
 const monthTitle   = document.getElementById("monthTitle");
 const calendarDays = document.getElementById("calendarDays");
+let latestTimeAvailabilityRequest = 0;
 
 const modeCards = document.querySelectorAll(".mode-card");
 const serviceCount = {{ services|length|default:0 }};
@@ -668,8 +676,7 @@ function renderCalendar(month, year){
 
       const weekdayCode = WEEKDAY_CODES[weekday];
       document.getElementById("day_work_best").value = JSON.stringify([weekdayCode]);
-
-      updateScheduleSummary();
+      loadSameDayAvailability(dateStr).then(() => updateScheduleSummary());
     });
 
     calendarDays.appendChild(cell);
@@ -693,14 +700,204 @@ if (prevMonthBtn && nextMonthBtn){
   };
 }
 
-document.querySelectorAll(".time-option").forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    document.querySelectorAll(".time-option").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    if (inputWindow) inputWindow.value = btn.getAttribute("data-time") || "";
-    updateScheduleSummary();
+function formatStartTimePreview(value) {
+  if (!value || !/^\d{2}:\d{2}$/.test(value)) return "Not set yet";
+  const [hourRaw, minuteRaw] = value.split(":");
+  const hour = Number(hourRaw);
+  const minute = minuteRaw;
+  const period = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+  return `${String(displayHour).padStart(2, "0")}:${minute} ${period}`;
+}
+
+function syncStartTimePickerUi(value) {
+  const normalized = value || "";
+  if (inputStartTime) inputStartTime.value = normalized;
+
+  if (timePreviewValue) {
+    timePreviewValue.textContent = formatStartTimePreview(normalized);
+  }
+  if (timePreviewCard) {
+    timePreviewCard.classList.toggle("is-active", Boolean(normalized));
+  }
+  if (timeSlotsSelect) {
+    timeSlotsSelect.value = normalized || "";
+  }
+}
+
+function setSameTimeAvailabilityState(message, tone) {
+  if (!timeSlotsStatus) return;
+  timeSlotsStatus.textContent = message || "";
+  timeSlotsStatus.classList.remove("is-loading", "is-empty", "is-ready");
+  if (tone) {
+    timeSlotsStatus.classList.add(`is-${tone}`);
+  }
+}
+
+function renderSameTimeSlots(slots) {
+  if (!timeSlotsSelect) return;
+  const currentValue = inputStartTime ? inputStartTime.value : "";
+  timeSlotsSelect.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = slots && slots.length ? "Select an available hour" : "No available hours";
+  timeSlotsSelect.appendChild(placeholder);
+
+  (slots || []).forEach((slot) => {
+    const option = document.createElement("option");
+    option.value = slot.value;
+    option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
+    option.selected = slot.value === currentValue;
+    timeSlotsSelect.appendChild(option);
   });
-});
+
+  timeSlotsSelect.disabled = !(slots && slots.length);
+  if (!slots || !slots.length) {
+    timeSlotsSelect.value = "";
+  }
+}
+
+function setServiceSlotState(acc, message, tone) {
+  const statusEl = acc.querySelector(".svc-slot-status");
+  if (!statusEl) return;
+  statusEl.textContent = message || "";
+  statusEl.classList.remove("is-loading", "is-empty", "is-ready");
+  if (tone) {
+    statusEl.classList.add(`is-${tone}`);
+  }
+}
+
+function renderServiceSlots(acc, slots) {
+  const select = acc.querySelector(".svc-slot-select");
+  const timeInput = acc.querySelector(".svc-time");
+  if (!select || !timeInput) return;
+  select.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = slots && slots.length ? "Select an available hour" : "No available hours";
+  select.appendChild(placeholder);
+
+  (slots || []).forEach((slot) => {
+    const option = document.createElement("option");
+    option.value = slot.value;
+    option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
+    option.selected = slot.value === timeInput.value;
+    select.appendChild(option);
+  });
+
+  select.disabled = !(slots && slots.length);
+  if (!slots || !slots.length) {
+    timeInput.value = "";
+    select.value = "";
+  }
+}
+
+function loadSameDayAvailability(dateValue, preserveSelected = false) {
+  if (!dateValue) {
+    if (inputStartTime && !preserveSelected) inputStartTime.value = "";
+    syncStartTimePickerUi(preserveSelected ? (inputStartTime ? inputStartTime.value : "") : "");
+    if (timeSlotsSelect) {
+      timeSlotsSelect.innerHTML = '<option value="">Select a date first</option>';
+      timeSlotsSelect.disabled = true;
+    }
+    setSameTimeAvailabilityState("Select a date to see real availability.", "");
+    return Promise.resolve([]);
+  }
+
+  const requestId = ++latestTimeAvailabilityRequest;
+  if (!preserveSelected) {
+    syncStartTimePickerUi("");
+  }
+  setSameTimeAvailabilityState("Checking live provider availability...", "loading");
+
+  return fetch(`/private/api/providers/availability/?date=${encodeURIComponent(dateValue)}`)
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`Availability API failed with status ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      if (requestId !== latestTimeAvailabilityRequest) {
+        return [];
+      }
+      const slots = Array.isArray(data.available_slots) ? data.available_slots : [];
+      const currentValue = inputStartTime ? inputStartTime.value : "";
+      const hasCurrentValue = currentValue && slots.some((slot) => slot.value === currentValue);
+      if (preserveSelected && currentValue && !hasCurrentValue) {
+        syncStartTimePickerUi("");
+      }
+      renderSameTimeSlots(slots);
+      if (slots.length) {
+        setSameTimeAvailabilityState("Only real free slots are shown below.", "ready");
+      } else {
+        setSameTimeAvailabilityState(data.message || "No appointments are available for this day.", "empty");
+      }
+      return slots;
+    })
+    .catch(() => {
+      if (requestId !== latestTimeAvailabilityRequest) {
+        return [];
+      }
+      if (timeSlotsSelect) {
+        timeSlotsSelect.innerHTML = '<option value="">Could not load hours</option>';
+        timeSlotsSelect.disabled = true;
+      }
+      syncStartTimePickerUi("");
+      setSameTimeAvailabilityState("Could not load live availability right now.", "empty");
+      return [];
+    });
+}
+
+function loadServiceAvailability(acc, dateValue, preserveSelected = false) {
+  const timeInput = acc.querySelector(".svc-time");
+  const select = acc.querySelector(".svc-slot-select");
+  if (!timeInput || !select) return Promise.resolve([]);
+
+  if (!dateValue) {
+    if (!preserveSelected) timeInput.value = "";
+    select.innerHTML = '<option value="">Choose a date first</option>';
+    select.disabled = true;
+    setServiceSlotState(acc, "Choose a date first to load available slots.", "");
+    return Promise.resolve([]);
+  }
+
+  if (!preserveSelected) {
+    timeInput.value = "";
+  }
+  setServiceSlotState(acc, "Checking real provider availability...", "loading");
+
+  return fetch(`/private/api/providers/availability/?date=${encodeURIComponent(dateValue)}`)
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`Availability API failed with status ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((data) => {
+      const slots = Array.isArray(data.available_slots) ? data.available_slots : [];
+      const hasCurrentValue = timeInput.value && slots.some((slot) => slot.value === timeInput.value);
+      if (preserveSelected && timeInput.value && !hasCurrentValue) {
+        timeInput.value = "";
+      }
+      renderServiceSlots(acc, slots);
+      if (slots.length) {
+        setServiceSlotState(acc, "Available start times for this service date.", "ready");
+      } else {
+        setServiceSlotState(acc, data.message || "No appointments are available for this day.", "empty");
+      }
+      return slots;
+    })
+    .catch(() => {
+      timeInput.value = "";
+      select.innerHTML = '<option value="">Could not load hours</option>';
+      select.disabled = true;
+      setServiceSlotState(acc, "Could not load availability right now.", "empty");
+      return [];
+    });
+}
 
 document.querySelectorAll(".freq-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
@@ -755,6 +952,7 @@ if (noBtn && yesBtn && endDate){
 document.querySelectorAll(".service-acc").forEach(acc => {
   const header = acc.querySelector(".acc-header");
   const body   = acc.querySelector(".acc-body");
+  const serviceSlotSelect = acc.querySelector(".svc-slot-select");
 
   if (!header || !body) return;
 
@@ -774,7 +972,30 @@ document.querySelectorAll(".service-acc").forEach(acc => {
       updateScheduleSummary();
     });
   });
+
+  const serviceDateEl = acc.querySelector(".svc-date");
+  if (serviceDateEl) {
+    serviceDateEl.addEventListener("change", () => {
+      loadServiceAvailability(acc, serviceDateEl.value || "").then(() => updateScheduleSummary());
+    });
+  }
+  if (serviceSlotSelect) {
+    serviceSlotSelect.addEventListener("change", () => {
+      const timeInput = acc.querySelector(".svc-time");
+      if (timeInput) {
+        timeInput.value = serviceSlotSelect.value || "";
+      }
+      updateScheduleSummary();
+    });
+  }
 });
+
+if (timeSlotsSelect) {
+  timeSlotsSelect.addEventListener("change", () => {
+    syncStartTimePickerUi(timeSlotsSelect.value || "");
+    updateScheduleSummary();
+  });
+}
 
 function updateScheduleSummary() {
   const params = new URLSearchParams();
@@ -791,7 +1012,7 @@ function updateScheduleSummary() {
 
     document.getElementById("day_work_best").value = encodedDays;
     params.append("date", inputDate.value || "");
-    params.append("time_window", inputWindow.value || "");
+    params.append("start_time", inputStartTime.value || "");
     params.append("frequency", inputFreq.value || "");
     params.append("weekday", encodedDays);
     params.append("days", encodedDays);
@@ -812,7 +1033,7 @@ function updateScheduleSummary() {
 
       schedules[slug] = {
         date,
-        time_window: time,
+        start_time: time,
         frequency: freq,
         days,
         end_date: endDate,
@@ -976,12 +1197,10 @@ function applyInitialScheduleState() {
     }
   }
 
-  if (state.appointment_time_window && inputWindow) {
-    inputWindow.value = state.appointment_time_window;
-    document.querySelectorAll(".time-option").forEach((btn) => {
-      btn.classList.toggle("active", btn.getAttribute("data-time") === state.appointment_time_window);
-    });
+  if (state.appointment_start_time && inputStartTime) {
+    syncStartTimePickerUi(state.appointment_start_time);
   }
+  loadSameDayAvailability(inputDate ? inputDate.value : "", true);
 
   if (state.frequency_type && inputFreq) {
     inputFreq.value = state.frequency_type;
@@ -1028,7 +1247,7 @@ function applyInitialScheduleState() {
     const endEl = acc.querySelector(".svc-end-date");
 
     if (dateEl) dateEl.value = schedule.date || "";
-    if (timeEl) timeEl.value = schedule.time_window || "";
+    if (timeEl) timeEl.value = schedule.start_time || schedule.time_window || "";
     if (freqEl) freqEl.value = schedule.frequency || "";
     if (notesEl) notesEl.value = schedule.special_request || "";
     if (endEl) endEl.value = schedule.end_date || "";
@@ -1040,6 +1259,8 @@ function applyInitialScheduleState() {
       const pill = chk.closest(".svc-day-pill");
       if (pill) pill.classList.toggle("active", isChecked);
     });
+
+    loadServiceAvailability(acc, dateEl ? dateEl.value : "", true);
   });
 }
 
@@ -1051,7 +1272,6 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
   const clearErrors = () => {
     document.querySelectorAll(".field-error").forEach(el => el.classList.remove("field-error"));
     document.querySelectorAll(".field-error-pill").forEach(el => el.classList.remove("field-error-pill"));
-    document.querySelectorAll(".time-option.error").forEach(el => el.classList.remove("error"));
   };
 
   clearScheduleMessages();
@@ -1102,7 +1322,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
       return;
     }
 
-    if (!inputWindow.value) {
+    if (!inputStartTime.value) {
       valid = false;
       const timeBox = document.querySelector(".time-box");
       if (timeBox) timeBox.classList.add("field-error-pill");
@@ -1163,6 +1383,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
     document.querySelectorAll(".service-acc").forEach(acc => {
       const dateEl   = acc.querySelector(".svc-date");
       const timeEl   = acc.querySelector(".svc-time");
+      const slotBox  = acc.querySelector(".svc-slot-box");
       const freqEl   = acc.querySelector(".svc-frequency");
       const endEl    = acc.querySelector(".svc-end-date");
       const daysWrap = acc.querySelector(".svc-days");
@@ -1196,7 +1417,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
       if (!timeEl.value) {
         valid = false;
-        timeEl.classList.add("field-error");
+        if (slotBox) slotBox.classList.add("field-error-pill");
         firstInvalid = firstInvalid || acc;
       }
 
@@ -1246,7 +1467,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
         alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
         return;
       }
-      notify("Please complete the required schedule fields for each service: date, time window, frequency, and preferred days.");
+      notify("Please complete the required schedule fields for each service: date, available slot, frequency, and preferred days.");
       return;
     }
 
@@ -1273,7 +1494,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
       schedules[slug] = {
         date: dateVal,
-        time_window: timeVal,
+        start_time: timeVal,
         frequency: freqVal,
         days: days,
         end_date: endVal,
@@ -1284,7 +1505,8 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
     inputSchedulesJson.value = JSON.stringify(schedules);
 
     inputDate.value = "";
-    inputWindow.value = "";
+    inputStartTime.value = "";
+    syncStartTimePickerUi("");
     inputFreq.value = "";
     inputSpecial.value = "";
     document.getElementById("day_work_best").value = "";

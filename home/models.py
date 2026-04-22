@@ -11,6 +11,32 @@ from accounts.models import ChatThread, DiscountCode
 from .image_optimization import optimize_uploaded_image_fields
 User = get_user_model()
 
+
+def calculate_booking_end(start_time, duration_value):
+    minutes = 0
+    if duration_value is None:
+        minutes = 0
+    elif isinstance(duration_value, (int, float, Decimal)):
+        minutes = int(Decimal(str(duration_value)) * 60) if duration_value <= 24 else int(duration_value)
+    else:
+        raw = str(duration_value or "").strip()
+        if ":" in raw:
+            parts = raw.split(":")
+            try:
+                hours = int(parts[0] or 0)
+                mins = int(parts[1] or 0)
+                minutes = (hours * 60) + mins
+            except (TypeError, ValueError):
+                minutes = 0
+        else:
+            match = re.search(r"(\d+(?:\.\d+)?)", raw)
+            if match:
+                try:
+                    minutes = int(float(match.group(1)) * 60)
+                except ValueError:
+                    minutes = 0
+    return start_time + timedelta(minutes=minutes + 60)
+
 PRICE_CURRENCY_CHOICES = [
     ("SEK", "Swedish Krona (SEK)"),
     ("USD", "US Dollar (USD)"),
@@ -152,8 +178,24 @@ class BaseBooking(models.Model):
 
     def _get_time_hint(self):
         if self.__class__.__name__ == "PrivateBooking":
+            start_time = getattr(self, "appointment_start_time", None)
+            if start_time:
+                return start_time
             return self.appointment_time_window
         return self.custom_time or self.preferred_time
+
+    def _parse_single_time_value(self, raw):
+        if not raw:
+            return None
+        if isinstance(raw, time):
+            return raw
+        raw_str = str(raw).strip()
+        try:
+            return datetime.strptime(raw_str, "%H:%M").time()
+        except ValueError:
+            pass
+        candidates = self._parse_time_candidates(raw_str)
+        return candidates[0] if candidates else None
 
     def _parse_time_candidates(self, raw):
         if not raw:
@@ -203,42 +245,84 @@ class BaseBooking(models.Model):
             start_dt = self.scheduled_at
             if timezone.is_naive(start_dt):
                 start_dt = timezone.make_aware(start_dt, timezone.get_current_timezone())
-            end_dt = start_dt + timedelta(minutes=int(self.quoted_duration_minutes))
+            end_dt = calculate_booking_end(start_dt, int(self.quoted_duration_minutes))
             return start_dt, end_dt
+
+        if self.__class__.__name__ == "PrivateBooking" and getattr(self, "schedule_mode", "same") == "per_service":
+            windows = self.get_service_windows()
+            if windows:
+                starts = [window[0] for window in windows]
+                ends = [window[1] for window in windows]
+                return min(starts), max(ends)
+            return None, None
 
         booking_date = self._get_booking_date()
         if not booking_date:
             return None, None
 
         time_hint = self._get_time_hint() or ""
-        times = self._parse_time_candidates(time_hint)
-        duration_minutes = self._parse_duration_minutes()
         tz = timezone.get_current_timezone()
-
-        if len(times) >= 2:
-            start_time = times[0]
-            end_time = times[1]
-            start_dt = timezone.make_aware(datetime.combine(booking_date, start_time), tz)
-            end_dt = timezone.make_aware(datetime.combine(booking_date, end_time), tz)
-            if end_dt <= start_dt:
-                end_dt = start_dt + timedelta(minutes=duration_minutes)
-            return start_dt, end_dt
-
-        if len(times) == 1:
-            start_dt = timezone.make_aware(datetime.combine(booking_date, times[0]), tz)
-            end_dt = start_dt + timedelta(minutes=duration_minutes)
+        exact_start = self._parse_single_time_value(time_hint)
+        if exact_start:
+            start_dt = timezone.make_aware(datetime.combine(booking_date, exact_start), tz)
+            end_dt = calculate_booking_end(start_dt, self._parse_duration_minutes())
             return start_dt, end_dt
 
         start_dt = timezone.make_aware(datetime.combine(booking_date, time(hour=0, minute=0)), tz)
         end_dt = timezone.make_aware(datetime.combine(booking_date, time(hour=23, minute=59)), tz)
         return start_dt, end_dt
 
+    def get_service_windows(self):
+        if self.scheduled_at and self.quoted_duration_minutes:
+            start_dt = self.scheduled_at
+            if timezone.is_naive(start_dt):
+                start_dt = timezone.make_aware(start_dt, timezone.get_current_timezone())
+            return [(start_dt, calculate_booking_end(start_dt, int(self.quoted_duration_minutes)))]
+
+        if self.__class__.__name__ == "PrivateBooking" and getattr(self, "schedule_mode", "same") == "per_service":
+            schedules = self.service_schedules or {}
+            tz = timezone.get_current_timezone()
+            windows = []
+            for data in schedules.values():
+                if not isinstance(data, dict):
+                    continue
+                raw_date = data.get("date")
+                raw_time = data.get("start_time") or data.get("time_window")
+                if not raw_date or not raw_time:
+                    continue
+                if hasattr(raw_date, "year"):
+                    date_obj = raw_date
+                else:
+                    try:
+                        date_obj = datetime.strptime(str(raw_date), "%Y-%m-%d").date()
+                    except ValueError:
+                        continue
+                start_time = self._parse_single_time_value(raw_time)
+                if not start_time:
+                    continue
+                start_dt = timezone.make_aware(datetime.combine(date_obj, start_time), tz)
+                windows.append((start_dt, calculate_booking_end(start_dt, self._parse_duration_minutes())))
+            return windows
+
+        start_dt, end_dt = self.get_service_window()
+        return [(start_dt, end_dt)] if start_dt and end_dt else []
+
+    @property
+    def start_datetime(self):
+        start_dt, _ = self.get_service_window()
+        return start_dt
+
+    @property
+    def end_datetime(self):
+        _, end_dt = self.get_service_window()
+        return end_dt
+
     def provider_is_available(self, provider):
         if not provider:
             return True
 
-        target_start, target_end = self.get_service_window()
-        if not target_start or not target_end:
+        target_windows = self.get_service_windows()
+        if not target_windows:
             return True
 
         from home.models import PrivateBooking, BusinessBooking
@@ -258,13 +342,15 @@ class BaseBooking(models.Model):
         active_bookings = list(private_qs) + list(business_qs)
 
         for booking in active_bookings:
-            other_start, other_end = booking.get_service_window()
-            if not other_start or not other_end:
+            other_windows = booking.get_service_windows()
+            if not other_windows:
                 return False
-            if target_start.date() != other_start.date():
-                continue
-            if target_start < other_end and other_start < target_end:
-                return False
+            for target_start, target_end in target_windows:
+                for other_start, other_end in other_windows:
+                    if target_start.date() != other_start.date():
+                        continue
+                    if target_start < other_end and other_start < target_end:
+                        return False
         return True
 
     def extend_duration(self, extra_minutes, allow_conflict=False, note=""):
@@ -891,6 +977,21 @@ class BusinessBundle(models.Model):
         optimize_uploaded_image_fields(self, ["image"], update_fields=kwargs.get("update_fields"))
         return super().save(*args, **kwargs)
 
+    @property
+    def display_discount(self):
+        raw = (self.discount or "").strip()
+        if not raw:
+            return ""
+
+        match = re.search(r"-?\d+(?:\.\d+)?\s*%?", raw)
+        if not match:
+            return ""
+
+        value = match.group(0).replace(" ", "")
+        if "%" not in value:
+            value = f"{value}%"
+        return value.lstrip("+")
+
     def __str__(self):
         return self.title
 
@@ -1267,6 +1368,7 @@ class PrivateBooking(BaseBooking):
     )
 
     appointment_date = models.DateField(blank=True, null=True)
+    appointment_start_time = models.TimeField(blank=True, null=True)
     appointment_time_window = models.CharField(max_length=50, blank=True, null=True)
     frequency_type = models.CharField(max_length=50, blank=True, null=True)
     special_timing_requests = models.TextField(blank=True, null=True)

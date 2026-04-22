@@ -45,8 +45,8 @@
               <img src="{{ b.image.url }}" alt="{{ b.title }}" loading="lazy" decoding="async">
             {% endif %}
 
-            {% if b.discount %}
-              <span class="badge">Save {{ b.discount }}</span>
+            {% if b.display_discount %}
+              <span class="badge">Save {{ b.display_discount }}</span>
             {% endif %}
           </div>
 <div class="bundle__body">
@@ -69,7 +69,7 @@
                 data-why="{{ b.why_choose|join:'||' }}"
                 data-addons="{{ b.addons|join:'||' }}"
                 data-notes="{{ b.notes }}"
-                data-discount="{{ b.discount }}"
+                data-discount="{{ b.display_discount }}"
               >Learn More</button>
 <button
                 type="button"
@@ -140,7 +140,7 @@
         const why = btn.dataset.why.split("||");
         const addons = btn.dataset.addons.split("||");
         const notes = btn.dataset.notes;
-        const discount = btn.dataset.discount || "10%";
+        const discount = btn.dataset.discount || "";
 
         const html = `
           <h2>
@@ -182,7 +182,7 @@
 <p>${notes}</p>
 </div>
 </div>
-<button class="modal-action-btn" id="modalAddBtn">Add Bundle and save ${discount}</button>
+<button class="modal-action-btn" id="modalAddBtn">${discount ? `Add Bundle and save ${discount}` : "Add Bundle"}</button>
         `;
 
         document.getElementById("modal-body").innerHTML = html;

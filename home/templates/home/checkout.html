@@ -18,61 +18,165 @@
 </header>
 <div class="checkout-grid">
 <div class="checkout-main">
+<section class="card checkout-hero-card">
+<div class="checkout-hero-card__copy">
+<span class="checkout-kicker">Booking Review</span>
+<h2>Everything you selected, organized in one clean preview.</h2>
+<p>Review services, schedule, add-ons, address, and the live total before you move to payment.</p>
+</div>
+<div class="checkout-hero-card__stats">
+<div class="checkout-stat">
+<span class="checkout-stat__label">Services</span>
+<strong>{{ services|length }}</strong>
+</div>
+<div class="checkout-stat checkout-stat--accent">
+<span class="checkout-stat__label">Duration</span>
+<strong>{{ display_duration }}</strong>
+</div>
+<div class="checkout-stat checkout-stat--dark">
+<span class="checkout-stat__label">Preview Total</span>
+<strong>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</strong>
+</div>
+</div>
+</section>
 <section class="card services-card">
-<p class="subtitle">One step to a hassle-free day. Confirm your booking and let us take it from here.</p>
 <div class="card-header">
-<h2>Selected Services</h2>
+<div>
+<span class="section-chip">Chosen Services</span>
+<h2>What your booking includes</h2>
+</div>
 <a href="{% url 'home:private_booking_services' %}" class="edit-btn">Edit</a>
 </div>
 <hr>
-<div class="service-list">          {% for s in services %}            <div class="service-line">
-<div class="service-line__media" aria-hidden="true">{{ s.title|first|upper }}</div>
+<p class="subtitle">Instead of one washed-out block, each part of the booking now has its own place.</p>
+<div class="service-showcase-grid">{% for s in services %}<article class="service-showcase">
+<div class="service-showcase__media">
+{% if s.image %}
+<img src="{{ s.image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
+{% elif s.hero_image %}
+<img src="{{ s.hero_image.url }}" alt="{{ s.title }}" loading="lazy" decoding="async">
+{% else %}
+<div class="service-showcase__fallback" aria-hidden="true">{{ s.title|first|upper }}</div>
+{% endif %}
+</div>
+<div class="service-showcase__body">
+<span class="service-showcase__category">{{ s.category.title }}</span>
+<div class="service-line">
 <div class="service-line__copy">
 <h3>{{ s.title }}</h3>
-<p>{{ s.category.title }}</p>
+<p>Selected for this booking</p>
 </div>
 <span class="service-line__price">+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
-</div>          {% endfor %}        </div>
-<div class="services-breakdown">          {% if addons_total %}            <div class="services-total-line">
+</div>
+</div>
+</article>{% endfor %}</div>
+<div class="booking-review-grid">
+<article class="review-card review-card--schedule">
+<div class="review-card__head">
+<div>
+<span class="review-card__eyebrow">Schedule</span>
+<h3>Visit timing</h3>
+</div>
+<a href="{% url 'home:private_booking_schedule' %}" class="edit-btn">Edit</a>
+</div>
+{% if booking.schedule_mode == "same" %}
+<p class="review-card__value">{{ booking.appointment_date|default:"Not set" }}</p>
+<p class="review-card__detail">{% if booking.appointment_start_time %}{{ booking.appointment_start_time|time:"H:i" }}{% else %}Time not set{% endif %}</p>
+<p class="review-card__detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>
+<p class="review-card__detail">End date: {% if booking.End_Date %}{{ booking.End_Date|date:"M d, Y" }}{% else %}Ongoing{% endif %}</p>
+{% else %}
+<p class="review-card__value">Separate schedules</p>
+<p class="review-card__detail">Each service has its own timing setup.</p>
+{% endif %}
+{% if schedule_extra %}
+<div class="review-card__price">{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</div>
+{% endif %}
+</article>
+<article class="review-card review-card--addons">
+<div class="review-card__head">
+<div>
+<span class="review-card__eyebrow">Add-ons</span>
+<h3>Extra touches</h3>
+</div>
+<a href="{% url 'home:private_booking_services' %}" class="edit-btn">Edit</a>
+</div>
+{% if addons_breakdown %}
+<div class="review-pill-list">{% for addon in addons_breakdown %}<span class="review-pill">{{ addon.title }}</span>{% endfor %}</div>
+<div class="review-card__price">+{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</div>
+{% else %}
+<p class="review-card__value">No add-ons selected</p>
+<p class="review-card__detail">You can still go back and add extras if needed.</p>
+{% endif %}
+</article>
+<article class="review-card review-card--address">
+<div class="review-card__head">
+<div>
+<span class="review-card__eyebrow">Address</span>
+<h3>Where we're coming</h3>
+</div>
+<button type="button" class="edit-btn js-address-edit">Edit</button>
+</div>
+<div class="address-editor" data-open="false">
+<p class="review-card__value address-display">{{ display_address }}</p>
+<p class="review-card__detail">{{ display_area }}</p>
+<form method="POST" class="address-edit-form is-hidden">{% csrf_token %}<input type="hidden" name="form_type" value="update_address">
+<div class="address-edit-row">
+<input type="text" name="address" class="address-input" value="{% if display_address != 'Not provided' %}{{ display_address }}{% endif %}" placeholder="Enter your address">
+<button type="submit" class="address-save-btn">Save</button>
+</div>
+</form>
+</div>
+</article>
+<article class="review-card review-card--price">
+<div class="review-card__head">
+<div>
+<span class="review-card__eyebrow">Price Snapshot</span>
+<h3>Live cost recap</h3>
+</div>
+</div>
+<div class="mini-price-list">{% if addons_total %}<div class="services-total-line">
 <span>Add-ons</span>
 <span>+{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>            {% for addon in addons_breakdown %}              <div class="services-total-line services-total-line--subitem">
+</div>{% for addon in addons_breakdown %}<div class="services-total-line services-total-line--subitem">
 <span>{{ addon.title }}</span>
 <span>+{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>            {% endfor %}          {% endif %}          {% if schedule_extra %}            <div class="services-total-line">
+</div>{% endfor %}{% endif %}{% if schedule_extra %}<div class="services-total-line">
 <span>Schedule</span>
-<span>+{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          {% if date_surcharge and date_surcharge != 0 %}            <div class="services-total-line">
+<span>{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div>{% endif %}{% if date_surcharge and date_surcharge != 0 %}<div class="services-total-line">
 <span>Date surcharge</span>
 <span>+{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          <div class="services-total-line">
+</div>{% endif %}<div class="services-total-line">
 <span>Subtotal</span>
 <span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
 </div>
 <div class="services-total-line">
 <span>Service fee</span>
 <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% if vat_amount %}            <div class="services-total-line">
+</div>{% if vat_amount %}<div class="services-total-line">
 <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
 <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          <div class="services-total-line">
-<span>              {% if booking.use_rot %}                RUT              {% else %}                RUT              {% endif %}            </span>
+</div>{% endif %}<div class="services-total-line">
+<span>RUT</span>
 <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% if booking.discount_code %}            <div class="services-total-line discount">
+</div>{% if booking.discount_code %}<div class="services-total-line discount">
 <span>Discount Code</span>
 <span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          {% if referral_discount_applied %}            <div class="services-total-line discount">
+</div>{% endif %}{% if referral_discount_applied %}<div class="services-total-line discount">
 <span>Referral</span>
 <span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          {% if reward_applied and reward %}            <div class="services-total-line discount">
+</div>{% endif %}{% if reward_applied and reward %}<div class="services-total-line discount">
 <span>Reward</span>
 <span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          <div class="services-total-line services-total-line--grand">
+</div>{% endif %}<div class="services-total-line services-total-line--grand">
 <span>Total</span>
 <span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
 </div>
 </div>
-<p class="services-note">          {% if booking.use_rot %}            This price includes your RUT deduction. You only pay the reduced amount.          {% else %}            This price includes VAT. RUT deduction is not applied.          {% endif %}        </p>        {% if messages %}          <div class="flash-stack">            {% for message in messages %}              <div class="flash {{ message.tags|default:'info' }}">                {{ message }}              </div>            {% endfor %}          </div>        {% endif %}      </section>
+</article>
+</div>
+<p class="services-note">{% if booking.use_rot %}This price includes your RUT deduction. You only pay the reduced amount.{% else %}This price includes VAT. RUT deduction is not applied.{% endif %}</p>
+</section>
 <section class="card discount-card">
 <div class="card-header">
 <h2>Discount Code</h2>
@@ -87,7 +191,10 @@
 </form>        {% endif %}        {% if booking.discount_code %}          <div class="discount-saved">            You saved <b>{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</b> with this code.          </div>        {% elif referral_discount_applied %}          <div class="discount-saved">            Referral discount applied: <b>{{ referral_discount_percent }}%</b>            (saved {{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).          </div>        {% elif reward_applied and reward %}          <div class="discount-saved">            Reward applied: <b>{{ reward.title }}</b>            (saved {{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).          </div>        {% endif %}      </section>
 <section class="card booking-card">
 <div class="card-header">
-<h2>Booking Summary</h2>
+<div>
+<span class="section-chip">Booking Snapshot</span>
+<h2>Final review before payment</h2>
+</div>
 </div>
 <hr>
 <div class="summary-grid">
@@ -96,22 +203,14 @@
 <h4>Service Date & Time</h4>
 <a href="{% url 'home:private_booking_schedule' %}" class="edit-btn">Edit</a>
 </div>            {% if booking.schedule_mode == "same" %}              <p class="summary-detail">Date: {{ booking.appointment_date|default:"Not set" }}</p>
-<p class="summary-detail">Time: {{ booking.appointment_time_window|default:"Not set" }}</p>
-<p class="summary-detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>            {% else %}              <p class="summary-detail">Separate schedules per service</p>            {% endif %}          </div>
+<p class="summary-detail">Time: {% if booking.appointment_start_time %}{{ booking.appointment_start_time|time:"H:i" }}{% else %}Not set{% endif %}</p>
+<p class="summary-detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>
+<p class="summary-detail">End date: {% if booking.End_Date %}{{ booking.End_Date|date:"M d, Y" }}{% else %}Ongoing{% endif %}</p>            {% else %}              <p class="summary-detail">Separate schedules per service</p>            {% endif %}          </div>
 <div class="summary-card">
 <div class="summary-card-head">
 <h4>Location / Address</h4>
-<button type="button" class="edit-btn js-address-edit">Edit</button>
 </div>
-<div class="address-editor" data-open="false">
-<p class="summary-detail address-display">{{ display_address }}</p>
-<form method="POST" class="address-edit-form is-hidden">                {% csrf_token %}                <input type="hidden" name="form_type" value="update_address">
-<div class="address-edit-row">
-<input                    type="text"                    name="address"                    class="address-input"                    value="{% if display_address != 'Not provided' %}{{ display_address }}{% endif %}"                    placeholder="Enter your address">
-<button type="submit" class="address-save-btn">Save</button>
-</div>
-</form>
-</div>
+<p class="summary-detail">{{ display_address }}</p>
 </div>
 <div class="summary-card">
 <div class="summary-card-head">
@@ -121,7 +220,7 @@
 </div>
 <div class="summary-card">
 <div class="summary-card-head">
-<h4>Service Area</h4>
+<h4>City / ZIP code</h4>
 </div>
 <p class="summary-detail">{{ display_area }}</p>
 </div>
@@ -131,7 +230,7 @@
 <div class="invoice-box">
 <div class="invoice-head">
 <h4>Invoice Summary</h4>
-<span class="invoice-pill">Live</span>
+<span class="invoice-pill">Ready</span>
 </div>
 <div class="summary-line">
 <span>Services</span>
@@ -184,6 +283,18 @@
 <h2>Payment Method</h2>
 </div>
 <hr>
+        {% if not user.is_authenticated %}
+          <div class="flash info" style="margin-top: 10px;">
+            Review your full price first. Sign in or continue with BankID only when you're ready to pay.
+          </div>
+          <div class="discount-saved" style="margin-top: 14px;">
+            Final total: <b>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</b>
+          </div>
+          <div class="guest-payment-actions">
+            <a href="{{ payment_login_url }}" class="confirm guest-payment-actions__primary">Sign in to continue</a>
+            <a href="{{ payment_signup_url }}" class="apply-btn guest-payment-actions__secondary">Create account</a>
+          </div>
+        {% else %}
 <form method="POST" id="paymentForm"              data-stripe-publishable-key="{{ stripe_publishable_key }}"              data-stripe-client-secret="{{ stripe_client_secret }}"              data-stripe-payment-intent="{{ stripe_payment_intent_id }}"              data-stripe-complete-url="{{ payment_complete_url }}"              data-stripe-return-url="{{ payment_return_url }}"              data-cash-invoice-url="{{ cash_invoice_download_url }}"              data-stripe-ready="{{ stripe_ready|yesno:'1,0' }}"              data-stripe-currency="{{ stripe_currency }}"              data-stripe-failure-url="{{ payment_failed_url }}">          {% csrf_token %}          <input type="hidden" name="form_type" value="payment">
 <div class="payment-options payment-options--static" role="radiogroup" aria-label="Payment method">
 <label class="payment-option payment-choice is-active" data-payment-option="card">
@@ -204,7 +315,8 @@
 </span>
 <span class="payment-copy">
 <strong>Invoice</strong>
-<small>Send by email</small>
+<small>Send invoice by email</small>
+<small>Net 30 days</small>
 </span>
 </label>
 </div>
@@ -220,6 +332,7 @@
 <input type="checkbox" id="agreeTerms" required>              I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>.            </label>
 </div>          {% if not stripe_ready %}            <div class="flash error" style="margin-top: 10px;">              Payment service is not configured. Please try again later.            </div>          {% endif %}          <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
 </form>
+        {% endif %}
 </section>
 <section class="checkout-bottom">
 <h2>Cancellation Policy</h2>
@@ -230,7 +343,22 @@
 </section>
 </div>
 </div>
-</div>{% include "home/includes/footer.html" %}<script>  (function () {    var addressEditButton = document.querySelector(".js-address-edit");    var addressEditor = document.querySelector(".address-editor");    if (addressEditButton && addressEditor) {      var addressDisplay = addressEditor.querySelector(".address-display");      var addressForm = addressEditor.querySelector(".address-edit-form");      var addressInput = addressEditor.querySelector(".address-input");      addressEditButton.addEventListener("click", function () {        if (!addressForm || !addressInput) return;        if (addressDisplay) {          addressDisplay.style.display = "none";        }        addressForm.classList.remove("is-hidden");        addressEditor.setAttribute("data-open", "true");        addressEditButton.style.display = "none";        addressInput.focus();        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);      });    }  })();</script>
+</div>
+{% if messages %}
+<div class="checkout-message-modal" id="checkoutMessageModal" role="dialog" aria-modal="true" aria-labelledby="checkoutMessageTitle">
+  <div class="checkout-message-modal__panel">
+    <h3 id="checkoutMessageTitle">Notice</h3>
+    <div class="checkout-message-modal__body">
+      {% for message in messages %}
+        <div class="checkout-message checkout-message--{{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    <button type="button" class="checkout-message-modal__close" id="checkoutMessageClose">Back to Home</button>
+  </div>
+</div>
+{% endif %}
+{% include "home/includes/footer.html" %}<script>  (function () {    var addressEditButton = document.querySelector(".js-address-edit");    var addressEditor = document.querySelector(".address-editor");    if (addressEditButton && addressEditor) {      var addressDisplay = addressEditor.querySelector(".address-display");      var addressForm = addressEditor.querySelector(".address-edit-form");      var addressInput = addressEditor.querySelector(".address-input");      addressEditButton.addEventListener("click", function () {        if (!addressForm || !addressInput) return;        if (addressDisplay) {          addressDisplay.style.display = "none";        }        addressForm.classList.remove("is-hidden");        addressEditor.setAttribute("data-open", "true");        addressEditButton.style.display = "none";        addressInput.focus();        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);      });    }  })();</script>
+<script>  (function () {    var modal = document.getElementById("checkoutMessageModal");    var closeBtn = document.getElementById("checkoutMessageClose");    if (!modal || !closeBtn) return;    closeBtn.addEventListener("click", function () {      window.location.href = "{% url 'home:home' %}";    });  })();</script>
 <script>  (function () {    var form = document.getElementById("paymentForm");    var checkbox = document.getElementById("agreeTerms");    var button = document.getElementById("confirmPayment");    var optionInputs = form ? form.querySelectorAll('input[name="payment_option"]') : [];    var optionCards = form ? form.querySelectorAll("[data-payment-option]") : [];    var cardPanels = form ? form.querySelectorAll('[data-payment-panel="card"]') : [];    var invoicePanels = form ? form.querySelectorAll('[data-payment-panel="invoice"]') : [];    if (!form || !checkbox || !button || !optionInputs.length) return;    var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";    var selectedOption = function () {      for (var i = 0; i < optionInputs.length; i += 1) {        if (optionInputs[i].checked) return optionInputs[i].value;      }      return "card";    };    var syncOptionCards = function () {      var value = selectedOption();      for (var i = 0; i < optionCards.length; i += 1) {        optionCards[i].classList.toggle("is-active", optionCards[i].getAttribute("data-payment-option") === value);      }      for (var j = 0; j < cardPanels.length; j += 1) {        cardPanels[j].classList.toggle("payment-panel-hidden", value !== "card");        cardPanels[j].hidden = value !== "card";        cardPanels[j].setAttribute("aria-hidden", value !== "card" ? "true" : "false");      }      for (var k = 0; k < invoicePanels.length; k += 1) {        invoicePanels[k].classList.toggle("payment-panel-hidden", value !== "invoice");        invoicePanels[k].hidden = value !== "invoice";        invoicePanels[k].setAttribute("aria-hidden", value !== "invoice" ? "true" : "false");      }      var errorBox = document.getElementById("card-errors");      if (value === "invoice" && errorBox) {        errorBox.textContent = "";      }      button.textContent = value === "invoice" ? "Send Invoice by Email" : "Confirm Payment";    };    var toggle = function () {      var needsStripe = selectedOption() === "card";      button.disabled = !checkbox.checked || (needsStripe && !stripeReady);    };    for (var i = 0; i < optionInputs.length; i += 1) {      optionInputs[i].addEventListener("change", function () {        syncOptionCards();        toggle();      });    }    checkbox.addEventListener("change", toggle);    syncOptionCards();    toggle();  })();</script>
 <script src="https://js.stripe.com/v3/">
 </script>
