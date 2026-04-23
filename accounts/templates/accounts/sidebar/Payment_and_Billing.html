@@ -80,7 +80,7 @@
 <td data-label="Invoice #">{{ inv.invoice_number }}</td>
 <td data-label="Date">{{ inv.issued_at|date:"M d, Y" }}</td>
 <td data-label="Amount">{{ inv.amount }} {{ inv.currency }}</td>
-<td data-label="Payment Method" class="payment-method-cell">                  {% if inv.display_payment_label %}                    {{ inv.display_payment_label }}                  {% else %}                    �                  {% endif %}                </td>
+<td data-label="Payment Method" class="payment-method-cell">                  {% if inv.display_payment_label %}                    {{ inv.display_payment_label }}                  {% else %}                    &mdash;                  {% endif %}                </td>
 <td data-label="Status">
 <span class="status {{ inv.status|lower }}">{{ inv.get_status_display }}</span>
 </td>
@@ -99,7 +99,7 @@
 <div class="modal-sheet" id="subscriptionModal">
 <div class="modal-head">
 <h3>Manage Subscription</h3>
-<button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">�</button>
+<button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">Ã—</button>
 </div>
 <div class="modal-body">
 <div class="sub-summary">
@@ -134,7 +134,7 @@
 <div class="form-row">
 <label>Change Payment Method</label>
 <select name="payment_method" class="form-control">
-<option value="">Select a card</option>          {% for pm in payment_methods %}            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>              {{ pm.get_card_type_display }} ���� {{ pm.card_last4 }}            </option>          {% endfor %}        </select>
+<option value="">Select a card</option>          {% for pm in payment_methods %}            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>              {{ pm.get_card_type_display }} â€¢â€¢â€¢â€¢ {{ pm.card_last4 }}            </option>          {% endfor %}        </select>
 </div>
 <button type="button" class="link-danger" id="openCancelModal">Cancel Subscription</button>
 <div class="modal-actions">
@@ -147,7 +147,7 @@
 <div class="modal-sheet modal-compact" id="reviewModal">
 <div class="modal-head">
 <h3>Review Changes</h3>
-<button class="icon-ghost modal-close" type="button" data-close="reviewModal">�</button>
+<button class="icon-ghost modal-close" type="button" data-close="reviewModal">Ã—</button>
 </div>
 <div class="modal-body">
 <ul class="review-list" id="reviewList">
@@ -162,7 +162,7 @@
 <div class="modal-sheet modal-compact" id="cancelModal">
 <div class="modal-head">
 <h3>Cancel subscription</h3>
-<button class="icon-ghost modal-close" type="button" data-close="cancelModal">�</button>
+<button class="icon-ghost modal-close" type="button" data-close="cancelModal">Ã—</button>
 </div>
 <div class="modal-body">
 <p class="muted">Your service will end after the next billing cycle.</p>
@@ -183,7 +183,7 @@
 <div class="modal-sheet modal-compact" id="savedModal">
 <div class="modal-head">
 <h3>Changes Saved</h3>
-<button class="icon-ghost modal-close" type="button" data-close="savedModal">�</button>
+<button class="icon-ghost modal-close" type="button" data-close="savedModal">Ã—</button>
 </div>
 <div class="modal-body">
 <p>Your subscription has been updated successfully.</p>
@@ -195,7 +195,7 @@
 <div class="modal-sheet modal-compact" id="cancelledModal">
 <div class="modal-head">
 <h3>Subscription Canceled</h3>
-<button class="icon-ghost modal-close" type="button" data-close="cancelledModal">�</button>
+<button class="icon-ghost modal-close" type="button" data-close="cancelledModal">Ã—</button>
 </div>
 <div class="modal-body">
 <p>No further services will be scheduled. You can resubscribe anytime.</p>
@@ -204,7 +204,7 @@
 </div>
 </div>
 </div>
-<script>(function () {  const backdrop = document.getElementById("subscriptionBackdrop");  const mainModal = document.getElementById("subscriptionModal");  const reviewModal = document.getElementById("reviewModal");  const cancelModal = document.getElementById("cancelModal");  const savedModal = document.getElementById("savedModal");  const cancelledModal = document.getElementById("cancelledModal");  const openBtn = document.getElementById("openSubscriptionModal");  const reviewBtn = document.getElementById("reviewChangesBtn");  const confirmBtn = document.getElementById("confirmChangesBtn");  const cancelBtn = document.getElementById("openCancelModal");  const confirmCancelBtn = document.getElementById("confirmCancelBtn");  const pauseToggle = document.getElementById("pauseToggle");  const pauseFields = document.getElementById("pauseFields");  const reviewList = document.getElementById("reviewList");  const cancelReason = document.getElementById("cancelReason");  const form = document.getElementById("subscriptionForm");  function openModal(modal) {    if (!modal || !backdrop) return;    backdrop.classList.add("show");    modal.classList.add("show");  }  function closeModal(modal) {    if (!modal || !backdrop) return;    modal.classList.remove("show");    if (![mainModal, reviewModal, cancelModal, savedModal, cancelledModal].some(m => m && m.classList.contains("show"))) {      backdrop.classList.remove("show");    }  }  if (openBtn) {    openBtn.addEventListener("click", () => openModal(mainModal));  }  document.querySelectorAll("[data-close]").forEach(btn => {    btn.addEventListener("click", (e) => {      const target = document.getElementById(e.currentTarget.dataset.close);      closeModal(target);    });  });  if (backdrop) {    backdrop.addEventListener("click", () => {      [mainModal, reviewModal, cancelModal, savedModal, cancelledModal].forEach(closeModal);    });  }  function syncPauseFields() {    if (!pauseFields) return;    pauseFields.classList.toggle("show", pauseToggle && pauseToggle.checked);  }  if (pauseToggle) {    pauseToggle.addEventListener("change", syncPauseFields);    syncPauseFields();  }  if (reviewBtn) {    reviewBtn.addEventListener("click", () => {      if (!reviewList || !form) return;      reviewList.innerHTML = "";      const data = new FormData(form);      const items = [];      if (data.get("skip_next_service") === "on") items.push("Skip next service");      if (data.get("pause_subscription") === "on") {        items.push(`Pause until ${data.get("pause_until") || "-"}`);        items.push(`Resume on ${data.get("resume_on") || "-"}`);      }      const pm = form.querySelector("select[name='payment_method']");      if (pm && pm.value) items.push(`Payment method: ${pm.options[pm.selectedIndex].text}`);      if (!items.length) items.push("No changes selected");      items.forEach(text => {        const li = document.createElement("li");        li.textContent = text;        reviewList.appendChild(li);      });      openModal(reviewModal);    });  }  function getCookie(name) {    const value = `; ${document.cookie}`;    const parts = value.split(`; ${name}=`);    if (parts.length === 2) return parts.pop().split(";").shift();    return "";  }  if (confirmBtn) {    confirmBtn.addEventListener("click", async () => {      if (!form) return;      const data = new FormData(form);      data.append("action", "save");      const res = await fetch("{% url 'accounts:manage_subscription' %}", {        method: "POST",        headers: { "X-CSRFToken": getCookie("csrftoken") },        body: data,      });      if (res.ok) {        closeModal(reviewModal);        closeModal(mainModal);        openModal(savedModal);      }    });  }  if (cancelBtn) {    cancelBtn.addEventListener("click", () => openModal(cancelModal));  }  if (confirmCancelBtn) {    confirmCancelBtn.addEventListener("click", async () => {      const data = new FormData();      data.append("action", "cancel");      data.append("cancel_reason", cancelReason ? cancelReason.value : "");      const res = await fetch("{% url 'accounts:manage_subscription' %}", {        method: "POST",        headers: { "X-CSRFToken": getCookie("csrftoken") },        body: data,      });      if (res.ok) {        closeModal(cancelModal);        closeModal(mainModal);        openModal(cancelledModal);      }    });  }})();</script>
+<script>(function () {  const backdrop = document.getElementById("subscriptionBackdrop");  const mainModal = document.getElementById("subscriptionModal");  const reviewModal = document.getElementById("reviewModal");  const cancelModal = document.getElementById("cancelModal");  const savedModal = document.getElementById("savedModal");  const cancelledModal = document.getElementById("cancelledModal");  const openBtn = document.getElementById("openSubscriptionModal");  const reviewBtn = document.getElementById("reviewChangesBtn");  const confirmBtn = document.getElementById("confirmChangesBtn");  const cancelBtn = document.getElementById("openCancelModal");  const confirmCancelBtn = document.getElementById("confirmCancelBtn");  const pauseToggle = document.getElementById("pauseToggle");  const pauseFields = document.getElementById("pauseFields");  const reviewList = document.getElementById("reviewList");  const cancelReason = document.getElementById("cancelReason");  const form = document.getElementById("subscriptionForm");  function openModal(modal) {    if (!modal || !backdrop) return;    backdrop.classList.add("show");    modal.classList.add("show");  }  function closeModal(modal) {    if (!modal || !backdrop) return;    modal.classList.remove("show");    if (![mainModal, reviewModal, cancelModal, savedModal, cancelledModal].some(m => m && m.classList.contains("show"))) {      backdrop.classList.remove("show");    }  }  if (openBtn) {    openBtn.addEventListener("click", () => openModal(mainModal));  }  document.querySelectorAll("[data-close]").forEach(btn => {    btn.addEventListener("click", (e) => {      const target = document.getElementById(e.currentTarget.dataset.close);      closeModal(target);    });  });  if (backdrop) {    backdrop.addEventListener("click", () => {      [mainModal, reviewModal, cancelModal, savedModal, cancelledModal].forEach(closeModal);    });  }  function syncPauseFields() {    if (!pauseFields) return;    pauseFields.classList.toggle("show", pauseToggle && pauseToggle.checked);  }  if (pauseToggle) {    pauseToggle.addEventListener("change", syncPauseFields);    syncPauseFields();  }  if (reviewBtn) {    reviewBtn.addEventListener("click", () => {      if (!reviewList || !form) return;      reviewList.innerHTML = "";      const data = new FormData(form);      const items = [];      if (data.get("skip_next_service") === "on") items.push("Skip next service");      if (data.get("pause_subscription") === "on") {        items.push(`Pause until ${data.get("pause_until") || "-"}`);        items.push(`Resume on ${data.get("resume_on") || "-"}`);      }      const pm = form.querySelector(\"select[name='payment_method']\");      if (pm && pm.value) items.push(`Payment method: ${pm.options[pm.selectedIndex].text}`);      if (!items.length) items.push("No changes selected");      items.forEach(text => {        const li = document.createElement("li");        li.textContent = text;        reviewList.appendChild(li);      });      openModal(reviewModal);    });  }  function getCookie(name) {    const value = `; ${document.cookie}`;    const parts = value.split(`; ${name}=`);    if (parts.length === 2) return parts.pop().split(";").shift();    return "";  }  if (confirmBtn) {    confirmBtn.addEventListener("click", async () => {      if (!form) return;      const data = new FormData(form);      data.append("action", "save");      const res = await fetch("{% url 'accounts:manage_subscription' %}", {        method: "POST",        headers: { "X-CSRFToken": getCookie("csrftoken") },        body: data,      });      if (res.ok) {        closeModal(reviewModal);        closeModal(mainModal);        openModal(savedModal);      }    });  }  if (cancelBtn) {    cancelBtn.addEventListener("click", () => openModal(cancelModal));  }  if (confirmCancelBtn) {    confirmCancelBtn.addEventListener("click", async () => {      const data = new FormData();      data.append("action", "cancel");      data.append("cancel_reason", cancelReason ? cancelReason.value : "");      const res = await fetch("{% url 'accounts:manage_subscription' %}", {        method: "POST",        headers: { "X-CSRFToken": getCookie("csrftoken") },        body: data,      });      if (res.ok) {        closeModal(cancelModal);        closeModal(mainModal);        openModal(cancelledModal);      }    });  }})();</script>
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>
 </body>

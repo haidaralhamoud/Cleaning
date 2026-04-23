@@ -72,9 +72,7 @@
 {% if next %}?next={{ next|urlencode }}{% endif %}" class="btn-social google">
 <img src="{% static 'images/google0.png'%}" alt="Google Icon"> Continue with Google
         </a>
-<button type="button" class="btn-social bankid">
-<img src="{% static 'images/attachment-6-10.png'%}" alt="BankID Icon"> Continue with BankID
-        </button>
+{% comment %} BankID button hidden temporarily; restore when integration is ready. {% endcomment %}
 <p class="signup-text">
           Don't have an account <a href="{% url 'accounts:sign_up' %}
 {% if next %}?next={{ next|urlencode }}{% endif %}">Sign up</a>

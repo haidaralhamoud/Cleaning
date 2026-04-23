@@ -5,9 +5,10 @@ from typing import Counter
 from django.db.models import Q
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_date
+from django import forms
 
 from django.shortcuts import render, redirect , get_object_or_404
-from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm, ServiceCommentForm, ServiceReviewForm, PasswordResetRequestForm, OTPVerifyForm, SetNewPasswordForm
+from .forms import CustomerForm , CustomerBasicInfoForm , CustomerLocationForm ,IncidentForm , CustomerNoteForm , PaymentMethodForm ,CommunicationPreferenceForm, ServiceCommentForm, ServiceReviewForm, PasswordResetRequestForm, OTPVerifyForm
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from django.contrib import messages
@@ -18,7 +19,7 @@ from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.urls import reverse_lazy, reverse
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from django.contrib.auth.forms import PasswordChangeForm
 from django.urls import reverse
 from django.contrib.auth import logout, get_user_model
@@ -79,7 +80,6 @@ from .forms import (
     BookingChecklistForm,
     PasswordResetRequestForm,
     OTPVerifyForm,
-    SetNewPasswordForm,
 )
 from django.http import HttpResponse, JsonResponse
 import json
@@ -87,6 +87,39 @@ from django.db.models import Avg, Count
 User = get_user_model()
 from .forms import ProviderProfileForm, ProviderLocationForm
 logger = logging.getLogger(__name__)
+
+
+class PasswordResetNewPasswordForm(forms.Form):
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "autocomplete": "new-password",
+                "placeholder": "Enter your new password",
+                "class": "input-field",
+            }
+        )
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={
+                "autocomplete": "new-password",
+                "placeholder": "Confirm your new password",
+                "class": "input-field",
+            }
+        )
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
+
+    def clean(self):
+        cleaned = super().clean()
+        password1 = cleaned.get("new_password1")
+        password2 = cleaned.get("new_password2")
+        if password1 and password2 and password1 != password2:
+            self.add_error("new_password2", "Passwords do not match.")
+        return cleaned
 
 
 def _pdf_escape(text):
@@ -259,8 +292,29 @@ BOOKING_NEXT_SESSION_KEY = "post_auth_redirect_url"
 
 
 class RememberMeLoginView(LoginView):
+    def _default_authenticated_redirect(self):
+        if self.request.user.is_superuser:
+            return reverse("home:dashboard_home")
+        if hasattr(self.request.user, "provider_profile"):
+            return reverse("accounts:provider_profile")
+        return reverse("accounts:customer_profile_view")
+
+    def _authenticated_redirect_target(self, next_url=""):
+        target = (next_url or "").strip()
+        if not target:
+            return self._default_authenticated_redirect()
+
+        target_path = urlsplit(target).path or target
+        if target_path.startswith("/accounts/login/"):
+            return self._default_authenticated_redirect()
+        if target_path.startswith("/dashboard/") and not self.request.user.is_staff:
+            return self._default_authenticated_redirect()
+        return target
+
     def dispatch(self, request, *args, **kwargs):
         next_url = request.GET.get("next") or request.POST.get("next") or ""
+        if request.user.is_authenticated:
+            return redirect(self._authenticated_redirect_target(next_url))
         if next_url:
             request.session[BOOKING_NEXT_SESSION_KEY] = next_url
             request.session.modified = True
@@ -274,7 +328,7 @@ class RememberMeLoginView(LoginView):
         )
         if next_url:
             self.request.session.modified = True
-            return next_url
+            return self._authenticated_redirect_target(next_url)
         return super().get_success_url()
 
     def form_valid(self, form):
@@ -592,7 +646,7 @@ def _send_reset_code(email, user, request):
         ttl_minutes=OTP_TTL_MINUTES,
     )
 
-    subject = _("رمز إعادة تعيين كلمة المرور")
+    subject = "Password reset code"
     context = {"code": code, "ttl": OTP_TTL_MINUTES}
     text_body = render_to_string("accounts/emails/password_reset_code.txt", context)
     html_body = render_to_string("accounts/emails/password_reset_code.html", context)
@@ -771,7 +825,7 @@ def password_reset_new(request):
         messages.error(request, _("لا يوجد حساب لهذا البريد."))
         return redirect("password_reset")
 
-    form = SetNewPasswordForm(request.POST or None, user=user)
+    form = PasswordResetNewPasswordForm(request.POST or None, user=user)
     if request.method == "POST" and form.is_valid():
         user.set_password(form.cleaned_data["new_password1"])
         user.save()

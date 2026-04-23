@@ -4,8 +4,8 @@ from .models import BusinessMainCategory, PrivateMainCategory
 def header_private_services(request):
     private_categories = list(
         PrivateMainCategory.objects.prefetch_related("services")
-        .only("title", "slug")
-        .order_by("title")
+        .only("title", "slug", "display_order")
+        .order_by("display_order", "title", "id")
     )
     for category in private_categories:
         category.header_services = sorted(

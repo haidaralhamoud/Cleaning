@@ -179,9 +179,14 @@
 </section>
 <section class="card discount-card">
 <div class="card-header">
+<div>
+<span class="section-chip discount-card__chip">Save More</span>
 <h2>Discount Code</h2>
 </div>
-<hr>        {% if booking.discount_code %}          <div class="discount-status success">            Applied code: <b>{{ booking.discount_code.code }}</b>
+</div>
+<hr>
+<p class="discount-card__hint">Have a promo or referral code? Add it here before payment so the customer sees the reduced total immediately.</p>
+        {% if booking.discount_code %}          <div class="discount-status success">            Applied code: <b>{{ booking.discount_code.code }}</b>
 </div>
 <form method="POST" class="discount-form">            {% csrf_token %}            <input type="hidden" name="form_type" value="remove_discount">
 <button type="submit" class="apply-btn muted">Remove code</button>
@@ -189,95 +194,6 @@
 <input type="text" name="discount_code" placeholder="Enter discount code">
 <button type="submit" class="apply-btn">Apply</button>
 </form>        {% endif %}        {% if booking.discount_code %}          <div class="discount-saved">            You saved <b>{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</b> with this code.          </div>        {% elif referral_discount_applied %}          <div class="discount-saved">            Referral discount applied: <b>{{ referral_discount_percent }}%</b>            (saved {{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).          </div>        {% elif reward_applied and reward %}          <div class="discount-saved">            Reward applied: <b>{{ reward.title }}</b>            (saved {{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}).          </div>        {% endif %}      </section>
-<section class="card booking-card">
-<div class="card-header">
-<div>
-<span class="section-chip">Booking Snapshot</span>
-<h2>Final review before payment</h2>
-</div>
-</div>
-<hr>
-<div class="summary-grid">
-<div class="summary-card">
-<div class="summary-card-head">
-<h4>Service Date & Time</h4>
-<a href="{% url 'home:private_booking_schedule' %}" class="edit-btn">Edit</a>
-</div>            {% if booking.schedule_mode == "same" %}              <p class="summary-detail">Date: {{ booking.appointment_date|default:"Not set" }}</p>
-<p class="summary-detail">Time: {% if booking.appointment_start_time %}{{ booking.appointment_start_time|time:"H:i" }}{% else %}Not set{% endif %}</p>
-<p class="summary-detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>
-<p class="summary-detail">End date: {% if booking.End_Date %}{{ booking.End_Date|date:"M d, Y" }}{% else %}Ongoing{% endif %}</p>            {% else %}              <p class="summary-detail">Separate schedules per service</p>            {% endif %}          </div>
-<div class="summary-card">
-<div class="summary-card-head">
-<h4>Location / Address</h4>
-</div>
-<p class="summary-detail">{{ display_address }}</p>
-</div>
-<div class="summary-card">
-<div class="summary-card-head">
-<h4>Duration</h4>
-</div>
-<p class="summary-detail">{{ display_duration }}</p>
-</div>
-<div class="summary-card">
-<div class="summary-card-head">
-<h4>City / ZIP code</h4>
-</div>
-<p class="summary-detail">{{ display_area }}</p>
-</div>
-</div>
-<hr>
-<div class="invoice-inline">
-<div class="invoice-box">
-<div class="invoice-head">
-<h4>Invoice Summary</h4>
-<span class="invoice-pill">Ready</span>
-</div>
-<div class="summary-line">
-<span>Services</span>
-<span>{{ services_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>
-<div class="summary-line">
-<span>Add-ons</span>
-<span>{{ addons_total|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% for addon in addons_breakdown %}            <div class="summary-line summary-line--subitem">
-<span>{{ addon.title }}</span>
-<span>{{ addon.amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endfor %}          <div class="summary-line">
-<span>Schedule</span>
-<span>{{ schedule_extra|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% if date_surcharge and date_surcharge != 0 %}            <div class="summary-line">
-<span>Date surcharge</span>
-<span>{{ date_surcharge|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          <div class="summary-line">
-<span>Subtotal</span>
-<span>{{ subtotal|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>
-<div class="summary-line">
-<span>Service fee</span>
-<span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% if vat_amount %}            <div class="summary-line">
-<span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
-<span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          <div class="summary-line">
-<span>              {% if booking.use_rot %}                RUT Deduction ({{ rot_percent|default:"0" }}%)              {% else %}                RUT Deduction (not applied)              {% endif %}            </span>
-<span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% if booking.discount_code %}            <div class="summary-line discount-line">
-<span>Discount</span>
-<span>-{{ discount_preview_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          {% if referral_discount_applied %}            <div class="summary-line discount-line">
-<span>Referral discount ({{ referral_discount_percent }}%)</span>
-<span>-{{ referral_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          {% if reward_applied and reward %}            <div class="summary-line discount-line">
-<span>Reward: {{ reward.title }}</span>
-<span>-{{ reward_discount_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>          {% endif %}          <div class="summary-total">
-<span>Total</span>
-<span>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>
-<p class="note">            {% if booking.use_rot %}              This total includes VAT and your RUT deduction.            {% else %}              This total includes VAT. RUT deduction is not applied.            {% endif %}          </p>
-</div>
-</div>
-</section>
 <section class="card payment-card">
 <div class="card-header">
 <h2>Payment Method</h2>
@@ -347,18 +263,30 @@
 {% if messages %}
 <div class="checkout-message-modal" id="checkoutMessageModal" role="dialog" aria-modal="true" aria-labelledby="checkoutMessageTitle">
   <div class="checkout-message-modal__panel">
-    <h3 id="checkoutMessageTitle">Notice</h3>
+    <button type="button" class="checkout-message-modal__dismiss" id="checkoutMessageDismiss" aria-label="Close">&times;</button>
+    <div class="checkout-message-modal__icon" aria-hidden="true">
+      <svg viewBox="0 0 64 64" focusable="false">
+        <circle cx="32" cy="32" r="31" class="checkout-message-modal__icon-ring"></circle>
+        <path d="M20 33.5 28 41.5 44 24.5" class="checkout-message-modal__icon-check"></path>
+      </svg>
+    </div>
+    <p class="checkout-message-modal__eyebrow">Payment update</p>
+    <h3 id="checkoutMessageTitle">Invoice sent successfully</h3>
+    <p class="checkout-message-modal__lead">A confirmation notice has been prepared for this booking.</p>
     <div class="checkout-message-modal__body">
       {% for message in messages %}
         <div class="checkout-message checkout-message--{{ message.tags|default:'info' }}">{{ message }}</div>
       {% endfor %}
     </div>
-    <button type="button" class="checkout-message-modal__close" id="checkoutMessageClose">Back to Home</button>
+    <div class="checkout-message-modal__actions">
+      <button type="button" class="checkout-message-modal__secondary" id="checkoutMessageStay">Stay on checkout</button>
+      <button type="button" class="checkout-message-modal__close" id="checkoutMessageClose">Back to Home</button>
+    </div>
   </div>
 </div>
 {% endif %}
 {% include "home/includes/footer.html" %}<script>  (function () {    var addressEditButton = document.querySelector(".js-address-edit");    var addressEditor = document.querySelector(".address-editor");    if (addressEditButton && addressEditor) {      var addressDisplay = addressEditor.querySelector(".address-display");      var addressForm = addressEditor.querySelector(".address-edit-form");      var addressInput = addressEditor.querySelector(".address-input");      addressEditButton.addEventListener("click", function () {        if (!addressForm || !addressInput) return;        if (addressDisplay) {          addressDisplay.style.display = "none";        }        addressForm.classList.remove("is-hidden");        addressEditor.setAttribute("data-open", "true");        addressEditButton.style.display = "none";        addressInput.focus();        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);      });    }  })();</script>
-<script>  (function () {    var modal = document.getElementById("checkoutMessageModal");    var closeBtn = document.getElementById("checkoutMessageClose");    if (!modal || !closeBtn) return;    closeBtn.addEventListener("click", function () {      window.location.href = "{% url 'home:home' %}";    });  })();</script>
+<script>  (function () {    var modal = document.getElementById("checkoutMessageModal");    var closeBtn = document.getElementById("checkoutMessageClose");    var stayBtn = document.getElementById("checkoutMessageStay");    var dismissBtn = document.getElementById("checkoutMessageDismiss");    var title = document.getElementById("checkoutMessageTitle");    var lead = modal ? modal.querySelector(".checkout-message-modal__lead") : null;    if (!modal || !closeBtn) return;    var messages = modal.querySelectorAll(".checkout-message");    var hasError = modal.querySelector(".checkout-message--error");    var hasWarning = modal.querySelector(".checkout-message--warning");    var closeModal = function () {      modal.style.display = "none";    };    if (hasError) {      if (title) title.textContent = "We could not send the invoice";      if (lead) lead.textContent = "Please review the message below and try again.";      modal.classList.add("is-error");    } else if (hasWarning) {      if (title) title.textContent = "Action required";      if (lead) lead.textContent = "Please review the booking notice below.";      modal.classList.add("is-warning");    } else if (messages.length) {      modal.classList.add("is-success");    }    closeBtn.addEventListener("click", function () {      window.location.href = "{% url 'home:home' %}";    });    if (stayBtn) stayBtn.addEventListener("click", closeModal);    if (dismissBtn) dismissBtn.addEventListener("click", closeModal);    modal.addEventListener("click", function (event) {      if (event.target === modal) closeModal();    });    document.addEventListener("keydown", function (event) {      if (event.key === "Escape" && modal.style.display !== "none") {        closeModal();      }    });  })();</script>
 <script>  (function () {    var form = document.getElementById("paymentForm");    var checkbox = document.getElementById("agreeTerms");    var button = document.getElementById("confirmPayment");    var optionInputs = form ? form.querySelectorAll('input[name="payment_option"]') : [];    var optionCards = form ? form.querySelectorAll("[data-payment-option]") : [];    var cardPanels = form ? form.querySelectorAll('[data-payment-panel="card"]') : [];    var invoicePanels = form ? form.querySelectorAll('[data-payment-panel="invoice"]') : [];    if (!form || !checkbox || !button || !optionInputs.length) return;    var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";    var selectedOption = function () {      for (var i = 0; i < optionInputs.length; i += 1) {        if (optionInputs[i].checked) return optionInputs[i].value;      }      return "card";    };    var syncOptionCards = function () {      var value = selectedOption();      for (var i = 0; i < optionCards.length; i += 1) {        optionCards[i].classList.toggle("is-active", optionCards[i].getAttribute("data-payment-option") === value);      }      for (var j = 0; j < cardPanels.length; j += 1) {        cardPanels[j].classList.toggle("payment-panel-hidden", value !== "card");        cardPanels[j].hidden = value !== "card";        cardPanels[j].setAttribute("aria-hidden", value !== "card" ? "true" : "false");      }      for (var k = 0; k < invoicePanels.length; k += 1) {        invoicePanels[k].classList.toggle("payment-panel-hidden", value !== "invoice");        invoicePanels[k].hidden = value !== "invoice";        invoicePanels[k].setAttribute("aria-hidden", value !== "invoice" ? "true" : "false");      }      var errorBox = document.getElementById("card-errors");      if (value === "invoice" && errorBox) {        errorBox.textContent = "";      }      button.textContent = value === "invoice" ? "Send Invoice by Email" : "Confirm Payment";    };    var toggle = function () {      var needsStripe = selectedOption() === "card";      button.disabled = !checkbox.checked || (needsStripe && !stripeReady);    };    for (var i = 0; i < optionInputs.length; i += 1) {      optionInputs[i].addEventListener("change", function () {        syncOptionCards();        toggle();      });    }    checkbox.addEventListener("change", toggle);    syncOptionCards();    toggle();  })();</script>
 <script src="https://js.stripe.com/v3/">
 </script>

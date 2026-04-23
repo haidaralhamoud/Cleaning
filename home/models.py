@@ -1099,6 +1099,7 @@ class BusinessBooking(BaseBooking):
 
 class PrivateMainCategory(models.Model):
     title = models.CharField(max_length=200)
+    display_order = models.PositiveIntegerField(default=0)
     icon = models.ImageField(upload_to="private/categories/", blank=True, null=True)
     slug = models.SlugField(unique=True)
 

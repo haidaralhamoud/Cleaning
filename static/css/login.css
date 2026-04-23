@@ -355,6 +355,59 @@ body {
   text-align: left;
 }
 
+.password-strength {
+  margin: 0.85rem 0 1rem;
+  text-align: left;
+}
+
+.password-strength__bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.password-strength__fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  transition: width 0.18s ease, background-color 0.18s ease;
+  background: #ef4444;
+}
+
+.password-strength__fill[data-tone="weak"] {
+  background: #ef4444;
+}
+
+.password-strength__fill[data-tone="medium"] {
+  background: #f59e0b;
+}
+
+.password-strength__fill[data-tone="strong"] {
+  background: #10b981;
+}
+
+.password-strength__meta {
+  margin-top: 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.password-strength__label {
+  color: rgba(10, 10, 10, 0.55);
+  font-weight: 600;
+}
+
+.password-strength__value {
+  color: #0f172a;
+  font-weight: 700;
+}
+
 .form-footer {
   margin-top: 1rem;
   font-size: 14px;

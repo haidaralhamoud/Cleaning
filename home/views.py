@@ -90,6 +90,36 @@ PRIVATE_BOOKING_SERVICE_FEE = Decimal("50.00")
 PRIVATE_BOOKING_VAT_PERCENT = Decimal("25.00")
 
 
+def _email_safe_username(value):
+    value = (value or "").strip()
+    if "@" in value:
+        value = value.split("@", 1)[0]
+    return value.strip(" ._-")
+
+
+def _customer_greeting_name(user=None, customer=None):
+    if customer:
+        customer_full_name = f"{customer.first_name} {customer.last_name}".strip()
+        if customer_full_name:
+            return customer_full_name
+        email_name = _email_safe_username(customer.email)
+        if email_name:
+            return email_name
+
+    if user:
+        full_name = (user.get_full_name() or "").strip()
+        if full_name:
+            return full_name
+        username = _email_safe_username(getattr(user, "username", ""))
+        if username:
+            return username
+        email_name = _email_safe_username(getattr(user, "email", ""))
+        if email_name:
+            return email_name
+
+    return "Customer"
+
+
 def _format_call_request_preferred_time(preferred_time):
     if not preferred_time:
         return "To be confirmed"
@@ -3684,16 +3714,18 @@ def business_scheduling(request, booking_id):
         if path_type == "bundle" and selected_bundle_id:
             created.selected_bundle_id = selected_bundle_id
 
+        actor = request.user if getattr(request.user, "is_authenticated", False) else None
+
         try:
             created.save()
-            created.log_status(user=request.user, note="Order placed")
+            created.log_status(user=actor, note="Order placed")
             if created.is_urgent:
-                created.log_status(user=request.user, note="Urgent booking (same day) requested")
+                created.log_status(user=actor, note="Urgent booking (same day) requested")
             request.session["latest_business_booking_id"] = created.id
             request.session.modified = True
             request.session.pop("business_booking_draft", None)
         except Exception:
-            logger.exception("Business scheduling failed for draft=%s", draft)
+            logger.exception("Business scheduling failed for draft=%s booking_id=%s", draft, getattr(created, "id", None))
             return render(request, "home/SchedulingNotes.html", {
                 "booking": booking,
                 "step": step_number,
@@ -3753,7 +3785,7 @@ def all_services(request):
     for service in services:
         service.show_recommended_badge, service.recommended_note = _split_recommended_content(service.recommended)
     private_categories = list(
-        PrivateMainCategory.objects.filter(services__isnull=False).distinct().order_by("title")
+        PrivateMainCategory.objects.filter(services__isnull=False).distinct().order_by("display_order", "title", "id")
     )
     cart = request.session.get("private_cart", [])
     cart_lookup = {
@@ -4350,7 +4382,7 @@ def private_booking_cash_invoice_pdf(request):
     )
 
     customer = Customer.objects.filter(user=request.user).first()
-    customer_name = (request.user.get_full_name() or request.user.username or "").strip()
+    customer_name = _customer_greeting_name(request.user, customer)
     customer_email = (request.user.email or "").strip()
     customer_phone = ""
     customer_address = (draft.get("address") or "").strip()
@@ -4358,7 +4390,6 @@ def private_booking_cash_invoice_pdf(request):
     customer_zip = (draft.get("zip_code") or "").strip()
 
     if customer:
-        customer_name = customer_name or f"{customer.first_name} {customer.last_name}".strip()
         customer_email = customer_email or (customer.email or "").strip()
         customer_phone = (customer.phone or "").strip()
         customer_address = customer_address or customer.display_address()
@@ -4475,7 +4506,7 @@ def private_booking_cash_invoice_pdf(request):
         {
             "brand_name": "Hembla experten",
             "tagline": "Because Home Shouldn't Be Work",
-            "document_title": "Cash Payment Invoice",
+            "document_title": "Invoice",
             "document_code": reference_number,
             "logo_path": logo_path,
         },
@@ -4483,10 +4514,10 @@ def private_booking_cash_invoice_pdf(request):
         charge_rows,
         footer_lines=footer_lines,
     )
-    subject = f"Your cash invoice {reference_number}"
+    subject = f"Your invoice {reference_number}"
     text_body = (
         f"Hello {customer_name or 'Customer'},\n\n"
-        "Your cash invoice is attached as a PDF.\n"
+        "Your invoice is attached as a PDF.\n"
         f"Reference: {reference_number}\n"
         f"Amount due: {Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}\n"
         f"Booking time: {appointment_summary}\n\n"
@@ -4495,7 +4526,7 @@ def private_booking_cash_invoice_pdf(request):
     )
     html_body = (
         f"<p>Hello {customer_name or 'Customer'},</p>"
-        "<p>Your cash invoice is attached as a PDF.</p>"
+        "<p>Your invoice is attached as a PDF.</p>"
         f"<p><strong>Reference:</strong> {reference_number}<br>"
         f"<strong>Amount due:</strong> {Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}<br>"
         f"<strong>Booking time:</strong> {appointment_summary}</p>"
@@ -5322,6 +5353,20 @@ def private_booking_schedule(request):
             "end_date": temp_booking.End_Date or "",
             "service_schedules": temp_booking.service_schedules or {},
         }
+        service_list = list(services)
+        service_count = len(service_list)
+        if service_count == 1:
+            schedule_caption = f"Schedule for {service_list[0].title}:"
+            schedule_intro = (
+                f"Choose from real appointment slots for {service_list[0].title}. "
+                "We show times where at least one provider is free in your area for this service."
+            )
+        else:
+            schedule_caption = "Schedule for all selected services:"
+            schedule_intro = (
+                "Choose from real appointment slots for your selected services. "
+                "We show times where at least one provider is free in your area for the required visit."
+            )
         return render(request, "home/Private_scheduale.html", {
             "booking": temp_booking,
             "services": services,
@@ -5332,6 +5377,8 @@ def private_booking_schedule(request):
             "reward_context": reward_context,
             "initial_schedule_state": json.dumps(initial_schedule_state, cls=DjangoJSONEncoder),
             "min_booking_date": min_booking_date.isoformat(),
+            "schedule_caption": schedule_caption,
+            "schedule_intro": schedule_intro,
         })
 
     # -----------------------------
@@ -5735,14 +5782,17 @@ def private_provider_availability_api(request):
     booking = _build_private_booking_from_draft(draft, request.user)
     booking.appointment_date = date_obj
     service_slug = (request.GET.get("service") or "").strip()
+
     if service_slug:
         booking.selected_services = [service_slug]
-
-    duration_minutes = int(booking.quoted_duration_minutes or 0)
-    if duration_minutes <= 0:
-        temp_booking = _build_private_booking_from_draft(draft, request.user)
-        pricing = calculate_booking_price(temp_booking)
-        duration_minutes = int(pricing.get("duration_minutes") or 0)
+        booking.service_schedules = {}
+        service_pricing = calculate_booking_price(booking)
+        duration_minutes = int(service_pricing.get("duration_minutes") or 0)
+    else:
+        duration_minutes = int(booking.quoted_duration_minutes or 0)
+        if duration_minutes <= 0:
+            pricing = calculate_booking_price(booking)
+            duration_minutes = int(pricing.get("duration_minutes") or 0)
 
     if duration_minutes <= 0:
         return JsonResponse({"error": "Invalid duration"}, status=400)

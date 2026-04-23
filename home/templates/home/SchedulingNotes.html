@@ -38,7 +38,41 @@
 <input type="hidden" name="notes" id="notes_input">
 
       {% if error %}
-        <div class="schedule-message schedule-message-error" style="margin-bottom:16px;">{{ error }}</div>
+        <div class="schedule-alert-backdrop" id="scheduleAlert" role="presentation">
+          <div class="schedule-alert-modal" role="alertdialog" aria-modal="true" aria-labelledby="scheduleAlertTitle">
+            <button type="button" class="schedule-alert-close" data-dismiss-schedule-alert aria-label="Close error message">&times;</button>
+            <div class="schedule-alert-icon" aria-hidden="true">!</div>
+            <h3 id="scheduleAlertTitle">We couldn't complete this step</h3>
+            <p class="schedule-alert-text">{{ error }}</p>
+            {% if error == "Please select a start date and preferred time." %}
+              <ul class="schedule-alert-list">
+                <li>Select a desired start date.</li>
+                <li>Select a preferred time from the dropdown.</li>
+                <li>Then click Done again.</li>
+              </ul>
+            {% elif error == "Invalid date format. Please choose a valid date." %}
+              <ul class="schedule-alert-list">
+                <li>Choose the date from the calendar picker.</li>
+                <li>Do not type an incomplete date manually.</li>
+                <li>Review both desired start date and custom date if used.</li>
+              </ul>
+            {% elif error == "Booking date cannot be before today. Please choose today or a future date." %}
+              <ul class="schedule-alert-list">
+                <li>Choose today or any future date.</li>
+                <li>If custom date is enabled, update that date too.</li>
+              </ul>
+            {% else %}
+              <ul class="schedule-alert-list">
+                <li>Review the scheduling fields in this step.</li>
+                <li>Make sure all required information is selected.</li>
+                <li>Try again. If the issue repeats, report it with the exact time it happened.</li>
+              </ul>
+            {% endif %}
+            <div class="schedule-alert-actions">
+              <button type="button" class="schedule-alert-button" data-dismiss-schedule-alert>Review this step</button>
+            </div>
+          </div>
+        </div>
       {% endif %}
 
       <section class="card scheduling">
@@ -252,5 +286,23 @@
   </script>
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>
+  <script>
+    const scheduleAlert = document.getElementById("scheduleAlert");
+    if (scheduleAlert) {
+      const dismissAlert = () => {
+        scheduleAlert.classList.add("is-hidden");
+      };
+
+      scheduleAlert.querySelectorAll("[data-dismiss-schedule-alert]").forEach((button) => {
+        button.addEventListener("click", dismissAlert);
+      });
+
+      scheduleAlert.addEventListener("click", (event) => {
+        if (event.target === scheduleAlert) {
+          dismissAlert();
+        }
+      });
+    }
+  </script>
 </body>
 </html>

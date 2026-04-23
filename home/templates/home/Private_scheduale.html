@@ -81,7 +81,7 @@
       {% endif %}
 
       <div id="sameScheduleArea" class="hidden">
-<p class="section-caption">Schedule for all services:</p>
+<p class="section-caption">{{ schedule_caption|default:"Schedule for all selected services:" }}</p>
 <div class="q-row">
 <div class="q-col">
 <div class="calendar-container">
@@ -106,7 +106,7 @@
 <div class="q-col">
 <div class="time-box">
 <h3>Q2. Choose a Start Time</h3>
-<p class="time-box__intro">Choose from real appointment slots only. We show times where at least one provider is free in your area for the full service window.</p>
+<p class="time-box__intro">{{ schedule_intro|default:"Choose from real appointment slots only. We show times where at least one provider is free in your area for the required service duration." }}</p>
 <div class="time-preview-card" id="timePreviewCard">
 <span class="time-preview-card__label">Selected Start</span>
 <strong id="timePreviewValue">Not set yet</strong>

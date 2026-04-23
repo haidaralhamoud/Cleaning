@@ -5,86 +5,239 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Hembla experten - All Services</title>
-<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">  {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
+{% include 'home/includes/font_links.html' %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/AllServicesPrivate.css' %}">
 </head>
-<body>{% include "home/includes/main_header.html" %}<main class="services-section">
-<div class="section-header">
-<div>
-<h1>All Services</h1>
-<p class="section-subtitle">Search by name, description, or focus on recommended services.</p>
-</div>
-</div>
-<div class="urgent-banner">
-<div class="urgent-copy">
-<span class="urgent-icon" aria-hidden="true">!</span>
-<div>
-<p class="urgent-title">Need this urgently?</p>
-<p class="urgent-subtitle">Select Yes for same-day priority. We will do our best to schedule the earliest available time.</p>
-</div>
-</div>
-<div class="urgent-actions">
-<a href="?urgent=0" class="urgent-btn {% if urgent_selected %}is-ghost{% else %}is-active{% endif %}">No</a>
-<a href="?urgent=1" class="urgent-btn urgent-yes {% if urgent_selected %}is-active{% endif %}">Yes</a>
-</div>
-</div>
-<div class="filter-bar">
-<div class="search-field">
-<input type="text" id="serviceSearch" placeholder="Search by name or description">
-</div>
-<div class="category-field">
-<select id="categoryFilter">
-<option value="all">All categories</option>          {% for category in categories %}            <option value="{{ category.slug }}">{{ category.title }}</option>          {% endfor %}        </select>
-</div>
-<div class="filter-pills">
-<button type="button" class="filter-pill active" data-filter="all">All</button>
-<button type="button" class="filter-pill" data-filter="recommended">Recommended</button>
-<button type="button" class="filter-pill" data-filter="clear" id="clearFilters">Clear</button>
-</div>
-<button type="button" class="filter-apply" id="applyFilters">Apply</button>
-<div class="results-count" id="resultsCount">0 services</div>
-</div>
-<hr />
-<div class="services-list" id="servicesList">      {% for service in services %}      <div class="service-card fade-in"           data-title="{{ service.title|lower|escape }}"           data-description="{{ service.description|lower|escape }}"           data-category="{{ service.category.slug|default:'' }}"           data-recommended="{% if service.show_recommended_badge %}true{% else %}false{% endif %}"           data-slug="{{ service.slug }}"           data-title-display="{{ service.title|escape }}"           data-book-url="{% url 'home:private_zip_step1' service.slug %}
-{% if urgent_selected %}?urgent=1{% endif %}"           data-image="{% if service.image %}{{ service.image.url }}{% endif %}">        {% if service.image %}          <img src="{{ service.image.url }}" alt="{{ service.title }}" loading="lazy" decoding="async">        {% else %}          <div class="service-image placeholder">{{ service.title|first }}</div>        {% endif %}        <div class="service-info">
-<div class="title-row">
-<h2>
-<a class="service-title-link" href="{% url 'accounts:service_detail' service.slug %}">                {{ service.title }}              </a>
-</h2>            {% if service.show_recommended_badge %}              <span class="rec-badge">Recommended</span>            {% endif %}          </div>
-<p>{{ service.description }}</p>          {% if service.recommended_note %}            <span class="rec-note">{{ service.recommended_note }}</span>          {% endif %}        </div>
-<div class="service-actions">
-<button class="btn-cart" onclick="addToCart('{{ service.slug }}', this)">Add to Cart</button>
-<a href="{% url 'home:private_zip_step1' service.slug %}
-{% if urgent_selected %}?urgent=1{% endif %}" class="btn-book">Book Now</a>
-</div>
-</div>      {% endfor %}    </div>
+<body>
+{% include "home/includes/main_header.html" %}
+<main class="services-section">
+  <div class="section-header">
+    <div>
+      <h1>All Services</h1>
+      <p class="section-subtitle">Search by name, description, or focus on recommended services.</p>
+    </div>
+  </div>
+
+  <div class="urgent-banner">
+    <div class="urgent-copy">
+      <span class="urgent-icon" aria-hidden="true">!</span>
+      <div>
+        <p class="urgent-title">Need this urgently?</p>
+        <p class="urgent-subtitle">Select Yes for same-day priority. We will do our best to schedule the earliest available time.</p>
+      </div>
+    </div>
+    <div class="urgent-actions">
+      <a href="?urgent=0" class="urgent-btn {% if urgent_selected %}is-ghost{% else %}is-active{% endif %}">No</a>
+      <a href="?urgent=1" class="urgent-btn urgent-yes {% if urgent_selected %}is-active{% endif %}">Yes</a>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="search-field">
+      <input type="text" id="serviceSearch" placeholder="Search by name or description">
+    </div>
+    <div class="category-field">
+      <select id="categoryFilter">
+        <option value="all">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.slug }}">{{ category.title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-pills">
+      <button type="button" class="filter-pill active" data-filter="all">All</button>
+      <button type="button" class="filter-pill" data-filter="recommended">Recommended</button>
+      <button type="button" class="filter-pill" data-filter="clear" id="clearFilters">Clear</button>
+    </div>
+    <button type="button" class="filter-apply" id="applyFilters">Apply</button>
+    <div class="results-count" id="resultsCount">0 services</div>
+  </div>
+
+  <hr />
+
+  <div class="services-list" id="servicesList">
+    {% for service in services %}
+      <div
+        class="service-card fade-in"
+        data-title="{{ service.title|default:''|lower|escape }}"
+        data-description="{{ service.description|default:''|lower|escape }}"
+        data-category="{{ service.category.slug|default:'' }}"
+        data-recommended="{% if service.show_recommended_badge %}true{% else %}false{% endif %}"
+        data-slug="{{ service.slug }}"
+        data-title-display="{{ service.title|escape }}"
+      >
+        {% if service.image %}
+          <img src="{{ service.image.url }}" alt="{{ service.title }}" loading="lazy" decoding="async">
+        {% else %}
+          <div class="service-image placeholder">{{ service.title|first }}</div>
+        {% endif %}
+
+        <div class="service-info">
+          <div class="title-row">
+            <h2>
+              <a class="service-title-link" href="{% url 'accounts:service_detail' service.slug %}">{{ service.title }}</a>
+            </h2>
+            {% if service.show_recommended_badge %}
+              <span class="rec-badge">Recommended</span>
+            {% endif %}
+          </div>
+          <p>{{ service.description }}</p>
+          {% if service.recommended_note %}
+            <span class="rec-note">{{ service.recommended_note }}</span>
+          {% endif %}
+        </div>
+
+        <div class="service-actions">
+          <button class="btn-cart" onclick="addToCart('{{ service.slug }}', this)">Add to Cart</button>
+          <a href="{% url 'home:private_zip_step1' service.slug %}{% if urgent_selected %}?urgent=1{% endif %}" class="btn-book">Book Now</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
 </main>
+
 <a href="{% url 'home:private_cart' %}" class="floating-cart-fab{% if not cart_services %} is-hidden{% endif %}" id="floatingCartFab" aria-label="Review cart">
-<span class="floating-cart-glow" aria-hidden="true">
-</span>
-<span class="floating-cart-icon" aria-hidden="true">
-<svg viewBox="0 0 24 24" focusable="false">
-<path d="M3 5h2l2.1 9.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8L21 7H7.2">
-</path>
-<circle cx="10" cy="19" r="1.6">
-</circle>
-<circle cx="18" cy="19" r="1.6">
-</circle>
-</svg>
-</span>
-<span class="floating-cart-copy">
-<strong>Your cart</strong>
-<small>Review and continue</small>
-</span>
-<span class="floating-cart-count" id="floating-cart-count">{{ cart_services|length }}</span>
+  <span class="floating-cart-glow" aria-hidden="true"></span>
+  <span class="floating-cart-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" focusable="false">
+      <path d="M3 5h2l2.1 9.2a1 1 0 0 0 1 .8H18a1 1 0 0 0 1-.8L21 7H7.2"></path>
+      <circle cx="10" cy="19" r="1.6"></circle>
+      <circle cx="18" cy="19" r="1.6"></circle>
+    </svg>
+  </span>
+  <span class="floating-cart-copy">
+    <strong>Your cart</strong>
+    <small>Review and continue</small>
+  </span>
+  <span class="floating-cart-count" id="floating-cart-count">{{ cart_services|length }}</span>
 </a>
-<script>const SERVICE_CATALOG = {  {% for service in services %}  "{{ service.slug }}": {    "title": "{{ service.title|escapejs }}",    "bookUrl": "{% url 'home:private_zip_step1' service.slug %}
-{% if urgent_selected %}?urgent=1{% endif %}",    "image": "{% if service.image %}{{ service.image.url }}{% endif %}"  }{% if not forloop.last %},{% endif %}  {% endfor %}};function addToCart(slug, buttonEl) {    fetch(`/private/cart/add/${slug}/`, {        headers: {            "X-Requested-With": "XMLHttpRequest"        }    })        .then(r => r.json())        .then(data => {            if (data.count !== undefined) {                syncCartUI(data.count);                if (buttonEl) {                    const oldLabel = buttonEl.innerText;                    buttonEl.innerText = "Added";                    buttonEl.classList.add("is-added");                    setTimeout(() => {                        buttonEl.innerText = oldLabel;                        buttonEl.classList.remove("is-added");                    }, 1200);                }            }        });}function syncCartUI(count) {    const fab = document.getElementById("floatingCartFab");    const badge = document.getElementById("floating-cart-count");    if (badge) badge.innerText = count;    if (!fab) return;    fab.classList.toggle("is-hidden", !count);    fab.classList.remove("is-bumped");    if (count) {        window.requestAnimationFrame(() => fab.classList.add("is-bumped"));    }}function refreshCartCount() {    fetch("/private/cart/count/")        .then(r => r.json())        .then(data => {            if (data.count !== undefined) {                syncCartUI(data.count);            }        })        .catch(err => console.log("Cart Refresh Error:", err));}setInterval(refreshCartCount, 2000);const searchInput = document.getElementById("serviceSearch");const categoryFilter = document.getElementById("categoryFilter");const resultsCount = document.getElementById("resultsCount");const filterPills = document.querySelectorAll(".filter-pill");const cards = Array.from(document.querySelectorAll(".service-card"));const applyButton = document.getElementById("applyFilters");function applyFilters() {    const query = (searchInput.value || "").trim().toLowerCase();    const activeCategory = categoryFilter ? categoryFilter.value : "all";    const activePill = document.querySelector(".filter-pill.active");    const activeFilter = activePill ? activePill.dataset.filter : "all";    let visibleCount = 0;    cards.forEach(card => {        const title = card.dataset.title || "";        const desc = card.dataset.description || "";        const category = card.dataset.category || "";        const isRecommended = card.dataset.recommended === "true";        const matchesQuery = !query || title.includes(query) || desc.includes(query);        const matchesCategory = activeCategory === "all" || category === activeCategory;        const matchesRecommended = activeFilter !== "recommended" || isRecommended;        const shouldShow = matchesQuery && matchesCategory && matchesRecommended;        card.style.display = shouldShow ? "" : "none";        if (shouldShow) visibleCount += 1;    });    if (resultsCount) {        resultsCount.textContent = `${visibleCount} service${visibleCount === 1 ? "" : "s"}`;    }}filterPills.forEach(pill => {    pill.addEventListener("click", () => {        if (pill.dataset.filter === "clear") {            filterPills.forEach(p => p.classList.remove("active"));            document.querySelector('[data-filter="all"]').classList.add("active");            if (searchInput) searchInput.value = "";            if (categoryFilter) categoryFilter.value = "all";            applyFilters();        } else {            filterPills.forEach(p => p.classList.remove("active"));            pill.classList.add("active");        }    });});if (searchInput) {    searchInput.addEventListener("keydown", (event) => {        if (event.key === "Enter") {            event.preventDefault();            applyFilters();        }    });}if (applyButton) {    applyButton.addEventListener("click", applyFilters);}if (categoryFilter) {    categoryFilter.addEventListener("change", applyFilters);}document.addEventListener("DOMContentLoaded", applyFilters);document.addEventListener("DOMContentLoaded", () => syncCartUI({{ cart_services|length }}));</script>
-<script src="{% static 'js/main_header.js' %}" defer>
+
+<script>
+function addToCart(slug, buttonEl) {
+  fetch(`/private/cart/add/${slug}/`, {
+    headers: { "X-Requested-With": "XMLHttpRequest" }
+  })
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.count !== undefined) {
+        syncCartUI(data.count);
+        if (buttonEl) {
+          const oldLabel = buttonEl.innerText;
+          buttonEl.innerText = "Added";
+          buttonEl.classList.add("is-added");
+          setTimeout(() => {
+            buttonEl.innerText = oldLabel;
+            buttonEl.classList.remove("is-added");
+          }, 1200);
+        }
+      }
+    });
+}
+
+function syncCartUI(count) {
+  const fab = document.getElementById("floatingCartFab");
+  const badge = document.getElementById("floating-cart-count");
+  if (badge) badge.innerText = count;
+  if (!fab) return;
+  fab.classList.toggle("is-hidden", !count);
+  fab.classList.remove("is-bumped");
+  if (count) {
+    window.requestAnimationFrame(() => fab.classList.add("is-bumped"));
+  }
+}
+
+function refreshCartCount() {
+  fetch("/private/cart/count/")
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.count !== undefined) {
+        syncCartUI(data.count);
+      }
+    })
+    .catch((err) => console.log("Cart Refresh Error:", err));
+}
+
+const searchInput = document.getElementById("serviceSearch");
+const categoryFilter = document.getElementById("categoryFilter");
+const resultsCount = document.getElementById("resultsCount");
+const filterPills = document.querySelectorAll(".filter-pill");
+const cards = Array.from(document.querySelectorAll(".service-card"));
+const applyButton = document.getElementById("applyFilters");
+
+function applyFilters() {
+  const query = (searchInput?.value || "").trim().toLowerCase();
+  const activeCategory = categoryFilter ? categoryFilter.value : "all";
+  const activePill = document.querySelector(".filter-pill.active");
+  const activeFilter = activePill ? activePill.dataset.filter : "all";
+  let visibleCount = 0;
+
+  cards.forEach((card) => {
+    const title = card.dataset.title || "";
+    const desc = card.dataset.description || "";
+    const category = card.dataset.category || "";
+    const isRecommended = card.dataset.recommended === "true";
+    const matchesQuery = !query || title.includes(query) || desc.includes(query);
+    const matchesCategory = activeCategory === "all" || category === activeCategory;
+    const matchesRecommended = activeFilter !== "recommended" || isRecommended;
+    const shouldShow = matchesQuery && matchesCategory && matchesRecommended;
+
+    card.style.display = shouldShow ? "" : "none";
+    if (shouldShow) visibleCount += 1;
+  });
+
+  if (resultsCount) {
+    resultsCount.textContent = `${visibleCount} service${visibleCount === 1 ? "" : "s"}`;
+  }
+}
+
+filterPills.forEach((pill) => {
+  pill.addEventListener("click", () => {
+    if (pill.dataset.filter === "clear") {
+      filterPills.forEach((p) => p.classList.remove("active"));
+      document.querySelector('[data-filter="all"]')?.classList.add("active");
+      if (searchInput) searchInput.value = "";
+      if (categoryFilter) {
+        categoryFilter.value = "all";
+        categoryFilter.dispatchEvent(new Event("change", { bubbles: true }));
+      }
+      applyFilters();
+      return;
+    }
+
+    filterPills.forEach((p) => p.classList.remove("active"));
+    pill.classList.add("active");
+  });
+});
+
+if (searchInput) {
+  searchInput.addEventListener("input", applyFilters);
+  searchInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      applyFilters();
+    }
+  });
+}
+
+if (applyButton) {
+  applyButton.addEventListener("click", applyFilters);
+}
+
+if (categoryFilter) {
+  categoryFilter.addEventListener("change", applyFilters);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  applyFilters();
+  syncCartUI({{ cart_services|length }});
+  setInterval(refreshCartCount, 2000);
+});
 </script>
+<script src="{% static 'js/main_header.js' %}" defer></script>
 </body>
 </html>
