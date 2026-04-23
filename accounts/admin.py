@@ -86,6 +86,7 @@ class ProviderProfileAdmin(admin.ModelAdmin):
     list_filter = ("is_active",)
     search_fields = ("user__username", "user__email", "area", "city", "region")
     readonly_fields = ("preview_photo",)
+    filter_horizontal = ("supported_services",)
 
     def has_photo(self, obj):
         return bool(obj.photo)

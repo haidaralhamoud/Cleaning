@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 
 from home.models import PrivateBooking, BusinessBooking
+from accounts.models import ProviderShift
 
 User = get_user_model()
 
@@ -28,28 +29,27 @@ def _booking_location_candidates(booking):
 
 
 def provider_matches_location(provider_profile, booking):
-    booking_locations = _booking_location_candidates(booking)
-    if not booking_locations:
+    return True
+
+
+def _booking_service_slugs(booking):
+    raw_values = getattr(booking, "selected_services", None) or []
+    return {str(value).strip() for value in raw_values if str(value).strip()}
+
+
+def provider_matches_services(provider_profile, booking):
+    required_service_slugs = _booking_service_slugs(booking)
+    if not required_service_slugs:
         return True
     if not provider_profile:
         return False
-    provider_values = [
-        provider_profile.area,
-        provider_profile.city,
-        provider_profile.region,
-    ] + (provider_profile.nearby_areas or [])
-    provider_values = [_normalize_location(v) for v in provider_values if v]
-    if not provider_values:
-        return False
-    for booking_loc in booking_locations:
-        for provider_loc in provider_values:
-            if not booking_loc or not provider_loc:
-                continue
-            if booking_loc == provider_loc:
-                return True
-            if booking_loc in provider_loc or provider_loc in booking_loc:
-                return True
-    return False
+
+    allowed_service_slugs = set(
+        provider_profile.supported_services.values_list("slug", flat=True)
+    )
+    if not allowed_service_slugs:
+        return True
+    return required_service_slugs.issubset(allowed_service_slugs)
 
 
 def _active_bookings_for_provider(provider):
@@ -60,6 +60,34 @@ def _active_bookings_for_provider(provider):
         status__in=BusinessBooking.INACTIVE_STATUSES
     )
     return list(private_qs) + list(business_qs)
+
+
+def _active_shifts_for_provider(provider, date_obj=None):
+    if not provider:
+        return []
+    qs = ProviderShift.objects.filter(provider=provider, is_active=True)
+    if date_obj is not None:
+        qs = qs.filter(weekday=date_obj.weekday())
+    return list(qs.order_by("start_time"))
+
+
+def provider_has_shift_for_window(provider, start_dt, end_dt):
+    if not provider or not start_dt or not end_dt:
+        return False
+    if start_dt.date() != end_dt.date():
+        return False
+
+    shift_date = start_dt.date()
+    shifts = _active_shifts_for_provider(provider, date_obj=shift_date)
+    if not shifts:
+        return False
+
+    for shift in shifts:
+        shift_start = timezone.make_aware(datetime.combine(shift_date, shift.start_time), timezone.get_current_timezone())
+        shift_end = timezone.make_aware(datetime.combine(shift_date, shift.end_time), timezone.get_current_timezone())
+        if start_dt >= shift_start and end_dt <= shift_end:
+            return True
+    return False
 
 
 def has_overlap(provider, start_dt, end_dt, exclude_booking=None):
@@ -98,11 +126,11 @@ def generate_slots(provider, date_obj, duration_minutes, slot_size_minutes=30,
         return []
 
     tz = timezone.get_current_timezone()
-    start_of_day = timezone.make_aware(datetime.combine(date_obj, day_start), tz)
-    end_of_day = timezone.make_aware(datetime.combine(date_obj, day_end), tz)
-
     duration = timedelta(minutes=booking_total_minutes(duration_minutes))
     slot_size = timedelta(minutes=int(slot_size_minutes))
+    shifts = _active_shifts_for_provider(provider, date_obj=date_obj)
+    if not shifts:
+        return []
 
     busy_windows = []
     for booking in _active_bookings_for_provider(provider):
@@ -114,13 +142,16 @@ def generate_slots(provider, date_obj, duration_minutes, slot_size_minutes=30,
         busy_windows.append((b_start, b_end))
 
     slots = []
-    cursor = start_of_day
-    while cursor + duration <= end_of_day:
-        slot_end = cursor + duration
-        overlaps = any(cursor < b_end and b_start < slot_end for b_start, b_end in busy_windows)
-        if not overlaps:
-            slots.append(cursor)
-        cursor += slot_size
+    for shift in shifts:
+        shift_start = timezone.make_aware(datetime.combine(date_obj, max(day_start, shift.start_time)), tz)
+        shift_end = timezone.make_aware(datetime.combine(date_obj, min(day_end, shift.end_time)), tz)
+        cursor = shift_start
+        while cursor + duration <= shift_end:
+            slot_end = cursor + duration
+            overlaps = any(cursor < b_end and b_start < slot_end for b_start, b_end in busy_windows)
+            if not overlaps:
+                slots.append(cursor)
+            cursor += slot_size
     return slots
 
 
@@ -152,29 +183,7 @@ def select_nearest_provider(booking, date_obj, slot_size_minutes=30):
 
 
 def provider_distance_score(provider_profile, booking):
-    booking_locations = _booking_location_candidates(booking)
-    if not booking_locations:
-        return 0
-    if not provider_profile:
-        return 10_000
-
-    provider_values = [
-        provider_profile.area,
-        provider_profile.city,
-        provider_profile.region,
-    ] + (provider_profile.nearby_areas or [])
-    provider_values = [_normalize_location(v) for v in provider_values if v]
-    if not provider_values:
-        return 10_000
-
-    best_score = 10_000
-    for booking_loc in booking_locations:
-        for provider_loc in provider_values:
-            if booking_loc == provider_loc:
-                best_score = min(best_score, 0)
-            elif booking_loc in provider_loc or provider_loc in booking_loc:
-                best_score = min(best_score, 1)
-    return best_score
+    return 0
 
 
 def get_available_providers_for_booking(booking, *, date_obj=None, start_dt=None, end_dt=None, exclude_booking=None):
@@ -187,6 +196,12 @@ def get_available_providers_for_booking(booking, *, date_obj=None, start_dt=None
     for provider in providers:
         profile = getattr(provider, "provider_profile", None)
         if not provider_matches_location(profile, booking):
+            continue
+        if not provider_matches_services(profile, booking):
+            continue
+        if date_obj is not None and not _active_shifts_for_provider(provider, date_obj=date_obj):
+            continue
+        if start_dt and end_dt and not provider_has_shift_for_window(provider, start_dt, end_dt):
             continue
         if start_dt and end_dt and has_overlap(provider, start_dt, end_dt, exclude_booking=exclude_booking or booking):
             continue
@@ -230,6 +245,10 @@ def get_available_slots_for_booking(booking, date_obj, slot_size_minutes=30,
             "slot": slot,
             "value": slot.strftime("%H:%M"),
             "provider_ids": [provider.id for provider in providers],
+            "provider_names": [
+                (provider.get_full_name() or provider.username or "").strip()
+                for provider in providers
+            ],
             "provider_count": len(providers),
         })
     return ordered
@@ -243,10 +262,14 @@ def provider_can_take_booking(provider, booking, *, exclude_booking=None):
         return False
     if not provider_matches_location(profile, booking):
         return False
-    start_dt = getattr(booking, "start_datetime", None)
-    end_dt = getattr(booking, "end_datetime", None)
-    if start_dt and end_dt and has_overlap(provider, start_dt, end_dt, exclude_booking=exclude_booking or booking):
+    if not provider_matches_services(profile, booking):
         return False
+    target_windows = booking.get_service_windows()
+    for start_dt, end_dt in target_windows:
+        if not provider_has_shift_for_window(provider, start_dt, end_dt):
+            return False
+        if has_overlap(provider, start_dt, end_dt, exclude_booking=exclude_booking or booking):
+            return False
     return True
 
 

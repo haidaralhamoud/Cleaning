@@ -237,6 +237,66 @@
             {% endfor %}
           </div>
         {% endif %}
+        {% if item.slug == "provider-profiles" and object %}
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Provider Shifts</h6>
+              <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-secondary"
+                   href="{% url 'home:dashboard_model_list' 'provider-shifts' %}?provider_id={{ object.user.id }}">
+                  View All
+                </a>
+                {% if mode != "view" %}
+                  <a class="btn btn-sm btn-outline-primary"
+                     href="{% url 'home:dashboard_model_create' 'provider-shifts' %}?provider_id={{ object.user.id }}">
+                    <i class="fa-solid fa-plus"></i> Add Shift
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+            {% if provider_shifts %}
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Day</th>
+                      <th>Start</th>
+                      <th>End</th>
+                      <th>Label</th>
+                      <th>Status</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for shift in provider_shifts %}
+                      <tr>
+                        <td>{{ shift.get_weekday_display }}</td>
+                        <td>{{ shift.start_time|time:"H:i" }}</td>
+                        <td>{{ shift.end_time|time:"H:i" }}</td>
+                        <td>{{ shift.label|default:"-" }}</td>
+                        <td>{% if shift.is_active %}Active{% else %}Inactive{% endif %}</td>
+                        <td class="text-end">
+                          <a class="btn btn-sm btn-outline-secondary"
+                             href="{% url 'home:dashboard_model_edit' 'provider-shifts' shift.pk %}">
+                            Edit
+                          </a>
+                          {% if mode != "view" %}
+                            <a class="btn btn-sm btn-outline-danger"
+                               href="{% url 'home:dashboard_model_delete' 'provider-shifts' shift.pk %}">
+                              Delete
+                            </a>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-muted small">No shifts added yet for this provider.</div>
+            {% endif %}
+          </div>
+        {% endif %}
         {% if item.slug == "private-services" and object %}
           <div class="mt-4">
             <div class="d-flex justify-content-between align-items-center mb-2">

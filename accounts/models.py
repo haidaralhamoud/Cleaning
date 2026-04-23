@@ -1179,6 +1179,12 @@ class ProviderProfile(models.Model):
 
     bio = models.TextField(blank=True)
 
+    supported_services = models.ManyToManyField(
+        "home.PrivateService",
+        blank=True,
+        related_name="provider_profiles",
+    )
+
     city = models.CharField(max_length=100, blank=True)
     region = models.CharField(max_length=100, blank=True)
     area = models.CharField(max_length=120, blank=True)
@@ -1192,6 +1198,45 @@ class ProviderProfile(models.Model):
 
     def __str__(self):
         return f"Provider Profile - {self.user}"
+
+
+class ProviderShift(models.Model):
+    WEEKDAY_CHOICES = [
+        (0, "Monday"),
+        (1, "Tuesday"),
+        (2, "Wednesday"),
+        (3, "Thursday"),
+        (4, "Friday"),
+        (5, "Saturday"),
+        (6, "Sunday"),
+    ]
+
+    provider = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="provider_shifts",
+    )
+    weekday = models.PositiveSmallIntegerField(choices=WEEKDAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_active = models.BooleanField(default=True)
+    label = models.CharField(max_length=120, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["provider__username", "weekday", "start_time"]
+        verbose_name = "Provider Shift"
+        verbose_name_plural = "Provider Shifts"
+
+    def clean(self):
+        super().clean()
+        if self.end_time <= self.start_time:
+            raise ValidationError({"end_time": "Shift end time must be later than start time."})
+
+    def __str__(self):
+        label = self.label or self.get_weekday_display()
+        return f"{self.provider} | {label} {self.start_time.strftime('%H:%M')}-{self.end_time.strftime('%H:%M')}"
 
 
 class ProviderRatingSummary(models.Model):

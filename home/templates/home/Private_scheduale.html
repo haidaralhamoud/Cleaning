@@ -365,6 +365,10 @@
 <span id="sum_schedule">{{ pricing.currency|default:"sek"|upper }} {{ pricing.schedule_extra|default:0|floatformat:2 }}</span>
 </div>
 <div class="summary-item">
+<span>Duration</span>
+<span id="sum_duration">{{ display_duration|default:"To be confirmed" }}</span>
+</div>
+<div class="summary-item">
 <span>Service fee</span>
 <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:0|floatformat:2 }}</span>
 </div>
@@ -734,6 +738,17 @@ function setSameTimeAvailabilityState(message, tone) {
   }
 }
 
+function openSelectMenu(selectEl) {
+  if (!selectEl || selectEl.disabled || selectEl.options.length <= 1) return;
+  if (typeof selectEl.showPicker === "function") {
+    try {
+      selectEl.showPicker();
+    } catch (err) {
+      // Ignore browsers that block programmatic picker opening.
+    }
+  }
+}
+
 function renderSameTimeSlots(slots) {
   if (!timeSlotsSelect) return;
   const currentValue = inputStartTime ? inputStartTime.value : "";
@@ -745,15 +760,28 @@ function renderSameTimeSlots(slots) {
   timeSlotsSelect.appendChild(placeholder);
 
   (slots || []).forEach((slot) => {
+    const providerNames = Array.isArray(slot.provider_names) ? slot.provider_names.filter(Boolean) : [];
     const option = document.createElement("option");
     option.value = slot.value;
-    option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
+    if (providerNames.length === 1) {
+      option.textContent = `${slot.label} - ${providerNames[0]}`;
+    } else if (providerNames.length > 1) {
+      option.textContent = `${slot.label} - ${providerNames.join(", ")}`;
+    } else {
+      option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
+    }
     option.selected = slot.value === currentValue;
     timeSlotsSelect.appendChild(option);
   });
 
   timeSlotsSelect.disabled = !(slots && slots.length);
-  if (!slots || !slots.length) {
+  if (slots && slots.length) {
+    const selectedValue = currentValue && slots.some((slot) => slot.value === currentValue)
+      ? currentValue
+      : slots[0].value;
+    syncStartTimePickerUi(selectedValue);
+  } else {
+    syncStartTimePickerUi("");
     timeSlotsSelect.value = "";
   }
 }
@@ -780,15 +808,28 @@ function renderServiceSlots(acc, slots) {
   select.appendChild(placeholder);
 
   (slots || []).forEach((slot) => {
+    const providerNames = Array.isArray(slot.provider_names) ? slot.provider_names.filter(Boolean) : [];
     const option = document.createElement("option");
     option.value = slot.value;
-    option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
+    if (providerNames.length === 1) {
+      option.textContent = `${slot.label} - ${providerNames[0]}`;
+    } else if (providerNames.length > 1) {
+      option.textContent = `${slot.label} - ${providerNames.join(", ")}`;
+    } else {
+      option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
+    }
     option.selected = slot.value === timeInput.value;
     select.appendChild(option);
   });
 
   select.disabled = !(slots && slots.length);
-  if (!slots || !slots.length) {
+  if (slots && slots.length) {
+    const selectedValue = timeInput.value && slots.some((slot) => slot.value === timeInput.value)
+      ? timeInput.value
+      : slots[0].value;
+    timeInput.value = selectedValue;
+    select.value = selectedValue;
+  } else {
     timeInput.value = "";
     select.value = "";
   }
@@ -869,7 +910,13 @@ function loadServiceAvailability(acc, dateValue, preserveSelected = false) {
   }
   setServiceSlotState(acc, "Checking real provider availability...", "loading");
 
-  return fetch(`/private/api/providers/availability/?date=${encodeURIComponent(dateValue)}`)
+  const serviceSlug = acc.getAttribute("data-service") || "";
+  const query = new URLSearchParams({ date: dateValue });
+  if (serviceSlug) {
+    query.append("service", serviceSlug);
+  }
+
+  return fetch(`/private/api/providers/availability/?${query.toString()}`)
     .then((res) => {
       if (!res.ok) {
         throw new Error(`Availability API failed with status ${res.status}`);
@@ -987,6 +1034,9 @@ document.querySelectorAll(".service-acc").forEach(acc => {
       }
       updateScheduleSummary();
     });
+    serviceSlotSelect.addEventListener("pointerdown", () => {
+      setTimeout(() => openSelectMenu(serviceSlotSelect), 0);
+    });
   }
 });
 
@@ -994,6 +1044,9 @@ if (timeSlotsSelect) {
   timeSlotsSelect.addEventListener("change", () => {
     syncStartTimePickerUi(timeSlotsSelect.value || "");
     updateScheduleSummary();
+  });
+  timeSlotsSelect.addEventListener("pointerdown", () => {
+    setTimeout(() => openSelectMenu(timeSlotsSelect), 0);
   });
 }
 
@@ -1068,12 +1121,28 @@ function safeParseJson(value, fallback) {
   }
 }
 
+function formatSummaryDuration(data) {
+  const secondsRaw = Number(data && data.duration_seconds ? data.duration_seconds : 0);
+  if (Number.isFinite(secondsRaw) && secondsRaw > 0) {
+    const hours = Math.floor(secondsRaw / 3600);
+    const minutes = Math.floor((secondsRaw % 3600) / 60);
+    const seconds = secondsRaw % 60;
+    const pad = (value) => String(value).padStart(2, "0");
+    return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  }
+  return "To be confirmed";
+}
+
 function setSummaryValues(data) {
   if (!data) return;
   const currency = String(data.currency || "sek").toUpperCase();
   document.getElementById("sum_services").textContent = currency + " " + Number(data.services_total || 0).toFixed(2);
   document.getElementById("sum_addons").textContent = currency + " " + Number(data.addons_total || 0).toFixed(2);
   document.getElementById("sum_schedule").textContent = currency + " " + Number(data.schedule_extra || 0).toFixed(2);
+  const duration = document.getElementById("sum_duration");
+  if (duration) {
+    duration.textContent = formatSummaryDuration(data);
+  }
   const serviceFee = document.getElementById("sum_service_fee");
   if (serviceFee) {
     serviceFee.textContent = currency + " " + Number(data.service_fee || 0).toFixed(2);

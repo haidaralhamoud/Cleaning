@@ -61,6 +61,7 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("promotions", accounts_models.Promotion, "Promotions", "fa-solid fa-bullhorn"),
         DashboardItem("discount-codes", accounts_models.DiscountCode, "Discount Codes", "fa-solid fa-ticket"),
         DashboardItem("provider-profiles", accounts_models.ProviderProfile, "Provider Profiles", "fa-solid fa-id-badge"),
+        DashboardItem("provider-shifts", accounts_models.ProviderShift, "Provider Shifts", "fa-solid fa-clock"),
         DashboardItem("provider-messages", accounts_models.ProviderAdminMessage, "Provider Messages", "fa-solid fa-paper-plane"),
         DashboardItem("provider-ratings", accounts_models.ProviderRatingSummary, "Provider Ratings", "fa-solid fa-star"),
         DashboardItem("booking-checklists", accounts_models.BookingChecklist, "Booking Checklists", "fa-solid fa-list"),

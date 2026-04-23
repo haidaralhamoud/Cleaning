@@ -45,6 +45,7 @@ from accounts.models import (
     PaymentMethod,
     ServiceReview,
     ProviderProfile,
+    ProviderShift,
     ProviderAdminMessage,
     ChatMessage,
     Reward,
@@ -1068,27 +1069,24 @@ def _booking_location_candidates(booking):
 
 
 def _provider_matches_location(provider_profile, booking_locations):
-    if not booking_locations:
+    return True
+
+
+def _provider_matches_services(provider_profile, booking):
+    selected_services = {
+        str(value).strip()
+        for value in (getattr(booking, "selected_services", None) or [])
+        if str(value).strip()
+    }
+    if not selected_services:
         return True
     if not provider_profile:
         return False
-    provider_values = [
-        provider_profile.area,
-        provider_profile.city,
-        provider_profile.region,
-    ] + (provider_profile.nearby_areas or [])
-    provider_values = [_normalize_location(v) for v in provider_values if v]
-    if not provider_values:
-        return False
-    for booking_loc in booking_locations:
-        for provider_loc in provider_values:
-            if not booking_loc or not provider_loc:
-                continue
-            if booking_loc == provider_loc:
-                return True
-            if booking_loc in provider_loc or provider_loc in booking_loc:
-                return True
-    return False
+
+    allowed_services = set(provider_profile.supported_services.values_list("slug", flat=True))
+    if not allowed_services:
+        return True
+    return selected_services.issubset(allowed_services)
 
 
 def _filtered_provider_queryset(booking):
@@ -1134,12 +1132,12 @@ def _provider_debug_payload(booking):
         else:
             if not profile.is_active:
                 reasons.append("Profile inactive")
-            if booking_locations and not _provider_matches_location(profile, booking_locations):
-                reasons.append("Location differs")
+            if not _provider_matches_services(profile, booking):
+                reasons.append("Unsupported service")
         if profile and booking and not provider_can_take_booking(provider, booking, exclude_booking=booking):
             reasons.append("Overlapping booking")
 
-        blocking_reasons = [reason for reason in reasons if reason in {"No provider profile", "Profile inactive", "Location differs", "Overlapping booking"}]
+        blocking_reasons = [reason for reason in reasons if reason in {"No provider profile", "Profile inactive", "Unsupported service", "Overlapping booking"}]
         status = "Included" if not blocking_reasons else "Excluded"
         rows.append({
             "username": provider.get_full_name() or provider.username,
@@ -2156,7 +2154,7 @@ class BusinessBookingDashboardForm(forms.ModelForm):
         if not provider:
             return provider
         if self.instance and not provider_can_take_booking(provider, self.instance, exclude_booking=self.instance):
-            raise forms.ValidationError("Provider must be active, in the booking area, and free for the full service window.")
+            raise forms.ValidationError("Provider must be active, support the selected service, and be free for the full service window.")
         return provider
 
     def save(self, commit=True):
@@ -2195,7 +2193,7 @@ class PrivateBookingDashboardForm(forms.ModelForm):
         if not provider:
             return provider
         if self.instance and not provider_can_take_booking(provider, self.instance, exclude_booking=self.instance):
-            raise forms.ValidationError("Provider must be active, in the booking area, and free for the full service window.")
+            raise forms.ValidationError("Provider must be active, support the selected service, and be free for the full service window.")
         return provider
 
 
@@ -2384,6 +2382,13 @@ class ProviderProfileDashboardCreateForm(forms.Form):
         required=False,
         help_text="Comma-separated nearby areas.",
     )
+    supported_services = forms.ModelMultipleChoiceField(
+        label="Supported services",
+        queryset=PrivateService.objects.order_by("title"),
+        required=False,
+        widget=forms.SelectMultiple,
+        help_text="Leave empty to allow this provider for all services.",
+    )
     bio = forms.CharField(label="Bio", required=False, widget=forms.Textarea(attrs={"rows": 3}))
     is_active = forms.BooleanField(label="Active", required=False, initial=True)
 
@@ -2424,6 +2429,7 @@ class ProviderProfileDashboardCreateForm(forms.Form):
             area=self.cleaned_data.get("area", ""),
             nearby_areas=nearby_list,
         )
+        profile.supported_services.set(self.cleaned_data.get("supported_services") or [])
         return profile
 
 
@@ -2436,12 +2442,15 @@ class ProviderProfileDashboardEditForm(forms.ModelForm):
 
     class Meta:
         model = ProviderProfile
-        fields = ["user", "bio", "is_active", "city", "region", "area"]
+        fields = ["user", "bio", "is_active", "city", "region", "area", "supported_services"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if "user" in self.fields:
             self.fields["user"].disabled = True
+        if "supported_services" in self.fields:
+            self.fields["supported_services"].queryset = PrivateService.objects.order_by("title")
+            self.fields["supported_services"].help_text = "Leave empty to allow this provider for all services."
         if self.instance and self.instance.nearby_areas:
             self.fields["nearby_areas_text"].initial = ", ".join(self.instance.nearby_areas)
 
@@ -2452,6 +2461,24 @@ class ProviderProfileDashboardEditForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+
+
+class ProviderShiftDashboardForm(forms.ModelForm):
+    class Meta:
+        model = ProviderShift
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "provider" in self.fields:
+            self.fields["provider"].queryset = (
+                User.objects.filter(provider_profile__isnull=False)
+                .select_related("provider_profile")
+                .order_by("username")
+            )
+            self.fields["provider"].label_from_instance = (
+                lambda user: user.get_full_name().strip() or user.email or user.username
+            )
 
 
 class DateSurchargeDashboardForm(forms.ModelForm):
@@ -2591,8 +2618,11 @@ def dashboard_model_list(request, model):
 
     qs = item.model.objects.all()
     service_id = request.GET.get("service_id")
+    provider_id = request.GET.get("provider_id")
     if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "BusinessServiceCard"}:
         qs = qs.filter(service_id=service_id)
+    if provider_id and item.model == ProviderShift:
+        qs = qs.filter(provider_id=provider_id)
     q = request.GET.get("q", "").strip()
     if q:
         text_fields = [
@@ -2622,6 +2652,7 @@ def dashboard_model_list(request, model):
     display_fields_map = {
         "contacts": ["first_name", "last_name", "email", "phone", "source"],
         "provider-profiles": ["user", "city", "region", "area", "nearby_areas", "is_active"],
+        "provider-shifts": ["provider", "weekday", "start_time", "end_time", "is_active", "label"],
         "business-services": ["title", "recommended", "detail_description", "image", "hero_image"],
         "business-service-cards": ["service", "title", "order"],
         "business-bundles": ["title", "discount", "short_description", "image"],
@@ -2649,6 +2680,7 @@ def dashboard_model_list(request, model):
         "display_fields": display_fields,
         "query": q,
         "service_id": service_id,
+        "provider_id": provider_id,
         "service_obj": service_obj,
         "use_view_mode": _dashboard_uses_view_mode(item),
     }
@@ -2690,6 +2722,8 @@ def dashboard_model_create(request, model):
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
         Form = ScheduleRuleDashboardForm
+    elif item.model == ProviderShift:
+        Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardCreateForm
     else:
@@ -2707,8 +2741,12 @@ def dashboard_model_create(request, model):
                 if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
                     obj.created_by = request.user
                 obj.save()
+                if item.model == ProviderShift:
+                    return redirect(f"{reverse('home:dashboard_model_list', args=[item.slug])}?provider_id={obj.provider_id}")
             else:
-                form.save()
+                obj = form.save()
+                if item.model == ProviderProfile:
+                    return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
             return redirect("home:dashboard_model_list", model=item.slug)
     else:
         initial = {}
@@ -2737,6 +2775,10 @@ def dashboard_model_create(request, model):
             if service_id:
                 initial["service"] = service_id
         if item.model == ProviderAdminMessage:
+            provider_id = request.GET.get("provider_id")
+            if provider_id:
+                initial["provider"] = provider_id
+        if item.model == ProviderShift:
             provider_id = request.GET.get("provider_id")
             if provider_id:
                 initial["provider"] = provider_id
@@ -2792,6 +2834,8 @@ def dashboard_model_edit(request, model, pk):
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
         Form = ScheduleRuleDashboardForm
+    elif item.model == ProviderShift:
+        Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardEditForm
     else:
@@ -2840,6 +2884,13 @@ def dashboard_model_edit(request, model, pk):
             exclude_fields=JSON_EDIT_FIELDS.get(item.model, set())
         )
 
+    provider_shifts = None
+    if item.model == ProviderProfile:
+        provider_shifts = (
+            ProviderShift.objects.filter(provider=obj.user)
+            .order_by("weekday", "start_time", "pk")
+        )
+
     context = {
         "items": get_dashboard_items(),
         "item": item,
@@ -2851,6 +2902,7 @@ def dashboard_model_edit(request, model, pk):
         "addons_for_service": addons_for_service,
         "room_options_for_service": room_options_for_service,
         "business_cards_for_service": business_cards_for_service,
+        "provider_shifts": provider_shifts,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
     if item.model in {BusinessBooking, PrivateBooking}:
@@ -2891,6 +2943,8 @@ def dashboard_model_view(request, model, pk):
         Form = DateSurchargeDashboardForm
     elif item.model == ScheduleRule:
         Form = ScheduleRuleDashboardForm
+    elif item.model == ProviderShift:
+        Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardEditForm
     else:
@@ -2922,6 +2976,13 @@ def dashboard_model_view(request, model, pk):
         exclude_fields=JSON_EDIT_FIELDS.get(item.model, set())
     )
 
+    provider_shifts = None
+    if item.model == ProviderProfile:
+        provider_shifts = (
+            ProviderShift.objects.filter(provider=obj.user)
+            .order_by("weekday", "start_time", "pk")
+        )
+
     context = {
         "items": get_dashboard_items(),
         "item": item,
@@ -2932,6 +2993,7 @@ def dashboard_model_view(request, model, pk):
         "addon_form_preview": addon_form_preview,
         "addons_for_service": addons_for_service,
         "business_cards_for_service": business_cards_for_service,
+        "provider_shifts": provider_shifts,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
     if item.model in {BusinessBooking, PrivateBooking}:
@@ -5455,9 +5517,11 @@ def private_booking_schedule(request):
                 if not service_start_time:
                     messages.error(request, f"Please choose a valid start time for {service.title}.")
                     return _render_schedule_page(temp_booking, pricing)
+                service_booking = _build_private_booking_from_draft(draft, request.user)
+                service_booking.selected_services = [service.slug]
                 available_slots = {
                     item["value"]
-                    for item in get_available_slots_for_booking(temp_booking, service_date)
+                    for item in get_available_slots_for_booking(service_booking, service_date)
                 }
                 selected_time_value = service_start_time.strftime("%H:%M")
                 if selected_time_value not in available_slots:
@@ -5670,6 +5734,9 @@ def private_provider_availability_api(request):
 
     booking = _build_private_booking_from_draft(draft, request.user)
     booking.appointment_date = date_obj
+    service_slug = (request.GET.get("service") or "").strip()
+    if service_slug:
+        booking.selected_services = [service_slug]
 
     duration_minutes = int(booking.quoted_duration_minutes or 0)
     if duration_minutes <= 0:
@@ -5717,6 +5784,7 @@ def private_provider_availability_api(request):
                 "label": item["slot"].strftime("%I:%M %p"),
                 "provider_count": item["provider_count"],
                 "provider_ids": item["provider_ids"],
+                "provider_names": item.get("provider_names", []),
             }
             for item in available_slots
         ],
