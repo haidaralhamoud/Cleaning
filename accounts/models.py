@@ -731,6 +731,12 @@ class LoyaltyTier(models.Model):
     min_points = models.PositiveIntegerField()
     max_points = models.PositiveIntegerField(null=True, blank=True)
 
+    image = models.ImageField(
+        upload_to="loyalty_tiers/",
+        blank=True,
+        null=True
+    )
+
     description = models.CharField(max_length=255)
     benefits = models.TextField()
 
@@ -1231,6 +1237,8 @@ class ProviderShift(models.Model):
 
     def clean(self):
         super().clean()
+        if self.start_time is None or self.end_time is None:
+            return
         if self.end_time <= self.start_time:
             raise ValidationError({"end_time": "Shift end time must be later than start time."})
 

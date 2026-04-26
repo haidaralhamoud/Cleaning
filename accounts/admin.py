@@ -47,9 +47,20 @@ class CustomerPreferencesAdmin(admin.ModelAdmin):
 # =========================
 @admin.register(LoyaltyTier)
 class LoyaltyTierAdmin(admin.ModelAdmin):
-    list_display = ("name", "min_points", "max_points", "is_active", "order")
+    list_display = ("tier_preview", "name", "min_points", "max_points", "is_active", "order")
     list_editable = ("order", "is_active")
     ordering = ("order",)
+
+    def tier_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" alt="{}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid #dbe7ef;" />',
+                obj.image.url,
+                obj.name,
+            )
+        return "—"
+
+    tier_preview.short_description = "Icon"
 
 
 @admin.register(Reward)

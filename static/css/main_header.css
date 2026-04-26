@@ -109,6 +109,7 @@ body.mobile-nav-open {
   position: absolute;
   top: 100%;
   left: 0;
+  display: block;
   background: #fff;
   min-width: 190px;
   border-radius: 12px;
@@ -163,6 +164,7 @@ body.mobile-nav-open {
   position: absolute;
   top: 0;
   left: calc(100% - 6px);
+  display: block;
   min-width: 240px;
   background: #fff;
   border-radius: 12px;
@@ -354,6 +356,11 @@ body.mobile-nav-open {
   gap: 12px;
 }
 
+.auth-buttons form {
+  margin: 0;
+  display: flex;
+}
+
 .lang-dropdown {
   position: relative;
 }
@@ -485,7 +492,12 @@ body.mobile-nav-open {
 }
 
 .btn-auth {
-  padding: 10px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  width: 150px;
+  padding: 10px 18px;
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
@@ -496,6 +508,7 @@ body.mobile-nav-open {
   border: none;
   cursor: pointer;
   box-shadow: 0 10px 20px rgba(0, 163, 200, 0.2);
+  white-space: nowrap;
 }
 
 .menu-toggle {
@@ -582,12 +595,15 @@ body.mobile-nav-open {
 }
 
 .btn-auth.logout {
-  background: #ff4f4f;
-  box-shadow: 0 10px 20px rgba(255, 79, 79, 0.2);
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe9e9 100%);
+  color: #d64545;
+  border: 1px solid rgba(214, 69, 69, 0.18);
+  box-shadow: 0 10px 20px rgba(214, 69, 69, 0.12);
 }
 
 .btn-auth.logout:hover {
-  background: #e63e3e;
+  background: linear-gradient(135deg, #ffecec 0%, #ffdede 100%);
+  color: #bf3333;
 }
 
 .lang-switch {
@@ -687,7 +703,7 @@ body.mobile-nav-open {
     align-items: center;
     justify-content: space-between;
     padding: 18px 24px;
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .nav-dropdown {
@@ -766,7 +782,7 @@ body.mobile-nav-open {
 
   .submenu-toggle {
     padding: 16px 24px !important;
-    font-size: 16px !important;
+    font-size: 15px !important;
     font-weight: 800 !important;
   }
 

@@ -503,10 +503,13 @@ img{display:block;max-width:100%;height:auto}
   }
   .hero-copy{
     max-width:100%;
+    margin-left:0;
+    margin-right:0;
     text-align:center;
   }
   .hero-buttons{
     justify-content:center;
+    align-items:center;
   }
   .steps{grid-template-columns:1fr; gap:26px}
   .track{display:none}
@@ -517,6 +520,18 @@ img{display:block;max-width:100%;height:auto}
 }
 @media (max-width:700px){
   .btn{width:100%}
+  .hero-copy{
+    margin-inline:auto;
+  }
+  .hero-copy h1,
+  .hero-copy p{
+    text-align:center;
+  }
+  .hero-buttons,
+  .same-day-dropdown{
+    width:100%;
+    justify-content:center;
+  }
   .cards{grid-template-columns:1fr}
   .mini-cards{grid-template-columns:1fr}
   .t-grid{grid-template-columns:1fr}

@@ -92,6 +92,14 @@ html {
 
 /* ====== RESPONSIVE ====== */
 @media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    font-size: 0.92rem;
+  }
+
   .menu-toggle {
     display: block;
   }

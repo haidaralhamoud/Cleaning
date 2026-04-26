@@ -37,6 +37,13 @@
     gap: 24px;
   }
 
+  .dropdown-menu,
+  .submenu-menu,
+  .nav-mobile-auth,
+  .services-preview-group {
+    display: none;
+  }
+
   .main-header .nav-links a,
   .main-header .dropdown-toggle {
     text-decoration: none;
@@ -97,6 +104,13 @@
       background: #fff;
       box-shadow: -16px 0 36px rgba(15, 23, 42, 0.18);
       transform: translateX(104%);
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .nav-links.active {
+      visibility: visible;
+      pointer-events: auto;
     }
   }
 </style>

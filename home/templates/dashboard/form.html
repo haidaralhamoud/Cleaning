@@ -3,6 +3,43 @@
 {% block title %}{{ item.label }}{% endblock %}
 {% block page_title %}{{ item.label }}{% endblock %}
 {% block content %}
+  <style>
+    .provider-shift-weekday-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border: 1px solid #d7e3ef;
+      border-radius: 999px;
+      background: #f8fbff;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .provider-shift-weekday-chip:has(input:checked) {
+      background: #e8f7ff;
+      border-color: #4cb7dd;
+      box-shadow: 0 0 0 3px rgba(76, 183, 221, 0.14);
+    }
+
+    .provider-shift-weekday-chip input {
+      margin: 0;
+    }
+
+    .provider-shift-time-field {
+      position: relative;
+    }
+
+    .provider-shift-time-selects {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 130px;
+      gap: 12px;
+    }
+
+    .provider-shift-time-field select {
+      min-height: 58px;
+    }
+  </style>
   <div class="card shadow-sm">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -97,6 +134,9 @@
           {% for field in form %}
             {% if item.slug == "private-addons" and field.name == "price_per_unit" %}
               <div class="d-none">{{ field }}</div>
+            {% elif item.slug == "provider-shifts" and mode == "create" and field.name == "weekday" %}
+              <div class="d-none">{{ field }}</div>
+            {% elif item.slug == "provider-shifts" and field.name == "start_time" or item.slug == "provider-shifts" and field.name == "end_time" or item.slug == "provider-shifts" and field.name == "start_period" or item.slug == "provider-shifts" and field.name == "end_period" %}
             {% elif item.slug == "service-estimates" and field.name == "property_options_text" or item.slug == "service-estimates" and field.name == "bedrooms_options_text" %}
               <div class="col-md-6 mb-3">
                 <label class="form-label">{{ field.label }}</label>
@@ -153,6 +193,62 @@
                   {% endfor %}
                 </div>
               {% endif %}
+            {% elif item.slug == "provider-shifts" and field.name == "weekdays" %}
+              <div class="col-md-6 mb-3">
+                <label class="form-label">{{ field.label }}</label>
+                <div class="provider-shift-weekdays d-flex flex-wrap gap-2">
+                  {% for checkbox in field %}
+                    <label class="provider-shift-weekday-chip">
+                      {{ checkbox.tag }}
+                      <span>{{ checkbox.choice_label }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% elif item.slug == "provider-shifts" and field.name == "start_hour" %}
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Start time</label>
+                <div class="provider-shift-time-field">
+                  <div class="provider-shift-time-selects">
+                    {{ field }}
+                    {{ form.start_period }}
+                  </div>
+                </div>
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% for error in form.start_period.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
+            {% elif item.slug == "provider-shifts" and field.name == "end_hour" %}
+              <div class="col-md-6 mb-3">
+                <label class="form-label">End time</label>
+                <div class="provider-shift-time-field">
+                  <div class="provider-shift-time-selects">
+                    {{ field }}
+                    {{ form.end_period }}
+                  </div>
+                </div>
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for error in field.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+                {% for error in form.end_period.errors %}
+                  <div class="text-danger small">{{ error }}</div>
+                {% endfor %}
+              </div>
             {% elif field.name == "recommended" and item.slug == "private-services" or field.name == "recommended" and item.slug == "business-services" %}
               <div class="col-md-6 mb-3">
                 <label class="form-label">Recommended</label>

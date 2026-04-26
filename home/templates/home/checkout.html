@@ -39,6 +39,49 @@
 </div>
 </div>
 </section>
+{% if user.is_authenticated %}
+<section class="card loyalty-card loyalty-card--checkout">
+<div class="loyalty-card__top">
+<span class="section-chip loyalty-card__chip">Loyalty & Rewards</span>
+</div>
+<div class="loyalty-card__grid">
+<div class="loyalty-card__tier">
+<div class="loyalty-card__icon-wrap loyalty-card__icon-wrap--{% if loyalty_snapshot.current_tier %}{{ loyalty_snapshot.current_tier.color|lower }}{% else %}member{% endif %}">
+{% if loyalty_snapshot.icon_is_static %}
+<img src="{% static loyalty_snapshot.icon_path %}" alt="" class="loyalty-card__icon-image">
+{% else %}
+<img src="{{ loyalty_snapshot.icon_path }}" alt="" class="loyalty-card__icon-image">
+{% endif %}
+</div>
+<div>
+<p class="loyalty-card__label">{% if loyalty_snapshot.current_tier %}{{ loyalty_snapshot.current_tier.name }} Member{% else %}Member{% endif %}</p>
+<strong>{{ points_balance }} points</strong>
+{% if loyalty_snapshot.next_tier %}
+<span>{{ loyalty_snapshot.next_tier_points }} pts away from {{ loyalty_snapshot.next_tier.name }} Tier</span>
+{% else %}
+<span>You're at the highest tier.</span>
+{% endif %}
+</div>
+</div>
+<div class="loyalty-card__progress">
+<p class="loyalty-card__label">{% if loyalty_snapshot.next_tier %}Progress to {{ loyalty_snapshot.next_tier.name }}{% else %}Tier progress{% endif %}</p>
+<strong>{% if loyalty_snapshot.next_tier %}{{ loyalty_snapshot.progress_current }} / {{ loyalty_snapshot.progress_target }} pts{% else %}Max level reached{% endif %}</strong>
+<div class="loyalty-card__bar"><span style="width: {{ loyalty_snapshot.progress_percent }}%;"></span></div>
+</div>
+<div class="loyalty-card__action">
+<p class="loyalty-card__label">Available for this booking</p>
+{% if reward_context.selected_reward %}
+<strong>Use {{ reward_context.selected_reward.points_required }} pts - {{ reward_context.selected_reward.discount_amount|floatformat:0 }}% off</strong>
+<span>{{ reward_context.selected_reward.title }}</span>
+{% else %}
+<strong>No reward available yet</strong>
+<span>Keep collecting points to unlock rewards.</span>
+{% endif %}
+<a href="{% url 'accounts:Loyalty_and_Rewards' %}" class="loyalty-card__button">{% if reward_context.selected_reward %}View rewards{% else %}See loyalty details{% endif %}</a>
+</div>
+</div>
+</section>
+{% endif %}
 <section class="card services-card">
 <div class="card-header">
 <div>
@@ -66,7 +109,6 @@
 <h3>{{ s.title }}</h3>
 <p>Selected for this booking</p>
 </div>
-<span class="service-line__price">+{{ s.price|floatformat:2 }} {{ s.price_currency }}</span>
 </div>
 </div>
 </article>{% endfor %}</div>

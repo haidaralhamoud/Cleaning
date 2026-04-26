@@ -112,7 +112,14 @@
 <strong id="timePreviewValue">Not set yet</strong>
 </div>
 <div class="time-slots-status" id="timeSlotsStatus">Select a date to see real availability.</div>
-<select id="timeSlotsSelect" class="time-slots-select" disabled>
+<div class="time-slots-panel" id="timeSlotsPanel">
+<div class="time-slots-primary" id="timeSlotsPrimary" hidden>
+</div>
+<div class="time-slots-list" id="timeSlotsList" aria-live="polite">
+</div>
+<div class="time-slots-empty" id="timeSlotsEmpty">Select a date first to see available times.</div>
+</div>
+<select id="timeSlotsSelect" class="time-slots-select" disabled hidden data-no-custom>
 <option value="">Select a date first</option>
 </select>
 </div>
@@ -203,7 +210,10 @@
 <input type="hidden" class="svc-time">
 <div class="svc-slot-box">
 <div class="svc-slot-status">Choose a date first to load available slots.</div>
-<select class="svc-slot-select" disabled>
+<div class="time-slots-list svc-slot-list" aria-live="polite">
+</div>
+<div class="time-slots-empty svc-slot-empty">Choose a date first to load available slots.</div>
+<select class="svc-slot-select" disabled hidden data-no-custom>
 <option value="">Choose a date first</option>
 </select>
 </div>
@@ -577,6 +587,9 @@ const timePreviewValue  = document.getElementById("timePreviewValue");
 const timePreviewCard  = document.getElementById("timePreviewCard");
 const timeSlotsSelect = document.getElementById("timeSlotsSelect");
 const timeSlotsStatus = document.getElementById("timeSlotsStatus");
+const timeSlotsPrimary = document.getElementById("timeSlotsPrimary");
+const timeSlotsList = document.getElementById("timeSlotsList");
+const timeSlotsEmpty = document.getElementById("timeSlotsEmpty");
 const inputFreq    = document.getElementById("frequency_type");
 const inputSpecial = document.getElementById("special_timing_requests");
 const inputMode    = document.getElementById("schedule_mode");
@@ -727,6 +740,20 @@ function syncStartTimePickerUi(value) {
   if (timeSlotsSelect) {
     timeSlotsSelect.value = normalized || "";
   }
+  if (timeSlotsList) {
+    timeSlotsList.querySelectorAll(".time-slot-chip").forEach((button) => {
+      const isSelected = button.getAttribute("data-value") === normalized;
+      button.classList.toggle("is-selected", isSelected);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+  }
+  if (timeSlotsPrimary) {
+    timeSlotsPrimary.querySelectorAll(".time-slot-primary").forEach((button) => {
+      const isSelected = button.getAttribute("data-value") === normalized;
+      button.classList.toggle("is-selected", isSelected);
+      button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+  }
 }
 
 function setSameTimeAvailabilityState(message, tone) {
@@ -738,15 +765,72 @@ function setSameTimeAvailabilityState(message, tone) {
   }
 }
 
-function openSelectMenu(selectEl) {
-  if (!selectEl || selectEl.disabled || selectEl.options.length <= 1) return;
-  if (typeof selectEl.showPicker === "function") {
-    try {
-      selectEl.showPicker();
-    } catch (err) {
-      // Ignore browsers that block programmatic picker opening.
-    }
+function getSlotMeta(slot) {
+  const providerNames = Array.isArray(slot.provider_names) ? slot.provider_names.filter(Boolean) : [];
+  if (providerNames.length === 1) {
+    return providerNames[0];
   }
+  if (providerNames.length > 1) {
+    return `${providerNames.length} providers available`;
+  }
+  return `${slot.provider_count || 1} provider${(slot.provider_count || 1) === 1 ? "" : "s"} available`;
+}
+
+function renderPrimarySlot(container, slot, selectedValue, onSelect) {
+  if (!container) return;
+  container.innerHTML = "";
+  container.hidden = !slot;
+  if (!slot) return;
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "time-slot-primary";
+  button.setAttribute("data-value", slot.value || "");
+  button.setAttribute("aria-pressed", slot.value === selectedValue ? "true" : "false");
+  button.classList.toggle("is-selected", slot.value === selectedValue);
+
+  const eyebrow = document.createElement("span");
+  eyebrow.className = "time-slot-primary__eyebrow";
+  eyebrow.textContent = "Earliest available";
+
+  const time = document.createElement("span");
+  time.className = "time-slot-primary__time";
+  time.textContent = slot.label || formatStartTimePreview(slot.value || "");
+
+  button.appendChild(eyebrow);
+  button.appendChild(time);
+  button.addEventListener("click", () => onSelect(slot.value || ""));
+  container.appendChild(button);
+}
+
+function renderSlotButtonList(container, emptyStateEl, slots, selectedValue, onSelect, emptyMessage) {
+  if (!container) return;
+  container.innerHTML = "";
+
+  const hasSlots = Array.isArray(slots) && slots.length > 0;
+  container.hidden = !hasSlots;
+  if (emptyStateEl) {
+    emptyStateEl.hidden = hasSlots;
+    emptyStateEl.textContent = hasSlots ? "" : (emptyMessage || "No available times.");
+  }
+  if (!hasSlots) return;
+
+  slots.forEach((slot) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "time-slot-chip";
+    button.setAttribute("data-value", slot.value || "");
+    button.setAttribute("aria-pressed", slot.value === selectedValue ? "true" : "false");
+    button.classList.toggle("is-selected", slot.value === selectedValue);
+
+    const label = document.createElement("span");
+    label.className = "time-slot-chip__label";
+    label.textContent = slot.label || formatStartTimePreview(slot.value || "");
+    button.appendChild(label);
+
+    button.addEventListener("click", () => onSelect(slot.value || ""));
+    container.appendChild(button);
+  });
 }
 
 function renderSameTimeSlots(slots) {
@@ -760,16 +844,9 @@ function renderSameTimeSlots(slots) {
   timeSlotsSelect.appendChild(placeholder);
 
   (slots || []).forEach((slot) => {
-    const providerNames = Array.isArray(slot.provider_names) ? slot.provider_names.filter(Boolean) : [];
     const option = document.createElement("option");
     option.value = slot.value;
-    if (providerNames.length === 1) {
-      option.textContent = `${slot.label} - ${providerNames[0]}`;
-    } else if (providerNames.length > 1) {
-      option.textContent = `${slot.label} - ${providerNames.join(", ")}`;
-    } else {
-      option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
-    }
+    option.textContent = `${slot.label} - ${getSlotMeta(slot)}`;
     option.selected = slot.value === currentValue;
     timeSlotsSelect.appendChild(option);
   });
@@ -780,9 +857,19 @@ function renderSameTimeSlots(slots) {
       ? currentValue
       : slots[0].value;
     syncStartTimePickerUi(selectedValue);
+    renderPrimarySlot(timeSlotsPrimary, slots[0], selectedValue, (value) => {
+      syncStartTimePickerUi(value);
+      updateScheduleSummary();
+    });
+    renderSlotButtonList(timeSlotsList, timeSlotsEmpty, slots, selectedValue, (value) => {
+      syncStartTimePickerUi(value);
+      updateScheduleSummary();
+    }, "");
   } else {
+    renderPrimarySlot(timeSlotsPrimary, null, "", () => {});
     syncStartTimePickerUi("");
     timeSlotsSelect.value = "";
+    renderSlotButtonList(timeSlotsList, timeSlotsEmpty, [], "", () => {}, "No available times for this date.");
   }
 }
 
@@ -799,6 +886,8 @@ function setServiceSlotState(acc, message, tone) {
 function renderServiceSlots(acc, slots) {
   const select = acc.querySelector(".svc-slot-select");
   const timeInput = acc.querySelector(".svc-time");
+  const slotList = acc.querySelector(".svc-slot-list");
+  const slotEmpty = acc.querySelector(".svc-slot-empty");
   if (!select || !timeInput) return;
   select.innerHTML = "";
 
@@ -808,16 +897,9 @@ function renderServiceSlots(acc, slots) {
   select.appendChild(placeholder);
 
   (slots || []).forEach((slot) => {
-    const providerNames = Array.isArray(slot.provider_names) ? slot.provider_names.filter(Boolean) : [];
     const option = document.createElement("option");
     option.value = slot.value;
-    if (providerNames.length === 1) {
-      option.textContent = `${slot.label} - ${providerNames[0]}`;
-    } else if (providerNames.length > 1) {
-      option.textContent = `${slot.label} - ${providerNames.join(", ")}`;
-    } else {
-      option.textContent = `${slot.label} - ${slot.provider_count} provider${slot.provider_count === 1 ? "" : "s"} available`;
-    }
+    option.textContent = `${slot.label} - ${getSlotMeta(slot)}`;
     option.selected = slot.value === timeInput.value;
     select.appendChild(option);
   });
@@ -829,20 +911,33 @@ function renderServiceSlots(acc, slots) {
       : slots[0].value;
     timeInput.value = selectedValue;
     select.value = selectedValue;
+    renderSlotButtonList(slotList, slotEmpty, slots, selectedValue, (value) => {
+      timeInput.value = value;
+      select.value = value;
+      slotList.querySelectorAll(".time-slot-primary, .time-slot-chip").forEach((button) => {
+        const isSelected = button.getAttribute("data-value") === value;
+        button.classList.toggle("is-selected", isSelected);
+        button.setAttribute("aria-pressed", isSelected ? "true" : "false");
+      });
+      updateScheduleSummary();
+    }, "");
   } else {
     timeInput.value = "";
     select.value = "";
+    renderSlotButtonList(slotList, slotEmpty, [], "", () => {}, "No available times for this date.");
   }
 }
 
 function loadSameDayAvailability(dateValue, preserveSelected = false) {
   if (!dateValue) {
     if (inputStartTime && !preserveSelected) inputStartTime.value = "";
+    renderPrimarySlot(timeSlotsPrimary, null, "", () => {});
     syncStartTimePickerUi(preserveSelected ? (inputStartTime ? inputStartTime.value : "") : "");
     if (timeSlotsSelect) {
       timeSlotsSelect.innerHTML = '<option value="">Select a date first</option>';
       timeSlotsSelect.disabled = true;
     }
+    renderSlotButtonList(timeSlotsList, timeSlotsEmpty, [], "", () => {}, "Select a date first to see available times.");
     setSameTimeAvailabilityState("Select a date to see real availability.", "");
     return Promise.resolve([]);
   }
@@ -886,7 +981,9 @@ function loadSameDayAvailability(dateValue, preserveSelected = false) {
         timeSlotsSelect.innerHTML = '<option value="">Could not load hours</option>';
         timeSlotsSelect.disabled = true;
       }
+      renderPrimarySlot(timeSlotsPrimary, null, "", () => {});
       syncStartTimePickerUi("");
+      renderSlotButtonList(timeSlotsList, timeSlotsEmpty, [], "", () => {}, "Could not load available times right now.");
       setSameTimeAvailabilityState("Could not load live availability right now.", "empty");
       return [];
     });
@@ -901,6 +998,7 @@ function loadServiceAvailability(acc, dateValue, preserveSelected = false) {
     if (!preserveSelected) timeInput.value = "";
     select.innerHTML = '<option value="">Choose a date first</option>';
     select.disabled = true;
+    renderSlotButtonList(acc.querySelector(".svc-slot-list"), acc.querySelector(".svc-slot-empty"), [], "", () => {}, "Choose a date first to load available slots.");
     setServiceSlotState(acc, "Choose a date first to load available slots.", "");
     return Promise.resolve([]);
   }
@@ -941,6 +1039,7 @@ function loadServiceAvailability(acc, dateValue, preserveSelected = false) {
       timeInput.value = "";
       select.innerHTML = '<option value="">Could not load hours</option>';
       select.disabled = true;
+      renderSlotButtonList(acc.querySelector(".svc-slot-list"), acc.querySelector(".svc-slot-empty"), [], "", () => {}, "Could not load available times right now.");
       setServiceSlotState(acc, "Could not load availability right now.", "empty");
       return [];
     });
@@ -1026,27 +1125,21 @@ document.querySelectorAll(".service-acc").forEach(acc => {
       loadServiceAvailability(acc, serviceDateEl.value || "").then(() => updateScheduleSummary());
     });
   }
-  if (serviceSlotSelect) {
-    serviceSlotSelect.addEventListener("change", () => {
-      const timeInput = acc.querySelector(".svc-time");
-      if (timeInput) {
-        timeInput.value = serviceSlotSelect.value || "";
-      }
-      updateScheduleSummary();
-    });
-    serviceSlotSelect.addEventListener("pointerdown", () => {
-      setTimeout(() => openSelectMenu(serviceSlotSelect), 0);
-    });
-  }
-});
+    if (serviceSlotSelect) {
+      serviceSlotSelect.addEventListener("change", () => {
+        const timeInput = acc.querySelector(".svc-time");
+        if (timeInput) {
+          timeInput.value = serviceSlotSelect.value || "";
+        }
+        updateScheduleSummary();
+      });
+    }
+  });
 
 if (timeSlotsSelect) {
   timeSlotsSelect.addEventListener("change", () => {
     syncStartTimePickerUi(timeSlotsSelect.value || "");
     updateScheduleSummary();
-  });
-  timeSlotsSelect.addEventListener("pointerdown", () => {
-    setTimeout(() => openSelectMenu(timeSlotsSelect), 0);
   });
 }
 

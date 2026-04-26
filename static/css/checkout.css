@@ -119,6 +119,12 @@ h1 {
   background: linear-gradient(135deg, #082f49 0%, #0f4c75 100%);
 }
 
+.checkout-stat--loyalty {
+  background:
+    radial-gradient(circle at top right, rgba(113, 178, 71, 0.16), transparent 34%),
+    linear-gradient(135deg, #fafdff 0%, #ffffff 52%, #f4fbf7 100%);
+}
+
 .checkout-stat__label {
   display: block;
   margin-bottom: 8px;
@@ -140,6 +146,50 @@ h1 {
   color: #fff;
 }
 
+.checkout-stat__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.checkout-stat__head .checkout-stat__label {
+  margin-bottom: 0;
+}
+
+.checkout-stat__link {
+  color: var(--brand-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.checkout-stat__link:hover {
+  text-decoration: underline;
+}
+
+.checkout-stat__sub {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink-700);
+  line-height: 1.45;
+}
+
+.checkout-stat__progress {
+  margin-top: 12px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.checkout-stat__progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #039fc8 0%, #71b247 100%);
+}
+
 .checkout-grid {
   display: grid;
   grid-template-columns: minmax(0, 1020px);
@@ -154,6 +204,148 @@ h1 {
   width: 100%;
   max-width: 1020px;
   margin: 0 auto;
+}
+
+.loyalty-card {
+  border: 1px solid rgba(3, 159, 200, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(3, 159, 200, 0.08), transparent 30%),
+    linear-gradient(135deg, #fcfeff 0%, #ffffff 54%, #fbfffd 100%);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.07);
+}
+
+.loyalty-card--checkout {
+  padding-top: 14px;
+  padding-bottom: 16px;
+}
+
+.loyalty-card__top {
+  margin-bottom: 10px;
+}
+
+.loyalty-card__chip {
+  background: rgba(8, 47, 73, 0.06);
+  color: #0f4c75;
+}
+
+.loyalty-card__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.95fr) minmax(220px, 0.9fr);
+  gap: 22px;
+  align-items: center;
+}
+
+.loyalty-card__tier {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.loyalty-card__icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(113, 178, 71, 0.16), rgba(3, 159, 200, 0.08));
+  flex-shrink: 0;
+}
+
+.loyalty-card__icon-wrap--member {
+  background: linear-gradient(135deg, #edf9f3 0%, #e7f5fb 100%);
+}
+
+.loyalty-card__icon-wrap--bronze {
+  background: linear-gradient(135deg, #fff4ec 0%, #ffe7d8 100%);
+}
+
+.loyalty-card__icon-wrap--silver {
+  background: linear-gradient(135deg, #f3f7fa 0%, #e8eef4 100%);
+}
+
+.loyalty-card__icon-wrap--gold {
+  background: linear-gradient(135deg, #fff9df 0%, #fff0bf 100%);
+}
+
+.loyalty-card__icon-wrap--platinum,
+.loyalty-card__icon-wrap--diamond {
+  background: linear-gradient(135deg, #f0f3ff 0%, #e4eaff 100%);
+}
+
+.loyalty-card__icon-image {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+.loyalty-card__label {
+  margin-bottom: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #0f4c75;
+}
+
+.loyalty-card__tier strong,
+.loyalty-card__progress strong,
+.loyalty-card__action strong {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--ink-900);
+  line-height: 1.2;
+}
+
+.loyalty-card__tier span,
+.loyalty-card__progress span,
+.loyalty-card__action span {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink-700);
+  line-height: 1.45;
+}
+
+.loyalty-card__bar {
+  margin-top: 12px;
+  width: 100%;
+  max-width: 210px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(203, 213, 225, 0.8);
+  overflow: hidden;
+}
+
+.loyalty-card__bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #039fc8 0%, #71b247 100%);
+}
+
+.loyalty-card__action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.loyalty-card__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: 12px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0a5790 0%, #0f4c75 100%);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 10px 20px rgba(15, 76, 117, 0.18);
+}
+
+.loyalty-card__button:hover {
+  filter: brightness(1.04);
 }
 
 .checkout-sidebar {
@@ -1554,6 +1746,10 @@ hr {
 
 @media (max-width: 992px) {
   .checkout-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .loyalty-card__grid {
     grid-template-columns: 1fr;
   }
   .checkout-hero-card,

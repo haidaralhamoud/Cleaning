@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 import logging
-from datetime import timedelta
+from datetime import timedelta, time as dt_time
 from io import BytesIO
 import re
 import stripe
@@ -49,6 +49,7 @@ from accounts.models import (
     ProviderAdminMessage,
     ChatMessage,
     Reward,
+    LoyaltyTier,
     PointsTransaction,
 )
 from django.http import JsonResponse, HttpResponse
@@ -597,6 +598,95 @@ def _get_private_reward_context(user, selected_reward_id=None, use_reward=False,
         "use_reward": bool(use_reward and selected_reward is not None),
         "reward_discount": reward_discount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
         "has_rewards": bool(eligible_rewards),
+    }
+
+
+def _get_loyalty_snapshot(user, points_balance=None):
+    def _resolve_loyalty_icon(tier):
+        if not tier:
+            return ("images/loyalty-icons/member.svg", True)
+
+        tier_image = getattr(tier, "image", None)
+        if tier_image:
+            try:
+                return (tier_image.url, False)
+            except ValueError:
+                pass
+
+        tier_name = (getattr(tier, "name", "") or "").strip().lower()
+        tier_color = (getattr(tier, "color", "") or "").strip().lower()
+        tier_token = f"{tier_name} {tier_color}"
+
+        if "platinum" in tier_token or "diamond" in tier_token:
+            return ("images/loyalty-icons/platinum.svg", True)
+        if "gold" in tier_token:
+            return ("images/loyalty-icons/gold.svg", True)
+        if "silver" in tier_token:
+            return ("images/loyalty-icons/silver.svg", True)
+        if "bronze" in tier_token:
+            return ("images/loyalty-icons/bronze.svg", True)
+        return ("images/loyalty-icons/member.svg", True)
+
+    if not user or not user.is_authenticated:
+        icon_path, icon_is_static = _resolve_loyalty_icon(None)
+        return {
+            "current_tier": None,
+            "next_tier": None,
+            "next_tier_points": 0,
+            "progress_current": 0,
+            "progress_target": 0,
+            "progress_percent": 0,
+            "icon_path": icon_path,
+            "icon_is_static": icon_is_static,
+        }
+
+    if points_balance is None:
+        points_balance = _get_user_points_balance(user)
+
+    tiers = list(LoyaltyTier.objects.filter(is_active=True).order_by("order", "min_points"))
+    current_tier = None
+    next_tier = None
+
+    for tier in tiers:
+        if tier.max_points is not None:
+            if tier.min_points <= points_balance <= tier.max_points:
+                current_tier = tier
+        elif points_balance >= tier.min_points:
+            current_tier = tier
+
+    if current_tier:
+        next_tier = next((tier for tier in tiers if tier.order > current_tier.order), None)
+    elif tiers:
+        next_tier = tiers[0]
+
+    if current_tier:
+        progress_current = max(0, points_balance - current_tier.min_points)
+    else:
+        progress_current = points_balance
+
+    if next_tier:
+        progress_target = max(0, next_tier.min_points - (current_tier.min_points if current_tier else 0))
+        next_tier_points = max(0, next_tier.min_points - points_balance)
+    else:
+        progress_target = 0
+        next_tier_points = 0
+
+    progress_percent = 100 if not next_tier else min(
+        100,
+        int((progress_current / max(progress_target, 1)) * 100),
+    )
+
+    icon_path, icon_is_static = _resolve_loyalty_icon(current_tier)
+
+    return {
+        "current_tier": current_tier,
+        "next_tier": next_tier,
+        "next_tier_points": next_tier_points,
+        "progress_current": progress_current,
+        "progress_target": progress_target,
+        "progress_percent": progress_percent,
+        "icon_path": icon_path,
+        "icon_is_static": icon_is_static,
     }
 
 
@@ -2494,6 +2584,21 @@ class ProviderProfileDashboardEditForm(forms.ModelForm):
 
 
 class ProviderShiftDashboardForm(forms.ModelForm):
+    HOUR_CHOICES = [("", "Hour")] + [(str(hour), str(hour)) for hour in range(1, 13)]
+    PERIOD_CHOICES = [("", "AM/PM"), ("AM", "AM"), ("PM", "PM")]
+
+    weekdays = forms.MultipleChoiceField(
+        label="Weekdays",
+        choices=ProviderShift.WEEKDAY_CHOICES,
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text="Select one or more days when creating the same shift for multiple weekdays.",
+    )
+    start_hour = forms.ChoiceField(label="Start time", choices=HOUR_CHOICES, required=False)
+    start_period = forms.ChoiceField(label="Start period", choices=PERIOD_CHOICES, required=False)
+    end_hour = forms.ChoiceField(label="End time", choices=HOUR_CHOICES, required=False)
+    end_period = forms.ChoiceField(label="End period", choices=PERIOD_CHOICES, required=False)
+
     class Meta:
         model = ProviderShift
         fields = "__all__"
@@ -2509,6 +2614,137 @@ class ProviderShiftDashboardForm(forms.ModelForm):
             self.fields["provider"].label_from_instance = (
                 lambda user: user.get_full_name().strip() or user.email or user.username
             )
+        self.fields["start_time"].required = False
+        self.fields["end_time"].required = False
+        self.fields["start_time"].widget = forms.HiddenInput()
+        self.fields["end_time"].widget = forms.HiddenInput()
+        if self.instance and self.instance.pk:
+            self.fields.pop("weekdays", None)
+        else:
+            self.fields["weekday"].required = False
+            self.fields["weekday"].widget = forms.HiddenInput()
+        if self.instance and self.instance.pk and not self.is_bound:
+            start_hour, start_period = self._split_time(self.instance.start_time)
+            end_hour, end_period = self._split_time(self.instance.end_time)
+            self.fields["start_hour"].initial = start_hour
+            self.fields["start_period"].initial = start_period
+            self.fields["end_hour"].initial = end_hour
+            self.fields["end_period"].initial = end_period
+        self.order_fields([
+            "provider",
+            "weekdays",
+            "start_hour",
+            "start_period",
+            "end_hour",
+            "end_period",
+            "is_active",
+            "label",
+            "weekday",
+            "start_time",
+            "end_time",
+        ])
+
+    @staticmethod
+    def _split_time(value):
+        if not value:
+            return "", ""
+        hour = value.hour
+        period = "PM" if hour >= 12 else "AM"
+        display_hour = hour % 12 or 12
+        return str(display_hour), period
+
+    @staticmethod
+    def _combine_time(hour_value, period_value):
+        if not hour_value or not period_value:
+            return None
+        hour = int(hour_value)
+        if period_value == "AM":
+            hour_24 = 0 if hour == 12 else hour
+        else:
+            hour_24 = 12 if hour == 12 else hour + 12
+        return dt_time(hour_24, 0)
+
+    def clean(self):
+        cleaned = super().clean()
+        start_hour = cleaned.get("start_hour")
+        start_period = cleaned.get("start_period")
+        end_hour = cleaned.get("end_hour")
+        end_period = cleaned.get("end_period")
+        start_time = self._combine_time(start_hour, start_period)
+        end_time = self._combine_time(end_hour, end_period)
+
+        if not start_hour:
+            self.add_error("start_hour", "Choose a start hour.")
+        if not start_period:
+            self.add_error("start_period", "Choose AM or PM for the start time.")
+        if not end_hour:
+            self.add_error("end_hour", "Choose an end hour.")
+        if not end_period:
+            self.add_error("end_period", "Choose AM or PM for the end time.")
+
+        if start_time and end_time and end_time <= start_time:
+            self.add_error("end_hour", "End time must be later than start time.")
+
+        cleaned["start_time"] = start_time
+        cleaned["end_time"] = end_time
+
+        if self.instance and self.instance.pk:
+            return cleaned
+
+        raw_weekdays = cleaned.get("weekdays") or []
+        weekdays = [int(day) for day in raw_weekdays]
+        provider = cleaned.get("provider")
+
+        if not weekdays:
+            self.add_error("weekdays", "Choose at least one weekday.")
+            return cleaned
+
+        if provider and start_time and end_time:
+            duplicates = ProviderShift.objects.filter(
+                provider=provider,
+                weekday__in=weekdays,
+                start_time=start_time,
+                end_time=end_time,
+            )
+            if duplicates.exists():
+                duplicate_days = ", ".join(shift.get_weekday_display() for shift in duplicates.order_by("weekday"))
+                self.add_error(
+                    "weekdays",
+                    f"This provider already has the same shift on: {duplicate_days}.",
+                )
+
+        cleaned["weekdays"] = weekdays
+        if len(weekdays) == 1:
+            cleaned["weekday"] = weekdays[0]
+        return cleaned
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.start_time = self.cleaned_data["start_time"]
+        instance.end_time = self.cleaned_data["end_time"]
+        if commit:
+            instance.save()
+        return instance
+
+    def save_multiple(self):
+        if self.instance and self.instance.pk:
+            return [self.save()]
+
+        weekdays = self.cleaned_data.get("weekdays") or []
+        created = []
+        with transaction.atomic():
+            for weekday in weekdays:
+                created.append(
+                    ProviderShift.objects.create(
+                        provider=self.cleaned_data["provider"],
+                        weekday=weekday,
+                        start_time=self.cleaned_data["start_time"],
+                        end_time=self.cleaned_data["end_time"],
+                        is_active=self.cleaned_data.get("is_active", True),
+                        label=(self.cleaned_data.get("label") or "").strip(),
+                    )
+                )
+        return created
 
 
 class DateSurchargeDashboardForm(forms.ModelForm):
@@ -2767,12 +3003,14 @@ def dashboard_model_create(request, model):
         form = _bootstrap_form(form)
         if form.is_valid():
             if isinstance(form, forms.ModelForm):
+                if item.model == ProviderShift:
+                    created_shifts = form.save_multiple()
+                    provider_id = created_shifts[0].provider_id if created_shifts else request.GET.get("provider_id")
+                    return redirect(f"{reverse('home:dashboard_model_list', args=[item.slug])}?provider_id={provider_id}")
                 obj = form.save(commit=False)
                 if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
                     obj.created_by = request.user
                 obj.save()
-                if item.model == ProviderShift:
-                    return redirect(f"{reverse('home:dashboard_model_list', args=[item.slug])}?provider_id={obj.provider_id}")
             else:
                 obj = form.save()
                 if item.model == ProviderProfile:
@@ -3099,7 +3337,7 @@ def contact(request):
         "show_popup": show_popup,
         "support_email": getattr(settings, "CONTACT_SUPPORT_EMAIL", "Support@hembla-experte.se"),
         "contact_address": "kikarvägen 18, 175 46 Järfälla stockholm",
-        "contact_phone": "",
+        "contact_phone": "0046769046338",
     })
 
 
@@ -4034,6 +4272,7 @@ def private_booking_checkout(request):
     reward_discount_amount = Decimal(str(payment_summary.get("reward_discount", 0) or 0))
     reward_applied = bool(payment_summary.get("reward_applied"))
     points_balance = int(payment_summary.get("points_balance", 0) or 0)
+    loyalty_snapshot = _get_loyalty_snapshot(request.user, points_balance=points_balance)
 
     addons_breakdown = []
     selected_addons = draft.get("addons_selected") or {}
@@ -4327,6 +4566,7 @@ def private_booking_checkout(request):
         "reward_discount_amount": reward_discount_amount,
         "reward_applied": reward_applied,
         "points_balance": points_balance,
+        "loyalty_snapshot": loyalty_snapshot,
         "final_preview_price": final_preview_price,
         "pricing": pricing,
         "services_total": services_total,
