@@ -1,6 +1,14 @@
 :root {
   --calendar-icon-url: url("../images/calendar-unified.svg");
   --cart-icon-url: url("../images/cart-unified.svg");
+  --lux-gold: #C8A75B;
+  --lux-gold-soft: #D6B56C;
+  --lux-gold-dark: #A88432;
+  --lux-gold-bg: #fbf7ee;
+  --lux-gold-border: rgba(200, 167, 91, 0.28);
+  --lux-gold-glow: rgba(200, 167, 91, 0.22);
+  --brand-navy: #1e4ed8;
+  --brand-navy-dark: #173da6;
 }
 
 input[type="date"] {
@@ -71,17 +79,21 @@ html {
 }
 
 .nav-links a:hover {
-  color: #71b247;
+  color: var(--lux-gold-dark);
 }
 
 .profile-btn a {
-  background: #71b247;
+  background: linear-gradient(135deg, var(--brand-navy), var(--brand-navy-dark));
   color: #fff;
   padding: 10px 20px;
   border-radius: 25px;
   font-family: "Vesper Libre", serif;
   font-size: 15px;
   white-space: nowrap;
+  border: 1px solid rgba(200, 167, 91, 0.2);
+  box-shadow:
+    0 10px 20px rgba(23, 61, 166, 0.18),
+    0 0 14px var(--lux-gold-glow);
 }
 
 /* ====== MENU TOGGLE (hidden on desktop) ====== */
@@ -170,7 +182,7 @@ button:lang(ar) {
 /* Footer */
 .footer {
   background: #fff;
-  border-top: 3px solid #71b247;
+  border-top: 3px solid var(--lux-gold);
   padding: 60px 6% 20px;
   font-family: "Vesper Libre", serif;
 }
@@ -210,7 +222,7 @@ button:lang(ar) {
   margin-top: 20px;
 }
 .bottom-left h4 {
-  color: #71b247;
+  color: var(--lux-gold-dark);
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 10px;
@@ -233,7 +245,7 @@ button:lang(ar) {
 
 /* الأعمدة التانية */
 .footer-col h4 {
-  color: #71b247;
+  color: var(--lux-gold-dark);
   font-size: 18px;
   font-weight: 700;
   margin-bottom: 10px;
@@ -252,13 +264,13 @@ button:lang(ar) {
   font-weight: 600;
 }
 .footer-col ul li a:hover {
-  color: #71b247;
+  color: var(--lux-gold-dark);
 }
 
 /* الخط الفاصل */
 .footer-line {
   border: none;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--lux-gold-border);
   margin: 40px 0 20px;
 }
 
@@ -338,7 +350,7 @@ button:lang(ar) {
 }
 
 .app-download h4 {
-  color: #71b247;
+  color: var(--lux-gold-dark);
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 10px;
@@ -392,7 +404,7 @@ button:lang(ar) {
   }
 
   .footer-col h4 {
-    color: #71b247;
+    color: var(--lux-gold-dark);
     margin-bottom: 10px;
   }
 
@@ -425,7 +437,7 @@ button:lang(ar) {
   }
 
   .app-download h4 {
-    color: #71b247;
+    color: var(--lux-gold-dark);
     margin-bottom: 10px;
   }
 
@@ -488,8 +500,8 @@ button:lang(ar) {
 }
 
 .custom-select.open .custom-select-toggle {
-  border-color: #00a3c8;
-  box-shadow: 0 0 0 4px rgba(0, 163, 200, 0.15);
+  border-color: var(--lux-gold);
+  box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.15);
 }
 
 .custom-select-arrow {
@@ -545,15 +557,15 @@ button:lang(ar) {
 }
 
 .custom-select-option:hover {
-  border-color: rgba(0, 163, 200, 0.4);
-  color: #00a3c8;
-  background: #edf7fb;
+  border-color: rgba(200, 167, 91, 0.4);
+  color: var(--lux-gold-dark);
+  background: var(--lux-gold-bg);
 }
 
 .custom-select-option.is-selected {
-  border-color: #00a3c8;
-  background: #e7f7fc;
-  color: #008aa8;
+  border-color: var(--lux-gold);
+  background: rgba(200, 167, 91, 0.14);
+  color: var(--lux-gold-dark);
 }
 
 .custom-select-option.is-disabled {
