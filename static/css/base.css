@@ -50,8 +50,10 @@ html {
 /* 🔹 كبرنا اللوغو شوي */
 .logo img {
   width: 150px;
-  height: 150px;
-  border-radius: 50%;
+  height: auto;
+  border-radius: 0;
+  background: transparent;
+  object-fit: contain;
 }
 
 .nav-links {
@@ -157,7 +159,7 @@ button:lang(ar) {
 
   .logo img {
     width: 100px;            /* 🔸 نفس حجم اللوغو اللي عجبك */
-    height: 100px;
+    height: auto;
   }
 
   .menu-toggle {
