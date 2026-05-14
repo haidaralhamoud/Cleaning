@@ -1815,3 +1815,324 @@ hr {
     gap: 14px;
   }
 }
+
+/* ===== Brand Refresh Overrides ===== */
+:root {
+  --brand: #c8a75b;
+  --brand-dark: #a88432;
+  --accent: #111111;
+  --ink-900: #111111;
+  --ink-700: #5f5548;
+  --ink-500: #8b7f70;
+  --border: rgba(200, 167, 91, 0.22);
+  --bg: #fbf7ef;
+  --card: #fffefa;
+  --shadow: 0 20px 42px rgba(168, 132, 50, 0.12);
+}
+
+body {
+  background:
+    radial-gradient(circle at top, rgba(200, 167, 91, 0.14), transparent 50%),
+    linear-gradient(120deg, #fffdfa 0%, #fbf7ef 56%, #f4ecdf 100%);
+}
+
+.card {
+  background: linear-gradient(180deg, #fffefa 0%, #fbf6eb 100%);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+.checkout-kicker,
+.section-chip,
+.review-card__eyebrow,
+.service-showcase__category,
+.invoice-pill {
+  background: linear-gradient(135deg, #f4e6c2, #fbf2df);
+  color: #7a6030;
+}
+
+.checkout-hero-card {
+  background:
+    radial-gradient(circle at top right, rgba(200, 167, 91, 0.18), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(17, 17, 17, 0.06), transparent 34%),
+    linear-gradient(135deg, #fffdfa 0%, #fff8ec 48%, #f6efdf 100%);
+}
+
+.checkout-hero-card__copy h2,
+.card-header h2,
+.review-card h3,
+.checkout-bottom h2,
+.payment-card h2,
+.right h3,
+h1 {
+  color: var(--ink-900);
+}
+
+.checkout-hero-card__copy p,
+.subtitle,
+.review-card__detail,
+.services-note,
+.discount-card__hint,
+.summary-note,
+.note,
+.flash,
+.loyalty-card__tier span,
+.loyalty-card__progress span,
+.loyalty-card__action span,
+.checkout-stat__sub {
+  color: var(--ink-700);
+}
+
+.checkout-stat {
+  border-color: var(--border);
+  background: rgba(255, 253, 248, 0.92);
+  box-shadow: 0 16px 28px rgba(168, 132, 50, 0.08);
+}
+
+.checkout-stat--accent {
+  background: linear-gradient(135deg, #fff9ee 0%, #f6edd8 100%);
+}
+
+.checkout-stat--dark {
+  border-color: rgba(17, 17, 17, 0.08);
+  background: linear-gradient(135deg, #111111 0%, #2a2620 100%);
+  box-shadow: 0 18px 30px rgba(17, 17, 17, 0.18);
+}
+
+.checkout-stat--dark strong,
+.checkout-stat--dark .checkout-stat__label {
+  color: #fff !important;
+}
+
+.checkout-stat__label,
+.loyalty-card__label,
+.checkout-message-modal__eyebrow {
+  color: #8a6a2b;
+}
+
+.checkout-stat strong,
+.loyalty-card__tier strong,
+.loyalty-card__progress strong,
+.loyalty-card__action strong,
+.review-card__value,
+.service-line h3 {
+  color: var(--ink-900);
+}
+
+.checkout-stat__progress,
+.loyalty-card__bar {
+  background: rgba(17, 17, 17, 0.12);
+}
+
+.checkout-stat__progress span,
+.loyalty-card__bar span {
+  background: linear-gradient(90deg, var(--brand) 0%, var(--brand-dark) 100%);
+}
+
+.loyalty-card {
+  border-color: var(--border);
+  background:
+    radial-gradient(circle at top right, rgba(200, 167, 91, 0.12), transparent 30%),
+    linear-gradient(135deg, #fffefa 0%, #fffaf0 54%, #f8f0df 100%);
+  box-shadow: 0 18px 34px rgba(168, 132, 50, 0.1);
+}
+
+.loyalty-card__icon-wrap {
+  background: linear-gradient(135deg, #f7ebcd, #fff4dc);
+}
+
+.loyalty-card__button,
+.confirm,
+.apply-btn,
+.guest-payment-actions__primary,
+.cash-invoice-btn,
+.address-save-btn {
+  background: #111111;
+  color: #fff;
+  box-shadow: 0 14px 28px rgba(17, 17, 17, 0.16);
+}
+
+.loyalty-card__button:hover,
+.confirm:hover,
+.apply-btn:hover,
+.guest-payment-actions__primary:hover,
+.cash-invoice-btn:hover,
+.address-save-btn:hover {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  transform: translateY(-1px);
+  box-shadow: 0 18px 32px rgba(168, 132, 50, 0.24);
+}
+
+.confirm:disabled {
+  background: #c9c1b4;
+}
+
+.edit-btn,
+.guest-payment-actions__secondary,
+.apply-btn.muted {
+  background: #fffdfa;
+  color: #6a5426;
+  border: 1px solid rgba(200, 167, 91, 0.24);
+}
+
+.edit-btn:hover,
+.guest-payment-actions__secondary:hover,
+.apply-btn.muted:hover {
+  background: #f4e6c2;
+  color: #111111;
+}
+
+hr,
+.line {
+  background: linear-gradient(90deg, rgba(200, 167, 91, 0.1), rgba(200, 167, 91, 0.3), rgba(200, 167, 91, 0.1));
+}
+
+.service-showcase {
+  border-color: rgba(200, 167, 91, 0.22);
+  background: linear-gradient(180deg, #fffefa 0%, #f9f2e3 100%);
+  box-shadow: 0 18px 32px rgba(168, 132, 50, 0.1);
+}
+
+.service-showcase__media {
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.2), rgba(255, 244, 220, 0.5));
+}
+
+.service-showcase__fallback {
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+}
+
+.review-card {
+  border-color: var(--border);
+  box-shadow: 0 14px 26px rgba(168, 132, 50, 0.08);
+}
+
+.review-card--schedule,
+.review-card--price {
+  background: linear-gradient(180deg, #fffdfa 0%, #f9f2e4 100%);
+}
+
+.review-card--addons {
+  background: linear-gradient(180deg, #fffaf0 0%, #f5ecd8 100%);
+  border-color: rgba(200, 167, 91, 0.24);
+}
+
+.review-card--address {
+  background: linear-gradient(180deg, #fff9f0 0%, #f4ead6 100%);
+  border-color: rgba(200, 167, 91, 0.24);
+}
+
+.review-card__price,
+.service-line__price,
+.invoice-pill {
+  background: linear-gradient(135deg, #f4e6c2, #fbf2df);
+  color: #6a5426;
+  box-shadow: inset 0 0 0 1px rgba(200, 167, 91, 0.16);
+}
+
+.review-pill {
+  background: #f4e6c2;
+  color: #6a5426;
+}
+
+.service-line {
+  background:
+    linear-gradient(135deg, rgba(200, 167, 91, 0.06), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(180deg, #fffefa 0%, #f9f2e4 100%);
+  border-color: rgba(200, 167, 91, 0.16);
+  box-shadow: 0 14px 28px rgba(168, 132, 50, 0.06);
+}
+
+.service-line__media {
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.18), rgba(255, 244, 220, 0.16));
+  color: #6a5426;
+  box-shadow: inset 0 0 0 1px rgba(200, 167, 91, 0.08);
+}
+
+.discount-card {
+  background:
+    radial-gradient(circle at right top, rgba(200, 167, 91, 0.12), transparent 28%),
+    linear-gradient(135deg, #fffdfa 0%, #faf2e1 100%);
+}
+
+.discount-card input,
+.summary-discount-controls input,
+.address-input,
+.stripe-card-element,
+.invoice-box,
+.cash-invoice-meta {
+  border-color: var(--border);
+  background: #fffefa;
+}
+
+.discount-card input:focus,
+.summary-discount-controls input:focus,
+.address-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.12);
+}
+
+.payment-option {
+  border-color: var(--border);
+  background: linear-gradient(180deg, #fffefa 0%, #f9f2e4 100%);
+}
+
+.payment-option:hover,
+.payment-option.is-active {
+  border-color: rgba(200, 167, 91, 0.4);
+  box-shadow: 0 14px 24px rgba(168, 132, 50, 0.12);
+}
+
+.checkout-message-modal__panel {
+  background: linear-gradient(180deg, #fffefa 0%, #fbf6eb 100%);
+  border: 1px solid rgba(200, 167, 91, 0.22);
+  box-shadow: 0 28px 56px rgba(17, 17, 17, 0.18);
+}
+
+.checkout-message-modal__dismiss {
+  background: #f7efe1;
+  color: #6a5426;
+}
+
+.checkout-message-modal__dismiss:hover {
+  background: #f4e6c2;
+  color: #111111;
+}
+
+.checkout-message-modal__icon {
+  background: linear-gradient(135deg, #f4e6c2, #fbf2df);
+}
+
+.checkout-message-modal__icon-ring {
+  stroke: #c8a75b;
+}
+
+.checkout-message-modal__icon-check {
+  stroke: #a88432;
+}
+
+.note,
+.flash.info,
+.cash-invoice-meta,
+.invoice-box {
+  background:
+    radial-gradient(circle at top right, rgba(200, 167, 91, 0.08), transparent 30%),
+    linear-gradient(180deg, #fffdfa 0%, #f8f0df 100%);
+}
+
+.checkout-hero-card,
+.card,
+.service-showcase,
+.review-card,
+.payment-option,
+.discount-card,
+.loyalty-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.service-showcase:hover,
+.review-card:hover,
+.payment-option:hover,
+.discount-card:hover,
+.loyalty-card:hover {
+  transform: translateY(-2px);
+}

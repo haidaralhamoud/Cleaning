@@ -384,6 +384,99 @@ body {
   }
 }
 
+/* ===== Brand Refresh Overrides ===== */
+.addon-card {
+  background: linear-gradient(180deg, #fffefa 0%, #fbf6eb 100%);
+  border: 1px solid rgba(200, 167, 91, 0.2);
+  box-shadow: 0 14px 28px rgba(168, 132, 50, 0.12);
+}
+
+.addon-card:hover {
+  box-shadow: 0 18px 34px rgba(168, 132, 50, 0.16);
+}
+
+.addon-card.is-selected {
+  border-color: #c8a75b;
+  box-shadow: 0 18px 34px rgba(168, 132, 50, 0.18);
+}
+
+.check-box {
+  border-color: #c8a75b;
+  border-radius: 8px;
+  background: #fffdfa;
+}
+
+.check-box.checked {
+  background: #111111;
+  box-shadow: 0 0 10px rgba(17, 17, 17, 0.18);
+}
+
+.popup-overlay {
+  background: rgba(17, 17, 17, 0.48);
+}
+
+.popup-content {
+  background: linear-gradient(180deg, #fffefa 0%, #fbf6eb 100%);
+  border: 1px solid rgba(200, 167, 91, 0.22);
+  box-shadow: 0 24px 50px rgba(17, 17, 17, 0.16);
+}
+
+.popup-header {
+  border-bottom-color: rgba(200, 167, 91, 0.2);
+}
+
+.popup-header h3 {
+  color: #111111;
+}
+
+.popup-header button {
+  background: #f7efe1;
+  color: #a88432;
+  border-color: rgba(200, 167, 91, 0.24);
+}
+
+.popup-header button:hover {
+  background: #eedcb1;
+  color: #111111;
+}
+
+.btn-outline,
+.btn-filled {
+  border-color: #c8a75b;
+}
+
+.btn-outline {
+  background: #fffdfa;
+  color: #6a5426;
+}
+
+.btn-outline:hover {
+  background: #f7eedb;
+}
+
+.btn-filled {
+  background: #111111;
+  color: #fff;
+}
+
+.btn-filled:hover {
+  background: linear-gradient(135deg, #c8a75b, #a88432);
+}
+
+.addon-form-grid input,
+.addon-form-grid select,
+.addon-form-grid textarea {
+  border-color: rgba(200, 167, 91, 0.22);
+  background: #fffefa;
+}
+
+.addon-form-grid input:focus,
+.addon-form-grid select:focus,
+.addon-form-grid textarea:focus {
+  border-color: #c8a75b;
+  box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.12);
+}
+
 /* === موبايل: خلي الصندوق تحت === */
 @media (max-width: 899px) {
   .booking-summary {

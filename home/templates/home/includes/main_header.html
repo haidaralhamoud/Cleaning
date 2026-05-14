@@ -218,8 +218,8 @@
         <button type="submit" class="btn-auth logout">Log out</button>
       </form>
     {% else %}
-      <a href="{% url 'accounts:sign_up' %}" class="btn-auth outline">Sign Up</a>
-      <a href="{% url 'login' %}" class="btn-auth">Sign In</a>
+      <a href="{% url 'accounts:sign_up' %}" class="btn-auth btn-guest btn-guest-signup">Sign Up</a>
+      <a href="{% url 'login' %}" class="btn-auth btn-guest btn-guest-signin">Sign In</a>
     {% endif %}
   </div>
   {% endwith %}

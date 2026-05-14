@@ -12,7 +12,7 @@
   top: 0;
   left: 0;
   z-index: 3000;
-  min-height: 82px;
+  min-height: 92px;
 }
 
 :root {
@@ -33,7 +33,7 @@
 }
 
 .logo img {
-  width: 138px;
+  width: 182px;
   height: auto;
   display: block;
   border-radius: 0;
@@ -87,7 +87,7 @@
 }
 
 body {
-  padding-top: 94px;
+  padding-top: 104px;
 }
 
 body.mobile-nav-open {
@@ -529,6 +529,29 @@ body.mobile-nav-open {
   white-space: nowrap;
 }
 
+.btn-guest {
+  min-height: 44px;
+  min-width: 146px;
+  width: auto;
+  padding: 8px 24px;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.btn-guest-signup {
+  background: #fff;
+  color: var(--lux-gold-dark);
+  border: 2px solid var(--lux-gold);
+  box-shadow: none;
+}
+
+.btn-guest-signin {
+  background: #111111;
+  color: #fff;
+  border: 2px solid #111111;
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
+}
+
 .menu-toggle {
   display: none;
   background: transparent;
@@ -603,6 +626,13 @@ body.mobile-nav-open {
     0 0 18px var(--lux-gold-glow);
 }
 
+.btn-guest:hover {
+  background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-dark));
+  color: #fff;
+  border-color: var(--lux-gold-dark);
+  box-shadow: 0 12px 24px var(--lux-gold-glow);
+}
+
 .btn-auth.outline {
   background: transparent;
   color: var(--lux-gold-dark);
@@ -665,7 +695,7 @@ body.mobile-nav-open {
     gap: 10px;
     z-index: 3000;
     padding: 10px 5%;
-    min-height: 70px;
+    min-height: 78px;
   }
   .auth-buttons {
     display: none;
@@ -870,10 +900,10 @@ body.mobile-nav-open {
   }
 
   .logo img {
-    width: 100px;
+    width: 128px;
   }
 
   body {
-    padding-top: 82px;
+    padding-top: 90px;
   }
 }

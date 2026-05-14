@@ -488,6 +488,106 @@
       gap: 10px;
     }
 
+    .booking-mode-tabs {
+      background: linear-gradient(180deg, #fffdf8 0%, #f5efdf 100%);
+      box-shadow: 0 16px 34px rgba(168, 132, 50, 0.12);
+    }
+
+    .booking-mode-tab {
+      color: #6a5426;
+    }
+
+    .booking-mode-tab span {
+      color: #8a7761;
+    }
+
+    .booking-mode-tab.is-active {
+      background: #111111;
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(17, 17, 17, 0.2);
+    }
+
+    .booking-mode-tab.is-active span {
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .by-room-shell {
+      background: linear-gradient(180deg, #fffefa 0%, #fbf6eb 100%);
+      border: 1px solid rgba(200, 167, 91, 0.22);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 18px 38px rgba(168, 132, 50, 0.08);
+    }
+
+    .by-room-header h6,
+    .by-room-note strong,
+    .category-card span,
+    .option-detail-card h6 {
+      color: #111111;
+    }
+
+    .by-room-header p,
+    .by-room-note span,
+    .by-room-footer {
+      color: #6e6456;
+    }
+
+    .by-room-note {
+      border-left-color: #c8a75b;
+      background: linear-gradient(180deg, rgba(200, 167, 91, 0.16) 0%, rgba(200, 167, 91, 0.08) 100%);
+      color: #7a6030;
+      box-shadow: 0 10px 22px rgba(200, 167, 91, 0.08);
+    }
+
+    .by-room-note-icon {
+      background: linear-gradient(135deg, #c8a75b 0%, #a88432 100%);
+      box-shadow: 0 8px 18px rgba(168, 132, 50, 0.22);
+    }
+
+    .room-card,
+    .category-card,
+    .option-detail-card {
+      border-color: rgba(200, 167, 91, 0.22);
+      box-shadow: 0 14px 26px rgba(168, 132, 50, 0.1);
+    }
+
+    .room-card .room-icon,
+    .category-card-media,
+    .option-detail-card {
+      background: #fffdfa;
+    }
+
+    .room-card .room-icon-fallback,
+    .room-card h6 {
+      color: #6a5426;
+    }
+
+    .room-counter button {
+      background: #111111;
+      color: #fff;
+    }
+
+    .room-counter button[data-step="-1"] {
+      background: #efe5cf;
+      color: #6a5426;
+    }
+
+    .category-card:hover,
+    .category-card.is-active {
+      border-color: #c8a75b;
+      box-shadow: 0 16px 28px rgba(168, 132, 50, 0.14);
+    }
+
+    .service-chip {
+      border-color: rgba(200, 167, 91, 0.24);
+      background: #f7eedc;
+      color: #6a5426;
+    }
+
+    .service-chip:hover,
+    .service-chip.is-active {
+      background: #111111;
+      box-shadow: 0 12px 22px rgba(17, 17, 17, 0.18);
+    }
+
   </style>
 </head>
 <body>
@@ -505,7 +605,7 @@
 {% endif %}
 
 <!-- HERO -->
-<section class="hero" style="background-image: url('{% static 'images/hero.webp' %}');">
+<section class="hero" style="background-image: url('{% static 'images/booking-services-hero.jpg' %}');">
 <div class="overlay">
 </div>
 <h1>Proceed to booking</h1>

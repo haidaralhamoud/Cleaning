@@ -1,6 +1,6 @@
 <style>
   body {
-    padding-top: 94px;
+    padding-top: 104px;
   }
 
   .main-header {
@@ -16,7 +16,7 @@
     top: 0;
     left: 0;
     z-index: 3000;
-    min-height: 82px;
+    min-height: 92px;
   }
 
   .logo {
@@ -26,7 +26,7 @@
   }
 
   .logo img {
-    width: 138px;
+    width: 182px;
     height: auto;
     display: block;
     border-radius: 0;
@@ -67,6 +67,58 @@
     cursor: pointer;
   }
 
+  .auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-auth {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    width: 150px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-guest {
+    min-height: 44px;
+    min-width: 146px;
+    width: auto;
+    padding: 8px 24px;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  .btn-guest-signup {
+    background: #fff;
+    color: #A88432;
+    border: 2px solid #C8A75B;
+    box-shadow: none;
+  }
+
+  .btn-guest-signin {
+    background: #111111;
+    color: #fff;
+    border: 2px solid #111111;
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
+  }
+
+  .btn-guest:hover {
+    background: linear-gradient(135deg, #C8A75B, #A88432);
+    color: #fff;
+    border-color: #A88432;
+    box-shadow: 0 12px 24px rgba(200, 167, 91, 0.2);
+  }
+
   .mobile-nav-overlay {
     position: fixed;
     inset: 70px 0 0;
@@ -77,13 +129,17 @@
 
   @media (max-width: 768px) {
     body {
-      padding-top: 84px;
+      padding-top: 90px;
     }
 
     .main-header {
       gap: 10px;
       padding: 10px 5%;
-      min-height: 70px;
+      min-height: 78px;
+    }
+
+    .auth-buttons {
+      display: none;
     }
 
     .menu-toggle {
@@ -114,6 +170,10 @@
     .nav-links.active {
       visibility: visible;
       pointer-events: auto;
+    }
+
+    .logo img {
+      width: 128px;
     }
   }
 </style>

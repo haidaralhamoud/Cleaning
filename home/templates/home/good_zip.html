@@ -16,6 +16,25 @@
 <link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
 <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
 <link rel="stylesheet" href="{% static 'css/send_email.css' %}">
+<style>
+  .methods-grid .btn,
+  .methods-grid a.btn,
+  .methods-grid button.btn {
+    background: #111111 !important;
+    color: #ffffff !important;
+    border: 1px solid #111111 !important;
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.16) !important;
+  }
+
+  .methods-grid .btn:hover,
+  .methods-grid a.btn:hover,
+  .methods-grid button.btn:hover {
+    background: linear-gradient(135deg, #c8a75b, #a88432) !important;
+    color: #ffffff !important;
+    border-color: #a88432 !important;
+    box-shadow: 0 14px 24px rgba(200, 167, 91, 0.2) !important;
+  }
+</style>
 </head>
 <body{% if call_success %} class="call-success-open"{% endif %}>
 {% include "home/includes/main_header.html" %}
@@ -76,7 +95,7 @@
 <div class="methods-grid">
 <div class="method-card">
 <div class="icon-circle">
-<img src="{% static 'images/calendar-vibrant.png' %}" alt="Calendar icon">
+<img src="{% static 'images/icon-booking-calendar.svg' %}" alt="Calendar icon">
 </div>
 <h4>Book Online Now</h4>
 <p>Choose your service, pick a date and time, then confirm your booking instantly when you're ready to go.</p>
@@ -84,7 +103,7 @@
 </div>
 <div class="method-card">
 <div class="icon-circle">
-<img src="{% static 'images/phone-call.png' %}" alt="Phone icon">
+<img src="{% static 'images/icon-booking-phone.svg' %}" alt="Phone icon">
 </div>
 <h4>Schedule a Call</h4>
 <p>Not sure what you need, or want service details first? Leave us your number and a time that suits you.</p>
@@ -92,7 +111,7 @@
 </div>
 <div class="method-card">
 <div class="icon-circle">
-<img src="{% static 'images/received-email.png' %}" alt="Email icon">
+<img src="{% static 'images/icon-booking-mail.svg' %}" alt="Email icon">
 </div>
 <h4>Send an Email</h4>
 <p>Prefer to write things down? Send your request and we'll get back to you with a personalized response.</p>
@@ -105,9 +124,9 @@
 <!-- ===== POPUP REQUEST A CALL ===== -->
 <div id="call-overlay" class="call-overlay">
 <div class="popup">
-<img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
+<img src="{% static 'images/icon-close-gold.svg' %}" class="close-btn" onclick="closeCallPopup()" alt="Close">
 <div class="popup-header">
-<img src="{% static 'images/phone-call.png' %}" class="call-icon" alt="Phone">
+<img src="{% static 'images/icon-booking-phone.svg' %}" class="call-icon" alt="Phone">
 <h2>Request a Call</h2>
 </div>
 <p class="subtitle">Let's find the best time to call you!</p>
@@ -123,7 +142,7 @@
 <label>Preferred Date</label>
 <div class="input-with-icon">
 <input type="date" id="preferredDateUi" required>
-<img src="{% static 'images/calendar-vibrant.png' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
+<img src="{% static 'images/icon-booking-calendar.svg' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
 </div>
 <label>Preferred Time</label>
 <div class="time-row">
@@ -142,7 +161,7 @@
 <div class="time-input time-input--custom">
 <button type="button" class="manual-time-trigger" id="manualTimeTrigger" aria-expanded="false" aria-controls="manualTimePanel">
 <span id="manualTimeValue">Choose custom time</span>
-<img src="{% static 'images/clock0.png' %}" class="manual-time-icon" alt="">
+<img src="{% static 'images/icon-time-gold.svg' %}" class="manual-time-icon" alt="">
 </button>
 <div class="manual-time-panel" id="manualTimePanel" hidden>
 <div class="manual-time-panel-head">
@@ -190,9 +209,9 @@
 <!-- ===== POPUP SEND EMAIL ===== -->
 <div id="email-overlay" class="email-overlay">
 <div class="popup">
-<img src="{% static 'images/icon-close.svg' %}" class="close-btn" onclick="closeEmailPopup()" alt="Close">
+<img src="{% static 'images/icon-close-gold.svg' %}" class="close-btn" onclick="closeEmailPopup()" alt="Close">
 <div class="popup-header">
-<img src="{% static 'images/received-email.png' %}" class="send-icon" alt="Email">
+<img src="{% static 'images/icon-booking-mail.svg' %}" class="send-icon" alt="Email">
 <h2>Send Email</h2>
 </div>
 <p class="subtitle">A brief summary is included in your email</p>
@@ -213,7 +232,6 @@
 <label for="emailAttachment" class="file-pill">
 <span class="file-btn">Choose File</span>
 <span class="file-name" id="fileName">No file chosen</span>
-<img src="{% static 'images/icon-upload.svg' %}" class="upload-icon" alt="Upload">
 </label>
 </div>
 <button type="submit" class="send-btn">Send Email</button>
