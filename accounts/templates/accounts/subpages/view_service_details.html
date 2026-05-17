@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <title>Customer Profile View</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 <link rel="stylesheet" href="{% static 'css/view_service_details.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 <link rel="stylesheet" href="{% static 'css/customer_sidebar.css' %}">
@@ -331,7 +332,9 @@
 <div class="popup-overlay" id="popupOverlay">
 <div class="popup approve-popup">
 <button class="close-btn" id="closePopupBtn" type="button" aria-label="Close approve work popup">&times;</button>
-<img class="logo" src="{% static 'images/frame-16865526320.png'%}" alt="Happy Home Logo">
+<div class="approve-popup__icon" aria-hidden="true">
+<i class="fa-solid fa-house-circle-check"></i>
+</div>
 <p class="message">
 <strong>Happy home, happy you </strong>
 <br>        Clean, fresh, and ready to enjoy. Until next time!      </p>

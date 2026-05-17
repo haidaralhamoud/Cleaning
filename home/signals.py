@@ -21,6 +21,7 @@ from home.models import (
     PrivateBooking,
     BusinessBooking,
     NoShowReport,
+    FeedbackRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -279,6 +280,25 @@ def notify_review(sender, instance, created, **kwargs):
         return
     subject = f"New Service Review ({instance.service_title})"
     body = f"A new review was submitted.\n\nService: {instance.service_title}\nRating: {instance.overall_rating}\nLink: /dashboard/service-reviews/"
+    _send_admin_alert(subject, body)
+
+
+@receiver(post_save, sender=FeedbackRequest)
+def notify_feedback_request(sender, instance, created, **kwargs):
+    if not created:
+        return
+    subject = "New Feedback Pending Review"
+    sender_label = (instance.customer_name or instance.email or f"Feedback #{instance.pk}").strip()
+    preview = (instance.feedback_text or "").strip()
+    if len(preview) > 160:
+        preview = f"{preview[:160]}..."
+    body = (
+        f"A new feedback submission is waiting for admin approval.\n\n"
+        f"Sender: {sender_label}\n"
+        f"Rating: {instance.rating}/5\n"
+        f"Preview: {preview or 'No feedback text'}\n"
+        f"Link: /dashboard/feedback/"
+    )
     _send_admin_alert(subject, body)
 
 

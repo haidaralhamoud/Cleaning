@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 import re
 from .models import (
     Contact,
+    FeedbackRequest,
     Job,
     Application,
     BusinessMainCategory,
@@ -48,6 +49,41 @@ from accounts.models import BookingChecklist   # âœ… ط§ط³طھظٹط±ط�
 # ط£ط¹ظ„ظ‰ ط§ظ„ظ…ظ„ظپ
 from accounts.models import PointsTransaction
 User = get_user_model()
+
+
+@admin.register(FeedbackRequest)
+class FeedbackRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        "customer_name",
+        "email",
+        "rating",
+        "is_approved",
+        "approved_by",
+        "approved_at",
+        "created_at",
+    )
+    list_filter = ("is_approved", "rating", "created_at")
+    search_fields = ("customer_name", "email", "feedback_text", "service_type", "request_details")
+    readonly_fields = ("created_at", "approved_by", "approved_at")
+    actions = ("approve_feedback", "unapprove_feedback")
+
+    @admin.action(description="Approve selected feedback")
+    def approve_feedback(self, request, queryset):
+        updated = 0
+        for feedback in queryset:
+            if feedback.is_approved:
+                continue
+            feedback.is_approved = True
+            feedback.approved_by = request.user
+            feedback.approved_at = timezone.now()
+            feedback.save(update_fields=["is_approved", "approved_by", "approved_at"])
+            updated += 1
+        self.message_user(request, f"Approved {updated} feedback item(s).", level=messages.SUCCESS)
+
+    @admin.action(description="Mark selected feedback as pending")
+    def unapprove_feedback(self, request, queryset):
+        updated = queryset.update(is_approved=False, approved_by=None, approved_at=None)
+        self.message_user(request, f"Moved {updated} feedback item(s) back to pending.", level=messages.SUCCESS)
 
 
 class ServiceEstimateAdminForm(forms.ModelForm):

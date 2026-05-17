@@ -1544,7 +1544,20 @@ class FeedbackRequest(models.Model):
     rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, default=5)
     service_type = models.CharField(max_length=100, blank=True)
     request_details = models.TextField(blank=True)
+    is_approved = models.BooleanField(default=False, db_index=True)
+    approved_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_feedback_requests",
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        label = (self.customer_name or self.email or "Feedback").strip()
+        return f"{label} ({'approved' if self.is_approved else 'pending'})"
 
 
 class BookingFormDocument(models.Model):

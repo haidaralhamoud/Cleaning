@@ -1273,7 +1273,9 @@ def _provider_debug_payload(booking):
 # STATIC PAGES
 # ================================
 def home(request):
-    feedbacks = list(FeedbackRequest.objects.order_by("-created_at"))
+    feedbacks = list(
+        FeedbackRequest.objects.filter(is_approved=True).order_by("-approved_at", "-created_at")
+    )
     return render(request, "home/home.html", {"feedbacks": feedbacks})
 
 def about(request):
@@ -1395,6 +1397,7 @@ def _dashboard_notifications(request=None):
     new_email_requests = EmailRequest.objects.filter(created_at__gte=since).count()
     new_incidents = Incident.objects.filter(created_at__gte=since).count()
     new_reviews = ServiceReview.objects.filter(created_at__gte=since).count()
+    pending_feedback = FeedbackRequest.objects.filter(is_approved=False).count()
     new_messages = ChatMessage.objects.filter(created_at__gte=since).count()
     new_customers = Customer.objects.filter(user__date_joined__gte=since).count()
     new_providers = ProviderProfile.objects.filter(user__date_joined__gte=since).count()
@@ -1456,6 +1459,10 @@ def _dashboard_notifications(request=None):
     recent_reviews = list(
         ServiceReview.objects.filter(created_at__gte=since)
         .select_related("customer")
+        .order_by("-created_at")[:6]
+    )
+    recent_pending_feedback = list(
+        FeedbackRequest.objects.filter(is_approved=False)
         .order_by("-created_at")[:6]
     )
     recent_messages = list(
@@ -1557,6 +1564,17 @@ def _dashboard_notifications(request=None):
             "time": rev.created_at,
             "url": "/dashboard/service-reviews/",
         })
+    for fb in recent_pending_feedback:
+        feedback_label = (fb.customer_name or fb.email or f"Feedback #{fb.pk}").strip()
+        preview = (fb.feedback_text or "").strip()
+        if len(preview) > 60:
+            preview = f"{preview[:60]}..."
+        items.append({
+            "title": f"Pending Feedback: {feedback_label}",
+            "detail": preview or "Awaiting admin review",
+            "time": fb.created_at,
+            "url": "/dashboard/feedback/",
+        })
     for msg in recent_messages:
         booking_type = msg.thread.booking_type
         booking_id = msg.thread.booking_id
@@ -1582,6 +1600,7 @@ def _dashboard_notifications(request=None):
         + new_email_requests
         + new_incidents
         + new_reviews
+        + pending_feedback
         + new_messages
         + new_customers
         + new_providers
@@ -1600,6 +1619,7 @@ def _dashboard_notifications(request=None):
         "dashboard_new_providers": new_providers,
         "dashboard_new_incidents": new_incidents,
         "dashboard_new_reviews": new_reviews,
+        "dashboard_pending_feedback": pending_feedback,
         "dashboard_new_messages": new_messages,
         "dashboard_new_call_requests": new_call_requests,
         "dashboard_new_email_requests": new_email_requests,
@@ -2823,6 +2843,8 @@ def _exclude_fields_for_form(model):
         excluded.append(f.name)
     if model.__name__ == "ServiceRoomOption":
         excluded.append("short_label")
+    if model.__name__ == "FeedbackRequest":
+        excluded.extend(["approved_by", "approved_at"])
     return list(dict.fromkeys(excluded))
 
 
@@ -3072,8 +3094,11 @@ def dashboard_model_edit(request, model, pk):
 
     obj = get_object_or_404(item.model, pk=pk)
     prev_status = None
+    prev_feedback_approved = None
     if item.model.__name__ == "BookingRequestFix":
         prev_status = getattr(obj, "status", None)
+    if item.model == FeedbackRequest:
+        prev_feedback_approved = bool(getattr(obj, "is_approved", False))
     if item.model == BusinessBundle:
         Form = BusinessBundleDashboardForm
     elif item.model == PrivateMainCategory:
@@ -3116,7 +3141,16 @@ def dashboard_model_edit(request, model, pk):
         form = Form(request.POST, request.FILES, instance=obj)
         form = _bootstrap_form(form)
         if form.is_valid():
-            obj = form.save()
+            obj = form.save(commit=False)
+            if item.model == FeedbackRequest:
+                will_be_approved = bool(form.cleaned_data.get("is_approved"))
+                if will_be_approved and not prev_feedback_approved:
+                    obj.approved_by = request.user
+                    obj.approved_at = timezone.now()
+                elif not will_be_approved:
+                    obj.approved_by = None
+                    obj.approved_at = None
+            obj.save()
             if item.model.__name__ == "BookingRequestFix":
                 new_status = getattr(obj, "status", None)
                 if prev_status and new_status and new_status != prev_status:
