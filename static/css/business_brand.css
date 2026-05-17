@@ -1,0 +1,344 @@
+﻿:root {
+  --business-ink: #16130f;
+  --business-ink-soft: #5f564a;
+  --business-gold: #c8a75b;
+  --business-gold-dark: #a88432;
+  --business-gold-pale: #efe2bf;
+  --business-ivory: #fffdfa;
+  --business-cream: #f7f1e6;
+  --business-sand: #eee3cf;
+  --business-border: rgba(200, 167, 91, 0.24);
+  --business-border-strong: rgba(200, 167, 91, 0.42);
+  --business-panel: rgba(255, 255, 255, 0.88);
+  --business-shadow: 0 22px 55px rgba(31, 24, 14, 0.09);
+  --business-shadow-strong: 0 28px 80px rgba(31, 24, 14, 0.14);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.business-flow {
+  margin: 0;
+  color: var(--business-ink);
+  font-family: "Inter", sans-serif;
+  background: #ffffff;
+}
+
+body.business-flow main,
+body.business-flow section,
+body.business-flow div,
+body.business-flow article,
+body.business-flow aside,
+body.business-flow form,
+body.business-flow p,
+body.business-flow span,
+body.business-flow label,
+body.business-flow li,
+body.business-flow a,
+body.business-flow button,
+body.business-flow input,
+body.business-flow textarea,
+body.business-flow select {
+  font-family: inherit;
+}
+
+.business-shell {
+  width: min(1240px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 40px 0 88px;
+}
+
+.business-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 34px 34px 30px;
+  border-radius: 34px;
+  border: 1px solid var(--business-border);
+  background:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(250, 245, 235, 0.93)),
+    radial-gradient(circle at top right, rgba(200, 167, 91, 0.18), transparent 30%);
+  box-shadow: var(--business-shadow);
+}
+
+.business-hero::before,
+.business-hero::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.business-hero::before {
+  width: 220px;
+  height: 220px;
+  right: -60px;
+  top: -80px;
+  background: radial-gradient(circle, rgba(200, 167, 91, 0.26), transparent 68%);
+}
+
+.business-hero::after {
+  width: 180px;
+  height: 180px;
+  left: -40px;
+  bottom: -90px;
+  background: radial-gradient(circle, rgba(17, 17, 17, 0.06), transparent 70%);
+}
+
+.business-hero-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+}
+
+.business-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  padding: 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--business-border);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--business-gold-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.business-title {
+  margin: 0;
+  font-family: "Vesper Libre", serif;
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.business-copy {
+  max-width: 760px;
+  margin: 0;
+  color: var(--business-ink-soft);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.business-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.business-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--business-border);
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--business-ink);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 10px 24px rgba(31, 24, 14, 0.05);
+}
+
+.business-panel {
+  margin-top: 24px;
+  padding: 28px;
+  border-radius: 28px;
+  border: 1px solid var(--business-border);
+  background: var(--business-panel);
+  box-shadow: var(--business-shadow);
+  backdrop-filter: blur(10px);
+}
+
+.business-panel--soft {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(250, 246, 238, 0.92));
+}
+
+.business-section-heading {
+  margin: 0 0 8px;
+  font-family: "Vesper Libre", serif;
+  font-size: clamp(1rem, 2vw, 2rem);
+  line-height: 1.15;
+}
+
+.business-section-copy {
+  margin: 0;
+  color: var(--business-ink-soft);
+  line-height: 1.75;
+}
+
+.business-grid-two {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 22px;
+}
+
+.business-stat-card {
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--business-border);
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.business-stat-label {
+  margin: 0 0 8px;
+  color: var(--business-ink-soft);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.business-stat-value {
+  margin: 0;
+  font-family: "Vesper Libre", serif;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.business-form-card {
+  padding: 28px;
+  border-radius: 26px;
+  border: 1px solid var(--business-border);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: var(--business-shadow);
+}
+
+.business-flow input[type="text"],
+.business-flow input[type="email"],
+.business-flow input[type="date"],
+.business-flow input[type="time"],
+.business-flow input[type="number"],
+.business-flow select,
+.business-flow textarea {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(200, 167, 91, 0.26);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--business-ink);
+  padding: 14px 16px;
+  font-size: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+.business-flow textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.business-flow input:focus,
+.business-flow select:focus,
+.business-flow textarea:focus {
+  outline: none;
+  border-color: var(--business-gold-dark);
+  box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.14);
+}
+
+.business-flow label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--business-ink);
+  font-family: "Vesper Libre", serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.business-kicker {
+  margin: 0 0 14px;
+  color: var(--business-gold-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.business-note,
+.form-error {
+  color: #8a2d2d;
+  background: #fff0ee;
+  border: 1px solid #f1c7c1;
+  border-radius: 16px;
+  padding: 13px 15px;
+  font-size: 12px;
+}
+
+.form-error {
+  display: none;
+  margin-top: 12px;
+}
+
+.form-error.is-visible {
+  display: block;
+}
+
+.business-bullet-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.business-bullet-list li {
+  position: relative;
+  padding-left: 20px;
+  color: var(--business-ink-soft);
+  line-height: 1.65;
+}
+
+.business-bullet-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--business-gold), var(--business-gold-dark));
+  transform: translateY(-50%);
+}
+
+@media (max-width: 960px) {
+  .business-shell {
+    width: min(100% - 24px, 100%);
+    padding-bottom: 72px;
+  }
+
+  .business-hero,
+  .business-panel,
+  .business-form-card {
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .business-grid-two {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .business-shell {
+    width: calc(100% - 18px);
+  }
+
+  .business-hero,
+  .business-panel,
+  .business-form-card {
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .business-meta {
+    gap: 10px;
+  }
+}
+
+

@@ -16,16 +16,14 @@
 
 body {
   font-family: "Manrope", "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top left, #e9f7f8 0%, transparent 55%),
-    radial-gradient(circle at 85% 10%, #fff2df 0%, transparent 50%),
-    linear-gradient(160deg, #f7fafc 0%, #f1f5f9 100%);
+  background: #ffffff;
   color: var(--ink);
   min-height: 100vh;
   position: relative;
 }
 
 body::before {
-  content: "";
+  content: none;
   position: fixed;
   inset: -20vh -10vw auto auto;
   width: 360px;
@@ -36,7 +34,7 @@ body::before {
 }
 
 body::after {
-  content: "";
+  content: none;
   position: fixed;
   inset: auto auto -18vh -12vw;
   width: 420px;
@@ -55,7 +53,7 @@ body::after {
 
 h1 {
   font-family: "Fraunces", "Times New Roman", serif;
-  font-size: clamp(2rem, 2.8vw, 2.75rem);
+  font-size: clamp(2rem, 2.8vw, 2rem);
   margin-bottom: 24px;
   letter-spacing: -0.02em;
 }
@@ -102,7 +100,7 @@ h1 {
 }
 
 .cart-info h3 {
-  font-size: 1.2rem;
+  font-size: 1rem;
   margin: 0;
   font-weight: 700;
 }
@@ -110,7 +108,7 @@ h1 {
 .cart-info p {
   color: rgba(11, 31, 42, 0.7);
   margin: 6px 0 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
 }
 
 .remove-btn {
@@ -180,7 +178,7 @@ h1 {
 
 .cart-empty h4 {
   font-family: "Fraunces", "Times New Roman", serif;
-  font-size: 1.6rem;
+  font-size: 1rem;
   margin-bottom: 12px;
 }
 
@@ -212,7 +210,7 @@ h1 {
 
 .cart-box:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(0, 163, 200, 0.2);
+  box-shadow: 0 12px 24px rgba(200, 167, 91, 0.2);
 }
 
 .cart-box span {
@@ -220,7 +218,7 @@ h1 {
   color: #fff;
   padding: 2px 6px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12px;
   position: absolute;
   top: -8px;
   right: -8px;
@@ -254,7 +252,7 @@ h1 {
   }
 
   h1 {
-    font-size: clamp(1.7rem, 6vw, 2.2rem);
+    font-size: clamp(1rem, 6vw, 2rem);
   }
 
   .cart-item {
@@ -276,7 +274,7 @@ h1 {
   }
 
   .cart-info h3 {
-    font-size: 1.1rem;
+    font-size: 1rem;
   }
 
   .btn-continue {
@@ -300,3 +298,6 @@ h1 {
     padding: 28px 20px;
   }
 }
+
+
+

@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -6,7 +6,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-<title>Customer Profile – Chat</title>
+<title>Customer Profile - Chat</title>
 <!-- Fonts -->
 <link rel="stylesheet" href="{% static 'css/chat.css' %}" />  {% include 'home/includes/font_links.html' %}
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
@@ -17,13 +17,13 @@
 </head>
 <body >
 <!-- HEADER -->{% include "home/includes/main_header.html" %}<div class="layout">
-<!-- ===== المينيو للموبايل ===== -->
+<!-- ===== ط§ظ„ظ…ظٹظ†ظٹظˆ ظ„ظ„ظ…ظˆط¨ط§ظٹظ„ ===== -->
 <div class="mobile-header">
 <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
 <span class="arrow">&#8250;</span>
 </button>
 </div>
-<!-- ===== Sidebar ===== -->    {% include "accounts/includes/customer_sidebar.html" %}  <!-- ===== الصفحة ===== -->
+<!-- ===== Sidebar ===== -->    {% include "accounts/includes/customer_sidebar.html" %}  <!-- ===== ط§ظ„طµظپط­ط© ===== -->
 <div class="page container">
 <main class="content">
 <section class="page-head">
@@ -31,19 +31,19 @@
 <p class="subline">Scheduled for tomorrow, 9:00 AM - 12:00 PM | location: rue8 maison 3, Meknes, Sweden</p>
 <p class="booking-line">Booking ID: #12345 | Payment status: Paid | Order type: One time</p>
 </section>
-<!-- ===== بطاقة المحادثة ===== -->
-<!-- ===== بطاقة المحادثة ===== -->
+<!-- ===== ط¨ط·ط§ظ‚ط© ط§ظ„ظ…ط­ط§ط¯ط«ط© ===== -->
+<!-- ===== ط¨ط·ط§ظ‚ط© ط§ظ„ظ…ط­ط§ط¯ط«ط© ===== -->
 <section class="chat-card">
-<!-- زر الرجوع -->
+<!-- ط²ط± ط§ظ„ط±ط¬ظˆط¹ -->
 <button class="back-btn" onclick="history.back()">
-<span class="back-icon">←</span>
+<span class="back-icon">&larr;</span>
 <span class="back-text">Back</span>
 </button>
-<!-- عنوان الطلب -->
-<h2>Order #12345 · Deep Clean · Today 10AM</h2>
-<!-- سطر فاصل بسيط -->
+<!-- ط¹ظ†ظˆط§ظ† ط§ظ„ط·ظ„ط¨ -->
+<h2>Order #12345 &middot; Deep Clean &middot; Today 10AM</h2>
+<!-- ط³ط·ط± ظپط§طµظ„ ط¨ط³ظٹط· -->
 <hr style="margin: 15px 0; border: none; border-top: 1px solid #eee;" />
-<!-- محتوى المحادثة -->
+<!-- ظ…ط­طھظˆظ‰ ط§ظ„ظ…ط­ط§ط¯ط«ط© -->
 <div class="chat-thread">
 <!-- Incoming -->
 <article class="message message--in">
@@ -96,3 +96,4 @@
 </script>
 </body>
 </html>
+

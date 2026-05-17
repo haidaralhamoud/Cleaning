@@ -1,7 +1,7 @@
-:root{
-  --sky: #c0e7f1;
-  --sky-strong:#039fc8;
-  --sky-soft: rgba(3,159,200,0.5);
+﻿:root{
+  --sky: #f8f3ea;
+  --sky-strong:#c8a75b;
+  --sky-soft: rgba(200,167,91,0.5);
   --ink:#000;
   --muted:#898989;
   --warn:#ff9500;
@@ -41,11 +41,11 @@ body{
 
 .profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
 .avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
-.name{font:700 20px "Vesper Libre", serif}
-.id{font-size:13px;color:#666}
+.name{font:700 16px "Vesper Libre", serif}
+.id{font-size:12px;color:#666}
 .side-nav{padding:10px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
-.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item:hover{background:rgba(200,167,91,.1);transform:translateX(4px)}
 .nav-item.active {
   background: rgba(0,0,0,.05);
   color: var(--sky-strong);
@@ -63,25 +63,25 @@ body{
   height: 52px;
   border-radius: 50%;
   border: none;
-  background: #039fc8;
+  background: #c8a75b;
   color: #fff;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 16px rgba(3,159,200,0.35);
+  box-shadow: 0 6px 16px rgba(200,167,91,0.35);
   cursor: pointer;
   transition: all 0.25s ease;
   z-index: 1100;
 }
 .menu-toggle:hover {
-  background: #028eb3;
+  background: #a88432;
   transform: scale(1.05);
 }
 .mobile-title {
   font-weight: 700;
-  font-size: 20px;
+  font-size: 16px;
   color: #000;
   position: fixed;
   top: 25px;
@@ -91,7 +91,7 @@ body{
 /* ===== CONTENT ===== */
 .content {
   flex: 1;
-  background: #c0e7f1;
+  background: #f8f3ea;
   padding: 2rem;
 }
 .page-head {
@@ -100,12 +100,12 @@ body{
 }
 .page-head h1 {
   font-family: 'Vesper Libre', serif;
-  font-size: 22px;
+  font-size: 18px;
 }
 .subline, .booking-line {
   color: #0334c8;
   font-family: 'Vesper Libre', serif;
-  font-size: 14px;
+  font-size: 12px;
   margin-top: 0.3rem;
 }
 
@@ -128,7 +128,7 @@ body{
 }
 .chat-card__head h2 {
   font-family: 'Vesper Libre', serif;
-  font-size: 18px;
+  font-size: 14px;
   flex: 1;
   text-align: center;
 }
@@ -157,7 +157,7 @@ body{
 }
 .message__bubble {
   font-family: 'Vesper Libre', serif;
-  font-size: 14px;
+  font-size: 12px;
   padding: 0.9rem 1.2rem;
   border-radius: 20px;
   max-width: 70%;
@@ -172,7 +172,7 @@ body{
   color: #000;
 }
 .message--out .message__bubble {
-  background: #039fc8;
+  background: #c8a75b;
   color: #fff;
   border-radius: 20px 0 20px 20px;
 }
@@ -207,7 +207,7 @@ body{
 .composer__field input {
   width: 100%;
   padding: 0.8rem 3rem 0.8rem 1rem;
-  border: 1px solid rgba(3,159,200,0.75);
+  border: 1px solid rgba(200,167,91,0.75);
   border-radius: 40px;
 }
 .emoji {
@@ -220,7 +220,7 @@ body{
 .upload-btn {
   width: 40px;
   height: 40px;
-  background: #039fc8;
+  background: #c8a75b;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -238,7 +238,7 @@ body{
   transform: scale(1.05);
 }
 .send-btn {
-  background: #039fc8;
+  background: #c8a75b;
   color: #fff;
   border: none;
   border-radius: 30px;
@@ -266,46 +266,46 @@ body{
   .chat-card { width: 100%; }
 }
 @media (max-width: 768px) {
-  .message__bubble { max-width: 85%; font-size: 13px; }
-  .message__meta { font-size: 11px; width: 85%; }
+  .message__bubble { max-width: 85%; font-size: 12px; }
+  .message__meta { font-size: 12px; width: 85%; }
   .message__avatar { width: 40px; height: 40px; }
   .upload-btn { width: 36px; height: 36px; }
   .upload-btn img { width: 18px; height: 18px; }
 }
-/* 🔹 رفع المحتوى لفوق */
+/* ًں”¹ ط±ظپط¹ ط§ظ„ظ…ط­طھظˆظ‰ ظ„ظپظˆظ‚ */
 .content {
-  padding-top: 40px; /* بدل 2rem أو أكتر حسب الحاجة */
+  padding-top: 40px; /* ط¨ط¯ظ„ 2rem ط£ظˆ ط£ظƒطھط± ط­ط³ط¨ ط§ظ„ط­ط§ط¬ط© */
   padding-bottom: 40px;
 }
 
 
 
 
-/* ===== زر الرجوع العصري ===== */
+/* ===== ط²ط± ط§ظ„ط±ط¬ظˆط¹ ط§ظ„ط¹طµط±ظٹ ===== */
 .back-btn {
   display: flex;
   align-items: center;
   gap: 8px;
   background: #e6f8fc;
-  border: 2px solid #039fc8;
-  color: #039fc8;
+  border: 2px solid #c8a75b;
+  color: #c8a75b;
   padding: 8px 16px;
   border-radius: 10px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 12px;
   cursor: pointer;
   transition: all 0.25s ease;
 }
 
 .back-btn:hover {
-  background: #039fc8;
+  background: #c8a75b;
   color: #fff;
   transform: translateX(-2px);
-  box-shadow: 0 4px 10px rgba(3,159,200,0.25);
+  box-shadow: 0 4px 10px rgba(200,167,91,0.25);
 }
 
 .back-icon {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: bold;
 }
 .back-text {
@@ -336,7 +336,7 @@ body{
 .back-btn {
   background: none;
   border: none;
-  color: #0d6efd;
+  color: #173da6;
   font-weight: 600;
   cursor: pointer;
   padding: 0;
@@ -344,7 +344,7 @@ body{
 }
 
 .chat-card h2 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   margin: 8px 0;
 }
@@ -373,7 +373,7 @@ body{
 .message__bubble {
   padding: 12px 16px;
   border-radius: 18px;
-  font-size: 15px;
+  font-size: 12px;
   line-height: 1.5;
   word-wrap: break-word;
 }
@@ -394,7 +394,7 @@ body{
   align-self: flex-end;
 }
 .message--out .message__bubble {
-  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+  background: linear-gradient(135deg, #173da6, #123b8d);
   color: #fff;
   border-bottom-right-radius: 6px;
   box-shadow: 0 8px 22px rgba(13,110,253,.35);
@@ -404,7 +404,7 @@ body{
    META
 ========================= */
 .message__meta {
-  font-size: 11px;
+  font-size: 12px;
   opacity: .6;
   margin-top: 4px;
 }
@@ -433,12 +433,12 @@ body{
   padding: 14px 42px 14px 18px;
   border-radius: 999px;
   border: 1px solid #ddd;
-  font-size: 14px;
+  font-size: 12px;
   outline: none;
 }
 
 .composer__field input:focus {
-  border-color: #0d6efd;
+  border-color: #173da6;
 }
 
 /* =========================
@@ -448,7 +448,7 @@ body{
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
   opacity: .7;
 }
 .icon-btn:hover {
@@ -459,7 +459,7 @@ body{
    SEND
 ========================= */
 .send-btn {
-  background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+  background: linear-gradient(135deg, #173da6, #123b8d);
   border: none;
   color: #fff;
   padding: 0 22px;
@@ -484,7 +484,7 @@ body{
   display: none;
   grid-template-columns: repeat(6, 1fr);
   gap: 6px;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .emoji-picker span {
@@ -493,3 +493,6 @@ body{
 .emoji-picker span:hover {
   transform: scale(1.2);
 }
+
+
+

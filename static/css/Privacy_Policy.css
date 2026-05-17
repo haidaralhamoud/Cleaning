@@ -1,4 +1,4 @@
-/* === RESET === */
+﻿/* === RESET === */
 * {
   margin: 0;
   padding: 0;
@@ -9,9 +9,9 @@
 body {
   font-family: "Vesper Libre", serif;
   background-color: #fff;
-  color: #000;
+  color: #16130f;
   line-height: 1.6;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 /* === MAIN CONTAINER === */
@@ -24,32 +24,33 @@ body {
 
 /* === BLUE SUMMARY BOX === */
 .summary-box {
-  background: #f4fafa;
-  border-radius: 15px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 244, 236, 0.96));
+  border: 1px solid rgba(200, 167, 91, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(31, 24, 14, 0.08);
   padding: 40px 40px 30px;
   margin-bottom: 40px;
 }
 
 .summary-box h1 {
   text-align: center;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
-  color: #000;
+  color: #16130f;
   margin-bottom: 10px;
 }
 
 .summary-box .intro {
   text-align: center;
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.8);
+  font-size: 12px;
+  color: #5f564a;
   margin-bottom: 25px;
 }
 
 .summary-list {
   list-style-type: none;
-  font-size: 15px;
-  color: rgba(0, 0, 0, 0.85);
+  font-size: 12px;
+  color: #5f564a;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -63,32 +64,33 @@ body {
 .summary-list li::before {
   position: absolute;
   left: 0;
-  color: #039fc8;
+  color: #a88432;
   font-weight: bold;
 }
 
 .summary-list strong {
-  color: #039fc8;
+  color: #a88432;
 }
 
 /* === FULL POLICY SECTION === */
 .full-policy {
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(200, 167, 91, 0.18);
+  border-radius: 20px;
+  box-shadow: 0 14px 32px rgba(31, 24, 14, 0.06);
   padding: 35px 40px;
 }
 
 .full-policy h2 {
-  font-size: 19px;
-  color: #039fc8;
+  font-size: 15px;
+  color: #a88432;
   margin-top: 30px;
   margin-bottom: 10px;
 }
 
 .full-policy p {
-  font-size: 15px;
-  color: rgba(0, 0, 0, 0.85);
+  font-size: 12px;
+  color: #5f564a;
   margin-bottom: 15px;
 }
 
@@ -98,18 +100,19 @@ body {
 }
 
 .full-policy ul li {
-  font-size: 15px;
+  font-size: 12px;
   margin-bottom: 10px;
-  color: rgba(0, 0, 0, 0.85);
+  color: #5f564a;
 }
 
 .full-policy strong {
-  color: #000;
+  color: #16130f;
 }
 
 .full-policy a {
-  color: #039fc8;
+  color: #a88432;
   text-decoration: none;
+  font-weight: 700;
 }
 
 .full-policy a:hover {
@@ -118,8 +121,8 @@ body {
 
 /* === LAST UPDATED === */
 .updated {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.7);
+  font-size: 12px;
+  color: #8b7f6f;
   margin-bottom: 20px;
   font-style: italic;
 }
@@ -132,16 +135,16 @@ body {
   }
 
   .summary-box h1 {
-    font-size: 30px;
+    font-size: 26px;
   }
 
   .full-policy h2 {
-    font-size: 20px;
+    font-size: 16px;
   }
 
   .full-policy p,
   .full-policy ul li {
-    font-size: 16px;
+    font-size: 12px;
   }
 }
 
@@ -156,11 +159,11 @@ body {
   }
 
   .summary-box h1 {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .summary-list li {
-    font-size: 15px;
+    font-size: 12px;
   }
 
   .full-policy {
@@ -168,26 +171,26 @@ body {
   }
 
   .full-policy h2 {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .full-policy p,
   .full-policy ul li {
-    font-size: 15px;
+    font-size: 12px;
   }
 }
 
 @media (max-width: 480px) {
   .summary-box h1 {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .summary-box .intro {
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .summary-list li {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .full-policy {
@@ -195,33 +198,33 @@ body {
   }
 
   .full-policy h2 {
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .full-policy p,
   .full-policy ul li {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
 /* === ICON STYLING === */
 .summary-list i {
-  color: #039fc8;
+  color: #a88432;
   margin-right: 8px;
-  font-size: 18px;
+  font-size: 14px;
   width: 22px;
   text-align: center;
 }
 
 .summary-box h1 i {
-  color: #039fc8;
+  color: #a88432;
   margin-right: 10px;
-  font-size: 26px;
+  font-size: 22px;
   vertical-align: middle;
 }
 
 i.fa-solid {
-  color: #039fc8 !important;
+  color: #a88432 !important;
   display: inline-block;
   font-style: normal;
 }
@@ -238,11 +241,11 @@ i.fa-solid {
   gap: 12px;
   margin-bottom: 18px;
   line-height: 1.6;
-  color: #333;
-  font-size: 15px;
+  color: #5f564a;
+  font-size: 12px;
 }
 
-/* 🔹 الأيقونة */
+/* ًں”¹ ط§ظ„ط£ظٹظ‚ظˆظ†ط© */
 .summary-list .icon {
   width: 22px;
   height: 22px;
@@ -251,17 +254,30 @@ i.fa-solid {
   object-fit: contain;
 }
 
-/* 🔹 العنوان والجملة يكونوا بنفس السطر */
-.summary-list strong {
-  color: #039fc8;
-  font-weight: 600;
-  margin-right: 6px;
-  white-space: nowrap; /* يمنع انقسام العنوان لسطرين */
+.summary-list .icon-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #a88432;
 }
 
-/* 🔹 الروابط */
+.summary-list .icon-svg svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* ًں”¹ ط§ظ„ط¹ظ†ظˆط§ظ† ظˆط§ظ„ط¬ظ…ظ„ط© ظٹظƒظˆظ†ظˆط§ ط¨ظ†ظپط³ ط§ظ„ط³ط·ط± */
+.summary-list strong {
+  color: #a88432;
+  font-weight: 600;
+  margin-right: 6px;
+  white-space: nowrap; /* ظٹظ…ظ†ط¹ ط§ظ†ظ‚ط³ط§ظ… ط§ظ„ط¹ظ†ظˆط§ظ† ظ„ط³ط·ط±ظٹظ† */
+}
+
+/* ًں”¹ ط§ظ„ط±ظˆط§ط¨ط· */
 .summary-list a {
-  color: #039fc8;
+  color: #a88432;
   text-decoration: none;
 }
 
@@ -287,9 +303,9 @@ i.fa-solid {
   }
 
   .summary-list strong {
-    color: #039fc8;
+    color: #a88432;
     font-weight: 600;
-    white-space: normal; /* يخلي النص ينزل سطر إذا لازم */
+    white-space: normal; /* ظٹط®ظ„ظٹ ط§ظ„ظ†طµ ظٹظ†ط²ظ„ ط³ط·ط± ط¥ط°ط§ ظ„ط§ط²ظ… */
     margin: 0;
   }
 
@@ -304,3 +320,5 @@ i.fa-solid {
     text-align: center;
   }
 }
+
+

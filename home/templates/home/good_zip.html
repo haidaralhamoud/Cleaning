@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,7 +12,7 @@
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
-<!-- ترتيب الستيلات: الأساسي، بعدين البوب أب -->
+<!-- طھط±طھظٹط¨ ط§ظ„ط³طھظٹظ„ط§طھ: ط§ظ„ط£ط³ط§ط³ظٹطŒ ط¨ط¹ط¯ظٹظ† ط§ظ„ط¨ظˆط¨ ط£ط¨ -->
 <link rel="stylesheet" href="{% static 'css/good_zip.css' %}">
 <link rel="stylesheet" href="{% static 'css/call_popup.css' %}">
 <link rel="stylesheet" href="{% static 'css/send_email.css' %}">
@@ -215,7 +215,7 @@
 <h2>Send Email</h2>
 </div>
 <p class="subtitle">A brief summary is included in your email</p>
-<!-- ⭐ أهم تعديل هون: class="email-form" -->
+<!-- â­گ ط£ظ‡ظ… طھط¹ط¯ظٹظ„ ظ‡ظˆظ†: class="email-form" -->
 <form method="POST" enctype="multipart/form-data" class="email-form">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="email_request">
@@ -502,5 +502,7 @@
 {% include "home/includes/footer.html" %}
 </body>
 </html>
+
+
 
 

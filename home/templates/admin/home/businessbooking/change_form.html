@@ -1,4 +1,4 @@
-{% extends "admin/change_form.html" %}
+﻿{% extends "admin/change_form.html" %}
 {% load admin_urls static %}
 
 {% block content %}
@@ -21,7 +21,7 @@
            text-decoration:none;
            font-weight:600;
          ">
-        ✏️ Enable Editing
+        âœڈï¸ڈ Enable Editing
       </a>
       <span style="margin-left:12px;color:#856404;">
         This booking is in read-only mode
@@ -38,14 +38,14 @@
       <a href="."
          class="button"
          style="
-           background:#0d6efd;
+           background:#173da6;
            color:#fff;
            padding:8px 14px;
            border-radius:4px;
            text-decoration:none;
            font-weight:600;
          ">
-        🔒 Disable Editing
+        ًں”’ Disable Editing
       </a>
       <span style="margin-left:12px;color:#084298;">
         Editing mode enabled
@@ -62,7 +62,7 @@
 
       {% if adminform.form.admin_points %}
       <div class="module aligned">
-        <h2>⭐ Loyalty Points</h2>
+        <h2>â­گ Loyalty Points</h2>
 
         <div class="form-row">
           {{ adminform.form.admin_points.label_tag }}
@@ -78,7 +78,7 @@
     <div style="margin-top:20px; display:flex; gap:10px;">
 
       <input type="submit"
-             value="💾 Save"
+             value="ًں’¾ Save"
              class="default"
              name="_save">
 
@@ -87,10 +87,13 @@
                 name="_cancel_booking"
                 class="button"
                 style="background:#dc3545;color:white;">
-          ❌ Cancel Booking
+          â‌Œ Cancel Booking
         </button>
       {% endif %}
 
     </div>
   {% endif %}
 {% endblock %}
+
+
+

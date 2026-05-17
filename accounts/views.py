@@ -2090,7 +2090,7 @@ def Media(request):
             ).first()
             if media:
                 media.delete()
-            return redirect(request.path + f"booking_type={booking_type}&booking_id={booking_id}")
+            return redirect(request.path + f"?booking_type={booking_type}&booking_id={booking_id}")
 
         phase = request.POST.get("phase", "before")
         file = request.FILES.get("file")
@@ -2102,7 +2102,7 @@ def Media(request):
                 file=file,
                 uploaded_by=request.user,
             )
-        return redirect(request.path + f"booking_type={booking_type}&booking_id={booking_id}")
+        return redirect(request.path + f"?booking_type={booking_type}&booking_id={booking_id}")
 
     media_qs = BookingMedia.objects.none()
     if booking:

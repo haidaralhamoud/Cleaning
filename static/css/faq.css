@@ -1,8 +1,8 @@
-body {
+﻿body {
   margin: 0;
   font-family: "Inter", sans-serif;
-  background-color: #f8fdf9;
-  color: #333;
+  background: #ffffff;
+  color: #16130f;
 }
 
 /* ===== NAVBAR ===== */
@@ -84,15 +84,19 @@ body {
 .faq-section {
   max-width: 900px;
   margin: 60px auto;
-  background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 244, 236, 0.96));
+  border: 1px solid rgba(200, 167, 91, 0.24);
+  border-radius: 28px;
+  box-shadow: 0 18px 44px rgba(31, 24, 14, 0.08);
   padding: 40px;
 }
 
 .faq-section h1 {
   text-align: center;
-  color: #039fc8;
+  color: #16130f;
+  font-family: "Vesper Libre", serif;
+  font-size: clamp(2rem, 3.4vw, 3rem);
   margin-bottom: 30px;
 }
 
@@ -106,15 +110,15 @@ body {
   gap: 12px;
   padding: 14px 18px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #f7fcff, #ffffff);
-  border: 1px solid #d5eaf4;
-  box-shadow: 0 12px 28px rgba(3, 159, 200, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(200, 167, 91, 0.24);
+  box-shadow: 0 12px 28px rgba(31, 24, 14, 0.05);
 }
 
 .faq-search-icon {
   width: 18px;
   height: 18px;
-  border: 2px solid #039fc8;
+  border: 2px solid #a88432;
   border-radius: 50%;
   position: relative;
   flex: 0 0 auto;
@@ -125,7 +129,7 @@ body {
   position: absolute;
   width: 8px;
   height: 2px;
-  background: #039fc8;
+  background: #a88432;
   border-radius: 999px;
   right: -5px;
   bottom: -2px;
@@ -137,20 +141,20 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
-  color: #22313f;
+  color: #16130f;
 }
 
 .faq-search input::placeholder {
-  color: #7a8b99;
+  color: #8b7f6f;
   font-weight: 500;
 }
 
 .faq-search-note {
   margin-top: 10px;
-  font-size: 13px;
-  color: #60707d;
+  font-size: 12px;
+  color: #5f564a;
   font-weight: 600;
 }
 
@@ -159,9 +163,10 @@ body {
 }
 
 .faq-category h2 {
-  color: #000;
-  font-size: 22px;
-  border-left: 5px solid #71b247;
+  color: #16130f;
+  font-family: "Vesper Libre", serif;
+  font-size: 18px;
+  border-left: 5px solid #c8a75b;
   padding-left: 10px;
   margin-bottom: 15px;
   display: flex;
@@ -169,9 +174,10 @@ body {
 }
 
 .faq-item {
-  background: #f6f6f6;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(200, 167, 91, 0.18);
   margin: 10px 0;
-  border-radius: 10px;
+  border-radius: 18px;
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -183,19 +189,22 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #16130f;
 }
 
 .faq-answer {
   display: none;
   padding: 0 20px 15px 20px;
-  color: #333;
-  line-height: 1.5;
+  color: #5f564a;
+  line-height: 1.7;
   font-weight: 500;
 }
 
 .faq-item.open {
-  background: #f3fff0;
-  transform: scale(1.02);
+  background: linear-gradient(180deg, #fffdfa 0%, #fbf7ef 100%);
+  border-color: rgba(200, 167, 91, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(31, 24, 14, 0.06);
 }
 
 .faq-item.open .faq-answer {
@@ -203,8 +212,8 @@ body {
 }
 
 .toggle-icon {
-  color: #71b247;
-  font-size: 20px;
+  color: #a88432;
+  font-size: 16px;
   transition: transform 0.3s ease;
 }
 
@@ -215,14 +224,15 @@ body {
 /* footer note */
 .footer-fun {
   text-align: center;
-  font-size: 15px;
-  color: #555;
+  font-size: 12px;
+  color: #5f564a;
   margin-top: 50px;
 }
 
 .footer-fun a {
-  color: #039fc8;
+  color: #a88432;
   text-decoration: none;
+  font-weight: 700;
 }
 
 .footer-fun a:hover {
@@ -233,12 +243,12 @@ body {
   margin-top: 18px;
   padding: 18px 20px;
   border-radius: 16px;
-  background: #f7fbfd;
-  border: 1px dashed rgba(3, 159, 200, 0.28);
+  background: #fffdfa;
+  border: 1px dashed rgba(200, 167, 91, 0.32);
   display: flex;
   flex-direction: column;
   gap: 6px;
-  color: #4b5b68;
+  color: #5f564a;
 }
 
 .faq-empty-state[hidden] {
@@ -257,10 +267,12 @@ body {
   }
 
   .faq-category h2 {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .faq-question {
-    font-size: 16px;
+    font-size: 12px;
   }
 }
+
+

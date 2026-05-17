@@ -1,4 +1,4 @@
-{% load static user_extras %}
+﻿{% load static user_extras %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -8,17 +8,26 @@
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <title>Add-Ons</title>
   {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_brand.css' %}">
 <link rel="stylesheet" href="{% static 'css/business_addons.css' %}">
 <link rel="stylesheet" href="{% static 'css/business_steps.css' %}">
 </head>
-<body>
+<body class="business-flow">
   {% include "home/includes/main_header.html" %}
 
-  <main class="container">
+  <main class="business-shell">
+<section class="business-hero">
+<div class="business-hero-content">
+<span class="business-eyebrow">Operational Extras</span>
+<h1 class="business-title">Layer in the add-ons that make the difference</h1>
+<p class="business-copy">These optional touches help tailor the cleaning plan to how your team actually uses the space.</p>
+</div>
+</section>
+<section class="business-panel">
 <div class="steps">
       {% for item in step_items %}
         {% if item.clickable %}
@@ -72,15 +81,8 @@
 </button>
 </div>
 </form>
+</section>
 </main>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
 
   {% include "home/includes/footer.html" %}
 
@@ -146,3 +148,5 @@
 </script>
 </body>
 </html>
+
+

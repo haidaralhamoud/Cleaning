@@ -1,4 +1,4 @@
-* {
+﻿* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -47,7 +47,7 @@ body {
 }
 .hero h1 {
   color: #fff;
-  font-size: 48px;
+  font-size: 44px;
 }
 
 /* ===== MAIN CONTENT ===== */
@@ -57,7 +57,7 @@ body {
   padding: 0 20px;
 }
 .section-title {
-  font-size: 26px;
+  font-size: 22px;
   color: #039FC8;
   text-align: center;
   font-weight: 700;
@@ -65,7 +65,7 @@ body {
 .subtitle {
   text-align: center;
   color: #000;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
   margin-bottom: 25px;
 }
@@ -106,7 +106,7 @@ body {
 }
 .addon-card.is-selected {
   border: 2px solid #039FC8;
-  box-shadow: 0 10px 24px rgba(3,159,200,0.22);
+  box-shadow: 0 10px 24px rgba(200,167,91,0.22);
 }
 .addon-card img {
   width: calc(100% - 36px);
@@ -118,7 +118,7 @@ body {
   border-radius: 18px;
 }
 .addon-card p {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 500;
 }
 .check-box {
@@ -132,10 +132,10 @@ body {
 }
 .check-box.checked {
   background: #039FC8;
-  box-shadow: 0 0 8px rgba(3,159,200,0.4);
+  box-shadow: 0 0 8px rgba(200,167,91,0.4);
 }
 .check-box.checked::after {
-  content: "✓";
+  content: "\2713";
   position: absolute;
   color: #fff;
   font-weight: 700;
@@ -173,7 +173,7 @@ body {
   align-items: center;
   gap: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(3,159,200,0.15);
+  border-bottom: 1px solid rgba(200,167,91,0.15);
   margin-bottom: 16px;
 }
 .popup-header h3 {
@@ -183,12 +183,12 @@ body {
 .popup-header button {
   background: #e6f7fb;
   color: #039FC8;
-  border: 1px solid rgba(3,159,200,0.3);
+  border: 1px solid rgba(200,167,91,0.3);
   border-radius: 12px;
   width: 34px;
   height: 34px;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -201,7 +201,7 @@ body {
   width: 8px;
 }
 .popup-content::-webkit-scrollbar-thumb {
-  background: rgba(3,159,200,0.35);
+  background: rgba(200,167,91,0.35);
   border-radius: 10px;
 }
 .popup-buttons {
@@ -234,7 +234,7 @@ body {
 
 .addon-form-grid label {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   color: #0f172a;
 }
 
@@ -246,15 +246,15 @@ body {
   border-radius: 14px;
   padding: 12px 14px;
   background: #ffffff;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .addon-form-grid input:focus,
 .addon-form-grid select:focus,
 .addon-form-grid textarea:focus {
   outline: none;
-  border-color: #00a3c8;
-  box-shadow: 0 0 0 4px rgba(0, 163, 200, 0.12);
+  border-color: #c8a75b;
+  box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.12);
 }
 
 .addon-form-grid select {
@@ -309,7 +309,7 @@ body {
 
 /* ===== Responsive ===== */
 @media (max-width: 600px) {
-  .hero h1 { font-size: 32px; }
+  .hero h1 { font-size: 28px; }
   .navbar { flex-direction: column; padding: 10px 20px; }
   .navbar ul { gap: 20px; flex-wrap: wrap; }
   .popup-content { padding: 18px; }
@@ -320,8 +320,8 @@ body {
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0,0,0,0.15);
   padding: 30px 40px;
-  max-width: 400px; /* ✅ وسّعنا العرض */
-  width: 100%; /* يخليها تتناسب بسلاسة */
+  max-width: 400px; /* âœ… ظˆط³ظ‘ط¹ظ†ط§ ط§ظ„ط¹ط±ط¶ */
+  width: 100%; /* ظٹط®ظ„ظٹظ‡ط§ طھطھظ†ط§ط³ط¨ ط¨ط³ظ„ط§ط³ط© */
   height: fit-content;
   margin-left: auto;
   font-family: "Vesper Libre", serif;
@@ -332,7 +332,7 @@ body {
   text-align: center;
   color: #000;
   font-weight: 700;
-  font-size: 22px;
+  font-size: 18px;
   margin-bottom: 15px;
 }
 
@@ -345,7 +345,7 @@ body {
 .summary-item, .summary-total {
   display: flex;
   justify-content: space-between;
-  font-size: 17px;
+  font-size: 13px;
   margin: 8px 0;
   font-weight: 600;
 }
@@ -364,7 +364,7 @@ body {
   border-radius: 12px;
   padding: 12px 0;
   margin-top: 20px;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.3s;
@@ -374,7 +374,7 @@ body {
   background: #0287ad;
 }
 
-/* === GRID تعديل بسيط لعرضه جنب القائمة === */
+/* === GRID طھط¹ط¯ظٹظ„ ط¨ط³ظٹط· ظ„ط¹ط±ط¶ظ‡ ط¬ظ†ط¨ ط§ظ„ظ‚ط§ط¦ظ…ط© === */
 @media (min-width: 900px) {
   .content {
     display: grid;
@@ -477,7 +477,7 @@ body {
   box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.12);
 }
 
-/* === موبايل: خلي الصندوق تحت === */
+/* === ظ…ظˆط¨ط§ظٹظ„: ط®ظ„ظٹ ط§ظ„طµظ†ط¯ظˆظ‚ طھط­طھ === */
 @media (max-width: 899px) {
   .booking-summary {
     margin: 40px auto 0;
@@ -487,8 +487,26 @@ body {
 @media (min-width: 900px) {
   .content {
     display: grid;
-    grid-template-columns: 1fr 400px; /* 🔹 بدل 320px */
-    gap: 25px; /* 🔹 خففنا المسافة بين الأعمدة */
+    grid-template-columns: 1fr 400px; /* ًں”¹ ط¨ط¯ظ„ 320px */
+    gap: 25px; /* ًں”¹ ط®ظپظپظ†ط§ ط§ظ„ظ…ط³ط§ظپط© ط¨ظٹظ† ط§ظ„ط£ط¹ظ…ط¯ط© */
     align-items: start;
   }
+
+  .content > .left {
+    min-width: 0;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .content > #booking-summary-box {
+    grid-column: 2;
+    grid-row: 1;
+    width: 100%;
+    max-width: 400px;
+    justify-self: end;
+    align-self: start;
+  }
 }
+
+
+

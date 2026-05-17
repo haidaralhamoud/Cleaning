@@ -7,141 +7,194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <title>Join the Hembla experten Team</title>
-  {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/font_links.html' %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/career_page.css'%}" />
-<style>
-*, *:before, *:after {
-  box-sizing: border-box;
-  .fade-in {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.9s ease-out;
-}
-
-.fade-in.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-.join-section img,
-.why-section img,
-.growth-section img {
-  opacity: 0;
-  transform: scale(0.95);
-  transition: all 1s ease-out;
-}
-
-.fade-in.show img {
-  opacity: 1;
-  transform: scale(1);
-}
-.join-section h1 {
-  animation: slideIn 1.2s ease forwards;
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-.job-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.job-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0px 12px 25px rgba(0,0,0,0.15);
-}
-.job-card img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: center;
-}
-
-}
-   </style>
 </head>
-<body>
-<!-- ' HEADER -->
+<body class="career-page">
 {% include "home/includes/main_header.html" %}
-  <section class="join-section fade-in" >
-<h1>Join the Hembla experten Team</h1>
-<p>At Hembla experten, we believe that every home, every family, and every business deserves care they can rely on. We're not just here to fix or install, we're here to bring comfort, safety, and peace of mind to the people we serve.</p>
-</section>
-<section class="openings-section fade-in">
-<h2>Current Openings</h2>
 
-    {% for job in jobs %}
-    <div class="job-card">
-<img src="{{ job.image.url }}" alt="{{ job.title }}" width="150" height="150" loading="lazy" decoding="async">
-<div class="job-content">
-<h3>{{ job.title }}</h3>
-<p>{{ job.description }}</p>
-<div class="job-buttons">
-<button class="btn blue">{{ job.job_type }}</button>
-<!-- 🔥 زر التقديم مع تمرير رقم الوظيفة -->
-<a href="{% url 'home:apply_page' job.id %}" class="btn green">Apply Now</a>
-</div>
-</div>
-</div>
-    {% endfor %}
+<main class="career-shell">
+  <section class="career-hero reveal">
+    <div class="career-hero__copy">
+      <span class="career-kicker">Careers at Hembla</span>
+      <h1>Build work people trust, with a team that keeps moving forward.</h1>
+      <p>
+        Join a company that blends care, speed, and operational excellence across homes and businesses.
+        We are building a sharper service experience, and we want ambitious people inside it.
+      </p>
+      <div class="career-hero__actions">
+        <a href="#openings" class="career-btn career-btn--primary">See current openings</a>
+        <a href="{% url 'home:contact' %}" class="career-btn career-btn--ghost">Talk to our team</a>
+      </div>
+      <div class="career-hero__stats">
+        <div class="career-stat">
+          <strong>{{ jobs|length }}</strong>
+          <span>Open roles</span>
+        </div>
+        <div class="career-stat">
+          <strong>Fast</strong>
+          <span>Hiring flow</span>
+        </div>
+        <div class="career-stat">
+          <strong>Real</strong>
+          <span>Growth path</span>
+        </div>
+      </div>
+    </div>
 
+    <div class="career-hero__panel reveal">
+      <div class="career-panel-card career-panel-card--dark">
+        <span class="career-panel-card__eyebrow">What it feels like</span>
+        <h2>Structured, warm, and high standards.</h2>
+        <p>
+          We care about presentation, punctuality, and consistency, but we also care about people
+          feeling supported while they do great work.
+        </p>
+      </div>
+
+      <div class="career-panel-card career-panel-card--light">
+        <div class="career-orbit career-orbit--one"></div>
+        <div class="career-orbit career-orbit--two"></div>
+        <div class="career-signal">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="career-panel-metric">
+          <strong>New identity</strong>
+          <p>Sharper service brand. More premium candidate experience.</p>
+        </div>
+      </div>
+    </div>
   </section>
-<section class="why-section fade-in">
-<h2>Why Work at Hembla experten</h2>
-<div class="why-container">
-<div class="why-text">
-<p>
-<strong>Because here, you're not just an employee,</strong>
-<br>
-        you're part of a family that believes in trust, respect, and kindness. We celebrate small wins, support each other through challenges, and always strive to make life a little easier for our customers, and for each other.</p>
-</div>
-<picture>
-<source srcset="{% static 'images/frame-16865528320.webp' %}" type="image/webp">
-<img src="{% static 'images/frame-16865528320.png'%}" alt="Team Meeting" width="686" height="341" loading="lazy" decoding="async">
-</picture>
-</div>
-</section>
-<section class="growth-section fade-in">
-<h2>Your Growth Matters</h2>
-<div class="growth-container">
-<picture>
-<source srcset="{% static 'images/frame-16865528330.webp' %}" type="image/webp">
-<img src="{% static 'images/frame-16865528330.png'%}" alt="Team Growth" width="686" height="341" loading="lazy" decoding="async">
-</picture>
-<div class="growth-text">
-<p>We want you to grow with us, not just as a professional, but as a person. At Hembla experten, you'll find encouragement to learn, space to be creative, and support to reach your full potential.</p>
-</div>
-</div>
-</section>
+
+  <section class="career-values reveal">
+    <div class="career-values__intro">
+      <span class="career-kicker">Why Join</span>
+      <h2>We are not building a generic workplace.</h2>
+      <p>
+        The culture is hands-on, quality-focused, and visibly modern. That should show up in how we hire too.
+      </p>
+    </div>
+
+    <div class="career-values__grid">
+      <article class="value-card">
+        <div class="value-card__icon">01</div>
+        <h3>Visible impact</h3>
+        <p>Your work affects real customer experiences every single day.</p>
+      </article>
+      <article class="value-card">
+        <div class="value-card__icon">02</div>
+        <h3>Clear standards</h3>
+        <p>We like defined expectations, clean systems, and teams that know how to move.</p>
+      </article>
+      <article class="value-card">
+        <div class="value-card__icon">03</div>
+        <h3>Room to grow</h3>
+        <p>Strong people get more ownership, not more waiting.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="career-openings reveal" id="openings">
+    <div class="career-section-head">
+      <div>
+        <span class="career-kicker">Open Positions</span>
+        <h2>Current openings</h2>
+      </div>
+      <p>Choose a role that matches your strengths and apply directly.</p>
+    </div>
+
+    <div class="career-openings__list">
+      {% for job in jobs %}
+      <article class="career-job-card reveal">
+        <div class="career-job-card__media">
+          {% if job.image %}
+          <img src="{{ job.image.url }}" alt="{{ job.title }}" width="280" height="280" loading="lazy" decoding="async">
+          {% else %}
+          <div class="career-job-card__placeholder" aria-hidden="true">
+            <span>{{ job.title|slice:":1" }}</span>
+          </div>
+          {% endif %}
+          <div class="career-job-card__badge">{{ job.job_type }}</div>
+        </div>
+
+        <div class="career-job-card__content">
+          <div class="career-job-card__topline">
+            <span>Hembla experten</span>
+            <span>Hiring now</span>
+          </div>
+          <h3>{{ job.title }}</h3>
+          <p>{{ job.description }}</p>
+          <div class="career-job-card__actions">
+            <a href="{% url 'home:apply_page' job.id %}" class="career-btn career-btn--primary">Apply now</a>
+            <span class="career-job-card__meta">Professional onboarding</span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="career-story reveal">
+    <div class="career-story__visual">
+      <img src="{% static 'images/careers-team-energy.jpg' %}" alt="Professional team collaboration at Hembla experten" width="686" height="341" loading="lazy" decoding="async">
+    </div>
+    <div class="career-story__copy">
+      <span class="career-kicker">Team Energy</span>
+      <h2>People stay where standards and respect live together.</h2>
+      <p>
+        We want disciplined execution without cold culture. That means communication, trust,
+        and a team that treats reliability as part of the brand.
+      </p>
+      <ul class="career-points">
+        <li>Clear expectations from day one</li>
+        <li>Supportive team culture with real accountability</li>
+        <li>Work that reflects a premium customer promise</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="career-growth reveal">
+    <div class="career-growth__copy">
+      <span class="career-kicker">Growth Path</span>
+      <h2>Your next role should not feel static.</h2>
+      <p>
+        Whether you are operational, customer-facing, or specialist talent, we want people who
+        can evolve with the business and raise the bar as we scale.
+      </p>
+      <a href="#openings" class="career-btn career-btn--secondary">Explore roles again</a>
+    </div>
+    <div class="career-growth__visual">
+      <img src="{% static 'images/careers-growth-path.jpg' %}" alt="Team brainstorming and growth planning at Hembla experten" width="686" height="341" loading="lazy" decoding="async">
+    </div>
+  </section>
+</main>
+
 {% include "home/includes/footer.html" %}
+
 <script>
-  const elements = document.querySelectorAll('.fade-in');
+  const revealItems = document.querySelectorAll(".reveal");
 
-  const observer = new IntersectionObserver((entries)=>{
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        entry.target.classList.add('show');
-      }
-    });
-  });
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
 
-  elements.forEach(el => observer.observe(el));
+    revealItems.forEach((item) => observer.observe(item));
+  } else {
+    revealItems.forEach((item) => item.classList.add("is-visible"));
+  }
 </script>
-<script src="{% static 'js/main_header.js' %}" defer>
-</script>
+<script src="{% static 'js/main_header.js' %}" defer></script>
 </body>
 </html>
-
-

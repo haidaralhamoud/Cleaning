@@ -1,4 +1,4 @@
-/* ====== RESET ====== */
+﻿/* ====== RESET ====== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -8,9 +8,9 @@
 
 body {
   background: #fff;
-  color: #000;
+  color: #16130f;
   overflow-x: hidden;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 /* ====== HEADER ====== */
@@ -45,7 +45,7 @@ body {
   color: #000;
   text-decoration: none;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 12px;
   position: relative;
 }
 
@@ -62,7 +62,7 @@ body {
   border-radius: 30px;
   padding: 8px 20px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: 0.2s;
 }
@@ -97,22 +97,24 @@ body {
 
 .title {
   text-align: center;
-  font-size: 34px;
+  font-size: 30px;
   font-weight: 700;
+  color: #16130f;
   margin-bottom: 0.5rem;
 }
 
 .update-date {
   text-align: center;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 600;
+  color: #a88432;
   margin-bottom: 1rem;
 }
 
 .intro {
   text-align: center;
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.8);
+  font-size: 12px;
+  color: #5f564a;
   line-height: 1.6;
   margin: 0 auto 2rem auto;
   max-width: 1000px;
@@ -120,23 +122,25 @@ body {
 
 /* ====== SECTION CARDS ====== */
 .section-card {
-  background: rgba(3, 159, 200, 0.05);
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 244, 236, 0.96));
+  border: 1px solid rgba(200, 167, 91, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(31, 24, 14, 0.08);
   padding: 2rem 2.5rem;
   margin-bottom: 2rem;
 }
 
 .section-card h2 {
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 700;
+  color: #16130f;
   margin-bottom: 1rem;
 }
 
 .section-card p {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.8);
+  color: #5f564a;
   margin-bottom: 1rem;
   line-height: 1.6;
 }
@@ -147,9 +151,9 @@ body {
 }
 
 .section-card li {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
-  color: rgba(0, 0, 0, 0.6);
+  color: #5f564a;
   margin: 0.6rem 0;
   position: relative;
   line-height: 1.6;
@@ -160,10 +164,10 @@ body {
   content: "";
   position: absolute;
   left: -14px;
-  top: 0.55em; /* 🔹 عدّلنا هون بدل 10px حتى تطلع بمحاذاة السطر */
+  top: 0.55em; /* ًں”¹ ط¹ط¯ظ‘ظ„ظ†ط§ ظ‡ظˆظ† ط¨ط¯ظ„ 10px ط­طھظ‰ طھط·ظ„ط¹ ط¨ظ…ط­ط§ط°ط§ط© ط§ظ„ط³ط·ط± */
   width: 8px;
   height: 8px;
-  background: #d9d9d9;
+  background: #c8a75b;
   border-radius: 50%;
 }
 
@@ -197,7 +201,7 @@ body {
   }
 
   .title {
-    font-size: 32px;
+    font-size: 28px;
   }
 }
 
@@ -229,15 +233,15 @@ body {
   }
 
   .title {
-    font-size: 26px;
+    font-size: 22px;
   }
 
   .update-date {
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .intro {
-    font-size: 15px;
+    font-size: 12px;
     max-width: 90%;
   }
 
@@ -246,10 +250,12 @@ body {
   }
 
   .section-card h2 {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .section-card li {
-    font-size: 15px;
+    font-size: 12px;
   }
 }
+
+

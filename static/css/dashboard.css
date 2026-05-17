@@ -88,7 +88,7 @@ body{
   border-radius:14px;
   background:#f8fbff;
   color:#6b7280;
-  font-size:13px;
+  font-size:12px;
   font-weight:700;
   border:1px dashed #d7e3ee;
 }
@@ -102,7 +102,7 @@ body{
   position:sticky;top:0;z-index:10;
   backdrop-filter:blur(10px)
 }
-.dash-title{font-size:22px;font-weight:800}
+.dash-title{font-size:18px;font-weight:800}
 .dash-actions{display:flex;align-items:center;gap:12px}
 
 /* ===== Password Modal ===== */
@@ -118,7 +118,7 @@ body{
 }
 .dash-modal__panel{
   position:relative;
-  background:linear-gradient(180deg, #ffffff, #f7fbff);
+  background:linear-gradient(180deg, #ffffff, #fffdf8);
   width:min(440px, 92%);
   border-radius:18px;
   padding:22px 20px 18px;
@@ -131,7 +131,7 @@ body{
 }
 .dash-modal__panel h3{
   font-weight:800;
-  font-size:20px;
+  font-size:16px;
   margin-bottom:12px;
   color:#0b6b88;
 }
@@ -146,7 +146,7 @@ body{
   border:1px solid #d7e3ee;
   border-radius:12px;
   padding:11px 12px;
-  font-size:14px;
+  font-size:12px;
   background:#f9fcff;
   transition:border-color .2s ease, box-shadow .2s ease;
 }
@@ -219,7 +219,7 @@ body{
 }
 .dash-bell-badge{
   position:absolute;top:-6px;right:-6px;
-  background:#ff4f4f;color:#fff;font-size:11px;font-weight:800;
+  background:#ff4f4f;color:#fff;font-size:12px;font-weight:800;
   min-width:18px;height:18px;padding:0 6px;border-radius:999px;
   display:flex;align-items:center;justify-content:center
 }
@@ -231,7 +231,7 @@ body{
 }
 .dash-bell-menu.open{display:block}
 .dash-bell-head{font-weight:800;margin-bottom:8px}
-.dash-bell-summary{display:flex;flex-direction:column;gap:4px;font-size:13px;color:#4b5563;margin-bottom:10px}
+.dash-bell-summary{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#4b5563;margin-bottom:10px}
 .dash-bell-list{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:10px}
 .dash-bell-item{
   border:1px solid #eef2f7;border-radius:12px;padding:10px;background:#f9fbff;
@@ -239,9 +239,9 @@ body{
 }
 .dash-bell-item:hover{background:#eef6ff}
 .dash-bell-title{font-weight:700;margin-bottom:2px}
-.dash-bell-note{font-size:13px;color:#4b5563}
+.dash-bell-note{font-size:12px;color:#4b5563}
 .dash-bell-time{font-size:12px;color:#9ca3af;margin-top:4px}
-.dash-bell-empty{color:#6b7280;font-size:13px;padding:8px 4px}
+.dash-bell-empty{color:#6b7280;font-size:12px;padding:8px 4px}
 
 /* ==========================
    Modern Dashboard Theme
@@ -301,7 +301,7 @@ body::after{
   color:#084c63;
   border:1px solid rgba(11,142,162,.25);
 }
-.dash-title{font-size:24px;font-weight:800;letter-spacing:.2px}
+.dash-title{font-size:20px;font-weight:800;letter-spacing:.2px}
 .dash-topbar{background:rgba(255,255,255,.88)}
 
 .card{
@@ -320,7 +320,7 @@ body::after{
 }
 .table{
   margin:0;
-  font-size:14px;
+  font-size:12px;
 }
 .dash-table{
   table-layout:fixed;
@@ -424,13 +424,13 @@ body::after{
 .dash-queue-detail,
 .dash-inbox-detail{
   color:#526174;
-  font-size:14px;
+  font-size:12px;
   margin-top:4px;
 }
 .dash-task-meta,
 .dash-queue-meta{
   color:#0b8ea2;
-  font-size:13px;
+  font-size:12px;
   margin-top:6px;
   font-weight:700;
 }
@@ -473,17 +473,17 @@ body::after{
 .dash-mini-stat{
   padding:14px 16px;
   border-radius:18px;
-  background:linear-gradient(180deg, #f7fbff, #fff);
+  background:linear-gradient(180deg, #fffdf8, #fff);
   border:1px solid #e8eef6;
 }
 .dash-mini-stat span{
   display:block;
   color:#5a6a7f;
-  font-size:13px;
+  font-size:12px;
 }
 .dash-mini-stat b{
   display:block;
-  font-size:28px;
+  font-size:24px;
   margin-top:4px;
 }
 .dash-queue-row,
@@ -521,11 +521,11 @@ body::after{
 .dash-queue-time,
 .dash-inbox-time{
   color:#526174;
-  font-size:13px;
+  font-size:12px;
 }
 .dash-queue-provider{
   color:#0b8ea2;
-  font-size:13px;
+  font-size:12px;
   font-weight:700;
   margin-top:4px;
 }
@@ -549,7 +549,7 @@ body::after{
   background:#fff;
   border-radius:12px;
   padding:8px 10px;
-  font-size:13px;
+  font-size:12px;
   color:#31506c;
 }
 .dash-row-btn{
@@ -607,7 +607,7 @@ body::after{
   color:#385067;
   border-radius:999px;
   padding:8px 14px;
-  font-size:13px;
+  font-size:12px;
   font-weight:800;
   cursor:pointer;
 }
@@ -764,7 +764,7 @@ textarea.form-control:focus{
   padding:6px 14px;border-radius:999px;background:rgba(14,165,164,.15);
   color:#0b6b88;font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.08em
 }
-.dash-hero-title{font-size:32px;font-weight:800;margin:10px 0 8px}
+.dash-hero-title{font-size:28px;font-weight:800;margin:10px 0 8px}
 .dash-hero-sub{color:var(--muted);margin-bottom:16px;max-width:520px}
 .dash-hero-stats{display:grid;grid-template-columns:repeat(4, minmax(0,1fr));gap:12px}
 .dash-stat{
@@ -772,7 +772,7 @@ textarea.form-control:focus{
   box-shadow:0 12px 22px rgba(15,23,42,.08)
 }
 .dash-stat span{display:block;font-size:12px;color:#64748b}
-.dash-stat b{font-size:20px}
+.dash-stat b{font-size:16px}
 
 .dash-quick{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .dash-quick-btn{
@@ -787,12 +787,12 @@ textarea.form-control:focus{
   box-shadow:0 18px 32px rgba(15,23,42,.12)
 }
 .dash-hero-card-title{font-weight:800;margin-bottom:4px}
-.dash-hero-card-sub{font-size:13px;color:var(--muted);margin-bottom:12px}
+.dash-hero-card-sub{font-size:12px;color:var(--muted);margin-bottom:12px}
 .dash-hero-meter{height:10px;border-radius:999px;background:#e2e8f0;overflow:hidden;margin-bottom:14px}
 .dash-hero-meter-bar{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));max-width:100%}
 .dash-hero-card-grid{display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px}
 .dash-hero-card-grid span{display:block;font-size:12px;color:#64748b}
-.dash-hero-card-grid b{font-size:18px}
+.dash-hero-card-grid b{font-size:14px}
 
 /* ===== Quick Panels ===== */
 .dash-fast{
@@ -810,12 +810,12 @@ textarea.form-control:focus{
 }
 .dash-fast-title{
   font-weight:800;
-  font-size:18px;
+  font-size:14px;
   margin-bottom:4px;
 }
 .dash-fast-sub{
   color:var(--muted);
-  font-size:13px;
+  font-size:12px;
   margin-bottom:12px;
 }
 .dash-fast-actions{
@@ -827,8 +827,8 @@ textarea.form-control:focus{
 /* ===== Sections ===== */
 .dash-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
 .dash-section-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
-.dash-section-head h2{font-size:20px;font-weight:800;margin:0}
-.dash-section-head p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.dash-section-head h2{font-size:16px;font-weight:800;margin:0}
+.dash-section-head p{margin:2px 0 0;color:var(--muted);font-size:12px}
 .dash-section-pill{font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;background:#e6f7f7;color:#0b6b88}
 
 .dash-cards{
@@ -847,9 +847,9 @@ textarea.form-control:focus{
   min-width:22px;height:22px;padding:0 6px;border-radius:999px;
   background:#ff4f4f;color:#fff;font-size:12px;font-weight:800;margin-top:6px
 }
-.dash-card .count{font-size:28px;font-weight:800;color:#0b6b88}
+.dash-card .count{font-size:24px;font-weight:800;color:#0b6b88}
 .dash-card .label{font-weight:700}
-.dash-card i{font-size:22px;color:#0b6b88;background:#eaf6fb;padding:12px;border-radius:12px}
+.dash-card i{font-size:18px;color:#0b6b88;background:#eaf6fb;padding:12px;border-radius:12px}
 
 /* ===== Activity ===== */
 .dash-activity{
@@ -866,25 +866,25 @@ textarea.form-control:focus{
   display:flex;align-items:center;justify-content:center;color:var(--primary)
 }
 .dash-activity-title{font-weight:700}
-.dash-activity-note{font-size:13px;color:#64748b}
+.dash-activity-note{font-size:12px;color:#64748b}
 .dash-activity-time{font-size:12px;color:#94a3b8;white-space:nowrap}
-.dash-activity-empty{color:#6b7280;font-size:13px;padding:8px 4px}
+.dash-activity-empty{color:#6b7280;font-size:12px;padding:8px 4px}
 
 /* ===== Tables / Forms ===== */
 .table thead th{background:#f1f6fb}
 .table td, .table th{vertical-align:middle}
-.json-box{background:#f7fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-size:13px;white-space:pre-wrap}
+.json-box{background:#f7fafc;border:1px solid #e5e7eb;border-radius:10px;padding:12px;font-size:12px;white-space:pre-wrap}
 .json-read{margin-top:18px}
 .json-block{background:#fff;border:1px solid #eef2f7;border-radius:16px;padding:14px;box-shadow:0 10px 20px rgba(15,23,42,.06)}
-.json-title{font-weight:800;color:#0b6b88;margin-bottom:8px;font-size:14px}
+.json-title{font-weight:800;color:#0b6b88;margin-bottom:8px;font-size:12px}
 .json-card{background:#f9fbff;border:1px solid #e5eff8;border-radius:12px;padding:12px}
 .json-grid{display:flex;flex-direction:column;gap:10px}
 .json-row{display:grid;grid-template-columns:160px 1fr;gap:12px;align-items:start}
-.json-key{font-weight:700;color:#334155;font-size:13px;text-transform:capitalize}
-.json-val{font-size:13px;color:#0f172a}
+.json-key{font-weight:700;color:#334155;font-size:12px;text-transform:capitalize}
+.json-val{font-size:12px;color:#0f172a}
 .json-list{display:flex;flex-wrap:wrap;gap:8px}
 .json-pill{background:#fff;border:1px solid #e2e8f0;border-radius:999px;padding:6px 10px;font-size:12px;font-weight:600}
-.json-text{font-size:13px;color:#0f172a}
+.json-text{font-size:12px;color:#0f172a}
 .json-empty{font-size:12px;color:#6b7280}
 .json-nested{width:100%}
 .qs-builder{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:14px}
@@ -983,3 +983,6 @@ textarea.form-control:focus{
   .dash-activity-time{grid-column:1 / -1}
   .dash-content{padding:18px 14px 32px}
 }
+
+
+

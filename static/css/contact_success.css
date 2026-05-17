@@ -1,4 +1,4 @@
-/* === RESET === */
+﻿/* === RESET === */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,7 +6,7 @@
   font-family: "VesperLibre-Bold", sans-serif;
 }
 
-/* === الخلفية الشفافة للمودال === */
+/* === ط§ظ„ط®ظ„ظپظٹط© ط§ظ„ط´ظپط§ظپط© ظ„ظ„ظ…ظˆط¯ط§ظ„ === */
 .thankyou-popup {
   position: fixed;
   inset: 0;
@@ -18,7 +18,7 @@
   animation: fadeIn 0.4s ease forwards;
 }
 
-/* === الإطار الأبيض للمحتوى === */
+/* === ط§ظ„ط¥ط·ط§ط± ط§ظ„ط£ط¨ظٹط¶ ظ„ظ„ظ…ط­طھظˆظ‰ === */
 .popup-content {
   background: linear-gradient(
     180deg,
@@ -36,31 +36,31 @@
   box-shadow: 0px 6px 25px rgba(0,0,0,0.25);
 }
 
-/* === أيقونة النجاح === */
+/* === ط£ظٹظ‚ظˆظ†ط© ط§ظ„ظ†ط¬ط§ط­ === */
 .popup-icon {
   width: 80px;
   height: 80px;
   margin-bottom: 30px;
 }
 
-/* === العنوان الرئيسي === */
+/* === ط§ظ„ط¹ظ†ظˆط§ظ† ط§ظ„ط±ط¦ظٹط³ظٹ === */
 .popup-title {
-  color: #039fc8;
-  font-size: 22px;
+  color: #c8a75b;
+  font-size: 18px;
   font-weight: 700;
   margin-bottom: 15px;
 }
 
-/* === الفقرات === */
+/* === ط§ظ„ظپظ‚ط±ط§طھ === */
 .popup-text {
   color: #000;
-  font-size: 18px;
+  font-size: 14px;
   line-height: 1.7;
   font-weight: 600;
   margin-bottom: 10px;
 }
 
-/* === الأزرار === */
+/* === ط§ظ„ط£ط²ط±ط§ط± === */
 .popup-buttons {
   display: flex;
   justify-content: center;
@@ -74,7 +74,7 @@
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 700;
   transition: 0.3s ease;
 }
@@ -89,7 +89,7 @@
   transform: translateY(-2px);
 }
 
-/* === الأنيميشن === */
+/* === ط§ظ„ط£ظ†ظٹظ…ظٹط´ظ† === */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -106,13 +106,16 @@
     padding: 40px 25px;
   }
   .popup-title {
-    font-size: 20px;
+    font-size: 16px;
   }
   .popup-text {
-    font-size: 16px;
+    font-size: 12px;
   }
   .btn {
     width: 100%;
-    font-size: 16px;
+    font-size: 12px;
   }
 }
+
+
+

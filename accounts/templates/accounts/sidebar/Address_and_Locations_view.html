@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -17,11 +17,11 @@
 <body class="address-locations-view">
 <!-- HEADER -->{% include "home/includes/main_header.html" %}   <div class="layout">
 <!-- Sidebar -->
-<!-- Ø²Ø± Ø§ÙÙÙÙÙÙ ÙØ¸ÙØ± ÙÙØ· Ø¨Ø§ÙÙÙØ¨Ø§ÙÙ -->
+<!-- أکآ²أکآ± أکآ§أ™آ„أ™آ…أ™آٹأ™آ†أ™آٹأ™آˆ أ™آٹأکآ¸أ™آ‡أکآ± أ™آپأ™آ‚أکآ· أکآ¨أکآ§أ™آ„أ™آ…أ™آˆأکآ¨أکآ§أ™آٹأ™آ„ -->
 <div >
 <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
 <span class="arrow">&#8250;</span>
-<!-- âº -->
+<!-- أ¢آ€آ؛ -->
 </button>
 </div>    {% include "accounts/includes/customer_sidebar.html" %}    <!-- Main content -->
 <main class="main">
@@ -31,7 +31,7 @@
 <img src="{% static 'images/home2.png'%}" class="icon">
 <h3>      {{ location.get_address_type_display }}      {% if location.is_primary %}        <img src="{% static 'images/star0.png'%}" class="star">
 <span class="badge">Active</span>      {% endif %}    </h3>
-<p>      Address: {{ location.street_address }},      {{ location.city }},      {{ location.region }},      {{ location.postal_code }},      {{ location.country }}    </p>    {% if location.contact_name %}      <p>Contact: {{ location.contact_name }} · {{ location.contact_phone }}</p>    {% endif %}    {% if location.parking_notes or location.entry_code %}      <p>        Parking: {{ location.parking_notes|default:"" }}        · Entry: {{ location.entry_code|default:"" }}      </p>    {% endif %}  </div>
+<p>      Address: {{ location.street_address }},      {{ location.city }},      {{ location.region }},      {{ location.postal_code }},      {{ location.country }}    </p>    {% if location.contact_name %}      <p>Contact: {{ location.contact_name }} &middot; {{ location.contact_phone }}</p>    {% endif %}    {% if location.parking_notes or location.entry_code %}      <p>        Parking: {{ location.parking_notes|default:"—" }}        &middot; Entry: {{ location.entry_code|default:"—" }}      </p>    {% endif %}  </div>
 <div class="right">    {% if not location.is_primary %}      <a href="{% url 'accounts:set_location_primary' location.id %}"         class="btn btn-default">        Set as default      </a>    {% endif %}    <a href="#" class="btn btn-ghost">View on Map</a>
 <a href="{% url 'accounts:edit_address_and_locations' location.id %}"       class="btn btn-ghost">Edit</a>
 <a href="{% url 'accounts:delete_location' location.id %}"       class="btn btn-danger"       onclick="return confirm('Delete this location')">      Remove    </a>
@@ -45,3 +45,4 @@
 </script>
 </body>
 </html>
+

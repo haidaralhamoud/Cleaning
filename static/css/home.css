@@ -1,4 +1,4 @@
-/* ===== Variables ===== */
+﻿/* ===== Variables ===== */
 :root{
   --green:#4aa96c;
   --blue:#1a87c3;
@@ -20,11 +20,8 @@ body{
   margin:0;
   font-family:"Inter",sans-serif;
   color:var(--ink);
-  font-size:15px;
-  background:
-    radial-gradient(1100px 600px at 10% -10%, rgba(26,135,195,.15), transparent 60%),
-    radial-gradient(800px 500px at 90% 0%, rgba(74,169,108,.12), transparent 55%),
-    var(--bg);
+  font-size:12px;
+  background:#ffffff;
   line-height:1.6;
   overflow-x:hidden;
 }
@@ -36,14 +33,14 @@ img{display:block;max-width:100%;height:auto}
   font-family:"Vesper Libre",serif;
   font-weight:700;
   color:var(--green);
-  font-size:clamp(24px, 2.8vw, 34px);
+  font-size:clamp(20px, 2.8vw, 30px);
   text-align:center;
   margin:0 0 8px;
 }
 .lead{
   font-family:"Vesper Libre",serif;
   font-weight:700;
-  font-size:clamp(16px, 1.7vw, 19px);
+  font-size:clamp(12px, 1.7vw, 15px);
   line-height:1.7;
   text-align:center;
   margin:8px auto 32px;
@@ -110,7 +107,7 @@ img{display:block;max-width:100%;height:auto}
 }
 .actions .btn-profile:hover{transform:translateY(-2px); box-shadow:var(--shadow-soft)}
 .nav-toggle{
-  display:none; background:#fff; font-size:20px; padding:6px 10px;
+  display:none; background:#fff; font-size:16px; padding:6px 10px;
   border:1px solid rgba(16,18,20,.12); border-radius:10px;
 }
 
@@ -135,21 +132,21 @@ img{display:block;max-width:100%;height:auto}
 .hero-inner{position:relative; display:flex; align-items:center; min-height:inherit; z-index:2}
 .hero-copy{
   max-width:700px;
-  margin-left:-44px;
+  margin-left:0;
   animation:fadeUp .8s ease both;
 }
 .hero-copy h1{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(30px, 3.7vw, 46px);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(26px, 3.7vw, 42px);
   margin:0 0 12px; color:var(--ink); letter-spacing:.2px;
 }
 .hero-copy p{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(16px, 1.8vw, 20px); line-height:1.7; margin:0 0 22px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:clamp(12px, 1.8vw, 16px); line-height:1.7; margin:0 0 22px;
   color:var(--muted);
 }
 .hero-buttons{display:flex; gap:14px; flex-wrap:wrap}
 .btn{
     display:inline-flex; align-items:center; justify-content:center;
-    min-height:52px; padding:11px 24px; border-radius:999px; font-weight:700; font-size:15px; text-decoration:none;
+    min-height:52px; padding:11px 24px; border-radius:999px; font-weight:700; font-size:12px; text-decoration:none;
     transition:transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease;
     box-shadow:var(--shadow-tight);
   }
@@ -185,7 +182,7 @@ img{display:block;max-width:100%;height:auto}
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1;
 }
 
@@ -232,7 +229,7 @@ img{display:block;max-width:100%;height:auto}
   padding: 9px 12px;
   border-radius: 10px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--ink);
   text-decoration: none;
 }
@@ -275,10 +272,10 @@ img{display:block;max-width:100%;height:auto}
 .services-modal__close{
   position:absolute; right:14px; top:10px; width:32px; height:32px;
   border-radius:50%; background:rgba(26,135,195,.08); color:var(--ink);
-  font-size:18px; line-height:1; cursor:pointer;
+  font-size:14px; line-height:1; cursor:pointer;
 }
 .services-modal h3{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:21px; margin:4px 0 6px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:17px; margin:4px 0 6px;
 }
 .services-modal p{color:var(--muted); font-weight:600; margin:0 0 16px}
 .services-modal__actions{display:grid; gap:10px}
@@ -307,10 +304,10 @@ img{display:block;max-width:100%;height:auto}
 }
 .card .card-icon img{width:76px; height:76px; object-fit:contain}
 .card h3{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; margin:10px 0 6px; color:var(--ink);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:14px; margin:10px 0 6px; color:var(--ink);
 }
 .card p{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; line-height:1.6; color:var(--muted);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:12px; line-height:1.6; color:var(--muted);
 }
 .card .white{color:#fff}
 
@@ -346,9 +343,9 @@ img{display:block;max-width:100%;height:auto}
 }
 .mini-badge img{width:90px; height:90px; border-radius:50%; object-fit:cover}
 .mini h4{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:17px; margin:10px 0 6px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:13px; margin:10px 0 6px;
 }
-.mini p{font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; color:var(--muted)}
+.mini p{font-family:"Vesper Libre",serif; font-weight:700; font-size:12px; color:var(--muted)}
 
 /* ===== HOW IT WORKS ===== */
 .how{background:linear-gradient(180deg, rgba(26,135,195,.12), rgba(26,135,195,.04)); padding:46px 0}
@@ -365,19 +362,26 @@ img{display:block;max-width:100%;height:auto}
 .dot{
   width:84px; height:84px; border:2px solid var(--green); background:#fff; color:var(--green);
   border-radius:50%; display:grid; place-items:center; font-family:"Vesper Libre",serif;
-  font-size:30px; font-weight:700; margin:0 auto 10px; box-shadow:var(--shadow-tight);
+  font-size:26px; font-weight:700; margin:0 auto 10px; box-shadow:var(--shadow-tight);
 }
 .step h3{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; margin:12px 0 6px;
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:14px; margin:12px 0 6px;
 }
 .step p{
-  font-family:"Vesper Libre",serif; font-weight:700; font-size:15px; line-height:1.7; color:var(--muted);
+  font-family:"Vesper Libre",serif; font-weight:700; font-size:12px; line-height:1.7; color:var(--muted);
 }
 
 /* ===== TESTIMONIALS ===== */
 .testimonials{background:#f4f7f9; padding:46px 0 64px}
+.testimonials-stage{
+  display:grid;
+  grid-template-columns:64px minmax(0, 1fr) 64px;
+  align-items:center;
+  gap:18px;
+  margin-top:18px;
+}
 .t-grid{
-  display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:22px; margin-top:18px;
+  display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:22px;
 }
 .t-card{
   background:#fff; border-radius:var(--radius-lg); padding:20px;
@@ -387,9 +391,9 @@ img{display:block;max-width:100%;height:auto}
 .t-card.is-visible{display:block}
 .t-card.raised{transform:translateY(-6px)}
 .t-name{
-  color:var(--blue); font-family:"Vesper Libre",serif; font-weight:700; font-size:18px; margin:0 0 8px;
+  color:var(--blue); font-family:"Vesper Libre",serif; font-weight:700; font-size:14px; margin:0 0 8px;
 }
-.t-text{font-family:"Vesper Libre",serif; font-weight:700; font-size:14px; line-height:1.6; color:var(--muted)}
+.t-text{font-family:"Vesper Libre",serif; font-weight:700; font-size:12px; line-height:1.6; color:var(--muted)}
 
 .testimonials .lead-paginator{
   display:block;
@@ -408,30 +412,82 @@ img{display:block;max-width:100%;height:auto}
 .stars .star.muted{
   filter: grayscale(100%) opacity(.35);
 }
+.t-nav{
+  width:58px;
+  height:58px;
+  border:1px solid rgba(200,167,91,.2);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,.35) 45%, transparent 46%),
+    linear-gradient(180deg, #fffdfa 0%, #f3e6c8 100%);
+  color:#7a5b22;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:
+    0 16px 28px rgba(168,132,50,.14),
+    inset 0 1px 0 rgba(255,255,255,.72);
+  cursor:pointer;
+  transition:transform .22s ease, box-shadow .22s ease, background .22s ease, color .22s ease, border-color .22s ease;
+}
+.t-nav__icon{
+  width:22px;
+  height:22px;
+  stroke:currentColor;
+  stroke-width:2.2;
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.t-nav:hover:not(:disabled){
+  transform:translateY(-2px);
+  border-color:rgba(200,167,91,.38);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.28), transparent 44%),
+    linear-gradient(135deg, #c8a75b, #a88432);
+  color:#fff;
+  box-shadow:
+    0 20px 36px rgba(168,132,50,.22),
+    inset 0 1px 0 rgba(255,255,255,.2);
+}
+.t-nav:disabled{
+  opacity:.42;
+  cursor:default;
+  box-shadow:none;
+}
 .bullets{display:flex; justify-content:center; gap:10px; margin-top:18px}
 .bullets span,
-.bullets a{
+.bullets a,
+.bullets button{
   width:14px; height:14px; border-radius:50%; background:#d9d9d9; display:inline-block
 }
 .bullets span.active,
-.bullets a.active{background:var(--green)}
-.bullets a{transition:transform .2s ease, background .2s ease}
+.bullets a.active,
+.bullets button.active{background:var(--green)}
+.bullets a,
+.bullets button{
+  transition:transform .2s ease, background .2s ease;
+  border:0;
+  padding:0;
+  cursor:pointer;
+}
 .bullets a:hover{transform:translateY(-1px)}
+.bullets button:hover{transform:translateY(-1px)}
 
 .footer .footer-logo {
   transform: translateY(-28px);
 }
 
 /* ===== FOOTER ===== */
-.site-footer{background:#fff; border-top:3px solid rgba(74,169,108,.5)}
+.site-footer{background:#fff !important; border-top:3px solid rgba(74,169,108,.5)}
 .footer-grid{
   display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1.3fr; gap:22px; padding:26px 0;
 }
 .f-about .logo{width:200px; height:200px; object-fit:cover}
-.f-about p{font-weight:600; font-size:15px; margin:6px 0 14px; color:var(--muted)}
+.f-about p{font-weight:600; font-size:12px; margin:6px 0 14px; color:var(--muted)}
 .f-about h5,
 .f-col h5,
-.f-app h5{color:var(--green); font-size:17px; margin:8px 0}
+.f-app h5{color:var(--green); font-size:13px; margin:8px 0}
 .social{display:flex; gap:10px; align-items:center; margin-bottom:14px}
 .social img{width:34px; height:34px; object-fit:cover}
 .lang{
@@ -440,14 +496,14 @@ img{display:block;max-width:100%;height:auto}
 }
 .lang img{width:22px; height:22px}
 .f-col a{
-  display:block; color:var(--ink); font-weight:600; font-size:15px;
+  display:block; color:var(--ink); font-weight:600; font-size:12px;
   text-decoration:none; margin:6px 0;
 }
 .f-col a:hover{color:var(--green)}
 .f-app .app-box{display:flex; gap:10px; align-items:center}
 .copy{
   border-top:1px solid rgba(16,18,20,.08); padding:12px 0;
-  color:rgba(86,98,110,.8); font-weight:600; font-size:14px; text-align:right;
+  color:rgba(86,98,110,.8); font-weight:600; font-size:12px; text-align:right;
 }
 
 /* ===== Responsive ===== */
@@ -501,6 +557,18 @@ img{display:block;max-width:100%;height:auto}
     min-height:520px;
     padding:32px 0 48px;
   }
+  .testimonials-stage{
+    grid-template-columns:52px minmax(0, 1fr) 52px;
+    gap:12px;
+  }
+  .t-nav{
+    width:48px;
+    height:48px;
+  }
+  .t-nav__icon{
+    width:20px;
+    height:20px;
+  }
   .hero-copy{
     max-width:100%;
     margin-left:0;
@@ -547,7 +615,9 @@ img{display:block;max-width:100%;height:auto}
 @media (max-width:520px){
   .topbar .container{gap:12px}
   .hero{min-height:440px}
-  .hero-copy h1{font-size:clamp(28px, 8vw, 36px)}
-  .hero-copy p{font-size:16px}
-  .dot{width:72px; height:72px; font-size:26px}
+  .hero-copy h1{font-size:clamp(24px, 8vw, 32px)}
+  .hero-copy p{font-size:12px}
+  .dot{width:72px; height:72px; font-size:22px}
 }
+
+

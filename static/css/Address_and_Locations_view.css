@@ -1,21 +1,27 @@
-:root{
-  --sky: #c0e7f1;
-  --sky-strong:#039fc8;
-  --sky-soft: rgba(3,159,200,0.5);
-  --ink:#000;
-  --muted:#898989;
-  --warn:#ff9500;
-  --success:#71b247;
-  --shadow:0 4px 10px rgba(0,0,0,.25);
-  --card-bg:#fff;
+﻿:root{
+  --brand: #c8a75b;
+  --brand-dark: #a88432;
+  --brand-soft: rgba(200, 167, 91, 0.14);
+  --accent: #1e4ed8;
+  --accent-dark: #173da6;
+  --ink: #14110f;
+  --muted: #84796b;
+  --success: #a88432;
+  --danger: #c2410c;
+  --shadow: 0 18px 38px rgba(34, 28, 20, 0.12);
+  --card-bg: #fff;
+  --border: rgba(200, 167, 91, 0.24);
+  --bg-soft: #fbf7ee;
   --sidebar-w: 300px;
 }
 
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   font-family: "Inter", sans-serif;
-  background: radial-gradient(circle at top, rgba(3, 159, 200, 0.12), transparent 55%),
-    linear-gradient(120deg, #f7fbff 0%, #ffffff 60%, #f0f7fb 100%);
+  background:
+    radial-gradient(circle at top left, rgba(200, 167, 91, 0.16), transparent 34%),
+    radial-gradient(circle at top right, rgba(23, 61, 166, 0.08), transparent 28%),
+    linear-gradient(135deg, #fffdf8 0%, #fcfaf5 54%, #f4ede1 100%);
   color: var(--ink);
 }
 
@@ -42,14 +48,14 @@ body{
 
 .profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
 .avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
-.name{font:700 20px "Vesper Libre", serif}
-.id{font-size:13px;color:#666}
+.name{font:700 16px "Vesper Libre", serif}
+.id{font-size:12px;color:#666}
 .side-nav{padding:10px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
-.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item:hover{background:rgba(200,167,91,.1);transform:translateX(4px)}
 .nav-item.active {
   background: rgba(0,0,0,.05);
-  color: var(--sky-strong);
+  color: var(--brand-dark);
 }
 
 
@@ -60,9 +66,9 @@ body{
   color: #000;
   font-weight: 700;
   text-decoration: none;
-  font-size: 18px;
+  font-size: 14px;
 }
-.nav-links a:hover { color: #71b247; }
+.nav-links a:hover { color: var(--brand-dark); }
 .drop { width: 10px; margin-left: 5px; }
 
 .auth { display: flex; gap: 10px; }
@@ -74,14 +80,14 @@ body{
   transition: .25s;
 }
 .btn-signup {
-  background: #71b247;
-  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #18120a;
   padding: 8px 20px;
 }
 .btn-signin {
   background: #fff;
-  border: 1px solid #71b247;
-  color: #71b247;
+  border: 1px solid var(--brand);
+  color: var(--brand-dark);
   padding: 8px 20px;
 }
 
@@ -95,33 +101,47 @@ body{
 }
 .main h1 {
   font-family: "Vesper Libre", serif;
-  font-size: 30px;
-  margin-bottom: 5px;
+  font-size: 26px;
+  margin-bottom: 8px;
 }
 .main h2 {
   font-family: "Vesper Libre", serif;
-  font-size: 22px;
+  font-size: 18px;
   margin-bottom: 25px;
+  color: var(--ink);
 }
 
 /* Card */
 .card {
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
-  border: 1px solid rgba(3, 159, 200, 0.12);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   gap: 20px;
   padding: 18px 22px;
   margin-bottom: 18px;
   flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  right: -34px;
+  bottom: -34px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 167, 91, 0.16) 0%, rgba(200, 167, 91, 0) 72%);
+  pointer-events: none;
 }
 .left { flex: 1; min-width: 240px; }
 .left .icon { width: 35px; vertical-align: middle; margin-right: 5px; }
 .left .star { width: 22px; margin-left: 5px; vertical-align: middle; }
 .left h3 {
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   margin: 0 0 5px;
   display: flex;
@@ -129,8 +149,8 @@ body{
   gap: 5px;
 }
 .badge {
-  background: rgba(3, 159, 200, 0.15);
-  color: #0c6f8a;
+  background: rgba(200, 167, 91, 0.14);
+  color: var(--brand-dark);
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
@@ -138,7 +158,7 @@ body{
 }
 .left p {
   margin: 4px 0;
-  color: #777;
+  color: var(--muted);
   font-weight: 600;
 }
 
@@ -164,42 +184,42 @@ body{
   gap: 6px;
   padding: 8px 14px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   text-decoration: none;
   border: 1px solid transparent;
   min-height: 34px;
 }
 .btn-default {
-  background: #039fc8;
-  color: #fff;
-  box-shadow: 0 8px 16px rgba(3, 159, 200, 0.2);
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #18120a;
+  box-shadow: 0 12px 22px rgba(168, 132, 50, 0.24);
 }
 .btn-ghost {
-  background: #f2f7fa;
-  color: #0f172a;
-  border-color: #dbe7ef;
+  background: var(--bg-soft);
+  color: var(--ink);
+  border-color: var(--border);
 }
 .btn-danger {
-  background: #ffe9ea;
-  color: #b42318;
-  border-color: #f7b7b9;
+  background: #fff3ee;
+  color: var(--danger);
+  border-color: rgba(194, 65, 12, 0.22);
 }
 
 /* Add Location */
 .btn-add {
-  background: #039fc8;
-  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  color: #18120a;
   border-radius: 14px;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 12px;
   padding: 12px 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin: 24px auto 10px;
   cursor: pointer;
-  box-shadow: 0 12px 22px rgba(3, 159, 200, 0.25);
+  box-shadow: 0 14px 28px rgba(168, 132, 50, 0.28);
 }
 
 /* ===== RESPONSIVE ===== */
@@ -223,33 +243,33 @@ body{
 
 .mobile-title {
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
   text-align: center;
   margin: 0;
 }
 
-/* === Floating Menu Button (السهم العائم) === */
+/* === Floating Menu Button (ط§ظ„ط³ظ‡ظ… ط§ظ„ط¹ط§ط¦ظ…) === */
 .menu-toggle.floating {
   position: fixed;
   top: 14px;
   left: 14px;
   width: 44px;
   height: 44px;
-  background: #039fc8;
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
   border: none;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 26px;
+  font-size: 22px;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(0,0,0,0.25);
   z-index: 200;
   transition: background 0.3s, transform 0.3s;
 }
 .menu-toggle.floating:hover {
-  background: #028eb3;
+  filter: brightness(0.98);
   transform: scale(1.08);
 }
 
@@ -266,18 +286,18 @@ body{
 }
 
 
-/* === إخفاء الزر الفلوتينغ على اللابتوب === */
+/* === ط¥ط®ظپط§ط، ط§ظ„ط²ط± ط§ظ„ظپظ„ظˆطھظٹظ†ط؛ ط¹ظ„ظ‰ ط§ظ„ظ„ط§ط¨طھظˆط¨ === */
 @media (min-width: 921px) {
   .menu-toggle.floating {
-    display: none; /* ✅ الزر ما بيبين إلا عالموبايل */
+    display: none; /* âœ… ط§ظ„ط²ط± ظ…ط§ ط¨ظٹط¨ظٹظ† ط¥ظ„ط§ ط¹ط§ظ„ظ…ظˆط¨ط§ظٹظ„ */
   }
 }
 
-/* === تحسين التباعد للموبايل (رفع المحتوى للأعلى) === */
+/* === طھط­ط³ظٹظ† ط§ظ„طھط¨ط§ط¹ط¯ ظ„ظ„ظ…ظˆط¨ط§ظٹظ„ (ط±ظپط¹ ط§ظ„ظ…ط­طھظˆظ‰ ظ„ظ„ط£ط¹ظ„ظ‰) === */
 @media (max-width: 920px) {
   .main {
-    margin-top: 0;        /* يلغي الفراغ الزايد */
-    padding-top: 5px;     /* يرفع المحتوى شوي */
+    margin-top: 0;        /* ظٹظ„ط؛ظٹ ط§ظ„ظپط±ط§ط؛ ط§ظ„ط²ط§ظٹط¯ */
+    padding-top: 5px;     /* ظٹط±ظپط¹ ط§ظ„ظ…ط­طھظˆظ‰ ط´ظˆظٹ */
   }
 
   .main h2 {
@@ -302,7 +322,7 @@ body{
   height: 46px;
   border-radius: 50%;
   border: none;
-  background: var(--sky-strong);
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -312,11 +332,11 @@ body{
   transition: all 0.3s ease;
 }
 .menu-toggle.floating:hover {
-  background: #028eb3;
+  filter: brightness(0.98);
   transform: scale(1.1);
 }
 .menu-toggle .arrow {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   transform: translateX(1px);
   transition: transform 0.3s ease;
@@ -335,7 +355,7 @@ body{
   z-index: 90;
 }
 .mobile-title {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: #000;
   text-align: center;
@@ -350,7 +370,7 @@ body{
   .sidebar {
     position: fixed;
     top: 55px;
-    left: -320px; /* مخفية افتراضيًا */
+    left: -320px; /* ظ…ط®ظپظٹط© ط§ظپطھط±ط§ط¶ظٹظ‹ط§ */
     width: 260px;
     height: 100vh;
     background: #fff;
@@ -361,7 +381,7 @@ body{
     z-index: 99;
   }
 
-  .sidebar.open { left: 0; } /* لما تفتح */
+  .sidebar.open { left: 0; } /* ظ„ظ…ط§ طھظپطھط­ */
 }
 
 @media (max-width: 991px) {
@@ -427,3 +447,5 @@ body{
     pointer-events: auto !important;
   }
 }
+
+

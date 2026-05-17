@@ -1,4 +1,4 @@
-/* === RESET === */
+﻿/* === RESET === */
 * {
   margin: 0;
   padding: 0;
@@ -7,46 +7,52 @@
 }
 
 body {
-  font-size: 15px;
+  font-size: 12px;
+  background: #ffffff;
+  color: #16130f;
 }
 
 
 
 /* === MAIN === */
 .cookies-container {
-  background: rgba(3,159,200,0.05);
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(249, 244, 236, 0.96));
+  border: 1px solid rgba(200, 167, 91, 0.24);
+  border-radius: 24px;
+  box-shadow: 0 18px 44px rgba(31, 24, 14, 0.08);
   margin: 60px auto;
   padding: 60px;
   max-width: 1100px;
-  color: #000;
+  color: #16130f;
   line-height: 1.7;
 }
 
 .cookies-container h1 {
   text-align: center;
-  font-size: 34px;
+  font-size: 30px;
+  color: #16130f;
   margin-bottom: 10px;
 }
 
 .updated-date {
   text-align: center;
-  font-size: 16px;
-  color: rgba(0,0,0,0.7);
+  font-size: 12px;
+  color: #a88432;
+  font-weight: 700;
   margin-bottom: 30px;
 }
 
 .cookies-container h2 {
-  color: #000;
-  font-size: 20px;
+  color: #a88432;
+  font-size: 16px;
   margin: 30px 0 10px;
 }
 
 .cookies-container p,
 .cookies-container li {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
+  color: #5f564a;
 }
 
 .cookies-container ul {
@@ -54,11 +60,36 @@ body {
   margin-bottom: 10px;
 }
 
+.cookies-container a {
+  color: #a88432;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.cookies-container a:hover {
+  text-decoration: underline;
+}
+
+.cookies-container b,
+.cookies-container strong {
+  color: #16130f;
+}
+
 .mail-icon {
   width: 22px;
   height: 22px;
   vertical-align: middle;
   margin-right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #a88432;
+}
+
+.mail-icon svg {
+  width: 22px;
+  height: 22px;
+  display: block;
 }
 
 /* === RESPONSIVE === */
@@ -76,9 +107,11 @@ body {
   }
 
   .cookies-container h1 {
-    font-size: 30px;
+    font-size: 26px;
   }
 
   .cookies-container h2 {
-    font-size: 20px
+    font-size: 16px
   }}
+
+

@@ -2025,7 +2025,7 @@ def dashboard_home(request):
 
 @user_passes_test(_staff_required)
 def dashboard_contacts_redirect(request):
-    return redirect("home:dashboard_model_list", model="contacts")
+    return dashboard_model_list(request, "contacts")
 
 
 @user_passes_test(_staff_required)

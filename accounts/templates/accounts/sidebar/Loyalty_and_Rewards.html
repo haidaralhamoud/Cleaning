@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -77,7 +77,7 @@
 <!-- Refer -->
 <div class="refer">
 <b>Refer a Friend &amp; Earn Big!</b>
-<div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">            Earn <span style="font-weight:900; font-size:18px;">500 pts</span> and your friend gets 10% off their first booking.          </div>
+<div style="color:var(--sky-strong); font-weight:700; margin-top:4px;">            Earn <span style="font-weight:900; font-size:14px;">500 pts</span> and your friend gets 10% off their first booking.          </div>
 <div class="share-row" data-referral-link="{{ referral_link }}">
 <a class="share wa"               href="https://wa.me/?text=Join%20me%20on%20Hembla%20experten%20and%20get%2010%25%20off%20your%20first%20booking!%20{{ referral_link|urlencode }}"               target="_blank" rel="noopener">
 <img src="{% static 'images/whats-app0.png' %}" alt="">WhatsApp            </a>
@@ -115,3 +115,5 @@
 <script>    const copyBtn = document.querySelector("[data-copy-referral]");    if (copyBtn) {      copyBtn.addEventListener("click", async () => {        const wrap = copyBtn.closest("[data-referral-link]");        const link = wrap ? wrap.getAttribute("data-referral-link") : "";        if (!link) return;        try {          await navigator.clipboard.writeText(link);          copyBtn.classList.add("copied");          copyBtn.textContent = "Copied!";          setTimeout(() => {            copyBtn.classList.remove("copied");            copyBtn.innerHTML = `<img src="{% static 'images/link0.png' %}" alt="">Copy Link`;          }, 1500);        } catch (err) {          window.prompt("Copy this link:", link);        }      });    }  </script>
 </body>
 </html>
+
+

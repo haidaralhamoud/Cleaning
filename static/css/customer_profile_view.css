@@ -1,20 +1,24 @@
-:root {
-  --brand: #039fc8;
-  --brand-dark: #028bb0;
-  --brand-soft: rgba(3, 159, 200, 0.12);
-  --accent: #71b247;
-  --warn: #ff9500;
-  --ink-900: #0f172a;
-  --ink-700: #334155;
-  --ink-500: #64748b;
-  --border: #dbe7ef;
-  --bg: #f5fbfe;
+﻿:root {
+  --brand: #c8a75b;
+  --brand-dark: #a88432;
+  --brand-soft: rgba(200, 167, 91, 0.14);
+  --accent: #1e4ed8;
+  --accent-dark: #173da6;
+  --warn: #b45309;
+  --danger: #c2410c;
+  --ink-900: #14110f;
+  --ink-700: #453d34;
+  --ink-600: #6f6558;
+  --ink-500: #84796b;
+  --border: rgba(200, 167, 91, 0.24);
+  --bg: #fcfaf5;
+  --bg-soft: #f6efe2;
   --card: #ffffff;
   --radius-lg: 16px;
   --radius-md: 12px;
-  --shadow-sm: 0 6px 14px rgba(15, 23, 42, 0.08);
-  --shadow-md: 0 12px 26px rgba(15, 23, 42, 0.12);
-  --shadow-lg: 0 18px 40px rgba(15, 23, 42, 0.14);
+  --shadow-sm: 0 10px 24px rgba(34, 28, 20, 0.08);
+  --shadow-md: 0 18px 38px rgba(34, 28, 20, 0.12);
+  --shadow-lg: 0 24px 52px rgba(34, 28, 20, 0.16);
   --sidebar-w: 300px;
 }
 
@@ -26,8 +30,10 @@
 
 body {
   font-family: "Inter", sans-serif;
-  background: radial-gradient(circle at top, rgba(3, 159, 200, 0.12), transparent 55%),
-    linear-gradient(120deg, #f7fbff 0%, #ffffff 60%, #f0f7fb 100%);
+  background:
+    radial-gradient(circle at top left, rgba(200, 167, 91, 0.16), transparent 34%),
+    radial-gradient(circle at top right, rgba(23, 61, 166, 0.08), transparent 28%),
+    linear-gradient(135deg, #fffdf8 0%, #fcfaf5 54%, #f4ede1 100%);
   color: var(--ink-900);
 }
 
@@ -49,7 +55,7 @@ body {
   height: fit-content;
   align-self: flex-start;
   margin: 10px;
-  border: 1px solid rgba(3, 159, 200, 0.12);
+  border: 1px solid var(--border);
 }
 
 .profile-head {
@@ -63,17 +69,17 @@ body {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #ffffff, #cfeef7);
-  border: 2px solid rgba(3, 159, 200, 0.25);
+  background: radial-gradient(circle at 30% 30%, #fffdf8, #f2e5c7);
+  border: 2px solid rgba(200, 167, 91, 0.28);
   box-shadow: var(--shadow-sm);
 }
 
 .name {
-  font: 700 20px "Vesper Libre", serif;
+  font: 700 16px "Vesper Libre", serif;
 }
 
 .id {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-500);
 }
 
@@ -95,12 +101,12 @@ body {
 }
 
 .nav-item:hover {
-  background: rgba(3, 159, 200, 0.1);
+  background: rgba(200, 167, 91, 0.1);
   transform: translateX(4px);
 }
 
 .nav-item.active {
-  background: rgba(3, 159, 200, 0.15);
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.16), rgba(200, 167, 91, 0.08));
   color: var(--brand-dark);
 }
 
@@ -112,7 +118,7 @@ body {
   bottom: 10px;
   width: 3px;
   border-radius: 999px;
-  background: var(--brand);
+  background: linear-gradient(180deg, var(--brand), var(--brand-dark));
 }
 
 .content {
@@ -121,7 +127,7 @@ body {
 }
 
 .page-title {
-  font: 700 30px "Vesper Libre", serif;
+  font: 700 26px "Vesper Libre", serif;
   margin-bottom: 20px;
 }
 
@@ -151,7 +157,7 @@ body {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   padding: 18px;
-  border: 1px solid rgba(3, 159, 200, 0.12);
+  border: 1px solid var(--border);
   transition: 0.25s ease;
 }
 
@@ -169,7 +175,7 @@ body {
 
 .card-title {
   font-weight: 700;
-  font-size: 20px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -199,33 +205,35 @@ body {
 }
 
 .btn-primary {
-  background: var(--brand);
-  color: #fff;
-  box-shadow: 0 10px 18px rgba(3, 159, 200, 0.25);
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+  color: #18120a;
+  box-shadow: 0 14px 28px rgba(168, 132, 50, 0.28);
 }
 
 .btn-primary:hover {
-  background: var(--brand-dark);
+  filter: brightness(0.98);
+  box-shadow: 0 16px 30px rgba(168, 132, 50, 0.34);
 }
 
 .btn-outline {
-  background: #fff;
-  border: 1px solid rgba(3, 159, 200, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(200, 167, 91, 0.5);
   color: var(--brand-dark);
 }
 
 .btn-outline:hover {
   border-color: var(--brand);
-  color: var(--brand);
+  color: var(--brand-dark);
+  background: var(--bg-soft);
 }
 
 .btn-sky-subtle {
-  background: rgba(3, 159, 200, 0.16);
+  background: rgba(200, 167, 91, 0.14);
   color: var(--brand-dark);
 }
 
 .btn-sky-subtle:hover {
-  background: rgba(3, 159, 200, 0.22);
+  background: rgba(200, 167, 91, 0.22);
 }
 
 .btn.full {
@@ -240,7 +248,7 @@ body {
 .icon-ghost,
 .edit-btn {
   border: none;
-  background: rgba(3, 159, 200, 0.12);
+  background: rgba(200, 167, 91, 0.14);
   color: var(--brand-dark);
   width: 36px;
   height: 36px;
@@ -260,7 +268,7 @@ body {
 
 .icon-ghost:hover,
 .edit-btn:hover {
-  background: rgba(3, 159, 200, 0.22);
+  background: rgba(200, 167, 91, 0.22);
   transform: scale(1.05);
 }
 
@@ -279,13 +287,13 @@ body {
 .pill-info {
   color: var(--brand-dark);
   border-color: var(--brand);
-  background: rgba(3, 159, 200, 0.12);
+  background: rgba(200, 167, 91, 0.12);
 }
 
 .pill-warn {
-  color: var(--warn);
-  border-color: var(--warn);
-  background: rgba(255, 149, 0, 0.12);
+  color: var(--accent-dark);
+  border-color: rgba(30, 78, 216, 0.36);
+  background: rgba(30, 78, 216, 0.08);
 }
 
 /* Basic Info */
@@ -312,14 +320,14 @@ body {
 .profile-photo {
   border-radius: 18px;
   background: #fff;
-  border: 1px solid rgba(3, 159, 200, 0.2);
+  border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
 }
 
 .field .label,
 .basic-info .label {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--ink-900);
 }
 
@@ -331,15 +339,15 @@ body {
 .basic-info .val {
   color: var(--ink-500);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .edit-only .form-control {
   width: 100%;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(3, 159, 200, 0.25);
-  font-size: 14px;
+  border: 1px solid rgba(200, 167, 91, 0.34);
+  font-size: 12px;
   background: #fff;
   transition: 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
@@ -351,8 +359,8 @@ body {
   gap: 10px;
   padding: 8px 14px;
   border-radius: 12px;
-  border: 1px dashed rgba(3, 159, 200, 0.45);
-  background: rgba(3, 159, 200, 0.08);
+  border: 1px dashed rgba(200, 167, 91, 0.5);
+  background: rgba(200, 167, 91, 0.08);
   color: var(--brand-dark);
   font-weight: 600;
   cursor: pointer;
@@ -363,7 +371,7 @@ body {
 
 .photo-upload:hover {
   border-color: var(--brand);
-  background: rgba(3, 159, 200, 0.15);
+  background: rgba(200, 167, 91, 0.15);
 }
 
 .photo-upload span {
@@ -377,7 +385,7 @@ body {
 .edit-only .form-control:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(3, 159, 200, 0.2);
+  box-shadow: 0 0 0 3px rgba(200, 167, 91, 0.18);
 }
 
 .edit-only select.form-control {
@@ -392,15 +400,15 @@ body {
 }
 
 .basic-info .emergency {
-  border-top: 1px solid rgba(3, 159, 200, 0.15);
+  border-top: 1px solid var(--border);
   margin-top: 14px;
   padding-top: 12px;
 }
 
 .basic-info .em-title {
-  color: #d82525;
+  color: var(--brand-dark);
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
   margin-bottom: 10px;
 }
 
@@ -417,7 +425,7 @@ body {
 
 .ongoing-orders .subtitle {
   color: var(--ink-500);
-  font-size: 14px;
+  font-size: 12px;
   margin: 2px 0 10px 32px;
 }
 
@@ -432,7 +440,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-top: 1px solid rgba(3, 159, 200, 0.15);
+  border-top: 1px solid var(--border);
   padding-top: 12px;
 }
 
@@ -444,13 +452,13 @@ body {
 
 .order-name {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 12px;
   color: var(--ink-900);
 }
 
 .order-id {
   color: var(--ink-500);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .order-date {
@@ -458,7 +466,7 @@ body {
   align-items: center;
   gap: 6px;
   color: var(--brand-dark);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -500,7 +508,7 @@ body {
 
 .row-title {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 12px;
   color: var(--ink-900);
   display: flex;
   align-items: center;
@@ -509,7 +517,7 @@ body {
 
 .row-text {
   color: var(--ink-500);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   margin-top: 4px;
   line-height: 1.4;
@@ -523,7 +531,23 @@ body {
 /* Side cards */
 .card.side {
   text-align: left;
-  background: linear-gradient(145deg, #ffffff 0%, #f6fbff 100%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(251, 247, 238, 0.96)),
+    linear-gradient(145deg, #ffffff 0%, #f6efe2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.card.side::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  bottom: -40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 167, 91, 0.18) 0%, rgba(200, 167, 91, 0) 72%);
+  pointer-events: none;
 }
 
 .side-head {
@@ -538,12 +562,12 @@ body {
 }
 
 .side-title {
-  font: 700 20px "Vesper Libre", serif;
+  font: 700 16px "Vesper Libre", serif;
   margin: 8px 0 4px;
 }
 
 .side-text {
-  font-size: 14px;
+  font-size: 12px;
   color: var(--ink-700);
   margin-bottom: 8px;
 }
@@ -562,14 +586,14 @@ body {
 }
 
 .mobile-title {
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--ink-900);
   text-align: center;
 }
 
 .menu-toggle {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   background: none;
   border: none;
@@ -591,23 +615,23 @@ body {
   height: 46px;
   border-radius: 50%;
   border: none;
-  background: var(--brand);
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
   color: #fff;
   cursor: pointer;
   display: none;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 12px 24px rgba(168, 132, 50, 0.3);
   transition: 0.3s ease;
 }
 
 .menu-toggle.floating:hover {
-  background: var(--brand-dark);
+  filter: brightness(0.98);
   transform: scale(1.06);
 }
 
 .menu-toggle .arrow {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
   transform: translateX(1px);
   transition: transform 0.3s ease;
@@ -661,7 +685,7 @@ body {
   }
 
   .page-title {
-    font-size: 22px;
+    font-size: 18px;
     text-align: left;
     margin-bottom: 14px;
     margin-left: 56px;
@@ -683,7 +707,7 @@ body {
   }
 
   .card-title {
-    font-size: 18px;
+    font-size: 14px;
   }
 
   .order-actions {
@@ -694,7 +718,7 @@ body {
 
   .ongoing-orders .subtitle {
     margin-left: 0;
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .order-block {
@@ -706,20 +730,20 @@ body {
     padding-top: 0;
     padding: 12px;
     border-radius: 12px;
-    background: #f7fbff;
-    border: 1px solid rgba(3, 159, 200, 0.12);
+    background: #fffaf1;
+    border: 1px solid var(--border);
   }
 
   .order-name {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .order-id {
-    font-size: 12.5px;
+    font-size: 12px;
   }
 
   .order-date {
-    font-size: 12.5px;
+    font-size: 12px;
   }
 
   .order-actions {
@@ -734,7 +758,7 @@ body {
 
   .pill {
     min-width: 90px;
-    font-size: 11.5px;
+    font-size: 12px;
   }
 }
 
@@ -759,7 +783,7 @@ body {
   }
 
   .card-title {
-    font-size: 16px;
+    font-size: 12px;
     gap: 6px;
   }
 
@@ -783,12 +807,12 @@ body {
 
   .field .label,
   .basic-info .label {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .field .val,
   .basic-info .val {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .stack {
@@ -805,11 +829,11 @@ body {
   }
 
   .row-title {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .row-text {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .right-column .card {
@@ -831,8 +855,8 @@ body {
   }
 
   .basic-info .field {
-    background: rgba(3, 159, 200, 0.06);
-    border: 1px solid rgba(3, 159, 200, 0.12);
+    background: rgba(200, 167, 91, 0.08);
+    border: 1px solid var(--border);
     border-radius: 14px;
     padding: 12px;
     margin: 0;
@@ -872,15 +896,15 @@ body {
   }
 
   .basic-info .emergency .field {
-    background: rgba(3, 159, 200, 0.06);
-    border: 1px solid rgba(3, 159, 200, 0.12);
+    background: rgba(200, 167, 91, 0.08);
+    border: 1px solid var(--border);
     border-radius: 14px;
     padding: 12px;
     margin: 0;
   }
 
   .basic-info .em-title {
-    font-size: 16px;
+    font-size: 12px;
     margin-bottom: 8px;
   }
 }
@@ -1007,7 +1031,7 @@ body {
   border-radius: 18px;
   padding: 18px 20px 20px;
   box-shadow: 0 26px 60px rgba(15, 23, 42, 0.2);
-  border: 1px solid rgba(3, 159, 200, 0.2);
+  border: 1px solid var(--border);
   opacity: 0;
   pointer-events: none;
   transition: 0.25s ease;
@@ -1033,14 +1057,14 @@ body {
 
 .modal-head h3 {
   font-family: "Vesper Libre", serif;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .modal-close {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1;
 }
 
@@ -1050,9 +1074,10 @@ body {
 }
 
 .sub-summary {
-  background: rgba(3, 159, 200, 0.08);
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.12), rgba(23, 61, 166, 0.05));
   border-radius: 14px;
   padding: 12px 14px;
+  border: 1px solid var(--border);
 }
 
 .sub-title {
@@ -1065,7 +1090,7 @@ body {
   display: grid;
   gap: 4px;
   color: var(--ink-600, #6b7280);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .form-row {
@@ -1077,17 +1102,27 @@ body {
   width: 100%;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(3, 159, 200, 0.25);
-  font-size: 14px;
+  border: 1px solid rgba(200, 167, 91, 0.34);
+  font-size: 12px;
   background: #fff;
   transition: 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
+.modal-sheet select.form-control {
+  appearance: auto;
+  min-height: 44px;
+  line-height: 1.4;
+}
+
+.modal-sheet select.form-control option {
+  color: var(--ink-900);
+}
+
 .modal-sheet .form-control:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(3, 159, 200, 0.2);
+  box-shadow: 0 0 0 3px rgba(200, 167, 91, 0.18);
 }
 
 .inline-grid {
@@ -1118,14 +1153,14 @@ body {
 .link-danger {
   border: none;
   background: none;
-  color: #d32f2f;
+  color: var(--danger);
   font-weight: 700;
   cursor: pointer;
   padding: 0;
 }
 
 .btn-danger {
-  background: #e53935;
+  background: linear-gradient(135deg, #d97706, #c2410c);
   color: #fff;
   border: none;
   border-radius: 12px;
@@ -1146,18 +1181,18 @@ body {
   padding-left: 18px;
   position: relative;
   color: var(--ink-700);
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .review-list li::before {
-  content: "•";
+  content: "\2022";
   color: var(--brand);
   position: absolute;
   left: 0;
 }
 
 .review-note {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-500);
 }
 
@@ -1171,3 +1206,5 @@ body {
     align-items: stretch;
   }
 }
+
+

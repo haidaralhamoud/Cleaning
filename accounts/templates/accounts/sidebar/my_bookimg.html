@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +67,12 @@
 <td data-label="View">
 <div class="menu-wrap">
 <button class="dots" type="button" aria-label="Open booking actions" aria-expanded="false">...</button>
-<div class="dropdown">  {# فقط إذا الحجز مو مكتمل ولا ملغي #}  <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-view">View booking</a>  {% if b.status_group != "completed" and b.status_group != "cancelled" %}    <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-reschedule">Manage booking</a>  {% endif %}</div>
+<div class="dropdown">
+  <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-view">View booking</a>
+  {% if b.status_group != "completed" and b.status_group != "cancelled" %}
+    <a href="{% url 'accounts:view_service_details' b.type|lower b.id %}" class="action-reschedule">Manage booking</a>
+  {% endif %}
+</div>
 </div>
 </td>
 </tr>{% empty %}<tr>
@@ -82,8 +87,69 @@
 </main>
 </div>
 <div class="overlay customer-menu-overlay" id="overlay">
-</div>{% include "home/includes/footer.html" %}<script>document.addEventListener("DOMContentLoaded", () => {  const tabs = document.querySelectorAll(".tab");  const rows = document.querySelectorAll("tbody tr[data-status]");  const noResults = document.getElementById("no-results");  function filterRows(target) {    let visibleCount = 0;    rows.forEach(row => {      const status = row.dataset.status;      if (target === "all" || status === target) {        row.style.display = "";        visibleCount++;      } else {        row.style.display = "none";      }    });    // إذا ما في ولا صف ظاهر    if (visibleCount === 0) {      noResults.style.display = "";    } else {      noResults.style.display = "none";    }  }  tabs.forEach(tab => {    tab.addEventListener("click", () => {      const target = tab.dataset.target;      tabs.forEach(t => t.classList.remove("active"));      tab.classList.add("active");      filterRows(target);    });  });  // تشغيل افتراضي على All  filterRows("all");});document.querySelectorAll(".dots").forEach(btn => {  btn.addEventListener("click", e => {    e.stopPropagation();    const menuWrap = btn.closest(".menu-wrap");    const willOpen = !menuWrap.classList.contains("show");    document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));    document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));    menuWrap.classList.toggle("show", willOpen);    btn.setAttribute("aria-expanded", willOpen ? "true" : "false");  });});document.addEventListener("click", () => {  document.querySelectorAll(".menu-wrap").forEach(m => m.classList.remove("show"));  document.querySelectorAll(".dots").forEach(button => button.setAttribute("aria-expanded", "false"));});</script>
+</div>{% include "home/includes/footer.html" %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tabs = document.querySelectorAll(".tab");
+  const rows = document.querySelectorAll("tbody tr[data-status]");
+  const noResults = document.getElementById("no-results");
+  const dotButtons = document.querySelectorAll(".dots");
+
+  function filterRows(target) {
+    let visibleCount = 0;
+
+    rows.forEach((row) => {
+      const status = row.dataset.status;
+      if (target === "all" || status === target) {
+        row.style.display = "";
+        visibleCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    if (noResults) {
+      noResults.style.display = visibleCount === 0 ? "" : "none";
+    }
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const target = tab.dataset.target;
+      tabs.forEach((item) => item.classList.remove("active"));
+      tab.classList.add("active");
+      filterRows(target);
+    });
+  });
+
+  dotButtons.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+
+      const menuWrap = btn.closest(".menu-wrap");
+      if (!menuWrap) return;
+
+      const willOpen = !menuWrap.classList.contains("show");
+
+      document.querySelectorAll(".menu-wrap").forEach((menu) => menu.classList.remove("show"));
+      document.querySelectorAll(".dots").forEach((button) => button.setAttribute("aria-expanded", "false"));
+
+      menuWrap.classList.toggle("show", willOpen);
+      btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
+  });
+
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".menu-wrap").forEach((menu) => menu.classList.remove("show"));
+    document.querySelectorAll(".dots").forEach((button) => button.setAttribute("aria-expanded", "false"));
+  });
+
+  filterRows("all");
+});
+</script>
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>
 </body>
 </html>
+
+

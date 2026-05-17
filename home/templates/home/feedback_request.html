@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
@@ -7,13 +7,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{% trans "Feedback | Hembla experten" %}</title>
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">  {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_brand.css' %}">
 <link rel="stylesheet" href="{% static 'css/feedback_request.css' %}">
 </head>
-<body{% if show_success_popup %} class="feedback-popup-open"{% endif %}>  {% include "home/includes/main_header.html" %}  <main class="feedback-page">
+<body class="business-flow{% if show_success_popup %} feedback-popup-open{% endif %}">  {% include "home/includes/main_header.html" %}  <main class="feedback-page">
 <section class="feedback-shell">
 <header class="feedback-head">
 <h1>{% trans "Feedback" %}</h1>
@@ -75,3 +76,5 @@
 </script>
 </body>
 </html>
+
+

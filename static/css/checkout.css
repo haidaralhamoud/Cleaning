@@ -1,6 +1,6 @@
 ﻿:root {
-  --brand: #039fc8;
-  --brand-dark: #028bb0;
+  --brand: #c8a75b;
+  --brand-dark: #a88432;
   --accent: #71b247;
   --ink-900: #0f172a;
   --ink-700: #334155;
@@ -19,11 +19,10 @@
 }
 
 body {
-  background: radial-gradient(circle at top, rgba(3, 159, 200, 0.08), transparent 55%),
-              linear-gradient(120deg, #f7fbff 0%, #ffffff 60%, #f0f7fb 100%);
+  background: #ffffff;
   color: var(--ink-900);
   padding: 40px 20px;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .checkout-container {
@@ -39,7 +38,7 @@ header {
 
 h1 {
   font-family: "Vesper Libre", serif;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
 }
 
@@ -57,7 +56,7 @@ h1 {
   overflow: hidden;
   background:
     radial-gradient(circle at top right, rgba(113, 178, 71, 0.15), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(3, 159, 200, 0.14), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(200, 167, 91, 0.14), transparent 34%),
     linear-gradient(135deg, #fafdff 0%, #ffffff 48%, #f4fbf7 100%);
 }
 
@@ -83,7 +82,7 @@ h1 {
 
 .checkout-hero-card__copy h2 {
   font-family: "Vesper Libre", serif;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-size: clamp(2rem, 3vw, 2rem);
   line-height: 1.08;
   letter-spacing: -0.03em;
   max-width: 12ch;
@@ -104,7 +103,7 @@ h1 {
 .checkout-stat {
   padding: 18px 20px;
   border-radius: 22px;
-  border: 1px solid rgba(3, 159, 200, 0.14);
+  border: 1px solid rgba(200, 167, 91, 0.14);
   background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 18px 30px rgba(15, 23, 42, 0.06);
 }
@@ -136,7 +135,7 @@ h1 {
 }
 
 .checkout-stat strong {
-  font-size: 1.25rem;
+  font-size: 1rem;
   color: var(--ink-900);
   line-height: 1.2;
 }
@@ -159,7 +158,7 @@ h1 {
 
 .checkout-stat__link {
   color: var(--brand-dark);
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 700;
   text-decoration: none;
 }
@@ -187,7 +186,7 @@ h1 {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #039fc8 0%, #71b247 100%);
+  background: linear-gradient(90deg, #c8a75b 0%, #71b247 100%);
 }
 
 .checkout-grid {
@@ -207,10 +206,10 @@ h1 {
 }
 
 .loyalty-card {
-  border: 1px solid rgba(3, 159, 200, 0.28);
+  border: 1px solid rgba(200, 167, 91, 0.28);
   background:
-    radial-gradient(circle at top right, rgba(3, 159, 200, 0.08), transparent 30%),
-    linear-gradient(135deg, #fcfeff 0%, #ffffff 54%, #fbfffd 100%);
+    radial-gradient(circle at top right, rgba(200, 167, 91, 0.08), transparent 30%),
+    linear-gradient(135deg, #fffdfa 0%, #ffffff 54%, #fbfffd 100%);
   box-shadow: 0 16px 34px rgba(15, 23, 42, 0.07);
 }
 
@@ -248,7 +247,7 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(113, 178, 71, 0.16), rgba(3, 159, 200, 0.08));
+  background: linear-gradient(135deg, rgba(113, 178, 71, 0.16), rgba(200, 167, 91, 0.08));
   flex-shrink: 0;
 }
 
@@ -281,7 +280,7 @@ h1 {
 
 .loyalty-card__label {
   margin-bottom: 5px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -292,7 +291,7 @@ h1 {
 .loyalty-card__progress strong,
 .loyalty-card__action strong {
   display: block;
-  font-size: 1.15rem;
+  font-size: 1rem;
   color: var(--ink-900);
   line-height: 1.2;
 }
@@ -320,7 +319,7 @@ h1 {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #039fc8 0%, #71b247 100%);
+  background: linear-gradient(90deg, #c8a75b 0%, #71b247 100%);
 }
 
 .loyalty-card__action {
@@ -364,7 +363,7 @@ h1 {
     linear-gradient(180deg, #ffffff 0%, #fbfeff 100%);
   padding: 1.75rem;
   border-radius: 26px;
-  border: 1px solid rgba(3, 159, 200, 0.14);
+  border: 1px solid rgba(200, 167, 91, 0.14);
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.12);
 }
 
@@ -379,7 +378,7 @@ h1 {
 .checkout-sidebar .summary h3 {
   text-align: center;
   margin-bottom: 14px;
-  font-size: 1.75rem;
+  font-size: 2rem;
   line-height: 1.1;
   color: #082f49;
   letter-spacing: -0.03em;
@@ -436,7 +435,7 @@ h1 {
 .checkout-sidebar .rot-toggle-copy small {
   color: #64748b;
   line-height: 1.4;
-  font-size: 0.92rem;
+  font-size: 1rem;
 }
 
 .checkout-sidebar .rot-toggle-row input[type="checkbox"] {
@@ -450,7 +449,7 @@ h1 {
 .checkout-sidebar .summary-discount-panel {
   margin: 0 0 16px;
   padding: 18px;
-  border: 1px solid rgba(3, 159, 200, 0.14);
+  border: 1px solid rgba(200, 167, 91, 0.14);
   border-radius: 22px;
   background:
     radial-gradient(circle at top right, rgba(17, 162, 207, 0.12), transparent 38%),
@@ -476,7 +475,7 @@ h1 {
 .checkout-sidebar .summary-discount-head small {
   color: #64748b;
   line-height: 1.4;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .checkout-sidebar .summary-discount-controls {
@@ -492,7 +491,7 @@ h1 {
   border-radius: 16px;
   border: 1px solid #cfe7f3;
   padding: 0 16px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   background: rgba(255, 255, 255, 0.94);
 }
 
@@ -506,7 +505,7 @@ h1 {
   border: 0;
   border-radius: 16px;
   padding: 0 24px;
-  background: linear-gradient(135deg, #11a2cf 0%, #028bb0 100%);
+  background: linear-gradient(135deg, #a88432 0%, #a88432 100%);
   color: #fff;
   font-weight: 800;
   cursor: pointer;
@@ -521,7 +520,7 @@ h1 {
 
 .checkout-sidebar .summary-discount-feedback {
   margin: 12px 0 0;
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.5;
   color: #64748b;
 }
@@ -538,7 +537,7 @@ h1 {
   background: linear-gradient(135deg, #082f49 0%, #0f4c75 100%);
   box-shadow: 0 22px 34px rgba(8, 47, 73, 0.22);
   font-weight: 700;
-  font-size: 1.08rem;
+  font-size: 1rem;
 }
 
 .checkout-sidebar .summary .total span {
@@ -556,7 +555,7 @@ h1 {
   border-radius: 16px;
   background: linear-gradient(180deg, #fff9e8 0%, #fff4d6 100%);
   border: 1px solid rgba(245, 158, 11, 0.18);
-  font-size: 0.94rem;
+  font-size: 1rem;
   line-height: 1.6;
   color: #8a5a00;
 }
@@ -566,7 +565,7 @@ h1 {
   min-height: 54px;
   border-radius: 18px;
   margin-top: 16px;
-  background: linear-gradient(135deg, #11a2cf 0%, #028bb0 100%);
+  background: linear-gradient(135deg, #a88432 0%, #a88432 100%);
   box-shadow: 0 18px 30px rgba(17, 162, 207, 0.22);
 }
 
@@ -581,7 +580,7 @@ h1 {
 
 .card {
   background: var(--card);
-  border: 1px solid rgba(3, 159, 200, 0.15);
+  border: 1px solid rgba(200, 167, 91, 0.15);
   border-radius: 18px;
   box-shadow: var(--shadow);
   padding: 24px 24px;
@@ -589,7 +588,7 @@ h1 {
 
 .section-chip {
   margin-bottom: 10px;
-  background: rgba(3, 159, 200, 0.1);
+  background: rgba(200, 167, 91, 0.1);
   color: var(--brand-dark);
 }
 
@@ -601,16 +600,16 @@ h1 {
 
 .card-header h2 {
   font-family: "Vesper Libre", serif;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .edit-btn {
   border: none;
-  background: rgba(3, 159, 200, 0.1);
+  background: rgba(200, 167, 91, 0.1);
   color: var(--brand-dark);
   font-weight: 700;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   padding: 6px 12px;
   border-radius: 999px;
   text-decoration: none;
@@ -618,7 +617,7 @@ h1 {
 }
 
 .edit-btn:hover {
-  background: rgba(3, 159, 200, 0.2);
+  background: rgba(200, 167, 91, 0.2);
 }
 
 hr {
@@ -648,7 +647,7 @@ hr {
   gap: 18px;
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid rgba(3, 159, 200, 0.14);
+  border: 1px solid rgba(200, 167, 91, 0.14);
   background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
   padding: 18px;
@@ -661,7 +660,7 @@ hr {
   flex: 0 0 96px;
   border-radius: 22px;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(3, 159, 200, 0.18), rgba(113, 178, 71, 0.18));
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.18), rgba(113, 178, 71, 0.18));
 }
 
 .service-showcase__media img,
@@ -682,7 +681,7 @@ hr {
   font-family: "Vesper Libre", serif;
   font-size: 4rem;
   color: #fff;
-  background: linear-gradient(135deg, #11a2cf 0%, #71b247 100%);
+  background: linear-gradient(135deg, #a88432 0%, #71b247 100%);
 }
 
 .service-showcase__body {
@@ -712,7 +711,7 @@ hr {
 .review-card {
   padding: 18px;
   border-radius: 22px;
-  border: 1px solid rgba(3, 159, 200, 0.14);
+  border: 1px solid rgba(200, 167, 91, 0.14);
   box-shadow: 0 14px 26px rgba(15, 23, 42, 0.06);
 }
 
@@ -750,11 +749,11 @@ hr {
 
 .review-card h3 {
   font-family: "Vesper Libre", serif;
-  font-size: 1.15rem;
+  font-size: 1rem;
 }
 
 .review-card__value {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 800;
   color: var(--ink-900);
   line-height: 1.5;
@@ -789,7 +788,7 @@ hr {
   border-radius: 999px;
   background: rgba(113, 178, 71, 0.12);
   color: #3d6b20;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 }
 
@@ -805,9 +804,9 @@ hr {
   padding: 16px 18px;
   border-radius: 18px;
   background:
-    linear-gradient(135deg, rgba(3, 159, 200, 0.05), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(135deg, rgba(200, 167, 91, 0.05), rgba(255, 255, 255, 0) 42%),
     linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  border: 1px solid rgba(3, 159, 200, 0.12);
+  border: 1px solid rgba(200, 167, 91, 0.12);
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05);
 }
 
@@ -819,12 +818,12 @@ hr {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(3, 159, 200, 0.18), rgba(3, 159, 200, 0.06));
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.18), rgba(200, 167, 91, 0.06));
   color: var(--brand-dark);
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 800;
   font-family: "Vesper Libre", serif;
-  box-shadow: inset 0 0 0 1px rgba(3, 159, 200, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(200, 167, 91, 0.08);
 }
 
 .service-line__copy {
@@ -833,7 +832,7 @@ hr {
 }
 
 .service-line h3 {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 700;
   margin-bottom: 4px;
   color: var(--ink-900);
@@ -841,18 +840,18 @@ hr {
 
 .service-line p {
   color: #607086;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .service-line__price {
   flex: 0 0 auto;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #083344;
   padding: 10px 14px;
   border-radius: 999px;
-  background: linear-gradient(135deg, rgba(3, 159, 200, 0.12), rgba(3, 159, 200, 0.04));
-  box-shadow: inset 0 0 0 1px rgba(3, 159, 200, 0.08);
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.12), rgba(200, 167, 91, 0.04));
+  box-shadow: inset 0 0 0 1px rgba(200, 167, 91, 0.08);
 }
 
 .services-breakdown {
@@ -866,7 +865,7 @@ hr {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--ink-700);
 }
 
@@ -885,7 +884,7 @@ hr {
   margin-top: 4px;
   padding-top: 12px;
   border-top: 1px solid rgba(2, 132, 199, 0.15);
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--ink-900);
 }
@@ -961,7 +960,7 @@ hr {
   border-radius: 999px;
   background: #f8fafc;
   color: #94a3b8;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
@@ -1017,7 +1016,7 @@ hr {
   margin: 8px 0 10px;
   color: #0f172a;
   font-family: "Vesper Libre", serif;
-  font-size: 33px;
+  font-size: 29px;
   line-height: 1.14;
 }
 
@@ -1025,7 +1024,7 @@ hr {
   margin: 0 auto 18px;
   max-width: 32ch;
   color: #64748b;
-  font-size: 15px;
+  font-size: 12px;
   line-height: 1.6;
 }
 
@@ -1162,11 +1161,11 @@ hr {
   }
 
   .checkout-message-modal__panel h3 {
-    font-size: 28px;
+    font-size: 24px;
   }
 
   .checkout-message-modal__lead {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .checkout-message-modal__actions {
@@ -1206,13 +1205,13 @@ hr {
   padding: 12px 16px;
   border-radius: 16px;
   border: 1px solid rgba(113, 178, 71, 0.22);
-  font-size: 14px;
+  font-size: 12px;
   background: rgba(255, 255, 255, 0.92);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 .apply-btn {
-  background: linear-gradient(135deg, #11a2cf 0%, #028bb0 100%);
+  background: linear-gradient(135deg, #a88432 0%, #a88432 100%);
   color: white;
   border: none;
   padding: 10px 22px;
@@ -1247,7 +1246,7 @@ hr {
   min-height: 56px;
   padding: 0 28px;
   border-radius: 16px;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 800;
   box-shadow: 0 14px 26px rgba(17, 162, 207, 0.16);
 }
@@ -1282,13 +1281,13 @@ hr {
 
 .summary-item h4 {
   font-family: "Vesper Libre", serif;
-  font-size: 15px;
+  font-size: 12px;
   margin-bottom: 4px;
 }
 
 .summary-item p {
   color: var(--ink-500);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .summary-grid {
@@ -1299,10 +1298,10 @@ hr {
 
 .summary-card {
   border-radius: 14px;
-  border: 1px solid rgba(3, 159, 200, 0.18);
+  border: 1px solid rgba(200, 167, 91, 0.18);
   padding: 14px 16px;
-  background: linear-gradient(145deg, #ffffff 0%, #f7fbff 100%);
-  box-shadow: 0 10px 22px rgba(3, 159, 200, 0.08);
+  background: linear-gradient(145deg, #ffffff 0%, #fffdf8 100%);
+  box-shadow: 0 10px 22px rgba(200, 167, 91, 0.08);
   min-height: 110px;
 }
 
@@ -1315,12 +1314,12 @@ hr {
 
 .summary-card h4 {
   font-family: \"Vesper Libre\", serif;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .summary-detail {
   color: var(--ink-500);
-  font-size: 14px;
+  font-size: 12px;
   margin-bottom: 4px;
 }
 
@@ -1346,10 +1345,10 @@ hr {
 .address-input {
   flex: 1;
   min-width: 0;
-  border: 1px solid rgba(3, 159, 200, 0.2);
+  border: 1px solid rgba(200, 167, 91, 0.2);
   border-radius: 12px;
   padding: 10px 12px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--ink-900);
   background: #fff;
 }
@@ -1357,7 +1356,7 @@ hr {
 .address-input:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 4px rgba(3, 159, 200, 0.12);
+  box-shadow: 0 0 0 4px rgba(200, 167, 91, 0.12);
 }
 
 .address-save-btn {
@@ -1438,7 +1437,7 @@ hr {
 
 .payment-logo--icon {
   color: #334155;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .payment-logo img {
@@ -1456,13 +1455,13 @@ hr {
 
 .payment-copy strong {
   color: #0f172a;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
 .payment-copy small {
   color: #64748b;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.2;
 }
 
@@ -1504,15 +1503,15 @@ hr {
 .payment-method-note {
   margin-bottom: 12px;
   color: #475569;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .payment-method-note--invoice {
   margin-bottom: 16px;
   padding: 14px 16px;
   border-radius: 12px;
-  border: 1px solid rgba(3, 159, 200, 0.12);
-  background: #f7fbff;
+  border: 1px solid rgba(200, 167, 91, 0.12);
+  background: #fffdf8;
 }
 
 .payment-panel-hidden {
@@ -1533,7 +1532,7 @@ hr {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 12px;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .input-row {
@@ -1553,7 +1552,7 @@ hr {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 12px;
   flex-wrap: nowrap;
   white-space: nowrap;
 }
@@ -1569,7 +1568,7 @@ hr {
   background: var(--brand);
   color: #fff;
   border: none;
-  font-size: 18px;
+  font-size: 14px;
   font-family: "Vesper Libre", serif;
   border-radius: 12px;
   padding: 14px 22px;
@@ -1586,7 +1585,7 @@ hr {
 
 .checkout-bottom h2 {
   font-family: "Vesper Libre", serif;
-  font-size: 20px;
+  font-size: 16px;
   margin-bottom: 10px;
 }
 
@@ -1621,7 +1620,7 @@ hr {
   min-height: 48px;
   margin-top: 10px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #11a2cf 0%, #078fbd 100%);
+  background: linear-gradient(135deg, #a88432 0%, #078fbd 100%);
   color: #fff;
   font-weight: 800;
   text-decoration: none;
@@ -1638,14 +1637,14 @@ hr {
   margin-top: 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #f7fbff;
-  border: 1px solid rgba(3, 159, 200, 0.14);
+  background: #fffdf8;
+  border: 1px solid rgba(200, 167, 91, 0.14);
 }
 
 .cash-invoice-meta span {
   display: block;
   color: var(--ink-600);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .cash-invoice-meta span + span {
@@ -1657,12 +1656,12 @@ hr {
 }
 
 .invoice-box {
-  border: 1px solid rgba(3, 159, 200, 0.15);
+  border: 1px solid rgba(200, 167, 91, 0.15);
   border-radius: 14px;
   padding: 16px;
   background:
-    radial-gradient(circle at top right, rgba(3, 159, 200, 0.08), transparent 30%),
-    linear-gradient(180deg, #f7fbff 0%, #ffffff 100%);
+    radial-gradient(circle at top right, rgba(200, 167, 91, 0.08), transparent 30%),
+    linear-gradient(180deg, #fffdf8 0%, #ffffff 100%);
 }
 
 .invoice-head {
@@ -1674,11 +1673,11 @@ hr {
 
 .invoice-inline h4 {
   font-family: "Vesper Libre", serif;
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .invoice-pill {
-  background: rgba(3, 159, 200, 0.15);
+  background: rgba(200, 167, 91, 0.15);
   color: var(--brand-dark);
   font-weight: 700;
   font-size: 12px;
@@ -1691,21 +1690,21 @@ hr {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
-  font-size: 14px;
+  font-size: 12px;
   color: var(--ink-700);
 }
 
 .invoice-inline .summary-total {
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   margin-top: 12px;
 }
 
 .summary-note {
   color: var(--ink-500);
-  font-size: 14px;
+  font-size: 12px;
   margin-bottom: 8px;
 }
 
@@ -1720,7 +1719,7 @@ hr {
 .summary-total {
   display: flex;
   justify-content: space-between;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 700;
   margin-top: 14px;
 }
@@ -1731,7 +1730,7 @@ hr {
   padding: 10px 12px;
   margin-top: 14px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .footer .footer-col.about {
@@ -1778,7 +1777,7 @@ hr {
     grid-template-columns: 1fr;
   }
   .confirm {
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .agree {
@@ -2088,6 +2087,12 @@ hr,
   box-shadow: 0 28px 56px rgba(17, 17, 17, 0.18);
 }
 
+.checkout-message-modal {
+  background:
+    radial-gradient(circle at top, rgba(200, 167, 91, 0.14), transparent 34%),
+    rgba(17, 17, 17, 0.48);
+}
+
 .checkout-message-modal__dismiss {
   background: #f7efe1;
   color: #6a5426;
@@ -2108,6 +2113,56 @@ hr,
 
 .checkout-message-modal__icon-check {
   stroke: #a88432;
+}
+
+.checkout-message-modal__lead {
+  color: #6c7a90;
+}
+
+.checkout-message {
+  border-color: rgba(200, 167, 91, 0.16);
+  background: linear-gradient(180deg, #fffdfa 0%, #f8f0df 100%);
+  color: #4f5d73;
+}
+
+.checkout-message--success {
+  background: linear-gradient(180deg, #eef8f1 0%, #e2f2e7 100%);
+  border-color: rgba(113, 178, 71, 0.18);
+  color: #1f7a4d;
+}
+
+.checkout-message--warning {
+  background: linear-gradient(180deg, #fffaf0 0%, #f6ecd5 100%);
+  border-color: rgba(200, 167, 91, 0.2);
+  color: #8a6a2b;
+}
+
+.checkout-message--error {
+  background: linear-gradient(180deg, #fff4f1 0%, #fde8e4 100%);
+  border-color: rgba(192, 68, 28, 0.18);
+  color: #b54708;
+}
+
+.checkout-message-modal__secondary {
+  border: 1px solid rgba(200, 167, 91, 0.24);
+  background: #fffdfa;
+  color: #6a5426;
+}
+
+.checkout-message-modal__secondary:hover {
+  background: #f4e6c2;
+  color: #111111;
+}
+
+.checkout-message-modal__close {
+  background: #111111;
+  color: #fff;
+  box-shadow: 0 16px 30px rgba(17, 17, 17, 0.18);
+}
+
+.checkout-message-modal__close:hover {
+  background: linear-gradient(135deg, #c8a75b, #a88432);
+  box-shadow: 0 20px 36px rgba(168, 132, 50, 0.24);
 }
 
 .note,
@@ -2136,3 +2191,6 @@ hr,
 .loyalty-card:hover {
   transform: translateY(-2px);
 }
+
+
+

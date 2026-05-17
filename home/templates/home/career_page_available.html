@@ -7,190 +7,164 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <title>Available Positions - Hembla experten</title>
-
-  {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/font_links.html' %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/career_page_available.css'%}" />
-<style>
-*, *:before, *:after {
-  box-sizing: border-box;
-}
-/* --- Fade-in on scroll --- */
-.fade-in {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.9s ease-out;
-}
-
-.fade-in.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* --- Zoom-in images --- */
-.zoom-in {
-  opacity: 0;
-  transform: scale(0.9);
-  transition: all 1s ease-out;
-}
-
-.zoom-in.show {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* --- Card hover animation --- */
-.apply-container {
-  align-items: center;
-}
-
-.apply-form {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.apply-form:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0,0,0,0.15);
-}
-
-/* --- Form fields animation --- */
-.apply-form input,
-.apply-form select,
-.apply-form textarea {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.6s ease;
-}
-
-.show-field {
-  opacity: 1 !important;
-  transform: translateY(0) !important;
-}
-
-/* --- Submit button bounce --- */
-.submit-btn {
-  transition: transform 0.25s ease;
-}
-
-.submit-btn:hover {
-  transform: translateY(-3px) scale(1.05);
-}
-
-/* --- Right image slide animation --- */
-.apply-image img {
-  opacity: 0;
-  transform: translateX(40px);
-  transition: all 1s ease-out;
-}
-
-.apply-image.show img {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* --- Smooth scroll for full page --- */
-html {
-  scroll-behavior: smooth;
-}
-
-   </style>
 </head>
-<body{% if show_success_popup %} class="career-popup-open"{% endif %}>
-<!-- ' HEADER -->
+<body class="career-apply-page{% if show_success_popup %} career-popup-open{% endif %}">
 {% include "home/includes/main_header.html" %}
-  <section class="apply-section  fade-in">
-<div class="available-banner zoom-in">
-<picture>
-<source srcset="{% static 'images/avaiabe.webp' %}" type="image/webp">
-<img src="{% static 'images/avaiabe.png'%}" alt="Available Now" width="1099" height="324" loading="eager" decoding="async" fetchpriority="high" />
-</picture>
-</div>
-<div class="intro-box fade-in">
-<p>Your journey starts here ' Apply now and be part of Hembla's family</p>
-</div>
-<h2 class="apply-title fade-in">Apply Now</h2>
-<div class="apply-container fade-in">
-<!-- 🔥 الفورم الحقيقي -->
-<form class="apply-form fade-in" method="POST" enctype="multipart/form-data">
+
+<main class="career-apply-shell">
+  <section class="career-apply-hero reveal">
+    <div class="career-apply-hero__copy">
+      <span class="career-apply-kicker">Apply now</span>
+      <h1>{{ job.title|default:"Join Hembla experten" }}</h1>
+      <p>
+        Send a focused application. We are looking for people who care about quality, communication,
+        and doing dependable work at a high standard.
+      </p>
+      <div class="career-apply-pill-row">
+        <span class="career-apply-pill">{{ job.job_type|default:"Open role" }}</span>
+        <span class="career-apply-pill">Professional onboarding</span>
+      </div>
+    </div>
+
+    <div class="career-apply-hero__card reveal">
+      <span class="career-apply-card__eyebrow">Application flow</span>
+      <ol class="career-apply-steps">
+        <li>Share your details and role fit</li>
+        <li>Attach CV and motivation</li>
+        <li>We review and contact matching candidates</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="career-apply-layout reveal">
+    <div class="career-apply-form-wrap">
+      <div class="career-apply-section-head">
+        <span class="career-apply-kicker">Candidate profile</span>
+        <h2>Tell us who you are</h2>
+      </div>
+
+      <form class="career-apply-form" method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        
-        {{ form.full_name }}
-        {{ form.email }}
-        {{ form.phone }}
-        {{ form.job }}
-        {{ form.message }}
-        {{ form.cv }}
 
-        <button class="submit-btn" type="submit">Submit Application</button>
-</form>
-<div class="apply-image zoom-in">
-<picture>
-<source srcset="{% static 'images/frame-16865528070.webp' %}" type="image/webp">
-<img src="{% static 'images/frame-16865528070.png'%}" alt="Apply illustration" width="693" height="580" loading="lazy" decoding="async" />
-</picture>
+        <div class="career-apply-grid">
+          <div class="career-apply-field">
+            <label for="{{ form.full_name.id_for_label }}">Full name</label>
+            {{ form.full_name }}
+          </div>
+          <div class="career-apply-field">
+            <label for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.email }}
+          </div>
+          <div class="career-apply-field">
+            <label for="{{ form.phone.id_for_label }}">Phone number</label>
+            {{ form.phone }}
+          </div>
+          <div class="career-apply-field">
+            <label for="{{ form.job.id_for_label }}">Role</label>
+            {{ form.job }}
+          </div>
+          <div class="career-apply-field career-apply-field--full">
+            <label for="{{ form.area.id_for_label }}">Preferred role / area</label>
+            {{ form.area }}
+          </div>
+          <div class="career-apply-field career-apply-field--full">
+            <label for="{{ form.availability.id_for_label }}">Availability</label>
+            {{ form.availability }}
+          </div>
+          <div class="career-apply-field career-apply-field--full">
+            <label for="{{ form.message.id_for_label }}">Why are you interested?</label>
+            {{ form.message }}
+          </div>
+          <div class="career-apply-field career-apply-field--full">
+            <label for="{{ form.cv.id_for_label }}">CV / Resume</label>
+            <div class="career-file-card">
+              <div>
+                <strong>Upload your file</strong>
+                <span id="careerFileName">No file selected yet</span>
+              </div>
+              {{ form.cv }}
+            </div>
+          </div>
+        </div>
+
+        <button class="career-apply-submit" type="submit">Submit application</button>
+      </form>
+    </div>
+
+    <aside class="career-apply-aside reveal">
+      <div class="career-apply-visual">
+        <picture>
+          <source srcset="{% static 'images/frame-16865528070.webp' %}" type="image/webp">
+          <img src="{% static 'images/frame-16865528070.png'%}" alt="Apply illustration" width="693" height="580" loading="lazy" decoding="async" />
+        </picture>
+      </div>
+
+      <div class="career-apply-note">
+        <h3>What helps your application stand out?</h3>
+        <ul>
+          <li>Clear experience summary</li>
+          <li>Strong communication and reliability</li>
+          <li>Specific motivation for joining Hembla experten</li>
+        </ul>
+      </div>
+    </aside>
+  </section>
+</main>
+
+{% if show_success_popup %}
+<div class="career-success-overlay" role="dialog" aria-modal="true" aria-labelledby="careerSuccessTitle">
+  <div class="career-success-popup">
+    <div class="career-success-badge" aria-hidden="true">
+      <span class="career-success-badge-core">
+        <span class="career-success-badge-check"></span>
+      </span>
+    </div>
+    <h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
+    <p>We will contact you if your profile matches the job requirements.</p>
+    <div class="career-success-actions">
+      <a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
+    </div>
+  </div>
 </div>
-</div>
-</section>
-  {% if show_success_popup %}
-  <div class="career-success-overlay" role="dialog" aria-modal="true" aria-labelledby="careerSuccessTitle">
-<div class="career-success-popup">
-<div class="career-success-badge" aria-hidden="true">
-<span class="career-success-badge-core">
-<span class="career-success-badge-check">
-</span>
-</span>
-</div>
-<h2 id="careerSuccessTitle">Your application has been submitted successfully!</h2>
-<p>We will contact you if your profile matches the job requirements.</p>
-<div class="career-success-actions">
-<a href="{% url 'home:careers_home' %}" class="career-success-btn">Back to Careers</a>
-</div>
-</div>
-</div>
-  {% endif %}
-  {% include "home/includes/footer.html" %}
+{% endif %}
+
+{% include "home/includes/footer.html" %}
+
 <script>
-  // Scroll-based animations (fade, zoom)
-  const animatedElements = document.querySelectorAll('.fade-in, .zoom-in');
+  const revealNodes = document.querySelectorAll(".reveal");
 
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('show');
-      }
+  if ("IntersectionObserver" in window) {
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14 });
+
+    revealNodes.forEach((node) => revealObserver.observe(node));
+  } else {
+    revealNodes.forEach((node) => node.classList.add("is-visible"));
+  }
+
+  const fileInput = document.getElementById("{{ form.cv.id_for_label }}");
+  const fileName = document.getElementById("careerFileName");
+
+  if (fileInput && fileName) {
+    fileInput.addEventListener("change", () => {
+      fileName.textContent = fileInput.files && fileInput.files[0]
+        ? fileInput.files[0].name
+        : "No file selected yet";
     });
-  });
-
-  animatedElements.forEach(el => observer.observe(el));
-
-  // Animate form fields one-by-one
-  const formFields = document.querySelectorAll(".apply-form input, .apply-form select, .apply-form textarea");
-
-  formFields.forEach((field, index) => {
-    setTimeout(() => {
-      field.classList.add("show-field");
-    }, index * 120);
-  });
-
-  // Animate right-side image
-  const rightImage = document.getElementById("applyImage");
-
-  const imageObserver = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if(entry.isIntersecting){
-        rightImage.classList.add("show");
-      }
-    });
-  });
-
-  imageObserver.observe(rightImage);
+  }
 </script>
-<script src="{% static 'js/main_header.js' %}" defer>
-</script>
+<script src="{% static 'js/main_header.js' %}" defer></script>
 </body>
 </html>
-
-

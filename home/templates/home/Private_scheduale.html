@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +22,7 @@
   border-radius: 12px;
   padding: 12px 14px;
   margin-bottom: 10px;
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.5;
 }
 .schedule-message-error {
@@ -1458,8 +1458,8 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
     if (false && isPastBookingDate(inputDate.value)) {
       e.preventDefault();
-      notify("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
-      alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+      notify("ظ„ط§ ظٹظ…ظƒظ† ط§ط®طھظٹط§ط± طھط§ط±ظٹط® ظ‚ط¨ظ„ ط§ظ„ظٹظˆظ…. ط§ط®طھط± طھط§ط±ظٹط® ط§ظ„ظٹظˆظ… ط£ظˆ طھط§ط±ظٹط®ظ‹ط§ ظ‚ط§ط¯ظ…ظ‹ط§.");
+      alert("ظ„ط§ ظٹظ…ظƒظ† ط§ط®طھظٹط§ط± طھط§ط±ظٹط® ظ‚ط¨ظ„ ط§ظ„ظٹظˆظ…. ط§ط®طھط± طھط§ط±ظٹط® ط§ظ„ظٹظˆظ… ط£ظˆ طھط§ط±ظٹط®ظ‹ط§ ظ‚ط§ط¯ظ…ظ‹ط§.");
       return;
     }
 
@@ -1625,8 +1625,8 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
         return;
       }
       if (hasPastDate) {
-        notify("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
-        alert("لا يمكن اختيار تاريخ قبل اليوم. اختر تاريخ اليوم أو تاريخًا قادمًا.");
+        notify("ظ„ط§ ظٹظ…ظƒظ† ط§ط®طھظٹط§ط± طھط§ط±ظٹط® ظ‚ط¨ظ„ ط§ظ„ظٹظˆظ…. ط§ط®طھط± طھط§ط±ظٹط® ط§ظ„ظٹظˆظ… ط£ظˆ طھط§ط±ظٹط®ظ‹ط§ ظ‚ط§ط¯ظ…ظ‹ط§.");
+        alert("ظ„ط§ ظٹظ…ظƒظ† ط§ط®طھظٹط§ط± طھط§ط±ظٹط® ظ‚ط¨ظ„ ط§ظ„ظٹظˆظ…. ط§ط®طھط± طھط§ط±ظٹط® ط§ظ„ظٹظˆظ… ط£ظˆ طھط§ط±ظٹط®ظ‹ط§ ظ‚ط§ط¯ظ…ظ‹ط§.");
         return;
       }
       notify("Please complete the required schedule fields for each service: date, available slot, frequency, and preferred days.");
@@ -1762,3 +1762,5 @@ document.addEventListener("DOMContentLoaded", () => {
 {% include "home/includes/footer.html" %}
 </body>
 </html>
+
+

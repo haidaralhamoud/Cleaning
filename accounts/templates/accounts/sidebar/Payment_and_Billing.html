@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +99,7 @@
 <div class="modal-sheet" id="subscriptionModal">
 <div class="modal-head">
 <h3>Manage Subscription</h3>
-<button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">Ã—</button>
+<button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">&times;</button>
 </div>
 <div class="modal-body">
 <div class="sub-summary">
@@ -134,7 +134,7 @@
 <div class="form-row">
 <label>Change Payment Method</label>
 <select name="payment_method" class="form-control">
-<option value="">Select a card</option>          {% for pm in payment_methods %}            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>              {{ pm.get_card_type_display }} â€¢â€¢â€¢â€¢ {{ pm.card_last4 }}            </option>          {% endfor %}        </select>
+<option value="">Select a card</option>          {% for pm in payment_methods %}            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>              {{ pm.get_card_type_display }} &#8226;&#8226;&#8226;&#8226; {{ pm.card_last4 }}            </option>          {% endfor %}        </select>
 </div>
 <button type="button" class="link-danger" id="openCancelModal">Cancel Subscription</button>
 <div class="modal-actions">
@@ -147,7 +147,7 @@
 <div class="modal-sheet modal-compact" id="reviewModal">
 <div class="modal-head">
 <h3>Review Changes</h3>
-<button class="icon-ghost modal-close" type="button" data-close="reviewModal">Ã—</button>
+<button class="icon-ghost modal-close" type="button" data-close="reviewModal">&times;</button>
 </div>
 <div class="modal-body">
 <ul class="review-list" id="reviewList">
@@ -162,7 +162,7 @@
 <div class="modal-sheet modal-compact" id="cancelModal">
 <div class="modal-head">
 <h3>Cancel subscription</h3>
-<button class="icon-ghost modal-close" type="button" data-close="cancelModal">Ã—</button>
+<button class="icon-ghost modal-close" type="button" data-close="cancelModal">&times;</button>
 </div>
 <div class="modal-body">
 <p class="muted">Your service will end after the next billing cycle.</p>
@@ -183,7 +183,7 @@
 <div class="modal-sheet modal-compact" id="savedModal">
 <div class="modal-head">
 <h3>Changes Saved</h3>
-<button class="icon-ghost modal-close" type="button" data-close="savedModal">Ã—</button>
+<button class="icon-ghost modal-close" type="button" data-close="savedModal">&times;</button>
 </div>
 <div class="modal-body">
 <p>Your subscription has been updated successfully.</p>
@@ -195,7 +195,7 @@
 <div class="modal-sheet modal-compact" id="cancelledModal">
 <div class="modal-head">
 <h3>Subscription Canceled</h3>
-<button class="icon-ghost modal-close" type="button" data-close="cancelledModal">Ã—</button>
+<button class="icon-ghost modal-close" type="button" data-close="cancelledModal">&times;</button>
 </div>
 <div class="modal-body">
 <p>No further services will be scheduled. You can resubscribe anytime.</p>
@@ -209,3 +209,5 @@
 </script>
 </body>
 </html>
+
+

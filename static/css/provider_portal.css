@@ -1,6 +1,6 @@
-:root{
-  --brand:#00a3c8;
-  --brand-dark:#0089a8;
+﻿:root{
+  --brand:#c8a75b;
+  --brand-dark:#8f6f29;
   --brand-green:#71b247;
   --ink-900:#0f172a;
   --ink-700:#334155;
@@ -14,7 +14,7 @@
 
 body.provider-portal{
   background:
-    radial-gradient(800px 260px at 12% -10%, rgba(0,163,200,.18), transparent 60%),
+    radial-gradient(800px 260px at 12% -10%, rgba(200,167,91,.18), transparent 60%),
     radial-gradient(600px 240px at 90% 10%, rgba(113,178,71,.15), transparent 60%),
     linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
   color: var(--ink-900);
@@ -32,7 +32,7 @@ body.provider-portal{
 
 .provider-portal .btn-auth{
   padding: 6px 10px;
-  font-size: 0.8rem;
+  font-size: 1rem;
   white-space: nowrap;
 }
 
@@ -58,7 +58,7 @@ body.provider-portal{
 }
 
 .provider-topbar h2{
-  font-size:28px;
+  font-size:24px;
   font-weight:800;
   color:var(--ink-900);
 }
@@ -78,7 +78,7 @@ body.provider-portal{
   border-radius:999px;
   background:#ff4f4f;
   color:#fff;
-  font-size:11px;
+  font-size:12px;
   font-weight:800;
   line-height:1;
 }
@@ -111,11 +111,11 @@ body.provider-portal{
   inset: -120px -120px auto auto;
   width: 220px;
   height: 220px;
-  background: radial-gradient(circle, rgba(0,163,200,.25) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(200,167,91,.25) 0%, transparent 65%);
 }
 
 .hero-title{
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 800;
   color: var(--ink-900);
   margin-bottom: 6px;
@@ -132,14 +132,14 @@ body.provider-portal{
   width: 120px;
   height: 120px;
   border-radius: 26px;
-  background: linear-gradient(135deg,#00a3c8,#71b247);
+  background: linear-gradient(135deg,#c8a75b,#71b247);
   color: white;
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 10px 24px rgba(0,163,200,0.28);
+  box-shadow: 0 10px 24px rgba(200,167,91,0.28);
   overflow: hidden;
 }
 
@@ -162,13 +162,13 @@ body.provider-portal{
   padding:12px 14px;
   border-radius:14px;
   border:1px solid #dfecee;
-  font-size:15px;
+  font-size:12px;
   transition:.2s;
 }
 .input:focus{
   outline:none;
   border-color:var(--brand);
-  box-shadow:0 0 0 3px rgba(0,163,200,.2);
+  box-shadow:0 0 0 3px rgba(200,167,91,.2);
 }
 
 .btn{
@@ -202,7 +202,7 @@ body.provider-portal{
   font-weight: 800;
   color: var(--ink-900);
   margin-bottom: 14px;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .hero-actions{
@@ -296,7 +296,7 @@ body.provider-portal{
 
 .thread-sub{
   color:var(--ink-500);
-  font-size:13px;
+  font-size:12px;
 }
 
 .list-item:hover{
@@ -325,7 +325,7 @@ body.provider-portal{
 }
 
 .empty-state i{
-  font-size:44px;
+  font-size:40px;
   color: var(--brand);
   margin-bottom:14px;
 }
@@ -395,7 +395,7 @@ body.provider-portal{
   transition:.2s;
 }
 
-.action-btn.resume{background:#00a3c8;}
+.action-btn.resume{background:#c8a75b;}
 .action-btn.complete{background:#71b247;}
 .action-btn.danger{background:#dc3545;}
 .action-btn:disabled{background:#e0e0e0;color:#999;cursor:not-allowed;}
@@ -403,7 +403,7 @@ body.provider-portal{
 .timeline-item{
   padding:14px;
   border-left:4px solid var(--brand);
-  background:#f7fbff;
+  background:#fffdf8;
   border-radius:12px;
   margin-bottom:12px;
 }
@@ -418,3 +418,7 @@ body.provider-portal{
 @media (max-width: 560px){
   .summary-grid{grid-template-columns:1fr;}
 }
+
+
+
+

@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 {% load i18n %}
 <!DOCTYPE html>
@@ -9,10 +9,11 @@
 <title>{% trans "Contact Us" %}</title>
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
   {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_brand.css' %}">
 <link rel="stylesheet" href="{% static 'css/contact.css' %}">
 <style>
 *, *:before, *:after {
@@ -22,7 +23,7 @@
 
    </style>
 </head>
-<body{% if show_popup %} class="contact-popup-open"{% endif %}>
+<body class="business-flow{% if show_popup %} contact-popup-open{% endif %}">
 <!-- ' HEADER -->
 {% include "home/includes/main_header.html" %}
 
@@ -184,7 +185,7 @@ function validateAndSubmit() {
         return;
     }
 
-    // إذا كلشي تمام ' أرسل الفورم
+    // ط¥ط°ط§ ظƒظ„ط´ظٹ طھظ…ط§ظ… ' ط£ط±ط³ظ„ ط§ظ„ظپظˆط±ظ…
     document.querySelector("form").submit();
 }
 
@@ -202,5 +203,7 @@ if (agreeBox && sendBtn) {
 </script>
 </body>
 </html>
+
+
 
 

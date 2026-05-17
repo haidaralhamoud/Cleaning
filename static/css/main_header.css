@@ -1,4 +1,4 @@
-/* Core header layout so pages do not depend on base.css */
+﻿/* Core header layout so pages do not depend on base.css */
 .main-header {
   width: 100%;
   background: #fff;
@@ -51,7 +51,7 @@
   text-decoration: none;
   color: #000;
   font-family: "Vesper Libre", serif;
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 600;
   transition: color 0.25s ease;
 }
@@ -254,7 +254,7 @@ body.mobile-nav-open {
   background: linear-gradient(135deg, var(--brand-navy-dark), var(--lux-gold));
   color: #fff;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   letter-spacing: 0.02em;
   box-shadow:
     0 10px 20px rgba(23, 61, 166, 0.16),
@@ -345,7 +345,7 @@ body.mobile-nav-open {
 .nav-mobile-auth a,
 .nav-mobile-auth button {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 12px;
   color: var(--lux-gold-dark);
   text-decoration: none;
   background: transparent;
@@ -512,28 +512,26 @@ body.mobile-nav-open {
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  width: 150px;
-  padding: 8px 18px;
+  width: auto;
+  padding: 8px 28px;
   border-radius: 999px;
   font-weight: 600;
   text-decoration: none;
-  background: linear-gradient(135deg, var(--brand-navy), var(--brand-navy-dark));
-  color: #fff;
+  background: #fff;
+  color: var(--lux-gold-dark);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  font-size: 0.9rem;
-  border: none;
+  font-size: 1rem;
+  border: 2px solid var(--lux-gold);
   cursor: pointer;
-  box-shadow:
-    0 10px 20px rgba(23, 61, 166, 0.18),
-    0 0 14px var(--lux-gold-glow);
+  box-shadow: none;
   white-space: nowrap;
 }
 
 .btn-guest {
   min-height: 44px;
-  min-width: 146px;
+  min-width: 0;
   width: auto;
-  padding: 8px 24px;
+  padding: 8px 28px;
   border-radius: 999px;
   font-weight: 700;
 }
@@ -618,12 +616,11 @@ body.mobile-nav-open {
 }
 
 .btn-auth:hover {
-  background: linear-gradient(135deg, #2457e4, #1a43b6);
+  background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-dark));
   color: #fff;
   transform: translateY(-1px);
-  box-shadow:
-    0 12px 24px rgba(23, 61, 166, 0.22),
-    0 0 18px var(--lux-gold-glow);
+  border-color: var(--lux-gold-dark);
+  box-shadow: 0 12px 24px var(--lux-gold-glow);
 }
 
 .btn-guest:hover {
@@ -647,15 +644,16 @@ body.mobile-nav-open {
 }
 
 .btn-auth.logout {
-  background: linear-gradient(135deg, #fff5f5 0%, #ffe9e9 100%);
-  color: #d64545;
-  border: 1px solid rgba(214, 69, 69, 0.18);
-  box-shadow: 0 10px 20px rgba(214, 69, 69, 0.12);
+  background: #111111;
+  color: #fff;
+  border: 2px solid #111111;
+  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
 }
 
 .btn-auth.logout:hover {
-  background: linear-gradient(135deg, #ffecec 0%, #ffdede 100%);
-  color: #bf3333;
+  background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-dark));
+  color: #fff;
+  border-color: var(--lux-gold-dark);
 }
 
 .lang-switch {
@@ -755,20 +753,20 @@ body.mobile-nav-open {
     align-items: center;
     justify-content: space-between;
     padding: 18px 24px;
-    font-size: 16px;
+    font-size: 12px;
   }
 
   .nav-dropdown {
-    border-top: 1px solid rgba(0, 163, 200, 0.08);
+    border-top: 1px solid rgba(200, 167, 91, 0.08);
   }
 
   .nav-links > a:first-child {
-    border-top: 1px solid rgba(0, 163, 200, 0.08);
+    border-top: 1px solid rgba(200, 167, 91, 0.08);
   }
 
   .nav-links > a,
   .nav-links > .nav-dropdown > .dropdown-toggle {
-    border-bottom: 1px solid rgba(0, 163, 200, 0.08);
+    border-bottom: 1px solid rgba(200, 167, 91, 0.08);
   }
 
   .services-mega-menu,
@@ -825,7 +823,7 @@ body.mobile-nav-open {
   }
 
   .dropdown-submenu {
-    border-top: 1px solid rgba(0, 163, 200, 0.08);
+    border-top: 1px solid rgba(200, 167, 91, 0.08);
   }
 
   .dropdown-submenu:first-child {
@@ -834,7 +832,7 @@ body.mobile-nav-open {
 
   .submenu-toggle {
     padding: 16px 24px !important;
-    font-size: 15px !important;
+    font-size: 12px !important;
     font-weight: 800 !important;
   }
 
@@ -873,7 +871,7 @@ body.mobile-nav-open {
 
   .services-preview-pane a {
     padding: 12px 0 !important;
-    border-bottom: 1px solid rgba(0, 163, 200, 0.08);
+    border-bottom: 1px solid rgba(200, 167, 91, 0.08);
   }
 
   .services-preview-pane a:last-of-type {
@@ -887,7 +885,7 @@ body.mobile-nav-open {
 
   .nav-mobile-auth {
     padding: 20px 18px 0;
-    border-top: 1px solid rgba(0, 163, 200, 0.08);
+    border-top: 1px solid rgba(200, 167, 91, 0.08);
   }
 
   .auth-buttons {
@@ -907,3 +905,6 @@ body.mobile-nav-open {
     padding-top: 90px;
   }
 }
+
+
+

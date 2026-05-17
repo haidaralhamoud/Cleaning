@@ -1,4 +1,4 @@
-from django import forms
+﻿from django import forms
 from django.utils import timezone 
 from django import forms
 from django.contrib import admin, messages
@@ -43,9 +43,9 @@ from django.utils.safestring import mark_safe
 from django.contrib import messages
 from django.http import HttpResponseRedirect
 from accounts.models import BookingChecklist
-from accounts.models import BookingChecklist   # ✅ استيراد فقط
+from accounts.models import BookingChecklist   # âœ… ط§ط³طھظٹط±ط§ط¯ ظپظ‚ط·
 # # Register your models here.
-# أعلى الملف
+# ط£ط¹ظ„ظ‰ ط§ظ„ظ…ظ„ظپ
 from accounts.models import PointsTransaction
 User = get_user_model()
 
@@ -138,11 +138,11 @@ class ServiceEstimateAdminForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.title = "Get a Quick Estimate"
-        instance.property_label = "Property Size (m²)"
+        instance.property_label = "Property Size (mآ²)"
         instance.bedrooms_label = (self.cleaned_data.get("bedrooms_label") or "Number of Bedrooms").strip()
         instance.cta_text = "Calculate Estimate"
         instance.note = "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition."
-        instance.property_label = (self.cleaned_data.get("property_label") or instance.property_label or "Property Size (m²)").strip()
+        instance.property_label = (self.cleaned_data.get("property_label") or instance.property_label or "Property Size (mآ²)").strip()
         instance.property_options = self.cleaned_data.get("property_options", [])
         instance.bedrooms_options = self.cleaned_data.get("bedrooms_options", [])
         if commit:
@@ -169,16 +169,16 @@ class ContactAdmin(admin.ModelAdmin):
 
     ordering = ("-created_at",)
 
-    # كل الحقول Read Only
+    # ظƒظ„ ط§ظ„ط­ظ‚ظˆظ„ Read Only
     readonly_fields = [f.name for f in Contact._meta.fields]
 
-    # 🔹 دمج الاسم الأول + الأخير
+    # ًں”¹ ط¯ظ…ط¬ ط§ظ„ط§ط³ظ… ط§ظ„ط£ظˆظ„ + ط§ظ„ط£ط®ظٹط±
     def full_name(self, obj):
         return f"{obj.first_name} {obj.last_name}"
 
     full_name.short_description = "Name"
 
-    # ❌ منع أي تعديل
+    # â‌Œ ظ…ظ†ط¹ ط£ظٹ طھط¹ط¯ظٹظ„
     def has_add_permission(self, request):
         return False
 
@@ -293,23 +293,23 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     # =========================
     def pretty_json_colored(self, data):
         if not data:
-            return format_html("<span style='color:#6c757d;'>—</span>")
+            return format_html("<span style='color:#6c757d;'>â€”</span>")
 
         html = '<div style="display:flex;flex-wrap:wrap;gap:6px;">'
 
         if isinstance(data, list):
             for item in data:
                 if isinstance(item, dict):
-                    label = item.get("title", "—")
-                    icon = "🧩"
+                    label = item.get("title", "â€”")
+                    icon = "ًں§©"
                 else:
                     label = item
-                    icon = "🔹"
+                    icon = "ًں”¹"
 
                 html += f"""
                 <span style="
                     background:#e7f1ff;
-                    color:#0d6efd;
+                    color:#173da6;
                     padding:6px 12px;
                     border-radius:20px;
                     font-weight:600;
@@ -350,7 +350,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     frequency_pretty.short_description = "Frequency"
 
     # =========================
-    # FIELDSETS (مرة وحدة فقط)
+    # FIELDSETS (ظ…ط±ط© ظˆط­ط¯ط© ظپظ‚ط·)
     # =========================
     fieldsets = (
         ("Service", {
@@ -376,7 +376,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "fields": (
                 "start_date",
                 "preferred_time",
-                "quoted_duration_minutes",  # ⏱ هنا
+                "quoted_duration_minutes",  # âڈ± ظ‡ظ†ط§
                 "days_type",
                 "custom_date",
                 "custom_time",
@@ -406,7 +406,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "classes": ("collapse",),
         }),
 
-        ("💰 Refund (Admin Only)", {
+        ("ًں’° Refund (Admin Only)", {
             "fields": ("refund_amount", "refund_reason", "is_refunded"),
             "classes": ("collapse",),
         }),
@@ -420,7 +420,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     )
 
     # =========================
-    # READONLY (مرة وحدة فقط)
+    # READONLY (ظ…ط±ط© ظˆط­ط¯ط© ظپظ‚ط·)
     # =========================
     def get_readonly_fields(self, request, obj=None):
         if not obj:
@@ -431,11 +431,11 @@ class BusinessBookingAdmin(admin.ModelAdmin):
         hidden_json_fields = ("services_needed", "addons", "frequency")
         pretty_fields = ("services_needed_pretty", "addons_pretty", "frequency_pretty")
 
-        # 🔒 VIEW MODE: كلشي Read-only
+        # ًں”’ VIEW MODE: ظƒظ„ط´ظٹ Read-only
         if request.GET.get("edit") != "1":
             return tuple(model_fields) + pretty_fields
 
-        # ✏️ EDIT MODE: شو بدنا نفتح؟
+        # âœڈï¸ڈ EDIT MODE: ط´ظˆ ط¨ط¯ظ†ط§ ظ†ظپطھط­طں
         editable_fields = (
             # Assignment
             "provider",
@@ -454,7 +454,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             "is_refunded",
         )
 
-        # كل الحقول ما عدا editable = Read-only
+        # ظƒظ„ ط§ظ„ط­ظ‚ظˆظ„ ظ…ط§ ط¹ط¯ط§ editable = Read-only
         return tuple(
             f for f in model_fields
             if f not in editable_fields
@@ -466,11 +466,11 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
             refund_amount = None
 
-            # إذا كان Business → خلي الأدمن يكتب المبلغ
+            # ط¥ط°ط§ ظƒط§ظ† Business â†’ ط®ظ„ظٹ ط§ظ„ط£ط¯ظ…ظ† ظٹظƒطھط¨ ط§ظ„ظ…ط¨ظ„ط؛
             if obj.total_price > 0:
                 refund_amount = obj.total_price
             else:
-                # Business بدون سعر (manual)
+                # Business ط¨ط¯ظˆظ† ط³ط¹ط± (manual)
                 refund_amount = obj.refund_amount or None
 
             obj.cancel_by_admin(
@@ -481,7 +481,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
             self.message_user(
                 request,
-                "❌ Booking cancelled & refund applied successfully."
+                "â‌Œ Booking cancelled & refund applied successfully."
             )
             return HttpResponseRedirect(".")
 
@@ -501,7 +501,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
 
     # =========================
-    # SAVE_MODEL (مرة وحدة فقط)
+    # SAVE_MODEL (ظ…ط±ط© ظˆط­ط¯ط© ظپظ‚ط·)
     #  - assign provider
     #  - apply refund
     # =========================
@@ -509,7 +509,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     def cancel_booking(self, request, queryset):
         for booking in queryset:
             booking.cancel_by_admin(admin_user=request.user, note="Cancelled from admin")
-    cancel_booking.short_description = "❌ Cancel selected bookings"
+    cancel_booking.short_description = "â‌Œ Cancel selected bookings"
 
     def has_add_permission(self, request):
         return False
@@ -549,7 +549,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             )
 
         # =========================
-        # ⭐ LOYALTY POINTS
+        # â­گ LOYALTY POINTS
         # =========================
         admin_points = form.cleaned_data.get("admin_points")
 
@@ -557,12 +557,12 @@ class BusinessBookingAdmin(admin.ModelAdmin):
             PointsTransaction.objects.create(
                 user=obj.user,
                 amount=admin_points,
-                reason=f"Admin adjustment – Business Booking #{obj.id}"
+                reason=f"Admin adjustment â€“ Business Booking #{obj.id}"
             )
 
             self.message_user(
                 request,
-                f"✅ {admin_points} loyalty points applied.",
+                f"âœ… {admin_points} loyalty points applied.",
                 messages.SUCCESS
             )
 
@@ -572,7 +572,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
 
         form.base_fields["admin_points"] = forms.IntegerField(
             required=False,
-            label="⭐ Loyalty Points (Admin)",
+            label="â­گ Loyalty Points (Admin)",
             help_text="Add or deduct points (use negative number to deduct)"
         )
         return form
@@ -882,11 +882,11 @@ class PrivateBookingAdmin(admin.ModelAdmin):
     ordering = ("-created_at",)
 
     # =========================
-    # PRETTY JSON (مثل شغلك)
+    # PRETTY JSON (ظ…ط«ظ„ ط´ط؛ظ„ظƒ)
     # =========================
     def pretty_json_colored(self, data):
         if not data:
-            return mark_safe("<span style='color:#6c757d;'>—</span>")
+            return mark_safe("<span style='color:#6c757d;'>â€”</span>")
 
         html = """
         <div style="
@@ -903,13 +903,13 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                 html += f"""
                 <div style="
                     background:#e7f1ff;
-                    color:#0d6efd;
+                    color:#173da6;
                     padding:6px 10px;
                     border-radius:8px;
                     margin-bottom:6px;
                     font-weight:600;
                 ">
-                    🔹 {item}
+                    ًں”¹ {item}
                 </div>
                 """
         elif isinstance(data, dict):
@@ -923,13 +923,13 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                     margin-bottom:10px;
                 ">
                     <div style="font-weight:700;color:#6f42c1;margin-bottom:6px;">
-                        🧹 {key}
+                        ًں§¹ {key}
                     </div>
                 """
                 if isinstance(value, dict) and "title" in value:
                     html += f"""
                     <div style="background:#f1f3f5;border-radius:8px;padding:8px;margin-left:10px;">
-                        <div style="font-weight:700;">🧺 {value.get('title')}</div>
+                        <div style="font-weight:700;">ًں§؛ {value.get('title')}</div>
                         <div style="margin-left:10px;">
                             Quantity: <b>{value.get('quantity', '-')}</b><br>
                             Unit price: <b>${value.get('unit_price', 0)}</b><br>
@@ -971,7 +971,7 @@ class PrivateBookingAdmin(admin.ModelAdmin):
     special_timing_requests_pretty.short_description = "Special Timing Requests"
 
     # =========================
-    # FIELDSETS (مرة وحدة)
+    # FIELDSETS (ظ…ط±ط© ظˆط­ط¯ط©)
     # =========================
     base_fieldsets = (
         ("ZIP Code Check", {"fields": ("zip_code", "zip_is_available")}),
@@ -1003,7 +1003,7 @@ class PrivateBookingAdmin(admin.ModelAdmin):
             "classes": ("collapse",)
         }),
 
-        ("💰 Refund (Admin Only)", {
+        ("ًں’° Refund (Admin Only)", {
             "fields": ("refund_amount", "refund_reason", "is_refunded"),
             "classes": ("collapse",),
         }),
@@ -1025,7 +1025,7 @@ class PrivateBookingAdmin(admin.ModelAdmin):
         return final_sets
 
     # =========================
-    # READONLY (مرة وحدة)
+    # READONLY (ظ…ط±ط© ظˆط­ط¯ط©)
     # =========================
     def get_readonly_fields(self, request, obj=None):
         if not obj:
@@ -1050,14 +1050,14 @@ class PrivateBookingAdmin(admin.ModelAdmin):
                 if f not in ("refund_amount", "refund_reason", "is_refunded", "provider")
             ) + pretty
 
-        # إذا refunded: قفل كل شي
+        # ط¥ط°ط§ refunded: ظ‚ظپظ„ ظƒظ„ ط´ظٹ
         if obj.is_refunded:
             ro = tuple(model_fields) + pretty
 
         return ro
 
     # =========================
-    # SAVE = APPLY REFUND (مرة وحدة)
+    # SAVE = APPLY REFUND (ظ…ط±ط© ظˆط­ط¯ط©)
     # =========================
     def save_model(self, request, obj, form, change):
         old = None
@@ -1075,14 +1075,14 @@ class PrivateBookingAdmin(admin.ModelAdmin):
 
         super().save_model(request, obj, form, change)
 
-        # ✅ الحالة 1: provider تغيّر
+        # âœ… ط§ظ„ط­ط§ظ„ط© 1: provider طھط؛ظٹظ‘ط±
         if obj.provider and old and old.provider != obj.provider:
             obj.assign_provider(
                 provider=obj.provider,
                 user=request.user
             )
 
-        # ✅ الحالة 2: provider موجود لكن الحالة لسه ORDERED
+        # âœ… ط§ظ„ط­ط§ظ„ط© 2: provider ظ…ظˆط¬ظˆط¯ ظ„ظƒظ† ط§ظ„ط­ط§ظ„ط© ظ„ط³ظ‡ ORDERED
         elif obj.provider and obj.status == "ORDERED":
             obj.assign_provider(
                 provider=obj.provider,
@@ -1274,10 +1274,10 @@ class NoShowReportAdmin(admin.ModelAdmin):
         if obj.pk:
             previous_decision = NoShowReport.objects.get(pk=obj.pk).decision
 
-        # حفظ التعديل أولاً
+        # ط­ظپط¸ ط§ظ„طھط¹ط¯ظٹظ„ ط£ظˆظ„ط§ظ‹
         super().save_model(request, obj, form, change)
 
-        # إذا تغيّر القرار
+        # ط¥ط°ط§ طھط؛ظٹظ‘ط± ط§ظ„ظ‚ط±ط§ط±
         if previous_decision != obj.decision:
             booking = self.get_booking(obj)
 
@@ -1326,7 +1326,7 @@ class NoShowReportAdmin(admin.ModelAdmin):
             if not booking:
                 continue
 
-            # 🔴 هذا هو السطر اللي كان ناقصك
+            # ًں”´ ظ‡ط°ط§ ظ‡ظˆ ط§ظ„ط³ط·ط± ط§ظ„ظ„ظٹ ظƒط§ظ† ظ†ط§ظ‚طµظƒ
             booking.approve_no_show(
                 admin_user=request.user,
                 note="Customer not available (No Show)"
@@ -1337,7 +1337,7 @@ class NoShowReportAdmin(admin.ModelAdmin):
             report.reviewed_at = timezone.now()
             report.save()
 
-    approve_no_show.short_description = "✅ Approve No Show"
+    approve_no_show.short_description = "âœ… Approve No Show"
 
     def reject_no_show(self, request, queryset):
         queryset.update(
@@ -1346,4 +1346,5 @@ class NoShowReportAdmin(admin.ModelAdmin):
             reviewed_at=timezone.now()
         )
 
-    reject_no_show.short_description = "❌ Reject No Show"
+    reject_no_show.short_description = "â‌Œ Reject No Show"
+

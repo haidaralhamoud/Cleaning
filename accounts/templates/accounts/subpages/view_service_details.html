@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -14,29 +14,29 @@
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 </head>
-<body class="customer-profile-view">{% include "home/includes/main_header.html" %}  <!-- زر المنيو يظهر فقط بالموبايل -->
+<body class="customer-profile-view">{% include "home/includes/main_header.html" %}  <!-- ط²ط± ط§ظ„ظ…ظ†ظٹظˆ ظٹط¸ظ‡ط± ظپظ‚ط· ط¨ط§ظ„ظ…ظˆط¨ط§ظٹظ„ -->
 <button class="menu-toggle customer-menu-toggle" id="menuToggle">
 <span class="arrow">&#8250;</span>
 </button>
-<!-- Overlay تبع المنيو -->
+<!-- Overlay طھط¨ط¹ ط§ظ„ظ…ظ†ظٹظˆ -->
 <div class="overlay customer-menu-overlay" id="menuOverlay">
 </div>
 <!-- Sidebar -->
-<div class="booking-detail-shell">    {% include "accounts/includes/customer_sidebar.html" with customer=booking.customer %}  <!-- الصفحة الكاملة -->
+<div class="booking-detail-shell">    {% include "accounts/includes/customer_sidebar.html" with customer=booking.customer %}  <!-- ط§ظ„طµظپط­ط© ط§ظ„ظƒط§ظ…ظ„ط© -->
 <main class="page booking-detail-page">
 <section class="content booking-detail-content">
 <h1 class="deep-clean-service">{{ service_title }}</h1>
 <p class="scheduled">        Scheduled for        {% if booking_date %}{{ booking_date|date:"F d, Y" }}{% else %}-{% endif %}        {% if booking_time %} | {{ booking_time }}{% endif %}        {% if location_text %} | location: {{ location_text }}{% endif %}      </p>
 <p class="booking-id">        Booking ID: #{{ booking.id }} |        {% if booking_type == "private" %}Payment method: {{ payment_method|default:"-" }} |{% endif %}        Order type: {{ order_type_label }}      </p>
 <div class="grid two-cols booking-detail-grid">
-<!-- العمود اليساري -->
+<!-- ط§ظ„ط¹ظ…ظˆط¯ ط§ظ„ظٹط³ط§ط±ظٹ -->
 <div class="left-col">
 <div class="card timeline">
 <div class="track">        {% for item in timeline %}        <div class="stage          {% if item.is_exception %}            exception          {% elif item.latest %}            latest          {% elif item.active %}            done          {% else %}            pending          {% endif %}        ">
 <span class="dot">
 </span>
 <div class="info">
-<b>{{ item.label }}</b>            {% if item.date %}              <small>{{ item.date|date:"F d, Y · h:i A" }}</small>            {% else %}              <small>Pending</small>            {% endif %}            {% if item.note %}              <small>{{ item.note }}</small>            {% endif %}          </div>
+<b>{{ item.label }}</b>            {% if item.date %}              <small>{{ item.date|date:"F d, Y" }} &middot; {{ item.date|date:"h:i A" }}</small>            {% else %}              <small>Pending</small>            {% endif %}            {% if item.note %}              <small>{{ item.note }}</small>            {% endif %}          </div>
 </div>        {% endfor %}      </div>
 <!-- ACTION BUTTONS -->
 <div class="timeline-actions">{% if not hide_actions %}  <button class="btn-reschedule" type="button" onclick="openPopup()">Reschedule</button>
@@ -45,12 +45,12 @@
 <!-- ===== CANCEL BOOKING POPUP ===== -->
 <div class="popup-overlay" id="cancelPopup">
 <form method="post"        action="{% url 'accounts:cancel_booking' booking_type booking.id %}"        class="popup cancel-popup">    {% csrf_token %}    <div class="cancel-header">
-<div class="cancel-icon">✕</div>
+<div class="cancel-icon">&times;</div>
 <h2>Cancel Booking</h2>
 </div>
 <div class="cancel-body">
 <h4>Deep Clean Service</h4>
-<p class="time">Tomorrow, 9:00 AM – 12:00 PM</p>
+<p class="time">Tomorrow, 9:00 AM - 12:00 PM</p>
 <p class="warning">        Cancellations within 12 hours of the service may incur a fee as per our policy.      </p>
 <label class="label">Reason for cancellation</label>
 <div class="select-box">
@@ -75,7 +75,7 @@
 <!-- ===== RESCHEDULE POPUP OVERLAY ===== -->
 <div class="popup-overlay" id="reschedulePopup">
 <form method="post"      action="{% url 'accounts:reschedule_booking' booking_type booking.id %}"      class="popup reschedule-popup">    {% csrf_token %}    <!-- CLOSE BUTTON -->
-<button type="button" class="close-btn" onclick="closePopup()">×</button>
+<button type="button" class="close-btn" onclick="closePopup()" aria-label="Close">&times;</button>
 <!-- ===== HEADER ===== -->
 <div class="popup-header">
 <div class="header-icon">
@@ -83,7 +83,7 @@
 </div>
 <div class="header-text">
 <h2>Reschedule Service</h2>
-<p>Tomorrow, 9:00 AM – 12:00 PM</p>
+<p>Tomorrow, 9:00 AM - 12:00 PM</p>
 </div>
 </div>
 <!-- ===== BODY ===== -->
@@ -112,7 +112,7 @@
 <span style="padding:6px 12px; border-radius:999px; background:#f2f9ec; color:#47792c;">        {{ checklist_progress_percent }}%      </span>
 </div>
 <div style="height:12px; background:linear-gradient(180deg, #e8f4f8 0%, #f2fbfd 100%); border-radius:999px; overflow:hidden; margin-top:10px; position:relative;">
-<div style="height:100%; width:{{ checklist_progress_percent }}%; background:linear-gradient(90deg, #039fc8 0%, #71b247 100%);">
+<div style="height:100%; width:{{ checklist_progress_percent }}%; background:linear-gradient(90deg, #c8a75b 0%, #71b247 100%);">
 </div>
 </div>
 </div>  {% if checklist_sections %}    {% for section in checklist_sections %}      <div class="checklist-service-block" style="margin-bottom:18px;">
@@ -129,9 +129,9 @@
 <span class="dot green">
 </span>        {{ note.text }}        <small class="note-time">          {{ note.created_at|date:"M d, H:i" }}        </small>
 </li>    {% empty %}      <li class="muted">No notes yet.</li>    {% endfor %}  </ul>
-<!-- زر + -->
+<!-- ط²ط± + -->
 <button class="fab-plus" onclick="toggleNoteForm()">+</button>
-<!-- الفورم المخفي -->
+<!-- ط§ظ„ظپظˆط±ظ… ط§ظ„ظ…ط®ظپظٹ -->
 <form method="post" class="note-form" id="noteForm" style="display:none;">    {% csrf_token %}    <input type="hidden" name="form_type" value="note">
 <textarea      name="note_text"      placeholder="Write your note..."      required    >
 </textarea>
@@ -141,7 +141,7 @@
 </div>
 <input type="hidden" id="bookingId" value="{{ booking.id }}">
 <input type="hidden" id="bookingType" value="{{ booking_type }}">
-<!-- العمود اليميني -->
+<!-- ط§ظ„ط¹ظ…ظˆط¯ ط§ظ„ظٹظ…ظٹظ†ظٹ -->
 <div class="right-col">
 <div class="card provider">
 <h3>Provider Assigned</h3>  {% if booking.provider %}    <div class="provider-row">
@@ -151,7 +151,7 @@
 <b>          {{ booking.provider.get_full_name|default:booking.provider.username }}        </b>        {% if booking.provider.profile %}          <small>            Rating: {{ booking.provider.profile.rating }}            ({{ booking.provider.profile.reviews_count }} reviews)          </small>        {% else %}          <small>No rating yet</small>        {% endif %}      </div>
 </div>  {% else %}    <p style="opacity:.6;">No provider assigned yet</p>  {% endif %}              <div class="provider-actions">
 <a href="{% url 'accounts:booking_chat' booking_type booking.id %}"                  class="message-btn">
-<span class="icon">💬</span>
+<span class="icon">&#128172;</span>
 <span class="text">Message</span>                  {% if customer_unread_messages > 0 %}                    <span class="msg-badge">{{ customer_unread_messages }}</span>                  {% endif %}                </a>                {% if can_rate %}                  <button type="button" class="rate-btn" onclick="openReviewPopup()">Rate</button>                {% elif has_review %}                  <span class="rated-tag">Rated</span>                {% endif %}              </div>
 </div>
 <div class="card timing">
@@ -195,15 +195,15 @@
 <div class="card media-gallery">
 <div class="media-header">
 <h3>Media Gallery</h3>
-<a href="{% url 'accounts:Media' %}booking_type={{ booking_type }}&booking_id={{ booking.id }}" class="see-more">see more →</a>
+<a href="{% url 'accounts:Media' %}?booking_type={{ booking_type }}&booking_id={{ booking.id }}" class="see-more">see more &rarr;</a>
 </div>
 <div class="media-carousel">
-<button class="arrow-btn left">‹</button>
+<button class="arrow-btn left">&lsaquo;</button>
 <div class="media-track">                {% if media_items %}                  {% for media in media_items %}                    <img src="{{ media.file.url }}" alt="{{ media.phase }} photo">                  {% endfor %}                {% else %}                  <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
 <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
 <img src="https://via.placeholder.com/130x100?text=Workspace" alt="Workspace photo">
 <img src="https://via.placeholder.com/130x100?text=Equipment" alt="Equipment photo">                {% endif %}              </div>
-<button class="arrow-btn right">›</button>
+<button class="arrow-btn right">&rsaquo;</button>
 </div>
 <div class="media-pagination">
 <span class="media-dot active">
@@ -218,7 +218,7 @@
 <button class="btn btn-blue" id="approveWorkBtn">Approve Work</button>
 <button class="btn btn-light" id="requestFixBtn">Request Fix</button>
 </div>            {% if latest_request_fix %}              <div class="request-fix-status">                Request Fix Status:                <span class="status-badge status-{{ latest_request_fix.status|lower }}">                  {{ latest_request_fix.get_status_display }}                </span>
-<span class="status-time">                  • {{ latest_request_fix.created_at|date:"M d, Y H:i" }}                </span>
+<span class="status-time">                  &bull; {{ latest_request_fix.created_at|date:"M d, Y H:i" }}                </span>
 </div>            {% endif %}          </div>
 <div class="card help">
 <span class="need-help">
@@ -244,75 +244,75 @@
 <label>Overall</label>
 <div class="star-rating">
 <input type="radio" id="overall-5" name="overall_rating" value="5" required>
-<label for="overall-5">★</label>
+<label for="overall-5">&#9733;</label>
 <input type="radio" id="overall-4" name="overall_rating" value="4">
-<label for="overall-4">★</label>
+<label for="overall-4">&#9733;</label>
 <input type="radio" id="overall-3" name="overall_rating" value="3">
-<label for="overall-3">★</label>
+<label for="overall-3">&#9733;</label>
 <input type="radio" id="overall-2" name="overall_rating" value="2">
-<label for="overall-2">★</label>
+<label for="overall-2">&#9733;</label>
 <input type="radio" id="overall-1" name="overall_rating" value="1">
-<label for="overall-1">★</label>
+<label for="overall-1">&#9733;</label>
 </div>
 </div>
 <div>
 <label>Punctuality</label>
 <div class="star-rating">
 <input type="radio" id="punctuality-5" name="punctuality" value="5" required>
-<label for="punctuality-5">★</label>
+<label for="punctuality-5">&#9733;</label>
 <input type="radio" id="punctuality-4" name="punctuality" value="4">
-<label for="punctuality-4">★</label>
+<label for="punctuality-4">&#9733;</label>
 <input type="radio" id="punctuality-3" name="punctuality" value="3">
-<label for="punctuality-3">★</label>
+<label for="punctuality-3">&#9733;</label>
 <input type="radio" id="punctuality-2" name="punctuality" value="2">
-<label for="punctuality-2">★</label>
+<label for="punctuality-2">&#9733;</label>
 <input type="radio" id="punctuality-1" name="punctuality" value="1">
-<label for="punctuality-1">★</label>
+<label for="punctuality-1">&#9733;</label>
 </div>
 </div>
 <div>
 <label>Quality</label>
 <div class="star-rating">
 <input type="radio" id="quality-5" name="quality" value="5" required>
-<label for="quality-5">★</label>
+<label for="quality-5">&#9733;</label>
 <input type="radio" id="quality-4" name="quality" value="4">
-<label for="quality-4">★</label>
+<label for="quality-4">&#9733;</label>
 <input type="radio" id="quality-3" name="quality" value="3">
-<label for="quality-3">★</label>
+<label for="quality-3">&#9733;</label>
 <input type="radio" id="quality-2" name="quality" value="2">
-<label for="quality-2">★</label>
+<label for="quality-2">&#9733;</label>
 <input type="radio" id="quality-1" name="quality" value="1">
-<label for="quality-1">★</label>
+<label for="quality-1">&#9733;</label>
 </div>
 </div>
 <div>
 <label>Professionalism</label>
 <div class="star-rating">
 <input type="radio" id="professionalism-5" name="professionalism" value="5" required>
-<label for="professionalism-5">★</label>
+<label for="professionalism-5">&#9733;</label>
 <input type="radio" id="professionalism-4" name="professionalism" value="4">
-<label for="professionalism-4">★</label>
+<label for="professionalism-4">&#9733;</label>
 <input type="radio" id="professionalism-3" name="professionalism" value="3">
-<label for="professionalism-3">★</label>
+<label for="professionalism-3">&#9733;</label>
 <input type="radio" id="professionalism-2" name="professionalism" value="2">
-<label for="professionalism-2">★</label>
+<label for="professionalism-2">&#9733;</label>
 <input type="radio" id="professionalism-1" name="professionalism" value="1">
-<label for="professionalism-1">★</label>
+<label for="professionalism-1">&#9733;</label>
 </div>
 </div>
 <div>
 <label>Value</label>
 <div class="star-rating">
 <input type="radio" id="value-5" name="value" value="5" required>
-<label for="value-5">★</label>
+<label for="value-5">&#9733;</label>
 <input type="radio" id="value-4" name="value" value="4">
-<label for="value-4">★</label>
+<label for="value-4">&#9733;</label>
 <input type="radio" id="value-3" name="value" value="3">
-<label for="value-3">★</label>
+<label for="value-3">&#9733;</label>
 <input type="radio" id="value-2" name="value" value="2">
-<label for="value-2">★</label>
+<label for="value-2">&#9733;</label>
 <input type="radio" id="value-1" name="value" value="1">
-<label for="value-1">★</label>
+<label for="value-1">&#9733;</label>
 </div>
 </div>
 </div>
@@ -395,11 +395,185 @@
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>
 <!-- ====== JavaScript ====== -->
-<script>    // القائمة الجانبية    const toggle = document.getElementById("menuToggle");    const sidebar = document.querySelector(".sidebar");    const menuOverlay = document.getElementById("menuOverlay");    const arrow = document.querySelector(".menu-toggle .arrow");    toggle.addEventListener("click", () => {      sidebar.classList.toggle("open");      menuOverlay.classList.toggle("show");      arrow.innerHTML = sidebar.classList.contains("open") ? "&#8249;" : "&#8250;";    });    menuOverlay.addEventListener("click", () => {      sidebar.classList.remove("open");      menuOverlay.classList.remove("show");      arrow.innerHTML = "&#8250;";    });    // === APPROVE WORK POPUP ===    const popupOverlay = document.getElementById("popupOverlay");    const approveWorkBtn = document.getElementById("approveWorkBtn");    const closePopupBtn = document.getElementById("closePopupBtn");    approveWorkBtn.addEventListener("click", () => {      popupOverlay.classList.add("active");    });    closePopupBtn.addEventListener("click", () => {      popupOverlay.classList.remove("active");    });    popupOverlay.addEventListener("click", (e) => {      if (e.target === popupOverlay) popupOverlay.classList.remove("active");    });    // === REQUEST FIX POPUP ===    const fixPopupOverlay = document.getElementById("fixPopupOverlay");    const requestFixBtn = document.getElementById("requestFixBtn");    const closeFixPopupBtn = document.getElementById("closeFixPopupBtn");    const cancelFixBtn = document.getElementById("cancelFixBtn");    requestFixBtn.addEventListener("click", () => {      fixPopupOverlay.classList.add("active");    });    closeFixPopupBtn.addEventListener("click", () => {      fixPopupOverlay.classList.remove("active");    });    cancelFixBtn.addEventListener("click", () => {      fixPopupOverlay.classList.remove("active");    });    fixPopupOverlay.addEventListener("click", (e) => {      if (e.target === fixPopupOverlay) fixPopupOverlay.classList.remove("active");    });    const fixUpload = document.getElementById("requestFixUpload");    const fixFiles = document.getElementById("requestFixFiles");    const fixPreviews = document.getElementById("requestFixPreviews");    function clearFixUploads() {      if (fixFiles) fixFiles.value = "";      if (fixPreviews) fixPreviews.innerHTML = "";    }    if (fixUpload && fixFiles) {      fixUpload.addEventListener("click", () => {        fixFiles.click();      });    }    if (fixFiles && fixPreviews) {      fixFiles.addEventListener("change", () => {        fixPreviews.innerHTML = "";        Array.from(fixFiles.files).forEach((file) => {          if (!file.type.startsWith("image/")) return;          const reader = new FileReader();          reader.onload = (e) => {            const wrap = document.createElement("div");            wrap.className = "upload-preview";            const img = document.createElement("img");            img.src = e.target.result;            img.alt = file.name;            wrap.appendChild(img);            fixPreviews.appendChild(wrap);          };          reader.readAsDataURL(file);        });      });    }    closeFixPopupBtn.addEventListener("click", clearFixUploads);    cancelFixBtn.addEventListener("click", clearFixUploads);    fixPopupOverlay.addEventListener("click", (e) => {      if (e.target === fixPopupOverlay) clearFixUploads();    });  </script>
-<script>const track = document.querySelector('.media-track');const dots = document.querySelectorAll('.media-dot');const btnLeft = document.querySelector('.arrow-btn.left');const btnRight = document.querySelector('.arrow-btn.right');let currentIndex = 0;const total = dots.length;function updateCarousel() {  const offset = -currentIndex * 140; // عرض الصورة + المسافة  track.style.transform = `translateX(${offset}px)`;  dots.forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));}btnRight.addEventListener('click', () => {  currentIndex = (currentIndex + 1) % total;  updateCarousel();});btnLeft.addEventListener('click', () => {  currentIndex = (currentIndex - 1 + total) % total;  updateCarousel();});dots.forEach((dot, i) => {  dot.addEventListener('click', () => {    currentIndex = i;    updateCarousel();  });});</script>
-<script>  // البوب أب الخاص بإعادة الجدولة فقط  const reschedulePopup = document.getElementById('reschedulePopup');  // فتح البوب أب عند الضغط على زر Reschedule  function openPopup() {    reschedulePopup.classList.add('active');  }  // إغلاق البوب أب عند الضغط على × أو Cancel  function closePopup() {    reschedulePopup.classList.remove('active');  }  // كمان إذا المستخدم ضغط على الخلفية السودا (خارج المربع)، بيتسكر  reschedulePopup.addEventListener('click', (e) => {    if (e.target === reschedulePopup) {      closePopup();    }  });</script>
-<script>  const rescheduleSuccessOverlay = document.getElementById('rescheduleSuccessOverlay');  const rescheduleSuccessPopup = document.getElementById('rescheduleSuccessPopup');  function showRescheduleSuccess() {    // أغلقي بوب أب الجدولة أولاً    closePopup();    // بعد لحظة قصيرة افتحي بوب أب النجاح    setTimeout(() => {      rescheduleSuccessOverlay.classList.add('active');      rescheduleSuccessPopup.classList.add('active');    }, 250);  }  function closeRescheduleSuccess() {    rescheduleSuccessOverlay.classList.remove('active');    rescheduleSuccessPopup.classList.remove('active');  }  // كمان الضغط على الخلفية يغلق البوب أب  rescheduleSuccessOverlay.addEventListener('click', closeRescheduleSuccess);</script>
-<script>  const cancelPopup = document.getElementById('cancelPopup');  function openCancelPopup() {    cancelPopup.classList.add('active');  }  function closeCancelPopup() {    cancelPopup.classList.remove('active');  }  // سكّر إذا كبس برا  cancelPopup.addEventListener('click', (e) => {    if (e.target === cancelPopup) {      closeCancelPopup();    }  });</script>
+<script>
+  (function () {
+    const popupOverlay = document.getElementById("popupOverlay");
+    const approveWorkBtn = document.getElementById("approveWorkBtn");
+    const closePopupBtn = document.getElementById("closePopupBtn");
+    const fixPopupOverlay = document.getElementById("fixPopupOverlay");
+    const requestFixBtn = document.getElementById("requestFixBtn");
+    const closeFixPopupBtn = document.getElementById("closeFixPopupBtn");
+    const cancelFixBtn = document.getElementById("cancelFixBtn");
+    const fixUpload = document.getElementById("requestFixUpload");
+    const fixFiles = document.getElementById("requestFixFiles");
+    const fixPreviews = document.getElementById("requestFixPreviews");
+
+    function clearFixUploads() {
+      if (fixFiles) fixFiles.value = "";
+      if (fixPreviews) fixPreviews.innerHTML = "";
+    }
+
+    if (approveWorkBtn && popupOverlay) {
+      approveWorkBtn.addEventListener("click", () => popupOverlay.classList.add("active"));
+    }
+
+    if (closePopupBtn && popupOverlay) {
+      closePopupBtn.addEventListener("click", () => popupOverlay.classList.remove("active"));
+    }
+
+    if (popupOverlay) {
+      popupOverlay.addEventListener("click", (e) => {
+        if (e.target === popupOverlay) popupOverlay.classList.remove("active");
+      });
+    }
+
+    if (requestFixBtn && fixPopupOverlay) {
+      requestFixBtn.addEventListener("click", () => fixPopupOverlay.classList.add("active"));
+    }
+
+    if (closeFixPopupBtn && fixPopupOverlay) {
+      closeFixPopupBtn.addEventListener("click", () => {
+        fixPopupOverlay.classList.remove("active");
+        clearFixUploads();
+      });
+    }
+
+    if (cancelFixBtn && fixPopupOverlay) {
+      cancelFixBtn.addEventListener("click", () => {
+        fixPopupOverlay.classList.remove("active");
+        clearFixUploads();
+      });
+    }
+
+    if (fixPopupOverlay) {
+      fixPopupOverlay.addEventListener("click", (e) => {
+        if (e.target === fixPopupOverlay) {
+          fixPopupOverlay.classList.remove("active");
+          clearFixUploads();
+        }
+      });
+    }
+
+    if (fixUpload && fixFiles) {
+      fixUpload.addEventListener("click", () => fixFiles.click());
+    }
+
+    if (fixFiles && fixPreviews) {
+      fixFiles.addEventListener("change", () => {
+        fixPreviews.innerHTML = "";
+        Array.from(fixFiles.files).forEach((file) => {
+          if (!file.type.startsWith("image/")) return;
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const wrap = document.createElement("div");
+            wrap.className = "upload-preview";
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.alt = file.name;
+            wrap.appendChild(img);
+            fixPreviews.appendChild(wrap);
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    }
+  })();
+</script>
+<script>
+  (function () {
+    const track = document.querySelector(".media-track");
+    const dots = document.querySelectorAll(".media-dot");
+    const btnLeft = document.querySelector(".arrow-btn.left");
+    const btnRight = document.querySelector(".arrow-btn.right");
+
+    if (!track || !dots.length || !btnLeft || !btnRight) return;
+
+    let currentIndex = 0;
+    const total = dots.length;
+
+    function updateCarousel() {
+      const offset = -currentIndex * 140;
+      track.style.transform = `translateX(${offset}px)`;
+      dots.forEach((dot, i) => dot.classList.toggle("active", i === currentIndex));
+    }
+
+    btnRight.addEventListener("click", () => {
+      currentIndex = (currentIndex + 1) % total;
+      updateCarousel();
+    });
+
+    btnLeft.addEventListener("click", () => {
+      currentIndex = (currentIndex - 1 + total) % total;
+      updateCarousel();
+    });
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener("click", () => {
+        currentIndex = i;
+        updateCarousel();
+      });
+    });
+  })();
+</script>
+<script>
+  const reschedulePopup = document.getElementById("reschedulePopup");
+
+  function openPopup() {
+    if (reschedulePopup) reschedulePopup.classList.add("active");
+  }
+
+  function closePopup() {
+    if (reschedulePopup) reschedulePopup.classList.remove("active");
+  }
+
+  if (reschedulePopup) {
+    reschedulePopup.addEventListener("click", (e) => {
+      if (e.target === reschedulePopup) {
+        closePopup();
+      }
+    });
+  }
+</script>
+<script>
+  const rescheduleSuccessOverlay = document.getElementById("rescheduleSuccessOverlay");
+  const rescheduleSuccessPopup = document.getElementById("rescheduleSuccessPopup");
+
+  function showRescheduleSuccess() {
+    closePopup();
+    setTimeout(() => {
+      if (rescheduleSuccessOverlay) rescheduleSuccessOverlay.classList.add("active");
+      if (rescheduleSuccessPopup) rescheduleSuccessPopup.classList.add("active");
+    }, 250);
+  }
+
+  function closeRescheduleSuccess() {
+    if (rescheduleSuccessOverlay) rescheduleSuccessOverlay.classList.remove("active");
+    if (rescheduleSuccessPopup) rescheduleSuccessPopup.classList.remove("active");
+  }
+
+  if (rescheduleSuccessOverlay) {
+    rescheduleSuccessOverlay.addEventListener("click", closeRescheduleSuccess);
+  }
+</script>
+<script>
+  const cancelPopup = document.getElementById("cancelPopup");
+
+  function openCancelPopup() {
+    if (cancelPopup) cancelPopup.classList.add("active");
+  }
+
+  function closeCancelPopup() {
+    if (cancelPopup) cancelPopup.classList.remove("active");
+  }
+
+  if (cancelPopup) {
+    cancelPopup.addEventListener("click", (e) => {
+      if (e.target === cancelPopup) {
+        closeCancelPopup();
+      }
+    });
+  }
+</script>
 <script>document.addEventListener("DOMContentLoaded", () => {  const params = new URLSearchParams(window.location.search);  if (params.get("cancel") === "1") {    const popup = document.getElementById("cancelPopup");    if (popup) {      popup.classList.add("active");    }  }});</script>
 <script>function toggleNoteForm() {  const form = document.getElementById("noteForm");  form.style.display = form.style.display === "none" ? "block" : "none";}</script>
 <script>function openReviewPopup() {  const popup = document.getElementById("reviewPopup");  if (popup) {    popup.classList.add("active");  }}function closeReviewPopup() {  const popup = document.getElementById("reviewPopup");  if (popup) {    popup.classList.remove("active");  }}{% if rating_form.errors %}document.addEventListener("DOMContentLoaded", () => {  openReviewPopup();});{% endif %}</script>
@@ -421,3 +595,6 @@
 </span>`;    const totalRow = rows.querySelector("#chargeTotal").parentElement || null;    if (totalRow) {      rows.insertBefore(row, totalRow);    } else {      rows.appendChild(row);    }    discountEl = row.querySelector("#chargeDiscount");  }  if (subtotalEl) subtotalEl.textContent = `${Number(pricing.subtotal || 0).toFixed(2)} ${chargeCurrency}`;  if (discountEl) discountEl.textContent = `-${Number(pricing.rot || 0).toFixed(2)} ${chargeCurrency}`;  if (totalEl) totalEl.textContent = `${Number(pricing.final || 0).toFixed(2)} ${chargeCurrency}`;  if (totalBottomEl) totalBottomEl.textContent = `${Number(pricing.final || 0).toFixed(2)} ${chargeCurrency}`;}function sendAddonsUpdate() {  const fd = new FormData();  fd.append("addons_json", JSON.stringify(ADDONS_DATA));  fetch(`/private/api/booking/{{ booking.id }}/update-addons/`, {    method: "POST",    body: fd,  })    .then((r) => r.json())    .then((data) => {      if (data && data.pricing) updateCharges(data.pricing);    });}if (openAddonsBtn) {  openAddonsBtn.addEventListener("click", openAddonsPopup);}if (closeAddonsBtn) closeAddonsBtn.addEventListener("click", closeAddonsPopup);if (cancelAddonsBtn) cancelAddonsBtn.addEventListener("click", closeAddonsPopup);if (addonsOverlay) {  addonsOverlay.addEventListener("click", (e) => {    if (e.target === addonsOverlay) closeAddonsPopup();  });}if (saveAddonsBtn) {  saveAddonsBtn.addEventListener("click", () => {    if (!CURRENT_ADDON) {      closeAddonsPopup();      return;    }    const { data, valid } = collectAddonFormData();    if (!valid) {      alert("Please answer all questions for this add-on before saving.");      return;    }    ADDONS_DATA[CURRENT_SERVICE] = ADDONS_DATA[CURRENT_SERVICE] || {};    ADDONS_DATA[CURRENT_SERVICE][CURRENT_ADDON] = data;    sendAddonsUpdate();    renderAddonsList();  });}</script>
 </body>
 </html>
+
+
+

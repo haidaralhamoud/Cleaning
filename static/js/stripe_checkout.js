@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   var form = document.getElementById("paymentForm");
   if (!form) return;
 
@@ -164,3 +164,5 @@
     });
   });
 })();
+
+

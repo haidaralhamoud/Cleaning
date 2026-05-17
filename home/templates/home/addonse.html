@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -20,7 +20,7 @@
   </section>
 
   <main class="content">
-    <h2 class="section-title">🧹 Cleaning & Housemaid Add-ons</h2>
+    <h2 class="section-title">Cleaning &amp; Housemaid Add-ons</h2>
     <p class="subtitle">Standard Cleaning</p>
 
     <div class="addons-grid">
@@ -97,7 +97,7 @@
     <div class="popup-content">
       <div class="popup-header">
         <h3 id="popupTitle"></h3>
-        <button id="closePopup">×</button>
+        <button id="closePopup" aria-label="Close">&times;</button>
       </div>
       <div id="popupBody" class="popup-body"></div>
       <div class="popup-buttons">
@@ -107,7 +107,7 @@
     </div>
   </div>
 
-  <!-- ✅ الكود داخل سكربت داخلي بدون src -->
+  <!-- âœ… ط§ظ„ظƒظˆط¯ ط¯ط§ط®ظ„ ط³ظƒط±ط¨طھ ط¯ط§ط®ظ„ظٹ ط¨ط¯ظˆظ† src -->
   <script>
 document.addEventListener("DOMContentLoaded", () => {
   const popup = document.getElementById("popup");
@@ -121,8 +121,8 @@ document.addEventListener("DOMContentLoaded", () => {
     laundry: `
       <p><strong>Q1.</strong> How many loads of laundry</p>
       <label><input type="radio" name="load"> 1 load</label><br>
-      <label><input type="radio" name="load"> 2–3 loads</label><br>
-      <label><input type="radio" name="load"> 4–5 loads</label><br>
+      <label><input type="radio" name="load"> 2-3 loads</label><br>
+      <label><input type="radio" name="load"> 4-5 loads</label><br>
       <label><input type="radio" name="load"> 6+ loads</label><hr>
       <p><strong>Q2.</strong> Service type</p>
       <label><input type="radio" name="service"> Washing only</label><br>
@@ -138,8 +138,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ironing: `
       <p><strong>Q1.</strong> How many items need ironing</p>
       <label><input type="radio" name="ironing"> Up to 10 items</label><br>
-      <label><input type="radio" name="ironing"> 11–20 items</label><br>
-      <label><input type="radio" name="ironing"> 21–40 items</label><br>
+      <label><input type="radio" name="ironing"> 11-20 items</label><br>
+      <label><input type="radio" name="ironing"> 21-40 items</label><br>
       <label><input type="radio" name="ironing"> 40+ items</label><hr>
       <p><strong>Q2.</strong> Finish preference</p>
       <label><input type="radio" name="finish"> Folded</label>
@@ -147,8 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
     `,
     dishwashing: `
       <p><strong>Q1.</strong> How many dishes need washing</p>
-      <label><input type="radio" name="dishes"> Small load (10–20 items)</label><br>
-      <label><input type="radio" name="dishes"> Medium load (20–50 items)</label><br>
+      <label><input type="radio" name="dishes"> Small load (10-20 items)</label><br>
+      <label><input type="radio" name="dishes"> Medium load (20-50 items)</label><br>
       <label><input type="radio" name="dishes"> Large load (50+ items)</label><hr>
       <p><strong>Q2.</strong> Include pots & pans</p>
       <label><input type="radio" name="pots"> Yes</label>
@@ -180,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
       <label><input type="radio" name="empty"> No, I'll do it</label><hr>
       <p><strong>Last deep clean</strong></p>
       <label><input type="radio" name="time"> &lt; 3 months</label>
-      <label><input type="radio" name="time"> 3–6 months</label>
+      <label><input type="radio" name="time"> 3-6 months</label>
       <label><input type="radio" name="time"> &gt; 6 months</label>
     `,
     cabinet: `
@@ -235,7 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `
   };
 
-  // === عرض البوب-أب عند الضغط على أي Check Box ===
+  // === ط¹ط±ط¶ ط§ظ„ط¨ظˆط¨-ط£ط¨ ط¹ظ†ط¯ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط£ظٹ Check Box ===
   document.querySelectorAll(".addon-card").forEach(card => {
     const box = card.querySelector(".check-box");
     box.addEventListener("click", () => {
@@ -246,13 +246,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // === إغلاق البوب-أب ===
+  // === ط¥ط؛ظ„ط§ظ‚ ط§ظ„ط¨ظˆط¨-ط£ط¨ ===
   const closePopupHandler = () => popup.style.display = "none";
   closePopup.onclick = closePopupHandler;
   cancelPopup.onclick = closePopupHandler;
   popup.addEventListener("click", e => { if (e.target === popup) closePopupHandler(); });
 
-  // === عند الضغط على Save & Close
+  // === ط¹ظ†ط¯ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ Save & Close
   savePopup.onclick = () => {
     const title = popupTitle.textContent;
     document.querySelectorAll(".addon-card").forEach(c => {
@@ -275,8 +275,8 @@ document.addEventListener("DOMContentLoaded", () => {
       laundry: `
         <p><strong>Q1.</strong> How many loads of laundry</p>
         <label><input type="radio" name="load"> 1 load</label><br>
-        <label><input type="radio" name="load"> 2–3 loads</label><br>
-        <label><input type="radio" name="load"> 4–5 loads</label><br>
+        <label><input type="radio" name="load"> 2-3 loads</label><br>
+        <label><input type="radio" name="load"> 4-5 loads</label><br>
         <label><input type="radio" name="load"> 6+ loads</label><hr>
         <p><strong>Q2.</strong> Service type</p>
         <label><input type="radio" name="service"> Washing only</label><br>
@@ -292,14 +292,14 @@ document.addEventListener("DOMContentLoaded", () => {
       ironing: `
         <p><strong>Q1.</strong> How many items need ironing</p>
         <label><input type="radio" name="ironing"> Up to 10 items</label><br>
-        <label><input type="radio" name="ironing"> 11–20 items</label><br>
-        <label><input type="radio" name="ironing"> 21–40 items</label><br>
+        <label><input type="radio" name="ironing"> 11-20 items</label><br>
+        <label><input type="radio" name="ironing"> 21-40 items</label><br>
         <label><input type="radio" name="ironing"> 40+ items</label><hr>
         <p><strong>Q2.</strong> Finish preference</p>
         <label><input type="radio" name="finish"> Folded</label>
         <label><input type="radio" name="finish"> On hangers</label>
       `
-      // باقي الفورمز نفس اللي عندك
+      // ط¨ط§ظ‚ظٹ ط§ظ„ظپظˆط±ظ…ط² ظ†ظپط³ ط§ظ„ظ„ظٹ ط¹ظ†ط¯ظƒ
     };
 
     document.querySelectorAll(".addon-card").forEach(card => {
@@ -330,3 +330,5 @@ document.addEventListener("DOMContentLoaded", () => {
   </script>
 </body>
 </html>
+
+

@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -44,7 +44,7 @@
 <input type="hidden" name="media_id" value="{{ media.id }}">
 <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
 </form>
-</div>            {% empty %}              <img src="{% static 'images/frame-16865526140.svg' %}" alt="">            {% endfor %}          </div>
+</div>            {% empty %}              <img class="placeholder-media" src="{% static 'images/frame-16865526140.svg' %}" alt="">            {% endfor %}          </div>
 <button class="nav next">&rsaquo;</button>
 </div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="before">
 <label class="file-pill">
@@ -66,7 +66,7 @@
 <input type="hidden" name="media_id" value="{{ media.id }}">
 <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
 </form>
-</div>            {% empty %}              <img src="{% static 'images/frame-16865526141.svg' %}" alt="">            {% endfor %}          </div>
+</div>            {% empty %}              <img class="placeholder-media" src="{% static 'images/frame-16865526141.svg' %}" alt="">            {% endfor %}          </div>
 <button class="nav next">&rsaquo;</button>
 </div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="during">
 <label class="file-pill">
@@ -88,7 +88,7 @@
 <input type="hidden" name="media_id" value="{{ media.id }}">
 <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
 </form>
-</div>            {% empty %}              <img src="{% static 'images/frame-16865526142.svg' %}" alt="">            {% endfor %}          </div>
+</div>            {% empty %}              <img class="placeholder-media" src="{% static 'images/frame-16865526142.svg' %}" alt="">            {% endfor %}          </div>
 <button class="nav next">&rsaquo;</button>
 </div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="after">
 <label class="file-pill">
@@ -109,7 +109,7 @@
 <input type="hidden" name="media_id" value="{{ media.id }}">
 <button type="submit" class="delete-media-btn" title="Delete">&times;</button>
 </form>
-</div>          {% empty %}            <img src="{% static 'images/frame-16865526200.svg' %}" alt="Issue 1">          {% endfor %}        </div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="issue">
+</div>          {% empty %}            <img class="placeholder-media" src="{% static 'images/frame-16865526200.svg' %}" alt="Issue 1">          {% endfor %}        </div>        {% if booking %}          <form method="post" enctype="multipart/form-data" class="add-media-form">            {% csrf_token %}            <input type="hidden" name="phase" value="issue">
 <label class="file-pill">
 <input type="file" name="file" accept="image/*" required>
 <span>Choose file</span>
@@ -125,9 +125,34 @@
 </div>
 <div class="overlay customer-menu-overlay" id="menuOverlay">
 </div>
-<script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.getElementById("menuOverlay");  const arrow = document.querySelector(".customer-menu-toggle .arrow");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);    if (arrow) arrow.innerHTML = open &lsaquo; "&#8249;" : "&#8250;";  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");      if (arrow) arrow.innerHTML = "&#8250;";    });  }})();</script>
+<script>
+  (function () {
+    const toggle = document.getElementById("menuToggle");
+    const sidebar = document.querySelector(".sidebar");
+    const overlay = document.getElementById("menuOverlay");
+    const arrow = document.querySelector(".customer-menu-toggle .arrow");
+
+    if (!toggle || !sidebar) return;
+
+    toggle.addEventListener("click", () => {
+      const open = sidebar.classList.toggle("open");
+      if (overlay) overlay.classList.toggle("show", open);
+      if (arrow) arrow.innerHTML = open ? "&#8249;" : "&#8250;";
+    });
+
+    if (overlay) {
+      overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        overlay.classList.remove("show");
+        if (arrow) arrow.innerHTML = "&#8250;";
+      });
+    }
+  })();
+</script>
 <script>(function () {  const lightbox = document.getElementById("imageLightbox");  const lightboxImg = document.getElementById("lightboxImage");  const lightboxClose = document.getElementById("lightboxClose");  document.querySelectorAll(".media-section .track img, .issues-grid img").forEach(img => {    img.addEventListener("click", () => {      if (!lightbox || !lightboxImg) return;      lightboxImg.src = img.src;      lightbox.classList.add("show");    });  });  function closeLightbox() {    if (!lightbox) return;    lightbox.classList.remove("show");    if (lightboxImg) lightboxImg.src = "";  }  if (lightboxClose) {    lightboxClose.addEventListener("click", closeLightbox);  }  if (lightbox) {    lightbox.addEventListener("click", (e) => {      if (e.target === lightbox) closeLightbox();    });  }})();</script>
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>
 </body>
 </html>
+
+

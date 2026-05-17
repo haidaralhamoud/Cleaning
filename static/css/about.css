@@ -1,10 +1,7 @@
-body {
+﻿body {
   margin: 0;
   font-family: "Vesper Libre", serif;
-  background:
-    radial-gradient(920px 520px at 8% -8%, rgba(200, 169, 107, 0.08), transparent 56%),
-    radial-gradient(780px 420px at 92% 0%, rgba(17, 17, 17, 0.04), transparent 54%),
-    linear-gradient(180deg, #fafaf8 0%, #ede7dd 100%);
+  background: #ffffff;
   color: #111111;
 }
 img { max-width: 100%; height: auto; display: block; }
@@ -51,12 +48,12 @@ img { max-width: 100%; height: auto; display: block; }
   animation: riseIn .8s ease .1s both;
 }
 .hembla-title {
-  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+  font-size: clamp(1rem, 2.5vw, 2rem);
   margin-bottom: 15px;
 }
 .hembla-description,
 .hembla-subtext {
-  font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+  font-size: clamp(1rem, 1.3vw, 1rem);
   line-height: 1.6;
   margin-bottom: 15px;
 }
@@ -67,7 +64,7 @@ img { max-width: 100%; height: auto; display: block; }
 }
 .guides-section h3 {
   text-align: center;
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-size: clamp(1rem, 2vw, 1rem);
   margin-bottom: 40px;
 }
 .principles {
@@ -94,7 +91,7 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 6px;
 }
 .principle p {
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.4;
 }
 .principle:hover { transform: translateY(-6px); }
@@ -143,11 +140,11 @@ img { max-width: 100%; height: auto; display: block; }
   text-align: center;
 }
 .goals-section h3 {
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
+  font-size: clamp(1rem, 2.4vw, 2rem);
   margin-bottom: 15px;
 }
 .goals-intro {
-  font-size: clamp(0.95rem, 1.3vw, 1.05rem);
+  font-size: clamp(1rem, 1.3vw, 1rem);
   max-width: 800px;
   margin: 0 auto 40px auto;
 }
@@ -188,7 +185,7 @@ img { max-width: 100%; height: auto; display: block; }
   color: #111111;
 }
 .goal-card p {
-  font-size: 0.9rem;
+  font-size: 1rem;
   line-height: 1.4;
   color: #6b645a;
 }
@@ -253,3 +250,5 @@ img { max-width: 100%; height: auto; display: block; }
   .circles-section img { width: 160px; height: 160px; }
   .cta-btn { width: 100%; }
 }
+
+

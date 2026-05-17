@@ -1,4 +1,4 @@
-function updateSummary() {
+﻿function updateSummary() {
     fetch(`/private/api/booking/price/`)
         .then(r => r.json())
         .then(data => {
@@ -8,3 +8,5 @@ function updateSummary() {
         })
         .catch(err => console.error("Error updating summary:", err));
 }
+
+

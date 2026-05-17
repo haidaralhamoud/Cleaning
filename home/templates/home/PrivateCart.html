@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -20,7 +20,7 @@
 <body>
 {% include "home/includes/main_header.html" %}
 
-<!-- ð¥ Ø¹ÙØµØ± ÙØ®ÙÙ ÙØ­ØªÙ JS ÙÙØ§ÙÙ cart-count -->
+<!-- أ°آںآ”آ¥ أکآ¹أ™آ†أکآµأکآ± أ™آ…أکآ®أ™آپأ™آٹ أ™آ„أکآ­أکآھأ™آ‰ JS أ™آٹأ™آ„أکآ§أ™آ‚أ™آٹ cart-count -->
 <div style="display:none;">
 <span id="cart-count">{{ cart|length }}</span>
 </div>
@@ -62,11 +62,11 @@ function removeItem(slug) {
         .then(r => r.json())
         .then(data => {
 
-            // Ø§Ø­Ø°Ù Ø§ÙØ¹ÙØµØ± ÙÙ Ø§ÙØµÙØ­Ø©
+            // أکآ§أکآ­أکآ°أ™آپ أکآ§أ™آ„أکآ¹أ™آ†أکآµأکآ± أ™آ…أ™آ† أکآ§أ™آ„أکآµأ™آپأکآ­أکآ©
             const item = document.getElementById(`item-${slug}`);
             if (item) item.remove();
 
-            // Ø­Ø¯Ù'Ø« Ø¹Ø¯Ø§Ø¯ Ø§ÙØ³ÙØ© (ÙÙØ¬ÙØ¯ Ø§ÙØ¢Ù ÙØ£ÙÙ ÙÙÙØª Ø§ÙÙÙØ¯Ø±)
+            // أکآ­أکآ¯أ™'أکآ« أکآ¹أکآ¯أکآ§أکآ¯ أکآ§أ™آ„أکآ³أ™آ„أکآ© (أ™آ…أ™آˆأکآ¬أ™آˆأکآ¯ أکآ§أ™آ„أکآ¢أ™آ† أ™آ„أکآ£أ™آ†أ™آƒ أ™آ†أ™آ‚أ™آ„أکآھ أکآ§أ™آ„أ™آ‡أ™آٹأکآ¯أکآ±)
             const counter = document.getElementById("cart-count");
             if (counter) counter.innerText = data.count;
 
@@ -81,5 +81,7 @@ function removeItem(slug) {
 {% include "home/includes/footer.html" %}
 </body>
 </html>
+
+
 
 

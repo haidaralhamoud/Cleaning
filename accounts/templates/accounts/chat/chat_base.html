@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}">
 
 <style>
@@ -34,7 +34,7 @@
 }
 
 .message--out .message__bubble {
-  background: #0d6efd;
+  background: #173da6;
   color: #fff;
   border-bottom-right-radius: 4px;
 }
@@ -67,12 +67,12 @@
 .icon-btn {
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 18px;
   cursor: pointer;
 }
 
 .send-btn {
-  background: #0d6efd;
+  background: #173da6;
   color: #fff;
   border: none;
   padding: 10px 18px;
@@ -83,11 +83,11 @@
 <section class="chat-card">
 
   <!-- BACK -->
-  <button class="back-btn" onclick="history.back()">← Back</button>
+  <button class="back-btn" onclick="history.back()">&larr; Back</button>
 
   <h2>
     Booking #{{ booking.id }}
-    {% if booking_type %} · {{ booking_type|title }} {% endif %}
+    {% if booking_type %} &middot; {{ booking_type|title }} {% endif %}
   </h2>
 
   <hr style="border:none;border-top:1px solid #eee;margin:10px 0;" />
@@ -99,7 +99,7 @@
         <div class="message__bubble">
           {{ m.text|linebreaksbr }}
           {% if m.file %}
-            <div><a href="{{ m.file.url }}" target="_blank">📎 Attachment</a></div>
+            <div><a href="{{ m.file.url }}" target="_blank">Attachment</a></div>
           {% endif %}
         </div>
         <div class="message__meta">
@@ -107,7 +107,7 @@
         </div>
       </article>
     {% empty %}
-      <p style="opacity:.6;">No messages yet…</p>
+      <p style="opacity:.6;">No messages yet...</p>
     {% endfor %}
   </div>
 
@@ -116,7 +116,7 @@
     {% csrf_token %}
 
     <label class="icon-btn" title="Attach file">
-      📎
+      &#128206;
       <input type="file" name="file" hidden>
     </label>
 
@@ -124,11 +124,11 @@
       id="chat-input"
       name="message"
       type="text"
-      placeholder="Type a message…"
+      placeholder="Type a message..."
       required
     >
 
-<button type="button" id="emoji-btn" class="icon-btn">😊</button>
+<button type="button" id="emoji-btn" class="icon-btn" aria-label="Emoji">&#9786;</button>
 
 <emoji-picker id="emoji-picker" style="
   display:none;
@@ -154,20 +154,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn    = document.getElementById("emoji-btn");
   const picker = document.getElementById("emoji-picker");
 
-  // فتح / إغلاق عند الضغط على الزر
+  // ظپطھط­ / ط¥ط؛ظ„ط§ظ‚ ط¹ظ†ط¯ ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط§ظ„ط²ط±
   btn.addEventListener("click", (e) => {
-    e.stopPropagation(); // مهم
+    e.stopPropagation(); // ظ…ظ‡ظ…
     picker.style.display =
       picker.style.display === "none"  "block" : "none";
   });
 
-  // إدخال الإيموجي
+  // ط¥ط¯ط®ط§ظ„ ط§ظ„ط¥ظٹظ…ظˆط¬ظٹ
   picker.addEventListener("emoji-click", event => {
     input.value += event.detail.unicode;
     input.focus();
   });
 
-  // 👈 إغلاق الإيموجي عند الضغط خارجها
+  // ًں‘ˆ ط¥ط؛ظ„ط§ظ‚ ط§ظ„ط¥ظٹظ…ظˆط¬ظٹ ط¹ظ†ط¯ ط§ظ„ط¶ط؛ط· ط®ط§ط±ط¬ظ‡ط§
   document.addEventListener("click", (e) => {
     if (
       picker.style.display === "block" &&
@@ -182,3 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+
+
+

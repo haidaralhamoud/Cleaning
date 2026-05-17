@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -127,10 +127,10 @@
               <div class="eco-item-header">
                 <span class="eco-icon-wrap eco-icon-{{ point.icon }}" aria-hidden="true">
                   {% if point.icon == "eco-products" %}
-                    <span class="eco-sprout">🌱</span>
-                    <span class="eco-drops">💧</span>
+                    <span class="eco-sprout">&#127793;</span>
+                    <span class="eco-drops">&#128167;</span>
                   {% elif point.icon == "sustainable-methods" %}
-                    <span class="eco-recycle">♻</span>
+                    <span class="eco-recycle">&#9851;</span>
                   {% endif %}
                 </span>
                 <h3>{{ point.title }}</h3>
@@ -267,3 +267,5 @@
   <script src="{% static 'js/main_header.js' %}" defer></script>
 </body>
 </html>
+
+

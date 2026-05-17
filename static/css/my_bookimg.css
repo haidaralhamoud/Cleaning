@@ -1,14 +1,17 @@
-:root {
-  --brand: #039fc8;
-  --brand-dark: #028bb0;
-  --brand-soft: rgba(3, 159, 200, 0.12);
-  --ink-900: #0f172a;
-  --ink-700: #334155;
-  --ink-500: #64748b;
-  --border: #dbe7ef;
+﻿:root {
+  --brand: #c8a75b;
+  --brand-dark: #a88432;
+  --brand-soft: rgba(200, 167, 91, 0.14);
+  --accent: #1e4ed8;
+  --accent-dark: #173da6;
+  --ink-900: #14110f;
+  --ink-700: #453d34;
+  --ink-500: #84796b;
+  --border: rgba(200, 167, 91, 0.24);
+  --bg-soft: #fbf7ee;
   --card: #ffffff;
-  --shadow-sm: 0 6px 14px rgba(15, 23, 42, 0.08);
-  --shadow-md: 0 14px 30px rgba(15, 23, 42, 0.12);
+  --shadow-sm: 0 10px 24px rgba(34, 28, 20, 0.08);
+  --shadow-md: 0 18px 38px rgba(34, 28, 20, 0.12);
   --radius-lg: 18px;
 }
 
@@ -21,8 +24,10 @@
 body {
   font-family: "Inter", sans-serif;
   color: var(--ink-900);
-  background: radial-gradient(circle at top, rgba(3, 159, 200, 0.12), transparent 55%),
-    linear-gradient(120deg, #f7fbff 0%, #ffffff 60%, #f0f7fb 100%);
+  background:
+    radial-gradient(circle at top left, rgba(200, 167, 91, 0.16), transparent 34%),
+    radial-gradient(circle at top right, rgba(23, 61, 166, 0.08), transparent 28%),
+    linear-gradient(135deg, #fffdf8 0%, #fcfaf5 54%, #f4ede1 100%);
 }
 
 .sidebar {
@@ -46,11 +51,11 @@ body {
 }
 
 .name {
-  font: 700 20px "Vesper Libre", serif;
+  font: 700 16px "Vesper Libre", serif;
 }
 
 .id {
-  font-size: 13px;
+  font-size: 12px;
   color: #666;
 }
 
@@ -71,7 +76,7 @@ body {
 
 .page-title {
   font-family: "Vesper Libre", serif;
-  font-size: 30px;
+  font-size: 26px;
   font-weight: 700;
   margin-bottom: 6px;
 }
@@ -88,6 +93,7 @@ body {
   background: #fff;
   border-radius: 14px;
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
   padding: 10px 12px;
   margin-bottom: 16px;
 }
@@ -95,7 +101,7 @@ body {
 .tab {
   border: 1px solid transparent;
   background: transparent;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   cursor: pointer;
   padding: 8px 14px;
@@ -105,14 +111,14 @@ body {
 }
 
 .tab:hover {
-  background: rgba(3, 159, 200, 0.1);
+  background: rgba(200, 167, 91, 0.1);
   color: var(--brand-dark);
 }
 
 .tab.active {
   background: var(--brand-soft);
   color: var(--brand-dark);
-  border-color: rgba(3, 159, 200, 0.3);
+  border-color: rgba(200, 167, 91, 0.3);
 }
 
 .tables {
@@ -125,7 +131,7 @@ body {
   background: #fff;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(3, 159, 200, 0.12);
+  border: 1px solid var(--border);
   overflow: visible;
 }
 
@@ -143,22 +149,22 @@ th,
  td {
   text-align: left;
   padding: 14px 16px;
-  border-bottom: 1px solid rgba(3, 159, 200, 0.12);
-  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
 }
 
 th {
-  background: #f3f9fc;
+  background: #fbf7ee;
   font-weight: 700;
   color: var(--ink-700);
 }
 
 tr:hover td {
-  background: rgba(3, 159, 200, 0.04);
+  background: rgba(200, 167, 91, 0.04);
 }
 
 .service-link {
-  color: #1a73e8;
+  color: var(--accent);
   font-weight: 700;
   text-decoration: none;
 }
@@ -181,23 +187,23 @@ tr:hover td {
 }
 
 .status-upcoming {
-  background-color: #d6f4c5;
-  color: #4e7d28;
+  background-color: rgba(200, 167, 91, 0.16);
+  color: var(--brand-dark);
 }
 
 .status-ongoing {
-  background-color: #ffe3c1;
-  color: #c46300;
+  background-color: rgba(30, 78, 216, 0.1);
+  color: var(--accent-dark);
 }
 
 .status-completed {
-  background-color: #cfefff;
-  color: #006c85;
+  background-color: rgba(20, 17, 15, 0.08);
+  color: var(--ink-900);
 }
 
 .status-cancelled {
-  background-color: #fde1e1;
-  color: #b42318;
+  background-color: #fff3ee;
+  color: #b45309;
 }
 
 .menu-wrap {
@@ -212,7 +218,7 @@ tr:hover td {
   width: 38px;
   height: 38px;
   border-radius: 999px;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   cursor: pointer;
   color: var(--brand-dark);
@@ -224,12 +230,12 @@ tr:hover td {
 
 .dots:hover,
 .menu-wrap.show .dots {
-  background: rgba(3, 159, 200, 0.08);
-  border-color: rgba(3, 159, 200, 0.18);
+  background: rgba(200, 167, 91, 0.08);
+  border-color: rgba(200, 167, 91, 0.18);
 }
 
 .dots:focus-visible {
-  outline: 2px solid rgba(3, 159, 200, 0.28);
+  outline: 2px solid rgba(200, 167, 91, 0.28);
   outline-offset: 2px;
 }
 
@@ -241,7 +247,7 @@ tr:hover td {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-  border: 1px solid rgba(3, 159, 200, 0.12);
+  border: 1px solid var(--border);
   min-width: 210px;
   z-index: 10020;
   display: none;
@@ -255,14 +261,14 @@ tr:hover td {
 .dropdown a {
   display: block;
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: 12px;
   text-decoration: none;
   color: var(--ink-900);
   font-weight: 600;
 }
 
 .dropdown a:hover {
-  background: #f2f9fc;
+  background: var(--bg-soft);
   color: var(--brand-dark);
 }
 
@@ -355,11 +361,11 @@ tr:hover td {
   }
 
   .page-title {
-    font-size: 24px;
+    font-size: 20px;
   }
 
   .subtitle {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   table,
@@ -378,7 +384,7 @@ tr:hover td {
 
   tbody tr {
     background: #fff;
-    border: 1px solid rgba(3, 159, 200, 0.12);
+    border: 1px solid var(--border);
     border-radius: 14px;
     box-shadow: var(--shadow-sm);
     margin: 10px 12px 14px;
@@ -395,7 +401,7 @@ tr:hover td {
   }
 
   td + td {
-    border-top: 1px dashed rgba(3, 159, 200, 0.12);
+    border-top: 1px dashed var(--border);
   }
 
   td::before {
@@ -445,3 +451,5 @@ tr:hover td {
     padding-top: 6px;
   }
 }
+
+

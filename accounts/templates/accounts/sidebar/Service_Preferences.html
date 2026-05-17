@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -27,8 +27,8 @@
 <!-- ===== Sidebar ===== -->  {% include "accounts/includes/customer_sidebar.html" %}  <!-- ===== Main Content ===== -->
 <main class="main">
 <h1 class="page-title">Customize Your Cleaning Preferences</h1>
-<!-- ===== FORM: حفظ ضربة وحدة ===== -->
-<form method="post" action="" data-skip-validate>      {% csrf_token %}      <!-- إذا بدك تربطها بكائن preferences موجود -->      {% if pref_id %}        <input type="hidden" name="pref_id" value="{{ pref_id }}">      {% endif %}      <!-- ===== Summary Box ===== -->
+<!-- ===== FORM: ط­ظپط¸ ط¶ط±ط¨ط© ظˆط­ط¯ط© ===== -->
+<form method="post" action="" data-skip-validate>      {% csrf_token %}      <!-- ط¥ط°ط§ ط¨ط¯ظƒ طھط±ط¨ط·ظ‡ط§ ط¨ظƒط§ط¦ظ† preferences ظ…ظˆط¬ظˆط¯ -->      {% if pref_id %}        <input type="hidden" name="pref_id" value="{{ pref_id }}">      {% endif %}      <!-- ===== Summary Box ===== -->
 <div class="summary-card">
 <div class="summary-top">
 <div class="title-left">
@@ -99,10 +99,10 @@
 <button type="submit"          name="save_custom"          value="products"          class="btn-mini-save">    Save  </button>
 </div>
 </div>
-<!-- Frequency (اختيار واحد غالباً) -->
+<!-- Frequency (ط§ط®طھظٹط§ط± ظˆط§ط­ط¯ ط؛ط§ظ„ط¨ط§ظ‹) -->
 <div class="card">
 <div class="card-header">
-<h3>⏰ Frequency</h3>
+<h3>âڈ° Frequency</h3>
 </div>
 <label>
 <input type="radio"           name="frequency"           value="weekly"           {% if prefs.frequency == "weekly" %}checked{% endif %}>    Weekly  </label>
@@ -147,7 +147,7 @@
 <!-- Lifestyle -->
 <div class="card">
 <div class="card-header">
-<h3>🌿 Lifestyle & Add-ons Tab</h3>
+<h3>Lifestyle &amp; Add-ons</h3>
 </div>
 <label>
 <input type="checkbox"           name="lifestyle_addons"           value="event_staffing"           {% if "event_staffing" in prefs.lifestyle_addons %}checked{% endif %}>    Event staffing (setup, serving, after-cleaning)  </label>
@@ -171,7 +171,7 @@
 <!-- Assembly -->
 <div class="card">
 <div class="card-header">
-<h3>🧰 Assembly & Renovations</h3>
+<h3>Assembly &amp; Renovations</h3>
 </div>
 <label>
 <input type="checkbox"           name="assembly_services"           value="ikea_furniture"           {% if "ikea_furniture" in prefs.assembly_services %}checked{% endif %}>    IKEA & furniture assembly  </label>
@@ -185,7 +185,7 @@
 <input type="checkbox"           name="assembly_services"           value="large_renovation"           {% if "large_renovation" in prefs.assembly_services %}checked{% endif %}>    Large renovation project  </label>
 </div>
 </div>
-<!-- زر حفظ -->
+<!-- ط²ط± ط­ظپط¸ -->
 <div style="margin-top:14px;">
 <button type="submit" class="btn btn-primary">Save Preferences</button>
 </div>
@@ -201,3 +201,4 @@
 </script>
 </body>
 </html>
+

@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -13,7 +13,41 @@
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/customer_profile_view.css' %}">
-<style>/* ===== DROPDOWN ===== */.nav-dropdown {  position: relative;}.dropdown-toggle {  cursor: pointer;  display: inline-flex;  align-items: center;  gap: 6px;}.dropdown-menu {  position: absolute;  top: 100%;  left: 0;  background: #fff;  min-width: 190px;  border-radius: 12px;  box-shadow: 0 12px 30px rgba(0,0,0,0.12);  padding: 8px 0;  opacity: 0;  visibility: hidden;  transform: translateY(10px);  transition: all .25s ease;  z-index: 999;}.dropdown-menu a {  display: block;  padding: 10px 18px;  color: #222;  text-decoration: none;  font-weight: 500;}.dropdown-menu a:hover {  background: #f2f7fa;  color: #00a3c8;}.nav-dropdown:hover .dropdown-menu {  opacity: 1;  visibility: visible;  transform: translateY(0);}.auth-buttons {  display: flex;  align-items: center;  gap: 12px;}.btn-auth {  padding: 8px 18px;  border-radius: 10px;  font-weight: 600;  text-decoration: none;  background: #00a3c8;  color: #fff;  transition: .25s ease;  font-size: 0.9rem;}.auth-buttons button.btn-auth {  font: inherit;  font-weight: 600;  font-size: 0.9rem;}.btn-auth:hover {  background: #0089a8;  color: #fff;}.btn-auth.outline {  background: transparent;  color: #00a3c8;  border: 2px solid #00a3c8;}.btn-auth.outline:hover {  background: #00a3c8;  color: #fff;}.btn-auth.logout {  background: #ff4f4f;}.btn-auth.logout:hover {  background: #e63e3e;}.nav-links .auth-buttons {  display: none;}/* ================= BASIC ================= */.layout {  display: flex;  min-height: 100vh;}.sidebar {  width: 300px;  background: #fff;}/* ================= MOBILE ================= */@media (max-width: 991px) {  .main-header {    position: sticky;    top: 0;    z-index: 1100;  }  .profile-btn {    display: none;  }  .layout {    flex-direction: row;    min-height: 100vh;    padding: 0;  }  /* ===== SIDEBAR ===== */  .sidebar {    position: fixed;    top: 70px;    left: 0;    width: 280px;    height: calc(100vh - 70px);    margin: 0;    background: #fff;    z-index: 2000;    overflow-y: auto;    -webkit-overflow-scrolling: touch;    transform: translateX(-100%);    transition: transform 0.3s ease;    border-radius: 0 18px 18px 0;  }  .sidebar.open {    transform: translateX(0);  }  /* ===== OVERLAY ===== */  .sidebar-overlay {    position: fixed;    inset: 0;    background: rgba(0,0,0,0.35);    z-index: 1500;    display: none;  }  .sidebar.open ~ .sidebar-overlay {    display: block;  }  /* ===== CONTENT ===== */  .content {    margin: 0;    padding: 16px 16px 20px;    padding-top: 16px;  }  .cards-container {    display: flex;    flex-direction: column;    gap: 16px;  }  .left-column,  .right-column {    width: 100%;  }  /* ===== NAV LINKS (Ø§Ø®ØªSØ§Ø±S - dropdown) ===== */  .nav-links {    position: fixed;    top: 70px;    left: 0;    right: 0;    background: #fff;    display: none;    flex-direction: column;    align-items: center;    gap: 18px;    padding: 20px 0;    z-index: 1050;    box-shadow: 0 10px 20px rgba(0,0,0,0.15);  }  .nav-links.active {    display: flex;  }  .auth-buttons {    display: none;  }  .nav-links .auth-buttons {    display: flex;    flex-direction: column;    align-items: center;    gap: 12px;    width: 100%;    padding: 6px 0;  }  .nav-links a,  .nav-links .btn-auth,  .nav-links .auth-buttons button.btn-auth {    font: inherit;    font-weight: 600;    font-size: 0.95rem;    line-height: 1.2;    padding: 0;  }  .nav-links .auth-buttons .btn-auth,  .nav-links .auth-buttons .btn-auth.outline,  .nav-links .auth-buttons .btn-auth.logout {    background: transparent;    border: none;    color: inherit;  }  .nav-dropdown {    width: 100%;    text-align: center;  }  .dropdown-menu {    position: static;    width: 100%;    min-width: 0;    box-shadow: none;    opacity: 1;    visibility: visible;    transform: none;    display: none;    padding: 0;  }  .nav-dropdown.open .dropdown-menu {    display: block;  }  .dropdown-menu a {    padding: 8px 0;  }}/* ===== SCROLLBAR ===== */.sidebar::-webkit-scrollbar {  width: 5px;}.sidebar::-webkit-scrollbar-thumb {  background: #ccebf3;  border-radius: 10px;}@media (max-width: 991px) {  body {    padding-top: 0 !important;  }  .content {    margin-top: 0 !important;  }}</style>
+<style>/* ===== DROPDOWN ===== */.nav-dropdown {  position: relative;}.dropdown-toggle {  cursor: pointer;  display: inline-flex;  align-items: center;  gap: 6px;}.dropdown-menu {  position: absolute;  top: 100%;  left: 0;  background: #fff;  min-width: 190px;  border-radius: 12px;  box-shadow: 0 12px 30px rgba(0,0,0,0.12);  padding: 8px 0;  opacity: 0;  visibility: hidden;  transform: translateY(10px);  transition: all .25s ease;  z-index: 999;}.dropdown-menu a {  display: block;  padding: 10px 18px;  color: #222;  text-decoration: none;  font-weight: 500;}.dropdown-menu a:hover {  background: #fbf7ee;  color: #c8a75b;}.nav-dropdown:hover .dropdown-menu {  opacity: 1;  visibility: visible;  transform: translateY(0);}.auth-buttons {  display: flex;  align-items: center;  gap: 12px;}.btn-auth {  padding: 8px 18px;  border-radius: 10px;  font-weight: 600;  text-decoration: none;  background: #c8a75b;  color: #fff;  transition: .25s ease;  font-size: 1rem;}.auth-buttons button.btn-auth {  font: inherit;  font-weight: 600;  font-size: 1rem;}.btn-auth:hover {  background: #8f6f29;  color: #fff;}.btn-auth.outline {  background: transparent;  color: #c8a75b;  border: 2px solid #c8a75b;}.btn-auth.outline:hover {  background: #c8a75b;  color: #fff;}.btn-auth.logout {  background: #ff4f4f;}.btn-auth.logout:hover {  background: #e63e3e;}.nav-links .auth-buttons {  display: none;}/* ================= BASIC ================= */.layout {  display: flex;  min-height: 100vh;}.sidebar {  width: 300px;  background: #fff;}/* ================= MOBILE ================= */@media (max-width: 991px) {  .main-header {    position: sticky;    top: 0;    z-index: 1100;  }  .profile-btn {    display: none;  }  .layout {    flex-direction: row;    min-height: 100vh;    padding: 0;  }  /* ===== SIDEBAR ===== */  .sidebar {    position: fixed;    top: 70px;    left: 0;    width: 280px;    height: calc(100vh - 70px);    margin: 0;    background: #fff;    z-index: 2000;    overflow-y: auto;    -webkit-overflow-scrolling: touch;    transform: translateX(-100%);    transition: transform 0.3s ease;    border-radius: 0 18px 18px 0;  }  .sidebar.open {    transform: translateX(0);  }  /* ===== OVERLAY ===== */  .sidebar-overlay {    position: fixed;    inset: 0;    background: rgba(0,0,0,0.35);    z-index: 1500;    display: none;  }  .sidebar.open ~ .sidebar-overlay {    display: block;  }  /* ===== CONTENT ===== */  .content {    margin: 0;    padding: 16px 16px 20px;    padding-top: 16px;  }  .cards-container {    display: flex;    flex-direction: column;    gap: 16px;  }  .left-column,  .right-column {    width: 100%;  }  /* ===== NAV LINKS (ط£ع©ط¢آ§ط£ع©ط¢آ®ط£ع©ط¢ع¾Sط£ع©ط¢آ§ط£ع©ط¢آ±S - dropdown) ===== */  .nav-links {    position: fixed;    top: 70px;    left: 0;    right: 0;    background: #fff;    display: none;    flex-direction: column;    align-items: center;    gap: 18px;    padding: 20px 0;    z-index: 1050;    box-shadow: 0 10px 20px rgba(0,0,0,0.15);  }  .nav-links.active {    display: flex;  }  .auth-buttons {    display: none;  }  .nav-links .auth-buttons {    display: flex;    flex-direction: column;    align-items: center;    gap: 12px;    width: 100%;    padding: 6px 0;  }  .nav-links a,  .nav-links .btn-auth,  .nav-links .auth-buttons button.btn-auth {    font: inherit;    font-weight: 600;    font-size: 1rem;    line-height: 1.2;    padding: 0;  }  .nav-links .auth-buttons .btn-auth,  .nav-links .auth-buttons .btn-auth.outline,  .nav-links .auth-buttons .btn-auth.logout {    background: transparent;    border: none;    color: inherit;  }  .nav-dropdown {    width: 100%;    text-align: center;  }  .dropdown-menu {    position: static;    width: 100%;    min-width: 0;    box-shadow: none;    opacity: 1;    visibility: visible;    transform: none;    display: none;    padding: 0;  }  .nav-dropdown.open .dropdown-menu {    display: block;  }  .dropdown-menu a {    padding: 8px 0;  }}/* ===== SCROLLBAR ===== */.sidebar::-webkit-scrollbar {  width: 5px;}.sidebar::-webkit-scrollbar-thumb {  background: #d6b56c;  border-radius: 10px;}@media (max-width: 991px) {  body {    padding-top: 0 !important;  }  .content {    margin-top: 0 !important;  }}</style>
+<style>
+  .dropdown-menu a:hover { background: #fbf7ee; color: #a88432; }
+  .auth-buttons .btn-auth {
+    background: linear-gradient(135deg, #c8a75b, #a88432);
+    color: #18120a;
+    box-shadow: 0 10px 22px rgba(168, 132, 50, 0.22);
+  }
+  .auth-buttons .btn-auth:hover { filter: brightness(0.98); color: #18120a; }
+  .auth-buttons .btn-auth.outline {
+    background: transparent;
+    color: #a88432;
+    border-color: #c8a75b;
+    box-shadow: none;
+  }
+  .auth-buttons .btn-auth.outline:hover { background: #fbf7ee; color: #a88432; }
+  .auth-buttons .btn-auth.logout {
+    background: #14110f;
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(20, 17, 15, 0.18);
+  }
+  .auth-buttons .btn-auth.logout:hover { background: #2a241d; color: #fff; }
+  .sidebar::-webkit-scrollbar-thumb { background: #d6b56c; }
+  @media (max-width: 991px) {
+    .nav-links .auth-buttons .btn-auth,
+    .nav-links .auth-buttons .btn-auth.outline,
+    .nav-links .auth-buttons .btn-auth.logout {
+      background: transparent;
+      border: none;
+      color: inherit;
+      box-shadow: none;
+      filter: none;
+    }
+  }
+</style>
 </head>
 <body class="customer-profile-view">
 <!-- ================= HEADER ================= -->{% include "home/includes/main_header.html" %}<div >
@@ -279,7 +313,7 @@
 <div class="modal-sheet" id="subscriptionModal">
 <div class="modal-head">
 <h3>Manage Subscription</h3>
-<button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">×</button>
+<button class="icon-ghost modal-close" type="button" data-close="subscriptionModal">&times;</button>
 </div>
 <div class="modal-body">
 <div class="sub-summary">
@@ -314,7 +348,7 @@
 <div class="form-row">
 <label>Change Payment Method</label>
 <select name="payment_method" class="form-control">
-<option value="">Select a card</option>          {% for pm in payment_methods %}            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>              {{ pm.get_card_type_display }} •••• {{ pm.card_last4 }}            </option>          {% endfor %}        </select>
+<option value="">Select a card</option>          {% for pm in payment_methods %}            <option value="{{ pm.id }}" {% if subscription.payment_method and subscription.payment_method.id == pm.id %}selected{% endif %}>              {{ pm.get_card_type_display }} &#8226;&#8226;&#8226;&#8226; {{ pm.card_last4 }}            </option>          {% endfor %}        </select>
 </div>
 <button type="button" class="link-danger" id="openCancelModal">Cancel Subscription</button>
 <div class="modal-actions">
@@ -327,7 +361,7 @@
 <div class="modal-sheet modal-compact" id="reviewModal">
 <div class="modal-head">
 <h3>Review Changes</h3>
-<button class="icon-ghost modal-close" type="button" data-close="reviewModal">×</button>
+<button class="icon-ghost modal-close" type="button" data-close="reviewModal">&times;</button>
 </div>
 <div class="modal-body">
 <ul class="review-list" id="reviewList">
@@ -342,7 +376,7 @@
 <div class="modal-sheet modal-compact" id="cancelModal">
 <div class="modal-head">
 <h3>Cancel subscription</h3>
-<button class="icon-ghost modal-close" type="button" data-close="cancelModal">×</button>
+<button class="icon-ghost modal-close" type="button" data-close="cancelModal">&times;</button>
 </div>
 <div class="modal-body">
 <p class="muted">Your service will end after the next billing cycle.</p>
@@ -363,7 +397,7 @@
 <div class="modal-sheet modal-compact" id="savedModal">
 <div class="modal-head">
 <h3>Changes Saved</h3>
-<button class="icon-ghost modal-close" type="button" data-close="savedModal">×</button>
+<button class="icon-ghost modal-close" type="button" data-close="savedModal">&times;</button>
 </div>
 <div class="modal-body">
 <p>Your subscription has been updated successfully.</p>
@@ -375,7 +409,7 @@
 <div class="modal-sheet modal-compact" id="cancelledModal">
 <div class="modal-head">
 <h3>Subscription Canceled</h3>
-<button class="icon-ghost modal-close" type="button" data-close="cancelledModal">×</button>
+<button class="icon-ghost modal-close" type="button" data-close="cancelledModal">&times;</button>
 </div>
 <div class="modal-body">
 <p>No further services will be scheduled. You can resubscribe anytime.</p>
@@ -389,3 +423,7 @@
 </script>
 </body>
 </html>
+
+
+
+

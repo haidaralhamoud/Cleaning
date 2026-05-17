@@ -1,4 +1,4 @@
-* {
+﻿* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -6,8 +6,8 @@
 }
 
 :root {
-  --brand: #039fc8;
-  --brand-strong: #028bb0;
+  --brand: #c8a75b;
+  --brand-strong: #a88432;
   --accent: #71b247;
   --text: #0a0a0a;
   --muted: rgba(10, 10, 10, 0.7);
@@ -17,7 +17,7 @@
 }
 
 body {
-  background: linear-gradient(140deg, #eff9ff 0%, #ffffff 45%, #f7fbff 100%);
+  background: linear-gradient(140deg, #f8f3ea 0%, #ffffff 45%, #fffdf8 100%);
   color: var(--text);
 }
 
@@ -45,7 +45,7 @@ body {
   color: #000;
   text-decoration: none;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 .menu a:hover {
@@ -61,7 +61,7 @@ body {
   border-radius: 30px;
   padding: 8px 20px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -92,7 +92,7 @@ body {
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, rgba(3, 159, 200, 0.18), transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgba(200, 167, 91, 0.18), transparent 60%);
   pointer-events: none;
 }
 
@@ -111,8 +111,8 @@ body {
   width: 90%;
   max-width: 900px;
   border-radius: 18px;
-  border: 1px solid rgba(3, 159, 200, 0.1);
-  box-shadow: 0 18px 45px rgba(3, 159, 200, 0.18);
+  border: 1px solid rgba(200, 167, 91, 0.1);
+  box-shadow: 0 18px 45px rgba(200, 167, 91, 0.18);
   padding: 2.4rem 3rem 2.8rem;
   position: relative;
   z-index: 1;
@@ -122,11 +122,11 @@ body {
   display: block;
   margin: 0 auto 1rem auto;
   width: 100px;
-  filter: drop-shadow(0 8px 16px rgba(3, 159, 200, 0.18));
+  filter: drop-shadow(0 8px 16px rgba(200, 167, 91, 0.18));
 }
 
 .title {
-  font-size: 28px;
+  font-size: 24px;
   text-align: center;
   font-weight: 700;
 }
@@ -134,7 +134,7 @@ body {
 .subtitle {
   text-align: center;
   color: var(--muted);
-  font-size: 16px;
+  font-size: 12px;
   margin-bottom: 2rem;
 }
 
@@ -150,7 +150,7 @@ body {
   background: #ffe9e9;
   color: #b42318;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .form-group {
@@ -161,7 +161,7 @@ body {
 label {
   display: block;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 12px;
   margin-bottom: 6px;
   color: #000;
 }
@@ -173,7 +173,7 @@ label {
 .field-error {
   margin-top: 0.45rem;
   color: #b42318;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
@@ -188,7 +188,7 @@ select {
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 10px;
-  font-size: 15px;
+  font-size: 12px;
   background: #fff;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -211,30 +211,30 @@ input[type="file"].file-input__field {
   gap: 12px;
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(3, 159, 200, 0.35);
-  background: linear-gradient(135deg, rgba(3, 159, 200, 0.08), rgba(113, 178, 71, 0.08));
+  border: 1px solid rgba(200, 167, 91, 0.35);
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.08), rgba(113, 178, 71, 0.08));
   cursor: pointer;
   transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .file-input__label:hover {
-  border-color: rgba(3, 159, 200, 0.6);
-  box-shadow: 0 10px 24px rgba(3, 159, 200, 0.18);
+  border-color: rgba(200, 167, 91, 0.6);
+  box-shadow: 0 10px 24px rgba(200, 167, 91, 0.18);
   transform: translateY(-1px);
 }
 
 .file-input__cta {
-  background: linear-gradient(135deg, #08b3dd, #039fc8);
+  background: linear-gradient(135deg, #a88432, #c8a75b);
   color: #fff;
   font-weight: 700;
   padding: 8px 16px;
   border-radius: 10px;
-  box-shadow: 0 8px 18px rgba(3, 159, 200, 0.25);
+  box-shadow: 0 8px 18px rgba(200, 167, 91, 0.25);
   white-space: nowrap;
 }
 
 .file-input__name {
-  font-size: 14px;
+  font-size: 12px;
   color: rgba(10, 10, 10, 0.7);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -244,8 +244,8 @@ input[type="file"].file-input__field {
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: rgba(3, 159, 200, 0.8);
-  box-shadow: 0 0 0 3px rgba(3, 159, 200, 0.2), 0 10px 24px rgba(3, 159, 200, 0.18);
+  border-color: rgba(200, 167, 91, 0.8);
+  box-shadow: 0 0 0 3px rgba(200, 167, 91, 0.2), 0 10px 24px rgba(200, 167, 91, 0.18);
   outline: none;
   transform: translateY(-1px);
 }
@@ -279,7 +279,7 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
 }
@@ -300,10 +300,10 @@ textarea {
 .service-card {
   min-height: 58px;
   padding: 14px 16px;
-  border: 1px solid rgba(3, 159, 200, 0.16);
+  border: 1px solid rgba(200, 167, 91, 0.16);
   border-radius: 14px;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(244, 251, 254, 0.96));
-  box-shadow: 0 10px 24px rgba(3, 159, 200, 0.08);
+  box-shadow: 0 10px 24px rgba(200, 167, 91, 0.08);
 }
 
 .service-card--addons {
@@ -322,7 +322,7 @@ textarea {
 
 .section-title {
   font-family: "VesperLibre-Bold", sans-serif;
-  font-size: 20px;
+  font-size: 16px;
   margin: 2rem 0 1rem 0;
 }
 
@@ -342,7 +342,7 @@ textarea {
 }
 
 .blue {
-  background: rgba(3, 159, 200, 0.5);
+  background: rgba(200, 167, 91, 0.5);
 }
 
 .green {
@@ -383,11 +383,11 @@ textarea {
   border: none;
   border-radius: 8px;
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 16px rgba(3, 159, 200, 0.2);
+  box-shadow: 0 8px 16px rgba(200, 167, 91, 0.2);
 }
 
 .add-btn:hover {
@@ -412,14 +412,14 @@ textarea {
   align-items: center;
   gap: 6px;
   background: #e6f7fb;
-  border: 1px solid rgba(3, 159, 200, 0.35);
+  border: 1px solid rgba(200, 167, 91, 0.35);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   animation: fadeIn 0.2s ease;
 }
 
 .tag:nth-child(3n + 1) {
   background: #e6f7fb;
-  border-color: rgba(3, 159, 200, 0.35);
+  border-color: rgba(200, 167, 91, 0.35);
 }
 
 .tag:nth-child(3n + 2) {
@@ -433,7 +433,7 @@ textarea {
 }
 
 .tag-close {
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   color: var(--brand);
   font-weight: bold;
@@ -441,18 +441,18 @@ textarea {
 
 /* Buttons */
 .btn-submit {
-  background: linear-gradient(135deg, #08b3dd 0%, #039fc8 50%, #038bb1 100%);
+  background: linear-gradient(135deg, #a88432 0%, #c8a75b 50%, #a88432 100%);
   color: #fff;
   font-weight: 700;
   border: none;
   border-radius: 12px;
   padding: 15px;
   width: 100%;
-  font-size: 18px;
+  font-size: 14px;
   cursor: pointer;
   margin-top: 1.5rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  box-shadow: 0 12px 28px rgba(3, 159, 200, 0.28);
+  box-shadow: 0 12px 28px rgba(200, 167, 91, 0.28);
 }
 
 .btn-submit[disabled] {
@@ -537,7 +537,7 @@ textarea {
   position: absolute;
   right: 12px;
   color: var(--brand);
-  font-size: 18px;
+  font-size: 14px;
   cursor: pointer;
   transition: color 0.2s ease;
 }
@@ -564,7 +564,7 @@ textarea {
     max-width: 95%;
     margin: 20px auto;
     padding: 20px;
-    box-shadow: 0 10px 24px rgba(3, 159, 200, 0.2);
+    box-shadow: 0 10px 24px rgba(200, 167, 91, 0.2);
   }
 
   .form-row {
@@ -581,7 +581,7 @@ textarea {
   }
 
   .btn-submit {
-    font-size: 16px;
+    font-size: 12px;
     padding: 12px;
   }
 
@@ -609,15 +609,15 @@ textarea {
 
 @media (max-width: 480px) {
   .title {
-    font-size: 22px;
+    font-size: 18px;
   }
 
   .subtitle {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   label {
-    font-size: 14px;
+    font-size: 12px;
   }
 }
 
@@ -717,7 +717,7 @@ body {
 
 .title {
   font-family: "Vesper Libre", serif;
-  font-size: 2.35rem;
+  font-size: 2rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: #111111;
@@ -743,7 +743,7 @@ label,
 
 .section-title {
   font-family: "Vesper Libre", serif;
-  font-size: 1.45rem;
+  font-size: 1rem;
   letter-spacing: -0.02em;
   padding-top: 0.35rem;
   margin-top: 2.1rem;
@@ -894,3 +894,6 @@ select:focus {
       0 14px 28px rgba(168, 132, 50, 0.08);
   }
 }
+
+
+

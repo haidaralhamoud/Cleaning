@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -13,19 +13,19 @@
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
-<style>  /* ===== Pop-up Submitted ===== */.popup-overlay {  position: fixed;  inset: 0;  background: rgba(0, 0, 0, 0.4);  display: none;  align-items: center;  justify-content: center;  z-index: 2000;}.popup-content {  background: #fff;  border-radius: 15px;  padding: 40px 30px;  width: 90%;  max-width: 500px;  text-align: center;  box-shadow: 0 6px 20px rgba(0,0,0,0.2);  animation: popupShow 0.4s ease;}.popup-img {  width: 120px;  margin-bottom: 20px;  animation: handshake 1.2s ease-in-out infinite;  transform-origin: center;}@keyframes handshake {  0%, 100% { transform: rotate(0deg); }  25% { transform: rotate(-6deg); }  50% { transform: rotate(6deg); }  75% { transform: rotate(-4deg); }}.popup-content h2 {  color: #d93025;  font-size: 22px;  margin-bottom: 20px;  font-weight: 700;}.popup-content p {  color: #000;  font-weight: 600;  margin: 8px 0;}/* === الأزرار === */.popup-buttons {  display: flex;  gap: 15px;  justify-content: center;  margin-top: 25px;  flex-wrap: wrap;}.btn-outline,.btn-filled {  padding: 12px 25px;  border-radius: 12px;  font-weight: 600;  cursor: pointer;  font-size: 15px;  transition: 0.3s;  min-width: 180px;}/* زر الإطار فقط */.btn-outline {  border: 2px solid #d93025;  color: #d93025;  background: #fff;}.btn-outline:hover {  background: #d93025;  color: #fff;}/* زر ممتلئ */.btn-filled {  background: #d93025;  color: #fff;  border: none;}.btn-filled:hover {  background: #b1241b;}/* حركة ظهور ناعمة */@keyframes popupShow {  from { transform: scale(0.7); opacity: 0; }  to { transform: scale(1); opacity: 1; }}/* Responsive */@media (max-width: 500px) {  .popup-content {    padding: 25px 20px;    width: 80%;  }  .popup-content h2 {    font-size: 18px;  }  .popup-buttons button {    width: 100%;  }}  .popup-overlay {  position: fixed;  inset: 0;  background: rgba(0,0,0,.6);  display: flex;  align-items: center;  justify-content: center;  z-index: 9999;}.popup-content {  background: #fff;  padding: 30px;  border-radius: 14px;  width: 420px;  text-align: center;}</style>
+<style>  /* ===== Pop-up Submitted ===== */.popup-overlay {  position: fixed;  inset: 0;  background: rgba(0, 0, 0, 0.4);  display: none;  align-items: center;  justify-content: center;  z-index: 2000;}.popup-content {  background: #fff;  border-radius: 15px;  padding: 40px 30px;  width: 90%;  max-width: 500px;  text-align: center;  box-shadow: 0 6px 20px rgba(0,0,0,0.2);  animation: popupShow 0.4s ease;}.popup-img {  width: 120px;  margin-bottom: 20px;  animation: handshake 1.2s ease-in-out infinite;  transform-origin: center;}@keyframes handshake {  0%, 100% { transform: rotate(0deg); }  25% { transform: rotate(-6deg); }  50% { transform: rotate(6deg); }  75% { transform: rotate(-4deg); }}.popup-content h2 {  color: #d93025;  font-size: 18px;  margin-bottom: 20px;  font-weight: 700;}.popup-content p {  color: #000;  font-weight: 600;  margin: 8px 0;}/* === ط§ظ„ط£ط²ط±ط§ط± === */.popup-buttons {  display: flex;  gap: 15px;  justify-content: center;  margin-top: 25px;  flex-wrap: wrap;}.btn-outline,.btn-filled {  padding: 12px 25px;  border-radius: 12px;  font-weight: 600;  cursor: pointer;  font-size: 12px;  transition: 0.3s;  min-width: 180px;}/* ط²ط± ط§ظ„ط¥ط·ط§ط± ظپظ‚ط· */.btn-outline {  border: 2px solid #d93025;  color: #d93025;  background: #fff;}.btn-outline:hover {  background: #d93025;  color: #fff;}/* ط²ط± ظ…ظ…طھظ„ط¦ */.btn-filled {  background: #d93025;  color: #fff;  border: none;}.btn-filled:hover {  background: #b1241b;}/* ط­ط±ظƒط© ط¸ظ‡ظˆط± ظ†ط§ط¹ظ…ط© */@keyframes popupShow {  from { transform: scale(0.7); opacity: 0; }  to { transform: scale(1); opacity: 1; }}/* Responsive */@media (max-width: 500px) {  .popup-content {    padding: 25px 20px;    width: 80%;  }  .popup-content h2 {    font-size: 14px;  }  .popup-buttons button {    width: 100%;  }}  .popup-overlay {  position: fixed;  inset: 0;  background: rgba(0,0,0,.6);  display: flex;  align-items: center;  justify-content: center;  z-index: 9999;}.popup-content {  background: #fff;  padding: 30px;  border-radius: 14px;  width: 420px;  text-align: center;}</style>
 </head>
 <body>
 <!-- HEADER -->{% include "home/includes/main_header.html" %}  <div class="layout">
 <!-- Sidebar -->
-<!-- زر المينيو يظهر فقط بالموبايل -->
+<!-- ط²ط± ط§ظ„ظ…ظٹظ†ظٹظˆ ظٹط¸ظ‡ط± ظپظ‚ط· ط¨ط§ظ„ظ…ظˆط¨ط§ظٹظ„ -->
 <div class="mobile-header">
 <button class="menu-toggle floating customer-menu-toggle" id="menuToggle">
 <span class="arrow">&#8250;</span>
-<!-- › -->
+<!-- â€؛ -->
 </button>
 </div>
-<!-- Sidebar -->    {% include "accounts/includes/customer_sidebar.html" %}  <!-- المحتوى الرئيسي -->
+<!-- Sidebar -->    {% include "accounts/includes/customer_sidebar.html" %}  <!-- ط§ظ„ظ…ط­طھظˆظ‰ ط§ظ„ط±ط¦ظٹط³ظٹ -->
 <!-- MAIN CONTENT -->
 <main class="main-content">
 <div class="report-container">
@@ -69,10 +69,11 @@
 </div>{% endif %}    </div>
 </main>
 </div>{% include "home/includes/footer.html" %}
-{% if show_popup %}<script>  const popup = document.getElementById("popup");  popup.addEventListener("click", (e) => {    if (e.target === popup) {      popup.style.display = "none";    }  });</script>{% endif %}<script>  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const arrow = document.querySelector(".menu-toggle .arrow");  toggle.addEventListener("click", () => {    sidebar.classList.toggle("open");    // لما تفتح القائمة السهم ينعكس    if (sidebar.classList.contains("open")) {      arrow.innerHTML = "&#8249;"; // ‹ سهم لليسار    } else {      arrow.innerHTML = "&#8250;"; // › سهم لليمين    }  });</script>
+{% if show_popup %}<script>  const popup = document.getElementById("popup");  popup.addEventListener("click", (e) => {    if (e.target === popup) {      popup.style.display = "none";    }  });</script>{% endif %}<script>  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const arrow = document.querySelector(".menu-toggle .arrow");  toggle.addEventListener("click", () => {    sidebar.classList.toggle("open");    // ظ„ظ…ط§ طھظپطھط­ ط§ظ„ظ‚ط§ط¦ظ…ط© ط§ظ„ط³ظ‡ظ… ظٹظ†ط¹ظƒط³    if (sidebar.classList.contains("open")) {      arrow.innerHTML = "&#8249;"; // â€¹ ط³ظ‡ظ… ظ„ظ„ظٹط³ط§ط±    } else {      arrow.innerHTML = "&#8250;"; // â€؛ ط³ظ‡ظ… ظ„ظ„ظٹظ…ظٹظ†    }  });</script>
 <script>(function () {  const toggle = document.getElementById("menuToggle");  const sidebar = document.querySelector(".sidebar");  const overlay = document.querySelector(".customer-menu-overlay");  if (!toggle || !sidebar) return;  toggle.addEventListener("click", () => {    const open = sidebar.classList.toggle("open");    if (overlay) overlay.classList.toggle("show", open);  });  if (overlay) {    overlay.addEventListener("click", () => {      sidebar.classList.remove("open");      overlay.classList.remove("show");    });  }})();</script>
 <script>(function () {  const confirmBox = document.querySelector(".confirmation input[type='checkbox']");  const submitBtn = document.querySelector(".submit-btn");  if (!confirmBox || !submitBtn) return;  const syncState = () => {    submitBtn.disabled = !confirmBox.checked;  };  syncState();  confirmBox.addEventListener("change", syncState);})();</script>
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>
 </body>
 </html>
+

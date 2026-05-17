@@ -1,4 +1,4 @@
-{% extends "dashboard/base.html" %}
+﻿{% extends "dashboard/base.html" %}
 {% load dashboard_extras %}
 {% block title %}{{ item.label }}{% endblock %}
 {% block page_title %}{{ item.label }}{% endblock %}
@@ -103,7 +103,7 @@
                 Prefill Sunday +10%
               </button>
             </div>
-            <div class="form-text">You can still add specific dates using “Date” rule type.</div>
+            <div class="form-text">You can still add specific dates using â€œDateâ€‌ rule type.</div>
           </div>
         {% endif %}
         {% if item.slug == "schedule-rules" %}
@@ -261,7 +261,7 @@
                     type="text"
                     class="form-control"
                     data-recommended-note
-                    placeholder="Optional note, for example: Recommended: Daily or 3–5 times a week."
+                    placeholder="Optional note, for example: Recommended: Daily or 3â€“5 times a week."
                   >
                   <div class="form-text">
                     Turn on the badge if you want the green Recommended label. The note below is optional and appears as plain text.
@@ -600,7 +600,7 @@
                         <span class="badge bg-light text-dark border me-1">{{ r }}</span>
                       {% endfor %}
                     {% else %}
-                      <span class="text-muted small">—</span>
+                      <span class="text-muted small">â€”</span>
                     {% endif %}
                   </td>
                 </tr>
@@ -622,8 +622,8 @@
       iconInput.readOnly = true;
 
       const icons = [
-        "✅","✔️","⭐","✨","⚠️","❗","❌","ℹ️","🧹","🧽",
-        "🧼","🧴","🧺","🧤","🪣","🪟","🚿","🧴","🛁","🏠"
+        "âœ…","âœ”ï¸ڈ","â­گ","âœ¨","âڑ ï¸ڈ","â‌—","â‌Œ","â„¹ï¸ڈ","ًں§¹","ًں§½",
+        "ًں§¼","ًں§´","ًں§؛","ًں§¤","ًںھ£","ًںھں","ًںڑ؟","ًں§´","ًں›پ","ًںڈ "
       ];
 
       const setActive = (value) => {
@@ -1376,3 +1376,5 @@
     });
   </script>
 {% endblock %}
+
+

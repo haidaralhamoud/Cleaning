@@ -2,7 +2,9 @@
 <footer class="footer">
   <div class="footer-container">
     <div class="footer-col about">
-      <img src="{% static 'images/logo.png' %}" alt="Hembla experten Logo" class="footer-logo" width="235" height="235" loading="lazy" decoding="async">
+      <a href="{% url 'home:home' %}" class="footer-brand" aria-label="Go to home page">
+        <img src="{% static 'images/logo-tight.png' %}" alt="Hembla experten Logo" class="footer-logo" width="235" height="127" loading="lazy" decoding="async">
+      </a>
       <p>
         
         At Hembla experten, we believe home should be your haven, not your to-do list.
@@ -85,6 +87,8 @@
 
 <script src="{% static 'js/cookie_consent.js' %}" defer></script>
 {% include "home/includes/cookie_banner.html" %}
+
+
 
 
 

@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -42,7 +42,7 @@
 </a>
 </div>
 </h3>
-<div class="alarm-wrap">              {% if notes.alarm_code %}                <span id="alarmMasked" class="alarm-text muted">••••••••</span>
+<div class="alarm-wrap">              {% if notes.alarm_code %}                <span id="alarmMasked" class="alarm-text muted">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span>
 <span id="alarmReal" class="alarm-text hidden">{{ notes.alarm_code }}</span>
 <button type="button" class="icon-btn" id="toggleAlarm" aria-label="Show alarm code">
 <i class="fa-solid fa-eye icon view">
@@ -115,3 +115,4 @@
 </script>
 </body>
 </html>
+

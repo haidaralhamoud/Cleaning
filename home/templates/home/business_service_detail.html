@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,54 +6,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
 <title>{{ service.title }} | Business Service</title>
-  {% include 'home/includes/font_links.html' %}
-  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+{% include 'home/includes/font_links.html' %}
+<link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
-<link rel="stylesheet" href="{% static 'css/service_detail.css' %}">
+<link rel="stylesheet" href="{% static 'css/business_brand.css' %}">
+<link rel="stylesheet" href="{% static 'css/business_service_detail.css' %}">
 </head>
-<body class="service-detail-page">
-  {% include "home/includes/main_header.html" %}
+<body class="business-flow business-service-detail-page">
+{% include "home/includes/main_header.html" %}
 
-  <main class="service-detail">
-<section class="hero" style="background-image: url('{% if service.hero_image %}{{ service.hero_image.url }}{% else %}{{ service.image.url }}{% endif %}');">
-<div class="hero-overlay">
-</div>
-<div class="hero-content">
+<main class="business-shell service-detail-shell">
+<section class="detail-hero" style="background-image: url('{% if service.hero_image %}{{ service.hero_image.url }}{% else %}{{ service.image.url }}{% endif %}');">
+<div class="detail-hero-overlay"></div>
+<div class="detail-hero-content">
+<span class="business-eyebrow">Business Service</span>
 <h1>{{ service.title }}</h1>
-        {% if service.recommended_note %}
-          <p class="hero-subtitle">{{ service.recommended_note }}</p>
-        {% endif %}
-        <a href="{% url 'home:business_start_booking' %}?service={{ service.title }}{% if urgent_selected %}&urgent=1{% endif %}" class="hero-cta">Request Quote</a>
+{% if service.recommended_note %}
+<p class="hero-subtitle">{{ service.recommended_note }}</p>
+{% endif %}
+<p class="hero-copy">{{ service.description }}</p>
+<div class="hero-actions">
+<a href="{% url 'home:business_start_booking' %}?service={{ service.title }}{% if urgent_selected %}&urgent=1{% endif %}" class="hero-cta">Request Quote</a>
+<span class="hero-chip">{% if urgent_selected %}Priority request active{% else %}Tailored for professional spaces{% endif %}</span>
+</div>
 </div>
 </section>
+
 <section class="content">
-<section class="service-intro-card">
+<section class="service-intro-card business-panel business-panel--soft">
 <span class="service-intro-eyebrow">Service Overview</span>
 <div class="service-intro-layout">
 <p class="service-intro">{{ service.detail_description|default:service.description }}</p>
 </div>
 </section>
+
 <div class="checklist-header">
 <span class="check-icon">&#10003;</span>
 <h2>Complete {{ service.title }} Checklist</h2>
 </div>
 <div class="checklist-grid">
-        {% for card in cards %}
-          <article class="checklist-card">
+{% for card in cards %}
+<article class="checklist-card">
 <div class="card-title">
 <span class="card-icon">&#10003;</span>
 <h3>{{ card.title }}</h3>
 </div>
 <ul>
-              {% for item in card.items %}
-                <li>{{ item }}</li>
-              {% endfor %}
-            </ul>
+{% for item in card.items %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
 </article>
-        {% empty %}
-          <article class="checklist-card">
+{% empty %}
+<article class="checklist-card">
 <div class="card-title">
 <span class="card-icon">&#10003;</span>
 <h3>No detail cards added yet</h3>
@@ -62,47 +69,45 @@
 <li>Add cards from the admin to show checklist items.</li>
 </ul>
 </article>
-        {% endfor %}
-      </div>
+{% endfor %}
+</div>
+
 <section class="eco-section">
 <h2>{{ eco.title }}</h2>
 <p class="eco-subtitle">{{ eco.subtitle }}</p>
 <div class="eco-grid">
-          {% for point in eco.points %}
-            <article class="eco-item">
+{% for point in eco.points %}
+<article class="eco-item">
 <div class="eco-item-header">
 <span class="eco-icon-wrap eco-icon-{{ point.icon }}" aria-hidden="true">
-                  {% if point.icon == "eco-products" %}
-                    <span class="eco-sprout">🌱</span>
-<span class="eco-drops">💧</span>
-                  {% elif point.icon == "sustainable-methods" %}
-                    <span class="eco-recycle">♻</span>
-                  {% endif %}
-                </span>
+{% if point.icon == "eco-products" %}
+<span class="eco-glyph">Eco</span>
+{% elif point.icon == "sustainable-methods" %}
+<span class="eco-glyph">+</span>
+{% else %}
+<span class="eco-glyph">*</span>
+{% endif %}
+</span>
 <h3>{{ point.title }}</h3>
 </div>
 <p>{{ point.body }}</p>
 </article>
-          {% endfor %}
-        </div>
+{% endfor %}
+</div>
 </section>
 
-      {% if service.background_image %}
-        <section class="detail-background-image-section" aria-label="Service background image">
-<img
-            src="{{ service.background_image.url }}"
-            alt="{{ service.title }} background"
-            class="detail-background-image"
-          >
+{% if service.background_image %}
+<section class="detail-background-image-section" aria-label="Service background image">
+<img src="{{ service.background_image.url }}" alt="{{ service.title }} background" class="detail-background-image">
 </section>
-      {% endif %}
+{% endif %}
 
-      <section class="contact-section">
+<section class="contact-section business-panel">
 <h2>Have a question</h2>
 <p class="contact-subtitle">Fill out the form below and we'll get back to you as soon as possible.</p>
 <form class="contact-form" method="post" action="{% url 'home:service_contact_submit' %}">
-          {% csrf_token %}
-          <input type="hidden" name="business_service_id" value="{{ service.id }}">
+{% csrf_token %}
+<input type="hidden" name="business_service_id" value="{{ service.id }}">
 <input type="hidden" name="contact_source" value="business">
 <div class="contact-grid">
 <div class="field">
@@ -128,8 +133,7 @@
 </div>
 <div class="field full">
 <label>Message</label>
-<textarea name="message" rows="5">
-</textarea>
+<textarea name="message" rows="5"></textarea>
 </div>
 <button type="submit" class="primary-btn">Send Message</button>
 </form>
@@ -137,8 +141,9 @@
 </section>
 </main>
 
-  {% include "home/includes/footer.html" %}
-  <script src="{% static 'js/main_header.js' %}" defer>
-</script>
+{% include "home/includes/footer.html" %}
+<script src="{% static 'js/main_header.js' %}" defer></script>
 </body>
 </html>
+
+

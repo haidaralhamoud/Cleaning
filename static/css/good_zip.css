@@ -1,4 +1,4 @@
-* {
+﻿* {
   box-sizing: border-box;
   font-family: "Vesper Libre", serif;
   margin: 0;
@@ -24,7 +24,7 @@ body {
     linear-gradient(120deg, #faf8f2 0%, #ffffff 60%, #efe6d7 100%);
   overflow-x: hidden;
   color: var(--ink-900);
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .hero {
@@ -45,7 +45,7 @@ body {
 
 .hero-title {
   color: white;
-  font-size: 2.5rem;
+  font-size: 2rem;
   text-align: center;
   letter-spacing: 0.5px;
   text-shadow: 0 10px 24px rgba(0,0,0,0.35);
@@ -67,7 +67,7 @@ body {
 
 .step {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 12px;
   color: var(--brand-ink-soft);
   margin-bottom: 12px;
 }
@@ -95,7 +95,7 @@ body {
 
 .booking-method h3 {
   text-align: center;
-  font-size: 22px;
+  font-size: 18px;
   margin-bottom: 12px;
   color: var(--ink-900);
 }
@@ -106,7 +106,7 @@ body {
   margin: 0 auto 24px;
   max-width: 520px;
   line-height: 1.65;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .methods-grid {
@@ -180,7 +180,7 @@ body {
 }
 
 .method-card p {
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: #6b645a;
   margin-bottom: 20px;
   line-height: 1.7;
@@ -193,7 +193,7 @@ body {
   padding: 10px 22px;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
   transition: 0.25s;
   text-decoration: none;
@@ -222,7 +222,7 @@ body {
 }
 
 .summary-card h3 {
-  font-size: 19px;
+  font-size: 15px;
   text-align: center;
   margin-bottom: 10px;
 }
@@ -307,7 +307,7 @@ body {
 
 @media (max-width: 768px) {
   .hero-title {
-    font-size: 2.2rem;
+    font-size: 2rem;
   }
   .content {
     padding: 40px 20px;
@@ -328,3 +328,5 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+

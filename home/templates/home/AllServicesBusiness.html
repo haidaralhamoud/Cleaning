@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 {% load bootstrap4 %}
 <!DOCTYPE html>
 <html lang="en">
@@ -12,17 +12,21 @@
 {% include 'home/includes/critical_header_css.html' %}
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
+<link rel="stylesheet" href="{% static 'css/business_brand.css' %}">
 <link rel="stylesheet" href="{% static 'css/AllServicesBusiness.css'%}" />
 </head>
-<body>
+<body class="business-flow business-catalog-page">
 <!-- HEADER -->
 {% include "home/includes/main_header.html" %}
 
-  <main class="container">
+  <main class="business-shell">
+<section class="business-hero">
+<div class="business-hero-content">
+<span class="business-eyebrow">Business Collection</span>
 <div class="header-row">
 <div>
-<h1 class="page-title">All Services</h1>
-<div class="page-subtitle">Premium business cleaning packages tailored to your space.</div>
+<h1 class="page-title business-title">All Services</h1>
+<div class="page-subtitle business-copy">Premium business cleaning packages tailored to your space, from polished daily maintenance to deeper operational resets.</div>
 </div>
 <!-- filter button -->
 <div class="filter-wrapper">
@@ -31,6 +35,13 @@
 </button>
 </div>
 </div>
+<div class="business-meta">
+<span class="business-chip">{{ services|length }} curated options</span>
+<span class="business-chip">{% if urgent_selected %}Same-day priority enabled{% else %}Flexible scheduling available{% endif %}</span>
+</div>
+</div>
+</section>
+<section class="business-panel business-panel--soft">
 <div class="urgent-banner">
 <div class="urgent-copy">
 <span class="urgent-icon" aria-hidden="true">!</span>
@@ -68,13 +79,14 @@
       <span class="recommended">{{ s.recommended_note }}</span>
       {% endif %}
     </div>
-<!-- زر بدء المسار -->
+<!-- ط²ط± ط¨ط¯ط، ط§ظ„ظ…ط³ط§ط± -->
 <a href="{% url 'home:business_start_booking' %}?service={{ s.title }}{% if urgent_selected %}&urgent=1{% endif %}" 
    class="quote-btn">Request Quote</a>
 </div>
   {% endfor %}
 
 </div>
+</section>
 </main>
 <div class="filter-modal" id="filterModal" aria-hidden="true">
 <div class="filter-card" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
@@ -185,3 +197,5 @@
 </script>
 </body>
 </html>
+
+

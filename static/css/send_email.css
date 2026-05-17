@@ -1,4 +1,4 @@
-/* popup only */
+﻿/* popup only */
 
 .email-overlay {
   position: fixed;
@@ -81,7 +81,7 @@
 }
 
 .email-overlay h2 {
-  font-size: 38px;
+  font-size: 34px;
   font-weight: 700;
   color: var(--ink-900);
   margin: 0;
@@ -90,7 +90,7 @@
 .email-overlay .subtitle {
   text-align: center;
   color: var(--ink-700);
-  font-size: 16px;
+  font-size: 12px;
   line-height: 1.6;
   margin-top: 14px;
   margin-bottom: 30px;
@@ -103,7 +103,7 @@
 }
 
 .email-form label {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--ink-900);
 }
@@ -113,7 +113,7 @@
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 15px 18px;
-  font-size: 15px;
+  font-size: 12px;
   font-family: "Vesper Libre", serif;
   background: #fbfdff;
   width: 100%;
@@ -154,7 +154,7 @@
   border-radius: 16px;
   padding: 15px 16px;
   background: #fffdf9;
-  font-size: 15px;
+  font-size: 12px;
   color: var(--ink-700);
 }
 
@@ -164,7 +164,7 @@
   padding: 10px 16px;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 12px;
   white-space: nowrap;
 }
 
@@ -190,7 +190,7 @@
 .send-btn {
   background: #111111;
   color: white;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 700;
   border: none;
   border-radius: 16px;
@@ -231,11 +231,11 @@
   }
 
   .email-overlay h2 {
-    font-size: 32px;
+    font-size: 28px;
   }
 
   .email-overlay .subtitle {
-    font-size: 15px;
+    font-size: 12px;
   }
 
   .email-form {
@@ -243,7 +243,9 @@
   }
 
   .send-btn {
-    font-size: 16px;
+    font-size: 12px;
     padding: 14px 18px;
   }
 }
+
+

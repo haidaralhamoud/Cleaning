@@ -1,7 +1,7 @@
-:root{
-  --sky: #c0e7f1;
-  --sky-strong:#039fc8;
-  --sky-soft: rgba(3,159,200,0.5);
+﻿:root{
+  --sky: #f8f3ea;
+  --sky-strong:#c8a75b;
+  --sky-soft: rgba(200,167,91,0.5);
   --ink:#000;
   --muted:#898989;
   --warn:#ff9500;
@@ -41,11 +41,11 @@ body{
 
 .profile-head{display:flex;align-items:center;gap:10px;padding:24px 16px 14px}
 .avatar{width:70px;height:70px;border-radius:50%;background:#d9d9d9}
-.name{font:700 20px "Vesper Libre", serif}
-.id{font-size:13px;color:#666}
+.name{font:700 16px "Vesper Libre", serif}
+.id{font-size:12px;color:#666}
 .side-nav{padding:10px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;color:#444;text-decoration:none;transition:.3s}
-.nav-item:hover{background:rgba(3,159,200,.1);transform:translateX(4px)}
+.nav-item:hover{background:rgba(200,167,91,.1);transform:translateX(4px)}
 .nav-item.active {
   background: rgba(0,0,0,.05);
   color: var(--sky-strong);
@@ -54,26 +54,26 @@ body{
 
 
 
-    /* الزر العائم */
+    /* ط§ظ„ط²ط± ط§ظ„ط¹ط§ط¦ظ… */
     .menu-toggle {
       position: fixed;
       top: 20px;
       left: 20px;
       width: 45px;
       height: 45px;
-      background: #039fc8;
+      background: #c8a75b;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 24px;
+      font-size: 20px;
       cursor: pointer;
       z-index: 1200;
       display: none;
     }
 
-    /* المحتوى */
+    /* ط§ظ„ظ…ط­طھظˆظ‰ */
     .main-content {
       flex: 1;
 
@@ -90,20 +90,20 @@ body{
 
     .header h2 {
       font-family: "VesperLibre-Bold", sans-serif;
-      font-size: 22px;
+      font-size: 18px;
       color: rgba(0,0,0,0.7);
     }
 
     .header h1 {
       font-family: "VesperLibre-Bold", sans-serif;
-      font-size: 28px;
+      font-size: 24px;
       color: #000;
       margin: 5px 0;
     }
 
     .header p {
       font-family: "VesperLibre-Medium", sans-serif;
-      font-size: 17px;
+      font-size: 13px;
       color: rgba(0,0,0,0.7);
     }
 
@@ -123,7 +123,7 @@ body{
 
     .card h3 {
       font-family: "VesperLibre-Bold", sans-serif;
-      font-size: 20px;
+      font-size: 16px;
       margin-bottom: 15px;
     }
 
@@ -138,24 +138,24 @@ body{
       font-weight: 700;
       display: block;
       margin-bottom: 6px;
-      font-size: 17px;
+      font-size: 13px;
     }
 
     select {
       width: 100%;
       padding: 8px 10px;
-      border: 1px solid #039fc8;
+      border: 1px solid #c8a75b;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 12px;
       color: rgba(0,0,0,0.6);
     }
 
     .calculate-btn {
-      background: #039fc8;
+      background: #c8a75b;
       color: #fff;
       border: none;
       border-radius: 10px;
-      font-size: 18px;
+      font-size: 14px;
       padding: 10px 35px;
       font-weight: 700;
       cursor: pointer;
@@ -169,7 +169,7 @@ body{
     .invoice-line {
       display: flex;
       justify-content: space-between;
-      font-size: 17px;
+      font-size: 13px;
       padding: 6px 0;
     }
 
@@ -181,7 +181,7 @@ body{
       color: #71b247;
     }
 
-    /* الأزرار الأخيرة */
+    /* ط§ظ„ط£ط²ط±ط§ط± ط§ظ„ط£ط®ظٹط±ط© */
     .buttons {
       display: flex;
       justify-content: center;
@@ -190,14 +190,14 @@ body{
     }
 
     .btn {
-      background: #039fc8;
+      background: #c8a75b;
       color: white;
       font-weight: bold;
       border: none;
       border-radius: 10px;
       padding: 12px 40px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 14px;
       transition: background 0.2s;
     }
     .btn:hover {
@@ -260,26 +260,26 @@ body{
 .info h2 {
   font-family: "Inter", sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
 }
 .info small {
   color: #999;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 
 
-/* الزر العائم */
+/* ط§ظ„ط²ط± ط§ظ„ط¹ط§ط¦ظ… */
 .menu-toggle {
   position: fixed;
   top: 18px;
   left: 18px;
   width: 45px;
   height: 45px;
-  background: #039fc8;
+  background: #c8a75b;
   color: #fff;
   border-radius: 50%;
-  font-size: 25px;
+  font-size: 21px;
   display: none;
   align-items: center;
   justify-content: center;
@@ -313,11 +313,11 @@ body{
 .info h2 {
   font-family: "Inter", sans-serif;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
 }
 .info small {
   color: #999;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .sidebar ul {
@@ -326,27 +326,27 @@ body{
 }
 .sidebar ul li {
   padding: 10px 0;
-  font-size: 17px;
+  font-size: 13px;
   color: rgba(0,0,0,0.7);
   cursor: pointer;
   transition: all 0.2s;
 }
 .sidebar ul li:hover {
-  color: #039fc8;
+  color: #c8a75b;
   transform: translateX(3px);
 }
 
-/* الزر العائم */
+/* ط§ظ„ط²ط± ط§ظ„ط¹ط§ط¦ظ… */
 .menu-toggle {
   position: fixed;
   top: 18px;
   left: 18px;
   width: 45px;
   height: 45px;
-  background: #039fc8;
+  background: #c8a75b;
   color: #fff;
   border-radius: 50%;
-  font-size: 25px;
+  font-size: 21px;
   display: none;
   align-items: center;
   justify-content: center;
@@ -356,7 +356,7 @@ body{
 }
 .menu-toggle:hover { transform: rotate(180deg); }
 
-/* موبايل */
+/* ظ…ظˆط¨ط§ظٹظ„ */
 @media (max-width: 992px) {
   .menu-toggle { display: flex; }
   .sidebar {
@@ -366,4 +366,7 @@ body{
     transform: translateX(0);
   }
 }
+
+
+
 

@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+﻿document.addEventListener("DOMContentLoaded", () => {
   const toggleBtn = document.getElementById("menu-toggle");
   const navLinks = document.getElementById("nav-links");
   const mobileOverlay = document.getElementById("mobile-nav-overlay");
@@ -712,3 +712,5 @@ const initHemblaCalendar = () => {
 };
 
 window.initHemblaCalendar = initHemblaCalendar;
+
+
