@@ -1917,7 +1917,6 @@ def view_service_details(request, booking_type, booking_id):
             "location_text": location_text,
             "payment_method": payment_method,
             "order_type_label": order_type_label,
-            "note": booking.note.all(),
             "timeline": timeline,
             "hide_actions": hide_actions,
             "customer_unread_messages": customer_unread_messages,
