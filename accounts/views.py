@@ -1507,7 +1507,13 @@ def view_service_details(request, booking_type, booking_id):
             id=booking_id,
             user=request.user
         ).first()
-        service_title = ", ".join(booking.selected_services or []) or "Private Service" if booking else "Private Service"
+        service_title = (
+            _get_private_booking_title(
+                booking,
+                _get_private_service_title_map([booking]),
+            )
+            if booking else "Private Service"
+        )
         booking_date = getattr(booking, "appointment_date", None)
         booking_time = booking.appointment_start_time.strftime("%H:%M") if booking and getattr(booking, "appointment_start_time", None) else ""
         location_text = getattr(booking, "address", None) or getattr(booking, "area", None) or "-"
@@ -1551,7 +1557,10 @@ def view_service_details(request, booking_type, booking_id):
             return redirect(request.path)
 
         if booking_type == "private":
-            service_title = ", ".join(booking.selected_services or []) or "Private Service"
+            service_title = _get_private_booking_title(
+                booking,
+                _get_private_service_title_map([booking]),
+            )
         else:
             service_title = (
                 booking.selected_service
@@ -1897,6 +1906,33 @@ def view_service_details(request, booking_type, booking_id):
         booking_id=booking.id
     ).order_by("-created_at")[:8]
 
+    safe_media_items = []
+    for media in media_items:
+        try:
+            if not getattr(media, "file", None):
+                continue
+            safe_media_items.append({
+                "url": media.file.url,
+                "phase": media.phase,
+            })
+        except Exception:
+            continue
+
+    provider_profile = None
+    provider_rating = None
+    provider_reviews_count = None
+    provider_display_name = ""
+
+    if booking.provider:
+        provider_display_name = booking.provider.get_full_name() or booking.provider.username
+        provider_profile = ProviderProfile.objects.filter(user=booking.provider).first()
+        provider_summary = getattr(booking.provider, "rating_summary", None)
+        if provider_summary:
+            provider_rating = getattr(provider_summary, "avg_rating", None)
+            provider_reviews_count = getattr(provider_summary, "total_reviews", None)
+
+    customer = Customer.objects.filter(user=request.user).first()
+
     latest_request_fix = BookingRequestFix.objects.filter(
         booking_type=booking_type,
         booking_id=booking.id,
@@ -1933,10 +1969,15 @@ def view_service_details(request, booking_type, booking_id):
             "actual_duration": actual_duration,
             "start_time": start_time,
             "end_time": end_time,
-            "media_items": media_items,
+            "media_items": safe_media_items,
             "latest_request_fix": latest_request_fix,
             "available_addons_json": available_addons_json,
             "saved_addons_json": saved_addons_json,
+            "customer": customer,
+            "provider_display_name": provider_display_name,
+            "provider_profile": provider_profile,
+            "provider_rating": provider_rating,
+            "provider_reviews_count": provider_reviews_count,
             "charge_currency": (
                 getattr(booking, "payment_currency", None)
                 or getattr(settings, "STRIPE_CURRENCY", "usd")

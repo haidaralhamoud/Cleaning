@@ -22,7 +22,7 @@
 <div class="overlay customer-menu-overlay" id="menuOverlay">
 </div>
 <!-- Sidebar -->
-<div class="booking-detail-shell">    {% include "accounts/includes/customer_sidebar.html" with customer=booking.customer %}  <!-- ط§ظ„طµظپط­ط© ط§ظ„ظƒط§ظ…ظ„ط© -->
+<div class="booking-detail-shell">    {% include "accounts/includes/customer_sidebar.html" with customer=customer %}  <!-- ط§ظ„طµظپط­ط© ط§ظ„ظƒط§ظ…ظ„ط© -->
 <main class="page booking-detail-page">
 <section class="content booking-detail-content">
 <h1 class="deep-clean-service">{{ service_title }}</h1>
@@ -148,7 +148,7 @@
 <div class="avatar ellipse-1857">
 </div>
 <div>
-<b>          {{ booking.provider.get_full_name|default:booking.provider.username }}        </b>        {% if booking.provider.profile %}          <small>            Rating: {{ booking.provider.profile.rating }}            ({{ booking.provider.profile.reviews_count }} reviews)          </small>        {% else %}          <small>No rating yet</small>        {% endif %}      </div>
+<b>          {{ provider_display_name }}        </b>        {% if provider_rating %}          <small>            Rating: {{ provider_rating }}            ({{ provider_reviews_count|default:0 }} reviews)          </small>        {% else %}          <small>No rating yet</small>        {% endif %}      </div>
 </div>  {% else %}    <p style="opacity:.6;">No provider assigned yet</p>  {% endif %}              <div class="provider-actions">
 <a href="{% url 'accounts:booking_chat' booking_type booking.id %}"                  class="message-btn">
 <span class="icon">&#128172;</span>
@@ -199,7 +199,7 @@
 </div>
 <div class="media-carousel">
 <button class="arrow-btn left">&lsaquo;</button>
-<div class="media-track">                {% if media_items %}                  {% for media in media_items %}                    <img src="{{ media.file.url }}" alt="{{ media.phase }} photo">                  {% endfor %}                {% else %}                  <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
+<div class="media-track">                {% if media_items %}                  {% for media in media_items %}                    <img src="{{ media.url }}" alt="{{ media.phase }} photo">                  {% endfor %}                {% else %}                  <img src="https://via.placeholder.com/130x100?text=Before" alt="Before photo">
 <img src="https://via.placeholder.com/130x100?text=After" alt="After photo">
 <img src="https://via.placeholder.com/130x100?text=Workspace" alt="Workspace photo">
 <img src="https://via.placeholder.com/130x100?text=Equipment" alt="Equipment photo">                {% endif %}              </div>
