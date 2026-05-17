@@ -234,6 +234,7 @@
 </section>
 </main>
 </div>  {% if can_rate %}  <!-- ===== REVIEW POPUP ===== -->
+<script src="{% static 'js/customer_sidebar.js' %}"></script>
 <div class="popup-overlay" id="reviewPopup">
 <form method="post" class="popup review-popup">      {% csrf_token %}      <input type="hidden" name="form_type" value="rating">
 <input type="hidden" name="booking_type" value="{{ booking_type }}">

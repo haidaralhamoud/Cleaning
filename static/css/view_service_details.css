@@ -2341,6 +2341,99 @@ body.customer-profile-view .close-btn:hover {
   box-shadow: 0 14px 26px rgba(168, 132, 50, 0.28);
 }
 
+/* ===== Hard layout fix for booking details ===== */
+body.customer-profile-view .booking-detail-shell {
+  display: grid !important;
+  grid-template-columns: 300px minmax(0, 1fr) !important;
+  gap: 28px !important;
+  align-items: start !important;
+  width: min(1280px, calc(100% - 40px)) !important;
+  margin: 34px auto 56px !important;
+  padding: 0 !important;
+}
+
+body.customer-profile-view .booking-detail-shell > .sidebar.customer-sidebar {
+  grid-column: 1 !important;
+  width: 300px !important;
+  min-width: 300px !important;
+  max-width: 300px !important;
+  margin: 0 !important;
+  position: sticky !important;
+  top: 96px !important;
+  align-self: start !important;
+}
+
+body.customer-profile-view .booking-detail-shell > main.page.booking-detail-page {
+  grid-column: 2 !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+body.customer-profile-view .booking-detail-shell > main.page.booking-detail-page > .content.booking-detail-content {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.customer-profile-view .booking-detail-content > .deep-clean-service,
+body.customer-profile-view .booking-detail-content > .scheduled,
+body.customer-profile-view .booking-detail-content > .booking-id {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+body.customer-profile-view .booking-detail-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 1fr) !important;
+  gap: 20px !important;
+  width: 100% !important;
+  margin-top: 18px !important;
+}
+
+body.customer-profile-view .booking-detail-grid > .left-col,
+body.customer-profile-view .booking-detail-grid > .right-col {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 991px) {
+  body.customer-profile-view .booking-detail-shell {
+    display: block !important;
+    width: calc(100% - 20px) !important;
+    margin: 20px auto 32px !important;
+  }
+
+  body.customer-profile-view .booking-detail-shell > .sidebar.customer-sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    position: fixed !important;
+    top: 70px !important;
+    left: 0 !important;
+    margin: 0 !important;
+    height: calc(100vh - 70px) !important;
+  }
+
+  body.customer-profile-view .booking-detail-shell > main.page.booking-detail-page {
+    padding-top: 88px !important;
+  }
+
+  body.customer-profile-view .booking-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 
 
 
