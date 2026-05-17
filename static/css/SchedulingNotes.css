@@ -112,7 +112,30 @@
   border: 1px solid var(--business-border);
   background: rgba(255, 255, 255, 0.9);
   color: var(--business-gold-dark);
-  font-size: 20px;
+}
+
+.title-icon::before {
+  content: "";
+  width: 24px;
+  height: 24px;
+  display: block;
+  background: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.title-icon--calendar::before {
+  -webkit-mask-image: url("../images/ui/calendar-days.svg");
+  mask-image: url("../images/ui/calendar-days.svg");
+}
+
+.title-icon--notes::before {
+  -webkit-mask-image: url("../images/ui/pencil-square.svg");
+  mask-image: url("../images/ui/pencil-square.svg");
 }
 
 .card h2 {
@@ -158,8 +181,20 @@
 }
 
 .date-trigger::before {
-  content: "\1F4C5";
-  font-size: 13px;
+  content: "";
+  width: 18px;
+  height: 18px;
+  display: block;
+  margin: 0 auto;
+  background: var(--business-gold-dark);
+  -webkit-mask-image: url("../images/ui/calendar-days.svg");
+  mask-image: url("../images/ui/calendar-days.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
 }
 
 .days {

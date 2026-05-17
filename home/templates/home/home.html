@@ -1211,12 +1211,14 @@
   }
 
   body.home-page--quiet .btn-auth.btn-guest {
-    min-height: 44px;
+    min-height: 36px;
     min-width: 0;
     width: auto;
-    padding: 8px 28px;
+    padding: 4px 20px;
     border-radius: 999px;
     font-weight: 700;
+    font-size: 12px;
+    line-height: 1;
   }
 
   body.home-page--quiet .btn-auth.btn-guest.btn-guest-signup {
@@ -1485,6 +1487,242 @@
   }
   </style>
 <style>   a,   button,   input,   select,   h1,   h2,   h3,   h4,   h5,   * {       box-sizing: border-box;       margin: 0;       padding: 0;       border: none;       text-decoration: none;       background: none;          -webkit-font-smoothing: antialiased;   }      menu, ol, ul {       list-style-type: none;       margin: 0;       padding: 0;   }    .hero-bg {      background-image: url("{% static 'images/hero2.jpeg' %}");    }  </style>
+<style>
+  body.home-page--quiet {
+    --hero-title-size: clamp(44px, 5.2vw, 68px);
+    --hero-body-size: clamp(16px, 1.45vw, 19px);
+    --section-title-size: clamp(30px, 3vw, 42px);
+    --section-body-size: clamp(15px, 1.3vw, 18px);
+    --card-title-size: clamp(20px, 1.85vw, 24px);
+    --card-body-size: 15px;
+    --eyebrow-size: 12px;
+  }
+
+  body.home-page--quiet .main-header {
+    min-height: 98px;
+    padding-inline: clamp(24px, 4vw, 72px);
+  }
+
+  body.home-page--quiet .hero {
+    min-height: clamp(700px, 78vh, 860px);
+    margin-top: 0;
+    border-radius: 36px;
+  }
+
+  body.home-page--quiet .hero-inner {
+    align-items: center;
+    padding-block: clamp(84px, 10vh, 124px);
+  }
+
+  body.home-page--quiet .hero-copy {
+    max-width: 760px;
+    padding: clamp(32px, 3vw, 44px);
+    border-radius: 30px;
+  }
+
+  body.home-page--quiet .hero-copy h1 {
+    font-size: clamp(34px, 4.1vw, 56px);
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+    margin-bottom: 20px;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+
+  body.home-page--quiet .hero-copy p {
+    max-width: 60ch;
+    font-size: var(--hero-body-size);
+    line-height: 1.72;
+    margin-bottom: 28px;
+  }
+
+  body.home-page--quiet .hero-buttons {
+    gap: 16px;
+    align-items: center;
+  }
+
+  body.home-page--quiet .hero-buttons .btn {
+    min-height: 46px;
+    width: fit-content;
+    padding: 6px 20px;
+    font-size: 12px;
+    line-height: 1;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    box-shadow: 0 10px 22px rgba(17, 17, 17, 0.12);
+  }
+
+  body.home-page--quiet .same-day-dropdown {
+    display: inline-flex;
+  }
+
+  body.home-page--quiet .services,
+  body.home-page--quiet .extras,
+  body.home-page--quiet .how,
+  body.home-page--quiet .testimonials {
+    padding-top: clamp(88px, 9vw, 112px);
+    padding-bottom: clamp(88px, 9vw, 112px);
+  }
+
+  body.home-page--quiet .section-kicker {
+    margin-bottom: 18px;
+    font-size: var(--eyebrow-size);
+    letter-spacing: 0.18em;
+  }
+
+  body.home-page--quiet .section-title,
+  body.home-page--quiet .how .section-title,
+  body.home-page--quiet .testimonials .section-title {
+    font-size: var(--section-title-size);
+    line-height: 1.12;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+
+  body.home-page--quiet .lead,
+  body.home-page--quiet .services .lead,
+  body.home-page--quiet .how .lead,
+  body.home-page--quiet .testimonials .lead {
+    max-width: 760px;
+    font-size: var(--section-body-size);
+    line-height: 1.75;
+    margin-bottom: 44px;
+  }
+
+  body.home-page--quiet .cards,
+  body.home-page--quiet .mini-cards {
+    gap: 24px;
+  }
+
+  body.home-page--quiet .card,
+  body.home-page--quiet .mini,
+  body.home-page--quiet .t-card {
+    padding: 28px 24px 30px;
+    border-radius: 28px;
+  }
+
+  body.home-page--quiet .card h3,
+  body.home-page--quiet .mini h4,
+  body.home-page--quiet .step h3,
+  body.home-page--quiet .t-name {
+    font-size: var(--card-title-size);
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  body.home-page--quiet .card p,
+  body.home-page--quiet .mini p,
+  body.home-page--quiet .step p,
+  body.home-page--quiet .t-text {
+    font-size: var(--card-body-size);
+    line-height: 1.8;
+  }
+
+  body.home-page--quiet .card .card-icon,
+  body.home-page--quiet .mini-badge {
+    margin-bottom: 18px;
+  }
+
+  body.home-page--quiet .step {
+    padding: 24px 22px 28px;
+  }
+
+  body.home-page--quiet .dot {
+    width: 76px;
+    height: 76px;
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+
+  body.home-page--quiet .steps {
+    gap: 24px;
+    padding-top: 46px;
+  }
+
+  body.home-page--quiet .track {
+    top: 84px;
+  }
+
+  body.home-page--quiet .same-day-button {
+    min-height: 46px;
+    padding: 6px 20px;
+  }
+
+  body.home-page--quiet .same-day-button .caret {
+    margin-left: 6px;
+    width: 8px;
+    height: 8px;
+  }
+
+  body.home-page--quiet .btn-electric {
+    gap: 10px;
+    padding-inline: 18px;
+  }
+
+  body.home-page--quiet .btn-electric__icon {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+    flex: 0 0 22px;
+  }
+
+  @media (max-width: 768px) {
+    body.home-page--quiet .hero {
+      min-height: 620px;
+      border-radius: 28px;
+    }
+
+    body.home-page--quiet .hero-inner {
+      padding-block: 72px 84px;
+    }
+
+    body.home-page--quiet .hero-copy {
+      padding: 24px 22px;
+    }
+
+    body.home-page--quiet .hero-copy h1 {
+      font-size: clamp(30px, 7.2vw, 42px);
+      max-width: 18ch;
+    }
+
+    body.home-page--quiet .hero-copy p,
+    body.home-page--quiet .lead,
+    body.home-page--quiet .services .lead,
+    body.home-page--quiet .how .lead,
+    body.home-page--quiet .testimonials .lead,
+    body.home-page--quiet .card p,
+    body.home-page--quiet .mini p,
+    body.home-page--quiet .step p,
+    body.home-page--quiet .t-text {
+      font-size: 15px;
+    }
+
+    body.home-page--quiet .section-title,
+    body.home-page--quiet .how .section-title,
+    body.home-page--quiet .testimonials .section-title {
+      font-size: clamp(28px, 7vw, 36px);
+    }
+
+    body.home-page--quiet .hero-buttons {
+      gap: 12px;
+    }
+
+    body.home-page--quiet .hero-buttons .btn,
+    body.home-page--quiet .same-day-button {
+      min-height: 42px;
+      padding: 5px 16px;
+      font-size: 11px;
+    }
+
+    body.home-page--quiet .card h3,
+    body.home-page--quiet .mini h4,
+    body.home-page--quiet .step h3,
+    body.home-page--quiet .t-name {
+      font-size: 20px;
+    }
+  }
+</style>
 <title>Hembla experten</title>
 </head>
 <body class="home-page--quiet">{% include "home/includes/main_header.html" %}<!-- ============================================================================================= -->

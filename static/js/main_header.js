@@ -645,6 +645,19 @@ const initHemblaCalendar = () => {
     wrap.setAttribute("aria-hidden", "false");
   };
 
+  const isCalendarOpenFor = (input) => {
+    return wrap.classList.contains("open") && state.activeInput === input;
+  };
+
+  const toggleCalendar = (input) => {
+    if (!input) return;
+    if (isCalendarOpenFor(input)) {
+      closeCalendar();
+      return;
+    }
+    openCalendar(input);
+  };
+
   const closeCalendar = () => {
     wrap.classList.remove("open");
     wrap.setAttribute("aria-hidden", "true");
@@ -677,15 +690,32 @@ const initHemblaCalendar = () => {
     input.setAttribute("autocomplete", "off");
     input.readOnly = true;
     input.dataset.hemblaCalendarBound = "1";
-    input.addEventListener("focus", () => openCalendar(input));
-    input.addEventListener("click", () => openCalendar(input));
+    input.addEventListener("click", (event) => {
+      event.preventDefault();
+      toggleCalendar(input);
+    });
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " " || event.key === "ArrowDown") {
+        event.preventDefault();
+        toggleCalendar(input);
+      }
+      if (event.key === "Escape" && isCalendarOpenFor(input)) {
+        event.preventDefault();
+        closeCalendar();
+      }
+    });
   });
 
   document.querySelectorAll("[data-date-trigger]").forEach((btn) => {
-    btn.addEventListener("click", () => {
+    btn.addEventListener("click", (event) => {
+      event.preventDefault();
       const targetId = btn.getAttribute("data-date-trigger");
-      const input = document.getElementById(targetId);
-      if (input && !input.disabled) openCalendar(input);
+      let input = targetId ? document.getElementById(targetId) : null;
+      if (!input) {
+        const scope = btn.closest("label, .input-with-icon, .date-input, .field, .form-group, .svc-col, .q-col") || btn.parentElement;
+        input = scope ? scope.querySelector("input[type='date']") : null;
+      }
+      if (input && !input.disabled) toggleCalendar(input);
     });
   });
 

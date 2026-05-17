@@ -6,13 +6,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 6px 5%;
+  gap: 28px;
+  padding: 10px 5%;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 3000;
-  min-height: 92px;
+  min-height: 98px;
 }
 
 :root {
@@ -33,7 +33,7 @@
 }
 
 .logo img {
-  width: 182px;
+  width: 196px;
   height: auto;
   display: block;
   border-radius: 0;
@@ -44,15 +44,16 @@
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 28px;
 }
 
 .main-header .nav-links a {
   text-decoration: none;
   color: #000;
   font-family: "Vesper Libre", serif;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   transition: color 0.25s ease;
 }
 
@@ -369,7 +370,7 @@ body.mobile-nav-open {
 .auth-buttons {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
 .auth-buttons form {
@@ -511,16 +512,17 @@ body.mobile-nav-open {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
+  min-height: 36px;
   width: auto;
-  padding: 8px 28px;
+  padding: 4px 20px;
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   background: #fff;
   color: var(--lux-gold-dark);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  font-size: 1rem;
+  font-size: 12px;
+  line-height: 1;
   border: 2px solid var(--lux-gold);
   cursor: pointer;
   box-shadow: none;
@@ -528,10 +530,10 @@ body.mobile-nav-open {
 }
 
 .btn-guest {
-  min-height: 44px;
+  min-height: 36px;
   min-width: 0;
   width: auto;
-  padding: 8px 28px;
+  padding: 4px 20px;
   border-radius: 999px;
   font-weight: 700;
 }

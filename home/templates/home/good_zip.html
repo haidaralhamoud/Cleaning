@@ -142,7 +142,7 @@
 <label>Preferred Date</label>
 <div class="input-with-icon">
 <input type="date" id="preferredDateUi" required>
-<img src="{% static 'images/icon-booking-calendar.svg' %}" class="calendar-icon" alt="Calendar" data-date-trigger>
+<img src="{% static 'images/icon-booking-calendar.svg' %}" class="calendar-icon" alt="Calendar" data-date-trigger="preferredDateUi">
 </div>
 <label>Preferred Time</label>
 <div class="time-row">
@@ -282,6 +282,23 @@
     function closeEmailPopup() {
       document.getElementById("email-overlay").classList.remove("show");
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const callOverlay = document.getElementById("call-overlay");
+      const emailOverlay = document.getElementById("email-overlay");
+
+      if (callOverlay) {
+        callOverlay.addEventListener("click", (event) => {
+          if (event.target === callOverlay) closeCallPopup();
+        });
+      }
+
+      if (emailOverlay) {
+        emailOverlay.addEventListener("click", (event) => {
+          if (event.target === emailOverlay) closeEmailPopup();
+        });
+      }
+    });
   </script>
   {% if call_success %}
   <script>
@@ -460,7 +477,7 @@
       });
     }
 
-    if (dateTrigger && preferredDateUi) {
+    if (dateTrigger && preferredDateUi && preferredDateUi.dataset.hemblaCalendarBound !== "1") {
       dateTrigger.addEventListener("click", (event) => {
         event.preventDefault();
         if (preferredDateUi.showPicker) {
