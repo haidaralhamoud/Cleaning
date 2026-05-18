@@ -23,9 +23,10 @@ select.hembla-field{
 .contact-title{
   margin:0 0 10px;
   font-family:"Vesper Libre",serif;
-  font-size:clamp(2rem, 4vw, 3rem);
-  line-height:1.04;
-  letter-spacing:-0.03em;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.4;
+  letter-spacing:0;
 }
 .contact-subtitle{
   margin:0;
@@ -78,7 +79,8 @@ select.hembla-field{
 .contact-info h2{
   margin:0 0 18px;
   font-family:"Vesper Libre",serif;
-  font-size:clamp(1rem, 2vw, 2rem);
+  font-size:14px;
+  font-weight:700;
 }
 .contact-info p{
   display:flex;

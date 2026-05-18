@@ -114,6 +114,7 @@
     font-size: clamp(30px, 4vw, 52px);
     line-height: 1.08;
     letter-spacing: -0.03em;
+    white-space: nowrap;
     margin-bottom: 14px;
     text-shadow: 0 14px 32px rgba(0, 0, 0, 0.24);
   }
@@ -675,6 +676,7 @@
 
     body.home-page--quiet .hero-copy h1 {
       font-size: clamp(30px, 9vw, 44px);
+      white-space: normal;
     }
 
     body.home-page--quiet .hero-copy p {
@@ -1525,8 +1527,9 @@
     line-height: 0.98;
     letter-spacing: -0.04em;
     margin-bottom: 20px;
-    max-width: 18ch;
-    text-wrap: balance;
+    max-width: 760px;
+    white-space: nowrap;
+    text-wrap: nowrap;
   }
 
   body.home-page--quiet .hero-copy p {
@@ -1542,9 +1545,9 @@
   }
 
   body.home-page--quiet .hero-buttons .btn {
-    min-height: 46px;
+    min-height: auto;
     width: fit-content;
-    padding: 6px 20px;
+    padding: 5px 18px;
     font-size: 12px;
     line-height: 1;
     white-space: nowrap;
@@ -1683,7 +1686,9 @@
 
     body.home-page--quiet .hero-copy h1 {
       font-size: clamp(30px, 7.2vw, 42px);
-      max-width: 18ch;
+      max-width: 760px;
+      white-space: normal;
+      text-wrap: balance;
     }
 
     body.home-page--quiet .hero-copy p,
@@ -1934,6 +1939,49 @@
 </div>
 </div>
 <script>    const servicesModal = document.getElementById('servicesModal');    const serviceTriggers = document.querySelectorAll('.js-services-modal');    const serviceCloses = servicesModal ? servicesModal.querySelectorAll('[data-services-close]') : [];    const openServicesModal = () => {      if (!servicesModal) return;      servicesModal.classList.add('is-open');      servicesModal.setAttribute('aria-hidden', 'false');    };    const closeServicesModal = () => {      if (!servicesModal) return;      servicesModal.classList.remove('is-open');      servicesModal.setAttribute('aria-hidden', 'true');    };    serviceTriggers.forEach((btn) => btn.addEventListener('click', openServicesModal));    serviceCloses.forEach((btn) => btn.addEventListener('click', closeServicesModal));    document.addEventListener('keydown', (event) => {      if (event.key === 'Escape') closeServicesModal();    });  </script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const heroDropdowns = Array.from(document.querySelectorAll('.same-day-dropdown'));
+    if (!heroDropdowns.length) return;
+
+    const closeHeroDropdowns = () => {
+      heroDropdowns.forEach((dropdown) => dropdown.classList.remove('is-open'));
+    };
+
+    heroDropdowns.forEach((dropdown) => {
+      const trigger = dropdown.querySelector('.same-day-button');
+      const links = dropdown.querySelectorAll('.same-day-menu a');
+      if (!trigger) return;
+
+      trigger.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const willOpen = !dropdown.classList.contains('is-open');
+        closeHeroDropdowns();
+        if (willOpen) {
+          dropdown.classList.add('is-open');
+        }
+      });
+
+      links.forEach((link) => {
+        link.addEventListener('click', () => {
+          closeHeroDropdowns();
+        });
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (event.target.closest('.same-day-dropdown')) return;
+      closeHeroDropdowns();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeHeroDropdowns();
+      }
+    });
+  });
+</script>
 <script>    const grid = document.querySelector('.t-grid[data-group-size]');    if (grid) {      const cards = Array.from(grid.querySelectorAll('.t-card'));      const groupSize = parseInt(grid.dataset.groupSize, 10) || 3;      const totalPages = Math.max(1, Math.ceil(cards.length / groupSize));      const bullets = document.querySelector('.bullets');      const prevBtn = document.querySelector('.t-nav--prev');      const nextBtn = document.querySelector('.t-nav--next');      if (bullets) {        bullets.innerHTML = '';        for (let i = 0; i < totalPages; i += 1) {          const dot = document.createElement('button');          dot.type = 'button';          dot.className = 'bullet' + (i === 0 ? ' active' : '');          dot.setAttribute('aria-label', `Show review page ${i + 1}`);          dot.addEventListener('click', () => showPage(i));          bullets.appendChild(dot);        }        bullets.dataset.pages = String(totalPages);      }      let page = 0;      let autoRotate = null;      const showPage = (index) => {        page = ((index % totalPages) + totalPages) % totalPages;        cards.forEach((card, i) => {          const start = page * groupSize;          const end = start + groupSize;          card.classList.toggle('is-visible', i >= start && i < end);        });        if (bullets) {          const dots = bullets.querySelectorAll('.bullet');          dots.forEach((dot, i) => {            dot.classList.toggle('active', i === page);          });        }      };      const restartAutoRotate = () => {        if (autoRotate) clearInterval(autoRotate);        if (totalPages > 1) {          autoRotate = setInterval(() => showPage(page + 1), 8000);        }      };      if (prevBtn) {        prevBtn.disabled = totalPages <= 1;        prevBtn.addEventListener('click', () => {          showPage(page - 1);          restartAutoRotate();        });      }      if (nextBtn) {        nextBtn.disabled = totalPages <= 1;        nextBtn.addEventListener('click', () => {          showPage(page + 1);          restartAutoRotate();        });      }      showPage(0);      restartAutoRotate();    }  </script>
 <!-- ============================================================================================= -->{% include "home/includes/footer.html" %}<script src="{% static 'js/main_header.js' %}" defer>
 </script>
