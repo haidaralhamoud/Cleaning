@@ -720,11 +720,21 @@ body select {
   font-weight: 400 !important;
 }
 
+body h1,
+body h2,
+body .section-title,
+body .contact-title,
+body .contact-info h2,
+body .page-title,
+body .main-title {
+  font-size: 22px !important;
+  font-weight: 700 !important;
+}
+
 body h3,
 body h4,
 body h5,
 body h6,
-body .section-title,
 body .card h3,
 body .step h3,
 body .mini h3,
@@ -741,7 +751,7 @@ body .hero-title,
 body .hero-copy h1,
 body .hero-banner h1,
 body .hero-content h1 {
-  font-size: 20px !important;
+  font-size: 28px !important;
   font-weight: 700 !important;
   line-height: 1.3 !important;
 }
