@@ -16,6 +16,17 @@
 </head>
 <body>
   <div class="dash-toast-stack" id="dashToastStack" aria-live="polite" aria-atomic="true"></div>
+  {% if messages %}
+    <div id="dashMessageFeed" hidden>
+      {% for message in messages %}
+        <div
+          class="dash-message-feed__item"
+          data-tags="{{ message.tags|default:'' }}"
+          data-text="{{ message|escape }}"
+        ></div>
+      {% endfor %}
+    </div>
+  {% endif %}
   <div class="dash-layout">
     <aside class="dash-sidebar">
       <div class="dash-brand">
@@ -236,7 +247,7 @@
     }
 
     refreshDashboardNotifications();
-    setInterval(refreshDashboardNotifications, 15000);
+    setInterval(refreshDashboardNotifications, 30000);
   </script>
 
   <div class="dash-modal" id="dashPasswordModal" aria-hidden="true">
@@ -244,14 +255,7 @@
     <div class="dash-modal__panel" role="dialog" aria-modal="true" aria-labelledby="dashPasswordTitle">
       <button class="dash-modal__close" type="button" data-dash-modal-close>&times;</button>
       <h3 id="dashPasswordTitle">Change Password</h3>
-
-      {% if messages %}
-        <div class="dash-modal__messages" data-open-on-load="true">
-          {% for message in messages %}
-            <div class="dash-modal__message {{ message.tags }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
+      <div class="dash-modal__messages" id="dashPasswordMessages" hidden></div>
 
       <form method="post" action="{% url 'home:dashboard_change_password' %}">
         {% csrf_token %}
@@ -291,8 +295,34 @@
       if (e.key === "Escape") closePwdModal();
     });
 
-    const msgWrap = pwdModal ? pwdModal.querySelector("[data-open-on-load]") : null;
-    if (msgWrap) openPwdModal();
+    const msgFeed = document.getElementById("dashMessageFeed");
+    const pwdMsgWrap = document.getElementById("dashPasswordMessages");
+    if (msgFeed) {
+      const items = msgFeed.querySelectorAll(".dash-message-feed__item");
+      let hasPasswordMessage = false;
+      items.forEach((item) => {
+        const tags = item.dataset.tags || "";
+        const text = item.dataset.text || "";
+        const isPasswordMessage = tags.includes("password-change");
+        const kind = tags.includes("error") ? "error" : "success";
+
+        if (isPasswordMessage && pwdMsgWrap) {
+          hasPasswordMessage = true;
+          pwdMsgWrap.hidden = false;
+          const node = document.createElement("div");
+          node.className = `dash-modal__message ${kind}`;
+          node.textContent = text;
+          pwdMsgWrap.appendChild(node);
+          return;
+        }
+
+        dashShowToast(text, kind);
+      });
+
+      if (hasPasswordMessage) {
+        openPwdModal();
+      }
+    }
   </script>
   {% block extra_js %}{% endblock %}
 </body>

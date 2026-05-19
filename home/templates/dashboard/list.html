@@ -24,6 +24,11 @@
           All Shifts
         </a>
       {% endif %}
+      {% if invoice_id and item.slug == "invoice-line-items" %}
+        <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'invoices' invoice_id %}">
+          Back to Invoice
+        </a>
+      {% endif %}
       {% if service_id %}
         {% if item.slug == "service-pricing" or item.slug == "service-estimates" %}
           <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'private-services' service_id %}">
@@ -31,7 +36,7 @@
           </a>
         {% endif %}
       {% endif %}
-      <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}{% if provider_id and item.slug == 'provider-shifts' %}?provider_id={{ provider_id }}{% endif %}">
+      <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}{% if provider_id and item.slug == 'provider-shifts' %}?provider_id={{ provider_id }}{% elif invoice_id and item.slug == 'invoice-line-items' %}?invoice_id={{ invoice_id }}{% endif %}">
         <i class="fa-solid fa-plus"></i> Add
       </a>
     </div>
@@ -94,6 +99,12 @@
               {% endif %}
               {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.service.slug %}" target="_blank">Open Page</a>
+              {% endif %}
+              {% if item.slug == "invoices" %}
+                <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'invoice-line-items' %}?invoice_id={{ obj.pk }}">Line Items</a>
+                {% if obj.booking_id and obj.booking_type %}
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' obj.booking_type|add:'-bookings' obj.booking_id %}">Booking</a>
+                {% endif %}
               {% endif %}
               <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
             </td>

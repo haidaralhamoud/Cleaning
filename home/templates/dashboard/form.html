@@ -53,6 +53,15 @@
           <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' item.slug object.pk %}">Edit</a>
         {% endif %}
       </div>
+      {% if item.slug == "invoices" and object %}
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'invoice-line-items' %}?invoice_id={{ object.pk }}">Manage Line Items</a>
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'invoice-line-items' %}?invoice_id={{ object.pk }}">+ Add Line Item</a>
+          {% if object.booking_id and object.booking_type %}
+            <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' object.booking_type|add:'-bookings' object.booking_id %}">Open Booking</a>
+          {% endif %}
+        </div>
+      {% endif %}
       {% if item.slug == "private-services" and object %}
         <div class="mb-3 d-flex flex-wrap gap-2">
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ object.pk }}">Cards</a>
@@ -74,6 +83,16 @@
         </div>
       {% endif %}
       {% if mode == "edit" and object %}
+        {% if related_invoice %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' 'invoices' related_invoice.pk %}">Open Invoice Draft</a>
+            <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'invoice-line-items' %}?invoice_id={{ related_invoice.pk }}">Invoice Lines</a>
+          </div>
+        {% elif item.slug == "private-bookings" and object and object.payment_method == "invoice" %}
+          <div class="mb-3 d-flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline-primary" type="submit" name="create_invoice_draft" value="1">Create Invoice Draft</button>
+          </div>
+        {% endif %}
         {% if item.slug == "business-service-cards" %}
           <div class="mb-3 d-flex flex-wrap gap-2">
             <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' object.service.id %}" target="_blank">Open Page</a>
@@ -393,6 +412,64 @@
             {% endif %}
           </div>
         {% endif %}
+        {% if item.slug == "invoices" and object %}
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="mb-0">Invoice Line Items</h6>
+              <div class="d-flex gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_list' 'invoice-line-items' %}?invoice_id={{ object.pk }}">View All</a>
+                {% if not object.is_locked %}
+                  <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_create' 'invoice-line-items' %}?invoice_id={{ object.pk }}">
+                    <i class="fa-solid fa-plus"></i> Add Line Item
+                  </a>
+                {% endif %}
+              </div>
+            </div>
+            {% if invoice_line_items %}
+              <div class="table-responsive">
+                <table class="table table-sm align-middle">
+                  <thead>
+                    <tr>
+                      <th>Order</th>
+                      <th>Description</th>
+                      <th>Time</th>
+                      <th>Qty</th>
+                      <th>Unit Price</th>
+                      <th>Discount</th>
+                      <th>ROT/RUT</th>
+                      <th>VAT %</th>
+                      <th>Total</th>
+                      <th class="text-end">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for line in invoice_line_items %}
+                      <tr>
+                        <td>{{ line.line_order }}</td>
+                        <td>{{ line.description }}</td>
+                        <td>{{ line.service_time|default:"-" }}</td>
+                        <td>{{ line.quantity }}</td>
+                        <td>{{ line.unit_price }}</td>
+                        <td>{{ line.discount_amount }}</td>
+                        <td>{{ line.rot_rut_amount }}</td>
+                        <td>{{ line.vat_percent }}</td>
+                        <td>{{ line.line_total }}</td>
+                        <td class="text-end">
+                          <a class="btn btn-sm btn-outline-secondary" href="{% url 'home:dashboard_model_edit' 'invoice-line-items' line.pk %}">Edit</a>
+                          {% if not object.is_locked %}
+                            <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' 'invoice-line-items' line.pk %}">Delete</a>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="text-muted small">No line items added yet.</div>
+            {% endif %}
+          </div>
+        {% endif %}
         {% if item.slug == "private-services" and object %}
           <div class="mt-4">
             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -545,11 +622,15 @@
             {% endif %}
           </div>
         {% endif %}
-        <div class="d-flex gap-2">
-          {% if mode != "view" %}
-            <button class="btn btn-primary" type="submit">Save</button>
-            <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
-          {% else %}
+          <div class="d-flex gap-2">
+            {% if mode != "view" %}
+              <button class="btn btn-primary" type="submit">Save</button>
+              {% if item.slug == "invoices" and object and not object.is_locked %}
+                <button class="btn btn-outline-secondary" type="submit" name="refresh_invoice_from_booking" value="1">Refresh Draft From Booking</button>
+                <button class="btn btn-success" type="submit" name="send_invoice" value="1">Send Invoice</button>
+              {% endif %}
+              <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
+            {% else %}
             <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Back</a>
           {% endif %}
         </div>

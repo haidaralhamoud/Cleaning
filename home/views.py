@@ -42,6 +42,7 @@ from accounts.models import (
     CustomerNote,
     Incident,
     Invoice,
+    InvoiceLineItem,
     PaymentMethod,
     ServiceReview,
     ProviderProfile,
@@ -51,6 +52,11 @@ from accounts.models import (
     Reward,
     LoyaltyTier,
     PointsTransaction,
+)
+from accounts.invoice_utils import (
+    create_invoice_draft_for_private_booking,
+    populate_invoice_from_private_booking,
+    send_invoice_email,
 )
 from django.http import JsonResponse, HttpResponse
 import json
@@ -68,6 +74,7 @@ from .availability_utils import (
     get_available_slots_for_booking,
     provider_can_take_booking,
 )
+from .invoice_pdf import _format_money, build_branded_invoice_pdf, default_logo_path, get_invoice_sender_details
 from django.views.decorators.csrf import csrf_exempt
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.mail import EmailMultiAlternatives
@@ -430,9 +437,17 @@ def _get_private_draft_data(request):
     data = request.session.get(DRAFT_SESSION_KEY)
     if not isinstance(data, dict) or not data.get("selected_services"):
         user = getattr(request, "user", None)
-        if user and getattr(user, "is_authenticated", False):
+        resume_payment_intent = (
+            request.GET.get("payment_intent_id")
+            or request.GET.get("payment_intent")
+            or request.session.get("latest_private_payment_intent_id")
+        )
+        if user and getattr(user, "is_authenticated", False) and resume_payment_intent:
             draft_record = (
-                PrivateBookingDraft.objects.filter(user=user)
+                PrivateBookingDraft.objects.filter(
+                    user=user,
+                    payment_intent_id=resume_payment_intent,
+                )
                 .order_by("-updated_at")
                 .first()
             )
@@ -443,10 +458,12 @@ def _get_private_draft_data(request):
                 request.session.modified = True
     if not isinstance(data, dict):
         data = {}
+    data = _sanitize_private_draft_data(data)
     return data
 
 
 def _save_private_draft_data(request, data):
+    data = _sanitize_private_draft_data(data)
     request.session[DRAFT_SESSION_KEY] = data
     request.session.modified = True
     user = getattr(request, "user", None)
@@ -459,6 +476,36 @@ def _save_private_draft_data(request, data):
         if draft_record:
             draft_record.payload = data
             draft_record.save(update_fields=["payload", "updated_at"])
+
+
+def _sanitize_private_draft_data(data):
+    if not isinstance(data, dict):
+        return {}
+
+    selected_services = []
+    seen = set()
+    for value in data.get("selected_services") or []:
+        slug = str(value or "").strip()
+        if not slug or slug in seen:
+            continue
+        seen.add(slug)
+        selected_services.append(slug)
+
+    allowed = set(selected_services)
+    data["selected_services"] = selected_services
+
+    for key in ("service_answers", "service_modes", "addons_selected", "service_schedules"):
+        raw = data.get(key)
+        if not isinstance(raw, dict):
+            data[key] = {}
+            continue
+        data[key] = {
+            str(service_slug): value
+            for service_slug, value in raw.items()
+            if str(service_slug or "").strip() in allowed
+        }
+
+    return data
 
 
 def _is_truthy(value, default=False):
@@ -956,13 +1003,37 @@ def _calculate_private_payment_summary(booking, currency):
 
 
 def _store_private_draft_pricing(draft, pricing, payment_summary=None):
+    pricing_payload = dict(pricing or {})
     duration_seconds = _pricing_duration_seconds_for_display(pricing)
     hours = duration_seconds // 3600
     minutes = (duration_seconds % 3600) // 60
     seconds = duration_seconds % 60
     draft["duration_hours"] = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
     draft["quoted_duration_minutes"] = int(pricing.get("duration_minutes") or 0)
-    draft["pricing_details"] = pricing
+    if payment_summary is not None:
+        reward = payment_summary.get("reward")
+        discount_code = payment_summary.get("discount_code")
+        pricing_payload["_invoice_summary"] = {
+            "services_total": float(pricing.get("services_total", 0) or 0),
+            "addons_total": float(pricing.get("addons_total", 0) or 0),
+            "subtotal": float(payment_summary.get("subtotal", 0) or 0),
+            "rot": float(payment_summary.get("rot_discount", 0) or 0),
+            "rot_percent": float(pricing.get("rot_percent", 0) or 0),
+            "service_fee": float(payment_summary.get("service_fee", 0) or 0),
+            "vat_percent": float(payment_summary.get("vat_percent", 0) or 0),
+            "vat_amount": float(payment_summary.get("vat_amount", 0) or 0),
+            "total_before_discounts": float(payment_summary.get("total_before_discounts", 0) or 0),
+            "discount_code": discount_code.code if discount_code else "",
+            "discount_amount": float(payment_summary.get("discount_amount", 0) or 0),
+            "referral_discount_applied": bool(payment_summary.get("referral_discount_applied")),
+            "referral_discount_amount": float(payment_summary.get("referral_discount_amount", 0) or 0),
+            "reward_title": reward.title if reward else "",
+            "reward_applied": bool(payment_summary.get("reward_applied")),
+            "reward_discount": float(payment_summary.get("reward_discount", 0) or 0),
+            "final": float(payment_summary.get("amount", 0) or 0),
+            "currency": str(payment_summary.get("currency") or pricing.get("currency") or (settings.STRIPE_CURRENCY or "sek")).upper(),
+        }
+    draft["pricing_details"] = pricing_payload
     draft["subtotal"] = pricing.get("subtotal", 0) or 0
     draft["rot_discount"] = pricing.get("rot", 0) or 0
     if payment_summary is not None:
@@ -1154,6 +1225,51 @@ def _create_private_booking_from_draft_payload(payload):
 
     booking.save()
     return booking
+
+
+def _create_private_invoice_booking(request):
+    if not request.user.is_authenticated:
+        messages.info(request, "Please sign in to continue with invoice payment.")
+        return redirect(f"{reverse('login')}?{urlencode({'next': request.get_full_path()})}")
+
+    draft = _get_private_draft_data(request)
+    selected_slugs = draft.get("selected_services") or []
+    if not selected_slugs:
+        messages.error(request, "No booking details were found.")
+        return redirect("home:private_booking_checkout")
+
+    booking = _build_private_booking_from_draft(draft, request.user)
+    payment_summary = _calculate_private_payment_summary(
+        booking,
+        ((draft.get("pricing_details") or {}).get("currency") or (settings.STRIPE_CURRENCY or "sek")).lower(),
+    )
+    booking.payment_method = "invoice"
+    booking.payment_status = "draft"
+    booking.payment_amount = payment_summary["amount"]
+    booking.payment_currency = payment_summary["currency"] or "sek"
+    booking.accepted_terms = True
+    booking.total_price = payment_summary["amount"]
+    booking.subtotal = payment_summary["subtotal"]
+    booking.rot_discount = payment_summary["rot_discount"]
+    booking.save()
+
+    try:
+        create_invoice_draft_for_private_booking(booking)
+    except Exception as exc:
+        logger.exception("Failed to create invoice draft for booking %s", booking.id)
+        booking.delete()
+        messages.error(request, f"Could not create the invoice draft: {exc}")
+        return redirect("home:private_booking_checkout")
+
+    request.session["latest_private_booking_id"] = booking.id
+    request.session.pop(DRAFT_SESSION_KEY, None)
+    request.session.modified = True
+
+    messages.success(
+        request,
+        "Booking created. The invoice draft is ready in the dashboard and will only be sent to the customer after review.",
+    )
+    return redirect("home:home")
 
 
 def _mark_private_draft_failed(draft_record, status_value, error_message=None):
@@ -1412,6 +1528,16 @@ def _dashboard_notifications(request=None):
         BookingStatusHistory.objects.filter(created_at__gte=since)
         .order_by("-created_at")[:6]
     )
+    recent_private_bookings = list(
+        PrivateBooking.objects.filter(created_at__gte=since)
+        .select_related("user")
+        .order_by("-created_at")[:6]
+    )
+    recent_business_bookings = list(
+        BusinessBooking.objects.filter(created_at__gte=since)
+        .select_related("user")
+        .order_by("-created_at")[:6]
+    )
     recent_fixes = list(
         BookingRequestFix.objects.filter(created_at__gte=since).exclude(status="OPEN")
         .order_by("-created_at")[:6]
@@ -1472,6 +1598,24 @@ def _dashboard_notifications(request=None):
     )
 
     items = []
+    for booking in recent_private_bookings:
+        customer_label = _dashboard_booking_customer_label(booking)
+        service_label = _dashboard_booking_service_label(booking)
+        items.append({
+            "title": f"New Private Booking #{booking.id}",
+            "detail": f"{customer_label} - {service_label}",
+            "time": booking.created_at,
+            "url": _booking_dashboard_url("private", booking.id),
+        })
+    for booking in recent_business_bookings:
+        customer_label = _dashboard_booking_customer_label(booking)
+        service_label = _dashboard_booking_service_label(booking)
+        items.append({
+            "title": f"New Business Booking #{booking.id}",
+            "detail": f"{customer_label} - {service_label}",
+            "time": booking.created_at,
+            "url": _booking_dashboard_url("business", booking.id),
+        })
     for r in recent_status:
         status_text = _status_label(r.status)
         note = (r.note or "").strip()
@@ -2132,9 +2276,9 @@ def dashboard_change_password(request):
     if form.is_valid():
         user = form.save()
         update_session_auth_hash(request, user)
-        messages.success(request, "Password updated successfully.")
+        messages.success(request, "Password updated successfully.", extra_tags="password-change")
     else:
-        messages.error(request, "Please check the password fields and try again.")
+        messages.error(request, "Please check the password fields and try again.", extra_tags="password-change")
 
     return redirect("home:dashboard_home")
 
@@ -2335,6 +2479,64 @@ class PrivateBookingDashboardForm(forms.ModelForm):
         if self.instance and not provider_can_take_booking(provider, self.instance, exclude_booking=self.instance):
             raise forms.ValidationError("Provider must be active, support the selected service, and be free for the full service window.")
         return provider
+
+
+class InvoiceDashboardForm(forms.ModelForm):
+    class Meta:
+        model = Invoice
+        fields = (
+            "customer",
+            "invoice_number",
+            "booking_type",
+            "booking_id",
+            "currency",
+            "status",
+            "due_date",
+            "payment_reference",
+            "customer_number",
+            "payment_terms",
+            "late_interest_rate",
+            "rounding",
+            "delivery_terms",
+            "note",
+            "long_note",
+        )
+
+    def clean(self):
+        cleaned = super().clean()
+        if self.instance.pk and self.instance.is_locked:
+            raise forms.ValidationError("This invoice has already been sent and is locked.")
+        return cleaned
+
+
+class InvoiceLineItemDashboardForm(forms.ModelForm):
+    class Meta:
+        model = InvoiceLineItem
+        fields = (
+            "invoice",
+            "line_order",
+            "description",
+            "service_time",
+            "quantity",
+            "unit_price",
+            "discount_amount",
+            "rot_rut_amount",
+            "vat_percent",
+            "is_service_fee",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        invoice_id = self.initial.get("invoice") or getattr(self.instance, "invoice_id", None)
+        if invoice_id:
+            self.fields["invoice"].initial = invoice_id
+
+    def clean(self):
+        cleaned = super().clean()
+        invoice = cleaned.get("invoice") or getattr(self.instance, "invoice", None)
+        if invoice and invoice.is_locked:
+            raise forms.ValidationError("This invoice is locked and can no longer be edited.")
+        return cleaned
 
 
 class PrivateMainCategoryDashboardForm(forms.ModelForm):
@@ -2839,8 +3041,8 @@ def _exclude_fields_for_form(model):
                 excluded.append(f.name)
         if getattr(f, "auto_now", False) or getattr(f, "auto_now_add", False):
             excluded.append(f.name)
-    if model.__name__ == "PrivateAddon" and f.name == "form_html":
-        excluded.append(f.name)
+    if model.__name__ == "PrivateAddon":
+        excluded.append("form_html")
     if model.__name__ == "ServiceRoomOption":
         excluded.append("short_label")
     if model.__name__ == "FeedbackRequest":
@@ -2905,12 +3107,31 @@ def dashboard_model_list(request, model):
     _dashboard_handle_seen_no_show(request, item.slug)
 
     qs = item.model.objects.all()
+    if item.model == PrivateAddon:
+        qs = qs.select_related("service").defer("form_html", "questions")
+    elif item.model == PrivateService:
+        qs = qs.select_related("category").defer("questions")
+    elif item.model == ServiceCard:
+        qs = qs.select_related("service")
+    elif item.model == ServicePricing:
+        qs = qs.select_related("service")
+    elif item.model == ServiceEstimate:
+        qs = qs.select_related("service")
+    elif item.model == ServiceRoomOption:
+        qs = qs.select_related("service")
+    elif item.model == BusinessServiceCard:
+        qs = qs.select_related("service")
+    elif item.model == Invoice:
+        qs = qs.select_related("customer")
     service_id = request.GET.get("service_id")
     provider_id = request.GET.get("provider_id")
+    invoice_id = request.GET.get("invoice_id")
     if service_id and item.model.__name__ in {"ServiceCard", "ServicePricing", "ServiceEstimate", "BusinessServiceCard"}:
         qs = qs.filter(service_id=service_id)
     if provider_id and item.model == ProviderShift:
         qs = qs.filter(provider_id=provider_id)
+    if invoice_id and item.model == InvoiceLineItem:
+        qs = qs.filter(invoice_id=invoice_id)
     q = request.GET.get("q", "").strip()
     if q:
         text_fields = [
@@ -2951,15 +3172,20 @@ def dashboard_model_list(request, model):
         "service-room-options": ["service", "title", "image", "unit_price", "price_currency", "display_order", "is_active"],
         "service-pricing": ["service", "price_value", "price_note"],
         "service-estimates": ["service", "property_options", "bedrooms_options"],
+        "invoices": ["invoice_number", "customer", "booking_type", "amount", "status", "due_date"],
+        "invoice-line-items": ["invoice", "line_order", "description", "quantity", "unit_price", "vat_percent"],
     }
     display_fields = display_fields_map.get(item.slug, _model_fields(item.model)[:5])
 
     service_obj = None
+    invoice_obj = None
     if service_id:
         if item.slug in {"service-cards", "service-room-options", "service-pricing", "service-estimates"}:
             service_obj = PrivateService.objects.filter(id=service_id).first()
         if item.slug == "business-service-cards":
             service_obj = BusinessService.objects.filter(id=service_id).first()
+    if invoice_id and item.slug == "invoice-line-items":
+        invoice_obj = Invoice.objects.filter(id=invoice_id).first()
 
     context = {
         "items": get_dashboard_items(),
@@ -2969,7 +3195,9 @@ def dashboard_model_list(request, model):
         "query": q,
         "service_id": service_id,
         "provider_id": provider_id,
+        "invoice_id": invoice_id,
         "service_obj": service_obj,
+        "invoice_obj": invoice_obj,
         "use_view_mode": _dashboard_uses_view_mode(item),
     }
     context.update(_dashboard_notifications(request))
@@ -3014,6 +3242,10 @@ def dashboard_model_create(request, model):
         Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardCreateForm
+    elif item.model == Invoice:
+        Form = InvoiceDashboardForm
+    elif item.model == InvoiceLineItem:
+        Form = InvoiceLineItemDashboardForm
     else:
         Form = modelform_factory(
             item.model,
@@ -3033,6 +3265,8 @@ def dashboard_model_create(request, model):
                 if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
                     obj.created_by = request.user
                 obj.save()
+                if item.model == InvoiceLineItem:
+                    return redirect("home:dashboard_model_edit", model="invoices", pk=obj.invoice_id)
             else:
                 obj = form.save()
                 if item.model == ProviderProfile:
@@ -3072,6 +3306,10 @@ def dashboard_model_create(request, model):
             provider_id = request.GET.get("provider_id")
             if provider_id:
                 initial["provider"] = provider_id
+        if item.model == InvoiceLineItem:
+            invoice_id = request.GET.get("invoice_id")
+            if invoice_id:
+                initial["invoice"] = invoice_id
         form = _bootstrap_form(Form(initial=initial))
 
     context = {
@@ -3131,6 +3369,10 @@ def dashboard_model_edit(request, model, pk):
         Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardEditForm
+    elif item.model == Invoice:
+        Form = InvoiceDashboardForm
+    elif item.model == InvoiceLineItem:
+        Form = InvoiceLineItemDashboardForm
     else:
         Form = modelform_factory(
             item.model,
@@ -3138,6 +3380,53 @@ def dashboard_model_edit(request, model, pk):
             formfield_callback=lambda db_field, **kwargs: _json_formfield_callback(item.model, db_field, **kwargs),
         )
     if request.method == "POST":
+        if item.model == Invoice and "refresh_invoice_from_booking" in request.POST:
+            if obj.is_locked:
+                messages.error(request, "This invoice is locked and can no longer be refreshed.")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            booking = obj.get_booking()
+            if not isinstance(booking, PrivateBooking):
+                messages.error(request, "Automatic refresh is currently available for private booking invoices only.")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            populate_invoice_from_private_booking(obj, booking, reset_items=True)
+            messages.success(request, "Invoice draft refreshed from the booking.")
+            return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+
+        if item.model == Invoice and "send_invoice" in request.POST:
+            if obj.is_locked:
+                messages.error(request, "This invoice has already been sent and locked.")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            if not obj.line_items.exists():
+                messages.error(request, "Add at least one invoice line before sending.")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            try:
+                send_invoice_email(obj)
+            except Exception as exc:
+                logger.exception("Failed to send invoice %s", obj.invoice_number)
+                messages.error(request, f"Could not send invoice: {exc}")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+
+            obj.status = "SENT"
+            obj.sent_at = timezone.now()
+            obj.sent_by = request.user
+            obj.is_locked = True
+            obj.save(update_fields=["status", "sent_at", "sent_by", "is_locked"])
+            messages.success(request, "Invoice sent and locked.")
+            return redirect("home:dashboard_home")
+
+        if item.model == PrivateBooking and "create_invoice_draft" in request.POST:
+            if (obj.payment_method or "").lower() != "invoice":
+                messages.error(request, "This booking is not using invoice as the payment method.")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            try:
+                invoice = create_invoice_draft_for_private_booking(obj)
+            except Exception as exc:
+                logger.exception("Failed to create invoice draft from booking %s", obj.pk)
+                messages.error(request, f"Could not create invoice draft: {exc}")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            messages.success(request, "Invoice draft created.")
+            return redirect("home:dashboard_model_edit", model="invoices", pk=invoice.pk)
+
         form = Form(request.POST, request.FILES, instance=obj)
         form = _bootstrap_form(form)
         if form.is_valid():
@@ -3163,6 +3452,8 @@ def dashboard_model_edit(request, model, pk):
                         booking_id=obj.booking_id,
                         request_fix=obj,
                     )
+            if item.model == InvoiceLineItem:
+                return redirect("home:dashboard_model_edit", model="invoices", pk=obj.invoice_id)
             return redirect("home:dashboard_model_list", model=item.slug)
     else:
         form = _bootstrap_form(Form(instance=obj))
@@ -3193,6 +3484,14 @@ def dashboard_model_edit(request, model, pk):
             .order_by("weekday", "start_time", "pk")
         )
 
+    related_invoice = None
+    invoice_line_items = None
+    if item.model == Invoice:
+        invoice_line_items = obj.line_items.all()
+    elif item.model in {BusinessBooking, PrivateBooking}:
+        booking_type = "business" if item.model == BusinessBooking else "private"
+        related_invoice = Invoice.objects.filter(booking_type=booking_type, booking_id=obj.pk).first()
+
     context = {
         "items": get_dashboard_items(),
         "item": item,
@@ -3205,6 +3504,8 @@ def dashboard_model_edit(request, model, pk):
         "room_options_for_service": room_options_for_service,
         "business_cards_for_service": business_cards_for_service,
         "provider_shifts": provider_shifts,
+        "related_invoice": related_invoice,
+        "invoice_line_items": invoice_line_items,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
     }
     if item.model in {BusinessBooking, PrivateBooking}:
@@ -3311,6 +3612,12 @@ def dashboard_model_delete(request, model, pk):
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
 
     obj = get_object_or_404(item.model, pk=pk)
+    if item.model == Invoice and obj.is_locked:
+        messages.error(request, "Locked invoices cannot be deleted.")
+        return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+    if item.model == InvoiceLineItem and obj.invoice.is_locked:
+        messages.error(request, "Line items of a locked invoice cannot be deleted.")
+        return redirect("home:dashboard_model_edit", model="invoices", pk=obj.invoice_id)
     if request.method == "POST":
         obj.delete()
         return redirect("home:dashboard_model_list", model=item.slug)
@@ -4414,7 +4721,7 @@ def private_booking_checkout(request):
         elif form_type == "payment":
             selected_payment_option = (request.POST.get("payment_option") or "card").strip().lower()
             if selected_payment_option == "invoice":
-                return redirect("home:private_booking_cash_invoice_pdf")
+                return _create_private_invoice_booking(request)
             if not request.user.is_authenticated:
                 messages.info(request, "Please sign in to continue to payment.")
                 return redirect(f"{reverse('login')}?{urlencode({'next': request.get_full_path()})}")
@@ -4636,194 +4943,7 @@ def private_booking_checkout(request):
 
 @login_required
 def private_booking_cash_invoice_pdf(request):
-    draft = _get_private_draft_data(request)
-    selected_slugs = draft.get("selected_services") or []
-    if not selected_slugs:
-        return redirect("home:private_booking_checkout")
-
-    services = list(
-        PrivateService.objects.filter(slug__in=selected_slugs).select_related("category")
-    )
-    if not services:
-        messages.error(request, "No booking details found for invoice download.")
-        return redirect("home:private_booking_checkout")
-
-    temp_booking = _build_private_booking_from_draft(draft, request.user)
-    pricing = calculate_booking_price(temp_booking)
-    payment_summary = _calculate_private_payment_summary(
-        temp_booking,
-        pricing.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()),
-    )
-
-    customer = Customer.objects.filter(user=request.user).first()
-    customer_name = _customer_greeting_name(request.user, customer)
-    customer_email = (request.user.email or "").strip()
-    customer_phone = ""
-    customer_address = (draft.get("address") or "").strip()
-    customer_area = (draft.get("area") or "").strip()
-    customer_zip = (draft.get("zip_code") or "").strip()
-
-    if customer:
-        customer_email = customer_email or (customer.email or "").strip()
-        customer_phone = (customer.phone or "").strip()
-        customer_address = customer_address or customer.display_address()
-        customer_area = customer_area or customer.display_city()
-        customer_zip = customer_zip or customer.display_postal_code()
-
-    if not customer_email:
-        messages.error(request, "No customer email was found for sending the cash invoice.")
-        return redirect("home:private_booking_checkout")
-
-    appointment_date = draft.get("appointment_date") or "To be confirmed"
-    appointment_time = draft.get("appointment_start_time") or "To be confirmed"
-    schedule_mode = draft.get("schedule_mode") or "same"
-    if schedule_mode == "per_service":
-        appointment_summary = "Separate schedule per service"
-    else:
-        appointment_summary = f"{appointment_date} / {appointment_time}"
-
-    currency = payment_summary.get("currency", (settings.STRIPE_CURRENCY or "sek").lower()).upper()
-    reference_number = f"CASH-{timezone.now().strftime('%Y%m%d-%H%M%S')}"
-    issued_at = timezone.localtime(timezone.now()).strftime("%Y-%m-%d %H:%M")
-
-    meta_rows = [
-        ("Reference", reference_number),
-        ("Issued At", issued_at),
-        ("Customer", customer_name or "N/A"),
-        ("Email", customer_email or "N/A"),
-        ("Phone", customer_phone or "N/A"),
-        ("Address", customer_address or "Not provided"),
-        ("Area / Zip", " / ".join(filter(None, [customer_area, customer_zip])) or "Not provided"),
-        ("Booking Time", appointment_summary),
-    ]
-
-    charge_rows = []
-    for index, service in enumerate(services, start=1):
-        charge_rows.append(
-            (
-                f"Service {index}: {service.title} ({service.category.title})",
-                f"{Decimal(str(service.price or 0)):.2f} {currency}",
-                False,
-            )
-        )
-
-    selected_addons = draft.get("addons_selected") or {}
-    for service_slug, service_addons in selected_addons.items():
-        if not isinstance(service_addons, dict):
-            continue
-        for addon_data in service_addons.values():
-            if not isinstance(addon_data, dict):
-                continue
-            addon_title = addon_data.get("title") or "Add-on"
-            addon_qty = int(addon_data.get("quantity") or 1)
-            addon_price = Decimal(str(addon_data.get("price") or 0))
-            charge_rows.append(
-                (
-                    f"Add-on: {addon_title} x{addon_qty}",
-                    f"{addon_price:.2f} {currency}",
-                    False,
-                )
-            )
-
-    charge_rows.extend([
-        ("Services Total", f"{Decimal(str(pricing.get('services_total', 0) or 0)):.2f} {currency}", False),
-        ("Add-ons Total", f"{Decimal(str(pricing.get('addons_total', 0) or 0)):.2f} {currency}", False),
-        ("Schedule Extra", f"{Decimal(str(pricing.get('schedule_extra', 0) or 0)):.2f} {currency}", False),
-        ("Date Surcharge", f"{Decimal(str(pricing.get('date_surcharge', 0) or 0)):.2f} {currency}", False),
-        ("Service Fee", f"{Decimal(str(payment_summary.get('service_fee', 0) or 0)):.2f} {currency}", False),
-        (
-            "RUT Deduction",
-            f"-{Decimal(str(pricing.get('rot', 0) or 0)):.2f} {currency}" if temp_booking.use_rot else f"0.00 {currency}",
-            False,
-        ),
-    ])
-    if Decimal(str(payment_summary.get("vat_amount", 0) or 0)) > 0:
-        charge_rows.insert(
-            len(charge_rows) - 1,
-            (
-                f"VAT ({Decimal(str(payment_summary.get('vat_percent', 0) or 0)):.0f}%)",
-                f"{Decimal(str(payment_summary.get('vat_amount', 0) or 0)):.2f} {currency}",
-                False,
-            ),
-        )
-
-    if draft.get("discount_code_id"):
-        charge_rows.append((
-            "Discount Code",
-            f"-{Decimal(str(payment_summary.get('discount_amount', 0) or 0)):.2f} {currency}",
-            False,
-        ))
-    if payment_summary.get("reward_applied"):
-        charge_rows.append((
-            "Reward Discount",
-            f"-{Decimal(str(payment_summary.get('reward_discount', 0) or 0)):.2f} {currency}",
-            False,
-        ))
-
-    charge_rows.append((
-        "Total Due",
-        f"{Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}",
-        True,
-    ))
-
-    footer_lines = [
-        "This document can be used for cash payment at service time.",
-        "Payment is still pending until received and confirmed by Hembla experten.",
-    ]
-    if temp_booking.use_rot:
-        footer_lines.append("The total shown includes VAT and the selected RUT deduction.")
-    else:
-        footer_lines.append("The total shown includes VAT. RUT deduction is not applied.")
-
-    logo_path = str(settings.BASE_DIR / "static" / "images" / "logo.png")
-    pdf_bytes = _build_cash_invoice_pdf(
-        {
-            "brand_name": "Hembla experten",
-            "tagline": "Because Home Shouldn't Be Work",
-            "document_title": "Invoice",
-            "document_code": reference_number,
-            "logo_path": logo_path,
-        },
-        meta_rows,
-        charge_rows,
-        footer_lines=footer_lines,
-    )
-    subject = f"Your invoice {reference_number}"
-    text_body = (
-        f"Hello {customer_name or 'Customer'},\n\n"
-        "Your invoice is attached as a PDF.\n"
-        f"Reference: {reference_number}\n"
-        f"Amount due: {Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}\n"
-        f"Booking time: {appointment_summary}\n\n"
-        "Please keep this invoice and present it at service time if needed.\n\n"
-        "Hembla experten"
-    )
-    html_body = (
-        f"<p>Hello {customer_name or 'Customer'},</p>"
-        "<p>Your invoice is attached as a PDF.</p>"
-        f"<p><strong>Reference:</strong> {reference_number}<br>"
-        f"<strong>Amount due:</strong> {Decimal(str(payment_summary.get('amount', 0) or 0)):.2f} {currency}<br>"
-        f"<strong>Booking time:</strong> {appointment_summary}</p>"
-        "<p>Please keep this invoice and present it at service time if needed.</p>"
-        "<p>Hembla experten</p>"
-    )
-    message = EmailMultiAlternatives(
-        subject,
-        text_body,
-        settings.DEFAULT_FROM_EMAIL,
-        [customer_email],
-    )
-    message.attach_alternative(html_body, "text/html")
-    message.attach(f"{reference_number}.pdf", pdf_bytes, "application/pdf")
-    try:
-        message.send(fail_silently=False)
-    except Exception:
-        logger.exception("Failed to send cash invoice email to %s", customer_email)
-        messages.error(request, "Could not send the cash invoice email. Please try again.")
-        return redirect("home:private_booking_checkout")
-
-    messages.success(request, f"Invoice sent to {customer_email}.")
-    return redirect("home:private_booking_checkout")
+    return _create_private_invoice_booking(request)
 
 @login_required
 def private_booking_payment_complete(request):
@@ -5237,17 +5357,24 @@ def private_booking_start(request, service_slug):
     urgent_flag = request.GET.get("urgent") == "1" or request.session.get("urgent_booking")
 
     cart = request.session.get("private_cart", [])
-    selected_services = cart or [service.slug]
+    selected_services = list(dict.fromkeys(cart or [service.slug]))
 
-    draft = _get_private_draft_data(request)
-    draft.update({
+    existing_draft = _get_private_draft_data(request)
+    draft = {
         "booking_method": "online",
         "main_category": service.category.slug,
         "selected_services": selected_services,
         "is_urgent": bool(urgent_flag),
-        "use_rot": _is_truthy(draft.get("use_rot"), default=True),
+        "use_rot": _is_truthy(existing_draft.get("use_rot"), default=True),
         "user_id": request.user.id if request.user.is_authenticated else None,
-    })
+        "zip_code": existing_draft.get("zip_code"),
+        "zip_is_available": bool(existing_draft.get("zip_is_available")),
+        "address": existing_draft.get("address"),
+        "area": existing_draft.get("area"),
+        "use_reward": _is_truthy(existing_draft.get("use_reward"), default=False),
+        "selected_reward_id": existing_draft.get("selected_reward_id"),
+        "discount_code_id": existing_draft.get("discount_code_id"),
+    }
 
     if urgent_flag:
         request.session.pop("urgent_booking", None)

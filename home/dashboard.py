@@ -55,6 +55,8 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("customer-locations", accounts_models.CustomerLocation, "Customer Locations", "fa-solid fa-location-dot"),
         DashboardItem("customer-preferences", accounts_models.CustomerPreferences, "Customer Preferences", "fa-solid fa-sliders"),
         DashboardItem("payment-methods", accounts_models.PaymentMethod, "Payment Methods", "fa-solid fa-credit-card"),
+        DashboardItem("invoices", accounts_models.Invoice, "Invoices", "fa-solid fa-file-invoice-dollar"),
+        DashboardItem("invoice-line-items", accounts_models.InvoiceLineItem, "Invoice Line Items", "fa-solid fa-list-ol"),
         DashboardItem("communication-preferences", accounts_models.CommunicationPreference, "Communication Prefs", "fa-solid fa-comment-sms"),
         DashboardItem("loyalty-tiers", accounts_models.LoyaltyTier, "Loyalty Tiers", "fa-solid fa-trophy"),
         DashboardItem("rewards", accounts_models.Reward, "Rewards", "fa-solid fa-gift"),

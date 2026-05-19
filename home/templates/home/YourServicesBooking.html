@@ -604,23 +604,18 @@
 </script>
 {% endif %}
 
-<!-- HERO -->
-<section class="hero" style="background-image: url('{% static 'images/booking-services-hero.jpg' %}');">
-<div class="overlay">
-</div>
-<h1>Proceed to booking</h1>
-</section>
-<!-- PROGRESS -->
-<section class="progress">
-<p>Step 2 of 4</p>
-<div class="bar">
-<div class="fill">
-</div>
-</div>
-</section>
 <main class="content">
 <!-- LEFT -->
 <div class="left">
+<section class="booking-step-strip" aria-label="Booking progress">
+<div class="booking-step-strip__copy">
+<span class="booking-step-strip__eyebrow">Proceed to booking</span>
+<strong>Step 2 of 4</strong>
+</div>
+<div class="booking-step-strip__bar" aria-hidden="true">
+<div class="booking-step-strip__fill"></div>
+</div>
+</section>
 <h2>Your Selected Services</h2>
 <h3>What can we help with</h3>
 <form id="private-booking-services-form" method="post" data-skip-validate onsubmit="return handleServicesSubmit(event);">
@@ -1112,16 +1107,18 @@ function renderAddonsGrid(serviceSlug) {
 
         html += `
           <div class="addon-card${isChecked ? ' is-selected' : ''}">
-<button type="button" class="addon-card-main" onclick="handleAddonCardOpen('${serviceSlug}','${key}')">
-<img src="${ad.icon}" class="addon-icon">
-<p>${ad.label}</p>
-</button>
 <button
               type="button"
               class="check-box ${isChecked ? 'checked' : ''}"
               onclick="handleAddonCardToggle(event,'${serviceSlug}','${key}')"
               aria-label="${isChecked ? 'Remove add-on' : 'Select add-on'}"
             >
+</button>
+<button type="button" class="addon-card-main" onclick="handleAddonCardOpen('${serviceSlug}','${key}')">
+<div class="addon-card-media">
+<img src="${ad.icon}" class="addon-icon">
+<p>${ad.label}</p>
+</div>
 </button>
 </div>
         `;
@@ -1138,6 +1135,15 @@ function openAddonsPopup(serviceSlug) {
     if (!ADDONS_DRAFT) {
         ADDONS_DRAFT = cloneAddonsData(ADDONS_DATA);
     }
+    if (CURRENT_SERVICE && CURRENT_ADDON) {
+        saveAddonDraftAnswers(CURRENT_SERVICE, CURRENT_ADDON);
+    }
+    CURRENT_SERVICE = serviceSlug;
+    CURRENT_ADDON = null;
+    renderAddonsGrid(serviceSlug);
+}
+
+function saveDraftAndBackToAddons(serviceSlug) {
     if (CURRENT_SERVICE && CURRENT_ADDON) {
         saveAddonDraftAnswers(CURRENT_SERVICE, CURRENT_ADDON);
     }
@@ -1163,7 +1169,7 @@ function openAddonForm(serviceSlug, addonKey) {
       <div class="addon-form-wrapper">
 <div class="addon-form-grid">${addon.form}</div>
 </div>
-<button type="button" class="btn-outline" onclick="openAddonsPopup('${serviceSlug}')">&larr; Back to Add-ons</button>
+<button type="button" class="btn-outline addon-form-back" onclick="saveDraftAndBackToAddons('${serviceSlug}')">&larr; Save & Back to Add-ons</button>
     `;
 
     popupBody.querySelectorAll("option").forEach((option) => {

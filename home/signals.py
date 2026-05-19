@@ -10,6 +10,8 @@ from django.urls import NoReverseMatch, reverse
 from accounts.models import (
     Customer,
     ProviderProfile,
+    CommunicationPreference,
+    CustomerNotification,
     CustomerNote,
     Incident,
     ServiceReview,
@@ -166,6 +168,24 @@ def _business_booking_details_url(booking):
         return ""
 
 
+def _create_booking_in_app_notification(user, *, title, body, booking_type, booking_id):
+    if not user:
+        return
+
+    pref = CommunicationPreference.objects.filter(user=user).only("in_app").first()
+    if pref is not None and not pref.in_app:
+        return
+
+    CustomerNotification.objects.create(
+        user=user,
+        title=title,
+        body=body,
+        notification_type="general",
+        booking_type=booking_type,
+        booking_id=booking_id,
+    )
+
+
 def _send_private_booking_confirmation(booking):
     recipient = _private_booking_customer_email(booking)
     if not recipient:
@@ -228,6 +248,18 @@ def notify_private_booking(sender, instance, created, **kwargs):
     if not created:
         return
     _send_private_booking_confirmation(instance)
+    if getattr(instance, "user_id", None):
+        service_titles = _private_booking_service_titles(instance)
+        service_label = ", ".join(service_titles[:2]) if service_titles else "your service"
+        if len(service_titles) > 2:
+            service_label = f"{service_label} +{len(service_titles) - 2} more"
+        _create_booking_in_app_notification(
+            instance.user,
+            title=f"Booking Confirmed #{instance.id}",
+            body=f"Your private booking for {service_label} has been received and confirmed.",
+            booking_type="private",
+            booking_id=instance.id,
+        )
     subject = f"New Private Booking #{instance.id}"
     body = f"A new private booking was created.\n\nBooking ID: {instance.id}\nStatus: {instance.status}\nLink: {_booking_admin_url('private', instance.id)}"
     _send_admin_alert(subject, body)
@@ -238,6 +270,14 @@ def notify_business_booking(sender, instance, created, **kwargs):
     if not created:
         return
     _send_business_booking_confirmation(instance)
+    if getattr(instance, "user_id", None):
+        _create_booking_in_app_notification(
+            instance.user,
+            title=f"Booking Confirmed #{instance.id}",
+            body=f"Your business booking for {_business_booking_service_label(instance)} has been received and confirmed.",
+            booking_type="business",
+            booking_id=instance.id,
+        )
     subject = f"New Business Booking #{instance.id}"
     body = f"A new business booking was created.\n\nBooking ID: {instance.id}\nStatus: {instance.status}\nLink: {_booking_admin_url('business', instance.id)}"
     _send_admin_alert(subject, body)

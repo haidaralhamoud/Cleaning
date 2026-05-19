@@ -1,3 +1,6 @@
+from decimal import Decimal, ROUND_HALF_UP
+
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -525,10 +528,13 @@ def _invoice_number():
 
 class Invoice(models.Model):
     STATUS_CHOICES = [
+        ("DRAFT", "Draft"),
+        ("SENT", "Sent"),
         ("PAID", "Paid"),
         ("PENDING", "Pending"),
         ("FAILED", "Failed"),
         ("REFUNDED", "Refunded"),
+        ("CANCELLED", "Cancelled"),
     ]
     BOOKING_TYPE_CHOICES = [
         ("private", "Private"),
@@ -545,7 +551,7 @@ class Invoice(models.Model):
     booking_id = models.PositiveIntegerField(null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     currency = models.CharField(max_length=5, default="USD")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="PENDING")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="DRAFT")
     payment_method = models.ForeignKey(
         PaymentMethod,
         on_delete=models.SET_NULL,
@@ -557,12 +563,117 @@ class Invoice(models.Model):
     due_date = models.DateField(null=True, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
     note = models.CharField(max_length=255, blank=True)
+    payment_reference = models.CharField(max_length=120, blank=True)
+    customer_number = models.CharField(max_length=60, blank=True)
+    payment_terms = models.CharField(max_length=60, blank=True, default="10 days")
+    late_interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("12.00"))
+    rounding = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    delivery_terms = models.TextField(blank=True)
+    long_note = models.TextField(blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="sent_invoices",
+    )
+    is_locked = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-issued_at"]
 
     def __str__(self):
         return f"{self.invoice_number} ({self.customer})"
+
+    def get_booking(self):
+        from home.models import BusinessBooking, PrivateBooking
+
+        if self.booking_type == "private" and self.booking_id:
+            return PrivateBooking.objects.filter(id=self.booking_id).first()
+        if self.booking_type == "business" and self.booking_id:
+            return BusinessBooking.objects.filter(id=self.booking_id).first()
+        return None
+
+    def subtotal_excl_vat(self):
+        subtotal = sum((item.net_amount() for item in self.line_items.all()), Decimal("0.00"))
+        return subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def vat_amount_total(self):
+        vat_total = sum((item.vat_amount() for item in self.line_items.all()), Decimal("0.00"))
+        return vat_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def discounts_total(self):
+        total = sum((item.discount_amount or Decimal("0.00")) for item in self.line_items.all())
+        total += sum((item.rot_rut_amount or Decimal("0.00")) for item in self.line_items.all())
+        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def total_amount(self):
+        total = self.subtotal_excl_vat() + self.vat_amount_total() + (self.rounding or Decimal("0.00"))
+        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def sync_amounts(self, save=True):
+        self.amount = self.total_amount()
+        if save:
+            self.save(update_fields=["amount"])
+        return self.amount
+
+
+class InvoiceLineItem(models.Model):
+    invoice = models.ForeignKey(
+        Invoice,
+        on_delete=models.CASCADE,
+        related_name="line_items",
+    )
+    line_order = models.PositiveIntegerField(default=0)
+    description = models.CharField(max_length=255)
+    service_time = models.CharField(max_length=120, blank=True)
+    quantity = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("1.00"))
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    rot_rut_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    vat_percent = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("25.00"))
+    is_service_fee = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ["line_order", "id"]
+
+    def __str__(self):
+        return f"{self.invoice.invoice_number} - {self.description}"
+
+    def clean(self):
+        super().clean()
+        if self.invoice_id and self.invoice.is_locked:
+            raise ValidationError("This invoice is locked and can no longer be edited.")
+
+    def base_amount(self):
+        amount = (self.quantity or Decimal("0.00")) * (self.unit_price or Decimal("0.00"))
+        return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def net_amount(self):
+        amount = self.base_amount() - (self.discount_amount or Decimal("0.00")) - (self.rot_rut_amount or Decimal("0.00"))
+        return max(amount, Decimal("0.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def vat_amount(self):
+        amount = self.net_amount() * ((self.vat_percent or Decimal("0.00")) / Decimal("100.00"))
+        return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def line_total(self):
+        amount = self.net_amount() + self.vat_amount()
+        return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+        if self.invoice_id:
+            self.invoice.sync_amounts()
+
+    def delete(self, *args, **kwargs):
+        invoice = self.invoice
+        if invoice.is_locked:
+            raise ValidationError("This invoice is locked and can no longer be edited.")
+        super().delete(*args, **kwargs)
+        invoice.sync_amounts()
 
 
 class Subscription(models.Model):

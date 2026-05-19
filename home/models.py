@@ -1389,7 +1389,7 @@ class PrivateBooking(BaseBooking):
 
     payment_method = models.CharField(
         max_length=50,
-        choices=[("card", "Credit Card")],
+        choices=[("card", "Credit Card"), ("invoice", "Invoice")],
         blank=True,
         null=True
     )

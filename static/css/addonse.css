@@ -85,7 +85,7 @@ body {
   background: #fff;
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-  padding: 25px 10px;
+  padding: 14px 14px 24px;
   text-align: center;
   position: relative;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -95,10 +95,16 @@ body {
   width: 100%;
   border: 0;
   background: transparent;
-  padding: 0;
+  padding: 34px 0 0;
   color: inherit;
   font: inherit;
   cursor: pointer;
+  display: block;
+}
+.addon-card-media {
+  display: block;
+  width: 100%;
+  padding-top: 16px;
 }
 .addon-card:hover {
   transform: translateY(-4px);
@@ -123,12 +129,15 @@ body {
 }
 .check-box {
   position: absolute;
-  top: 18px; right: 18px;
-  width: 24px; height: 24px;
+  top: 8px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
   border: 2px solid #039FC8;
   border-radius: 6px;
   cursor: pointer;
   transition: 0.3s;
+  z-index: 2;
 }
 .check-box.checked {
   background: #039FC8;
@@ -188,10 +197,13 @@ body {
   width: 34px;
   height: 34px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding-top: 5px;
 }
 .popup-header button:hover {
   background: #d9f1f7;
@@ -401,9 +413,15 @@ body {
 }
 
 .check-box {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  width: 28px;
+  height: 28px;
   border-color: #c8a75b;
   border-radius: 8px;
   background: #fffdfa;
+  z-index: 3;
 }
 
 .check-box.checked {

@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from django.utils.translation import gettext as _
 import datetime
@@ -33,6 +34,7 @@ from .models import (
     LoyaltyTier,
     PaymentMethod,
     Invoice,
+    InvoiceLineItem,
     CommunicationPreference,
     BookingNote,
     PointsTransaction,
@@ -84,6 +86,8 @@ from .forms import (
 from django.http import HttpResponse, JsonResponse
 import json
 from django.db.models import Avg, Count
+from accounts.invoice_utils import render_invoice_pdf
+from home.invoice_pdf import _format_money, build_branded_invoice_pdf, default_logo_path, get_invoice_sender_details
 User = get_user_model()
 from .forms import ProviderProfileForm, ProviderLocationForm
 logger = logging.getLogger(__name__)
@@ -2428,7 +2432,9 @@ def Payment_and_Billing(request):
     ).order_by("-is_default", "-created_at")
     logger.info("[Payment & Billing] payment methods count=%s", payment_methods.count())
 
-    invoices = Invoice.objects.filter(
+    invoices = Invoice.objects.exclude(
+        status="DRAFT"
+    ).filter(
         customer=customer
     ).select_related("payment_method").order_by("-issued_at")[:20]
     private_booking_brands = {
@@ -2484,26 +2490,85 @@ def download_invoice_pdf(request, invoice_id):
         id=invoice_id,
         customer=customer,
     )
+    if invoice.status == "DRAFT":
+        raise Http404("Invoice is not available yet.")
 
     booking_summary = ""
+    booking_address = ""
+    booking_company = ""
+    booking_contact = ""
+    line_items = []
+    subtotal_amount = invoice.amount or Decimal("0.00")
+    discount_amount = Decimal("0.00")
+    vat_percent = Decimal("25.00")
+    payment_terms = getattr(settings, "INVOICE_DEFAULT_PAYMENT_TERMS", "10 days")
+    late_interest = getattr(settings, "INVOICE_LATE_PAYMENT_INTEREST", "12%")
+
     if invoice.booking_type == "private" and invoice.booking_id:
         booking = PrivateBooking.objects.filter(id=invoice.booking_id, user=request.user).first()
         if booking:
             services = booking.selected_services or []
             service_title_map = _get_private_service_title_map([booking])
-            booking_summary = ", ".join(
-                filter(
-                    None,
-                    [
-                        service_title_map.get(service, _humanize_service_name(service))
-                        for service in services
-                    ],
-                )
-            )
+            resolved_services = [
+                service_title_map.get(service, _humanize_service_name(service))
+                for service in services
+            ]
+            booking_summary = ", ".join(filter(None, resolved_services))
+            booking_address = " / ".join(filter(None, [booking.address, booking.area]))
+            subtotal_amount = Decimal(str(booking.subtotal or invoice.amount or 0))
+            discount_amount = Decimal(str(booking.rot_discount or 0))
+
+            service_objects = {
+                service.slug: service
+                for service in PrivateService.objects.filter(slug__in=services)
+            }
+            currency = (invoice.currency or "SEK").upper()
+            for service_slug in services:
+                service_obj = service_objects.get(service_slug)
+                service_name = service_title_map.get(service_slug, _humanize_service_name(service_slug))
+                unit_price = Decimal(str(getattr(service_obj, "price", 0) or 0))
+                if unit_price <= 0 and subtotal_amount > 0 and services:
+                    unit_price = (subtotal_amount / Decimal(len(services))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                line_items.append({
+                    "description": service_name,
+                    "quantity": "1",
+                    "unit_price": _format_money(unit_price, currency),
+                    "vat_percent": f"{vat_percent:.0f}%",
+                    "line_total": _format_money(unit_price, currency),
+                })
+
+            selected_addons = booking.addons_selected or {}
+            for service_addons in selected_addons.values():
+                if not isinstance(service_addons, dict):
+                    continue
+                for addon_data in service_addons.values():
+                    if not isinstance(addon_data, dict):
+                        continue
+                    qty = int(addon_data.get("quantity") or 1)
+                    addon_price = Decimal(str(addon_data.get("price") or 0))
+                    unit_price = (addon_price / Decimal(qty or 1)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                    line_items.append({
+                        "description": addon_data.get("title") or "Add-on",
+                        "quantity": str(qty),
+                        "unit_price": _format_money(unit_price, currency),
+                        "vat_percent": f"{vat_percent:.0f}%",
+                        "line_total": _format_money(addon_price, currency),
+                    })
     elif invoice.booking_type == "business" and invoice.booking_id:
         booking = BusinessBooking.objects.filter(id=invoice.booking_id, user=request.user).first()
         if booking:
             booking_summary = booking.selected_service or booking.company_name or ""
+            booking_address = booking.office_address or ""
+            booking_company = booking.company_name or ""
+            booking_contact = booking.contact_person or ""
+            currency = (invoice.currency or "SEK").upper()
+            line_items.append({
+                "description": booking_summary or "Business Service",
+                "quantity": "1",
+                "unit_price": _format_money(invoice.amount, currency),
+                "vat_percent": f"{vat_percent:.0f}%",
+                "line_total": _format_money(invoice.amount, currency),
+            })
 
     payment_method_label = "Not available"
     if invoice.payment_method:
@@ -2512,30 +2577,86 @@ def download_invoice_pdf(request, invoice_id):
         )
 
     customer_name = f"{customer.first_name} {customer.last_name}".strip() or customer.email or "Customer"
-    meta_rows = [
-        ("Invoice Number", invoice.invoice_number),
-        ("Customer", customer_name),
-        ("Issued At", timezone.localtime(invoice.issued_at).strftime("%Y-%m-%d %H:%M")),
-        ("Status", invoice.get_status_display()),
-        ("Amount", f"{invoice.amount:.2f} {invoice.currency}"),
-    ]
-    section_rows = [
-        ("Payment Method", payment_method_label),
-        ("Booking Type", invoice.get_booking_type_display() if invoice.booking_type else "N/A"),
-        ("Booking ID", invoice.booking_id or "N/A"),
-    ]
+    currency = (invoice.currency or "SEK").upper()
+    due_date = invoice.due_date or (timezone.localdate(invoice.issued_at) + datetime.timedelta(days=10))
+    total_amount = Decimal(str(invoice.amount or 0))
+    derived_vat_amount = (total_amount - (total_amount / Decimal("1.25"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total_amount > 0 else Decimal("0.00")
+    subtotal_ex_vat = (total_amount - derived_vat_amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-    if booking_summary:
-        section_rows.append(("Service Summary", booking_summary))
+    if not line_items:
+        line_items.append({
+            "description": booking_summary or "Service Invoice",
+            "quantity": "1",
+            "unit_price": _format_money(total_amount, currency),
+            "vat_percent": f"{vat_percent:.0f}%",
+            "line_total": _format_money(total_amount, currency),
+        })
+
+    sender = get_invoice_sender_details()
+    sender_rows = [
+        ("Company name", sender["company_name"]),
+        ("Address", sender["address"]),
+        ("Organization number (Org.nr)", sender["organization_number"]),
+        ("VAT number", sender["vat_number"]),
+        ("F-tax status", sender["f_tax_status"]),
+        ("Email", sender["email"]),
+        ("Phone number", sender["phone"]),
+        ("Bank details", sender["bank_details"]),
+    ]
+    customer_rows = [
+        ("Customer name", customer_name),
+        ("Address", customer.display_address() or booking_address or "-"),
+        ("Postal code and city", " / ".join(filter(None, [customer.display_postal_code(), customer.display_city()])) or "-"),
+        ("Customer number", customer.user_id or "-"),
+    ]
+    invoice_rows = [
+        ("Invoice number", invoice.invoice_number),
+        ("Invoice date", timezone.localtime(invoice.issued_at).strftime("%Y-%m-%d")),
+        ("Due date", due_date.strftime("%Y-%m-%d")),
+        ("Payment terms", payment_terms),
+        ("Reference number", invoice.note or invoice.invoice_number),
+        ("Interest on late payment", late_interest),
+    ]
+    summary_rows = [
+        ("Subtotal (excl. VAT)", _format_money(subtotal_ex_vat, currency), False),
+        ("VAT amount", _format_money(derived_vat_amount, currency), False),
+        ("Rounding", _format_money(Decimal("0.00"), currency), False),
+    ]
+    if discount_amount > 0:
+        summary_rows.append(("Discounts (ROT/RUT)", f"-{_format_money(discount_amount, currency)}", False))
+    summary_rows.append(("Total amount to pay", _format_money(total_amount, currency), True))
+
+    additional_notes = [
+        f"Payment reference (OCR or reference number): {invoice.note or invoice.invoice_number}",
+        f"Notes / description: {booking_summary or 'Invoice for completed services.'}",
+        "Delivery terms: Service delivery according to booking confirmation and agreed schedule.",
+    ]
+    if booking_contact:
+        additional_notes.append(f"Customer contact person: {booking_contact}")
+    if booking_company:
+        additional_notes.append(f"Customer company: {booking_company}")
+    additional_notes.append(f"Payment method: {payment_method_label}")
+    additional_notes.append(f"Booking type / ID: {(invoice.get_booking_type_display() if invoice.booking_type else 'N/A')} / {invoice.booking_id or 'N/A'}")
     if invoice.paid_at:
-        section_rows.append(("Paid At", timezone.localtime(invoice.paid_at).strftime("%Y-%m-%d %H:%M")))
+        additional_notes.append(f"Paid at: {timezone.localtime(invoice.paid_at).strftime('%Y-%m-%d %H:%M')}")
 
-    footer_lines = []
-    if invoice.note:
-        footer_lines.append(f"Reference: {invoice.note}")
-    footer_lines.append("Thank you for choosing Hembla Experten.")
-
-    pdf_bytes = _build_invoice_pdf("Invoice", meta_rows, section_rows, footer_lines=footer_lines)
+    if invoice.line_items.exists():
+        pdf_bytes = render_invoice_pdf(invoice)
+    else:
+        pdf_bytes = build_branded_invoice_pdf({
+            "brand_name": "Hembla experten",
+            "tagline": "Because Home Shouldn't Be Work",
+            "document_title": "Invoice",
+            "document_number": invoice.invoice_number,
+            "logo_path": default_logo_path(),
+            "sender_rows": sender_rows,
+            "customer_rows": customer_rows,
+            "invoice_rows": invoice_rows,
+            "line_items": line_items,
+            "summary_rows": summary_rows,
+            "additional_notes": additional_notes,
+            "footer_text": "Hembla Experten | services@hembla-experten.se",
+        })
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{invoice.invoice_number}.pdf"'
     return response
