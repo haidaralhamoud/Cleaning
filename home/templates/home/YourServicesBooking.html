@@ -960,6 +960,13 @@ let CURRENT_ADDON = null;
 let ADDONS_DATA = SAVED_ADDONS || {};
 let ADDONS_DRAFT = null;
 
+function setAddonsPopupOpen(isOpen) {
+    const popup = document.getElementById("popup");
+    if (!popup) return;
+    popup.style.display = isOpen ? "flex" : "none";
+    document.body.classList.toggle("addons-popup-open", !!isOpen);
+}
+
 function cloneAddonsData(data) {
     try {
         return JSON.parse(JSON.stringify(data || {}));
@@ -1096,7 +1103,7 @@ function renderAddonsGrid(serviceSlug) {
     if (!addons || Object.keys(addons).length === 0) {
         popupTitle.textContent = "No Add-ons";
         popupBody.innerHTML = "<p style='padding:20px;'>This service has no add-ons.</p>";
-        popup.style.display = "flex";
+        setAddonsPopupOpen(true);
         return;
     }
 
@@ -1126,7 +1133,7 @@ function renderAddonsGrid(serviceSlug) {
 
     popupTitle.textContent = "Add-ons";
     popupBody.innerHTML = `<div class="addons-grid">${html}</div>`;
-    popup.style.display = "flex";
+    setAddonsPopupOpen(true);
 }
 
 
@@ -1224,7 +1231,7 @@ document.getElementById("savePopup").onclick = () => {
         document.getElementById("addons_json").value = JSON.stringify(ADDONS_DATA);
         sendAddonsUpdate();
         resetAddonsDraft();
-        popup.style.display = "none";
+        setAddonsPopupOpen(false);
         return;
     }
 
@@ -1285,14 +1292,14 @@ document.getElementById("savePopup").onclick = () => {
 
     sendAddonsUpdate();
     resetAddonsDraft();
-    popup.style.display = "none";
+    setAddonsPopupOpen(false);
 };
 
 
 // ط²ط± X ظˆ Cancel
 document.getElementById("closePopup").onclick =
 document.getElementById("cancelPopup").onclick = () => {
-    document.getElementById("popup").style.display = "none";
+    setAddonsPopupOpen(false);
     resetAddonsDraft();
 };
 
@@ -1300,7 +1307,7 @@ document.getElementById("cancelPopup").onclick = () => {
 // ط§ظ„ط¶ط؛ط· ط¹ظ„ظ‰ ط®ظ„ظپظٹط© ط§ظ„ط¨ظˆط¨ط§ط¨
 document.getElementById("popup").onclick = e => {
     if (e.target.id === "popup") {
-        e.target.style.display = "none";
+        setAddonsPopupOpen(false);
         resetAddonsDraft();
     }
 };
