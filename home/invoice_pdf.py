@@ -476,6 +476,11 @@ def _build_legacy_branded_invoice_pdf(document):
     thank_card_left = property_card_left + card_w + card_gap
 
     customer_card_lines = []
+    customer_name_lines = wrap(
+        str(customer_details.get("name", "-")),
+        body_bold_font,
+        card_w - S(36),
+    )[:2]
     for line in [
         f"Customer No.:  {customer_details.get('customer_number', '-')}",
         customer_details.get("address", "-"),
@@ -500,17 +505,20 @@ def _build_legacy_branded_invoice_pdf(document):
         card_w - S(96),
     )
 
+    customer_line_h = S(30)
     customer_card_h = (
-        S(24) + S(24) + S(24) + S(42)
-        + sum(S(28) if len(lines) == 1 else S(44) for lines in customer_card_lines[:-2])
+        S(60)
+        + block_height(customer_name_lines, customer_line_h)
+        + S(12)
+        + sum(block_height(lines[:3], customer_line_h) + S(9) for lines in customer_card_lines)
+        + S(16)
         + S(20)
-        + sum(S(28) if len(lines) == 1 else S(44) for lines in customer_card_lines[-2:])
-        + S(24)
     )
     property_card_h = (
-        S(24) + S(24) + S(24) + S(32)
-        + sum(S(28) if len(lines) == 1 else S(44) for lines in property_address_lines)
-        + S(18) + S(30) + S(32) + block_height(property_note_lines, S(18)) + S(22)
+        S(62) + S(30)
+        + sum(block_height(lines[:3], S(30)) + S(9) for lines in property_address_lines)
+        + S(14) + S(28) + block_height(property_number_lines[:2], S(30))
+        + S(10) + block_height(property_note_lines[:2], S(22)) + S(24)
     )
     thank_card_h = S(34) + S(64) + block_height(thank_text[:6], S(32)) + S(36)
     card_h = max(S(248), customer_card_h, property_card_h, thank_card_h)
@@ -520,11 +528,12 @@ def _build_legacy_branded_invoice_pdf(document):
 
     section_title(customer_card_left + S(18), cards_top + S(14), _user_icon((S(24), S(24)), stroke=colors["gold"]), "CUSTOMER INFORMATION")
     cy = cards_top + S(60)
-    draw.text((customer_card_left + S(18), cy), str(customer_details.get("name", "-")), font=body_bold_font, fill=colors["ink"])
-    cy += S(36)
+    draw_text_block(customer_card_left + S(18), cy, customer_name_lines, body_bold_font, colors["ink"], customer_line_h)
+    cy += block_height(customer_name_lines, customer_line_h) + S(12)
     for index, wrapped in enumerate(customer_card_lines):
-        draw_text_block(customer_card_left + S(18), cy, wrapped[:3], body_font, colors["ink"], S(24))
-        cy += S(28) if len(wrapped) == 1 else S(44)
+        visible_lines = wrapped[:3]
+        draw_text_block(customer_card_left + S(18), cy, visible_lines, body_font, colors["ink"], customer_line_h)
+        cy += block_height(visible_lines, customer_line_h) + S(9)
         if index == 3:
             cy += S(16)
 
@@ -533,13 +542,16 @@ def _build_legacy_branded_invoice_pdf(document):
     draw.text((property_card_left + S(18), py), "Property Address", font=small_bold_font, fill=colors["ink"])
     py += S(28)
     for wrapped in property_address_lines:
-        draw_text_block(property_card_left + S(18), py, wrapped[:2], body_font, colors["ink"], S(24))
-        py += S(28) if len(wrapped) == 1 else S(44)
+        visible_lines = wrapped[:3]
+        draw_text_block(property_card_left + S(18), py, visible_lines, body_font, colors["ink"], S(30))
+        py += block_height(visible_lines, S(30)) + S(9)
     divider_y = py + S(8)
     draw.line([(property_card_left + S(18), divider_y), (property_card_left + card_w - S(18), divider_y)], fill=colors["line"], width=S(1))
     draw.text((property_card_left + S(18), divider_y + S(20)), "Property Number", font=small_bold_font, fill=colors["ink"])
-    draw_text_block(property_card_left + S(18), divider_y + S(50), property_number_lines[:2], body_bold_font, colors["ink"], S(26))
-    draw_text_block(property_card_left + S(18), divider_y + S(84), property_note_lines[:2], small_font, colors["muted"], S(18))
+    property_number_top = divider_y + S(50)
+    draw_text_block(property_card_left + S(18), property_number_top, property_number_lines[:2], body_bold_font, colors["ink"], S(30))
+    property_note_top = property_number_top + block_height(property_number_lines[:2], S(30)) + S(10)
+    draw_text_block(property_card_left + S(18), property_note_top, property_note_lines[:2], small_font, colors["muted"], S(22))
 
     thank_title = "Thank you!"
     fitted_thank_font = fit_font_for_width(
