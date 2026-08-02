@@ -89,7 +89,7 @@ def populate_invoice_from_private_booking(invoice: Invoice, booking: PrivateBook
     invoice.currency = currency
     invoice.booking_type = "private"
     invoice.booking_id = booking.id
-    invoice.customer_number = str(booking.user_id or "")
+    invoice.customer_number = str(invoice.customer.customer_number or "")
     invoice.payment_reference = invoice.payment_reference or invoice.invoice_number
     invoice.payment_terms = invoice.payment_terms or getattr(settings, "INVOICE_DEFAULT_PAYMENT_TERMS", "10 days")
     invoice.late_interest_rate = invoice.late_interest_rate or Decimal("12.00")
@@ -194,7 +194,7 @@ def _invoice_customer_rows(invoice: Invoice):
         ("Postal code and city", " / ".join(filter(None, [postal_code, city])) or "-"),
         ("Email", customer.email or getattr(customer.user, "email", "") or "-"),
         ("Phone", customer.phone or "-"),
-        ("Customer number", invoice.customer_number or customer.user_id or "-"),
+        ("Customer number", invoice.customer_number or customer.customer_number or "-"),
     ]
 
 
@@ -236,6 +236,7 @@ def _invoice_line_rows(invoice: Invoice):
             "date": item.service_time or "",
             "quantity": f"{_q(item.quantity):.2f}".rstrip("0").rstrip("."),
             "unit_price": _format_money(item.unit_price, invoice.currency),
+            "discount_percent": f"{_q(item.discount_percent):.2f}".rstrip("0").rstrip(".") + "%",
             "vat_percent": f"{_q(item.vat_percent):.0f}%",
             "line_total": _format_money(item.line_total(), invoice.currency),
         })
@@ -256,7 +257,7 @@ def _invoice_summary_rows(invoice: Invoice):
     def money(value):
         return _format_money(value or 0, currency)
 
-    if snapshot:
+    if snapshot and not invoice.line_items.exists():
         discount_amount = Decimal(str(snapshot.get("discount_amount", 0) or 0))
         referral_amount = Decimal(str(snapshot.get("referral_discount_amount", 0) or 0))
         reward_amount = Decimal(str(snapshot.get("reward_discount", 0) or 0))
@@ -273,17 +274,24 @@ def _invoice_summary_rows(invoice: Invoice):
         ]
         return summary
 
-    service_fee_amount = Decimal("0.00")
-    if invoice.line_items.filter(is_service_fee=True).exists():
-        service_fee_amount = sum((item.line_total() for item in invoice.line_items.filter(is_service_fee=True)), Decimal("0.00"))
-
+    subtotal_before_discount = invoice.subtotal_before_discount()
+    discount_amount = invoice.discounts_total()
+    net_excl_vat = invoice.subtotal_excl_vat()
+    vat_amount = invoice.vat_amount_total()
+    total_incl_vat = invoice.total_incl_vat_before_rot_rut()
+    rot_rut_amount = invoice.rot_rut_total()
+    eligible_labor = sum(
+        (item.net_amount() for item in invoice.line_items.filter(is_service_fee=False)),
+        Decimal("0.00"),
+    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     summary = [
-        ("SUBTOTAL", money(invoice.subtotal_excl_vat()), False),
-        ("VAT", money(invoice.vat_amount_total()), False),
-        ("DISCOUNT", money(0), False),
-        ("REWARD / LOYALTY DEDUCTION", money(0), False),
-        ("SERVICE FEE", money(service_fee_amount), False),
-        ("RUT DEDUCTION", money(0), False),
+        ("SUBTOTAL (EXCL. VAT)", money(subtotal_before_discount), False),
+        ("DISCOUNT (BEFORE VAT)", f"-{money(discount_amount)}" if discount_amount > 0 else money(0), False),
+        ("NET (EXCL. VAT)", money(net_excl_vat), False),
+        ("VAT", money(vat_amount), False),
+        ("TOTAL (INCL. VAT)", money(total_incl_vat), False),
+        ("RUT ELIGIBLE LABOR", money(eligible_labor), False),
+        ("ROT/RUT (INCL. VAT)", f"-{money(rot_rut_amount)}" if rot_rut_amount > 0 else money(0), False),
     ]
     summary.append((f"FINAL TOTAL ({currency})", money(invoice.total_amount()), True))
     return summary
@@ -397,7 +405,7 @@ def _customer_detail_payload(invoice: Invoice):
     customer = invoice.customer
     return {
         "name": f"{customer.first_name} {customer.last_name}".strip() or customer.email or str(customer),
-        "customer_number": invoice.customer_number or customer.user_id or "-",
+        "customer_number": invoice.customer_number or customer.customer_number or "-",
         "address": customer.display_address() if hasattr(customer, "display_address") else "-",
         "postal_city": " ".join(
             part
@@ -424,6 +432,7 @@ def render_invoice_pdf(invoice: Invoice) -> bytes:
         "tagline": "Because Home Shouldn't Be Work",
         "document_title": "Invoice",
         "document_number": invoice.invoice_number,
+        "currency": invoice.currency,
         "logo_path": default_logo_path(),
         "sender_rows": _invoice_sender_rows(),
         "customer_rows": _invoice_customer_rows(invoice),
@@ -455,13 +464,17 @@ def send_invoice_email(invoice: Invoice):
 
     pdf_bytes = render_invoice_pdf(invoice)
     subject = f"Your invoice {invoice.invoice_number}"
+    customer_name = (invoice.customer.first_name or "Customer").strip()
+    amount_due = _format_money(invoice.total_amount(), invoice.currency)
+    due_date = invoice.due_date.strftime("%Y-%m-%d") if invoice.due_date else "not specified"
     body = (
-        f"Hello {invoice.customer.first_name or 'Customer'},\n\n"
-        "Your invoice is attached as a PDF.\n"
-        f"Reference: {invoice.payment_reference or invoice.invoice_number}\n"
-        f"Amount due: {_format_money(invoice.total_amount(), invoice.currency)}\n\n"
+        f"Hi {customer_name},\n\n"
+        "Thank you for trusting Hembla Experten.\n\n"
+        "Please find the invoice attached, as agreed. Have a look and let me know "
+        "if you have any questions or notice anything that needs clarification.\n\n"
+        f"The amount to pay is {amount_due}, and the due date is {due_date}.\n\n"
         "Best regards,\n"
-        "Hembla experten"
+        "Hembla Experten"
     )
     connection = get_connection(fail_silently=False)
     try:

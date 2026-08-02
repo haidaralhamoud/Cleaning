@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 import logging
+import hashlib
 from datetime import timedelta, time as dt_time
 from io import BytesIO
 import re
@@ -56,6 +57,7 @@ from accounts.models import (
 from accounts.invoice_utils import (
     create_invoice_draft_for_private_booking,
     populate_invoice_from_private_booking,
+    render_invoice_pdf,
     send_invoice_email,
 )
 from django.http import JsonResponse, HttpResponse
@@ -2502,10 +2504,25 @@ class InvoiceDashboardForm(forms.ModelForm):
             "long_note",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        number_field = self.fields["customer_number"]
+        number_field.required = False
+        number_field.widget.attrs.update({
+            "readonly": "readonly",
+            "aria-readonly": "true",
+            "placeholder": "Filled automatically from the selected customer",
+        })
+        if self.instance.pk and self.instance.customer_id:
+            number_field.initial = str(self.instance.customer.customer_number or "")
+
     def clean(self):
         cleaned = super().clean()
         if self.instance.pk and self.instance.is_locked:
             raise forms.ValidationError("This invoice has already been sent and is locked.")
+        customer = cleaned.get("customer")
+        if customer:
+            cleaned["customer_number"] = str(customer.customer_number or "")
         return cleaned
 
 
@@ -2519,11 +2536,23 @@ class InvoiceLineItemDashboardForm(forms.ModelForm):
             "service_time",
             "quantity",
             "unit_price",
-            "discount_amount",
+            "discount_percent",
             "rot_rut_amount",
             "vat_percent",
             "is_service_fee",
         )
+        labels = {
+            "unit_price": "Unit price (excluding VAT)",
+            "discount_percent": "Discount (%)",
+            "rot_rut_amount": "ROT/RUT deduction (including VAT)",
+            "vat_percent": "VAT (%)",
+        }
+        help_texts = {
+            "unit_price": "Enter the price before VAT.",
+            "discount_percent": "Applied to the price excluding VAT, before VAT is calculated.",
+            "rot_rut_amount": "Enter the final VAT-inclusive deduction. It is subtracted after VAT.",
+            "vat_percent": "VAT is calculated after the discount.",
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -3205,6 +3234,39 @@ def dashboard_model_list(request, model):
 
 
 @user_passes_test(_staff_required)
+def dashboard_invoice_preview(request, pk):
+    """Render the current invoice draft exactly as it will be emailed."""
+    invoice = get_object_or_404(
+        Invoice.objects.select_related("customer").prefetch_related("line_items"),
+        pk=pk,
+    )
+    pdf_bytes = render_invoice_pdf(invoice)
+    request.session[f"invoice_preview_{invoice.pk}"] = _invoice_preview_signature(invoice)
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'inline; filename="{invoice.invoice_number}-preview.pdf"'
+    response["X-Content-Type-Options"] = "nosniff"
+    return response
+
+
+def _invoice_preview_signature(invoice):
+    invoice.refresh_from_db()
+    invoice_values = [
+        getattr(invoice, field.attname)
+        for field in invoice._meta.concrete_fields
+        if field.name not in {"sent_at", "sent_by", "is_locked", "status"}
+    ]
+    line_values = list(
+        invoice.line_items.order_by("line_order", "pk").values_list(
+            "pk", "line_order", "description", "service_time", "quantity",
+            "unit_price", "discount_percent", "discount_amount", "rot_rut_amount", "vat_percent",
+            "is_service_fee",
+        )
+    )
+    payload = json.dumps([invoice_values, line_values], default=str, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+@user_passes_test(_staff_required)
 def dashboard_model_create(request, model):
     item = get_item_by_slug(model)
     if not item:
@@ -3318,6 +3380,10 @@ def dashboard_model_create(request, model):
         "form": form,
         "mode": "create",
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
+        "customer_number_map": (
+            {str(pk): number for pk, number in Customer.objects.values_list("pk", "customer_number")}
+            if item.model == Invoice else None
+        ),
     }
     context.update(_dashboard_notifications(request))
     return render(request, "dashboard/form.html", context)
@@ -3399,6 +3465,10 @@ def dashboard_model_edit(request, model, pk):
             if not obj.line_items.exists():
                 messages.error(request, "Add at least one invoice line before sending.")
                 return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
+            preview_signature = request.session.get(f"invoice_preview_{obj.pk}")
+            if not preview_signature or preview_signature != _invoice_preview_signature(obj):
+                messages.error(request, "Preview the current invoice before sending. If you changed it, preview it again.")
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
             try:
                 send_invoice_email(obj)
             except Exception as exc:
@@ -3411,6 +3481,7 @@ def dashboard_model_edit(request, model, pk):
             obj.sent_by = request.user
             obj.is_locked = True
             obj.save(update_fields=["status", "sent_at", "sent_by", "is_locked"])
+            request.session.pop(f"invoice_preview_{obj.pk}", None)
             messages.success(request, "Invoice sent and locked.")
             return redirect("home:dashboard_home")
 
@@ -3507,6 +3578,10 @@ def dashboard_model_edit(request, model, pk):
         "related_invoice": related_invoice,
         "invoice_line_items": invoice_line_items,
         "emoji_datalist": EMOJI_OPTIONS if item.model == BusinessAddon else None,
+        "customer_number_map": (
+            {str(pk): number for pk, number in Customer.objects.values_list("pk", "customer_number")}
+            if item.model == Invoice else None
+        ),
     }
     if item.model in {BusinessBooking, PrivateBooking}:
         context["provider_debug"] = _provider_debug_payload(obj)

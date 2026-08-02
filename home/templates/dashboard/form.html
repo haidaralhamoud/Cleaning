@@ -55,6 +55,9 @@
       </div>
       {% if item.slug == "invoices" and object %}
         <div class="mb-3 d-flex flex-wrap gap-2">
+          <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_invoice_preview' object.pk %}" target="_blank" rel="noopener">
+            <i class="fa-regular fa-eye me-1"></i> Preview Invoice
+          </a>
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'invoice-line-items' %}?invoice_id={{ object.pk }}">Manage Line Items</a>
           <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'invoice-line-items' %}?invoice_id={{ object.pk }}">+ Add Line Item</a>
           {% if object.booking_id and object.booking_type %}
@@ -319,6 +322,25 @@
             {% endif %}
           {% endfor %}
         </div>
+        {% if item.slug == "invoice-line-items" %}
+          <div class="card border-0 bg-light mb-4" id="invoiceLineCalculation">
+            <div class="card-body">
+              <h6 class="mb-3">Calculation preview</h6>
+              <div class="row g-2 small">
+                <div class="col-md-4 d-flex justify-content-between"><span>Price before VAT</span><strong id="calcBase">0.00</strong></div>
+                <div class="col-md-4 d-flex justify-content-between"><span>Discount before VAT</span><strong id="calcDiscount">-0.00</strong></div>
+                <div class="col-md-4 d-flex justify-content-between"><span>Net before VAT</span><strong id="calcNet">0.00</strong></div>
+                <div class="col-md-4 d-flex justify-content-between"><span>VAT amount</span><strong id="calcVat">0.00</strong></div>
+                <div class="col-md-4 d-flex justify-content-between"><span>Total including VAT</span><strong id="calcWithVat">0.00</strong></div>
+                <div class="col-md-4 d-flex justify-content-between"><span>ROT/RUT including VAT</span><strong id="calcRot">-0.00</strong></div>
+              </div>
+              <div class="d-flex justify-content-between border-top mt-3 pt-3">
+                <strong>Final line total</strong>
+                <strong class="text-primary" id="calcFinal">0.00</strong>
+              </div>
+            </div>
+          </div>
+        {% endif %}
         {% if emoji_datalist %}
           <datalist id="emoji-options">
             {% for e in emoji_datalist %}
@@ -413,7 +435,7 @@
           </div>
         {% endif %}
         {% if item.slug == "invoices" and object %}
-          <div class="mt-4">
+          <div class="mt-4 mb-4 pb-2">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="mb-0">Invoice Line Items</h6>
               <div class="d-flex gap-2">
@@ -435,7 +457,7 @@
                       <th>Time</th>
                       <th>Qty</th>
                       <th>Unit Price</th>
-                      <th>Discount</th>
+                      <th>Discount %</th>
                       <th>ROT/RUT</th>
                       <th>VAT %</th>
                       <th>Total</th>
@@ -450,7 +472,7 @@
                         <td>{{ line.service_time|default:"-" }}</td>
                         <td>{{ line.quantity }}</td>
                         <td>{{ line.unit_price }}</td>
-                        <td>{{ line.discount_amount }}</td>
+                        <td>{{ line.discount_percent }}%</td>
                         <td>{{ line.rot_rut_amount }}</td>
                         <td>{{ line.vat_percent }}</td>
                         <td>{{ line.line_total }}</td>
@@ -622,11 +644,14 @@
             {% endif %}
           </div>
         {% endif %}
-          <div class="d-flex gap-2">
+          <div class="d-flex flex-wrap gap-2 mt-3">
             {% if mode != "view" %}
               <button class="btn btn-primary" type="submit">Save</button>
               {% if item.slug == "invoices" and object and not object.is_locked %}
                 <button class="btn btn-outline-secondary" type="submit" name="refresh_invoice_from_booking" value="1">Refresh Draft From Booking</button>
+                <a class="btn btn-outline-success" href="{% url 'home:dashboard_invoice_preview' object.pk %}" target="_blank" rel="noopener">
+                  <i class="fa-regular fa-eye me-1"></i> Preview Before Sending
+                </a>
                 <button class="btn btn-success" type="submit" name="send_invoice" value="1">Send Invoice</button>
               {% endif %}
               <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
@@ -634,6 +659,9 @@
             <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Back</a>
           {% endif %}
         </div>
+        {% if item.slug == "invoices" and object and not object.is_locked %}
+          <p class="text-muted small mt-2 mb-0">Save your changes, then preview the final PDF. Sending is enabled only after the current version has been previewed.</p>
+        {% endif %}
       </form>
     </div>
   </div>
@@ -1456,6 +1484,147 @@
       });
     });
   </script>
+  {% if item.slug == "invoice-line-items" %}
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const fields = {
+          quantity: document.getElementById("id_quantity"),
+          unit: document.getElementById("id_unit_price"),
+          discount: document.getElementById("id_discount_percent"),
+          vat: document.getElementById("id_vat_percent"),
+          rot: document.getElementById("id_rot_rut_amount"),
+        };
+        if (Object.values(fields).some((field) => !field)) return;
+        const number = (field) => Math.max(0, Number.parseFloat(field.value) || 0);
+        const show = (id, value, negative = false) => {
+          const element = document.getElementById(id);
+          if (element) element.textContent = `${negative ? "-" : ""}${value.toFixed(2)}`;
+        };
+        const calculate = () => {
+          const base = number(fields.quantity) * number(fields.unit);
+          const discount = base * Math.min(number(fields.discount), 100) / 100;
+          const net = Math.max(0, base - discount);
+          const vat = net * number(fields.vat) / 100;
+          const includingVat = net + vat;
+          const rot = number(fields.rot);
+          const finalTotal = Math.max(0, includingVat - rot);
+          show("calcBase", base);
+          show("calcDiscount", discount, true);
+          show("calcNet", net);
+          show("calcVat", vat);
+          show("calcWithVat", includingVat);
+          show("calcRot", rot, true);
+          show("calcFinal", finalTotal);
+        };
+        Object.values(fields).forEach((field) => field.addEventListener("input", calculate));
+        calculate();
+      });
+    </script>
+  {% endif %}
+  {% if item.slug == "invoices" and customer_number_map %}
+    {{ customer_number_map|json_script:"invoiceCustomerNumbers" }}
+  {% endif %}
+  {% if item.slug == "invoices" or item.slug == "invoice-line-items" %}
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const customerSelect = document.getElementById("{% if item.slug == 'invoices' %}id_customer{% else %}id_invoice{% endif %}");
+        const customerNumber = document.getElementById("id_customer_number");
+        const numberData = document.getElementById("invoiceCustomerNumbers");
+        if (!customerSelect) return;
+
+        const numbers = numberData ? JSON.parse(numberData.textContent || "{}") : {};
+        const syncCustomerNumber = () => {
+          if (customerNumber) customerNumber.value = numbers[customerSelect.value] || "";
+        };
+
+        syncCustomerNumber();
+        customerSelect.addEventListener("change", syncCustomerNumber);
+
+        const options = Array.from(customerSelect.options)
+          .filter((option) => option.value)
+          .map((option) => ({ value: option.value, label: option.textContent.trim() }));
+        const selected = options.find((option) => option.value === customerSelect.value);
+        const combo = document.createElement("div");
+        combo.className = "dash-searchable-select";
+        combo.innerHTML = `
+          <input class="form-control dash-searchable-select__input" type="search"
+                 placeholder="{% if item.slug == 'invoices' %}Search customer by name...{% else %}Search by invoice number or customer name...{% endif %}" autocomplete="off"
+                 role="combobox" aria-expanded="false" aria-autocomplete="list">
+          <div class="dash-searchable-select__menu" role="listbox" hidden></div>
+        `;
+        customerSelect.before(combo);
+        customerSelect.classList.add("dash-searchable-select__native");
+
+        const input = combo.querySelector(".dash-searchable-select__input");
+        const menu = combo.querySelector(".dash-searchable-select__menu");
+        input.value = selected ? selected.label : "";
+        input.required = customerSelect.required;
+        customerSelect.required = false;
+        const validateSelection = () => input.setCustomValidity(
+          customerSelect.value ? "" : "Please select {% if item.slug == 'invoices' %}a customer{% else %}an invoice{% endif %} from the results."
+        );
+        validateSelection();
+        customerSelect.addEventListener("change", validateSelection);
+
+        const closeMenu = () => {
+          menu.hidden = true;
+          input.setAttribute("aria-expanded", "false");
+        };
+        const renderMatches = () => {
+          const query = input.value.trim().toLocaleLowerCase();
+          const matches = options.filter((option) => option.label.toLocaleLowerCase().includes(query));
+          menu.replaceChildren();
+          matches.slice(0, 30).forEach((option) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "dash-searchable-select__option";
+            button.dataset.value = option.value;
+            button.setAttribute("role", "option");
+            button.textContent = option.label;
+            button.addEventListener("mousedown", (event) => {
+              event.preventDefault();
+              customerSelect.value = option.value;
+              input.value = option.label;
+              customerSelect.dispatchEvent(new Event("change", { bubbles: true }));
+              closeMenu();
+            });
+            menu.appendChild(button);
+          });
+          if (!matches.length) {
+            const empty = document.createElement("div");
+            empty.className = "dash-searchable-select__empty";
+            empty.textContent = "No {% if item.slug == 'invoices' %}customers{% else %}invoices{% endif %} found";
+            menu.appendChild(empty);
+          }
+          menu.hidden = false;
+          input.setAttribute("aria-expanded", "true");
+        };
+
+        input.addEventListener("focus", renderMatches);
+        input.addEventListener("input", () => {
+          const current = options.find((option) => option.value === customerSelect.value);
+          if (!current || input.value !== current.label) {
+            customerSelect.value = "";
+            customerSelect.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+          renderMatches();
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") closeMenu();
+          if (event.key === "Enter") {
+            const first = menu.querySelector(".dash-searchable-select__option");
+            if (first) {
+              event.preventDefault();
+              first.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+            }
+          }
+        });
+        document.addEventListener("mousedown", (event) => {
+          if (!combo.contains(event.target)) closeMenu();
+        });
+      });
+    </script>
+  {% endif %}
 {% endblock %}
 
 

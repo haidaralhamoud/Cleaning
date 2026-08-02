@@ -101,6 +101,7 @@
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.service.slug %}" target="_blank">Open Page</a>
               {% endif %}
               {% if item.slug == "invoices" %}
+                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_invoice_preview' obj.pk %}" target="_blank" rel="noopener">Preview</a>
                 <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'invoice-line-items' %}?invoice_id={{ obj.pk }}">Line Items</a>
                 {% if obj.booking_id and obj.booking_type %}
                   <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' obj.booking_type|add:'-bookings' obj.booking_id %}">Booking</a>

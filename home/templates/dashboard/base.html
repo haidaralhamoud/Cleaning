@@ -38,11 +38,11 @@
         <input type="search" id="dashSidebarSearch" placeholder="Search sections" aria-label="Search dashboard sections">
       </div>
       <nav class="dash-nav">
-        <a href="{% url 'home:dashboard_home' %}" class="dash-link" data-nav-label="Overview">
+        <a href="{% url 'home:dashboard_home' %}" class="dash-link{% if request.resolver_match.url_name == 'dashboard_home' %} active{% endif %}" data-nav-label="Overview"{% if request.resolver_match.url_name == 'dashboard_home' %} aria-current="page"{% endif %}>
           <i class="fa-solid fa-grid-2"></i> Overview
         </a>
         {% for item in items %}
-          <a href="{% url 'home:dashboard_model_list' item.slug %}" class="dash-link" data-nav-label="{{ item.label }}">
+          <a href="{% url 'home:dashboard_model_list' item.slug %}" class="dash-link{% if request.resolver_match.kwargs.model == item.slug %} active{% endif %}" data-nav-label="{{ item.label }}"{% if request.resolver_match.kwargs.model == item.slug %} aria-current="page"{% endif %}>
             <i class="{{ item.icon }}"></i> {{ item.label }}
           </a>
         {% endfor %}

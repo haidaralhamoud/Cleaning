@@ -1,14 +1,13 @@
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth.hashers import check_password, make_password
 from datetime import timedelta
 import secrets
-import uuid
 
 from home.image_optimization import optimize_uploaded_image_fields
 
@@ -47,7 +46,27 @@ class Service(models.Model):
         return self.label
 
 
+class DocumentSequence(models.Model):
+    key = models.CharField(max_length=40, unique=True)
+    last_value = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.key}: {self.last_value}"
+
+
+def _next_document_number(key, start):
+    with transaction.atomic():
+        sequence, _ = DocumentSequence.objects.select_for_update().get_or_create(
+            key=key,
+            defaults={"last_value": start - 1},
+        )
+        sequence.last_value = max(sequence.last_value + 1, start)
+        sequence.save(update_fields=["last_value"])
+        return sequence.last_value
+
+
 class Customer(models.Model):
+    customer_number = models.PositiveIntegerField(unique=True, null=True, blank=True, editable=False)
     personal_identity_number = models.CharField(max_length=20)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -109,6 +128,8 @@ class Customer(models.Model):
     accepted_terms = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+        if self._state.adding and not self.customer_number:
+            self.customer_number = _next_document_number("customer", 2500)
         optimize_uploaded_image_fields(self, ["profile_photo"], update_fields=kwargs.get("update_fields"))
         return super().save(*args, **kwargs)
 
@@ -523,7 +544,7 @@ class PaymentMethod(models.Model):
 
 
 def _invoice_number():
-    return f"INV-{timezone.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+    return f"INV-{_next_document_number('invoice', 101)}"
 
 
 class Invoice(models.Model):
@@ -586,6 +607,21 @@ class Invoice(models.Model):
     def __str__(self):
         return f"{self.invoice_number} ({self.customer})"
 
+    def save(self, *args, **kwargs):
+        if self.customer_id and not self.customer_number:
+            self.customer_number = str(self.customer.customer_number or "")
+        if self.invoice_number and not self.payment_reference:
+            self.payment_reference = self.invoice_number
+        update_fields = kwargs.get("update_fields")
+        if update_fields:
+            fields = set(update_fields)
+            if self.customer_number:
+                fields.add("customer_number")
+            if self.payment_reference:
+                fields.add("payment_reference")
+            kwargs["update_fields"] = fields
+        return super().save(*args, **kwargs)
+
     def get_booking(self):
         from home.models import BusinessBooking, PrivateBooking
 
@@ -599,18 +635,29 @@ class Invoice(models.Model):
         subtotal = sum((item.net_amount() for item in self.line_items.all()), Decimal("0.00"))
         return subtotal.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
+    def subtotal_before_discount(self):
+        total = sum((item.base_amount() for item in self.line_items.all()), Decimal("0.00"))
+        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
     def vat_amount_total(self):
         vat_total = sum((item.vat_amount() for item in self.line_items.all()), Decimal("0.00"))
         return vat_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def discounts_total(self):
         total = sum((item.discount_amount or Decimal("0.00")) for item in self.line_items.all())
-        total += sum((item.rot_rut_amount or Decimal("0.00")) for item in self.line_items.all())
+        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def rot_rut_total(self):
+        total = sum((item.rot_rut_amount or Decimal("0.00")) for item in self.line_items.all())
+        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+    def total_incl_vat_before_rot_rut(self):
+        total = self.subtotal_excl_vat() + self.vat_amount_total() + (self.rounding or Decimal("0.00"))
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def total_amount(self):
-        total = self.subtotal_excl_vat() + self.vat_amount_total() + (self.rounding or Decimal("0.00"))
-        return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        total = self.total_incl_vat_before_rot_rut() - self.rot_rut_total()
+        return max(total, Decimal("0.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def sync_amounts(self, save=True):
         self.amount = self.total_amount()
@@ -630,6 +677,7 @@ class InvoiceLineItem(models.Model):
     service_time = models.CharField(max_length=120, blank=True)
     quantity = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("1.00"))
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    discount_percent = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
     discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
     rot_rut_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
     vat_percent = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("25.00"))
@@ -645,13 +693,17 @@ class InvoiceLineItem(models.Model):
         super().clean()
         if self.invoice_id and self.invoice.is_locked:
             raise ValidationError("This invoice is locked and can no longer be edited.")
+        if not Decimal("0.00") <= (self.discount_percent or Decimal("0.00")) <= Decimal("100.00"):
+            raise ValidationError({"discount_percent": "Discount must be between 0% and 100%."})
+        if (self.rot_rut_amount or Decimal("0.00")) < 0:
+            raise ValidationError({"rot_rut_amount": "ROT/RUT deduction cannot be negative."})
 
     def base_amount(self):
         amount = (self.quantity or Decimal("0.00")) * (self.unit_price or Decimal("0.00"))
         return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def net_amount(self):
-        amount = self.base_amount() - (self.discount_amount or Decimal("0.00")) - (self.rot_rut_amount or Decimal("0.00"))
+        amount = self.base_amount() - (self.discount_amount or Decimal("0.00"))
         return max(amount, Decimal("0.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def vat_amount(self):
@@ -659,11 +711,16 @@ class InvoiceLineItem(models.Model):
         return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def line_total(self):
-        amount = self.net_amount() + self.vat_amount()
-        return amount.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        amount = self.net_amount() + self.vat_amount() - (self.rot_rut_amount or Decimal("0.00"))
+        return max(amount, Decimal("0.00")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def save(self, *args, **kwargs):
+        self.discount_amount = (
+            self.base_amount() * ((self.discount_percent or Decimal("0.00")) / Decimal("100.00"))
+        ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         self.full_clean()
+        if kwargs.get("update_fields"):
+            kwargs["update_fields"] = set(kwargs["update_fields"]) | {"discount_amount"}
         super().save(*args, **kwargs)
         if self.invoice_id:
             self.invoice.sync_amounts()

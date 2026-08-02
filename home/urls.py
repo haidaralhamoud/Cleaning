@@ -21,6 +21,7 @@ urlpatterns = [
     path("dashboard/no-show/<int:report_id>/<str:decision_slug>/", views.dashboard_no_show_decision, name="dashboard_no_show_decision"),
     path("dashboard/bookings/<str:booking_type>/<int:booking_id>/assign-provider/", views.dashboard_assign_provider, name="dashboard_assign_provider"),
     path("dashboard/change-password/", views.dashboard_change_password, name="dashboard_change_password"),
+    path("dashboard/invoices/<int:pk>/preview/", views.dashboard_invoice_preview, name="dashboard_invoice_preview"),
     path("dashboard/<str:model>/", views.dashboard_model_list, name="dashboard_model_list"),
     path("dashboard/<str:model>/add/", views.dashboard_model_create, name="dashboard_model_create"),
     path("dashboard/<str:model>/<int:pk>/view/", views.dashboard_model_view, name="dashboard_model_view"),
