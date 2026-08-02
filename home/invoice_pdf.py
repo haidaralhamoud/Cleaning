@@ -7,6 +7,8 @@ from pathlib import Path
 from django.conf import settings
 from PIL import Image, ImageDraw, ImageFont
 
+FONT_DIR = Path(getattr(settings, "BASE_DIR")) / "static" / "fonts"
+
 
 def _load_font(size=20, candidates=None):
     for font_path in candidates or []:
@@ -14,13 +16,17 @@ def _load_font(size=20, candidates=None):
             return ImageFont.truetype(font_path, size=size)
         except Exception:
             continue
-    return ImageFont.load_default()
+    raise RuntimeError(
+        "Required invoice font could not be loaded. Ensure the bundled fonts in "
+        f"{FONT_DIR} are included in the deployment."
+    )
 
 
 def _invoice_font(size=20, bold=False):
     return _load_font(
         size=size,
         candidates=[
+            str(FONT_DIR / ("NotoSans-Bold.ttf" if bold else "NotoSans-Regular.ttf")),
             "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
             "C:/Windows/Fonts/calibrib.ttf" if bold else "C:/Windows/Fonts/calibri.ttf",
             "C:/Windows/Fonts/segoeuib.ttf" if bold else "C:/Windows/Fonts/segoeui.ttf",
@@ -33,6 +39,7 @@ def _invoice_serif_font(size=20, bold=False):
     return _load_font(
         size=size,
         candidates=[
+            str(FONT_DIR / ("NotoSerif-Bold.ttf" if bold else "NotoSerif-Regular.ttf")),
             "C:/Windows/Fonts/georgiab.ttf" if bold else "C:/Windows/Fonts/georgia.ttf",
             "C:/Windows/Fonts/timesbd.ttf" if bold else "C:/Windows/Fonts/times.ttf",
             "C:/Windows/Fonts/arialbd.ttf" if bold else "C:/Windows/Fonts/arial.ttf",
@@ -44,6 +51,7 @@ def _invoice_script_font(size=20):
     return _load_font(
         size=size,
         candidates=[
+            str(FONT_DIR / "Pacifico-Regular.ttf"),
             "C:/Windows/Fonts/segoesc.ttf",
             "C:/Windows/Fonts/BRUSHSCI.TTF",
             "C:/Windows/Fonts/georgiai.ttf",
@@ -55,7 +63,7 @@ def _invoice_script_font(size=20):
 def _fa_solid_font(size=20):
     return _load_font(
         size=size,
-        candidates=[str(Path(getattr(settings, "BASE_DIR")) / "static" / "fonts" / "fa-solid-900.ttf")],
+        candidates=[str(FONT_DIR / "fa-solid-900.ttf")],
     )
 
 
