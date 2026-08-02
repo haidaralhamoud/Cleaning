@@ -4,6 +4,8 @@
     const toggle = document.getElementById("menuToggle");
     const sidebar = document.querySelector(".customer-sidebar");
     if (!toggle || !sidebar) return;
+    if (toggle.dataset.customerSidebarReady === "1") return;
+    toggle.dataset.customerSidebarReady = "1";
 
     let overlay = document.querySelector(".customer-menu-overlay");
     if (!overlay) {
@@ -18,6 +20,8 @@
     const setOpen = (open) => {
       sidebar.classList.toggle("open", open);
       overlay.classList.toggle("show", open);
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      document.body.classList.toggle("customer-sidebar-open", open);
       if (arrow) {
         arrow.innerHTML = open ? "&#8249;" : "&#8250;";
       }
@@ -40,6 +44,14 @@
       },
       true
     );
+
+    sidebar.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => setOpen(false));
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") setOpen(false);
+    });
   },
   true
 );
