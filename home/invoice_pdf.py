@@ -427,8 +427,8 @@ def _build_legacy_branded_invoice_pdf(document):
     draw.line([(top_divider_x, frame_top + S(4)), (top_divider_x, frame_top + header_h - S(8))], fill=colors["line"], width=S(1))
     draw.text((top_right_left, frame_top), document_title, font=title_font, fill=colors["ink"])
 
-    due_badge_w = S(132)
-    due_badge_h = S(118)
+    due_badge_w = S(168)
+    due_badge_h = S(124)
     due_badge_left = frame_right - due_badge_w
     draw.rounded_rectangle(
         (due_badge_left, frame_top - S(4), due_badge_left + due_badge_w, frame_top - S(4) + due_badge_h),
@@ -439,8 +439,21 @@ def _build_legacy_branded_invoice_pdf(document):
     )
     due_icon = _calendar_icon((S(28), S(28)), stroke=colors["gold"])
     image.paste(due_icon, (due_badge_left + int((due_badge_w - due_icon.size[0]) / 2), frame_top + S(18)), due_icon)
-    centered_text(due_badge_left, due_badge_w, frame_top + S(54), "PAYMENT DUE BY", small_bold_font, colors["ink"])
-    centered_text(due_badge_left, due_badge_w, frame_top + S(76), str(due_date), body_bold_font, colors["ink"])
+    due_label = "PAYMENT DUE BY"
+    due_label_font = fit_font_for_width(
+        due_label,
+        small_bold_font,
+        [_invoice_font(F(S(14)), bold=True), _invoice_font(F(S(12)), bold=True)],
+        due_badge_w - S(24),
+    )
+    due_date_font = fit_font_for_width(
+        str(due_date),
+        body_bold_font,
+        [_invoice_font(F(S(19)), bold=True), _invoice_font(F(S(17)), bold=True)],
+        due_badge_w - S(24),
+    )
+    centered_text(due_badge_left, due_badge_w, frame_top + S(55), due_label, due_label_font, colors["ink"])
+    centered_text(due_badge_left, due_badge_w, frame_top + S(80), str(due_date), due_date_font, colors["ink"])
 
     meta_rows = [
         ("INVOICE NO.", document_number),
@@ -644,11 +657,11 @@ def _build_legacy_branded_invoice_pdf(document):
     table_inner_right = table_left + table_w - S(18)
     table_inner_w = table_inner_right - table_inner_left
     column_gap = S(14)
-    desc_w = S(240)
-    date_w = S(82)
-    qty_w = S(62)
-    unit_w = S(85)
-    vat_w = S(60)
+    desc_w = S(255)
+    date_w = S(105)
+    qty_w = S(70)
+    unit_w = S(100)
+    vat_w = S(72)
     amount_w = table_inner_w - desc_w - date_w - qty_w - unit_w - vat_w - (column_gap * 5)
     desc_x = table_inner_left
     date_x = desc_x + desc_w + column_gap
@@ -671,7 +684,14 @@ def _build_legacy_branded_invoice_pdf(document):
                     detail_lines = wrap(" ".join(split_lines[1:]), body_font, desc_w)
         else:
             title_lines = wrap(description, body_bold_font, desc_w)
-        date_lines = wrap(row.get("date") or invoice_date, small_font, date_w)
+        date_text = str(row.get("date") or invoice_date)
+        date_font = fit_font_for_width(
+            date_text,
+            small_font,
+            [_invoice_font(F(S(14))), _invoice_font(F(S(12)))],
+            date_w,
+        )
+        date_lines = [date_text]
         qty_lines = wrap(str(row.get("quantity", "-")), small_font, qty_w)
         unit_value = _clean_money(row.get("unit_price", "-")).replace(f" {currency_code}", "")
         amount_value = _clean_money(row.get("line_total", "-")).replace(f" {currency_code}", "")
@@ -687,10 +707,16 @@ def _build_legacy_branded_invoice_pdf(document):
             len(vat_lines) * S(24) + S(20),
             len(amount_lines) * S(24) + S(20),
         )
-        row_specs.append((row, title_lines, detail_lines, date_lines, qty_lines, unit_lines, vat_lines, amount_lines, row_h))
+        row_specs.append((row, title_lines, detail_lines, date_lines, qty_lines, unit_lines, vat_lines, amount_lines, row_h, date_font))
 
     if not row_specs:
-        row_specs.append(({"quantity": "-", "unit_price": "-", "vat_percent": "-", "line_total": "-", "date": invoice_date}, ["Service"], [], [invoice_date], ["-"], ["-"], ["-"], ["-"], S(70)))
+        fallback_date_font = fit_font_for_width(
+            str(invoice_date),
+            small_font,
+            [_invoice_font(F(S(14))), _invoice_font(F(S(12)))],
+            date_w,
+        )
+        row_specs.append(({"quantity": "-", "unit_price": "-", "vat_percent": "-", "line_total": "-", "date": invoice_date}, ["Service"], [], [invoice_date], ["-"], ["-"], ["-"], ["-"], S(70), fallback_date_font))
 
     table_h = table_header_h + sum(spec[8] for spec in row_specs)
     card_box(table_left, main_top, table_w, table_h)
@@ -708,7 +734,7 @@ def _build_legacy_branded_invoice_pdf(document):
     draw.text((amount_right_x - amount_label_w, main_top + S(18)), amount_label, font=table_header_font, fill=colors["ink"])
 
     row_y = main_top + table_header_h
-    for index, (row, title_lines, detail_lines, date_lines, qty_lines, unit_lines, vat_lines, amount_lines, row_h) in enumerate(row_specs):
+    for index, (row, title_lines, detail_lines, date_lines, qty_lines, unit_lines, vat_lines, amount_lines, row_h, date_font) in enumerate(row_specs):
         if index:
             draw.line([(table_left + S(16), row_y), (table_left + table_w - S(16), row_y)], fill=colors["line"], width=S(1))
         text_y = row_y + S(16)
@@ -718,7 +744,7 @@ def _build_legacy_branded_invoice_pdf(document):
         for i, line in enumerate(detail_lines[:3]):
             draw.text((desc_x, detail_y + (i * S(22))), line, font=body_font, fill=colors["ink"])
         for i, line in enumerate(date_lines[:2]):
-            draw.text((date_x, text_y + (i * S(24))), line, font=small_font, fill=colors["ink"])
+            draw.text((date_x, text_y + (i * S(24))), line, font=date_font, fill=colors["ink"])
         draw_text_block(qty_x + S(6), text_y, qty_lines[:2], small_font, colors["ink"], S(24))
         draw_text_block(unit_x + S(6), text_y, unit_lines[:2], small_font, colors["ink"], S(24))
         draw_text_block(vat_x + S(6), text_y, vat_lines[:2], small_font, colors["ink"], S(24))
@@ -732,6 +758,8 @@ def _build_legacy_branded_invoice_pdf(document):
             total_row = (label, value)
             continue
         label_text = str(label)
+        if label_text.strip().upper() == "ROT/RUT (INCL. VAT)":
+            continue
         value_text = str(value)
         fill = colors["success"] if any(word in label_text.upper() for word in ["RUT", "ROT", "DISCOUNT", "REWARD"]) or str(value_text).strip().startswith("-") else colors["ink"]
         clean_value = _clean_money(value_text)
