@@ -578,7 +578,7 @@ def _build_legacy_branded_invoice_pdf(document):
         card_w - S(36),
     )
     centered_text(thank_card_left, card_w, cards_top + S(24), thank_title, fitted_thank_font, colors["gold"])
-    draw_text_block(thank_card_left + S(24), cards_top + S(116), thank_text[:6], body_font, colors["ink"], S(32))
+    draw_text_block(thank_card_left + S(24), cards_top + S(140), thank_text[:6], body_font, colors["ink"], S(32))
 
     service_top = cards_top + card_h + S(24)
     service_title_lines = wrap(str(service_details.get("title", "-")), body_bold_font, S(330))
@@ -722,7 +722,7 @@ def _build_legacy_branded_invoice_pdf(document):
     card_box(table_left, main_top, table_w, table_h)
     draw.rectangle((table_left, main_top, table_left + table_w, main_top + table_header_h), fill=colors["soft_fill"], outline=colors["line"])
     draw.text((desc_x, main_top + S(18)), "DESCRIPTION", font=table_header_font, fill=colors["ink"])
-    draw.text((date_x, main_top + S(18)), "DATE", font=table_header_font, fill=colors["ink"])
+    centered_text(date_x, date_w, main_top + S(18), "DATE", table_header_font, colors["ink"])
     centered_text(qty_x, qty_w, main_top + S(8), "HOURS /", table_header_font, colors["ink"])
     centered_text(qty_x, qty_w, main_top + S(30), "QTY", table_header_font, colors["ink"])
     centered_text(unit_x, unit_w, main_top + S(8), "UNIT", table_header_font, colors["ink"])
@@ -744,10 +744,10 @@ def _build_legacy_branded_invoice_pdf(document):
         for i, line in enumerate(detail_lines[:3]):
             draw.text((desc_x, detail_y + (i * S(22))), line, font=body_font, fill=colors["ink"])
         for i, line in enumerate(date_lines[:2]):
-            draw.text((date_x, text_y + (i * S(24))), line, font=date_font, fill=colors["ink"])
-        draw_text_block(qty_x + S(6), text_y, qty_lines[:2], small_font, colors["ink"], S(24))
-        draw_text_block(unit_x + S(6), text_y, unit_lines[:2], small_font, colors["ink"], S(24))
-        draw_text_block(vat_x + S(6), text_y, vat_lines[:2], small_font, colors["ink"], S(24))
+            centered_text(date_x, date_w, text_y + (i * S(24)), line, date_font, colors["ink"])
+        centered_text_block(qty_x, qty_w, text_y, qty_lines[:2], small_font, colors["ink"], S(24))
+        centered_text_block(unit_x, unit_w, text_y, unit_lines[:2], small_font, colors["ink"], S(24))
+        centered_text_block(vat_x, vat_w, text_y, vat_lines[:2], small_font, colors["ink"], S(24))
         draw_right_aligned_block(amount_right_x, text_y, "\n".join(amount_lines[:2]).replace("\n", " "), small_font, colors["ink"], amount_w, S(24))
         row_y += row_h
 
