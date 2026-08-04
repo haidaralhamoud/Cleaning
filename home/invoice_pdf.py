@@ -115,6 +115,9 @@ def get_invoice_sender_details():
     default_email = getattr(settings, "CONTACT_SUPPORT_EMAIL", "") or getattr(settings, "DEFAULT_FROM_EMAIL", "")
     if "<" in default_email and ">" in default_email:
         default_email = default_email.split("<", 1)[1].split(">", 1)[0].strip()
+    company_email = getattr(settings, "INVOICE_COMPANY_EMAIL", default_email or "-")
+    if "<" in company_email and ">" in company_email:
+        company_email = company_email.split("<", 1)[1].split(">", 1)[0].strip()
 
     return {
         "company_name": getattr(settings, "INVOICE_COMPANY_NAME", "Hembla Experten AB"),
@@ -122,9 +125,14 @@ def get_invoice_sender_details():
         "organization_number": getattr(settings, "INVOICE_COMPANY_ORG_NUMBER", "-"),
         "vat_number": getattr(settings, "INVOICE_COMPANY_VAT_NUMBER", "-"),
         "f_tax_status": getattr(settings, "INVOICE_COMPANY_F_TAX_STATUS", "Approved for F-tax"),
-        "email": getattr(settings, "INVOICE_COMPANY_EMAIL", default_email or "-"),
+        "email": company_email,
         "phone": getattr(settings, "INVOICE_COMPANY_PHONE", "-"),
         "bank_details": getattr(settings, "INVOICE_COMPANY_BANK_DETAILS", "-"),
+        "bank_name": getattr(settings, "INVOICE_COMPANY_BANK_NAME", "-"),
+        "bankgiro": getattr(settings, "INVOICE_COMPANY_BANKGIRO", "-"),
+        "account_number": getattr(settings, "INVOICE_COMPANY_ACCOUNT_NUMBER", "-"),
+        "iban": getattr(settings, "INVOICE_COMPANY_IBAN", "-"),
+        "bic": getattr(settings, "INVOICE_COMPANY_BIC", "-"),
     }
 
 
@@ -321,6 +329,11 @@ def _build_legacy_branded_invoice_pdf(document):
     company_details.setdefault("email", sender.get("email") or "-")
     company_details.setdefault("phone", sender.get("phone number") or sender.get("phone") or "-")
     company_details.setdefault("bank_details", sender.get("bank details") or sender.get("bank_details") or "-")
+    company_details.setdefault("bank_name", sender.get("bank name") or sender.get("bank_name") or company_details["bank_details"])
+    company_details.setdefault("bankgiro", sender.get("bankgiro") or "-")
+    company_details.setdefault("account_number", sender.get("account number") or sender.get("account_number") or "-")
+    company_details.setdefault("iban", sender.get("iban") or "-")
+    company_details.setdefault("bic", sender.get("bic") or "-")
 
     if not service_details:
         service_details = {
@@ -879,12 +892,15 @@ def _build_legacy_branded_invoice_pdf(document):
         _user_icon((S(22), S(22)), stroke=colors["gold"]),
     ]
 
-    payment_value_lines = [wrap(str(value), small_font, footer_col_w - S(124))[:2] for _, value in [
-        ("Bank:", company_details.get("bank_details", "-")),
-        ("IBAN:", company_details.get("organization_number", "-")),
-        ("BIC:", company_details.get("vat_number", "-")),
+    payment_rows = [
+        ("Bank:", company_details.get("bank_name") or company_details.get("bank_details", "-")),
+        ("Bankgiro:", company_details.get("bankgiro", "-")),
+        ("Account:", company_details.get("account_number", "-")),
+        ("IBAN:", company_details.get("iban", "-")),
+        ("BIC:", company_details.get("bic", "-")),
         ("Reference:", reference_number),
-    ]]
+    ]
+    payment_value_lines = [wrap(str(value), small_font, footer_col_w - S(124))[:2] for _, value in payment_rows]
     company_wrapped_lines = []
     for line in [
         company_details.get("name", brand_name),
@@ -915,13 +931,12 @@ def _build_legacy_branded_invoice_pdf(document):
 
     left = footer_positions[0] + S(16)
     fy = footer_top + S(58)
-    payment_lines = [("Bank:", company_details.get("bank_details", "-")), ("IBAN:", company_details.get("organization_number", "-")), ("BIC:", company_details.get("vat_number", "-")), ("Reference:", reference_number)]
-    for idx, (label, value) in enumerate(payment_lines):
+    for idx, (label, value) in enumerate(payment_rows):
         draw.text((left, fy), label, font=small_bold_font, fill=colors["ink"])
         value_lines = payment_value_lines[idx]
         draw_text_block(left + S(88), fy, value_lines[:2], small_font, colors["ink"], S(20))
         fy += S(30) if len(value_lines) == 1 else S(46)
-    draw.text((left, footer_top + footer_h - S(36)), "Payment is due within 14 days.", font=small_font, fill=colors["muted"])
+    draw.text((left, footer_top + footer_h - S(36)), f"Payment terms: {payment_terms}.", font=small_font, fill=colors["muted"])
 
     left = footer_positions[1] + S(16)
     fy = footer_top + S(58)

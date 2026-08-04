@@ -209,6 +209,11 @@ def _invoice_sender_rows():
         ("Email", sender["email"]),
         ("Phone number", sender["phone"]),
         ("Bank details", sender["bank_details"]),
+        ("Bank name", sender["bank_name"]),
+        ("Bankgiro", sender["bankgiro"]),
+        ("Account number", sender["account_number"]),
+        ("IBAN", sender["iban"]),
+        ("BIC", sender["bic"]),
     ]
 
 
@@ -452,6 +457,11 @@ def render_invoice_pdf(invoice: Invoice) -> bytes:
             "email": sender["email"],
             "phone": sender["phone"],
             "bank_details": sender["bank_details"],
+            "bank_name": sender["bank_name"],
+            "bankgiro": sender["bankgiro"],
+            "account_number": sender["account_number"],
+            "iban": sender["iban"],
+            "bic": sender["bic"],
         },
         "footer_text": " | ".join([value for value in [sender["address"], sender["phone"], sender["email"]] if value and value != "-"]),
     })
