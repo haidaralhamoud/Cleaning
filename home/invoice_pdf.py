@@ -919,7 +919,11 @@ def _build_legacy_branded_invoice_pdf(document):
         "deduction when applicable.",
         "Keep this invoice for your records.",
     ]]
-    payment_h = S(54) + sum(S(26) if len(lines) == 1 else S(40) for lines in payment_value_lines) + S(28)
+    # Keep this in sync with the row advances used while drawing below. Payment
+    # details can contain six rows, so the old four-row estimate caused the
+    # reference and terms to overlap in production PDFs.
+    payment_row_heights = [S(30) if len(lines) == 1 else S(46) for lines in payment_value_lines]
+    payment_h = S(58) + sum(payment_row_heights) + S(44)
     company_h = S(54) + sum(S(24) if len(lines) == 1 else S(36) for lines, _font in company_wrapped_lines) + S(26)
     important_h = S(54) + sum(S(22) if len(lines) == 1 else S(34) for lines in important_wrapped_lines) + S(24)
     footer_h = max(S(210), payment_h, company_h, important_h)
@@ -935,8 +939,8 @@ def _build_legacy_branded_invoice_pdf(document):
         draw.text((left, fy), label, font=small_bold_font, fill=colors["ink"])
         value_lines = payment_value_lines[idx]
         draw_text_block(left + S(88), fy, value_lines[:2], small_font, colors["ink"], S(20))
-        fy += S(30) if len(value_lines) == 1 else S(46)
-    draw.text((left, footer_top + footer_h - S(36)), f"Payment terms: {payment_terms}.", font=small_font, fill=colors["muted"])
+        fy += payment_row_heights[idx]
+    draw.text((left, fy + S(6)), f"Payment terms: {payment_terms}.", font=small_font, fill=colors["muted"])
 
     left = footer_positions[1] + S(16)
     fy = footer_top + S(58)
