@@ -473,7 +473,7 @@ def send_invoice_email(invoice: Invoice):
         raise ValueError("Customer email is missing.")
 
     pdf_bytes = render_invoice_pdf(invoice)
-    subject = f"Your invoice {invoice.invoice_number}"
+    subject = f"Hembla Experten invoice {invoice.invoice_number}"
     customer_name = (invoice.customer.first_name or "Customer").strip()
     amount_due = _format_money(invoice.total_amount(), invoice.currency)
     due_date = invoice.due_date.strftime("%Y-%m-%d") if invoice.due_date else "not specified"
