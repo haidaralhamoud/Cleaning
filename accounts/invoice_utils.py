@@ -202,6 +202,8 @@ def _invoice_sender_rows():
     sender = get_invoice_sender_details()
     return [
         ("Company name", sender["company_name"]),
+        ("Legal entity", sender["legal_entity"]),
+        ("Business name", sender["business_name"]),
         ("Address", sender["address"]),
         ("Organization number (Org.nr)", sender["organization_number"]),
         ("VAT number", sender["vat_number"]),
@@ -210,10 +212,12 @@ def _invoice_sender_rows():
         ("Phone number", sender["phone"]),
         ("Bank details", sender["bank_details"]),
         ("Bank name", sender["bank_name"]),
+        ("Account holder", sender["account_holder"]),
         ("Bankgiro", sender["bankgiro"]),
         ("Account number", sender["account_number"]),
         ("IBAN", sender["iban"]),
         ("BIC", sender["bic"]),
+        ("Bank branch", sender["bank_branch"]),
     ]
 
 
@@ -450,6 +454,8 @@ def render_invoice_pdf(invoice: Invoice) -> bytes:
         "service_details": service_details,
         "company_details": {
             "name": sender["company_name"],
+            "legal_entity": sender["legal_entity"],
+            "business_name": sender["business_name"],
             "organization_number": sender["organization_number"],
             "vat_number": sender["vat_number"],
             "f_tax_status": sender["f_tax_status"],
@@ -458,10 +464,12 @@ def render_invoice_pdf(invoice: Invoice) -> bytes:
             "phone": sender["phone"],
             "bank_details": sender["bank_details"],
             "bank_name": sender["bank_name"],
+            "account_holder": sender["account_holder"],
             "bankgiro": sender["bankgiro"],
             "account_number": sender["account_number"],
             "iban": sender["iban"],
             "bic": sender["bic"],
+            "bank_branch": sender["bank_branch"],
         },
         "footer_text": " | ".join([value for value in [sender["address"], sender["phone"], sender["email"]] if value and value != "-"]),
     })

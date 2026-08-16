@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal, ROUND_HALF_UP
 from io import BytesIO
 from pathlib import Path
@@ -111,6 +112,25 @@ def _format_money(value, currency):
     return f"{amount:.2f} {currency}"
 
 
+def _invoice_month_year(*date_values):
+    """Return an English month/year from the first recognizable invoice date."""
+    formats = (
+        "%Y-%m-%d",
+        "%d %b %Y",
+        "%d %B %Y",
+        "%d/%m/%Y",
+        "%Y/%m/%d",
+    )
+    for value in date_values:
+        text = str(value or "").strip()
+        for date_format in formats:
+            try:
+                return datetime.strptime(text, date_format).strftime("%B %Y")
+            except ValueError:
+                continue
+    return "the invoiced period"
+
+
 def get_invoice_sender_details():
     default_email = getattr(settings, "CONTACT_SUPPORT_EMAIL", "") or getattr(settings, "DEFAULT_FROM_EMAIL", "")
     if "<" in default_email and ">" in default_email:
@@ -120,8 +140,10 @@ def get_invoice_sender_details():
         company_email = company_email.split("<", 1)[1].split(">", 1)[0].strip()
 
     return {
-        "company_name": getattr(settings, "INVOICE_COMPANY_NAME", "Hembla Experten AB"),
-        "address": getattr(settings, "INVOICE_COMPANY_ADDRESS", "Kikarvagen 18, 175 46 Jarfalla, Stockholm"),
+        "company_name": getattr(settings, "INVOICE_COMPANY_NAME", "Hembla Experten"),
+        "legal_entity": getattr(settings, "INVOICE_COMPANY_LEGAL_ENTITY", "RWM Helservice AB"),
+        "business_name": getattr(settings, "INVOICE_COMPANY_BUSINESS_NAME", "Hembla Experten (RWM EL)"),
+        "address": getattr(settings, "INVOICE_COMPANY_ADDRESS", "Kikarvägen 18, 175 46 Järfälla, Sweden"),
         "organization_number": getattr(settings, "INVOICE_COMPANY_ORG_NUMBER", "-"),
         "vat_number": getattr(settings, "INVOICE_COMPANY_VAT_NUMBER", "-"),
         "f_tax_status": getattr(settings, "INVOICE_COMPANY_F_TAX_STATUS", "Approved for F-tax"),
@@ -129,10 +151,12 @@ def get_invoice_sender_details():
         "phone": getattr(settings, "INVOICE_COMPANY_PHONE", "-"),
         "bank_details": getattr(settings, "INVOICE_COMPANY_BANK_DETAILS", "-"),
         "bank_name": getattr(settings, "INVOICE_COMPANY_BANK_NAME", "-"),
+        "account_holder": getattr(settings, "INVOICE_COMPANY_ACCOUNT_HOLDER", "-"),
         "bankgiro": getattr(settings, "INVOICE_COMPANY_BANKGIRO", "-"),
         "account_number": getattr(settings, "INVOICE_COMPANY_ACCOUNT_NUMBER", "-"),
         "iban": getattr(settings, "INVOICE_COMPANY_IBAN", "-"),
         "bic": getattr(settings, "INVOICE_COMPANY_BIC", "-"),
+        "bank_branch": getattr(settings, "INVOICE_COMPANY_BANK_BRANCH", "-"),
     }
 
 
@@ -322,6 +346,8 @@ def _build_legacy_branded_invoice_pdf(document):
     property_details.setdefault("property_number", document_number)
 
     company_details.setdefault("name", brand_name)
+    company_details.setdefault("legal_entity", sender.get("legal entity") or sender.get("legal_entity") or "-")
+    company_details.setdefault("business_name", sender.get("business name") or sender.get("business_name") or brand_name)
     company_details.setdefault("organization_number", sender.get("organization number (org.nr)") or sender.get("organization_number") or "-")
     company_details.setdefault("vat_number", sender.get("vat number") or sender.get("vat_number") or "-")
     company_details.setdefault("f_tax_status", sender.get("f-tax status") or sender.get("f_tax_status") or "-")
@@ -330,10 +356,12 @@ def _build_legacy_branded_invoice_pdf(document):
     company_details.setdefault("phone", sender.get("phone number") or sender.get("phone") or "-")
     company_details.setdefault("bank_details", sender.get("bank details") or sender.get("bank_details") or "-")
     company_details.setdefault("bank_name", sender.get("bank name") or sender.get("bank_name") or company_details["bank_details"])
+    company_details.setdefault("account_holder", sender.get("account holder") or sender.get("account_holder") or "-")
     company_details.setdefault("bankgiro", sender.get("bankgiro") or "-")
     company_details.setdefault("account_number", sender.get("account number") or sender.get("account_number") or "-")
     company_details.setdefault("iban", sender.get("iban") or "-")
     company_details.setdefault("bic", sender.get("bic") or "-")
+    company_details.setdefault("bank_branch", sender.get("bank branch") or sender.get("bank_branch") or "-")
 
     if not service_details:
         service_details = {
@@ -894,38 +922,78 @@ def _build_legacy_branded_invoice_pdf(document):
 
     payment_rows = [
         ("Bank:", company_details.get("bank_name") or company_details.get("bank_details", "-")),
-        ("Bankgiro:", company_details.get("bankgiro", "-")),
-        ("Account:", company_details.get("account_number", "-")),
+        ("Holder:", company_details.get("account_holder", "-")),
+        ("Account no.:", company_details.get("account_number", "-")),
         ("IBAN:", company_details.get("iban", "-")),
-        ("BIC:", company_details.get("bic", "-")),
+        ("BIC/SWIFT:", company_details.get("bic", "-")),
+        ("Clearing no.:", company_details.get("bank_branch", "-")),
         ("Reference:", reference_number),
     ]
-    payment_value_lines = [wrap(str(value), small_font, footer_col_w - S(124))[:2] for _, value in payment_rows]
-    company_wrapped_lines = []
-    for line in [
-        company_details.get("name", brand_name),
-        f"Org.nr: {company_details.get('organization_number', '-')}",
-        f"VAT No: {company_details.get('vat_number', '-')}",
-        f"F-tax: {company_details.get('f_tax_status', '-')}",
-        company_details.get("email", "-"),
-        company_details.get("phone", "-"),
-    ]:
-        font = small_font if ":" in str(line) or "@" in str(line) else small_bold_font
-        company_wrapped_lines.append((wrap(str(line), font, footer_col_w - S(32))[:2], font))
-    important_wrapped_lines = [wrap(line, small_font, footer_col_w - S(32))[:2] for line in [
-        "This invoice is issued in accordance",
-        "with the Swedish VAT Act.",
-        "Services are eligible for RUT",
-        "deduction when applicable.",
-        "Keep this invoice for your records.",
-    ]]
+    payment_label_w = max(
+        int(draw.textlength(label, font=small_bold_font))
+        for label, _value in payment_rows
+    ) + S(16)
+    payment_value_lines = [wrap(str(value), small_font, footer_col_w - payment_label_w - S(32))[:2] for _, value in payment_rows]
+    company_rows = [
+        ("Legal entity:", company_details.get("legal_entity", "-")),
+        ("Business name:", company_details.get("business_name", brand_name)),
+        ("Organization no.:", company_details.get("organization_number", "-")),
+        ("VAT No:", company_details.get("vat_number", "-")),
+        ("Address:", company_details.get("address", "-")),
+        ("F-tax:", company_details.get("f_tax_status", "-")),
+        ("Email:", company_details.get("email", "-")),
+    ]
+    company_label_w = max(
+        int(draw.textlength(label, font=small_bold_font))
+        for label, _value in company_rows
+    ) + S(12)
+    company_value_w = max(S(90), footer_col_w - S(32) - company_label_w)
+    company_row_specs = []
+    for label, value in company_rows:
+        value_lines = wrap(str(value), small_font, company_value_w)[:3]
+        company_row_specs.append((label, value_lines))
+    service_period = _invoice_month_year(service_details.get("date"), invoice_date)
+    company_short_name = str(company_details.get("name") or brand_name).removesuffix(" AB")
+    if rut_applied:
+        important_paragraphs = [
+            f"This invoice covers home cleaning services performed during {service_period} "
+            f"and includes a preliminary RUT deduction of {_format_money(deduction_number, currency_code)}.",
+            f"After the customer's payment is registered, {company_short_name} will apply "
+            "to the Swedish Tax Agency for the same amount.",
+            "If the deduction is wholly or partially denied, the customer must pay the outstanding amount.",
+        ]
+    else:
+        important_paragraphs = [
+            "This invoice is issued in accordance with the Swedish VAT Act.",
+            "No preliminary RUT deduction has been applied.",
+            "Keep this invoice for your records.",
+        ]
+    important_wrapped_paragraphs = [
+        wrap(paragraph, small_font, footer_col_w - S(32))
+        for paragraph in important_paragraphs
+    ]
     # Keep this in sync with the row advances used while drawing below. Payment
-    # details can contain six rows, so the old four-row estimate caused the
+    # details can contain several rows, so a fixed estimate would cause the
     # reference and terms to overlap in production PDFs.
-    payment_row_heights = [S(30) if len(lines) == 1 else S(46) for lines in payment_value_lines]
+    payment_row_heights = [S(32) if len(lines) == 1 else S(52) for lines in payment_value_lines]
     payment_h = S(58) + sum(payment_row_heights) + S(44)
-    company_h = S(54) + sum(S(24) if len(lines) == 1 else S(36) for lines, _font in company_wrapped_lines) + S(26)
-    important_h = S(54) + sum(S(22) if len(lines) == 1 else S(34) for lines in important_wrapped_lines) + S(24)
+    company_line_height = S(24)
+    company_row_gap = S(6)
+    company_h = (
+        S(54)
+        + sum(max(1, len(lines)) * company_line_height for _label, lines in company_row_specs)
+        + ((len(company_row_specs) - 1) * company_row_gap)
+        + S(26)
+    )
+    important_line_height = S(27)
+    important_paragraph_gap = S(16)
+    important_line_count = sum(len(lines) for lines in important_wrapped_paragraphs)
+    important_h = (
+        S(54)
+        + (important_line_count * important_line_height)
+        + ((len(important_wrapped_paragraphs) - 1) * important_paragraph_gap)
+        + S(24)
+    )
     footer_h = max(S(210), payment_h, company_h, important_h)
 
     for left, title, icon in zip(footer_positions, footer_titles, footer_icons):
@@ -938,21 +1006,22 @@ def _build_legacy_branded_invoice_pdf(document):
     for idx, (label, value) in enumerate(payment_rows):
         draw.text((left, fy), label, font=small_bold_font, fill=colors["ink"])
         value_lines = payment_value_lines[idx]
-        draw_text_block(left + S(88), fy, value_lines[:2], small_font, colors["ink"], S(20))
+        draw_text_block(left + payment_label_w, fy, value_lines[:2], small_font, colors["ink"], S(20))
         fy += payment_row_heights[idx]
     draw.text((left, fy + S(6)), f"Payment terms: {payment_terms}.", font=small_font, fill=colors["muted"])
 
     left = footer_positions[1] + S(16)
     fy = footer_top + S(58)
-    for wrapped, font in company_wrapped_lines:
-        draw_text_block(left, fy, wrapped[:2], font, colors["ink"], S(20))
-        fy += S(28) if len(wrapped) == 1 else S(42)
+    for label, value_lines in company_row_specs:
+        draw.text((left, fy), label, font=small_bold_font, fill=colors["ink"])
+        draw_text_block(left + company_label_w, fy, value_lines, small_font, colors["ink"], company_line_height)
+        fy += (max(1, len(value_lines)) * company_line_height) + company_row_gap
 
     left = footer_positions[2] + S(16)
     fy = footer_top + S(58)
-    for wrapped in important_wrapped_lines:
-        draw_text_block(left, fy, wrapped[:2], small_font, colors["ink"], S(20))
-        fy += S(26) if len(wrapped) == 1 else S(40)
+    for paragraph_lines in important_wrapped_paragraphs:
+        draw_text_block(left, fy, paragraph_lines, small_font, colors["ink"], important_line_height)
+        fy += (len(paragraph_lines) * important_line_height) + important_paragraph_gap
 
     bottom_y = footer_top + footer_h + S(52)
     draw.line([(frame_left, bottom_y - S(34)), (frame_right, bottom_y - S(34))], fill=colors["line"], width=S(1))
