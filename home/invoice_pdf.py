@@ -132,6 +132,12 @@ def _invoice_month_year(*date_values):
 
 
 def get_invoice_sender_details():
+    def configured(name, default, legacy_values=()):
+        value = str(getattr(settings, name, "") or "").strip()
+        if not value or value == "-" or value in legacy_values:
+            return default
+        return value
+
     default_email = getattr(settings, "CONTACT_SUPPORT_EMAIL", "") or getattr(settings, "DEFAULT_FROM_EMAIL", "")
     if "<" in default_email and ">" in default_email:
         default_email = default_email.split("<", 1)[1].split(">", 1)[0].strip()
@@ -140,23 +146,30 @@ def get_invoice_sender_details():
         company_email = company_email.split("<", 1)[1].split(">", 1)[0].strip()
 
     return {
-        "company_name": getattr(settings, "INVOICE_COMPANY_NAME", "Hembla Experten"),
-        "legal_entity": getattr(settings, "INVOICE_COMPANY_LEGAL_ENTITY", "RWM Helservice AB"),
-        "business_name": getattr(settings, "INVOICE_COMPANY_BUSINESS_NAME", "Hembla Experten (RWM EL)"),
-        "address": getattr(settings, "INVOICE_COMPANY_ADDRESS", "Kikarvägen 18, 175 46 Järfälla, Sweden"),
-        "organization_number": getattr(settings, "INVOICE_COMPANY_ORG_NUMBER", "-"),
-        "vat_number": getattr(settings, "INVOICE_COMPANY_VAT_NUMBER", "-"),
+        "company_name": configured("INVOICE_COMPANY_NAME", "Hembla Experten"),
+        "legal_entity": configured("INVOICE_COMPANY_LEGAL_ENTITY", "RWM Helservice AB"),
+        "business_name": configured("INVOICE_COMPANY_BUSINESS_NAME", "Hembla Experten (RWM EL)"),
+        "address": configured(
+            "INVOICE_COMPANY_ADDRESS",
+            "Kikarvägen 18, 175 46 Järfälla, Sweden",
+            legacy_values=(
+                "Kikarvagen 18, 175 46 Jarfalla, Stockholm",
+                "Kikarvagen 18, 175 46 Jarfalla, Sweden",
+            ),
+        ),
+        "organization_number": configured("INVOICE_COMPANY_ORG_NUMBER", "559545-1351"),
+        "vat_number": configured("INVOICE_COMPANY_VAT_NUMBER", "SE559545135101"),
         "f_tax_status": getattr(settings, "INVOICE_COMPANY_F_TAX_STATUS", "Approved for F-tax"),
         "email": company_email,
         "phone": getattr(settings, "INVOICE_COMPANY_PHONE", "-"),
         "bank_details": getattr(settings, "INVOICE_COMPANY_BANK_DETAILS", "-"),
-        "bank_name": getattr(settings, "INVOICE_COMPANY_BANK_NAME", "-"),
-        "account_holder": getattr(settings, "INVOICE_COMPANY_ACCOUNT_HOLDER", "-"),
+        "bank_name": configured("INVOICE_COMPANY_BANK_NAME", "Handelsbanken"),
+        "account_holder": configured("INVOICE_COMPANY_ACCOUNT_HOLDER", "Hembla Experten"),
         "bankgiro": getattr(settings, "INVOICE_COMPANY_BANKGIRO", "-"),
-        "account_number": getattr(settings, "INVOICE_COMPANY_ACCOUNT_NUMBER", "-"),
-        "iban": getattr(settings, "INVOICE_COMPANY_IBAN", "-"),
-        "bic": getattr(settings, "INVOICE_COMPANY_BIC", "-"),
-        "bank_branch": getattr(settings, "INVOICE_COMPANY_BANK_BRANCH", "-"),
+        "account_number": configured("INVOICE_COMPANY_ACCOUNT_NUMBER", "755 995 651"),
+        "iban": configured("INVOICE_COMPANY_IBAN", "SE43 6000 0000 0007 5599 5651"),
+        "bic": configured("INVOICE_COMPANY_BIC", "HANDSESS"),
+        "bank_branch": configured("INVOICE_COMPANY_BANK_BRANCH", "6184"),
     }
 
 
