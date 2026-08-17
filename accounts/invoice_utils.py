@@ -236,13 +236,27 @@ def _invoice_info_rows(invoice: Invoice):
 
 def _invoice_line_rows(invoice: Invoice):
     rows = []
+    booking = invoice.get_booking()
+    booking_date = getattr(booking, "appointment_date", None)
     for item in invoice.line_items.all():
         description = item.description
         if item.service_time:
             description = f"{description}"
+        service_date = ""
+        service_time = str(item.service_time or "").strip()
+        date_candidate = service_time.split(" / ", 1)[0].strip()
+        for date_format in ("%Y-%m-%d", "%d %b %Y"):
+            try:
+                datetime.strptime(date_candidate, date_format)
+                service_date = date_candidate
+                break
+            except ValueError:
+                continue
+        if not service_date and booking_date:
+            service_date = booking_date.strftime("%Y-%m-%d")
         rows.append({
             "description": description,
-            "date": item.service_time or "",
+            "date": service_date,
             "quantity": f"{_q(item.quantity):.2f}".rstrip("0").rstrip("."),
             "unit_price": _format_money(item.unit_price, invoice.currency),
             "discount_percent": f"{_q(item.discount_percent):.2f}".rstrip("0").rstrip(".") + "%",
