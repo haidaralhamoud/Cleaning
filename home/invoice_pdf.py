@@ -534,8 +534,18 @@ def _build_legacy_branded_invoice_pdf(document):
                 width=S(1),
             )
         draw.text((meta_label_x, meta_y), label, font=meta_label_font, fill=colors["ink"])
-        value_lines = wrap(str(value), body_font, meta_value_width)
-        draw_text_block(meta_value_x, meta_y - S(2), value_lines[:2], body_font, colors["ink"], S(24))
+        value_font = body_font
+        if label in {"INVOICE DATE", "DUE DATE"}:
+            value_font = fit_font_for_width(
+                str(value),
+                body_font,
+                [_invoice_font(F(S(16))), _invoice_font(F(S(14))), _invoice_font(F(S(12)))],
+                meta_value_width,
+            )
+            value_lines = [str(value)]
+        else:
+            value_lines = wrap(str(value), value_font, meta_value_width)
+        draw_text_block(meta_value_x, meta_y - S(2), value_lines[:2], value_font, colors["ink"], S(24))
         meta_y += S(43) if len(value_lines) == 1 else S(59)
 
     cards_top = frame_top + header_h + S(26)
@@ -553,7 +563,7 @@ def _build_legacy_branded_invoice_pdf(document):
         card_w - S(36),
     )[:2]
     for line in [
-        f"Customer No.:  {customer_details.get('customer_number', '-')}",
+        f"Customer No:  {customer_details.get('customer_number', '-')}",
         customer_details.get("address", "-"),
         customer_details.get("postal_city", "-"),
         customer_details.get("country", "-"),
@@ -1026,7 +1036,6 @@ def _build_legacy_branded_invoice_pdf(document):
         value_lines = payment_value_lines[idx]
         draw_text_block(left + payment_label_w, fy, value_lines[:2], small_font, colors["ink"], S(20))
         fy += payment_row_heights[idx]
-    draw.text((left, fy + S(6)), f"Payment terms: {payment_terms}.", font=small_font, fill=colors["muted"])
 
     left = footer_positions[1] + S(16)
     fy = footer_top + S(58)
