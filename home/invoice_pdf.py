@@ -148,7 +148,11 @@ def get_invoice_sender_details():
     return {
         "company_name": configured("INVOICE_COMPANY_NAME", "Hembla Experten"),
         "legal_entity": configured("INVOICE_COMPANY_LEGAL_ENTITY", "RWM Helservice AB"),
-        "business_name": configured("INVOICE_COMPANY_BUSINESS_NAME", "Hembla Experten (RWM EL)"),
+        "business_name": configured(
+            "INVOICE_COMPANY_BUSINESS_NAME",
+            "Hembla Experten",
+            legacy_values=("Hembla Experten (RWM EL)",),
+        ),
         "address": configured(
             "INVOICE_COMPANY_ADDRESS",
             "Kikarvägen 18, 175 46 Järfälla, Sweden",
@@ -977,7 +981,7 @@ def _build_legacy_branded_invoice_pdf(document):
         ]
     else:
         important_paragraphs = [
-            "This invoice is issued in accordance with the Swedish VAT Act.",
+            f"This invoice covers home cleaning services performed during {service_period}.",
             "No preliminary RUT deduction has been applied.",
             "Keep this invoice for your records.",
         ]
