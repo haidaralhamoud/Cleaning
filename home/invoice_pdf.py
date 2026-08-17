@@ -981,9 +981,10 @@ def _build_legacy_branded_invoice_pdf(document):
         ]
     else:
         important_paragraphs = [
-            f"This invoice covers home cleaning services performed during {service_period}.",
-            "No preliminary RUT deduction has been applied.",
-            "Keep this invoice for your records.",
+            "This invoice covers the services detailed above.",
+            "Please use the invoice/reference number when making payment.",
+            "If you have any questions regarding the service, charges or invoice, "
+            "please contact Hembla Experten before the due date.",
         ]
     important_wrapped_paragraphs = [
         wrap(paragraph, small_font, footer_col_w - S(32))
