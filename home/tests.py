@@ -13,6 +13,77 @@ from accounts.models import Customer
 from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes, has_overlap
 from home.pricing_utils import calculate_booking_price
+from home.views import CustomerDashboardForm
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    STORAGES={
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    },
+)
+class CustomerDashboardFormTests(TestCase):
+    def customer_data(self, email="new.customer@example.com"):
+        return {
+            "personal_identity_number": "19900101-1234",
+            "first_name": "New",
+            "last_name": "Customer",
+            "phone": "+46700000000",
+            "email": email,
+            "country": "Sweden",
+            "city": "Stockholm",
+            "postal_code": "11122",
+            "house_num": "10",
+            "full_address": "Example Street 10",
+            "preferred_language": "en",
+        }
+
+    def test_customer_dashboard_does_not_expose_user_field(self):
+        user_model = get_user_model()
+        staff_user = user_model.objects.create_user(
+            username="dashboard-admin",
+            password="pass123",
+            is_staff=True,
+        )
+        self.client.force_login(staff_user)
+
+        response = self.client.get(
+            reverse("home:dashboard_model_create", args=["customers"])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("user", response.context["form"].fields)
+
+    def test_customer_form_creates_and_links_account_automatically(self):
+        form = CustomerDashboardForm(data=self.customer_data())
+
+        self.assertTrue(form.is_valid(), form.errors)
+        customer = form.save()
+
+        self.assertEqual(customer.user.email, "new.customer@example.com")
+        self.assertEqual(customer.user.first_name, "New")
+        self.assertFalse(customer.user.has_usable_password())
+
+    def test_customer_form_links_existing_account_with_same_email(self):
+        user_model = get_user_model()
+        existing_user = user_model.objects.create_user(
+            username="existing-user",
+            email="existing.customer@example.com",
+            password="pass123",
+        )
+        form = CustomerDashboardForm(
+            data=self.customer_data("existing.customer@example.com")
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        customer = form.save()
+
+        self.assertEqual(customer.user, existing_user)
 
 
 class ProviderAvailabilityTests(TestCase):

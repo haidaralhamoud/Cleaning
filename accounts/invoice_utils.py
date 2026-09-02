@@ -297,6 +297,19 @@ def _invoice_summary_rows(invoice: Invoice):
         ]
         return summary
 
+    if not invoice.line_items.exists():
+        total = _q(invoice.amount)
+        subtotal_excl_vat = (total / (Decimal("1.00") + (DEFAULT_VAT_PERCENT / Decimal("100.00")))).quantize(
+            Decimal("0.01"),
+            rounding=ROUND_HALF_UP,
+        )
+        vat_amount = total - subtotal_excl_vat
+        return [
+            ("SUBTOTAL (EXCL. VAT)", money(subtotal_excl_vat), False),
+            ("VAT", money(vat_amount), False),
+            (f"FINAL TOTAL ({currency})", money(total), True),
+        ]
+
     subtotal_before_discount = invoice.subtotal_before_discount()
     discount_amount = invoice.discounts_total()
     net_excl_vat = invoice.subtotal_excl_vat()
@@ -407,15 +420,12 @@ def _property_detail_payload(invoice: Invoice):
     address = customer.display_address() if hasattr(customer, "display_address") else ""
     city = customer.display_city() if hasattr(customer, "display_city") else ""
     postal_code = customer.display_postal_code() if hasattr(customer, "display_postal_code") else ""
-    property_number = invoice.booking_id or invoice.customer_number or invoice.invoice_number
+    property_number = customer.house_num or "-"
 
     if booking and getattr(booking, "address", None):
         address = booking.address
     if booking and getattr(booking, "area", None):
         city = booking.area
-    if booking and getattr(booking, "id", None):
-        property_number = booking.id
-
     return {
         "address": address or "-",
         "postal_city": " ".join(part for part in [postal_code, city] if part).strip() or city or postal_code or "-",
@@ -445,7 +455,6 @@ def _customer_detail_payload(invoice: Invoice):
 
 
 def render_invoice_pdf(invoice: Invoice) -> bytes:
-    invoice.sync_amounts()
     sender = get_invoice_sender_details()
     property_details = _property_detail_payload(invoice)
     service_details = _service_detail_payload(invoice)

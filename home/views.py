@@ -3057,6 +3057,66 @@ class ScheduleRuleDashboardForm(forms.ModelForm):
         self.fields["price_change"].help_text = "Use negative for discounts (e.g. -15). Positive adds a surcharge."
 
 
+class CustomerDashboardForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        exclude = ("user", "additional_locations", "custom_addons")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._account_user = None
+
+    def clean_email(self):
+        email = User.objects.normalize_email(self.cleaned_data["email"]).lower()
+
+        other_customers = Customer.objects.filter(email__iexact=email)
+        if self.instance and self.instance.pk:
+            other_customers = other_customers.exclude(pk=self.instance.pk)
+        if other_customers.exists():
+            raise forms.ValidationError("A customer with this email already exists.")
+
+        if not self.instance.pk:
+            self._account_user = User.objects.filter(email__iexact=email).first()
+            if self._account_user and Customer.objects.filter(user=self._account_user).exists():
+                raise forms.ValidationError("This user already has a customer profile.")
+
+        return email
+
+    @staticmethod
+    def _unique_username(email):
+        max_length = User._meta.get_field("username").max_length
+        base = (email or "customer")[:max_length]
+        candidate = base
+        suffix_number = 1
+        while User.objects.filter(username=candidate).exists():
+            suffix = f"-{suffix_number}"
+            candidate = f"{base[:max_length - len(suffix)]}{suffix}"
+            suffix_number += 1
+        return candidate
+
+    def save(self, commit=True):
+        customer = super().save(commit=False)
+
+        if not customer.pk and not customer.user_id:
+            user = self._account_user
+            if user is None:
+                user = User(
+                    username=self._unique_username(customer.email),
+                    email=customer.email,
+                    first_name=customer.first_name,
+                    last_name=customer.last_name,
+                    is_active=True,
+                )
+                user.set_unusable_password()
+                user.save()
+            customer.user = user
+
+        if commit:
+            customer.save()
+            self.save_m2m()
+        return customer
+
+
 def _exclude_fields_for_form(model):
     excluded = []
     for f in model._meta.fields:
@@ -3304,6 +3364,8 @@ def dashboard_model_create(request, model):
         Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardCreateForm
+    elif item.model == Customer:
+        Form = CustomerDashboardForm
     elif item.model == Invoice:
         Form = InvoiceDashboardForm
     elif item.model == InvoiceLineItem:
@@ -3323,10 +3385,14 @@ def dashboard_model_create(request, model):
                     created_shifts = form.save_multiple()
                     provider_id = created_shifts[0].provider_id if created_shifts else request.GET.get("provider_id")
                     return redirect(f"{reverse('home:dashboard_model_list', args=[item.slug])}?provider_id={provider_id}")
-                obj = form.save(commit=False)
-                if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
-                    obj.created_by = request.user
-                obj.save()
+                if item.model == Customer:
+                    with transaction.atomic():
+                        obj = form.save()
+                else:
+                    obj = form.save(commit=False)
+                    if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
+                        obj.created_by = request.user
+                    obj.save()
                 if item.model == InvoiceLineItem:
                     return redirect("home:dashboard_model_edit", model="invoices", pk=obj.invoice_id)
             else:
@@ -3435,6 +3501,8 @@ def dashboard_model_edit(request, model, pk):
         Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardEditForm
+    elif item.model == Customer:
+        Form = CustomerDashboardForm
     elif item.model == Invoice:
         Form = InvoiceDashboardForm
     elif item.model == InvoiceLineItem:
@@ -3625,6 +3693,8 @@ def dashboard_model_view(request, model, pk):
         Form = ProviderShiftDashboardForm
     elif item.model == ProviderProfile:
         Form = ProviderProfileDashboardEditForm
+    elif item.model == Customer:
+        Form = CustomerDashboardForm
     else:
         Form = modelform_factory(
             item.model,

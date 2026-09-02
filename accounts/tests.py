@@ -5,11 +5,70 @@ from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.core import mail
 from datetime import timedelta
+from decimal import Decimal
+from unittest.mock import patch
 
-from .models import Customer, PasswordResetOTP
+from .invoice_utils import _property_detail_payload, render_invoice_pdf
+from .models import Customer, Invoice, PasswordResetOTP
 
 
 User = get_user_model()
+
+
+class InvoicePropertyDetailTests(TestCase):
+    def test_property_number_uses_customer_house_number(self):
+        user = User.objects.create_user(
+            username="invoice-customer@example.com",
+            email="invoice-customer@example.com",
+            password="pass123",
+        )
+        customer = Customer.objects.create(
+            user=user,
+            first_name="Invoice",
+            last_name="Customer",
+            email=user.email,
+            house_num="42B",
+        )
+        invoice = Invoice.objects.create(customer=customer, booking_id=999)
+
+        property_details = _property_detail_payload(invoice)
+
+        self.assertEqual(property_details["property_number"], "42B")
+        self.assertNotEqual(
+            property_details["property_number"],
+            str(customer.customer_number),
+        )
+
+    @patch("accounts.invoice_utils.build_branded_invoice_pdf", return_value=b"%PDF-test")
+    def test_marking_invoice_paid_and_rendering_keeps_stored_amount(self, build_pdf):
+        user = User.objects.create_user(
+            username="paid-invoice-customer@example.com",
+            email="paid-invoice-customer@example.com",
+            password="pass123",
+        )
+        customer = Customer.objects.create(
+            user=user,
+            first_name="Paid",
+            last_name="Customer",
+            email=user.email,
+            house_num="15",
+        )
+        invoice = Invoice.objects.create(
+            customer=customer,
+            amount=Decimal("325.00"),
+            currency="SEK",
+            status="PENDING",
+        )
+
+        invoice.status = "PAID"
+        invoice.save(update_fields=["status"])
+        render_invoice_pdf(invoice)
+        invoice.refresh_from_db()
+
+        self.assertEqual(invoice.status, "PAID")
+        self.assertEqual(invoice.amount, Decimal("325.00"))
+        summary_rows = build_pdf.call_args.args[0]["summary_rows"]
+        self.assertIn("325", summary_rows[-1][1])
 
 
 @override_settings(
