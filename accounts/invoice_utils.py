@@ -316,10 +316,7 @@ def _invoice_summary_rows(invoice: Invoice):
     vat_amount = invoice.vat_amount_total()
     total_incl_vat = invoice.total_incl_vat_before_rot_rut()
     rot_rut_amount = invoice.rot_rut_total()
-    eligible_labor = sum(
-        (item.net_amount() for item in invoice.line_items.filter(is_service_fee=False)),
-        Decimal("0.00"),
-    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    eligible_labor = rot_rut_amount
     summary = [
         ("SUBTOTAL (EXCL. VAT)", money(subtotal_before_discount), False),
         ("DISCOUNT (BEFORE VAT)", f"-{money(discount_amount)}" if discount_amount > 0 else money(0), False),

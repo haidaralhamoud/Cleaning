@@ -8,8 +8,8 @@ from datetime import timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
-from .invoice_utils import _property_detail_payload, render_invoice_pdf
-from .models import Customer, Invoice, PasswordResetOTP
+from .invoice_utils import _invoice_summary_rows, _property_detail_payload, render_invoice_pdf
+from .models import Customer, Invoice, InvoiceLineItem, PasswordResetOTP
 
 
 User = get_user_model()
@@ -69,6 +69,35 @@ class InvoicePropertyDetailTests(TestCase):
         self.assertEqual(invoice.amount, Decimal("325.00"))
         summary_rows = build_pdf.call_args.args[0]["summary_rows"]
         self.assertIn("325", summary_rows[-1][1])
+
+    def test_rut_eligible_labor_displays_applied_rut_amount(self):
+        user = User.objects.create_user(
+            username="rut-invoice-customer@example.com",
+            email="rut-invoice-customer@example.com",
+            password="pass123",
+        )
+        customer = Customer.objects.create(
+            user=user,
+            first_name="RUT",
+            last_name="Customer",
+            email=user.email,
+        )
+        invoice = Invoice.objects.create(customer=customer, currency="SEK")
+        InvoiceLineItem.objects.create(
+            invoice=invoice,
+            description="Private Deep Cleaning - 5 hours",
+            quantity=Decimal("5.00"),
+            unit_price=Decimal("320.00"),
+            vat_percent=Decimal("25.00"),
+            rot_rut_amount=Decimal("1000.00"),
+        )
+
+        summary_rows = _invoice_summary_rows(invoice)
+
+        summary = {label: value for label, value, _ in summary_rows}
+        self.assertEqual(summary["RUT ELIGIBLE LABOR"], "1000.00 SEK")
+        self.assertEqual(summary["ROT/RUT (INCL. VAT)"], "-1000.00 SEK")
+        self.assertEqual(summary["FINAL TOTAL (SEK)"], "1000.00 SEK")
 
 
 @override_settings(
