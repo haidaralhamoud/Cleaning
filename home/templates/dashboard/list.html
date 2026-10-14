@@ -36,9 +36,11 @@
           </a>
         {% endif %}
       {% endif %}
-      <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}{% if provider_id and item.slug == 'provider-shifts' %}?provider_id={{ provider_id }}{% elif invoice_id and item.slug == 'invoice-line-items' %}?invoice_id={{ invoice_id }}{% endif %}">
-        <i class="fa-solid fa-plus"></i> Add
-      </a>
+      {% if item.slug != "airbnb-management-requests" and item.slug != "home-hero-price" %}
+        <a class="btn btn-primary" href="{% url 'home:dashboard_model_create' item.slug %}{% if provider_id and item.slug == 'provider-shifts' %}?provider_id={{ provider_id }}{% elif invoice_id and item.slug == 'invoice-line-items' %}?invoice_id={{ invoice_id }}{% endif %}">
+          <i class="fa-solid fa-plus"></i> Add
+        </a>
+      {% endif %}
     </div>
   </div>
 
@@ -107,7 +109,9 @@
                   <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' obj.booking_type|add:'-bookings' obj.booking_id %}">Booking</a>
                 {% endif %}
               {% endif %}
-              <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
+              {% if item.slug != "home-hero-price" %}
+                <a class="btn btn-sm btn-outline-danger" href="{% url 'home:dashboard_model_delete' item.slug obj.pk %}">Delete</a>
+              {% endif %}
             </td>
           </tr>
         {% empty %}

@@ -1,0 +1,13 @@
+<section class="private-flow-intro" aria-label="Private booking journey">
+  <div class="private-flow-intro__copy">
+    <span class="private-flow-intro__eyebrow">Your private booking</span>
+    <strong>{{ flow_title }}</strong>
+    <small>{{ flow_text }}</small>
+  </div>
+  <div class="private-flow-steps">
+    <span class="private-flow-step{% if flow_step > 1 %} is-done{% elif flow_step == 1 %} is-current{% endif %}"><b>{% if flow_step > 1 %}&#10003;{% else %}1{% endif %}</b>Services</span>
+    <span class="private-flow-step{% if flow_step > 2 %} is-done{% elif flow_step == 2 %} is-current{% endif %}"><b>{% if flow_step > 2 %}&#10003;{% else %}2{% endif %}</b>Preferences</span>
+    <span class="private-flow-step{% if flow_step > 3 %} is-done{% elif flow_step == 3 %} is-current{% endif %}"><b>{% if flow_step > 3 %}&#10003;{% else %}3{% endif %}</b>Schedule</span>
+    <span class="private-flow-step{% if flow_step == 4 %} is-current{% endif %}"><b>4</b>Review</span>
+  </div>
+</section>

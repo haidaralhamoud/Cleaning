@@ -52,7 +52,7 @@
 
 .options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -99,9 +99,31 @@
 }
 
 .freq-card img {
-  width: 50px;
-  height: 50px;
+  width: 68px;
+  height: 68px;
+  padding: 13px;
+  border-radius: 20px;
+  transition: transform .22s ease, box-shadow .22s ease;
 }
+
+.freq-card:nth-child(1) img { background: #fff0e5; box-shadow: 0 12px 26px rgba(240,138,75,.16); }
+.freq-card:nth-child(2) img { background: #efedff; box-shadow: 0 12px 26px rgba(119,104,216,.16); }
+.freq-card:nth-child(3) img { background: #e5f8f3; box-shadow: 0 12px 26px rgba(36,165,144,.16); }
+.freq-card:nth-child(4) img { background: #eaf3ff; box-shadow: 0 12px 26px rgba(71,135,208,.16); }
+.freq-card:nth-child(5) img { background: #ffebee; box-shadow: 0 12px 26px rgba(220,100,112,.16); }
+.freq-card:nth-child(6) img { background: #e9f6ee; box-shadow: 0 12px 26px rgba(56,146,103,.16); }
+
+.freq-card:hover img,
+.freq-card.selected img {
+  transform: translateY(-3px) rotate(-3deg) scale(1.06);
+}
+
+.freq-card:nth-child(1):hover { border-color: rgba(240,138,75,.45); }
+.freq-card:nth-child(2):hover { border-color: rgba(119,104,216,.45); }
+.freq-card:nth-child(3):hover { border-color: rgba(36,165,144,.45); }
+.freq-card:nth-child(4):hover { border-color: rgba(71,135,208,.45); }
+.freq-card:nth-child(5):hover { border-color: rgba(220,100,112,.45); }
+.freq-card:nth-child(6):hover { border-color: rgba(56,146,103,.45); }
 
 .freq-card span {
   font-family: "Vesper Libre", serif;
@@ -131,6 +153,16 @@
 
   .frequency-card {
     padding: 22px;
+  }
+
+  .options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .options {
+    grid-template-columns: 1fr;
   }
 }
 

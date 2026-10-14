@@ -129,7 +129,44 @@ body {
   align-items: center;
   justify-content: space-between;
   min-height: 310px;
+  overflow: hidden;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.method-photo {
+  position: relative;
+  width: calc(100% + 36px);
+  height: 165px;
+  flex: 0 0 165px;
+  margin: -24px -18px 20px;
+  overflow: hidden;
+  border-radius: 16px 16px 0 0;
+  background: #f4efe7;
+}
+
+.method-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 58%, rgba(21,17,12,.2));
+  pointer-events: none;
+}
+
+.method-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+  transition: transform .45s ease;
+}
+
+.method-card:nth-child(1) .method-photo img { object-position: center top; }
+.method-card:nth-child(2) .method-photo img { object-position: center top; }
+.method-card:nth-child(3) .method-photo img { object-position: center 12%; }
+
+.method-card:hover .method-photo img {
+  transform: scale(1.025);
 }
 
 .method-card:hover {

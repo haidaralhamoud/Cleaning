@@ -1,0 +1,254 @@
+﻿body {
+  margin: 0;
+  font-family: "Vesper Libre", serif;
+  background: #ffffff;
+  color: #111111;
+}
+img { max-width: 100%; height: auto; display: block; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ===== GENERAL STRUCTURE ===== */
+.about-us section {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 0;
+}
+
+/* ===== INTRO ===== */
+.intro-section .intro-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.intro-section .intro-image {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 15px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+  animation: riseIn .8s ease both;
+}
+.intro-text {
+  flex: 1;
+  text-align: left;
+  min-width: 320px;
+  animation: riseIn .8s ease .1s both;
+}
+.hembla-title {
+  font-size: clamp(1rem, 2.5vw, 2rem);
+  margin-bottom: 15px;
+}
+.hembla-description,
+.hembla-subtext {
+  font-size: clamp(1rem, 1.3vw, 1rem);
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+/* ===== GUIDES ===== */
+.guides-section {
+  text-align: left;
+}
+.guides-section h3 {
+  text-align: center;
+  font-size: clamp(1rem, 2vw, 1rem);
+  margin-bottom: 40px;
+}
+.principles {
+  display: flex;
+  justify-content: center;
+  gap: 60px;
+  flex-wrap: wrap;
+}
+.principle {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  width: 300px;
+  transition: transform .25s ease;
+}
+.guide-icon {
+  width: 40px;
+  height: 40px;
+  animation: floatPulse 4.2s ease-in-out infinite;
+  filter: brightness(0) saturate(100%) invert(76%) sepia(32%) saturate(627%) hue-rotate(4deg) brightness(92%) contrast(88%);
+}
+.principle h4 {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+.principle p {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+.principle:hover { transform: translateY(-6px); }
+
+/* ===== FUTURE ===== */
+.future-section {
+  background: linear-gradient(180deg, rgba(255, 251, 241, 0.96) 0%, rgba(245, 236, 210, 0.78) 100%);
+  border-radius: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding: 50px;
+  animation: riseIn .9s ease both;
+}
+.future-section .text-side {
+  flex: 1;
+  min-width: 320px;
+}
+.future-section .image-side img {
+  width: 100%;
+  max-width: 550px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.cta-btn {
+  background: linear-gradient(135deg, #d7bc88 0%, #dcc08d 48%, #c8a96b 100%);
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  padding: 15px 30px;
+  border-radius: 10px;
+  font-size: 1rem;
+  margin-top: 20px;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease;
+  box-shadow: 0 14px 28px rgba(200,169,107,0.24);
+}
+.cta-btn:hover { transform: translateY(-2px); box-shadow: 0 18px 30px rgba(200,169,107,0.3); }
+.future-section .image-side img:hover { transform: translateY(-6px) scale(1.01); }
+
+/* ===== GOALS ===== */
+.goals-section {
+  text-align: center;
+}
+.goals-section h3 {
+  font-size: clamp(1rem, 2.4vw, 2rem);
+  margin-bottom: 15px;
+}
+.goals-intro {
+  font-size: clamp(1rem, 1.3vw, 1rem);
+  max-width: 800px;
+  margin: 0 auto 40px auto;
+}
+.goals-cards {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.goal-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbf8f2 100%);
+  border-radius: 15px;
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(200, 169, 107, 0.12);
+  width: 320px;
+  padding: 20px;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.goal-icon {
+  background: linear-gradient(180deg, #111111 0%, #252525 100%);
+  border-radius: 50%;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 15px auto;
+  transition: transform .25s ease;
+}
+.goal-icon img {
+  width: 45px;
+  height: 45px;
+  filter: brightness(0) saturate(100%) invert(76%) sepia(32%) saturate(627%) hue-rotate(4deg) brightness(92%) contrast(88%);
+}
+.goal-card h4 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #111111;
+}
+.goal-card p {
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #6b645a;
+}
+.goal-card:hover { transform: translateY(-8px); box-shadow: 0 10px 26px rgba(0,0,0,0.12); }
+.goal-card:hover .goal-icon { transform: rotate(-4deg) scale(1.05); }
+
+/* ===== CIRCLES ===== */
+.circles-section {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 60px 0;
+}
+.circles-section img {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+  transition: transform .25s ease, box-shadow .25s ease;
+  animation: waveFloat 6s ease-in-out infinite;
+}
+.circles-section img:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.18); }
+.circles-section img:nth-child(2) { animation-delay: .6s; }
+.circles-section img:nth-child(3) { animation-delay: 1.2s; }
+
+@keyframes waveFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .intro-section .intro-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .intro-text {
+    text-align: center;
+  }
+  .principles,
+  .goals-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  .future-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 34px 24px;
+  }
+  .future-section .image-side img {
+    max-width: 100%;
+  }
+  .circles-section {
+    flex-direction: column;
+  }
+}
+@media (max-width: 520px) {
+  .about-us section { padding: 40px 0; }
+  .principle { width: 100%; }
+  .goal-card { width: 100%; }
+  .circles-section img { width: 160px; height: 160px; }
+  .cta-btn { width: 100%; }
+}
+
+

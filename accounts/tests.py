@@ -70,6 +70,28 @@ class InvoicePropertyDetailTests(TestCase):
         summary_rows = build_pdf.call_args.args[0]["summary_rows"]
         self.assertIn("325", summary_rows[-1][1])
 
+    @patch("accounts.invoice_utils.build_branded_invoice_pdf", return_value=b"%PDF-test")
+    def test_invoice_number_and_booking_reference_are_separate(self, build_pdf):
+        user = User.objects.create_user(
+            username="reference-customer@example.com",
+            email="reference-customer@example.com",
+            password="pass123",
+        )
+        customer = Customer.objects.create(user=user, email=user.email)
+        invoice = Invoice.objects.create(
+            customer=customer,
+            booking_type="private",
+            booking_id=90,
+            invoice_number="INV-128",
+        )
+
+        render_invoice_pdf(invoice)
+
+        document = build_pdf.call_args.args[0]
+        self.assertEqual(document["document_number"], "INV-128")
+        self.assertEqual(document["booking_reference"], "#90")
+        self.assertEqual(invoice.payment_reference, "INV-128")
+
     def test_rut_eligible_labor_displays_applied_rut_amount(self):
         user = User.objects.create_user(
             username="rut-invoice-customer@example.com",

@@ -36,9 +36,9 @@
 <div class="steps">
 {% for item in step_items %}
 {% if item.clickable %}
-<a href="{{ item.url }}" class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</a>
+<a href="{{ item.url }}" class="step {% if item.active %}active{% endif %} {% if item.completed %}completed{% endif %}"><span class="step-number">{{ item.number }}</span><span class="step-copy"><small>Step {{ item.number }}</small>{{ item.label }}</span></a>
 {% else %}
-<div class="step {% if item.active %}active{% endif %}">Step {{ item.number }}</div>
+<div class="step {% if item.active %}active{% endif %} {% if item.completed %}completed{% endif %}"><span class="step-number">{{ item.number }}</span><span class="step-copy"><small>Step {{ item.number }}</small>{{ item.label }}</span></div>
 {% endif %}
 {% endfor %}
 </div>

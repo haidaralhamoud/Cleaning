@@ -11,10 +11,17 @@
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+<link rel="stylesheet" href="{% static 'css/private_flow.css' %}">
 </head>
-<body>{% include "home/includes/main_header.html" %}<div class="checkout-container">
+<body class="private-flow">{% include "home/includes/main_header.html" %}<div class="checkout-container">
 <header>
 <h1>Checkout</h1>
+<div class="checkout-journey" aria-label="Private booking progress">
+<span class="is-done"><b>1</b> Services</span>
+<span class="is-done"><b>2</b> Preferences</span>
+<span class="is-done"><b>3</b> Schedule</span>
+<span class="is-current" aria-current="step"><b>4</b> Review &amp; pay</span>
+</div>
 </header>
 <div class="checkout-grid">
 <div class="checkout-main">
@@ -27,7 +34,7 @@
 <div class="checkout-hero-card__stats">
 <div class="checkout-stat">
 <span class="checkout-stat__label">Services</span>
-<strong>{{ services|length }}</strong>
+<strong>{{ services|length }} selected service{{ services|length|pluralize }}</strong>
 </div>
 <div class="checkout-stat checkout-stat--accent">
 <span class="checkout-stat__label">Duration</span>
@@ -37,6 +44,15 @@
 <span class="checkout-stat__label">Preview Total</span>
 <strong>{{ final_preview_price|floatformat:2 }} {{ stripe_currency|upper }}</strong>
 </div>
+</div>
+<div class="checkout-confidence" aria-label="Checkout assurances">
+<span><b aria-hidden="true">✓</b> Live server pricing</span>
+<span><b aria-hidden="true">✓</b> Secure payment</span>
+<span><b aria-hidden="true">✓</b> Review before confirmation</span>
+</div>
+<div class="checkout-ready-strip" role="status">
+<span class="checkout-ready-strip__pulse" aria-hidden="true"></span>
+<div><strong>Your booking is ready for a final look</strong><small>Nothing is charged until you confirm your preferred payment method.</small></div>
 </div>
 </section>
 {% if user.is_authenticated %}
@@ -287,7 +303,7 @@
 </div>
 <div class="terms">
 <label class="agree">
-<input type="checkbox" id="agreeTerms" required>              I agree to the <a href="#">terms and conditions</a> and <a href="#">privacy policy</a>.            </label>
+<input type="checkbox" id="agreeTerms" name="accepted_terms" value="1" required>              I agree to the <a href="{% url 'home:T_C' %}" target="_blank" rel="noopener">terms and conditions</a> and <a href="{% url 'home:Privacy_Policy' %}" target="_blank" rel="noopener">privacy policy</a>.            </label>
 </div>          {% if not stripe_ready %}            <div class="flash error" style="margin-top: 10px;">              Payment service is not configured. Please try again later.            </div>          {% endif %}          <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
 </form>
         {% endif %}
@@ -330,9 +346,29 @@
 {% include "home/includes/footer.html" %}<script>  (function () {    var addressEditButton = document.querySelector(".js-address-edit");    var addressEditor = document.querySelector(".address-editor");    if (addressEditButton && addressEditor) {      var addressDisplay = addressEditor.querySelector(".address-display");      var addressForm = addressEditor.querySelector(".address-edit-form");      var addressInput = addressEditor.querySelector(".address-input");      addressEditButton.addEventListener("click", function () {        if (!addressForm || !addressInput) return;        if (addressDisplay) {          addressDisplay.style.display = "none";        }        addressForm.classList.remove("is-hidden");        addressEditor.setAttribute("data-open", "true");        addressEditButton.style.display = "none";        addressInput.focus();        addressInput.setSelectionRange(addressInput.value.length, addressInput.value.length);      });    }  })();</script>
 <script>  (function () {    var modal = document.getElementById("checkoutMessageModal");    var closeBtn = document.getElementById("checkoutMessageClose");    var stayBtn = document.getElementById("checkoutMessageStay");    var dismissBtn = document.getElementById("checkoutMessageDismiss");    var title = document.getElementById("checkoutMessageTitle");    var lead = modal ? modal.querySelector(".checkout-message-modal__lead") : null;    if (!modal || !closeBtn) return;    var messages = modal.querySelectorAll(".checkout-message");    var hasError = modal.querySelector(".checkout-message--error");    var hasWarning = modal.querySelector(".checkout-message--warning");    var closeModal = function () {      modal.style.display = "none";    };    if (hasError) {      if (title) title.textContent = "We could not send the invoice";      if (lead) lead.textContent = "Please review the message below and try again.";      modal.classList.add("is-error");    } else if (hasWarning) {      if (title) title.textContent = "Action required";      if (lead) lead.textContent = "Please review the booking notice below.";      modal.classList.add("is-warning");    } else if (messages.length) {      modal.classList.add("is-success");    }    closeBtn.addEventListener("click", function () {      window.location.href = "{% url 'home:home' %}";    });    if (stayBtn) stayBtn.addEventListener("click", closeModal);    if (dismissBtn) dismissBtn.addEventListener("click", closeModal);    modal.addEventListener("click", function (event) {      if (event.target === modal) closeModal();    });    document.addEventListener("keydown", function (event) {      if (event.key === "Escape" && modal.style.display !== "none") {        closeModal();      }    });  })();</script>
 <script>  (function () {    var form = document.getElementById("paymentForm");    var checkbox = document.getElementById("agreeTerms");    var button = document.getElementById("confirmPayment");    var optionInputs = form ? form.querySelectorAll('input[name="payment_option"]') : [];    var optionCards = form ? form.querySelectorAll("[data-payment-option]") : [];    var cardPanels = form ? form.querySelectorAll('[data-payment-panel="card"]') : [];    var invoicePanels = form ? form.querySelectorAll('[data-payment-panel="invoice"]') : [];    if (!form || !checkbox || !button || !optionInputs.length) return;    var stripeReady = form && form.getAttribute("data-stripe-ready") === "1";    var selectedOption = function () {      for (var i = 0; i < optionInputs.length; i += 1) {        if (optionInputs[i].checked) return optionInputs[i].value;      }      return "card";    };    var syncOptionCards = function () {      var value = selectedOption();      for (var i = 0; i < optionCards.length; i += 1) {        optionCards[i].classList.toggle("is-active", optionCards[i].getAttribute("data-payment-option") === value);      }      for (var j = 0; j < cardPanels.length; j += 1) {        cardPanels[j].classList.toggle("payment-panel-hidden", value !== "card");        cardPanels[j].hidden = value !== "card";        cardPanels[j].setAttribute("aria-hidden", value !== "card" ? "true" : "false");      }      for (var k = 0; k < invoicePanels.length; k += 1) {        invoicePanels[k].classList.toggle("payment-panel-hidden", value !== "invoice");        invoicePanels[k].hidden = value !== "invoice";        invoicePanels[k].setAttribute("aria-hidden", value !== "invoice" ? "true" : "false");      }      var errorBox = document.getElementById("card-errors");      if (value === "invoice" && errorBox) {        errorBox.textContent = "";      }      button.textContent = value === "invoice" ? "Place Booking" : "Confirm Payment";    };    var toggle = function () {      var needsStripe = selectedOption() === "card";      button.disabled = !checkbox.checked || (needsStripe && !stripeReady);    };    for (var i = 0; i < optionInputs.length; i += 1) {      optionInputs[i].addEventListener("change", function () {        syncOptionCards();        toggle();      });    }    checkbox.addEventListener("change", toggle);    syncOptionCards();    toggle();  })();</script>
+<script>
+(function () {
+  var items = document.querySelectorAll(".checkout-main > .card, .checkout-sidebar > *, .checkout-bottom");
+  if (!("IntersectionObserver" in window) || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    for (var i = 0; i < items.length; i += 1) items[i].classList.add("is-revealed");
+    return;
+  }
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add("is-revealed");
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.08 });
+  for (var j = 0; j < items.length; j += 1) {
+    items[j].classList.add("checkout-reveal");
+    observer.observe(items[j]);
+  }
+})();
+</script>
 <script src="https://js.stripe.com/v3/">
 </script>
-<script src="{% static 'js/stripe_checkout.js' %}">
+<script src="{% static 'js/stripe_checkout_en.js' %}">
 </script>
 <script src="{% static 'js/main_header.js' %}" defer>
 </script>

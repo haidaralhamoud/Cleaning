@@ -30,9 +30,9 @@ from urllib.parse import urlencode
 
 from .models import (
     BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessMainCategory, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
-    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest,
+    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest, AirbnbManagementRequest,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
-    Contact, FAQCategory, FAQItem, StripeWebhookEvent, ServiceCard, ServicePricing, ServiceEstimate,
+    Contact, FAQCategory, FAQItem, HomeHeroPrice, StripeWebhookEvent, ServiceCard, ServicePricing, ServiceEstimate,
     ServiceRoomOption,
     ScheduleRule,
 )
@@ -559,6 +559,39 @@ def _date_is_before_today(value):
     if not value:
         return False
     return value < timezone.localdate()
+
+
+def _private_draft_has_complete_schedule(draft, service_slugs):
+    """Return whether the draft contains the minimum schedule data checkout needs."""
+    mode = draft.get("schedule_mode") or "same"
+    if mode == "same":
+        appointment_date = _parse_optional_date(draft.get("appointment_date"))
+        end_date = _parse_optional_date(draft.get("End_Date"))
+        return bool(
+            appointment_date
+            and not _date_is_before_today(appointment_date)
+            and (not end_date or (not _date_is_before_today(end_date) and end_date >= appointment_date))
+            and _parse_optional_time(draft.get("appointment_start_time"))
+        )
+    if mode != "per_service":
+        return False
+
+    schedules = draft.get("service_schedules") or {}
+    if not isinstance(schedules, dict):
+        return False
+    for slug in service_slugs:
+        schedule = schedules.get(slug) or {}
+        if not isinstance(schedule, dict):
+            return False
+        service_date = _parse_optional_date(schedule.get("date"))
+        end_date = _parse_optional_date(schedule.get("end_date"))
+        if not service_date or _date_is_before_today(service_date):
+            return False
+        if end_date and (_date_is_before_today(end_date) or end_date < service_date):
+            return False
+        if not _parse_optional_time(schedule.get("start_time") or schedule.get("time_window")):
+            return False
+    return bool(service_slugs)
 
 
 def _get_private_booking_customer_snapshot(customer):
@@ -1239,6 +1272,13 @@ def _create_private_invoice_booking(request):
     if not selected_slugs:
         messages.error(request, "No booking details were found.")
         return redirect("home:private_booking_checkout")
+    valid_slugs = list(PrivateService.objects.filter(slug__in=selected_slugs).values_list("slug", flat=True))
+    if set(valid_slugs) != set(selected_slugs) or not _private_draft_has_complete_schedule(draft, selected_slugs):
+        messages.error(request, "Please review the selected services and schedule before creating the booking.")
+        return redirect("home:private_booking_schedule")
+    if not _is_truthy(request.POST.get("accepted_terms"), default=False):
+        messages.error(request, "Please accept the terms and privacy policy before confirming your booking.")
+        return redirect("home:private_booking_checkout")
 
     booking = _build_private_booking_from_draft(draft, request.user)
     payment_summary = _calculate_private_payment_summary(
@@ -1394,14 +1434,38 @@ def home(request):
     feedbacks = list(
         FeedbackRequest.objects.filter(is_approved=True).order_by("-approved_at", "-created_at")
     )
-    return render(request, "home/home.html", {"feedbacks": feedbacks})
+    hero_price = HomeHeroPrice.objects.order_by("pk").first()
+    return render(
+        request,
+        "home/home.html",
+        {"feedbacks": feedbacks, "hero_price": hero_price},
+    )
 
 def about(request):
     return render(request, "home/about.html")
 
+def airbnb_management(request):
+    airbnb_faq_items = (
+        FAQItem.objects.filter(
+            category__placement=FAQCategory.PLACEMENT_AIRBNB,
+            category__is_active=True,
+            is_active=True,
+        )
+        .select_related("category")
+        .order_by("category__order", "order", "question")
+    )
+    return render(
+        request,
+        "home/airbnb_management.html",
+        {"airbnb_faq_items": airbnb_faq_items},
+    )
+
 def faq(request):
     categories = (
-        FAQCategory.objects.filter(is_active=True)
+        FAQCategory.objects.filter(
+            is_active=True,
+            placement=FAQCategory.PLACEMENT_GENERAL,
+        )
         .prefetch_related(
             Prefetch("items", queryset=FAQItem.objects.filter(is_active=True))
         )
@@ -1803,6 +1867,7 @@ def _dashboard_uses_view_mode(item):
         "business-bookings",
         "call-requests",
         "email-requests",
+        "airbnb-management-requests",
         "request-fixes",
         "customer-notifications",
         "service-reviews",
@@ -3057,6 +3122,47 @@ class ScheduleRuleDashboardForm(forms.ModelForm):
         self.fields["price_change"].help_text = "Use negative for discounts (e.g. -15). Positive adds a surcharge."
 
 
+class AirbnbFAQDashboardForm(forms.ModelForm):
+    class Meta:
+        model = FAQItem
+        fields = ("question", "answer", "order", "is_active")
+        widgets = {
+            "answer": forms.Textarea(attrs={"rows": 5}),
+        }
+
+    def save(self, commit=True):
+        item = super().save(commit=False)
+        if not item.category_id:
+            category = FAQCategory.objects.filter(
+                placement=FAQCategory.PLACEMENT_AIRBNB,
+            ).order_by("order", "pk").first()
+            if category is None:
+                category = FAQCategory.objects.create(
+                    title="Airbnb Management",
+                    icon="",
+                    order=0,
+                    is_active=True,
+                    placement=FAQCategory.PLACEMENT_AIRBNB,
+                )
+            item.category = category
+        if commit:
+            item.save()
+        return item
+
+
+class GeneralFAQCategoryDashboardForm(forms.ModelForm):
+    class Meta:
+        model = FAQCategory
+        fields = ("title", "icon", "order", "is_active")
+
+    def save(self, commit=True):
+        category = super().save(commit=False)
+        category.placement = FAQCategory.PLACEMENT_GENERAL
+        if commit:
+            category.save()
+        return category
+
+
 class CustomerDashboardForm(forms.ModelForm):
     class Meta:
         model = Customer
@@ -3065,6 +3171,7 @@ class CustomerDashboardForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._account_user = None
+        self._email_belongs_to_another_customer = False
 
     def clean_email(self):
         email = User.objects.normalize_email(self.cleaned_data["email"]).lower()
@@ -3072,13 +3179,12 @@ class CustomerDashboardForm(forms.ModelForm):
         other_customers = Customer.objects.filter(email__iexact=email)
         if self.instance and self.instance.pk:
             other_customers = other_customers.exclude(pk=self.instance.pk)
-        if other_customers.exists():
-            raise forms.ValidationError("A customer with this email already exists.")
+        self._email_belongs_to_another_customer = other_customers.exists()
 
-        if not self.instance.pk:
+        if not self.instance.pk and not self._email_belongs_to_another_customer:
             self._account_user = User.objects.filter(email__iexact=email).first()
             if self._account_user and Customer.objects.filter(user=self._account_user).exists():
-                raise forms.ValidationError("This user already has a customer profile.")
+                self._account_user = None
 
         return email
 
@@ -3102,7 +3208,10 @@ class CustomerDashboardForm(forms.ModelForm):
             if user is None:
                 user = User(
                     username=self._unique_username(customer.email),
-                    email=customer.email,
+                    # Customer.email is contact information and may be shared.
+                    # Keep duplicate contact addresses out of User.email so email
+                    # login continues to identify at most one account.
+                    email="" if self._email_belongs_to_another_customer else customer.email,
                     first_name=customer.first_name,
                     last_name=customer.last_name,
                     is_active=True,
@@ -3196,7 +3305,17 @@ def dashboard_model_list(request, model):
     _dashboard_handle_seen_no_show(request, item.slug)
 
     qs = item.model.objects.all()
-    if item.model == PrivateAddon:
+    if item.slug == "airbnb-faqs":
+        qs = qs.filter(
+            category__placement=FAQCategory.PLACEMENT_AIRBNB,
+        ).select_related("category")
+    elif item.slug == "faq-categories":
+        qs = qs.filter(placement=FAQCategory.PLACEMENT_GENERAL)
+    elif item.slug == "faq-items":
+        qs = qs.filter(
+            category__placement=FAQCategory.PLACEMENT_GENERAL,
+        ).select_related("category")
+    elif item.model == PrivateAddon:
         qs = qs.select_related("service").defer("form_html", "questions")
     elif item.model == PrivateService:
         qs = qs.select_related("category").defer("questions")
@@ -3263,6 +3382,8 @@ def dashboard_model_list(request, model):
         "service-estimates": ["service", "property_options", "bedrooms_options"],
         "invoices": ["invoice_number", "customer", "booking_type", "amount", "status", "due_date"],
         "invoice-line-items": ["invoice", "line_order", "description", "quantity", "unit_price", "vat_percent"],
+        "airbnb-management-requests": ["services", "property_count", "location", "phone", "created_at"],
+        "airbnb-faqs": ["question", "answer", "order", "is_active"],
     }
     display_fields = display_fields_map.get(item.slug, _model_fields(item.model)[:5])
 
@@ -3332,7 +3453,11 @@ def dashboard_model_create(request, model):
     if not item:
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
 
-    if item.model == BusinessBundle:
+    if item.slug == "airbnb-faqs":
+        Form = AirbnbFAQDashboardForm
+    elif item.slug == "faq-categories":
+        Form = GeneralFAQCategoryDashboardForm
+    elif item.model == BusinessBundle:
         Form = BusinessBundleDashboardForm
     elif item.model == PrivateMainCategory:
         Form = PrivateMainCategoryDashboardForm
@@ -3462,14 +3587,21 @@ def dashboard_model_edit(request, model, pk):
         return render(request, "dashboard/not_found.html", {"items": get_dashboard_items()})
     _dashboard_handle_seen_no_show(request, item.slug)
 
-    obj = get_object_or_404(item.model, pk=pk)
+    obj = item.model.objects.filter(pk=pk).first()
+    if obj is None:
+        messages.warning(request, "This record no longer exists. It may have already been deleted.")
+        return redirect("home:dashboard_model_list", model=item.slug)
     prev_status = None
     prev_feedback_approved = None
     if item.model.__name__ == "BookingRequestFix":
         prev_status = getattr(obj, "status", None)
     if item.model == FeedbackRequest:
         prev_feedback_approved = bool(getattr(obj, "is_approved", False))
-    if item.model == BusinessBundle:
+    if item.slug == "airbnb-faqs":
+        Form = AirbnbFAQDashboardForm
+    elif item.slug == "faq-categories":
+        Form = GeneralFAQCategoryDashboardForm
+    elif item.model == BusinessBundle:
         Form = BusinessBundleDashboardForm
     elif item.model == PrivateMainCategory:
         Form = PrivateMainCategoryDashboardForm
@@ -4046,6 +4178,10 @@ def _build_business_step_items(path_type, current_step, booking_id=0):
     booking_id = booking_id or 0
 
     if path_type == "custom":
+        step_labels = {
+            1: "Company", 2: "Office", 3: "Plan", 4: "Services",
+            5: "Add-ons", 6: "Frequency", 7: "Schedule",
+        }
         step_routes = {
             1: ("home:business_company_info", 0),
             2: ("home:business_office_setup", 0),
@@ -4056,6 +4192,10 @@ def _build_business_step_items(path_type, current_step, booking_id=0):
             7: ("home:business_scheduling", 0),
         }
     else:
+        step_labels = {
+            1: "Company", 2: "Office", 3: "Plan", 4: "Frequency",
+            5: "Schedule", 6: "Complete", 7: "Done",
+        }
         step_routes = {
             1: ("home:business_company_info", 0),
             2: ("home:business_office_setup", 0),
@@ -4073,7 +4213,9 @@ def _build_business_step_items(path_type, current_step, booking_id=0):
         url = reverse(route[0], kwargs={"booking_id": route[1]}) if is_clickable else ""
         items.append({
             "number": number,
+            "label": step_labels[number],
             "active": current_step == number,
+            "completed": number < current_step,
             "clickable": is_clickable,
             "url": url,
         })
@@ -4627,7 +4769,26 @@ def private_booking_checkout(request):
         else:
             return redirect("home:all_services_private")
 
-    services = PrivateService.objects.filter(slug__in=selected_slugs).select_related("category")
+    services_by_slug = {
+        service.slug: service
+        for service in PrivateService.objects.filter(slug__in=selected_slugs).select_related("category")
+    }
+    services = [services_by_slug[slug] for slug in selected_slugs if slug in services_by_slug]
+    valid_slugs = [service.slug for service in services]
+    if not valid_slugs:
+        request.session.pop(DRAFT_SESSION_KEY, None)
+        request.session.modified = True
+        messages.info(request, "The selected services are no longer available. Please choose your services again.")
+        return redirect("home:all_services_private")
+    if valid_slugs != selected_slugs:
+        draft["selected_services"] = valid_slugs
+        _save_private_draft_data(request, draft)
+        selected_slugs = valid_slugs
+
+    if not _private_draft_has_complete_schedule(draft, selected_slugs):
+        messages.info(request, "Please complete the booking schedule before checkout.")
+        return redirect("home:private_booking_schedule")
+
     temp_booking = _build_private_booking_from_draft(draft, request.user)
 
     pricing = calculate_booking_price(temp_booking)
@@ -4698,13 +4859,17 @@ def private_booking_checkout(request):
     else:
         display_area = display_city or display_zip_code or "Not provided"
 
-    if draft.get("duration_hours"):
-        display_duration = draft.get("duration_hours")
-    elif duration_seconds > 0:
+    if duration_seconds > 0:
         hours = duration_seconds // 3600
         minutes = (duration_seconds % 3600) // 60
-        seconds = duration_seconds % 60
-        display_duration = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        duration_parts = []
+        if hours:
+            duration_parts.append(f"{hours} hr" if hours == 1 else f"{hours} hrs")
+        if minutes:
+            duration_parts.append(f"{minutes} min")
+        display_duration = " ".join(duration_parts) or "Less than 1 min"
+    elif draft.get("duration_hours"):
+        display_duration = str(draft.get("duration_hours"))
     else:
         display_duration = "To be confirmed"
 
@@ -4839,7 +5004,11 @@ def private_booking_checkout(request):
         form_type = request.POST.get("form_type")
 
         if form_type == "update_address":
-            draft["address"] = (request.POST.get("address") or "").strip()
+            updated_address = (request.POST.get("address") or "").strip()
+            if not updated_address:
+                messages.error(request, "Please enter a valid service address.")
+                return redirect("home:private_booking_checkout")
+            draft["address"] = updated_address[:500]
             _save_private_draft_data(request, draft)
             messages.success(request, "Address updated.")
             return redirect("home:private_booking_checkout")
@@ -4864,6 +5033,9 @@ def private_booking_checkout(request):
 
         # 💳 CONFIRM PAYMENT
         elif form_type == "payment":
+            if not _is_truthy(request.POST.get("accepted_terms"), default=False):
+                messages.error(request, "Please accept the terms and privacy policy before confirming your booking.")
+                return redirect("home:private_booking_checkout")
             selected_payment_option = (request.POST.get("payment_option") or "card").strip().lower()
             if selected_payment_option == "invoice":
                 return _create_private_invoice_booking(request)
@@ -5087,6 +5259,7 @@ def private_booking_checkout(request):
 
 
 @login_required
+@require_POST
 def private_booking_cash_invoice_pdf(request):
     return _create_private_invoice_booking(request)
 
@@ -5491,6 +5664,44 @@ def submit_call_request(request):
     return JsonResponse({"success": False, "error": "Invalid request"})
 
 
+@require_POST
+def submit_airbnb_management_request(request):
+    services = [value.strip() for value in request.POST.getlist("services") if value.strip()]
+    property_count = (request.POST.get("property_count") or "").strip()
+    location = (request.POST.get("location") or "").strip()
+    phone = (request.POST.get("phone") or "").strip()
+    message_text = (request.POST.get("message") or "").strip()
+
+    errors = {}
+    if not services:
+        errors["services"] = "Choose at least one service."
+    if property_count not in {"1 property", "2–3", "4–10", "10+"}:
+        errors["property_count"] = "Choose the number of properties."
+    if not phone:
+        errors["phone"] = "Enter your phone number."
+    if errors:
+        return JsonResponse({"success": False, "errors": errors}, status=400)
+
+    airbnb_request = AirbnbManagementRequest.objects.create(
+        services=services,
+        property_count=property_count,
+        location=location,
+        phone=phone,
+        message=message_text,
+    )
+    return JsonResponse({
+        "success": True,
+        "request": {
+            "id": airbnb_request.pk,
+            "services": services,
+            "property_count": property_count,
+            "location": location or "—",
+            "phone": phone,
+            "message": message_text or "—",
+        },
+    })
+
+
 
 def private_booking_start(request, service_slug):
     """
@@ -5691,15 +5902,20 @@ def private_booking_services(request):
                 except PrivateAddon.DoesNotExist:
                     continue
 
-                quantity = int(addon_data.get("quantity", 1))
+                try:
+                    quantity = int(addon_data.get("quantity", 1))
+                except (TypeError, ValueError):
+                    quantity = 1
+                quantity = max(1, min(quantity, 100))
+
+                if addon_obj.service_id and addon_obj.service.slug != service_slug:
+                    continue
 
                 # 2) حساب السعر
                 if addon_obj.price_per_unit:
                     total_price = quantity * addon_obj.price_per_unit + addon_obj.price
-                    print(1)
                 else:
-                    total_price = quantity * addon_obj.price_per_unit + addon_obj.price
-                    print(total_price)
+                    total_price = addon_obj.price
 
                 # 3) نحفظ الشكل الصحيح
                 final_addons[service_slug][addon_slug] = {
@@ -5862,6 +6078,9 @@ def private_booking_schedule(request):
             _save_private_draft_data(request, draft)
 
     services = PrivateService.objects.filter(slug__in=(draft.get("selected_services") or []))
+    if not services.exists():
+        messages.info(request, "Choose at least one service before scheduling your booking.")
+        return redirect("home:all_services_private")
 
     # -----------------------------
     # 1) تجهيز قوانين الزيادة للـ JS
@@ -5931,20 +6150,21 @@ def private_booking_schedule(request):
     # 2) POST – تخزين البيانات
     # -----------------------------
     if request.method == "POST":
-        print(1)
         # MODE
         mode = request.POST.get("schedule_mode")
+        if mode not in {"same", "per_service"}:
+            temp_booking = _build_private_booking_from_draft(draft, request.user)
+            messages.error(request, "Please choose how you want to schedule the selected services.")
+            return _render_schedule_page(temp_booking, calculate_booking_price(temp_booking))
         draft["schedule_mode"] = mode
         draft["use_rot"] = _is_truthy(request.POST.get("use_rot"), default=True)
 
         # ---------------- SAME MODE ----------------
         if mode == "same":
-            print(2)
             # تاريخ
             date = request.POST.get("appointment_date")
             date_obj = parse_date(date) if date else None
             draft["appointment_date"] = date_obj.isoformat() if date_obj else None
-            print(draft.get("appointment_date"))
             if date_obj and _date_is_before_today(date_obj):
                 messages.error(request, "Booking date cannot be before today. Please choose today or a future date.")
                 temp_booking = _build_private_booking_from_draft(draft, request.user)
@@ -5955,15 +6175,16 @@ def private_booking_schedule(request):
             start_time_obj = _parse_optional_time(start_time_raw)
             draft["appointment_start_time"] = start_time_obj.strftime("%H:%M") if start_time_obj else None
             draft["appointment_time_window"] = None
-            print(draft.get("appointment_start_time"))
             # Frequency
             frequency = request.POST.get("frequency_type")
             draft["frequency_type"] = frequency
-            print(draft.get("frequency_type"))
             # أيام العمل
             days_json = request.POST.get("day_work_best")
-            draft["day_work_best"] = json.loads(days_json) if days_json else []
-            print(draft.get("day_work_best"))
+            try:
+                parsed_days = json.loads(days_json) if days_json else []
+            except (TypeError, json.JSONDecodeError):
+                parsed_days = []
+            draft["day_work_best"] = parsed_days if isinstance(parsed_days, list) else []
             # Special timing
             special = request.POST.get("special_timing_requests")
             draft["special_timing_requests"] = special
@@ -5989,7 +6210,6 @@ def private_booking_schedule(request):
         # ---------------- PER SERVICE MODE ----------------
         elif mode == "per_service":
             schedules_json = request.POST.get("schedules_json")
-            print(3)
             if schedules_json:
                 try:
                     schedules = json.loads(schedules_json)
@@ -6137,7 +6357,6 @@ def private_booking_schedule(request):
     # -----------------------------
     # 3) Render
     # -----------------------------
-    print(4)
     temp_booking = _build_private_booking_from_draft(draft, request.user)
     return _render_schedule_page(temp_booking, calculate_booking_price(temp_booking))
 
@@ -6391,11 +6610,8 @@ def private_provider_availability_api(request):
     })
 
 
-@csrf_exempt
+@require_POST
 def private_update_answer_api(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST only"}, status=400)
-
     draft = _get_private_draft_data(request)
 
     field = request.POST.get("field")
@@ -6404,6 +6620,14 @@ def private_update_answer_api(request):
 
     if not field or not service_slug:
         return JsonResponse({"error": "Missing data"}, status=400)
+
+    selected_services = set(draft.get("selected_services") or [])
+    if service_slug not in selected_services:
+        return JsonResponse({"error": "Service is not part of this booking."}, status=400)
+
+    service = PrivateService.objects.filter(slug=service_slug).first()
+    if service is None:
+        return JsonResponse({"error": "Unknown service."}, status=404)
 
     def _summary_payload_from_draft(current_draft, booking, pricing):
         payload = _private_booking_summary_payload(
@@ -6416,6 +6640,8 @@ def private_update_answer_api(request):
         return payload
 
     if field == "__mode":
+        if value not in {"all_area", "by_room"}:
+            return JsonResponse({"error": "Invalid booking mode."}, status=400)
         service_modes = draft.get("service_modes") or {}
         service_modes[service_slug] = value or "all_area"
         draft["service_modes"] = service_modes
@@ -6428,6 +6654,11 @@ def private_update_answer_api(request):
         _store_private_draft_pricing(draft, pricing, payment_summary=payment_summary)
         _save_private_draft_data(request, draft)
         return JsonResponse(_summary_payload_from_draft(draft, temp_booking, pricing))
+
+    valid_fields = set((service.questions or {}).keys())
+    base_field = field[:-9] if field.endswith("__details") else field
+    if field != "__room_counts" and base_field not in valid_fields:
+        return JsonResponse({"error": "Unknown service option."}, status=400)
 
     parsed_value = value
     if value:
@@ -6456,19 +6687,18 @@ def private_update_answer_api(request):
 
 
 
-@csrf_exempt
+@require_POST
 def private_update_addons_api(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST only"}, status=400)
-
     draft = _get_private_draft_data(request)
 
     raw = request.POST.get("addons_json", "{}")
 
     try:
         addons = json.loads(raw)
-    except:
-        addons = {}
+    except (TypeError, json.JSONDecodeError):
+        return JsonResponse({"error": "Invalid add-ons payload."}, status=400)
+    if not isinstance(addons, dict):
+        return JsonResponse({"error": "Invalid add-ons payload."}, status=400)
 
     draft["addons_selected"] = addons
     temp_booking = _build_private_booking_from_draft(draft, request.user)

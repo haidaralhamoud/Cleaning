@@ -37,6 +37,7 @@ from .models import (
     ServicePricing,
     ServiceEstimate,
     CurrencyRate,
+    AirbnbManagementRequest,
 )
 from jsoneditor.forms import JSONEditor
 from django.utils.html import format_html
@@ -49,6 +50,17 @@ from accounts.models import BookingChecklist   # âœ… ط§ط³طھظٹط±ط�
 # ط£ط¹ظ„ظ‰ ط§ظ„ظ…ظ„ظپ
 from accounts.models import PointsTransaction
 User = get_user_model()
+
+
+@admin.register(AirbnbManagementRequest)
+class AirbnbManagementRequestAdmin(admin.ModelAdmin):
+    list_display = ("phone", "property_count", "location", "created_at")
+    list_filter = ("property_count", "created_at")
+    search_fields = ("phone", "location", "message")
+    readonly_fields = ("services", "property_count", "location", "phone", "message", "created_at")
+
+    def has_add_permission(self, request):
+        return False
 
 
 @admin.register(FeedbackRequest)

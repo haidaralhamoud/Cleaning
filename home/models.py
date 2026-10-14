@@ -1290,6 +1290,13 @@ class ServiceRoomOption(models.Model):
 
 
 class FAQCategory(models.Model):
+    PLACEMENT_GENERAL = "general"
+    PLACEMENT_AIRBNB = "airbnb"
+    PLACEMENT_CHOICES = [
+        (PLACEMENT_GENERAL, "General FAQ page"),
+        (PLACEMENT_AIRBNB, "Airbnb Management page"),
+    ]
+
     title = models.CharField(max_length=150)
     icon = models.CharField(
         max_length=50,
@@ -1298,6 +1305,12 @@ class FAQCategory(models.Model):
     )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
+    placement = models.CharField(
+        max_length=20,
+        choices=PLACEMENT_CHOICES,
+        default=PLACEMENT_GENERAL,
+        help_text="Choose where this FAQ category should appear.",
+    )
 
     class Meta:
         ordering = ["order", "title"]
@@ -1521,6 +1534,23 @@ class CallRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class AirbnbManagementRequest(models.Model):
+    services = models.JSONField(default=list)
+    property_count = models.CharField(max_length=20)
+    location = models.CharField(max_length=255, blank=True)
+    phone = models.CharField(max_length=50)
+    message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Airbnb management request"
+        verbose_name_plural = "Airbnb management requests"
+
+    def __str__(self):
+        return f"{self.phone} - {self.property_count}"
+
+
 class EmailRequest(models.Model):
     email_from = models.EmailField()
     subject = models.CharField(max_length=255)
@@ -1705,6 +1735,21 @@ class RotSetting(models.Model):
 
     def __str__(self):
         return f"ROT {self.amount}"
+
+
+class HomeHeroPrice(models.Model):
+    label = models.CharField(max_length=100, default="Home cleaning from")
+    hourly_price = models.DecimalField(max_digits=10, decimal_places=2, default=240)
+    currency = models.CharField(max_length=3, choices=PRICE_CURRENCY_CHOICES, default="SEK")
+    unit_label = models.CharField(max_length=40, default="/ hour")
+    note = models.CharField(max_length=120, default="after RUT deduction")
+
+    class Meta:
+        verbose_name = "Home hero price"
+        verbose_name_plural = "Home hero price"
+
+    def __str__(self):
+        return f"{self.hourly_price:g} {self.currency} {self.unit_label}"
 
 
 class CurrencyRate(models.Model):

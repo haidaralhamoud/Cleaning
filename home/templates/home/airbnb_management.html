@@ -1,0 +1,52 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% trans "Airbnb Management" %} | Hembla Experten</title>
+  <link rel="icon" href="{% static 'images/logo.png' %}">
+  {% include 'home/includes/font_links.html' %}
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main_header.css' %}">
+  <link rel="stylesheet" href="{% static 'css/airbnb_management.css' %}">
+</head>
+<body class="airbnb-page">
+  {% include 'home/includes/main_header.html' %}
+  <main>
+    <section class="ab-hero">
+      <div class="ab-wrap ab-hero__content">
+        <p class="ab-kicker">{% trans "Airbnb management in Stockholm" %}</p>
+        <h1>{% trans "More Bookings." %}<br>{% trans "Happier Guests." %}<br><em>{% trans "Zero Stress." %}</em></h1>
+        <p>{% trans "We manage everything for your Airbnb property – from guest communication and bookings to cleaning, restocking and property care. So you can enjoy higher ratings and more bookings, without the daily work." %}</p>
+        <div class="ab-benefits"><span>✓ {% trans "Higher guest ratings" %}</span><span>▣ {% trans "More bookings" %}</span><span>◷ {% trans "Save time" %}</span><span>♡ {% trans "A trusted local partner" %}</span></div>
+        <div class="ab-actions"><a class="ab-btn ab-btn--gold" href="{% url 'home:home' %}?airbnb_request=1">{% trans "Request Airbnb Management" %} →</a><a class="ab-btn ab-btn--outline" href="#how-it-works">{% trans "See How It Works" %}</a></div>
+      </div>
+    </section>
+
+    <section class="ab-section">
+      <div class="ab-wrap"><h2>{% trans "A Complete Airbnb Solution" %}</h2><p class="ab-subtitle">{% trans "Everything you need. One trusted partner." %}</p>
+        <div class="ab-card-grid">
+          <article><b>▣</b><h3>{% trans "Booking & Guest Management" %}</h3><p>{% trans "We handle guest communication, check-in/out information and booking coordination." %}</p></article>
+          <article><b>✦</b><h3>{% trans "Cleaning & Turnovers" %}</h3><p>{% trans "Professional cleaning and preparation between guests." %}</p></article>
+          <article><b>▤</b><h3>{% trans "Linen & Essentials" %}</h3><p>{% trans "Towels, bedding, toiletries and restocking of essential supplies." %}</p></article>
+          <article><b>⌂</b><h3>{% trans "Property Care" %}</h3><p>{% trans "Regular property checks, inventory monitoring and maintenance coordination." %}</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="ab-split">
+      <div class="ab-split__image"></div><div class="ab-split__copy"><p class="ab-kicker">{% trans "Designed for Airbnb hosts" %}</p><h2>{% trans "Turn Your Property Into a 5-Star Experience" %}</h2><p>{% trans "We make sure your guests have a clean, comfortable and seamless stay – which leads to better reviews, more bookings and higher revenue for you." %}</p><ul><li>{% trans "Reliable and consistent service" %}</li><li>{% trans "Flexible and scalable for multiple properties" %}</li><li>{% trans "Local team in Stockholm, Solna, Järfälla and surrounding areas" %}</li><li>{% trans "Personal contact and fast response" %}</li></ul><a class="ab-btn ab-btn--gold" href="{% url 'home:home' %}?airbnb_request=1">{% trans "Request Airbnb Management" %} →</a></div>
+    </section>
+
+    <section class="ab-section" id="how-it-works"><div class="ab-wrap"><h2>{% trans "How It Works" %}</h2><p class="ab-subtitle">{% trans "A simple process. Maximum results." %}</p><div class="ab-steps"><article><b>1</b><div><h3>{% trans "Send a request" %}</h3><p>{% trans "Tell us about your property and your needs." %}</p></div></article><article><b>2</b><div><h3>{% trans "We contact you" %}</h3><p>{% trans "We discuss the details and create a tailored solution." %}</p></div></article><article><b>3</b><div><h3>{% trans "We take care of everything" %}</h3><p>{% trans "You enjoy more bookings and happier guests." %}</p></div></article></div></div></section>
+
+    <section class="ab-gallery ab-section"><div class="ab-wrap"><h2>{% trans "Beautiful Stays. Every Time." %}</h2><p class="ab-subtitle">{% trans "A clean and well-prepared home makes all the difference." %}</p><div><img src="{% static 'images/about-future-living-room.jpg' %}" alt=""><img src="{% static 'images/airbnb-bedroom.jpg' %}" alt=""><img src="{% static 'images/hero-warm-neutral-living-room.jpg' %}" alt=""></div></div></section>
+
+    <section class="ab-section ab-faq"><div class="ab-wrap ab-faq__layout"><div class="ab-faq__intro"><p class="ab-kicker">{% trans "Good to know" %}</p><h2>{% trans "Frequently Asked Questions" %}</h2><p>{% trans "Find quick answers to common questions about our Airbnb management service." %}</p></div><div class="ab-faq__list">{% for item in airbnb_faq_items %}<details><summary>{{ item.question }}</summary><p>{{ item.answer|linebreaksbr }}</p></details>{% endfor %}</div></div></section>
+    <section class="ab-cta"><div class="ab-wrap"><h2>{% trans "Ready to Simplify Your Airbnb Hosting?" %}</h2><p>{% trans "Get in touch today and let us take care of the rest." %}</p><div class="ab-actions"><a class="ab-btn ab-btn--gold" href="{% url 'home:home' %}?airbnb_request=1">{% trans "Request Airbnb Management" %} →</a><a class="ab-btn ab-btn--outline" href="tel:+46769046338">☎ 076 - 904 63 38</a><a class="ab-btn ab-btn--outline" href="https://wa.me/46769046338">WhatsApp</a></div></div></section>
+  </main>
+  {% include 'home/includes/footer.html' %}
+  <script src="{% static 'js/main_header.js' %}" defer></script>
+</body>
+</html>

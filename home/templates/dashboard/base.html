@@ -171,6 +171,49 @@
 
     const notifBtn = document.getElementById("dashNotifBtn");
     const notifMenu = document.getElementById("dashNotifMenu");
+    let dashNotifInitialized = false;
+    let dashLastNotifKey = "";
+    let dashLastNotifCount = Number(document.getElementById("dashNotifBadge")?.textContent || 0);
+    let dashAudioContext = null;
+
+    function unlockDashboardAudio() {
+      if (dashAudioContext) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      dashAudioContext = new AudioContextClass();
+      if (dashAudioContext.state === "suspended") dashAudioContext.resume().catch(() => {});
+    }
+
+    function playDashboardNotificationSound() {
+      if (!dashAudioContext || dashAudioContext.state !== "running") return;
+      const now = dashAudioContext.currentTime;
+      [659.25, 783.99].forEach((frequency, index) => {
+        const oscillator = dashAudioContext.createOscillator();
+        const gain = dashAudioContext.createGain();
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(frequency, now + (index * 0.13));
+        gain.gain.setValueAtTime(0.0001, now + (index * 0.13));
+        gain.gain.exponentialRampToValueAtTime(0.12, now + 0.025 + (index * 0.13));
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22 + (index * 0.13));
+        oscillator.connect(gain);
+        gain.connect(dashAudioContext.destination);
+        oscillator.start(now + (index * 0.13));
+        oscillator.stop(now + 0.24 + (index * 0.13));
+      });
+    }
+
+    function announceDashboardNotification(item) {
+      playDashboardNotificationSound();
+      if (notifBtn) {
+        notifBtn.classList.remove("has-new-notification");
+        void notifBtn.offsetWidth;
+        notifBtn.classList.add("has-new-notification");
+      }
+      dashShowToast(item?.title || "New dashboard notification received.", "success");
+    }
+
+    document.addEventListener("pointerdown", unlockDashboardAudio, { once: true });
+    document.addEventListener("keydown", unlockDashboardAudio, { once: true });
     if (notifBtn && notifMenu) {
       notifBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -190,6 +233,18 @@
         const res = await fetch("{% url 'home:dashboard_notifications_api' %}", { cache: "no-store" });
         if (!res.ok) return;
         const data = await res.json();
+
+        const newestItem = data.items && data.items.length ? data.items[0] : null;
+        const newestKey = newestItem
+          ? `${newestItem.title}|${newestItem.detail}|${newestItem.time}|${newestItem.url || ""}`
+          : "";
+        const currentCount = Number(data.count || 0);
+        if (dashNotifInitialized && newestKey && newestKey !== dashLastNotifKey && currentCount >= dashLastNotifCount) {
+          announceDashboardNotification(newestItem);
+        }
+        dashLastNotifKey = newestKey;
+        dashLastNotifCount = currentCount;
+        dashNotifInitialized = true;
 
         const badge = document.getElementById("dashNotifBadge");
         if (data.count && data.count > 0) {
@@ -227,11 +282,16 @@
               const wrap = document.createElement("a");
               wrap.className = "dash-bell-item dash-bell-link";
               wrap.href = item.url || "#";
-              wrap.innerHTML = `
-                <div class="dash-bell-title">${item.title}</div>
-                <div class="dash-bell-note">${item.detail}</div>
-                <div class="dash-bell-time">${item.time}</div>
-              `;
+              const title = document.createElement("div");
+              title.className = "dash-bell-title";
+              title.textContent = item.title || "Notification";
+              const note = document.createElement("div");
+              note.className = "dash-bell-note";
+              note.textContent = item.detail || "";
+              const time = document.createElement("div");
+              time.className = "dash-bell-time";
+              time.textContent = item.time || "";
+              wrap.append(title, note, time);
               list.appendChild(wrap);
             });
           } else {
@@ -247,7 +307,10 @@
     }
 
     refreshDashboardNotifications();
-    setInterval(refreshDashboardNotifications, 30000);
+    const dashboardNotificationTimer = setInterval(refreshDashboardNotifications, 10000);
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshDashboardNotifications();
+    });
   </script>
 
   <div class="dash-modal" id="dashPasswordModal" aria-hidden="true">

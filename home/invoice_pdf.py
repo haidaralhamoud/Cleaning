@@ -345,6 +345,7 @@ def _build_legacy_branded_invoice_pdf(document):
     due_date = invoice_info.get("due date") or "-"
     payment_terms = invoice_info.get("payment terms") or "-"
     reference_number = invoice_info.get("reference number") or document_number
+    booking_reference = document.get("booking_reference") or invoice_info.get("booking / reference id") or "-"
     late_interest = invoice_info.get("interest on late payment") or "-"
     customer_number = customer_rows.get("customer number") or customer_details.get("customer_number") or "-"
     currency_code = str(document.get("currency") or "SEK").upper()
@@ -515,7 +516,7 @@ def _build_legacy_branded_invoice_pdf(document):
 
     meta_rows = [
         ("INVOICE NO.", document_number),
-        ("BOOKING / REFERENCE ID", reference_number),
+        ("BOOKING / REFERENCE ID", booking_reference),
         ("CUSTOMER NO.", customer_number),
         ("INVOICE DATE", invoice_date),
         ("DUE DATE", due_date),

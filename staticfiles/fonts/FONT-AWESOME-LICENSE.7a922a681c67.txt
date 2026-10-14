@@ -1,0 +1,4 @@
+Font Awesome Free icons/font
+Copyright Fonticons, Inc.
+Icons: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
+Source: https://github.com/FortAwesome/Font-Awesome

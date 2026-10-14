@@ -13,6 +13,7 @@
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/private_scheduale.css' %}">
+<link rel="stylesheet" href="{% static 'css/private_flow.css' %}">
 <style>
 .schedule-messages {
   margin: 16px auto 0;
@@ -32,8 +33,9 @@
 }
 </style>
 </head>
-<body>
+<body class="private-flow">
 {% include "home/includes/main_header.html" %}
+{% include "home/includes/private_flow_intro.html" with flow_step=3 flow_title="Pick a time that suits your day" flow_text="Only real available times are shown, so there are no surprises later." %}
 
 <form method="post" id="scheduleForm" data-skip-validate action="{% url 'home:private_booking_schedule' %}">
   {% csrf_token %}

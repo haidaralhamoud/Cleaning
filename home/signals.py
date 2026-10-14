@@ -40,17 +40,27 @@ def _contact_support_email():
 def _send_admin_alert(subject, body):
     recipient = _admin_email()
     if not recipient:
-        return
+        logger.error("Admin booking alert was not sent because ADMIN_ALERT_EMAIL is empty.")
+        return False
     try:
-        send_mail(
+        sent_count = send_mail(
             subject,
             body,
             settings.DEFAULT_FROM_EMAIL,
             [recipient],
-            fail_silently=True,
+            fail_silently=False,
         )
+        if sent_count != 1:
+            logger.error(
+                "Admin booking alert returned an unexpected sent count (%s) for %s.",
+                sent_count,
+                recipient,
+            )
+            return False
+        return True
     except Exception:
-        logger.exception("Failed to send admin alert email")
+        logger.exception("Failed to send admin alert email to %s (subject=%s)", recipient, subject)
+        return False
 
 
 def _public_base_url():
@@ -204,7 +214,7 @@ def _send_private_booking_confirmation(booking):
     }
     subject = f"Your booking is confirmed #{booking.id}"
     text_body = render_to_string("home/emails/private_booking_confirmation.txt", context)
-    html_body = render_to_string("home/emails/private_booking_confirmation.html", context)
+    html_body = render_to_string("home/private_booking_confirmation_email.html", context)
     message = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [recipient])
     message.attach_alternative(html_body, "text/html")
     try:

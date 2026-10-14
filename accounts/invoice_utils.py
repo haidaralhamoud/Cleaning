@@ -461,6 +461,7 @@ def render_invoice_pdf(invoice: Invoice) -> bytes:
         "tagline": "Because Home Shouldn't Be Work",
         "document_title": "Invoice",
         "document_number": invoice.invoice_number,
+        "booking_reference": f"#{invoice.booking_id}" if invoice.booking_id else "-",
         "currency": invoice.currency,
         "logo_path": default_logo_path(),
         "sender_rows": _invoice_sender_rows(),

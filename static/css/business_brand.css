@@ -341,4 +341,65 @@ body.business-flow select {
   }
 }
 
+/* Refined business booking atmosphere */
+body.business-flow {
+  background:
+    radial-gradient(circle at 8% 18%, rgba(200, 167, 91, 0.08), transparent 24rem),
+    radial-gradient(circle at 94% 48%, rgba(168, 132, 50, 0.07), transparent 28rem),
+    linear-gradient(180deg, #fff 0%, #fffdf9 48%, #faf6ef 100%);
+  background-attachment: fixed;
+}
+
+body.business-flow .business-shell { padding-top: 46px; padding-bottom: 96px; }
+
+body.business-flow .business-hero {
+  padding: 46px 48px 42px;
+  background: linear-gradient(125deg, rgba(255,255,255,.98), rgba(249,243,231,.95));
+  box-shadow: 0 32px 80px rgba(45,33,15,.10), inset 0 1px 0 #fff;
+}
+
+body.business-flow .business-hero-content::before {
+  content: "HEMBLA  •  BUSINESS CARE";
+  position: absolute;
+  right: 0;
+  top: 2px;
+  color: rgba(168,132,50,.42);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .2em;
+}
+
+body.business-flow .business-title::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 2px;
+  margin-top: 18px;
+  background: linear-gradient(90deg, var(--business-gold-dark), transparent);
+}
+
+body.business-flow .business-panel,
+body.business-flow .business-form-card,
+body.business-flow .frequency-card,
+body.business-flow .form-card { position: relative; }
+
+body.business-flow .business-panel::before,
+body.business-flow .business-form-card::before,
+body.business-flow .frequency-card::before,
+body.business-flow .form-card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 9%;
+  right: 9%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,167,91,.7), transparent);
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  body.business-flow .business-hero { padding: 30px 22px 26px; }
+  body.business-flow .business-hero-content::before { display: none; }
+}
+
 

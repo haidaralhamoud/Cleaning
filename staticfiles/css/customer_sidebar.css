@@ -1,0 +1,640 @@
+﻿.customer-sidebar .side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.customer-sidebar .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #2b241b;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.customer-sidebar .nav-ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 167, 91, 0.22);
+  background: #fbf7ee;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+}
+
+.customer-sidebar .nav-ico img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  filter: grayscale(1) brightness(0.3);
+}
+
+.customer-sidebar .nav-item:hover {
+  background: rgba(200, 167, 91, 0.1);
+  transform: translateX(2px);
+}
+
+.customer-sidebar .nav-item.active {
+  background: linear-gradient(135deg, rgba(200, 167, 91, 0.16), rgba(200, 167, 91, 0.08));
+  color: #a88432;
+  box-shadow: inset 0 0 0 1px rgba(200, 167, 91, 0.24);
+}
+
+.customer-sidebar .nav-item.active .nav-ico {
+  border-color: rgba(200, 167, 91, 0.32);
+  background: #fbf7ee;
+}
+
+.customer-sidebar .nav-item.active img {
+  filter: none;
+}
+
+.customer-sidebar .avatar {
+  width: 72px;
+  height: 72px;
+  flex: 0 0 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 30% 30%, #fffdf8, #f2e5c7);
+  border: 2px solid rgba(200, 167, 91, 0.28);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.customer-sidebar .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 50%;
+  display: block;
+}
+
+/* ===== Mobile Menu Toggle + Overlay ===== */
+.menu-toggle.customer-menu-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #c8a75b, #a88432);
+  color: #fff;
+  box-shadow: 0 14px 30px rgba(168, 132, 50, 0.35);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  left: 16px;
+  top: 92px;
+  z-index: 1200;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+
+/* Hide mobile header title on customer pages */
+.mobile-header .mobile-title {
+  display: none;
+}
+
+.menu-toggle.customer-menu-toggle .arrow {
+  position: relative;
+  display: inline-block;
+  width: 22px;
+  height: 18px;
+  color: transparent;
+  font-size: 0;
+}
+
+.menu-toggle.customer-menu-toggle .arrow::before,
+.menu-toggle.customer-menu-toggle .arrow::after {
+  content: "";
+  position: absolute;
+  background: #fff;
+  border-radius: 3px;
+}
+
+.menu-toggle.customer-menu-toggle .arrow::before {
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: #fff;
+}
+
+.menu-toggle.customer-menu-toggle .arrow::after {
+  left: 7px;
+  top: 3px;
+  width: 13px;
+  height: 2px;
+  box-shadow: 0 5px 0 #fff, 0 10px 0 #fff;
+}
+
+.menu-toggle.customer-menu-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(168, 132, 50, 0.42);
+}
+
+.menu-toggle.customer-menu-toggle:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.customer-menu-overlay{
+  position: fixed;
+  inset:0;
+  background:rgba(5,24,34,.35);
+  backdrop-filter:blur(2px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease;
+  z-index:10;
+}
+
+.customer-menu-overlay.show{
+  opacity:1;
+  pointer-events:auto;
+}
+
+@media (max-width: 991px) {
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    /* Align body offset with fixed header height to avoid extra top gap */
+    padding-top: 70px !important;
+  }
+
+  .menu-toggle.customer-menu-toggle {
+    display: inline-flex !important;
+  }
+
+  .customer-sidebar {
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    will-change: transform;
+  }
+
+  .customer-sidebar.open,
+  .customer-sidebar.active {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  }
+
+  .layout,
+  .page {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 12px 16px;
+    padding-top: 0;
+  }
+
+  /* Remove extra top spacing added by page-specific layouts on mobile */
+  .layout,
+  .page {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .main,
+  .content,
+  .page,
+  .main-content {
+    width: 100%;
+    padding: 0 0 16px !important;
+    margin: 0 auto;
+  }
+
+  .main,
+  .content,
+  .main-content {
+    margin-top: 0 !important;
+  }
+
+
+  .sidebar.customer-sidebar.open,
+  .sidebar.customer-sidebar.active {
+    transform: translateX(0);
+  }
+
+  /* Strong mobile override for layouts that still keep reserved sidebar spacing */
+  body.customer-profile-view .layout,
+  body.customer-profile-view .layout .page,
+  body.customer-profile-view .layout .main,
+  body.customer-profile-view .layout .content,
+  body.customer-profile-view .page,
+  .layout,
+  .page,
+  .main,
+  .content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  /* Reduce sidebar footprint while hidden on small screens */
+  body.customer-profile-view .sidebar.customer-sidebar,
+  .sidebar.customer-sidebar {
+    margin: 0 !important;
+    left: 8px !important;
+  }
+
+  .table-wrapper,
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Ensure main content doesn't keep reserved sidebar space on small screens */
+  .main,
+  .content,
+  .main-content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .menu-toggle.customer-menu-toggle {
+    top: 84px;
+    left: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  .menu-toggle.customer-menu-toggle { display: inline-flex !important; }
+}
+
+@media (min-width: 992px) {
+  .customer-menu-toggle { display: none; }
+  .customer-menu-overlay { display: none; }
+}
+
+/* Keep header toggle clean and separate from sidebar toggle */
+.main-header .menu-toggle {
+  position: static;
+  width: auto;
+  height: auto;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+
+.main-header .menu-toggle:hover {
+  transform: none;
+  background: none;
+}
+.sidebar.customer-sidebar {
+  width: 300px;
+  background: #fff; /* solid white background as requested */
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  box-shadow: 0 18px 38px rgba(34, 28, 20, 0.14);
+  /* keep outer spacing but inner padding handled by .sidebar-inner */
+  padding: 0;
+  position: sticky;
+  top: 10px;
+  height: auto;
+  margin: 20px;
+}
+
+/* Inner container holds profile + nav and expands to full height */
+.sidebar.customer-sidebar .sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  padding-bottom: 30px; /* keep previous inner spacing */
+}
+
+/* Desktop hard override so page-level generic sidebar styles do not restyle customer pages */
+body .sidebar.customer-sidebar {
+  width: 300px !important;
+  min-width: 300px !important;
+  background: #fff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 15px !important;
+  box-shadow: 0 18px 38px rgba(34, 28, 20, 0.14) !important;
+  padding: 0 !important;
+  position: sticky !important;
+  top: 10px !important;
+  height: auto !important;
+  margin: 20px !important;
+  overflow: hidden !important;
+  align-self: flex-start !important;
+}
+
+body .sidebar.customer-sidebar .sidebar-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  padding: 0 0 30px !important;
+}
+
+body .customer-sidebar .profile-head {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 24px 16px 14px !important;
+}
+
+body .customer-sidebar .name {
+  font: 700 16px "Vesper Libre", serif !important;
+  color: #14110f !important;
+}
+
+body .customer-sidebar .id {
+  font-size: 12px !important;
+  color: #84796b !important;
+}
+
+body .customer-sidebar .side-nav {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  padding: 10px !important;
+}
+
+body .customer-sidebar .nav-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 12px !important;
+  border-radius: 12px !important;
+  color: #2f2f2f !important;
+  text-decoration: none !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease !important;
+}
+
+body .customer-sidebar .nav-item:hover {
+  background: #f3f9fc !important;
+  color: #2f2f2f !important;
+  transform: translateX(2px) !important;
+}
+
+body .customer-sidebar .nav-item.active {
+  background: #e7f6fb !important;
+  color: #007ea6 !important;
+  box-shadow: inset 0 0 0 1px rgba(0, 126, 166, 0.2) !important;
+}
+
+body .customer-sidebar .nav-ico {
+  width: 32px !important;
+  height: 32px !important;
+  flex: 0 0 32px !important;
+  border-radius: 10px !important;
+  border: 1px solid #e2eef3 !important;
+  background: #fbf7ee !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .customer-sidebar .nav-ico img {
+  width: 18px !important;
+  height: 18px !important;
+  object-fit: contain !important;
+  filter: grayscale(1) brightness(0.3) !important;
+}
+
+body .customer-sidebar .nav-item.active .nav-ico {
+  border-color: #bfe6f1 !important;
+  background: #e7f6fb !important;
+}
+
+body .customer-sidebar .nav-item.active .nav-ico img {
+  filter: none !important;
+}
+
+body .customer-sidebar .avatar {
+  width: 72px !important;
+  height: 72px !important;
+  flex: 0 0 72px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  background: radial-gradient(circle at 30% 30%, #fffdf8, #f2e5c7) !important;
+  border: 2px solid rgba(200, 167, 91, 0.28) !important;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body .customer-sidebar .avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  border-radius: 50% !important;
+  display: block !important;
+}
+
+/* Optional: soft gradient at bottom for a subtle finish (uncomment to use) */
+.sidebar.customer-sidebar.gradient {
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    #ffffff 85%,
+    #f8fbfd 100%
+  );
+}
+
+
+.customer-sidebar .profile-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 16px 14px;
+}
+
+.customer-sidebar .name {
+  font: 700 16px "Vesper Libre", serif;
+}
+
+.customer-sidebar .id {
+  font-size: 12px;
+  color: #666;
+}
+
+@media (max-width: 991px) {
+  .layout {
+    flex-direction: row !important;
+    min-height: 100vh;
+    padding: 0;
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    position: fixed;
+    top: 70px; /* ظ†ظپط³ ط§ط±طھظپط§ط¹ ط§ظ„ظ‡ظٹط¯ط± */
+    left: 0;
+
+    width: 300px;
+    height: calc(100vh - 70px);
+
+    margin: 0; /* â‌Œ ط´ظٹظ„ margin-top */
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+
+    z-index: 2000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 991px) {
+  .content {
+    margin: 0 !important;
+    padding-top: 16px;
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar.customer-sidebar {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 280px;
+    height: calc(100vh - 70px);
+    margin: 0;
+    border-radius: 0 18px 18px 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 2000;
+  }
+
+  .sidebar.customer-sidebar.open {
+    transform: translateX(0);
+  }
+}
+@media (max-width: 991px) {
+  .menu-toggle.customer-menu-toggle {
+    display: inline-flex !important;
+  }
+}
+
+/* Common mobile layout safety for customer pages */
+@media (max-width: 991px) {
+  .main,
+  .content,
+  .main-content {
+    padding-top: 16px !important;
+  }
+
+  .page-title,
+  h1.page-title,
+  .section-title {
+    text-align: center !important;
+  }
+
+  .card,
+  .section,
+  .panel,
+  .table-wrapper,
+  .table-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  img,
+  video,
+  canvas,
+  iframe {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* Mobile hard override to avoid per-page conflicts */
+@media (max-width: 991px) {
+  .sidebar.customer-sidebar {
+    position: fixed !important;
+    top: 70px !important;
+    left: 0 !important;
+    width: min(82vw, 320px) !important;
+    height: calc(100vh - 70px) !important;
+    margin: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.3s ease !important;
+    z-index: 2000 !important;
+    overflow: hidden !important;
+  }
+
+  body .sidebar.customer-sidebar {
+    width: min(82vw, 320px) !important;
+    min-width: 0 !important;
+    max-width: min(82vw, 320px) !important;
+    margin: 0 !important;
+    top: 70px !important;
+    left: 0 !important;
+    border-radius: 0 20px 20px 0 !important;
+  }
+
+  .sidebar.customer-sidebar.open,
+  .sidebar.customer-sidebar.active {
+    transform: translateX(0) !important;
+  }
+
+  .layout > .main,
+  .layout > .content,
+  .page > .main,
+  .page > .content {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 991px) {
+  .sidebar.customer-sidebar .sidebar-inner {
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 24px;
+  }
+
+  .customer-sidebar .profile-head {
+    padding: 18px 14px 10px;
+  }
+
+  .customer-sidebar .nav-item {
+    padding: 9px 12px;
+  }
+
+  .customer-sidebar .nav-ico {
+    width: 30px;
+    height: 30px;
+  }
+
+  .customer-sidebar .nav-ico img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .customer-menu-overlay {
+    background: rgba(8, 24, 32, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 1900;
+  }
+}
+
+
+

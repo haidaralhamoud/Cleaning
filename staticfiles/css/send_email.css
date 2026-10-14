@@ -1,0 +1,251 @@
+﻿/* popup only */
+
+.email-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 1000;
+  overflow: auto;
+  padding: 96px 24px 24px;
+}
+
+.email-overlay.show {
+  display: flex;
+}
+
+:root {
+  --brand: #c8a75b;
+  --brand-dark: #a88432;
+  --ink-900: #111111;
+  --ink-700: #6b645a;
+  --border: rgba(200, 167, 91, 0.22);
+}
+
+.email-overlay .popup {
+  background: linear-gradient(180deg, rgba(255,255,255,0.99) 0%, rgba(251,247,238,0.99) 100%);
+  border-radius: 28px;
+  width: min(700px, 94vw);
+  max-height: min(88vh, 900px);
+  overflow-y: auto;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.22);
+  padding: 40px 42px 30px;
+  position: relative;
+  animation: popupShow 0.25s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(200, 167, 91, 0.2);
+}
+
+.email-overlay .popup::-webkit-scrollbar {
+  width: 8px;
+}
+
+.email-overlay .popup::-webkit-scrollbar-thumb {
+  background: #e2c58b;
+  border-radius: 999px;
+}
+
+.email-overlay .popup::-webkit-scrollbar-thumb:hover {
+  background: var(--brand);
+}
+
+.email-overlay .close-btn {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 999px;
+  background: #f7efe1;
+}
+
+.email-overlay .popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.email-overlay .send-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: brightness(0) saturate(100%) invert(69%) sepia(29%) saturate(739%) hue-rotate(7deg) brightness(92%) contrast(86%);
+  transform: translateY(-3px);
+}
+
+.email-overlay h2 {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ink-900);
+  margin: 0;
+}
+
+.email-overlay .subtitle {
+  text-align: center;
+  color: var(--ink-700);
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 14px;
+  margin-bottom: 30px;
+}
+
+.email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.email-form label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-900);
+}
+
+.email-form input,
+.email-form textarea {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 15px 18px;
+  font-size: 12px;
+  font-family: "Vesper Libre", serif;
+  background: #fbfdff;
+  width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.email-form input:focus,
+.email-form textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(200, 167, 91, 0.14);
+  background: #ffffff;
+}
+
+.email-form textarea {
+  resize: vertical;
+  min-height: 170px;
+}
+
+.attachment-box {
+  position: relative;
+}
+
+.attachment-box input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.file-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 15px 16px;
+  background: #fffdf9;
+  font-size: 12px;
+  color: var(--ink-700);
+}
+
+.file-btn {
+  background: #111111;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.upload-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  object-fit: contain;
+  opacity: 0.9;
+}
+
+.send-btn {
+  background: #111111;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  padding: 15px 24px;
+  margin-top: 12px;
+  width: 100%;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 18px 32px rgba(17, 17, 17, 0.16);
+}
+
+.send-btn:hover {
+  background: linear-gradient(135deg, var(--brand), var(--brand-dark));
+  transform: translateY(-1px);
+}
+
+@keyframes popupShow {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .email-overlay {
+    padding: 84px 12px 12px;
+  }
+
+  .email-overlay .popup {
+    width: 100%;
+    max-height: calc(100vh - 24px);
+    padding: 28px 20px 24px;
+    border-radius: 24px;
+  }
+
+  .email-overlay h2 {
+    font-size: 28px;
+  }
+
+  .email-overlay .subtitle {
+    font-size: 12px;
+  }
+
+  .email-form {
+    gap: 12px;
+  }
+
+  .send-btn {
+    font-size: 12px;
+    padding: 14px 18px;
+  }
+}
+
+

@@ -14,6 +14,7 @@
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="stylesheet" href="{% static 'css/YourServicesBooking.css' %}">
 <link rel="stylesheet" href="{% static 'css/addonse.css' %}">
+<link rel="stylesheet" href="{% static 'css/private_flow.css' %}">
 <style>
     .error {
       border: 2px solid #e74c3c !important;
@@ -590,8 +591,9 @@
 
   </style>
 </head>
-<body>
+<body class="private-flow">
 {% include "home/includes/main_header.html" %}
+{% include "home/includes/private_flow_intro.html" with flow_step=2 flow_title="Make the service feel like yours" flow_text="A few thoughtful choices help us arrive prepared for your home." %}
 {% if messages %}
 <script>
   document.addEventListener("DOMContentLoaded", () => {
@@ -1489,6 +1491,9 @@ function updateAnswer(serviceSlug, fieldKey, value, options = {}) {
 
         return fetch(`/private/api/booking/update-answer/`, {
             method: "POST",
+            headers: {
+                "X-CSRFToken": document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || ""
+            },
             body: fd
         })
         .then(r => r.json())
@@ -1843,6 +1848,9 @@ function sendAddonsUpdate() {
 
     fetch(`/private/api/booking/update-addons/`, {
         method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector('input[name="csrfmiddlewaretoken"]')?.value || ""
+        },
         body: fd
     })
     .then(() => updateSummary());

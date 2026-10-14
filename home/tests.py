@@ -9,11 +9,71 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
 from home.models import BusinessBooking, CallRequest, EmailRequest, PrivateBooking, PrivateMainCategory, PrivateService
-from accounts.models import Customer
+from accounts.models import Customer, ProviderShift
 from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes, has_overlap
 from home.pricing_utils import calculate_booking_price
 from home.views import CustomerDashboardForm
+
+
+class PrivateBookingFlowSafetyTests(TestCase):
+    def setUp(self):
+        self.category = PrivateMainCategory.objects.create(
+            title="Home cleaning",
+            slug="home-cleaning",
+        )
+        self.service = PrivateService.objects.create(
+            category=self.category,
+            title="Standard cleaning",
+            slug="standard-cleaning",
+            price=Decimal("250.00"),
+            price_currency="SEK",
+        )
+
+    def _set_draft(self, **updates):
+        draft = {
+            "selected_services": [self.service.slug],
+            "schedule_mode": "same",
+        }
+        draft.update(updates)
+        session = self.client.session
+        session["private_booking_draft"] = draft
+        session.save()
+
+    def test_checkout_redirects_when_schedule_is_incomplete(self):
+        self._set_draft()
+
+        response = self.client.get(reverse("home:private_booking_checkout"))
+
+        self.assertRedirects(response, reverse("home:private_booking_schedule"), fetch_redirect_response=False)
+
+    def test_invoice_endpoint_rejects_get_requests(self):
+        user = get_user_model().objects.create_user(
+            username="invoice-flow@example.com",
+            email="invoice-flow@example.com",
+            password="test-password",
+        )
+        self.client.force_login(user)
+        self._set_draft(appointment_date=timezone.localdate().isoformat(), appointment_start_time="10:00")
+
+        response = self.client.get(reverse("home:private_booking_cash_invoice_pdf"))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(PrivateBooking.objects.count(), 0)
+
+    def test_invoice_endpoint_requires_terms_acceptance(self):
+        user = get_user_model().objects.create_user(
+            username="invoice-terms@example.com",
+            email="invoice-terms@example.com",
+            password="test-password",
+        )
+        self.client.force_login(user)
+        self._set_draft(appointment_date=timezone.localdate().isoformat(), appointment_start_time="10:00")
+
+        response = self.client.post(reverse("home:private_booking_cash_invoice_pdf"))
+
+        self.assertRedirects(response, reverse("home:private_booking_checkout"), fetch_redirect_response=False)
+        self.assertEqual(PrivateBooking.objects.count(), 0)
 
 
 @override_settings(
@@ -85,11 +145,55 @@ class CustomerDashboardFormTests(TestCase):
 
         self.assertEqual(customer.user, existing_user)
 
+    def test_customer_form_allows_multiple_customers_with_same_contact_email(self):
+        first_form = CustomerDashboardForm(data=self.customer_data("shared@example.com"))
+        self.assertTrue(first_form.is_valid(), first_form.errors)
+        first_customer = first_form.save()
+
+        second_data = self.customer_data("shared@example.com")
+        second_data["personal_identity_number"] = "19920202-5678"
+        second_data["first_name"] = "Second"
+        second_form = CustomerDashboardForm(data=second_data)
+
+        self.assertTrue(second_form.is_valid(), second_form.errors)
+        second_customer = second_form.save()
+
+        self.assertEqual(second_customer.email, "shared@example.com")
+        self.assertNotEqual(second_customer.user, first_customer.user)
+        self.assertEqual(first_customer.user.email, "shared@example.com")
+        self.assertEqual(second_customer.user.email, "")
+
+    def test_customer_form_allows_editing_email_to_an_existing_customer_email(self):
+        first_form = CustomerDashboardForm(data=self.customer_data("shared@example.com"))
+        self.assertTrue(first_form.is_valid(), first_form.errors)
+        first_form.save()
+
+        second_data = self.customer_data("second@example.com")
+        second_data["personal_identity_number"] = "19920202-5678"
+        second_form = CustomerDashboardForm(data=second_data)
+        self.assertTrue(second_form.is_valid(), second_form.errors)
+        second_customer = second_form.save()
+        original_user = second_customer.user
+
+        second_data["email"] = "shared@example.com"
+        edit_form = CustomerDashboardForm(data=second_data, instance=second_customer)
+
+        self.assertTrue(edit_form.is_valid(), edit_form.errors)
+        updated_customer = edit_form.save()
+        self.assertEqual(updated_customer.email, "shared@example.com")
+        self.assertEqual(updated_customer.user, original_user)
+
 
 class ProviderAvailabilityTests(TestCase):
     def setUp(self):
         self.User = get_user_model()
         self.provider = self.User.objects.create_user(username="provider1", password="pass123")
+        ProviderShift.objects.create(
+            provider=self.provider,
+            weekday=timezone.localdate().weekday(),
+            start_time=time(8, 0),
+            end_time=time(20, 0),
+        )
 
     def _dt(self, date_obj, t):
         tz = timezone.get_current_timezone()
@@ -272,6 +376,12 @@ class BookingPricingDurationTests(TestCase):
     CONTACT_SUPPORT_EMAIL="support@hembla-experten.se",
     SECURE_SSL_REDIRECT=False,
 )
+@override_settings(
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    },
+)
 class BookingEmailSignalTests(TestCase):
     def test_private_booking_creation_sends_customer_confirmation_email(self):
         user_model = get_user_model()
@@ -316,6 +426,13 @@ class BookingEmailSignalTests(TestCase):
         self.assertIn("Your booking is confirmed", customer_email.subject)
         self.assertIn("Standard Cleaning", customer_email.body)
         self.assertIn("09:00", customer_email.body)
+
+        admin_emails = [
+            email for email in mail.outbox
+            if "services@hembla-experten.se" in email.to and "New Private Booking" in email.subject
+        ]
+        self.assertEqual(len(admin_emails), 1)
+        self.assertIn("A new private booking was created", admin_emails[0].body)
 
     def test_business_booking_creation_sends_customer_confirmation_email(self):
         BusinessBooking.objects.create(

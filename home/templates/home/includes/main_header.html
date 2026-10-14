@@ -15,11 +15,11 @@
   </button>
 
   <nav class="nav-links" id="nav-links">
-    <a href="{% url 'home:home' %}" class="nav-link{% if url_name == 'home' %} is-active{% endif %}">HOME</a>
-    <a href="{% url 'home:about' %}" class="nav-link{% if url_name == 'about' %} is-active{% endif %}">ABOUT</a>
+    <a href="{% url 'home:home' %}" class="nav-link{% if url_name == 'home' %} is-active{% endif %}">{% trans "HOME" %}</a>
+    <a href="{% url 'home:about' %}" class="nav-link{% if url_name == 'about' %} is-active{% endif %}">{% trans "ABOUT" %}</a>
     <div class="nav-dropdown">
       <a href="#" class="dropdown-toggle nav-link{% if url_name == 'all_services_private' or url_name == 'business_all_services' or url_name == 'business_service_detail' or url_name == 'business_start_booking' or url_name == 'business_company_info' or url_name == 'business_office_setup' or url_name == 'business_bundles' or url_name == 'business_services_needed' or url_name == 'business_addons' or url_name == 'business_frequency' or url_name == 'business_scheduling' or url_name == 'business_thank_you' or url_name == 'private_zip_step1' or url_name == 'private_zip_available' or url_name == 'private_booking_start' or url_name == 'private_booking_services' or url_name == 'private_cart_continue' or url_name == 'private_cart' or url_name == 'private_cart_remove_json' or url_name == 'private_cart_add' or url_name == 'private_cart_count' or url_name == 'private_booking_schedule' or url_name == 'private_booking_checkout' or url_name == 'private_booking_payment_complete' or url_name == 'payment_success' or url_name == 'payment_failed' or url_name == 'service_detail' or url_name == 'view_service_details' or '/private/' in path or '/business/' in path or '/booking/' in path or '/private/' in next_path or '/business/' in next_path or '/booking/' in next_path %} is-active{% endif %}" aria-haspopup="true" aria-expanded="false">
-        <span class="dropdown-label">SERVICES</span>
+        <span class="dropdown-label">{% trans "SERVICES" %}</span>
       </a>
       <div class="dropdown-menu services-mega-menu">
         <div class="dropdown-submenu">
@@ -106,9 +106,9 @@
         </div>
       </div>
     </div>
-    <a href="{% url 'home:contact' %}" class="nav-link{% if url_name == 'contact' %} is-active{% endif %}">CONTACT</a>
+    <a href="{% url 'home:contact' %}" class="nav-link{% if url_name == 'contact' %} is-active{% endif %}">{% trans "CONTACT" %}</a>
     <a href="{% url 'home:feedback_request' %}" class="nav-link nav-feedback{% if url_name == 'feedback_request' %} is-active{% endif %}">
-      FEEDBACK
+      {% trans "FEEDBACK" %}
       <span class="nav-dot" aria-hidden="true"></span>
     </a>
 
@@ -136,15 +136,34 @@
           <button type="submit">Log out</button>
         </form>
       {% else %}
-        <a href="{% url 'accounts:sign_up' %}">Sign Up</a>
-        <a href="{% url 'login' %}">Sign In</a>
+        <a href="{% url 'accounts:sign_up' %}">{% trans "Sign Up" %}</a>
+        <a href="{% url 'login' %}">{% trans "Sign In" %}</a>
       {% endif %}
     </div>
   </nav>
 
 
   <div class="auth-buttons">
+    <div class="header-contact-actions" aria-label="{% trans 'Contact options' %}">
+      <a class="header-contact-button header-phone" href="tel:+46769046338" aria-label="{% trans 'Call us' %}: 076 904 63 38">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M6.6 10.8c1.7 3.3 3.3 4.9 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.5.7 3.8.7.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.7c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.6.7 3.8.1.4 0 .8-.2 1.1l-2.3 2.2Z"/>
+        </svg>
+        <span dir="ltr">076 904 63 38</span>
+      </a>
+      <a class="header-contact-button header-whatsapp" href="https://wa.me/46769046338" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Contact us on WhatsApp' %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M12 2a9.8 9.8 0 0 0-8.4 14.9L2.2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 17.8a7.8 7.8 0 0 1-4-1.1l-.3-.2-3.1.8.8-3-.2-.3A7.8 7.8 0 1 1 12 19.8Zm4.3-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1a6.4 6.4 0 0 1-1.9-1.2 7 7 0 0 1-1.3-1.7c-.1-.2 0-.4.1-.5l.4-.5.2-.4c.1-.1 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.2-.2-.3-.4-.4Z"/>
+        </svg>
+        <span>WhatsApp</span>
+      </a>
+    </div>
+    <a class="nav-electric" href="https://rwmel.se/" target="_blank" rel="noopener noreferrer">
+      <span class="nav-electric__icon" aria-hidden="true">&#9889;</span>
+      <span>{% trans "Electrical Services" %}</span>
+    </a>
     {% comment %}
+    Language selector is temporarily hidden until multilingual support is ready.
     <div class="lang-dropdown">
       {% get_current_language as CURRENT_LANGUAGE %}
       <form action="{% url 'set_language' %}" method="post" class="lang-form">
@@ -218,8 +237,8 @@
         <button type="submit" class="btn-auth logout">Log out</button>
       </form>
     {% else %}
-      <a href="{% url 'accounts:sign_up' %}" class="btn-auth btn-guest btn-guest-signup">Sign Up</a>
-      <a href="{% url 'login' %}" class="btn-auth btn-guest btn-guest-signin">Sign In</a>
+      <a href="{% url 'accounts:sign_up' %}" class="btn-auth btn-guest btn-guest-signup">{% trans "Sign Up" %}</a>
+      <a href="{% url 'login' %}" class="btn-auth btn-guest btn-guest-signin">{% trans "Sign In" %}</a>
     {% endif %}
   </div>
   {% endwith %}

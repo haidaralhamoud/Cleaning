@@ -5,6 +5,7 @@ app_name='home'
 urlpatterns = [
     path('', views.home,name='home'),
     path('about', views.about,name='about'),
+    path('airbnb-management/', views.airbnb_management, name='airbnb_management'),
     path('contact', views.contact,name='contact'),
     path("contact/success/", views.contact_success, name="contact_success"),
     path('Privacy_Policy', views.Privacy_Policy,name='Privacy_Policy'),
@@ -110,6 +111,7 @@ path(
         name="private_zip_available"
     ),
     path("ajax/submit-call-request/", views.submit_call_request, name="submit_call_request"),
+    path("ajax/submit-airbnb-management-request/", views.submit_airbnb_management_request, name="submit_airbnb_management_request"),
 
     path(
             "private/booking/<slug:service_slug>/start/",
