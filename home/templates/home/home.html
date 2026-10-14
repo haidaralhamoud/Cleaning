@@ -1775,7 +1775,7 @@
     border: 1px solid #d8deea; border-radius: 10px; background: #fff; color: #34405a;
     font-size: 11px; font-weight: 600; cursor: pointer; transition: .2s ease;
   }
-  .hero-service-option input:checked + span { border-color: #c98722; background: #fff7e9; color: #8d570a; box-shadow: 0 0 0 2px rgba(201,135,34,.1); }
+  .hero-service-option input:checked + span { border-color: var(--lux-gold); background: #f8f2e7; color: var(--lux-gold-dark); box-shadow: 0 0 0 2px rgba(200,169,107,.12); }
   .hero-service-option b { color: #c57a0a; font-size: 16px; }
   .hero-request-field { margin-bottom: 11px; }
   .hero-request-field input, .hero-request-field textarea {
@@ -1805,7 +1805,7 @@
     -moz-appearance: none !important;
   }
   .hero-time-select::-ms-expand { display: none; }
-  .hero-time-select:focus { border-color: #c98722; box-shadow: 0 0 0 3px rgba(201,135,34,.12); }
+  .hero-time-select:focus { border-color: var(--lux-gold); box-shadow: 0 0 0 3px rgba(200,169,107,.14); }
   .hero-time-menu {
     position: absolute; top: calc(100% + 5px); inset-inline: 0; z-index: 20;
     display: none; grid-template-columns: repeat(3, 1fr); gap: 4px;
@@ -1815,16 +1815,16 @@
   }
   .hero-time-select-wrap.is-open .hero-time-menu { display: grid; }
   .hero-time-option { padding: 7px 4px; border-radius: 7px; background: #f7f8fb; color: #26324e; font-size: 11px; font-weight: 700; cursor: pointer; }
-  .hero-time-option:hover, .hero-time-option.is-selected { background: #fff0d6; color: #9a5e00; }
-  .hero-request-field input:focus, .hero-request-field textarea:focus { border-color: #c98722; box-shadow: 0 0 0 3px rgba(201,135,34,.12); }
+  .hero-time-option:hover, .hero-time-option.is-selected { background: #f1e5ce; color: var(--lux-gold-dark); }
+  .hero-request-field input:focus, .hero-request-field textarea:focus { border-color: var(--lux-gold); box-shadow: 0 0 0 3px rgba(200,169,107,.14); }
   .hero-request-field textarea { min-height: 54px; resize: vertical; }
   .hero-request-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 9px; }
   .hero-request-submit {
     width: 100%; min-height: 44px; border-radius: 10px; cursor: pointer;
-    background: linear-gradient(135deg, #d89017, #b96b00); color: #fff; font-weight: 800;
-    box-shadow: 0 10px 22px rgba(185,107,0,.24); transition: .2s ease;
+    background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-dark)); color: #fff; font-weight: 800;
+    box-shadow: 0 10px 22px rgba(168,134,76,.24); transition: .2s ease;
   }
-  .hero-request-submit:hover { transform: translateY(-1px); box-shadow: 0 13px 26px rgba(185,107,0,.3); }
+  .hero-request-submit:hover { transform: translateY(-1px); box-shadow: 0 13px 26px rgba(168,134,76,.3); }
   .hero-request-note { display: block; margin-top: 7px; text-align: center; color: #788095; font-size: 10px; }
 
   .hero-service-area {
@@ -1845,9 +1845,9 @@
     height: 28px;
     flex: 0 0 28px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #d99a2b, #a96300);
+    background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-dark));
     color: #fff;
-    box-shadow: 0 7px 15px rgba(169, 99, 0, .22);
+    box-shadow: 0 7px 15px rgba(168, 134, 76, .22);
   }
   .hero-service-area__icon svg { width: 15px; height: 15px; fill: currentColor; }
 
@@ -1919,6 +1919,25 @@
     padding: 3px;
     border-radius: 5px;
     background-color: #f2e6cf;
+  }
+
+  #hero-date {
+    padding-inline-end: 42px;
+    color-scheme: light;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2380612f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M16 3v4M8 3v4M3 10h18'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 19px 19px;
+  }
+
+  #hero-date::-webkit-calendar-picker-indicator {
+    width: 28px;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
   }
 
   /* Editorial hero layout inspired by the supplied reference; existing content and flows stay intact. */
@@ -2005,10 +2024,10 @@
     display: grid;
     place-items: center;
     border-radius: 50%;
-    border: 1px solid rgba(204, 139, 35, .2);
-    background: linear-gradient(145deg, #fff0d1, #ffdfa2);
-    color: #9b5a00;
-    box-shadow: 0 7px 16px rgba(175, 105, 4, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
+    border: 1px solid rgba(200, 169, 107, .28);
+    background: linear-gradient(145deg, #f6ecd9, #e7d4af);
+    color: var(--lux-gold-dark);
+    box-shadow: 0 7px 16px rgba(168, 134, 76, .14), inset 0 1px 0 rgba(255, 255, 255, .9);
   }
 
   .home-trust-strip__icon svg {
@@ -2061,8 +2080,8 @@
     height: 34px;
     flex: 0 0 34px;
     border-radius: 50%;
-    background: #ffe7bf;
-    color: #9f6100;
+    background: #f1e5ce;
+    color: var(--lux-gold-dark);
   }
   .hero-benefit__icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .hero-benefit strong, .hero-benefit small { display: block; }
@@ -2075,7 +2094,7 @@
     overflow: hidden;
     border: 1px solid rgba(200, 169, 107, .25);
     border-radius: 18px;
-    background: linear-gradient(110deg, rgba(255,255,255,.76), rgba(255,244,226,.58));
+    background: linear-gradient(110deg, rgba(255,255,255,.8), rgba(241,229,206,.62));
     box-shadow: 0 12px 28px rgba(82, 51, 15, .09), inset 0 1px 0 rgba(255,255,255,.88);
   }
   .hero-price-card::after {
@@ -2086,14 +2105,14 @@
     right: -55px;
     top: -75px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(211,151,54,.2), transparent 68%);
+    background: radial-gradient(circle, rgba(200,169,107,.24), transparent 68%);
   }
   .hero-price-card__label,
   .hero-price-card__price,
   .hero-price-card__note { position: relative; z-index: 1; display: block; }
   .hero-price-card__label { margin-bottom: 2px; color: #27324a; font-size: 13px; font-weight: 700; }
   .hero-price-card__price {
-    color: #7e4500;
+    color: var(--lux-gold-dark);
     font-family: "Playfair Display", serif;
     font-size: clamp(30px, 3vw, 42px);
     font-weight: 800;
@@ -2117,16 +2136,16 @@
   body.home-page--quiet .hero-buttons .btn-primary {
     min-height: 48px;
     padding: 10px 25px;
-    border: 1px solid #b86b06;
+    border: 1px solid var(--lux-gold-dark);
     border-radius: 10px;
-    background: linear-gradient(135deg, #d99017, #b86b06);
+    background: linear-gradient(135deg, var(--lux-gold), var(--lux-gold-dark));
     color: #fff;
-    box-shadow: 0 12px 25px rgba(184, 107, 6, .26);
+    box-shadow: 0 12px 25px rgba(168, 134, 76, .26);
   }
 
   body.home-page--quiet .hero-buttons .btn-primary:hover {
-    background: linear-gradient(135deg, #e39a20, #aa6000);
-    box-shadow: 0 15px 30px rgba(184, 107, 6, .32);
+    background: linear-gradient(135deg, var(--lux-gold-soft), #987640);
+    box-shadow: 0 15px 30px rgba(168, 134, 76, .32);
   }
 
   body.home-page--quiet .hero-service-area {
@@ -2151,10 +2170,50 @@
     body.home-page--quiet .hero-bg::after {
       background: linear-gradient(180deg, rgba(255, 252, 247, .88), rgba(255, 252, 247, .42));
     }
-    body.home-page--quiet .hero-copy { width: 100%; max-width: 680px; padding: 24px; }
+    body.home-page--quiet .hero-inner.container {
+      width: calc(100% - 32px);
+      margin-inline: auto;
+      align-items: center;
+    }
+    body.home-page--quiet .hero-copy {
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 680px;
+      margin-inline: auto;
+      padding: 24px;
+      text-align: center;
+    }
     body.home-page--quiet .hero-copy h1 { font-size: clamp(38px, 8vw, 58px); }
     body.home-page--quiet .hero-request-card { transform: none; }
     .hero-benefits { width: 100%; grid-template-columns: 1fr; row-gap: 10px; }
+    .hero-benefit { justify-content: center; }
+    body.home-page--quiet .hero-buttons { justify-content: center; }
+    body.home-page--quiet .same-day-dropdown {
+      width: min(220px, 100%);
+    }
+    body.home-page--quiet .same-day-button {
+      width: 100%;
+      justify-content: center;
+    }
+    body.home-page--quiet .same-day-menu {
+      inset-inline: 0;
+      width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+      transform-origin: top center;
+      border-color: rgba(168, 134, 76, .26);
+      background: rgba(255, 253, 249, .98);
+      box-shadow: 0 16px 32px rgba(82, 51, 15, .18);
+    }
+    body.home-page--quiet .same-day-menu a {
+      position: relative;
+      text-align: center;
+    }
+    body.home-page--quiet .same-day-menu a + a {
+      border-top: 1px solid rgba(168, 134, 76, .24);
+      border-radius: 0 0 10px 10px;
+    }
+    body.home-page--quiet .hero-service-area { margin-inline: auto; }
   }
 
   .bottom-contact-cta {
@@ -2227,7 +2286,7 @@
   }
   .airbnb-feature__inner { width: min(1320px, 90%); margin: 0 auto; padding: 48px 0; }
   .airbnb-feature__content { width: min(570px, 48%); }
-  .airbnb-feature__eyebrow { display: block; margin-bottom: 9px; color: #ae6713; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .airbnb-feature__eyebrow { display: block; margin-bottom: 9px; color: #a8864c; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
   .airbnb-feature h2 { max-width: 520px; margin: 0 0 12px; color: #141414; font-size: clamp(38px, 4vw, 58px); line-height: .98; letter-spacing: -.035em; }
   .airbnb-feature p { max-width: 560px; margin: 0 0 22px; color: #34405a; font-size: 14px; line-height: 1.55; }
   .airbnb-feature__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -2237,11 +2296,11 @@
     border-radius: 9px; font-size: 12px; font-weight: 800; line-height: 1.2; white-space: nowrap;
     text-decoration: none; transition: transform .2s ease, box-shadow .2s ease;
   }
-  .airbnb-feature__button--primary { background: linear-gradient(135deg, #d58b17, #b66800); color: #fff; box-shadow: 0 10px 22px rgba(182,104,0,.23); }
-  .airbnb-feature__button--secondary { border: 1px solid #ca8725; background: rgba(255,255,255,.88); color: #172342; }
+  .airbnb-feature__button--primary { background: linear-gradient(135deg, #d8bf89, #b5904e); color: #fff; box-shadow: 0 10px 22px rgba(181,144,78,.27); }
+  .airbnb-feature__button--secondary { border: 1px solid #c8a96b; background: rgba(255,255,255,.88); color: #172342; }
   .airbnb-feature__button:hover { transform: translateY(-2px); }
-  .airbnb-feature__button--primary:hover { color: #fff; box-shadow: 0 14px 28px rgba(182,104,0,.3); }
-  .airbnb-feature__button--secondary:hover { color: #9a5900; box-shadow: 0 10px 22px rgba(42,31,18,.1); }
+  .airbnb-feature__button--primary:hover { color: #fff; background: linear-gradient(135deg, #dfc998, #aa8444); box-shadow: 0 14px 28px rgba(181,144,78,.34); }
+  .airbnb-feature__button--secondary:hover { color: #a8864c; box-shadow: 0 10px 22px rgba(42,31,18,.1); }
   @media (max-width: 820px) {
     .airbnb-feature { min-height: 520px; align-items: flex-end; background-position: 62% center; }
     .airbnb-feature::before { background: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,249,240,.92) 48%, #fff9f0 72%); }
@@ -2252,7 +2311,36 @@
   .airbnb-modal.is-open { display: flex; }
   .airbnb-modal__backdrop { position: absolute; inset: 0; background: rgba(7,10,14,.76); backdrop-filter: blur(3px); }
   .airbnb-modal__dialog { position: relative; display: grid; grid-template-columns: 39% 61%; width: min(1080px, 96vw); height: min(900px, calc(100dvh - 44px)); max-height: 92vh; overflow: hidden; border-radius: 18px; background: #fffdf9; box-shadow: 0 30px 90px rgba(0,0,0,.38); }
-  .airbnb-modal__close { position: absolute; top: 17px; inset-inline-end: 19px; z-index: 4; width: 36px; height: 36px; color: #172342; font-size: 31px; line-height: 1; cursor: pointer; }
+  .airbnb-modal__close {
+    position: absolute;
+    top: 17px;
+    inset-inline-end: 19px;
+    z-index: 4;
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    padding: 0 0 2px;
+    border: 1px solid rgba(168, 134, 76, .4);
+    border-radius: 50%;
+    background: rgba(255, 253, 249, .94);
+    color: #80612f;
+    box-shadow: 0 6px 16px rgba(82, 61, 29, .12);
+    font-size: 23px;
+    font-weight: 500;
+    line-height: 1;
+    cursor: pointer;
+    transition: transform .2s ease, background-color .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .airbnb-modal__close:hover,
+  .airbnb-modal__close:focus-visible {
+    background: #80612f;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(128, 97, 47, .24);
+    transform: rotate(90deg);
+    outline: none;
+  }
+  .airbnb-modal__close:active { transform: rotate(90deg) scale(.94); }
   .airbnb-modal__visual { position: relative; min-width: 0; min-height: 0; padding: 36px; display: flex; flex-direction: column; justify-content: flex-end; overflow-y: auto; color: #fff; background: url("{% static 'images/airbnb-bedroom.jpg' %}") center / cover no-repeat; }
   .airbnb-modal__visual::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,7,8,.12), rgba(4,7,8,.92)); }
   .airbnb-modal__visual-content { position: relative; }
@@ -2309,11 +2397,54 @@
     .airbnb-modal__visual { padding-block: 28px; }
   }
   @media (max-width: 820px) {
-    .airbnb-modal { padding: 0; }
-    .airbnb-modal__dialog { display: block; width: 100%; height: 100dvh; max-height: 100dvh; border-radius: 0; }
+    .airbnb-modal { padding: 0; overflow: hidden; }
+    .airbnb-modal__dialog {
+      display: block;
+      width: 100dvw;
+      max-width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      border-radius: 0;
+    }
     .airbnb-modal__visual { display: none; }
-    .airbnb-modal__main { padding: 52px 20px 28px; }
+    .airbnb-modal__main {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      padding: calc(48px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-gutter: auto;
+    }
+    .airbnb-request-form,
+    .airbnb-success { width: min(100%, 560px); margin-inline: auto; }
+    .airbnb-modal__close { top: max(10px, env(safe-area-inset-top)); inset-inline-end: max(10px, env(safe-area-inset-right)); }
+    .airbnb-modal__main h2 { font-size: clamp(27px, 7vw, 34px); }
     .airbnb-choice-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .airbnb-modal__main { padding-inline: 14px; }
+    .airbnb-modal__intro { margin-bottom: 16px; font-size: 12px; }
+    .airbnb-question { margin-bottom: 14px; }
+    .airbnb-question legend,
+    .airbnb-question > label { font-size: 13px; }
+    .airbnb-choice-grid { gap: 7px; }
+    .airbnb-choice span { min-height: 66px; padding-block: 10px 8px; }
+    .airbnb-count-grid { gap: 6px; }
+    .airbnb-count-choice span { min-height: 40px; }
+    .airbnb-modal-field { margin-bottom: 12px; }
+  }
+
+  @media (max-width: 350px) {
+    .airbnb-count-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 820px) and (max-height: 600px) {
+    .airbnb-modal__main { padding-top: 42px; }
+    .airbnb-modal__main h2 { font-size: 25px; }
+    .airbnb-choice span { min-height: 60px; }
   }
 </style>
 <title>Hembla experten</title>
@@ -2336,13 +2467,13 @@
   <div class="hero-benefit"><span class="hero-benefit__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 4C10 4 5 9 5 16c5 1 11-1 15-12Z"/><path d="M4 20c3-5 7-8 13-11"/></svg></span><span><strong>{% trans "Flexible cleaning plans" %}</strong></span></div>
 </div>
 <div class="hero-price-card">
-  <span class="hero-price-card__label">{{ hero_price.label|default:"Home cleaning from" }}</span>
+  <span class="hero-price-card__label">{{ hero_price.label|default:"Home cleaning"|cut:" from" }}</span>
   <strong class="hero-price-card__price">{{ hero_price.hourly_price|default:240|floatformat:"-2" }} {{ hero_price.currency|default:"SEK" }} {{ hero_price.unit_label|default:"/ hour" }}</strong>
   <span class="hero-price-card__note">{{ hero_price.note|default:"after RUT deduction" }}</span>
 </div>
 <div class="hero-buttons">
 <div class="same-day-dropdown">
-<button type="button" class="btn btn-primary same-day-button">{% trans "Book Cleaning" %}</button>
+<button type="button" class="btn btn-primary same-day-button" aria-haspopup="true" aria-expanded="false">{% trans "Book Cleaning" %}</button>
 <div class="same-day-menu" aria-label="Book Cleaning options">
 <a href="{% url 'home:all_services_private' %}">{% trans "Private Booking" %}</a>
 <a href="http://127.0.0.1:8000/business/services/">{% trans "Business Booking" %}</a>
@@ -2793,7 +2924,10 @@
     if (!heroDropdowns.length) return;
 
     const closeHeroDropdowns = () => {
-      heroDropdowns.forEach((dropdown) => dropdown.classList.remove('is-open'));
+      heroDropdowns.forEach((dropdown) => {
+        dropdown.classList.remove('is-open');
+        dropdown.querySelector('.same-day-button')?.setAttribute('aria-expanded', 'false');
+      });
     };
 
     heroDropdowns.forEach((dropdown) => {
@@ -2808,6 +2942,7 @@
         closeHeroDropdowns();
         if (willOpen) {
           dropdown.classList.add('is-open');
+          trigger.setAttribute('aria-expanded', 'true');
         }
       });
 
