@@ -1926,7 +1926,7 @@
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(255, 252, 247, .91) 0%, rgba(255, 250, 242, .76) 25%, rgba(255, 250, 242, .24) 49%, rgba(255, 255, 255, 0) 68%);
+    background: linear-gradient(90deg, rgba(255, 252, 247, .68) 0%, rgba(255, 250, 242, .5) 25%, rgba(255, 250, 242, .12) 49%, rgba(255, 255, 255, 0) 68%);
   }
 
   body.home-page--quiet .hero-inner.container {
@@ -1943,11 +1943,11 @@
     border-radius: 28px;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.72),
-      rgba(255, 250, 244, 0.5)
+      rgba(255, 255, 255, 0.46),
+      rgba(255, 250, 244, 0.24)
     );
-    -webkit-backdrop-filter: blur(14px) saturate(115%);
-    backdrop-filter: blur(14px) saturate(115%);
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
+    backdrop-filter: blur(8px) saturate(110%);
     box-shadow:
       0 22px 52px rgba(52, 40, 24, 0.13),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
@@ -1963,6 +1963,78 @@
     white-space: normal;
     text-wrap: balance;
     text-shadow: none;
+  }
+
+  .home-trust-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    position: relative;
+    z-index: 5;
+    width: min(1480px, 92%);
+    margin: 12px auto 0;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, .85);
+    border-radius: 22px;
+    background: rgba(255, 252, 247, .9);
+    -webkit-backdrop-filter: blur(16px) saturate(115%);
+    backdrop-filter: blur(16px) saturate(115%);
+    box-shadow: 0 18px 48px rgba(67, 45, 18, .14), inset 0 1px 0 #fff;
+  }
+
+  .home-trust-strip__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 76px;
+    padding: 12px 18px;
+    border-radius: 15px;
+    color: #26324e;
+    transition: background .2s ease, transform .2s ease;
+  }
+
+  .home-trust-strip__item + .home-trust-strip__item { border-left: 1px solid rgba(169, 119, 44, .14); }
+  .home-trust-strip__item:hover { background: rgba(255, 237, 205, .44); transform: translateY(-2px); }
+
+  .home-trust-strip__icon {
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(204, 139, 35, .2);
+    background: linear-gradient(145deg, #fff0d1, #ffdfa2);
+    color: #9b5a00;
+    box-shadow: 0 7px 16px rgba(175, 105, 4, .12), inset 0 1px 0 rgba(255, 255, 255, .9);
+  }
+
+  .home-trust-strip__icon svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .home-trust-strip strong, .home-trust-strip small { display: block; }
+  .home-trust-strip strong { color: #17233d; font-size: 14px; line-height: 1.25; }
+  .home-trust-strip small { margin-top: 4px; color: #66728a; font-size: 11px; line-height: 1.35; }
+
+  @media (max-width: 980px) {
+    .home-trust-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 10px; }
+    .home-trust-strip__item { justify-content: flex-start; padding-block: 10px; }
+    .home-trust-strip__item:nth-child(3) { border-left: 0; }
+  }
+
+  @media (max-width: 560px) {
+    .home-trust-strip { grid-template-columns: 1fr; width: calc(100% - 28px); margin-top: 8px; padding: 8px; border-radius: 18px; }
+    .home-trust-strip__item { min-height: 66px; padding-inline: 10px; }
+    .home-trust-strip__item + .home-trust-strip__item { border-left: 0; border-top: 1px solid rgba(38, 50, 78, .1); }
   }
 
   .hero-benefits {
@@ -2333,6 +2405,24 @@
   <small class="hero-request-note">{% trans "Free request • No obligation" %}</small>
 </form>
 </div>
+</section>
+<section class="home-trust-strip" aria-label="{% trans 'Why choose Hembla Experten' %}">
+  <div class="home-trust-strip__item">
+    <span class="home-trust-strip__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+    <span><strong>{% trans "Easy booking" %}</strong><small>{% trans "Send a request in 1 minute" %}</small></span>
+  </div>
+  <div class="home-trust-strip__item">
+    <span class="home-trust-strip__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4M9 11h6M9 15h3"/><circle cx="16" cy="16" r="3"/></svg></span>
+    <span><strong>{% trans "Pay by invoice" %}</strong><small>{% trans "after cleaning" %}</small></span>
+  </div>
+  <div class="home-trust-strip__item">
+    <span class="home-trust-strip__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 4C10 4 5 9 5 16c5 1 11-1 15-12Z"/><path d="M4 20c3-5 7-8 13-11"/></svg></span>
+    <span><strong>{% trans "Safe and eco-friendly" %}</strong><small>{% trans "Good for your home and the environment" %}</small></span>
+  </div>
+  <div class="home-trust-strip__item">
+    <span class="home-trust-strip__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20S4 15.5 4 9.5A4.5 4.5 0 0 1 12 6.7a4.5 4.5 0 0 1 8 2.8C20 15.5 12 20 12 20Z"/></svg></span>
+    <span><strong>{% trans "Trusted and personal" %}</strong><small>{% trans "We care about your home" %}</small></span>
+  </div>
 </section>
 <!-- ===== OUR SERVICES ===== -->
 <section class="services container">
