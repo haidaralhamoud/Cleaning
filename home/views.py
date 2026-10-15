@@ -5670,6 +5670,7 @@ def submit_call_request(request):
 def submit_home_service_inquiry(request):
     service = (request.POST.get("service") or "").strip()
     address = (request.POST.get("address") or "").strip()
+    email = (request.POST.get("email") or "").strip()
     phone = (request.POST.get("phone") or "").strip()
     preferred_date = parse_date((request.POST.get("date") or "").strip())
     preferred_time = parse_time((request.POST.get("time") or "").strip())
@@ -5680,6 +5681,10 @@ def submit_home_service_inquiry(request):
         errors["service"] = "Choose a service."
     if not address:
         errors["address"] = "Enter your address."
+    try:
+        validate_email(email)
+    except ValidationError:
+        errors["email"] = "Enter a valid email address."
     if not phone:
         errors["phone"] = "Enter your phone number."
     if errors:
@@ -5688,6 +5693,7 @@ def submit_home_service_inquiry(request):
     HomeServiceInquiry.objects.create(
         service=service,
         address=address,
+        email=email,
         phone=phone,
         preferred_date=preferred_date,
         preferred_time=preferred_time,

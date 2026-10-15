@@ -2094,6 +2094,86 @@
   .hero-request-submit:hover { transform: translateY(-1px); box-shadow: 0 13px 26px rgba(168,134,76,.3); }
   .hero-request-note { display: block; margin-top: 7px; text-align: center; color: #788095; font-size: 10px; }
 
+  .request-success-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    place-items: center;
+    padding: 18px;
+    background: rgba(19, 28, 45, .62);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  .request-success-modal.is-open { display: grid; }
+  .request-success-modal__card {
+    position: relative;
+    width: min(430px, 100%);
+    max-height: calc(100dvh - 36px);
+    overflow-y: auto;
+    padding: 30px 26px 24px;
+    border: 1px solid rgba(200, 169, 107, .42);
+    border-radius: 22px;
+    background: #fffdfa;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, .3);
+    text-align: center;
+  }
+  .request-success-modal__close {
+    position: absolute;
+    top: 10px;
+    inset-inline-end: 12px;
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #7b8496;
+    font-size: 23px;
+    cursor: pointer;
+  }
+  .request-success-modal__check {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: #f1e5ce;
+    color: var(--lux-gold-dark);
+    font-size: 28px;
+    font-weight: 800;
+  }
+  .request-success-modal h2 { margin: 0 0 8px; color: #172342; font-family: "Playfair Display", serif; font-size: 27px; }
+  .request-success-modal__intro { margin: 0 auto 20px; color: #667085; font-size: 13px; line-height: 1.55; }
+  .request-success-modal__summary { padding: 15px 17px; border-radius: 14px; background: #f8f3e9; text-align: start; }
+  .request-success-modal__summary h3 { margin: 0 0 9px; color: #26324e; font-size: 13px; }
+  .request-success-modal__row { display: grid; grid-template-columns: 112px 1fr; gap: 10px; padding: 6px 0; color: #536078; font-size: 12px; }
+  .request-success-modal__row strong { color: #26324e; }
+  .request-success-modal__notice { margin: 16px 0; padding: 11px 12px; border: 1px solid rgba(200,169,107,.25); border-radius: 11px; color: #59657a; font-size: 11px; line-height: 1.5; }
+  .request-success-modal__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .request-success-modal__actions a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 43px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .request-success-modal__phone { background: #936f39; }
+  .request-success-modal__whatsapp { background: #1f6b58; }
+  .request-success-modal__home { margin-top: 15px; border: 0; background: transparent; color: #59657a; font-size: 12px; cursor: pointer; }
+
+  @media (max-width: 480px) {
+    .request-success-modal { padding: 12px; }
+    .request-success-modal__card { padding: 26px 18px 20px; border-radius: 18px; }
+    .request-success-modal h2 { font-size: 24px; }
+    .request-success-modal__row { grid-template-columns: 96px 1fr; }
+  }
+
   .hero-service-area {
     display: inline-flex;
     align-items: center;
@@ -2526,8 +2606,16 @@
     }
     body.home-page--quiet .hero-copy h1 { font-size: clamp(38px, 8vw, 58px); }
     body.home-page--quiet .hero-request-card { transform: none; }
-    .hero-benefits { width: 100%; grid-template-columns: 1fr; row-gap: 10px; }
-    .hero-benefit { justify-content: center; }
+    .hero-benefits {
+      width: min(100%, 420px);
+      margin-inline: auto;
+      grid-template-columns: 1fr;
+      row-gap: 10px;
+    }
+    .hero-benefit {
+      justify-content: flex-start;
+      text-align: start;
+    }
     body.home-page--quiet .hero-buttons { justify-content: center; }
     body.home-page--quiet .same-day-dropdown {
       width: min(220px, 100%);
@@ -2555,6 +2643,48 @@
       border-radius: 0 0 10px 10px;
     }
     body.home-page--quiet .hero-service-area { margin-inline: auto; }
+  }
+
+  @media (max-width: 560px) {
+    body.home-page--quiet .hero-copy {
+      padding: 22px 18px;
+      border-radius: 22px;
+    }
+
+    .hero-benefits {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .hero-benefit {
+      min-height: 94px;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 7px;
+      padding: 9px 5px 7px;
+      border: 1px solid rgba(200, 169, 107, .2);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .58);
+      box-shadow: 0 5px 14px rgba(82, 51, 15, .05);
+      text-align: center;
+    }
+
+    .hero-benefit__icon {
+      width: 38px;
+      height: 38px;
+      flex: 0 0 38px;
+    }
+
+    .hero-benefit__icon svg {
+      width: 21px;
+      height: 21px;
+    }
+
+    .hero-benefit strong {
+      font-size: 10px;
+      line-height: 1.3;
+    }
   }
 
   .bottom-contact-cta {
@@ -2860,6 +2990,7 @@
     </div>
   </fieldset>
   <div class="hero-request-field"><label for="hero-address">{% trans "Address" %} *</label><input id="hero-address" name="address" type="text" placeholder="e.g. Storgatan 12, Järfälla" required></div>
+  <div class="hero-request-field"><label for="hero-email">{% trans "Email address" %} *</label><input id="hero-email" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></div>
   <div class="hero-request-field"><label for="hero-phone">{% trans "Phone number" %} *</label><input id="hero-phone" name="phone" type="tel" placeholder="e.g. 070 123 45 67" required></div>
   <div class="hero-request-row">
     <div class="hero-request-field"><label for="hero-date">{% trans "Preferred date" %}</label><input id="hero-date" name="date" type="date"></div>
@@ -2886,6 +3017,29 @@
 </form>
 </div>
 </section>
+<div class="request-success-modal" data-request-success-modal role="dialog" aria-modal="true" aria-labelledby="request-success-title" aria-hidden="true">
+  <div class="request-success-modal__card">
+    <button class="request-success-modal__close" type="button" aria-label="{% trans 'Close' %}" data-request-success-close>×</button>
+    <div class="request-success-modal__check" aria-hidden="true">✓</div>
+    <h2 id="request-success-title">{% trans "Your Request Has Been Sent!" %}</h2>
+    <p class="request-success-modal__intro">{% trans "Thank you for choosing Hembla Experten! We've received your cleaning request and will contact you shortly to discuss the details and confirm everything." %}</p>
+    <div class="request-success-modal__summary">
+      <h3>{% trans "Your request details" %}</h3>
+      <div class="request-success-modal__row"><strong>{% trans "Service" %}</strong><span data-success-service>—</span></div>
+      <div class="request-success-modal__row"><strong>{% trans "Preferred date" %}</strong><span data-success-date>—</span></div>
+      <div class="request-success-modal__row"><strong>{% trans "Preferred time" %}</strong><span data-success-time>—</span></div>
+      <div class="request-success-modal__row"><strong>{% trans "Contact number" %}</strong><span data-success-phone>—</span></div>
+      <div class="request-success-modal__row"><strong>{% trans "Contact email" %}</strong><span data-success-email>—</span></div>
+    </div>
+    <p class="request-success-modal__notice">{% trans "This is a request, not a confirmed booking. We will contact you shortly to confirm availability and finalize the details." %}</p>
+    <p class="request-success-modal__intro">{% trans "Need assistance sooner?" %}</p>
+    <div class="request-success-modal__actions">
+      <a class="request-success-modal__phone" href="tel:+46769046338">☎ 076 904 63 38</a>
+      <a class="request-success-modal__whatsapp" href="https://wa.me/46769046338" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+    </div>
+    <button class="request-success-modal__home" type="button" data-request-success-close>← {% trans "Back to homepage" %}</button>
+  </div>
+</div>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     const requestForm = document.querySelector('[data-home-inquiry-form]');
@@ -2893,11 +3047,33 @@
     const submitButton = requestForm.querySelector('[type="submit"]');
     const note = requestForm.querySelector('.hero-request-note');
     const timeToggle = requestForm.querySelector('[data-time-toggle]');
+    const successModal = document.querySelector('[data-request-success-modal]');
+    const successCloseButtons = successModal ? successModal.querySelectorAll('[data-request-success-close]') : [];
     const defaultNote = note.textContent;
     const defaultButton = submitButton.innerHTML;
 
+    const closeSuccessModal = () => {
+      if (!successModal) return;
+      successModal.classList.remove('is-open');
+      successModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    };
+
+    successCloseButtons.forEach((button) => button.addEventListener('click', closeSuccessModal));
+    if (successModal) {
+      successModal.addEventListener('click', (event) => {
+        if (event.target === successModal) closeSuccessModal();
+      });
+    }
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && successModal && successModal.classList.contains('is-open')) closeSuccessModal();
+    });
+
     requestForm.addEventListener('submit', async (event) => {
       event.preventDefault();
+      const submittedData = new FormData(requestForm);
+      const selectedService = requestForm.querySelector('input[name="service"]:checked');
+      const selectedServiceLabel = selectedService ? selectedService.closest('label').querySelector('span').textContent.trim() : '—';
       submitButton.disabled = true;
       submitButton.textContent = '{% trans "Sending..." %}';
       note.textContent = defaultNote;
@@ -2906,13 +3082,30 @@
       try {
         const response = await fetch(requestForm.action, {
           method: 'POST',
-          body: new FormData(requestForm),
+          body: submittedData,
           headers: { 'X-Requested-With': 'XMLHttpRequest' },
         });
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error('{% trans "The request could not be completed. Please try again." %}');
+        }
         if (!response.ok || !data.success) {
           const messages = data.errors ? Object.values(data.errors).flat() : [];
           throw new Error(messages.join(' ') || '{% trans "Unable to send your request. Please try again." %}');
+        }
+        if (successModal) {
+          successModal.querySelector('[data-success-service]').textContent = selectedServiceLabel;
+          successModal.querySelector('[data-success-date]').textContent = submittedData.get('date') || '—';
+          successModal.querySelector('[data-success-time]').textContent = submittedData.get('time') || '—';
+          successModal.querySelector('[data-success-phone]').textContent = submittedData.get('phone') || '—';
+          successModal.querySelector('[data-success-email]').textContent = submittedData.get('email') || '—';
+          successModal.classList.add('is-open');
+          successModal.setAttribute('aria-hidden', 'false');
+          document.body.style.overflow = 'hidden';
+          successModal.querySelector('[data-request-success-close]').focus();
         }
         requestForm.reset();
         if (timeToggle) timeToggle.textContent = '{% trans "Select time" %}';

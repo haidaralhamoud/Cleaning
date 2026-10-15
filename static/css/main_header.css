@@ -1150,6 +1150,10 @@ body.mobile-nav-open {
     border-bottom: 1px solid rgba(200, 167, 91, 0.08);
   }
 
+  .services-preview-group > a:not(.services-category-view-link)::before {
+    content: none;
+  }
+
   .services-preview-pane a:last-of-type {
     border-bottom: none;
   }
