@@ -38,6 +38,7 @@ def get_dashboard_items() -> List[DashboardItem]:
         DashboardItem("not-available-zips", home_models.NotAvailableZipRequest, "Zip Requests", "fa-solid fa-location-dot"),
         DashboardItem("call-requests", home_models.CallRequest, "Call Requests", "fa-solid fa-phone"),
         DashboardItem("email-requests", home_models.EmailRequest, "Email Requests", "fa-solid fa-envelope-open-text"),
+        DashboardItem("home-service-inquiries", home_models.HomeServiceInquiry, "Home Service Requests", "fa-solid fa-broom"),
         DashboardItem("airbnb-management-requests", home_models.AirbnbManagementRequest, "Airbnb Management Requests", "fa-brands fa-airbnb"),
         DashboardItem("airbnb-faqs", home_models.FAQItem, "Airbnb FAQs", "fa-brands fa-airbnb"),
         DashboardItem("faq-categories", home_models.FAQCategory, "FAQ Categories", "fa-solid fa-circle-question"),

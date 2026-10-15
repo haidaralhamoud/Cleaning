@@ -1579,6 +1579,8 @@ def _dashboard_notifications(request=None):
     new_contacts = Contact.objects.filter(created_at__gte=since).count()
     new_call_requests = CallRequest.objects.filter(created_at__gte=since).count()
     new_email_requests = EmailRequest.objects.filter(created_at__gte=since).count()
+    new_home_inquiries = HomeServiceInquiry.objects.filter(created_at__gte=since).count()
+    new_airbnb_requests = AirbnbManagementRequest.objects.filter(created_at__gte=since).count()
     new_incidents = Incident.objects.filter(created_at__gte=since).count()
     new_reviews = ServiceReview.objects.filter(created_at__gte=since).count()
     pending_feedback = FeedbackRequest.objects.filter(is_approved=False).count()
@@ -1628,6 +1630,14 @@ def _dashboard_notifications(request=None):
     )
     recent_email_requests = list(
         EmailRequest.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_home_inquiries = list(
+        HomeServiceInquiry.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_airbnb_requests = list(
+        AirbnbManagementRequest.objects.filter(created_at__gte=since)
         .order_by("-created_at")[:6]
     )
     recent_customers = list(
@@ -1739,6 +1749,20 @@ def _dashboard_notifications(request=None):
             "time": email_request.created_at,
             "url": "/dashboard/email-requests/",
         })
+    for inquiry in recent_home_inquiries:
+        items.append({
+            "title": f"New Home Service Request #{inquiry.id}",
+            "detail": f"{inquiry.service} - {inquiry.phone}",
+            "time": inquiry.created_at,
+            "url": "/dashboard/home-service-inquiries/",
+        })
+    for airbnb_request in recent_airbnb_requests:
+        items.append({
+            "title": f"New Airbnb Management Request #{airbnb_request.id}",
+            "detail": f"{airbnb_request.name} - {airbnb_request.phone}",
+            "time": airbnb_request.created_at,
+            "url": "/dashboard/airbnb-management-requests/",
+        })
     for customer in recent_customers:
         customer_name = f"{customer.first_name} {customer.last_name}".strip() or customer.email or str(customer)
         items.append({
@@ -1810,6 +1834,8 @@ def _dashboard_notifications(request=None):
         + new_contacts
         + new_call_requests
         + new_email_requests
+        + new_home_inquiries
+        + new_airbnb_requests
         + new_incidents
         + new_reviews
         + pending_feedback
@@ -1835,6 +1861,8 @@ def _dashboard_notifications(request=None):
         "dashboard_new_messages": new_messages,
         "dashboard_new_call_requests": new_call_requests,
         "dashboard_new_email_requests": new_email_requests,
+        "dashboard_new_home_inquiries": new_home_inquiries,
+        "dashboard_new_airbnb_requests": new_airbnb_requests,
     }
 
 
@@ -1869,6 +1897,7 @@ def _dashboard_uses_view_mode(item):
         "business-bookings",
         "call-requests",
         "email-requests",
+        "home-service-inquiries",
         "airbnb-management-requests",
         "request-fixes",
         "customer-notifications",
@@ -3385,6 +3414,7 @@ def dashboard_model_list(request, model):
         "invoices": ["invoice_number", "customer", "booking_type", "amount", "status", "due_date"],
         "invoice-line-items": ["invoice", "line_order", "description", "quantity", "unit_price", "vat_percent"],
         "airbnb-management-requests": ["name", "email", "services", "property_count", "location", "phone", "created_at"],
+        "home-service-inquiries": ["service", "address", "email", "phone", "preferred_date", "preferred_time", "contacted", "created_at"],
         "airbnb-faqs": ["question", "answer", "order", "is_active"],
     }
     display_fields = display_fields_map.get(item.slug, _model_fields(item.model)[:5])

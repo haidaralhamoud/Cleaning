@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from home.models import BusinessBooking, CallRequest, EmailRequest, PrivateBooking, PrivateMainCategory, PrivateService
+from home.models import AirbnbManagementRequest, BusinessBooking, CallRequest, EmailRequest, HomeServiceInquiry, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer, ProviderShift
 from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes, has_overlap
@@ -450,6 +450,94 @@ class BookingPricingDurationTests(TestCase):
     },
 )
 class BookingEmailSignalTests(TestCase):
+    def test_airbnb_request_sends_customer_and_company_emails_and_dashboard_notification(self):
+        response = self.client.post(
+            reverse("home:submit_airbnb_management_request"),
+            data={
+                "services": ["Complete Management", "Cleaning & Turnovers"],
+                "property_count": "2–3",
+                "name": "Lama Hassan",
+                "email": "airbnb@example.com",
+                "location": "Stockholm",
+                "phone": "070 555 12 34",
+                "message": "Two city apartments.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        airbnb_request = AirbnbManagementRequest.objects.get(email="airbnb@example.com")
+        self.assertEqual(len(mail.outbox), 2)
+        customer_email = next(email for email in mail.outbox if "airbnb@example.com" in email.to)
+        self.assertIn("We received your Airbnb management request", customer_email.subject)
+        self.assertIn("Complete Management", customer_email.body)
+        company_email = next(email for email in mail.outbox if "services@hembla-experten.se" in email.to)
+        self.assertEqual(company_email.subject, f"New Airbnb Management Request #{airbnb_request.pk}")
+        self.assertIn("Two city apartments.", company_email.body)
+
+        staff = get_user_model().objects.create_user(username="airbnb-admin", password="pass123", is_staff=True)
+        self.client.force_login(staff)
+        dashboard_response = self.client.get(reverse("home:dashboard_notifications_api"))
+        matching_items = [
+            item for item in dashboard_response.json()["items"]
+            if item["title"] == f"New Airbnb Management Request #{airbnb_request.pk}"
+        ]
+        self.assertEqual(len(matching_items), 1)
+        self.assertEqual(matching_items[0]["url"], "/dashboard/airbnb-management-requests/")
+
+    def test_home_service_inquiry_sends_customer_and_company_emails(self):
+        response = self.client.post(
+            reverse("home:submit_home_service_inquiry"),
+            data={
+                "service": "Deep cleaning",
+                "address": "Storgatan 12, Jarfalla",
+                "email": "requester@example.com",
+                "phone": "070 123 45 67",
+                "date": "2026-11-20",
+                "time": "10:30",
+                "message": "Please call before arriving.",
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["success"])
+        inquiry = HomeServiceInquiry.objects.get(email="requester@example.com")
+        self.assertEqual(len(mail.outbox), 2)
+
+        customer_email = next(email for email in mail.outbox if "requester@example.com" in email.to)
+        self.assertIn("We received your cleaning request", customer_email.subject)
+        self.assertIn("Deep cleaning", customer_email.body)
+        self.assertIn("November 20, 2026", customer_email.body)
+
+        company_email = next(email for email in mail.outbox if "services@hembla-experten.se" in email.to)
+        self.assertEqual(company_email.subject, f"New Home Service Request #{inquiry.pk}")
+        self.assertIn("070 123 45 67", company_email.body)
+        self.assertIn("Please call before arriving.", company_email.body)
+
+    def test_home_service_inquiry_appears_in_dashboard_notifications(self):
+        inquiry = HomeServiceInquiry.objects.create(
+            service="Regular cleaning",
+            address="Test address",
+            email="dashboard@example.com",
+            phone="0700000000",
+        )
+        staff = get_user_model().objects.create_user(
+            username="dashboard-admin",
+            password="pass123",
+            is_staff=True,
+        )
+        self.client.force_login(staff)
+
+        response = self.client.get(reverse("home:dashboard_notifications_api"))
+
+        self.assertEqual(response.status_code, 200)
+        matching_items = [
+            item for item in response.json()["items"]
+            if item["title"] == f"New Home Service Request #{inquiry.pk}"
+        ]
+        self.assertEqual(len(matching_items), 1)
+        self.assertEqual(matching_items[0]["url"], "/dashboard/home-service-inquiries/")
+
     def test_private_booking_creation_sends_customer_confirmation_email(self):
         user_model = get_user_model()
         user = user_model.objects.create_user(

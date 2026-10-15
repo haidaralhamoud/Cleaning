@@ -24,6 +24,8 @@ from home.models import (
     BusinessBooking,
     NoShowReport,
     FeedbackRequest,
+    HomeServiceInquiry,
+    AirbnbManagementRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -61,6 +63,91 @@ def _send_admin_alert(subject, body):
     except Exception:
         logger.exception("Failed to send admin alert email to %s (subject=%s)", recipient, subject)
         return False
+
+
+@receiver(post_save, sender=HomeServiceInquiry)
+def notify_home_service_inquiry(sender, instance, created, **kwargs):
+    """Send both sides of the acknowledgement for the homepage request form."""
+    if not created:
+        return
+
+    date_label = instance.preferred_date.strftime("%B %d, %Y") if instance.preferred_date else "Not specified"
+    time_label = instance.preferred_time.strftime("%H:%M") if instance.preferred_time else "Not specified"
+    customer_body = (
+        "Thank you for contacting Hembla Experten. We have received your cleaning request.\n\n"
+        f"Request number: {instance.pk}\n"
+        f"Service: {instance.service}\n"
+        f"Address: {instance.address}\n"
+        f"Preferred date: {date_label}\n"
+        f"Preferred time: {time_label}\n\n"
+        "This is a request, not a confirmed booking. Our team will contact you shortly "
+        "to confirm availability and the details."
+    )
+    try:
+        send_mail(
+            f"We received your cleaning request #{instance.pk}",
+            customer_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [instance.email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception("Failed to send home service inquiry confirmation for inquiry %s", instance.pk)
+
+    admin_body = (
+        f"A new home service request was received.\n\n"
+        f"Request ID: {instance.pk}\n"
+        f"Service: {instance.service}\n"
+        f"Address: {instance.address}\n"
+        f"Email: {instance.email}\n"
+        f"Phone: {instance.phone}\n"
+        f"Preferred date: {date_label}\n"
+        f"Preferred time: {time_label}\n"
+        f"Additional information: {instance.message or 'None'}\n\n"
+        "Dashboard: /dashboard/home-service-inquiries/"
+    )
+    _send_admin_alert(f"New Home Service Request #{instance.pk}", admin_body)
+
+
+@receiver(post_save, sender=AirbnbManagementRequest)
+def notify_airbnb_management_request(sender, instance, created, **kwargs):
+    if not created:
+        return
+
+    services = ", ".join(instance.services or []) or "Not specified"
+    customer_body = (
+        f"Hello {instance.name},\n\n"
+        "Thank you for contacting Hembla Experten. We have received your Airbnb management request.\n\n"
+        f"Request number: {instance.pk}\n"
+        f"Services: {services}\n"
+        f"Properties: {instance.property_count}\n"
+        f"Location: {instance.location or 'Not specified'}\n\n"
+        "Our team will contact you shortly to discuss the best solution for your properties."
+    )
+    try:
+        send_mail(
+            f"We received your Airbnb management request #{instance.pk}",
+            customer_body,
+            settings.DEFAULT_FROM_EMAIL,
+            [instance.email],
+            fail_silently=False,
+        )
+    except Exception:
+        logger.exception("Failed to send Airbnb request confirmation for request %s", instance.pk)
+
+    admin_body = (
+        "A new Airbnb management request was received.\n\n"
+        f"Request ID: {instance.pk}\n"
+        f"Name: {instance.name}\n"
+        f"Email: {instance.email}\n"
+        f"Phone: {instance.phone}\n"
+        f"Services: {services}\n"
+        f"Properties: {instance.property_count}\n"
+        f"Location: {instance.location or 'Not specified'}\n"
+        f"Additional information: {instance.message or 'None'}\n\n"
+        "Dashboard: /dashboard/airbnb-management-requests/"
+    )
+    _send_admin_alert(f"New Airbnb Management Request #{instance.pk}", admin_body)
 
 
 def _public_base_url():
