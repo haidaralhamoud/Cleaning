@@ -110,7 +110,6 @@
 </div>
 <div class="buttons">
 <a onclick="window.history.back();" class="back-btn">
-<span class="back-icon">&larr;</span>
         Back
       </a>
 <form method="POST" id="bundleSelectionForm">
@@ -119,7 +118,6 @@
 {% endfor %}]'>
 <button type="submit" id="continueBundlesBtn" class="next" {% if not selected_bundle_ids %}disabled{% endif %}>
           Continue
-          <span class="next-icon">&rarr;</span>
 </button>
 </form>
 </div>

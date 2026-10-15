@@ -16,6 +16,73 @@ from home.pricing_utils import calculate_booking_price
 from home.views import CustomerDashboardForm
 
 
+@override_settings(
+    PUBLIC_SITE_URL="https://hembla-experten.se",
+    STORAGES={
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    },
+)
+class PublicSeoTests(TestCase):
+    def test_robots_lists_private_areas_and_absolute_sitemap(self):
+        response = self.client.get("/robots.txt")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "text/plain; charset=utf-8")
+        self.assertContains(response, "Disallow: /admin/")
+        self.assertContains(response, "Disallow: /private/api/")
+        self.assertContains(response, "Sitemap: https://hembla-experten.se/sitemap.xml")
+
+    def test_canonical_ignores_query_string_and_home_has_schema(self):
+        contact = self.client.get("/contact?submitted=1")
+        home = self.client.get("/")
+
+        self.assertContains(
+            contact,
+            '<link rel="canonical" href="https://hembla-experten.se/contact">',
+            html=True,
+        )
+        self.assertContains(home, "Home Cleaning in Stockholm | Hembla Experten")
+        self.assertContains(home, '"@type": "LocalBusiness"')
+        self.assertContains(home, '"opens": "07:00"')
+        self.assertContains(home, '"closes": "18:00"')
+
+    def test_sitemap_contains_public_pages_and_database_services(self):
+        category = PrivateMainCategory.objects.create(title="Homes", slug="homes")
+        service = PrivateService.objects.create(
+            category=category,
+            title="Test clean",
+            slug="test-clean",
+        )
+
+        response = self.client.get("/sitemap.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "https://hembla-experten.se/")
+        self.assertContains(response, reverse("accounts:service_detail", args=[service.slug]))
+        self.assertNotContains(response, "/admin/")
+        self.assertNotContains(response, "/booking/checkout/")
+
+    def test_service_metadata_uses_service_content(self):
+        category = PrivateMainCategory.objects.create(title="Homes", slug="homes")
+        service = PrivateService.objects.create(
+            category=category,
+            title="Deep Cleaning Stockholm",
+            slug="deep-cleaning-stockholm",
+            description="A thorough cleaning service for homes in Stockholm.",
+            image="private/services/deep-clean.jpg",
+        )
+
+        response = self.client.get(reverse("accounts:service_detail", args=[service.slug]))
+
+        self.assertContains(response, "Deep Cleaning Stockholm | Hembla Experten")
+        self.assertContains(response, "A thorough cleaning service for homes in Stockholm.")
+        self.assertContains(
+            response,
+            "https://hembla-experten.se/media/private/services/deep-clean.jpg",
+        )
+
+
 class PrivateBookingFlowSafetyTests(TestCase):
     def setUp(self):
         self.category = PrivateMainCategory.objects.create(
@@ -496,7 +563,7 @@ class BookingEmailSignalTests(TestCase):
         self.assertEqual(Contact.objects.get(email="lama@example.com").source, "private")
 
         success_response = self.client.get(f"{reverse('home:contact')}?submitted=1")
-        self.assertContains(success_response, "Thank You! We&#x27;ve Got Your Message", html=False)
+        self.assertContains(success_response, "Thank You! We've Got Your Message")
 
     def test_private_zip_available_email_request_sends_support_and_customer_emails(self):
         category = PrivateMainCategory.objects.create(title="Home")
@@ -517,8 +584,14 @@ class BookingEmailSignalTests(TestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200)
+        redirect_url = reverse("home:private_zip_available", args=[service.slug])
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, redirect_url)
         self.assertTrue(EmailRequest.objects.filter(email_from="customer@example.com").exists())
+
+        success_response = self.client.get(redirect_url)
+        self.assertEqual(success_response.status_code, 200)
+        self.assertTrue(success_response.context["email_success"])
 
         support_emails = [
             email for email in mail.outbox

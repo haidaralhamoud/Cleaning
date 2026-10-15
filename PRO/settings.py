@@ -96,6 +96,7 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sites',
+    'django.contrib.sitemaps',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -169,6 +170,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                  'accounts.context_processors.chat_notifications',
                  'home.context_processors.header_private_services',
+                 'home.seo_context.seo_site',
             ],
         },
     },
@@ -336,6 +338,19 @@ INVOICE_COMPANY_BIC = os.getenv("INVOICE_COMPANY_BIC", "-")
 # Kept for compatibility with existing deployments using one combined value.
 INVOICE_COMPANY_BANK_DETAILS = os.getenv("INVOICE_COMPANY_BANK_DETAILS", INVOICE_COMPANY_BANK_NAME)
 INVOICE_DEFAULT_PAYMENT_TERMS = os.getenv("INVOICE_DEFAULT_PAYMENT_TERMS", "10 days")
+
+# Public business identity used by canonical URLs and structured data.
+PUBLIC_SITE_URL = os.getenv("PUBLIC_SITE_URL", "https://hembla-experten.se").rstrip("/")
+BUSINESS_NAME = os.getenv("BUSINESS_NAME", "Hembla Experten AB")
+BUSINESS_PHONE = os.getenv("BUSINESS_PHONE", "+46769046338")
+BUSINESS_EMAIL = os.getenv("BUSINESS_EMAIL", "support@hembla-experten.se")
+BUSINESS_STREET_ADDRESS = os.getenv("BUSINESS_STREET_ADDRESS", "Kikarvägen 18")
+BUSINESS_POSTAL_CODE = os.getenv("BUSINESS_POSTAL_CODE", "175 46")
+BUSINESS_LOCALITY = os.getenv("BUSINESS_LOCALITY", "Järfälla")
+BUSINESS_REGION = os.getenv("BUSINESS_REGION", "Stockholm")
+BUSINESS_COUNTRY = os.getenv("BUSINESS_COUNTRY", "SE")
+BUSINESS_OPENING_TIME = os.getenv("BUSINESS_OPENING_TIME", "07:00")
+BUSINESS_CLOSING_TIME = os.getenv("BUSINESS_CLOSING_TIME", "18:00")
 
 
 def _stripe_key_mode(value, publishable=False):

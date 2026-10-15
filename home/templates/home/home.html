@@ -469,6 +469,10 @@
     gap: 22px;
   }
 
+  .services-pagination {
+    display: none;
+  }
+
   body.home-page--quiet .card.soft {
     background: linear-gradient(180deg, #f8fafc 0%, #edf1f6 100%);
   }
@@ -668,6 +672,17 @@
   }
 
   @media (max-width: 768px) {
+    body.home-page--quiet .section-kicker {
+      width: 100%;
+      justify-content: center;
+      text-align: center;
+    }
+
+    body.home-page--quiet .section-kicker span {
+      justify-content: center;
+      text-align: center;
+    }
+
     body.home-page--quiet .hero,
     body.home-page--quiet .services,
     body.home-page--quiet .extras {
@@ -1263,6 +1278,54 @@
     color: #111111;
   }
 
+  body.home-page--quiet .same-day-menu .booking-menu-option {
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    text-align: start;
+  }
+
+  .booking-menu-option__icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #f3e7cf;
+    color: var(--lux-gold-dark);
+  }
+
+  .booking-menu-option__icon svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .booking-menu-option__text strong,
+  .booking-menu-option__text small {
+    display: block;
+  }
+
+  .booking-menu-option__text strong {
+    color: #172342;
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  .booking-menu-option__text small {
+    margin-top: 2px;
+    color: #6b7280;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.25;
+  }
+
   body.home-page--quiet .services,
   body.home-page--quiet .extras,
   body.home-page--quiet .how,
@@ -1556,7 +1619,16 @@
   }
 
   body.home-page--quiet .same-day-dropdown {
+    position: relative;
     display: inline-flex;
+  }
+
+  body.home-page--quiet .same-day-dropdown::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    height: 10px;
   }
 
   body.home-page--quiet .services,
@@ -1726,6 +1798,201 @@
     body.home-page--quiet .t-name {
       font-size: 20px;
     }
+
+    body.home-page--quiet .services {
+      padding-top: 64px;
+      padding-bottom: 72px;
+    }
+
+    body.home-page--quiet .services .section-kicker {
+      margin-bottom: 20px;
+    }
+
+    body.home-page--quiet .services .section-title {
+      margin: 0 0 12px;
+      padding-inline: 2px;
+      color: #17233d;
+      font-size: clamp(28px, 7.5vw, 34px);
+      line-height: 1.08;
+      text-align: left;
+      text-wrap: balance;
+    }
+
+    body.home-page--quiet .services .lead {
+      position: relative;
+      max-width: none;
+      margin: 0 0 28px;
+      padding: 16px 18px 16px 20px;
+      border: 1px solid rgba(200, 169, 107, .16);
+      border-left: 3px solid var(--lux-gold);
+      border-radius: 4px 17px 17px 4px;
+      background: rgba(255, 255, 255, .7);
+      color: #596477;
+      font-size: 14px;
+      line-height: 1.65;
+      text-align: left;
+      box-shadow: 0 12px 30px rgba(42, 32, 17, .06);
+    }
+
+    body.home-page--quiet .services .cards {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      margin: 0;
+      padding: 4px 2px 14px;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+
+    body.home-page--quiet .services .cards::-webkit-scrollbar {
+      display: none;
+    }
+
+    body.home-page--quiet .services .card {
+      flex: 0 0 calc(100% - 4px);
+      min-width: 0;
+      min-height: 270px;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+    }
+
+    body.home-page--quiet .services .card:hover {
+      transform: none;
+    }
+
+    .services-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 4px 0 22px;
+    }
+
+    .services-pagination button {
+      width: 8px;
+      height: 8px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: #d8d0c3;
+      cursor: pointer;
+      transition: width .25s ease, background .25s ease, transform .25s ease;
+    }
+
+    .services-pagination button.is-active {
+      width: 26px;
+      background: linear-gradient(90deg, var(--lux-gold), var(--lux-gold-dark));
+      box-shadow: 0 4px 10px rgba(168, 134, 76, .22);
+    }
+
+    .services-pagination button:focus-visible {
+      outline: 2px solid #17233d;
+      outline-offset: 3px;
+    }
+
+    body.home-page--quiet .extras {
+      padding: 66px 14px 72px;
+    }
+
+    body.home-page--quiet .extras .section-title {
+      margin: 0 2px 10px;
+      color: #17233d;
+      font-size: clamp(27px, 7vw, 33px);
+      line-height: 1.08;
+      text-align: left;
+      text-wrap: balance;
+    }
+
+    body.home-page--quiet .extras .lead {
+      margin: 0 2px 26px;
+      color: #667085;
+      font-size: 14px;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    body.home-page--quiet .extras .mini-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0;
+    }
+
+    body.home-page--quiet .extras .mini {
+      position: relative;
+      min-width: 0;
+      min-height: 214px;
+      padding: 20px 13px 18px;
+      overflow: hidden;
+      border: 1px solid rgba(200, 169, 107, .15);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 100% 0, rgba(200, 169, 107, .12), transparent 44%),
+        linear-gradient(180deg, #fff 0%, #f7f8fa 100%);
+      text-align: left;
+      box-shadow: 0 12px 28px rgba(23, 35, 61, .06);
+    }
+
+    body.home-page--quiet .extras .mini::after {
+      position: absolute;
+      top: 12px;
+      right: 13px;
+      color: rgba(168, 134, 76, .48);
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .12em;
+    }
+
+    body.home-page--quiet .extras .mini:nth-child(1)::after { content: "01"; }
+    body.home-page--quiet .extras .mini:nth-child(2)::after { content: "02"; }
+    body.home-page--quiet .extras .mini:nth-child(3)::after { content: "03"; }
+    body.home-page--quiet .extras .mini:nth-child(4)::after { content: "04"; }
+
+    body.home-page--quiet .extras .mini:hover {
+      transform: none;
+    }
+
+    body.home-page--quiet .extras .mini-badge {
+      width: 66px;
+      height: 66px;
+      margin: 0 0 16px;
+      border: 3px solid rgba(255, 255, 255, .9);
+      border-radius: 18px;
+      box-shadow: 0 9px 20px rgba(23, 35, 61, .1);
+    }
+
+    body.home-page--quiet .extras .mini-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    body.home-page--quiet .extras .mini h4 {
+      margin: 0 0 7px;
+      color: #17233d;
+      font-size: 15px;
+      line-height: 1.2;
+      text-align: left;
+    }
+
+    body.home-page--quiet .extras .mini p {
+      display: -webkit-box;
+      margin: 0;
+      overflow: hidden;
+      color: #6b7280;
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: left;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+    }
+
+    body.home-page--quiet .extras .btn-naked {
+      margin-top: 24px;
+    }
   }
 
   /* Full-bleed hero: the image joins the navbar and fills the first screen. */
@@ -1860,24 +2127,24 @@
   @media (min-width: 981px) {
     body.home-page--quiet .hero-inner { padding-block: 28px; }
     .hero-request-card {
-      width: min(350px, 32vw);
-      flex-basis: min(350px, 32vw);
-      padding: 18px 19px 16px;
-      border-radius: 18px;
+      width: min(430px, 35vw);
+      flex-basis: min(430px, 35vw);
+      padding: 27px 28px 23px;
+      border-radius: 22px;
     }
-    .hero-request-card h2 { font-size: 22px; margin-bottom: 3px; }
-    .hero-request-card > p { margin-bottom: 10px; font-size: 11px; }
+    .hero-request-card h2 { font-size: 28px; margin-bottom: 6px; }
+    .hero-request-card > p { margin-bottom: 15px; font-size: 12px; }
     .hero-request-card label,
-    .hero-request-card legend { margin-bottom: 4px; font-size: 11px; }
-    .hero-service-options { gap: 6px; margin-bottom: 8px; }
-    .hero-service-option span { min-height: 36px; padding: 6px 8px; font-size: 10px; }
-    .hero-service-option b { font-size: 14px; }
-    .hero-request-field { margin-bottom: 7px; }
-    .hero-request-field input { min-height: 38px; padding: 7px 10px; }
-    .hero-request-field textarea { min-height: 42px; max-height: 58px; padding: 8px 10px; }
-    .hero-request-row { gap: 7px; }
-    .hero-request-submit { min-height: 38px; }
-    .hero-request-note { margin-top: 4px; }
+    .hero-request-card legend { margin-bottom: 6px; font-size: 12px; }
+    .hero-service-options { gap: 8px; margin-bottom: 12px; }
+    .hero-service-option span { min-height: 43px; padding: 8px 10px; font-size: 11px; }
+    .hero-service-option b { font-size: 16px; }
+    .hero-request-field { margin-bottom: 10px; }
+    .hero-request-field input { min-height: 44px; padding: 9px 12px; }
+    .hero-request-field textarea { min-height: 58px; max-height: 78px; padding: 10px 12px; }
+    .hero-request-row { gap: 9px; }
+    .hero-request-submit { min-height: 44px; }
+    .hero-request-note { margin-top: 6px; }
   }
 
   .hero-request-row .hero-request-field { min-width: 0; }
@@ -1949,26 +2216,26 @@
   }
 
   body.home-page--quiet .hero-inner.container {
-    width: min(1480px, 92%);
-    max-width: 1480px;
+    width: min(1600px, 94%);
+    max-width: 1600px;
     align-items: center;
   }
 
   body.home-page--quiet .hero-copy {
-    width: min(650px, 52vw);
-    max-width: 650px;
-    padding: clamp(28px, 2.5vw, 38px);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    border-radius: 28px;
+    width: min(720px, 54vw);
+    max-width: 720px;
+    padding: clamp(34px, 3vw, 48px);
+    border: 2px solid rgba(255, 255, 255, 0.92);
+    border-radius: 30px;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.46),
-      rgba(255, 250, 244, 0.24)
+      rgba(255, 255, 255, 0.74),
+      rgba(255, 248, 239, 0.56)
     );
-    -webkit-backdrop-filter: blur(8px) saturate(110%);
-    backdrop-filter: blur(8px) saturate(110%);
+    -webkit-backdrop-filter: blur(12px) saturate(115%);
+    backdrop-filter: blur(12px) saturate(115%);
     box-shadow:
-      0 22px 52px rgba(52, 40, 24, 0.13),
+      0 28px 70px rgba(52, 40, 24, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
@@ -1976,8 +2243,8 @@
     max-width: 620px;
     margin-bottom: 18px;
     color: #111827;
-    font-size: clamp(52px, 5vw, 76px);
-    line-height: .98;
+    font-size: 50px !important;
+    line-height: .94;
     letter-spacing: -.045em;
     white-space: normal;
     text-wrap: balance;
@@ -1985,9 +2252,6 @@
   }
 
   .home-trust-strip {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
     position: relative;
     z-index: 5;
     width: min(1480px, 92%);
@@ -1999,6 +2263,13 @@
     -webkit-backdrop-filter: blur(16px) saturate(115%);
     backdrop-filter: blur(16px) saturate(115%);
     box-shadow: 0 18px 48px rgba(67, 45, 18, .14), inset 0 1px 0 #fff;
+    overflow: hidden;
+  }
+
+  .home-trust-strip__track {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
   }
 
   .home-trust-strip__item {
@@ -2045,15 +2316,59 @@
   .home-trust-strip small { margin-top: 4px; color: #66728a; font-size: 11px; line-height: 1.35; }
 
   @media (max-width: 980px) {
-    .home-trust-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 10px; }
+    .home-trust-strip { margin-top: 10px; }
+    .home-trust-strip__track { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .home-trust-strip__item { justify-content: flex-start; padding-block: 10px; }
     .home-trust-strip__item:nth-child(3) { border-left: 0; }
   }
 
   @media (max-width: 560px) {
-    .home-trust-strip { grid-template-columns: 1fr; width: calc(100% - 28px); margin-top: 8px; padding: 8px; border-radius: 18px; }
-    .home-trust-strip__item { min-height: 66px; padding-inline: 10px; }
-    .home-trust-strip__item + .home-trust-strip__item { border-left: 0; border-top: 1px solid rgba(38, 50, 78, .1); }
+    .home-trust-strip {
+      width: calc(100% - 28px);
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 18px;
+    }
+
+    .home-trust-strip__track {
+      display: flex;
+      width: max-content;
+      gap: 10px;
+      will-change: transform;
+    }
+
+    .home-trust-strip.is-carousel-ready .home-trust-strip__track {
+      animation: homeTrustCarousel 24s linear infinite;
+    }
+
+    .home-trust-strip:hover .home-trust-strip__track,
+    .home-trust-strip:focus-within .home-trust-strip__track,
+    .home-trust-strip:active .home-trust-strip__track {
+      animation-play-state: paused;
+    }
+
+    .home-trust-strip__item {
+      flex: 0 0 min(280px, calc(100vw - 72px));
+      min-height: 76px;
+      justify-content: flex-start;
+      padding: 10px 14px;
+      border: 1px solid rgba(200, 169, 107, .16);
+      background: rgba(255, 255, 255, .72);
+    }
+
+    .home-trust-strip__item + .home-trust-strip__item {
+      border-left: 1px solid rgba(200, 169, 107, .16);
+      border-top: 1px solid rgba(200, 169, 107, .16);
+    }
+
+    @keyframes homeTrustCarousel {
+      from { transform: translateX(0); }
+      to { transform: translateX(calc(-50% - 5px)); }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .home-trust-strip__track { animation: none !important; }
   }
 
   .hero-benefits {
@@ -2155,15 +2470,41 @@
   }
 
   body.home-page--quiet .hero-request-card {
-    border: 1px solid rgba(206, 170, 100, .32);
-    background: rgba(255, 255, 255, .96);
-    box-shadow: 0 20px 44px rgba(42, 31, 18, .15);
+    border: 2px solid rgba(206, 170, 100, .48);
+    background: rgba(255, 255, 255, .985);
+    box-shadow: 0 28px 68px rgba(42, 31, 18, .24);
     transform: translateY(-8px);
   }
 
   body.home-page--quiet .hero-request-card h2 {
     color: #172342;
     font-family: "Playfair Display", serif;
+  }
+
+  /* Keep both hero panels visually large when the browser is zoomed out. */
+  @media (min-width: 1280px) {
+    body.home-page--quiet .hero-inner.container {
+      width: 94vw;
+      max-width: none;
+    }
+    body.home-page--quiet .hero-copy {
+      width: 47vw;
+      max-width: none;
+      min-height: 57vh;
+      padding: clamp(42px, 3.2vw, 64px);
+    }
+    body.home-page--quiet .hero-copy h1 {
+      max-width: none;
+      font-size: 50px !important;
+      line-height: .92;
+      letter-spacing: -.05em;
+    }
+    body.home-page--quiet .hero-request-card {
+      width: 28vw;
+      max-width: none;
+      flex: 0 0 28vw;
+      padding: clamp(28px, 2vw, 40px);
+    }
   }
 
   @media (max-width: 980px) {
@@ -2207,7 +2548,7 @@
     }
     body.home-page--quiet .same-day-menu a {
       position: relative;
-      text-align: center;
+      text-align: start;
     }
     body.home-page--quiet .same-day-menu a + a {
       border-top: 1px solid rgba(168, 134, 76, .24);
@@ -2219,7 +2560,7 @@
   .bottom-contact-cta {
     position: relative;
     isolation: isolate;
-    min-height: 150px;
+    min-height: 250px;
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -2239,7 +2580,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 36px;
-    padding: 30px 0;
+    padding: 38px 0;
   }
   .bottom-contact-cta h2 { margin: 0 0 5px; color: #fff; font-size: clamp(24px, 2.4vw, 34px); }
   .bottom-contact-cta p { margin: 0; color: rgba(255,255,255,.82); font-size: 14px; }
@@ -2255,6 +2596,7 @@
   .bottom-contact-cta__button--whatsapp { border: 1px solid rgba(255,255,255,.72); background: rgba(8,12,10,.35); }
   .bottom-contact-cta__button:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 13px 28px rgba(0,0,0,.28); }
   @media (max-width: 760px) {
+    .bottom-contact-cta { min-height: 240px; }
     .bottom-contact-cta__inner { flex-direction: column; align-items: flex-start; gap: 20px; }
     .bottom-contact-cta__actions { width: 100%; flex-wrap: wrap; }
     .bottom-contact-cta__button { flex: 1 1 170px; }
@@ -2310,7 +2652,7 @@
   .airbnb-modal { position: fixed; inset: 0; z-index: 6000; display: none; align-items: center; justify-content: center; padding: 22px; }
   .airbnb-modal.is-open { display: flex; }
   .airbnb-modal__backdrop { position: absolute; inset: 0; background: rgba(7,10,14,.76); backdrop-filter: blur(3px); }
-  .airbnb-modal__dialog { position: relative; display: grid; grid-template-columns: 39% 61%; width: min(1080px, 96vw); height: min(900px, calc(100dvh - 44px)); max-height: 92vh; overflow: hidden; border-radius: 18px; background: #fffdf9; box-shadow: 0 30px 90px rgba(0,0,0,.38); }
+  .airbnb-modal__dialog { position: relative; display: grid; grid-template-columns: 46% 54%; width: min(1260px, 96vw); height: min(920px, calc(100dvh - 44px)); max-height: 92vh; overflow: hidden; border-radius: 18px; background: #fffdf9; box-shadow: 0 30px 90px rgba(0,0,0,.38); }
   .airbnb-modal__close {
     position: absolute;
     top: 17px;
@@ -2341,15 +2683,15 @@
     outline: none;
   }
   .airbnb-modal__close:active { transform: rotate(90deg) scale(.94); }
-  .airbnb-modal__visual { position: relative; min-width: 0; min-height: 0; padding: 36px; display: flex; flex-direction: column; justify-content: flex-end; overflow-y: auto; color: #fff; background: url("{% static 'images/airbnb-bedroom.jpg' %}") center / cover no-repeat; }
+  .airbnb-modal__visual { position: relative; min-width: 0; min-height: 0; padding: 56px 50px; display: flex; flex-direction: column; justify-content: flex-end; overflow-y: auto; color: #fff; background: url("{% static 'images/airbnb-bedroom.jpg' %}") center / cover no-repeat; }
   .airbnb-modal__visual::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,7,8,.12), rgba(4,7,8,.92)); }
   .airbnb-modal__visual-content { position: relative; }
-  .airbnb-modal__visual small { color: #e5a532; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-  .airbnb-modal__visual h3 { margin: 9px 0 22px; color: #fff; font-size: clamp(38px, 4vw, 56px); line-height: 1; }
-  .airbnb-modal__visual h3 em { color: #d98a13; font-style: normal; }
-  .airbnb-modal__benefit { display: flex; gap: 11px; margin-top: 14px; font-size: 12px; line-height: 1.4; }
-  .airbnb-modal__benefit b { display: block; font-size: 14px; }
-  .airbnb-modal__benefit-icon { width: 34px; height: 34px; flex: 0 0 34px; display: grid; place-items: center; border: 1px solid #df941c; border-radius: 50%; color: #f0a52b; font-size: 17px; }
+  .airbnb-modal__visual small { color: #d5b36f; font-size: 15px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .airbnb-modal__visual h3 { margin: 14px 0 32px; color: #fff; font-family: "Playfair Display", Georgia, serif !important; font-size: clamp(58px, 5vw, 78px); line-height: .92; letter-spacing: -.03em; }
+  .airbnb-modal__visual h3 em { color: #d5b36f; font-style: normal; }
+  .airbnb-modal__benefit { display: flex; align-items: center; gap: 16px; margin-top: 21px; color: rgba(255,255,255,.92); font-size: 16px; line-height: 1.45; }
+  .airbnb-modal__benefit b { display: block; margin-bottom: 3px; color: #fff; font-size: 21px; line-height: 1.18; }
+  .airbnb-modal__benefit-icon { width: 54px; height: 54px; flex: 0 0 54px; display: grid; place-items: center; border: 1.5px solid #c8a96b; border-radius: 50%; background: rgba(8,10,9,.38); color: #d5b36f; font-size: 24px; box-shadow: 0 8px 20px rgba(0,0,0,.24); }
   .airbnb-modal__main { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 42px 44px 34px; scrollbar-gutter: stable; }
   .airbnb-modal__eyebrow { color: #ad6712; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
   .airbnb-modal__main h2 { margin: 8px 0 5px; color: #101820; font-size: 37px; line-height: 1.05; }
@@ -2447,7 +2789,7 @@
     .airbnb-choice span { min-height: 60px; }
   }
 </style>
-<title>Hembla experten</title>
+<title>{{ seo_title }}</title>
 </head>
 <body class="home-page--quiet">{% include "home/includes/main_header.html" %}<!-- ============================================================================================= -->
 <!-- ===== HERO (ط§ظ„طµظˆط±ط© + ط§ظ„ظ†طµ + ط§ظ„ط£ط²ط±ط§ط± ظپظˆظ‚ ط§ظ„طµظˆط±ط©) ===== -->
@@ -2475,8 +2817,14 @@
 <div class="same-day-dropdown">
 <button type="button" class="btn btn-primary same-day-button" aria-haspopup="true" aria-expanded="false">{% trans "Book Cleaning" %}</button>
 <div class="same-day-menu" aria-label="Book Cleaning options">
-<a href="{% url 'home:all_services_private' %}">{% trans "Private Booking" %}</a>
-<a href="http://127.0.0.1:8000/business/services/">{% trans "Business Booking" %}</a>
+<a class="booking-menu-option" href="{% url 'home:all_services_private' %}">
+  <span class="booking-menu-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10M9 20v-6h6v6"/></svg></span>
+  <span class="booking-menu-option__text"><strong>{% trans "Private Booking" %}</strong><small>{% trans "For homes and apartments" %}</small></span>
+</a>
+<a class="booking-menu-option" href="{% url 'home:business_all_services' %}">
+  <span class="booking-menu-option__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 21V8h10v13M14 12h6v9M8 5h2M8 11h2M8 15h2M8 19h2M17 15h1M17 18h1M2 21h20"/></svg></span>
+  <span class="booking-menu-option__text"><strong>{% trans "Business Booking" %}</strong><small>{% trans "For offices and companies" %}</small></span>
+</a>
 </div>
 </div>
 {% comment %} Temporarily hidden: Same Day Service
@@ -2498,15 +2846,16 @@
   <span>{% trans "Cleaning services in Stockholm, Uppsala, and surrounding areas." %}</span>
 </div>
 </div>
-<form class="hero-request-card" action="{% url 'home:all_services_private' %}" method="get">
+<form class="hero-request-card" action="{% url 'home:submit_home_service_inquiry' %}" method="post" data-home-inquiry-form>
+  {% csrf_token %}
   <h2>{% trans "Let's Get Your Home Cleaned" %}</h2>
   <p>{% trans "Tell us what you need and we'll get back to you shortly." %}</p>
   <fieldset>
     <legend>{% trans "Choose a service" %}</legend>
     <div class="hero-service-options">
-      <label class="hero-service-option"><input type="radio" name="service" value="regular-cleaning" checked><span><b>⌂</b>{% trans "Regular cleaning" %}</span></label>
+      <label class="hero-service-option"><input type="radio" name="service" value="standard-cleaning" checked><span><b>⌂</b>{% trans "Regular cleaning" %}</span></label>
       <label class="hero-service-option"><input type="radio" name="service" value="deep-cleaning"><span><b>✦</b>{% trans "Deep cleaning" %}</span></label>
-      <label class="hero-service-option"><input type="radio" name="service" value="move-out-cleaning"><span><b>▣</b>{% trans "Move-out cleaning" %}</span></label>
+      <label class="hero-service-option"><input type="radio" name="service" value="move-inout-cleaning"><span><b>▣</b>{% trans "Move-out cleaning" %}</span></label>
       <label class="hero-service-option"><input type="radio" name="service" value="airbnb-cleaning"><span><b>▤</b>{% trans "Airbnb cleaning" %}</span></label>
     </div>
   </fieldset>
@@ -2533,11 +2882,56 @@
   </div>
   <div class="hero-request-field"><label for="hero-info">{% trans "Additional information" %}</label><textarea id="hero-info" name="message" placeholder="{% trans 'Tell us anything we should know...' %}"></textarea></div>
   <button class="hero-request-submit" type="submit">{% trans "Send Request" %} →</button>
-  <small class="hero-request-note">{% trans "Free request • No obligation" %}</small>
+  <small class="hero-request-note" aria-live="polite">{% trans "Free request • No obligation" %}</small>
 </form>
 </div>
 </section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const requestForm = document.querySelector('[data-home-inquiry-form]');
+    if (!requestForm) return;
+    const submitButton = requestForm.querySelector('[type="submit"]');
+    const note = requestForm.querySelector('.hero-request-note');
+    const timeToggle = requestForm.querySelector('[data-time-toggle]');
+    const defaultNote = note.textContent;
+    const defaultButton = submitButton.innerHTML;
+
+    requestForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      submitButton.disabled = true;
+      submitButton.textContent = '{% trans "Sending..." %}';
+      note.textContent = defaultNote;
+      note.style.color = '';
+
+      try {
+        const response = await fetch(requestForm.action, {
+          method: 'POST',
+          body: new FormData(requestForm),
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          const messages = data.errors ? Object.values(data.errors).flat() : [];
+          throw new Error(messages.join(' ') || '{% trans "Unable to send your request. Please try again." %}');
+        }
+        requestForm.reset();
+        if (timeToggle) timeToggle.textContent = '{% trans "Select time" %}';
+        note.textContent = '{% trans "Thank you! Your request was sent. We will contact you shortly." %}';
+        note.style.color = '#55753f';
+        submitButton.textContent = '{% trans "Request Sent" %} ✓';
+        window.setTimeout(() => { submitButton.innerHTML = defaultButton; }, 3500);
+      } catch (error) {
+        note.textContent = error.message;
+        note.style.color = '#b42318';
+        submitButton.innerHTML = defaultButton;
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+  });
+</script>
 <section class="home-trust-strip" aria-label="{% trans 'Why choose Hembla Experten' %}">
+  <div class="home-trust-strip__track">
   <div class="home-trust-strip__item">
     <span class="home-trust-strip__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
     <span><strong>{% trans "Easy booking" %}</strong><small>{% trans "Send a request in 1 minute" %}</small></span>
@@ -2554,7 +2948,33 @@
     <span class="home-trust-strip__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20S4 15.5 4 9.5A4.5 4.5 0 0 1 12 6.7a4.5 4.5 0 0 1 8 2.8C20 15.5 12 20 12 20Z"/></svg></span>
     <span><strong>{% trans "Trusted and personal" %}</strong><small>{% trans "We care about your home" %}</small></span>
   </div>
+  </div>
 </section>
+<script>
+  (() => {
+    const strip = document.querySelector('.home-trust-strip');
+    const track = strip?.querySelector('.home-trust-strip__track');
+    if (!track) return;
+
+    const mobileQuery = window.matchMedia('(max-width: 560px)');
+    const syncTrustCarousel = () => {
+      track.querySelectorAll('[data-trust-clone]').forEach((item) => item.remove());
+      strip.classList.remove('is-carousel-ready');
+      if (!mobileQuery.matches) return;
+
+      Array.from(track.children).forEach((item) => {
+        const clone = item.cloneNode(true);
+        clone.dataset.trustClone = 'true';
+        clone.setAttribute('aria-hidden', 'true');
+        track.appendChild(clone);
+      });
+      strip.classList.add('is-carousel-ready');
+    };
+
+    syncTrustCarousel();
+    mobileQuery.addEventListener?.('change', syncTrustCarousel);
+  })();
+</script>
 <!-- ===== OUR SERVICES ===== -->
 <section class="services container">
 <div class="section-kicker"><span>{% trans "Our Premium Services" %}</span></div>
@@ -2590,8 +3010,99 @@
 <p class="white">{% trans "Need cleaning now We arrive within 1 - 3 hours, fast, reliable, and hassle-free." %}</p>
 </article>
 </div>
+<div class="services-pagination" aria-label="{% trans 'Service carousel navigation' %}"></div>
 <button type="button" class="btn-naked js-services-modal">{% trans "See All Services" %}</button>
 </section>
+<script>
+  (() => {
+    const servicesSection = document.querySelector('.services');
+    const cardsTrack = servicesSection?.querySelector('.cards');
+    const cards = cardsTrack ? Array.from(cardsTrack.querySelectorAll('.card')) : [];
+    const pagination = servicesSection?.querySelector('.services-pagination');
+    if (!cardsTrack || !pagination || cards.length < 2) return;
+
+    const mobileQuery = window.matchMedia('(max-width: 768px)');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let activeIndex = 0;
+    let autoRotate = null;
+    let scrollFrame = null;
+
+    cards.forEach((card, index) => {
+      const dot = document.createElement('button');
+      dot.type = 'button';
+      dot.setAttribute('aria-label', `Show service ${index + 1} of ${cards.length}`);
+      dot.addEventListener('click', () => {
+        showCard(index, true);
+        restartAutoRotate();
+      });
+      pagination.appendChild(dot);
+    });
+
+    const dots = Array.from(pagination.querySelectorAll('button'));
+
+    const updatePagination = (index) => {
+      activeIndex = index;
+      dots.forEach((dot, dotIndex) => {
+        const isActive = dotIndex === index;
+        dot.classList.toggle('is-active', isActive);
+        dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+      });
+    };
+
+    const showCard = (index, smooth = true) => {
+      if (!mobileQuery.matches) return;
+      const nextIndex = (index + cards.length) % cards.length;
+      cardsTrack.scrollTo({
+        left: cards[nextIndex].offsetLeft - cardsTrack.offsetLeft,
+        behavior: smooth && !reduceMotion.matches ? 'smooth' : 'auto',
+      });
+      updatePagination(nextIndex);
+    };
+
+    const stopAutoRotate = () => {
+      if (autoRotate) window.clearInterval(autoRotate);
+      autoRotate = null;
+    };
+
+    const restartAutoRotate = () => {
+      stopAutoRotate();
+      if (mobileQuery.matches && !reduceMotion.matches) {
+        autoRotate = window.setInterval(() => showCard(activeIndex + 1), 4500);
+      }
+    };
+
+    cardsTrack.addEventListener('scroll', () => {
+      if (!mobileQuery.matches || scrollFrame) return;
+      scrollFrame = window.requestAnimationFrame(() => {
+        scrollFrame = null;
+        const nearest = cards.reduce((best, card, index) => {
+          const distance = Math.abs((card.offsetLeft - cardsTrack.offsetLeft) - cardsTrack.scrollLeft);
+          return distance < best.distance ? { index, distance } : best;
+        }, { index: 0, distance: Infinity });
+        updatePagination(nearest.index);
+      });
+    }, { passive: true });
+
+    cardsTrack.addEventListener('pointerdown', stopAutoRotate, { passive: true });
+    cardsTrack.addEventListener('pointerup', restartAutoRotate, { passive: true });
+    cardsTrack.addEventListener('pointercancel', restartAutoRotate, { passive: true });
+
+    const syncCarousel = () => {
+      stopAutoRotate();
+      if (mobileQuery.matches) {
+        showCard(activeIndex, false);
+        restartAutoRotate();
+      } else {
+        cardsTrack.scrollLeft = 0;
+      }
+    };
+
+    updatePagination(0);
+    syncCarousel();
+    mobileQuery.addEventListener?.('change', syncCarousel);
+    reduceMotion.addEventListener?.('change', syncCarousel);
+  })();
+</script>
 <section class="airbnb-feature" aria-labelledby="airbnb-feature-title">
   <div class="airbnb-feature__inner">
     <div class="airbnb-feature__content">
@@ -2599,7 +3110,7 @@
       <h2 id="airbnb-feature-title">{% trans "Your Airbnb. Completely Taken Care Of." %}</h2>
       <p>{% trans "From guest bookings and communication to cleaning, restocking, and property preparation, Hembla Experten takes care of the day-to-day operations so you don't have to." %}</p>
       <div class="airbnb-feature__actions">
-        <button class="airbnb-feature__button airbnb-feature__button--primary" type="button" data-airbnb-open>{% trans "Request Airbnb Management" %} →</button>
+        <button class="airbnb-feature__button airbnb-feature__button--primary" type="button" data-airbnb-open>{% trans "Request Airbnb Management" %}</button>
         <a class="airbnb-feature__button airbnb-feature__button--secondary" href="{% url 'home:airbnb_management' %}">{% trans "Explore Airbnb Services" %}</a>
       </div>
     </div>
@@ -2765,9 +3276,11 @@
             <label class="airbnb-count-choice"><input type="radio" name="property_count" value="10+"><span>10+</span></label>
           </div>
         </fieldset>
-        <div class="airbnb-modal-field"><label for="airbnbLocation">3. {% trans "Where are your properties located?" %} <small>({% trans "optional" %})</small></label><input id="airbnbLocation" name="location" type="text" placeholder="e.g. Stockholm, Solna, Järfälla"></div>
-        <div class="airbnb-modal-field"><label for="airbnbPhone">4. {% trans "Phone number" %} *</label><input id="airbnbPhone" name="phone" type="tel" placeholder="e.g. 070 123 45 67" required></div>
-        <div class="airbnb-modal-field"><label for="airbnbMessage">5. {% trans "Anything else we should know?" %} <small>({% trans "optional" %})</small></label><textarea id="airbnbMessage" name="message" placeholder="{% trans 'Tell us about your property or any specific requirements...' %}"></textarea></div>
+        <div class="airbnb-modal-field"><label for="airbnbName">3. {% trans "Name" %} *</label><input id="airbnbName" name="name" type="text" autocomplete="name" maxlength="150" placeholder="{% trans 'Your name' %}" required></div>
+        <div class="airbnb-modal-field"><label for="airbnbEmail">4. {% trans "Email address" %} *</label><input id="airbnbEmail" name="email" type="email" autocomplete="email" placeholder="name@example.com" required></div>
+        <div class="airbnb-modal-field"><label for="airbnbLocation">5. {% trans "Where are your properties located?" %} <small>({% trans "optional" %})</small></label><input id="airbnbLocation" name="location" type="text" placeholder="e.g. Stockholm, Solna, Järfälla"></div>
+        <div class="airbnb-modal-field"><label for="airbnbPhone">6. {% trans "Phone number" %} *</label><input id="airbnbPhone" name="phone" type="tel" autocomplete="tel" placeholder="e.g. 070 123 45 67" required></div>
+        <div class="airbnb-modal-field"><label for="airbnbMessage">7. {% trans "Anything else we should know?" %} <small>({% trans "optional" %})</small></label><textarea id="airbnbMessage" name="message" placeholder="{% trans 'Tell us about your property or any specific requirements...' %}"></textarea></div>
         <div class="airbnb-modal__error" role="alert"></div>
         <button class="airbnb-modal__submit" type="submit">{% trans "Send Request" %} →</button>
         <small class="airbnb-modal__note">{% trans "Free enquiry • No obligation • We'll contact you shortly." %}</small>
@@ -2780,6 +3293,8 @@
           <h3>{% trans "Your request summary" %} <button class="airbnb-success__edit" type="button" data-airbnb-edit>{% trans "Edit" %}</button></h3>
           <div class="airbnb-summary-row"><strong>{% trans "Services" %}</strong><span data-summary-services></span></div>
           <div class="airbnb-summary-row"><strong>{% trans "Number of properties" %}</strong><span data-summary-count></span></div>
+          <div class="airbnb-summary-row"><strong>{% trans "Name" %}</strong><span data-summary-name></span></div>
+          <div class="airbnb-summary-row"><strong>{% trans "Email address" %}</strong><span data-summary-email></span></div>
           <div class="airbnb-summary-row"><strong>{% trans "Location" %}</strong><span data-summary-location></span></div>
           <div class="airbnb-summary-row"><strong>{% trans "Phone number" %}</strong><span data-summary-phone></span></div>
           <div class="airbnb-summary-row"><strong>{% trans "Additional information" %}</strong><span data-summary-message></span></div>
@@ -2865,6 +3380,8 @@
         const request = data.request;
         success.querySelector('[data-summary-services]').textContent = request.services.join(', ');
         success.querySelector('[data-summary-count]').textContent = request.property_count;
+        success.querySelector('[data-summary-name]').textContent = request.name;
+        success.querySelector('[data-summary-email]').textContent = request.email;
         success.querySelector('[data-summary-location]').textContent = request.location;
         success.querySelector('[data-summary-phone]').textContent = request.phone;
         success.querySelector('[data-summary-message]').textContent = request.message;

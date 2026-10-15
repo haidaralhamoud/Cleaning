@@ -111,6 +111,7 @@ path(
         name="private_zip_available"
     ),
     path("ajax/submit-call-request/", views.submit_call_request, name="submit_call_request"),
+    path("ajax/submit-home-service-inquiry/", views.submit_home_service_inquiry, name="submit_home_service_inquiry"),
     path("ajax/submit-airbnb-management-request/", views.submit_airbnb_management_request, name="submit_airbnb_management_request"),
 
     path(

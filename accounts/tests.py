@@ -337,7 +337,21 @@ class SignUpVerificationFlowTests(TestCase):
         self.assertFalse(user.is_active)
         self.assertTrue(Customer.objects.filter(user=user).exists())
         self.assertTrue(PasswordResetOTP.objects.filter(email="newuser@example.com").exists())
-        self.assertEqual(len(mail.outbox), 1)
+        verification_emails = [
+            email
+            for email in mail.outbox
+            if "newuser@example.com" in email.to
+            and "verification code" in email.subject.lower()
+        ]
+        self.assertEqual(len(verification_emails), 1)
+
+        admin_emails = [
+            email
+            for email in mail.outbox
+            if "services@hembla-experten.se" in email.to
+            and email.subject == "New Customer Signup"
+        ]
+        self.assertEqual(len(admin_emails), 1)
 
     def test_signup_verify_activates_account(self):
         self.client.post(reverse("accounts:sign_up"), self._signup_payload())

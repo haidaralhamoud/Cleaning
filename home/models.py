@@ -1537,6 +1537,8 @@ class CallRequest(models.Model):
 class AirbnbManagementRequest(models.Model):
     services = models.JSONField(default=list)
     property_count = models.CharField(max_length=20)
+    name = models.CharField(max_length=150)
+    email = models.EmailField()
     location = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=50)
     message = models.TextField(blank=True)
@@ -1548,7 +1550,26 @@ class AirbnbManagementRequest(models.Model):
         verbose_name_plural = "Airbnb management requests"
 
     def __str__(self):
-        return f"{self.phone} - {self.property_count}"
+        return f"{self.name} - {self.property_count}"
+
+
+class HomeServiceInquiry(models.Model):
+    service = models.CharField(max_length=100)
+    address = models.CharField(max_length=255)
+    phone = models.CharField(max_length=50)
+    preferred_date = models.DateField(blank=True, null=True)
+    preferred_time = models.TimeField(blank=True, null=True)
+    message = models.TextField(blank=True)
+    contacted = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Home service inquiry"
+        verbose_name_plural = "Home service inquiries"
+
+    def __str__(self):
+        return f"{self.phone} - {self.service}"
 
 
 class EmailRequest(models.Model):

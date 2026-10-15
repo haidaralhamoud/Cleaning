@@ -14,6 +14,12 @@
     <span class="menu-icon" aria-hidden="true"></span>
   </button>
 
+  <a class="mobile-whatsapp" href="https://wa.me/46769046338" target="_blank" rel="noopener noreferrer" aria-label="{% trans 'Contact us on WhatsApp' %}">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 2a9.8 9.8 0 0 0-8.4 14.9L2.2 22l5.2-1.4A10 10 0 1 0 12 2Zm0 17.8a7.8 7.8 0 0 1-4-1.1l-.3-.2-3.1.8.8-3-.2-.3A7.8 7.8 0 1 1 12 19.8Zm4.3-5.8c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.6.1l-.7.9c-.1.2-.3.2-.5.1a6.4 6.4 0 0 1-1.9-1.2 7 7 0 0 1-1.3-1.7c-.1-.2 0-.4.1-.5l.4-.5.2-.4c.1-.1 0-.3 0-.4l-.7-1.7c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.8 2.8 4.5 3.9.6.3 1.1.4 1.5.5.6.2 1.2.2 1.7.1.5-.1 1.4-.6 1.6-1.1.2-.6.2-1 .2-1.1-.1-.2-.2-.3-.4-.4Z"/>
+    </svg>
+  </a>
+
   <nav class="nav-links" id="nav-links">
     <a href="{% url 'home:home' %}" class="nav-link{% if url_name == 'home' %} is-active{% endif %}">{% trans "HOME" %}</a>
     <a href="{% url 'home:about' %}" class="nav-link{% if url_name == 'about' %} is-active{% endif %}">{% trans "ABOUT" %}</a>
@@ -22,9 +28,17 @@
         <span class="dropdown-label">{% trans "SERVICES" %}</span>
       </a>
       <div class="dropdown-menu services-mega-menu">
+        <div class="services-menu-intro">
+          <span class="services-menu-eyebrow">Hembla Experten</span>
+          <strong>How can we help?</strong>
+          <p>Choose the service collection that fits your needs.</p>
+        </div>
         <div class="dropdown-submenu">
           <a href="{% url 'home:all_services_private' %}" class="submenu-toggle services-branch-link" aria-haspopup="true" aria-expanded="false">
-            <span>Private Services</span>
+            <span class="services-branch-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M3 11.2 12 4l9 7.2v8.3a.5.5 0 0 1-.5.5h-5.8v-6.1H9.3V20H3.5a.5.5 0 0 1-.5-.5v-8.3Z"/></svg>
+            </span>
+            <span class="services-branch-copy"><strong>Private Services</strong><small>Care for your home & family</small></span>
             <span class="submenu-arrow" aria-hidden="true"></span>
           </a>
           <div class="submenu-menu services-categories-menu" data-services-categories-menu>
@@ -65,7 +79,10 @@
         </div>
         <div class="dropdown-submenu">
           <a href="{% url 'home:business_all_services' %}" class="submenu-toggle services-branch-link" aria-haspopup="true" aria-expanded="false">
-            <span>Business Services</span>
+            <span class="services-branch-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 21V5.5A1.5 1.5 0 0 1 5.5 4h8A1.5 1.5 0 0 1 15 5.5V9h3.5a1.5 1.5 0 0 1 1.5 1.5V21h-6v-4h-3v4H4Zm3-13h2V6H7v2Zm4 0h2V6h-2v2Zm-4 4h2v-2H7v2Zm4 0h2v-2h-2v2Zm6 1h1v-2h-1v2Zm0 4h1v-2h-1v2Z"/></svg>
+            </span>
+            <span class="services-branch-copy"><strong>Business Services</strong><small>Solutions for modern workplaces</small></span>
             <span class="submenu-arrow" aria-hidden="true"></span>
           </a>
           <div class="submenu-menu services-categories-menu" data-services-categories-menu>

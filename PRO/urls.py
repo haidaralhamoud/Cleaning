@@ -21,7 +21,10 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from accounts.views import RememberMeLoginView
 from accounts import views as account_views
+from home.seo_views import robots_txt, sitemap_xml
 urlpatterns = [
+    path("robots.txt", robots_txt, name="robots_txt"),
+    path("sitemap.xml", sitemap_xml, name="sitemap"),
     path("accounts/login/", RememberMeLoginView.as_view(), name="login"),
     path("accounts/password_reset/", account_views.password_reset_request, name="password_reset"),
     path("accounts/password_reset/verify/", account_views.password_reset_verify, name="password_reset_verify"),

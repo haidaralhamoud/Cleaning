@@ -75,20 +75,6 @@
   border-color: var(--business-border-strong);
 }
 
-.back-icon,
-.next-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.back-icon {
-  background: var(--business-cream);
-}
-
 .next-btn,
 .confirm-btn button,
 .buttons .next {
@@ -114,10 +100,6 @@
 .buttons .next:hover {
   transform: translateY(-1px);
   box-shadow: 0 22px 38px rgba(168, 132, 50, 0.28);
-}
-
-.next-icon {
-  background: rgba(255, 255, 255, 0.18);
 }
 
 .buttons .next:disabled,

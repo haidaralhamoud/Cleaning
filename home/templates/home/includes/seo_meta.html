@@ -1,0 +1,16 @@
+{% load static %}
+{% with page_title=service.title|default:seo_title %}
+<meta name="description" content="{% if service and service.description %}{{ service.description|striptags|truncatechars:160 }}{% else %}{{ seo_description }}{% endif %}">
+<link rel="canonical" href="{{ seo_canonical_url }}">
+<meta property="og:site_name" content="Hembla Experten">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{% if service %}{{ page_title }} | Hembla Experten{% else %}{{ page_title }}{% endif %}">
+<meta property="og:description" content="{% if service and service.description %}{{ service.description|striptags|truncatechars:160 }}{% else %}{{ seo_description }}{% endif %}">
+<meta property="og:url" content="{{ seo_canonical_url }}">
+<meta property="og:image" content="{% if service and service.hero_image %}{{ seo_site_url }}{{ service.hero_image.url }}{% elif service and service.image %}{{ seo_site_url }}{{ service.image.url }}{% else %}{{ seo_default_image_url }}{% endif %}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{% if service %}{{ page_title }} | Hembla Experten{% else %}{{ page_title }}{% endif %}">
+<meta name="twitter:description" content="{% if service and service.description %}{{ service.description|striptags|truncatechars:160 }}{% else %}{{ seo_description }}{% endif %}">
+<meta name="twitter:image" content="{% if service and service.hero_image %}{{ seo_site_url }}{{ service.hero_image.url }}{% elif service and service.image %}{{ seo_site_url }}{{ service.image.url }}{% else %}{{ seo_default_image_url }}{% endif %}">
+{% if seo_is_homepage %}<script type="application/ld+json">{{ seo_business_schema }}</script>{% endif %}
+{% endwith %}

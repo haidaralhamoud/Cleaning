@@ -38,6 +38,7 @@ from .models import (
     ServiceEstimate,
     CurrencyRate,
     AirbnbManagementRequest,
+    HomeServiceInquiry,
 )
 from jsoneditor.forms import JSONEditor
 from django.utils.html import format_html
@@ -52,12 +53,24 @@ from accounts.models import PointsTransaction
 User = get_user_model()
 
 
+@admin.register(HomeServiceInquiry)
+class HomeServiceInquiryAdmin(admin.ModelAdmin):
+    list_display = ("phone", "service", "address", "preferred_date", "preferred_time", "contacted", "created_at")
+    list_filter = ("contacted", "service", "created_at")
+    search_fields = ("phone", "address", "message")
+    list_editable = ("contacted",)
+    readonly_fields = ("service", "address", "phone", "preferred_date", "preferred_time", "message", "created_at")
+
+    def has_add_permission(self, request):
+        return False
+
+
 @admin.register(AirbnbManagementRequest)
 class AirbnbManagementRequestAdmin(admin.ModelAdmin):
-    list_display = ("phone", "property_count", "location", "created_at")
+    list_display = ("name", "email", "phone", "property_count", "location", "created_at")
     list_filter = ("property_count", "created_at")
-    search_fields = ("phone", "location", "message")
-    readonly_fields = ("services", "property_count", "location", "phone", "message", "created_at")
+    search_fields = ("name", "email", "phone", "location", "message")
+    readonly_fields = ("services", "property_count", "name", "email", "location", "phone", "message", "created_at")
 
     def has_add_permission(self, request):
         return False

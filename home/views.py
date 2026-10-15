@@ -1,7 +1,7 @@
 from decimal import Decimal, ROUND_HALF_UP
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
-from django.utils.dateparse import parse_date, parse_datetime
+from django.utils.dateparse import parse_date, parse_datetime, parse_time
 import logging
 import hashlib
 from datetime import timedelta, time as dt_time
@@ -24,13 +24,15 @@ from .forms import (
 )
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db import IntegrityError, transaction
 from django.urls import reverse
 from urllib.parse import urlencode
 
 from .models import (
     BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessMainCategory, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
-    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest, AirbnbManagementRequest,
+    BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest, AirbnbManagementRequest, HomeServiceInquiry,
     EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
     Contact, FAQCategory, FAQItem, HomeHeroPrice, StripeWebhookEvent, ServiceCard, ServicePricing, ServiceEstimate,
     ServiceRoomOption,
@@ -3382,7 +3384,7 @@ def dashboard_model_list(request, model):
         "service-estimates": ["service", "property_options", "bedrooms_options"],
         "invoices": ["invoice_number", "customer", "booking_type", "amount", "status", "due_date"],
         "invoice-line-items": ["invoice", "line_order", "description", "quantity", "unit_price", "vat_percent"],
-        "airbnb-management-requests": ["services", "property_count", "location", "phone", "created_at"],
+        "airbnb-management-requests": ["name", "email", "services", "property_count", "location", "phone", "created_at"],
         "airbnb-faqs": ["question", "answer", "order", "is_active"],
     }
     display_fields = display_fields_map.get(item.slug, _model_fields(item.model)[:5])
@@ -5665,9 +5667,41 @@ def submit_call_request(request):
 
 
 @require_POST
+def submit_home_service_inquiry(request):
+    service = (request.POST.get("service") or "").strip()
+    address = (request.POST.get("address") or "").strip()
+    phone = (request.POST.get("phone") or "").strip()
+    preferred_date = parse_date((request.POST.get("date") or "").strip())
+    preferred_time = parse_time((request.POST.get("time") or "").strip())
+    message_text = (request.POST.get("message") or "").strip()
+
+    errors = {}
+    if not service:
+        errors["service"] = "Choose a service."
+    if not address:
+        errors["address"] = "Enter your address."
+    if not phone:
+        errors["phone"] = "Enter your phone number."
+    if errors:
+        return JsonResponse({"success": False, "errors": errors}, status=400)
+
+    HomeServiceInquiry.objects.create(
+        service=service,
+        address=address,
+        phone=phone,
+        preferred_date=preferred_date,
+        preferred_time=preferred_time,
+        message=message_text,
+    )
+    return JsonResponse({"success": True})
+
+
+@require_POST
 def submit_airbnb_management_request(request):
     services = [value.strip() for value in request.POST.getlist("services") if value.strip()]
     property_count = (request.POST.get("property_count") or "").strip()
+    name = (request.POST.get("name") or "").strip()
+    email = (request.POST.get("email") or "").strip()
     location = (request.POST.get("location") or "").strip()
     phone = (request.POST.get("phone") or "").strip()
     message_text = (request.POST.get("message") or "").strip()
@@ -5677,6 +5711,14 @@ def submit_airbnb_management_request(request):
         errors["services"] = "Choose at least one service."
     if property_count not in {"1 property", "2–3", "4–10", "10+"}:
         errors["property_count"] = "Choose the number of properties."
+    if not name:
+        errors["name"] = "Enter your name."
+    elif len(name) > 150:
+        errors["name"] = "Name must be 150 characters or fewer."
+    try:
+        validate_email(email)
+    except ValidationError:
+        errors["email"] = "Enter a valid email address."
     if not phone:
         errors["phone"] = "Enter your phone number."
     if errors:
@@ -5685,6 +5727,8 @@ def submit_airbnb_management_request(request):
     airbnb_request = AirbnbManagementRequest.objects.create(
         services=services,
         property_count=property_count,
+        name=name,
+        email=email,
         location=location,
         phone=phone,
         message=message_text,
@@ -5695,6 +5739,8 @@ def submit_airbnb_management_request(request):
             "id": airbnb_request.pk,
             "services": services,
             "property_count": property_count,
+            "name": name,
+            "email": email,
             "location": location or "—",
             "phone": phone,
             "message": message_text or "—",
