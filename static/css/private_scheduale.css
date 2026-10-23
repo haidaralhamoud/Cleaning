@@ -739,14 +739,73 @@ body {
 }
 
 .freq-btn {
-  padding: 12px;
+  padding: 13px 16px;
   border-radius: 14px;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
-  font-weight: 700;
   background: #e9edf2;
   transition: 0.2s;
   margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid rgba(200, 167, 91, 0.28);
+}
+
+.freq-btn__copy {
+  display: flex !important;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column !important;
+  align-items: flex-start;
+  gap: 4px !important;
+  line-height: 1.25;
+}
+
+.freq-btn__copy strong {
+  font-weight: 800;
+}
+
+.freq-btn__copy small {
+  display: block !important;
+  font-size: 0.86rem;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.freq-btn .save-tag {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.custom-frequency-fields {
+  margin: 4px 0 12px;
+  padding: 14px;
+  border: 1px solid rgba(200, 167, 91, 0.35);
+  border-radius: 14px;
+  background: #fffdfa;
+}
+
+.custom-frequency-fields > label {
+  display: block;
+  margin-bottom: 9px;
+  font-weight: 700;
+}
+
+.custom-frequency-fields__controls {
+  display: grid;
+  grid-template-columns: minmax(80px, 0.7fr) minmax(130px, 1.3fr);
+  gap: 10px;
+}
+
+.custom-frequency-fields select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(200, 167, 91, 0.45);
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
 }
 
 .freq-btn.active {

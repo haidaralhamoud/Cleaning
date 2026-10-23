@@ -55,6 +55,7 @@
 <div><strong>Your booking is ready for a final look</strong><small>Nothing is charged until you confirm your preferred payment method.</small></div>
 </div>
 </section>
+{% comment %}Temporarily hidden; keep the Loyalty & Rewards checkout section for later.
 {% if user.is_authenticated %}
 <section class="card loyalty-card loyalty-card--checkout">
 <div class="loyalty-card__top">
@@ -98,6 +99,7 @@
 </div>
 </section>
 {% endif %}
+{% endcomment %}
 <section class="card services-card">
 <div class="card-header">
 <div>
@@ -140,7 +142,7 @@
 {% if booking.schedule_mode == "same" %}
 <p class="review-card__value">{{ booking.appointment_date|default:"Not set" }}</p>
 <p class="review-card__detail">{% if booking.appointment_start_time %}{{ booking.appointment_start_time|time:"H:i" }}{% else %}Time not set{% endif %}</p>
-<p class="review-card__detail">Frequency: {{ booking.frequency_type|default:"Not set" }}</p>
+<p class="review-card__detail">Frequency: {{ booking.frequency_label }}</p>
 <p class="review-card__detail">End date: {% if booking.End_Date %}{{ booking.End_Date|date:"M d, Y" }}{% else %}Ongoing{% endif %}</p>
 {% else %}
 <p class="review-card__value">Separate schedules</p>
@@ -211,10 +213,13 @@
 <div class="services-total-line">
 <span>Service fee</span>
 <span>{{ service_fee|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>{% if vat_amount %}<div class="services-total-line">
+ </div><div class="services-total-line">
 <span>VAT ({{ vat_percent|floatformat:0 }}%)</span>
 <span>{{ vat_amount|floatformat:2 }} {{ stripe_currency|upper }}</span>
-</div>{% endif %}<div class="services-total-line">
+</div><div class="services-total-line">
+<span>Total before RUT</span>
+<span>{{ gross_before_rot|floatformat:2 }} {{ stripe_currency|upper }}</span>
+</div><div class="services-total-line">
 <span>RUT</span>
 <span>{% if booking.use_rot %}-{% endif %}{{ rot_value|floatformat:2 }} {{ stripe_currency|upper }}</span>
 </div>{% if booking.discount_code %}<div class="services-total-line discount">
@@ -233,7 +238,7 @@
 </div>
 </article>
 </div>
-<p class="services-note">{% if booking.use_rot %}This price includes your RUT deduction. You only pay the reduced amount.{% else %}This price includes VAT. RUT deduction is not applied.{% endif %}</p>
+<p class="services-note">VAT is calculated at {{ vat_percent|floatformat:0 }}%. {% if booking.use_rot %}RUT is then deducted at {{ rot_percent|floatformat:0 }}%, and you pay the final reduced amount.{% else %}RUT deduction is not applied.{% endif %}</p>
 </section>
 <section class="card discount-card">
 <div class="card-header">
@@ -271,6 +276,7 @@
         {% else %}
 <form method="POST" id="paymentForm"              data-stripe-publishable-key="{{ stripe_publishable_key }}"              data-stripe-client-secret="{{ stripe_client_secret }}"              data-stripe-payment-intent="{{ stripe_payment_intent_id }}"              data-stripe-complete-url="{{ payment_complete_url }}"              data-stripe-return-url="{{ payment_return_url }}"              data-cash-invoice-url="{{ cash_invoice_download_url }}"              data-stripe-ready="{{ stripe_ready|yesno:'1,0' }}"              data-stripe-currency="{{ stripe_currency }}"              data-stripe-failure-url="{{ payment_failed_url }}">          {% csrf_token %}          <input type="hidden" name="form_type" value="payment">
 <div class="payment-options payment-options--static" role="radiogroup" aria-label="Payment method">
+{% comment %}Temporarily disabled; keep the card payment code for later re-enabling.
 <label class="payment-option payment-choice is-active" data-payment-option="card">
 <input type="radio" name="payment_option" value="card" checked>
 <span class="payment-logo">
@@ -281,19 +287,26 @@
 <small>Pay now</small>
 </span>
 </label>
+{% endcomment %}
 <label class="payment-option payment-choice" data-payment-option="invoice">
-<input type="radio" name="payment_option" value="invoice">
+<input type="radio" name="payment_option" value="invoice" checked>
 <span class="payment-logo payment-logo--icon" aria-hidden="true">
 <i class="fa-regular fa-file-lines">
 </i>
 </span>
 <span class="payment-copy">
 <strong>Invoice</strong>
-<small>Invoice is reviewed after service</small>
-<small>Sent later by admin</small>
+<small>Your invoice will be prepared after the service is completed and sent to you by our team.</small>
 </span>
 </label>
+<style>
+  .payment-options--static:has([data-payment-option="invoice"]:only-child) {
+    grid-template-columns: minmax(280px, 520px);
+    justify-content: center;
+  }
+</style>
 </div>
+{% comment %}Temporarily disabled with card payment; keep this code for later re-enabling.
 <div class="payment-method-note" data-payment-panel="card">            Pay securely by card in {{ stripe_currency|upper }}.          </div>
 <div class="payment-inputs" data-payment-panel="card">
 <div id="payment-element" class="stripe-card-element">
@@ -301,18 +314,26 @@
 <div id="card-errors" class="card-errors" role="alert">
 </div>
 </div>
+{% endcomment %}
 <div class="terms">
 <label class="agree">
 <input type="checkbox" id="agreeTerms" name="accepted_terms" value="1" required>              I agree to the <a href="{% url 'home:T_C' %}" target="_blank" rel="noopener">terms and conditions</a> and <a href="{% url 'home:Privacy_Policy' %}" target="_blank" rel="noopener">privacy policy</a>.            </label>
 </div>          {% if not stripe_ready %}            <div class="flash error" style="margin-top: 10px;">              Payment service is not configured. Please try again later.            </div>          {% endif %}          <button class="confirm" type="submit" id="confirmPayment" disabled>Confirm Payment</button>
 </form>
+          {% if price_review_available %}
+          <form method="post" class="price-review-form" style="margin-top:16px;">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="price_review">
+            <button type="submit" class="apply-btn">Request a price review</button>
+            <p class="form-help">Something looks wrong with the price? Our team will review it and contact you.</p>
+          </form>
+          {% endif %}
         {% endif %}
 </section>
 <section class="checkout-bottom">
 <h2>Cancellation Policy</h2>
 <ul>
 <li>Free cancellation up to 24 hours before start time.</li>
-<li>Same-day bookings are non-refundable once confirmed.</li>
 </ul>
 </section>
 </div>
@@ -328,16 +349,12 @@
         <path d="M20 33.5 28 41.5 44 24.5" class="checkout-message-modal__icon-check"></path>
       </svg>
     </div>
-    <p class="checkout-message-modal__eyebrow">Payment update</p>
-    <h3 id="checkoutMessageTitle">Booking update</h3>
-    <p class="checkout-message-modal__lead">A confirmation notice has been prepared for this booking.</p>
     <div class="checkout-message-modal__body">
       {% for message in messages %}
         <div class="checkout-message checkout-message--{{ message.tags|default:'info' }}">{{ message }}</div>
       {% endfor %}
     </div>
     <div class="checkout-message-modal__actions">
-      <button type="button" class="checkout-message-modal__secondary" id="checkoutMessageStay">Stay on checkout</button>
       <button type="button" class="checkout-message-modal__close" id="checkoutMessageClose">Back to Home</button>
     </div>
   </div>

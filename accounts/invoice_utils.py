@@ -103,6 +103,13 @@ def populate_invoice_from_private_booking(invoice: Invoice, booking: PrivateBook
 
     if not invoice.line_items.exclude(is_service_fee=True).exists():
         selected_services = booking.selected_services or []
+        pricing_details = booking.pricing_details or {}
+        service_breakdown = pricing_details.get("service_breakdown") or {}
+        services_total = _q(pricing_details.get("services_total", 0))
+        fallback_service_amount = (
+            (services_total / Decimal(len(selected_services))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            if selected_services else Decimal("0.00")
+        )
         line_order = 10
         for service_slug in selected_services:
             service = service_map.get(service_slug)
@@ -114,7 +121,7 @@ def populate_invoice_from_private_booking(invoice: Invoice, booking: PrivateBook
                 description=service.title,
                 service_time=_format_private_service_time(booking, service_slug),
                 quantity=Decimal("1.00"),
-                unit_price=_q(service.price),
+                unit_price=_q(service_breakdown.get(service_slug, fallback_service_amount)),
                 discount_amount=Decimal("0.00"),
                 rot_rut_amount=Decimal("0.00"),
                 vat_percent=DEFAULT_VAT_PERCENT,

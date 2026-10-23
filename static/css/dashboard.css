@@ -27,6 +27,18 @@ body{
   grid-template-columns:260px 1fr;
   min-height:100vh;
 }
+.dash-layout.is-collapsed{grid-template-columns:78px 1fr}
+.dash-sidebar-toggle{
+  border:1px solid var(--border);background:#fff;color:var(--primary-2);
+  width:38px;height:38px;border-radius:10px;cursor:pointer;flex:0 0 auto;
+}
+.dash-layout.is-collapsed .dash-brand span,
+.dash-layout.is-collapsed .dash-sidebar-search,
+.dash-layout.is-collapsed .dash-link{font-size:0}
+.dash-layout.is-collapsed .dash-link{justify-content:center;padding-inline:8px}
+.dash-layout.is-collapsed .dash-link i{font-size:18px;margin:0}
+.dash-layout.is-collapsed .dash-brand{justify-content:center;padding-inline:0}
+.dash-layout.is-collapsed .dash-brand img{width:34px}
 
 /* ===== Sidebar ===== */
 .dash-sidebar{
@@ -169,6 +181,7 @@ body{
 }
 .dash-title{font-size:18px;font-weight:800}
 .dash-actions{display:flex;align-items:center;gap:12px}
+.dash-quick-actions{padding:10px 12px;border:1px solid var(--border);border-radius:14px;background:#fbfdff}
 
 /* ===== Password Modal ===== */
 .dash-modal{
@@ -321,10 +334,16 @@ body{
 .dash-bell-summary{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#4b5563;margin-bottom:10px}
 .dash-bell-list{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:10px}
 .dash-bell-item{
-  border:1px solid #eef2f7;border-radius:12px;padding:10px;background:#f9fbff;
-  text-decoration:none;color:inherit;display:block
+  border:1px solid #e5eaf2;border-radius:12px;padding:10px;background:#f9fbff;
+  text-decoration:none;color:inherit;display:block;transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,opacity .18s ease
 }
 .dash-bell-item:hover{background:#eef6ff}
+.dash-bell-item.is-unread{background:#e0f7ff;border-color:#18a8c1;box-shadow:0 0 0 2px rgba(14,165,164,.14)}
+.dash-bell-item.is-unread .dash-bell-title{color:#075985}
+.dash-bell-item.is-unread .dash-bell-title:before{content:"";display:inline-block;width:8px;height:8px;margin-right:7px;border-radius:50%;background:#0ea5a4;vertical-align:middle;box-shadow:0 0 0 3px rgba(14,165,164,.14)}
+.dash-bell-item.is-read{background:#f5f7fa;border-color:#e4e8ee;opacity:.68}
+.dash-bell-item.is-read .dash-bell-title{color:#64748b;font-weight:600}
+.dash-bell-item.is-read .dash-bell-note,.dash-bell-item.is-read .dash-bell-time{color:#94a3b8}
 .dash-bell-title{font-weight:700;margin-bottom:2px}
 .dash-bell-note{font-size:12px;color:#4b5563}
 .dash-bell-time{font-size:12px;color:#9ca3af;margin-top:4px}

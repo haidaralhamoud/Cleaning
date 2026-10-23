@@ -52,6 +52,9 @@
 
     <main class="dash-main">
       <header class="dash-topbar">
+        <button class="dash-sidebar-toggle" id="dashSidebarToggle" type="button" aria-label="Toggle sidebar" aria-expanded="true">
+          <i class="fa-solid fa-bars"></i>
+        </button>
         <div class="dash-title">
           {% block page_title %}Dashboard{% endblock %}
         </div>
@@ -76,7 +79,7 @@
               <div class="dash-bell-list" id="dashNotifList">
                 {% if dashboard_notif_items %}
                   {% for n in dashboard_notif_items %}
-                    <a class="dash-bell-item dash-bell-link" href="{% if n.url %}{{ n.url }}{% else %}#{% endif %}">
+                    <a class="dash-bell-item dash-bell-link" data-notification-key="{{ n.title|escape }}|{{ n.detail|escape }}|{{ n.url|escape }}" href="{% if n.url %}{{ n.url }}{% else %}#{% endif %}">
                       <div class="dash-bell-title">{{ n.title }}</div>
                       <div class="dash-bell-note">{{ n.detail }}</div>
                       <div class="dash-bell-time">{{ n.time|date:"M d, h:i A" }}</div>
@@ -153,6 +156,40 @@
     const dashSidebarSearch = document.getElementById("dashSidebarSearch");
     const dashNavLinks = Array.from(document.querySelectorAll(".dash-nav .dash-link[data-nav-label]"));
     const dashNavEmpty = document.getElementById("dashNavEmpty");
+    const dashSidebar = document.querySelector(".dash-sidebar");
+    const dashSidebarScrollKey = "dashboard-sidebar-scroll-top";
+    const dashLayout = document.querySelector(".dash-layout");
+    const dashSidebarToggle = document.getElementById("dashSidebarToggle");
+    const dashSidebarCollapsedKey = "dashboard-sidebar-collapsed";
+    const setSidebarCollapsed = (collapsed) => {
+      if (!dashLayout || !dashSidebarToggle) return;
+      dashLayout.classList.toggle("is-collapsed", collapsed);
+      dashSidebarToggle.setAttribute("aria-expanded", String(!collapsed));
+      dashSidebarToggle.innerHTML = `<i class="fa-solid fa-${collapsed ? "chevron-right" : "bars"}"></i>`;
+      localStorage.setItem(dashSidebarCollapsedKey, collapsed ? "1" : "0");
+    };
+    if (dashSidebarToggle) {
+      setSidebarCollapsed(localStorage.getItem(dashSidebarCollapsedKey) === "1");
+      dashSidebarToggle.addEventListener("click", () => {
+        setSidebarCollapsed(!dashLayout.classList.contains("is-collapsed"));
+      });
+    }
+    if (dashSidebar) {
+      const savedScrollTop = Number(sessionStorage.getItem(dashSidebarScrollKey) || 0);
+      dashSidebar.scrollTop = savedScrollTop;
+      requestAnimationFrame(() => {
+        dashSidebar.scrollTop = savedScrollTop;
+        requestAnimationFrame(() => { dashSidebar.scrollTop = savedScrollTop; });
+      });
+      dashSidebar.addEventListener("scroll", () => {
+        sessionStorage.setItem(dashSidebarScrollKey, String(dashSidebar.scrollTop));
+      }, { passive: true });
+      dashNavLinks.forEach((link) => {
+        link.addEventListener("click", () => {
+          sessionStorage.setItem(dashSidebarScrollKey, String(dashSidebar.scrollTop));
+        });
+      });
+    }
     if (dashSidebarSearch && dashNavLinks.length) {
       dashSidebarSearch.addEventListener("input", () => {
         const query = (dashSidebarSearch.value || "").trim().toLowerCase();
@@ -212,6 +249,42 @@
       dashShowToast(item?.title || "New dashboard notification received.", "success");
     }
 
+    const dashboardReadNotifications = new Set(JSON.parse(localStorage.getItem("dashboard-read-notifications") || "[]"));
+    function updateDashboardNotificationBadge() {
+      if (!notifBtn) return;
+      const unreadCount = document.querySelectorAll("#dashNotifList .dash-bell-item.is-unread").length;
+      const badge = document.getElementById("dashNotifBadge");
+      if (unreadCount > 0) {
+        if (badge) {
+          badge.textContent = unreadCount;
+        } else {
+          const newBadge = document.createElement("span");
+          newBadge.className = "dash-bell-badge";
+          newBadge.id = "dashNotifBadge";
+          newBadge.textContent = unreadCount;
+          notifBtn.appendChild(newBadge);
+        }
+      } else if (badge) {
+        badge.remove();
+      }
+    }
+    function decorateDashboardNotification(element) {
+      if (!element) return;
+      const key = element.dataset.notificationKey || "";
+      element.classList.toggle("is-read", dashboardReadNotifications.has(key));
+      element.classList.toggle("is-unread", !dashboardReadNotifications.has(key));
+      element.addEventListener("click", () => {
+        if (!key) return;
+        dashboardReadNotifications.add(key);
+        localStorage.setItem("dashboard-read-notifications", JSON.stringify([...dashboardReadNotifications].slice(-200)));
+        element.classList.remove("is-unread");
+        element.classList.add("is-read");
+        updateDashboardNotificationBadge();
+      }, { once: true });
+    }
+    document.querySelectorAll(".dash-bell-item").forEach(decorateDashboardNotification);
+    updateDashboardNotificationBadge();
+
     document.addEventListener("pointerdown", unlockDashboardAudio, { once: true });
     document.addEventListener("keydown", unlockDashboardAudio, { once: true });
     if (notifBtn && notifMenu) {
@@ -246,21 +319,6 @@
         dashLastNotifCount = currentCount;
         dashNotifInitialized = true;
 
-        const badge = document.getElementById("dashNotifBadge");
-        if (data.count && data.count > 0) {
-          if (badge) {
-            badge.textContent = data.count;
-          } else {
-            const b = document.createElement("span");
-            b.className = "dash-bell-badge";
-            b.id = "dashNotifBadge";
-            b.textContent = data.count;
-            notifBtn.appendChild(b);
-          }
-        } else if (badge) {
-          badge.remove();
-        }
-
         const newEl = document.getElementById("dashNotifNew");
         const noShowEl = document.getElementById("dashNotifNoShow");
         const callsEl = document.getElementById("dashNotifCalls");
@@ -291,7 +349,9 @@
               const time = document.createElement("div");
               time.className = "dash-bell-time";
               time.textContent = item.time || "";
+              wrap.dataset.notificationKey = `${item.title || ""}|${item.detail || ""}|${item.url || ""}`;
               wrap.append(title, note, time);
+              decorateDashboardNotification(wrap);
               list.appendChild(wrap);
             });
           } else {
@@ -300,6 +360,7 @@
             empty.textContent = "No new activity.";
             list.appendChild(empty);
           }
+          updateDashboardNotificationBadge();
         }
       } catch (e) {
         // ignore

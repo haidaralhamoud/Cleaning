@@ -136,14 +136,39 @@
 <div class="freq-row">
 <div class="freq-col">
 <h3>Q1. How often would you like this service</h3>
-<div class="freq-btn" data-freq="weekly">Weekly <span class="save-tag">
-</span>
+<div class="freq-btn" data-freq="one_time">
+<span class="freq-btn__copy"><strong>One-time</strong><small>Just one cleaning, no commitment</small></span>
+<span class="save-tag"></span>
 </div>
-<div class="freq-btn" data-freq="biweekly">Every 2 weeks <span class="save-tag">
-</span>
+<div class="freq-btn" data-freq="weekly">
+<span class="freq-btn__copy"><strong>Weekly</strong><small>Every week</small></span>
+<span class="save-tag"></span>
 </div>
-<div class="freq-btn" data-freq="monthly">Monthly <span class="save-tag">
-</span>
+<div class="freq-btn" data-freq="biweekly">
+<span class="freq-btn__copy"><strong>Every 2 weeks</strong><small>Every other week</small></span>
+<span class="save-tag"></span>
+</div>
+<div class="freq-btn" data-freq="four_weeks">
+<span class="freq-btn__copy"><strong>Every 4 weeks</strong><small>Once every four weeks</small></span>
+<span class="save-tag"></span>
+</div>
+<div class="freq-btn" data-freq="custom">
+<span class="freq-btn__copy"><strong>Custom schedule</strong><small>Choose a frequency that works for you</small></span>
+<span class="save-tag"></span>
+</div>
+<div class="custom-frequency-fields" id="customFrequencyFields" hidden>
+<label>How often should we visit?</label>
+<div class="custom-frequency-fields__controls">
+<select id="customFrequencyInterval" aria-label="Custom frequency interval">
+<option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+<option value="4">4</option><option value="5">5</option><option value="6">6</option>
+<option value="7">7</option><option value="8">8</option><option value="9">9</option>
+<option value="10">10</option><option value="11">11</option><option value="12">12</option>
+</select>
+<select id="customFrequencyUnit" aria-label="Custom frequency unit">
+<option value="weeks" selected>Weeks</option>
+</select>
+</div>
 </div>
 </div>
 <div class="freq-col">
@@ -225,12 +250,26 @@
 <div class="svc-col">
 <label class="svc-label">Frequency</label>
 <select class="svc-select svc-frequency">
-<option value="">One time only</option>
+<option value="one_time">One-time</option>
 <option value="weekly">Weekly</option>
 <option value="biweekly">Every 2 weeks</option>
-<option value="monthly">Monthly</option>
-<option value="seasonal">Seasonal</option>
+<option value="four_weeks">Every 4 weeks</option>
+<option value="custom">Custom schedule</option>
 </select>
+<div class="custom-frequency-fields svc-custom-frequency" hidden>
+<label>How often should we visit?</label>
+<div class="custom-frequency-fields__controls">
+<select class="svc-custom-interval" aria-label="Custom frequency interval">
+<option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
+<option value="4">4</option><option value="5">5</option><option value="6">6</option>
+<option value="7">7</option><option value="8">8</option><option value="9">9</option>
+<option value="10">10</option><option value="11">11</option><option value="12">12</option>
+</select>
+<select class="svc-custom-unit" aria-label="Custom frequency unit">
+<option value="weeks" selected>Weeks</option>
+</select>
+</div>
+</div>
 </div>
 </div>
 <div class="svc-row">
@@ -384,6 +423,10 @@
 <span>Service fee</span>
 <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:0|floatformat:2 }}</span>
 </div>
+<div class="summary-item">
+<span id="sum_vat_label">VAT ({{ summary_data.vat_percent|default:25|floatformat:2 }}%)</span>
+<span id="sum_vat">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.vat_amount|default:0|floatformat:2 }}</span>
+</div>
 <div class="summary-item summary-item--accent">
 <span id="sum_rot_label">RUT Deduction{% if pricing.use_rot %} ({{ pricing.rot_percent|floatformat:2 }}%){% else %} (not applied){% endif %}</span>
 <span id="sum_rot">{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:0|floatformat:2 }}</span>
@@ -413,9 +456,9 @@
 </div>
 <p class="summary-note" id="sum_total_note">
                     {% if booking.use_rot %}
-                      VAT is included in the service prices. Total includes RUT deduction.
+                      VAT is calculated at {{ summary_data.vat_percent|default:25|floatformat:2 }}%. Total includes the RUT deduction.
                     {% else %}
-                      VAT is included in the service prices. Total shown without RUT deduction.
+                      VAT is calculated at {{ summary_data.vat_percent|default:25|floatformat:2 }}%. Total shown without RUT deduction.
                     {% endif %}
                 </p>
 </div>
@@ -484,8 +527,10 @@ function updateFrequencyLabels() {
     const freq = btn.getAttribute("data-freq");
     const tag = btn.querySelector(".save-tag");
     if (!tag) return;
-    const amount = frequencyRuleMap.get(freq);
-    if (amount === undefined || Number.isNaN(amount)) {
+    const amount = freq === "four_weeks"
+      ? (frequencyRuleMap.get("four_weeks") ?? frequencyRuleMap.get("monthly"))
+      : frequencyRuleMap.get(freq);
+    if (amount === undefined || Number.isNaN(amount) || amount === 0) {
       tag.textContent = "";
       return;
     }
@@ -593,6 +638,9 @@ const timeSlotsPrimary = document.getElementById("timeSlotsPrimary");
 const timeSlotsList = document.getElementById("timeSlotsList");
 const timeSlotsEmpty = document.getElementById("timeSlotsEmpty");
 const inputFreq    = document.getElementById("frequency_type");
+const customFrequencyFields = document.getElementById("customFrequencyFields");
+const customFrequencyInterval = document.getElementById("customFrequencyInterval");
+const customFrequencyUnit = document.getElementById("customFrequencyUnit");
 const inputSpecial = document.getElementById("special_timing_requests");
 const inputMode    = document.getElementById("schedule_mode");
 const inputSchedulesJson = document.getElementById("schedules_json");
@@ -1047,15 +1095,50 @@ function loadServiceAvailability(acc, dateValue, preserveSelected = false) {
     });
 }
 
+function customFrequencyValue(intervalEl, unitEl) {
+  const interval = intervalEl ? (intervalEl.value || "1") : "1";
+  const unit = unitEl ? (unitEl.value || "weeks") : "weeks";
+  return `custom:${interval}:${unit}`;
+}
+
+function syncCustomFrequencyValue() {
+  if (inputFreq && inputFreq.value.startsWith("custom:")) {
+    inputFreq.value = customFrequencyValue(customFrequencyInterval, customFrequencyUnit);
+    updateScheduleSummary();
+  }
+}
+
 document.querySelectorAll(".freq-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
     document.querySelectorAll(".freq-btn").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
 
     const freqVal = btn.getAttribute("data-freq") || "";
-    if (inputFreq) inputFreq.value = freqVal;
+    if (customFrequencyFields) customFrequencyFields.hidden = freqVal !== "custom";
+    if (inputFreq) {
+      inputFreq.value = freqVal === "custom"
+        ? customFrequencyValue(customFrequencyInterval, customFrequencyUnit)
+        : freqVal;
+    }
 
     updateScheduleSummary();
+  });
+});
+
+[customFrequencyInterval, customFrequencyUnit].forEach((control) => {
+  if (control) control.addEventListener("change", syncCustomFrequencyValue);
+});
+
+document.querySelectorAll(".service-acc").forEach((acc) => {
+  const frequency = acc.querySelector(".svc-frequency");
+  const fields = acc.querySelector(".svc-custom-frequency");
+  if (!frequency || !fields) return;
+  frequency.addEventListener("change", () => {
+    fields.hidden = frequency.value !== "custom";
+    updateScheduleSummary();
+  });
+  fields.querySelectorAll("select").forEach((control) => {
+    control.addEventListener("change", updateScheduleSummary);
   });
 });
 
@@ -1172,7 +1255,11 @@ function updateScheduleSummary() {
 
       const date = acc.querySelector(".svc-date").value || "";
       const time = acc.querySelector(".svc-time").value || "";
-      const freq = acc.querySelector(".svc-frequency").value || "";
+      const frequencyEl = acc.querySelector(".svc-frequency");
+      const baseFrequency = frequencyEl.value || "";
+      const freq = baseFrequency === "custom"
+        ? customFrequencyValue(acc.querySelector(".svc-custom-interval"), acc.querySelector(".svc-custom-unit"))
+        : baseFrequency;
       const notes = acc.querySelector(".svc-notes").value || "";
       const endDate = acc.querySelector(".svc-end-date").value || "";
 
@@ -1242,6 +1329,10 @@ function setSummaryValues(data) {
   if (serviceFee) {
     serviceFee.textContent = currency + " " + Number(data.service_fee || 0).toFixed(2);
   }
+  const vatLabel = document.getElementById("sum_vat_label");
+  const vatValue = document.getElementById("sum_vat");
+  if (vatLabel) vatLabel.textContent = `VAT (${Number(data.vat_percent || 0).toFixed(2)}%)`;
+  if (vatValue) vatValue.textContent = currency + " " + Number(data.vat_amount || 0).toFixed(2);
   document.getElementById("sum_rot").textContent = (data.use_rot ? "-" : "") + currency + " " + Number(data.rot || 0).toFixed(2);
   document.getElementById("sum_total").textContent = currency + " " + Number(data.final || 0).toFixed(2);
   const rewardLabel = document.getElementById("sum_reward_label");
@@ -1297,8 +1388,8 @@ function setSummaryValues(data) {
   const totalNote = document.getElementById("sum_total_note");
   if (totalNote) {
     totalNote.textContent = data.use_rot
-      ? "VAT is included in the service prices. Total includes RUT deduction."
-      : "VAT is included in the service prices. Total shown without RUT deduction.";
+      ? `VAT is calculated at ${Number(data.vat_percent || 0).toFixed(2)}%. Total includes the RUT deduction.`
+      : `VAT is calculated at ${Number(data.vat_percent || 0).toFixed(2)}%. Total shown without RUT deduction.`;
   }
 }
 
@@ -1367,9 +1458,18 @@ function applyInitialScheduleState() {
   loadSameDayAvailability(inputDate ? inputDate.value : "", true);
 
   if (state.frequency_type && inputFreq) {
-    inputFreq.value = state.frequency_type;
+    inputFreq.value = state.frequency_type === "monthly" ? "four_weeks" : state.frequency_type;
+    const customParts = state.frequency_type.split(":");
+    const activeFrequency = customParts[0] === "custom"
+      ? "custom"
+      : (state.frequency_type === "monthly" ? "four_weeks" : state.frequency_type);
+    if (activeFrequency === "custom") {
+      if (customFrequencyInterval && customParts[1]) customFrequencyInterval.value = customParts[1];
+      if (customFrequencyUnit && customParts[2]) customFrequencyUnit.value = customParts[2];
+      if (customFrequencyFields) customFrequencyFields.hidden = false;
+    }
     document.querySelectorAll(".freq-btn").forEach((btn) => {
-      btn.classList.toggle("active", btn.getAttribute("data-freq") === state.frequency_type);
+      btn.classList.toggle("active", btn.getAttribute("data-freq") === activeFrequency);
     });
   }
 
@@ -1412,7 +1512,19 @@ function applyInitialScheduleState() {
 
     if (dateEl) dateEl.value = schedule.date || "";
     if (timeEl) timeEl.value = schedule.start_time || schedule.time_window || "";
-    if (freqEl) freqEl.value = schedule.frequency || "";
+    if (freqEl) {
+      const storedFrequency = schedule.frequency || "";
+      const customParts = storedFrequency.split(":");
+      freqEl.value = customParts[0] === "custom"
+        ? "custom"
+        : (storedFrequency === "monthly" ? "four_weeks" : storedFrequency);
+      const customFields = acc.querySelector(".svc-custom-frequency");
+      if (customFields) customFields.hidden = customParts[0] !== "custom";
+      const intervalEl = acc.querySelector(".svc-custom-interval");
+      const unitEl = acc.querySelector(".svc-custom-unit");
+      if (intervalEl && customParts[1]) intervalEl.value = customParts[1];
+      if (unitEl && customParts[2]) unitEl.value = customParts[2];
+    }
     if (notesEl) notesEl.value = schedule.special_request || "";
     if (endEl) endEl.value = schedule.end_date || "";
 
@@ -1499,7 +1611,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
     }
 
     const dayChecks = Array.from(document.querySelectorAll(".day-check input:checked"));
-    if (!dayChecks.length) {
+    if (inputFreq.value !== "one_time" && !dayChecks.length) {
       valid = false;
       const daysWrap = document.getElementById("weekDays");
       if (daysWrap) daysWrap.classList.add("field-error-pill");
@@ -1591,7 +1703,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
         firstInvalid = firstInvalid || acc;
       }
 
-      if (!dayChecks.length) {
+      if (freqEl.value !== "one_time" && !dayChecks.length) {
         valid = false;
         if (daysWrap) daysWrap.classList.add("field-error-pill");
         firstInvalid = firstInvalid || acc;
@@ -1631,7 +1743,7 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
         alert("ظ„ط§ ظٹظ…ظƒظ† ط§ط®طھظٹط§ط± طھط§ط±ظٹط® ظ‚ط¨ظ„ ط§ظ„ظٹظˆظ…. ط§ط®طھط± طھط§ط±ظٹط® ط§ظ„ظٹظˆظ… ط£ظˆ طھط§ط±ظٹط®ظ‹ط§ ظ‚ط§ط¯ظ…ظ‹ط§.");
         return;
       }
-      notify("Please complete the required schedule fields for each service: date, available slot, frequency, and preferred days.");
+      notify("Please complete the required schedule fields. Preferred days are required only for recurring services.");
       return;
     }
 
@@ -1652,7 +1764,10 @@ document.getElementById("scheduleForm").addEventListener("submit", function(e){
 
       const dateVal = dateEl ? (dateEl.value || null) : null;
       const timeVal = timeEl ? (timeEl.value || "") : "";
-      const freqVal = freqEl ? (freqEl.value || "") : "";
+      const baseFrequency = freqEl ? (freqEl.value || "") : "";
+      const freqVal = baseFrequency === "custom"
+        ? customFrequencyValue(acc.querySelector(".svc-custom-interval"), acc.querySelector(".svc-custom-unit"))
+        : baseFrequency;
       const notesVal= notesEl ? (notesEl.value || "") : "";
       const endVal  = endEl ? (endEl.value || null) : null;
 

@@ -17,6 +17,7 @@ urlpatterns = [
     path("Address_and_Locations_view/<int:location_id>/delete_location/", views.delete_location, name="delete_location"),
     path("address-locations/<int:location_id>/edit_address_and_locations/",views.edit_address_and_locations,name="edit_address_and_locations"),
     path("my_bookimg/", views.my_bookimg, name="my_bookimg"),
+    path("my_bookimg/", views.my_bookimg, name="customer_dashboard"),
     path("incident/", views.incident, name="incident"),
     path("Service_Preferences/", views.Service_Preferences, name="Service_Preferences"),
     path("Communication/", views.Communication, name="Communication"),

@@ -4,9 +4,42 @@
 {% block page_title %}{{ item.label }}{% endblock %}
 {% block content %}
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <form class="d-flex gap-2" method="get">
+    <form class="d-flex gap-2 flex-wrap" method="get">
       <input type="text" name="q" class="form-control" placeholder="Search..." value="{{ query }}">
+      {% if 'status' in available_filters %}
+        <select name="status" class="form-select">
+          <option value="">All statuses</option>
+          <option value="DRAFT"{% if filter_values.status == 'DRAFT' %} selected{% endif %}>Draft</option>
+          <option value="SENT"{% if filter_values.status == 'SENT' %} selected{% endif %}>Sent</option>
+          <option value="CANCELLED"{% if filter_values.status == 'CANCELLED' %} selected{% endif %}>Cancelled</option>
+        </select>
+      {% endif %}
+      {% if 'booking_type' in available_filters %}
+        <select name="booking_type" class="form-select">
+          <option value="">All booking types</option>
+          <option value="private"{% if filter_values.booking_type == 'private' %} selected{% endif %}>Private</option>
+          <option value="business"{% if filter_values.booking_type == 'business' %} selected{% endif %}>Business</option>
+        </select>
+      {% endif %}
+      {% if 'is_active' in available_filters %}
+        <select name="is_active" class="form-select">
+          <option value="">All activity</option>
+          <option value="True"{% if filter_values.is_active == 'True' %} selected{% endif %}>Active</option>
+          <option value="False"{% if filter_values.is_active == 'False' %} selected{% endif %}>Inactive</option>
+        </select>
+      {% endif %}
       <button class="btn btn-outline-primary" type="submit">Search</button>
+      <details class="ms-1">
+        <summary class="btn btn-outline-secondary">Columns</summary>
+        <div class="bg-white border rounded p-2 mt-1 position-absolute" style="z-index:20;">
+          {% for field in display_fields %}
+            <label class="d-block small text-nowrap">
+              <input type="checkbox" data-column-toggle="{{ forloop.counter0 }}" checked>
+              {{ field|human_label }}
+            </label>
+          {% endfor %}
+        </div>
+      </details>
     </form>
     <div class="d-flex gap-2 flex-wrap">
       {% if service_id and item.slug == "service-cards" %}
@@ -49,7 +82,7 @@
       <thead>
         <tr>
           {% for field in display_fields %}
-            <th>{{ field|human_label }}</th>
+            <th data-column-index="{{ forloop.counter0 }}">{{ field|human_label }}</th>
           {% endfor %}
           <th class="text-end">Actions</th>
         </tr>
@@ -59,11 +92,15 @@
           <tr>
             {% for field in display_fields %}
               {% with val=obj|attr:field %}
-              <td>
+              <td data-column-index="{{ forloop.counter0 }}">
                 {% if val and val.url %}
                   <div class="dash-file">
                     <img class="dash-thumb" src="{{ val.url }}" alt="">
                   </div>
+                {% elif item.slug == "invoices" and field == "status" %}
+                  <span class="badge rounded-pill {% if val == 'SENT' %}text-bg-success{% elif val == 'CANCELLED' %}text-bg-danger{% elif val == 'DRAFT' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">
+                    {{ val|default:"Unknown" }}
+                  </span>
                 {% else %}
                   <div class="cell-clamp" title="{{ val }}">{{ val }}</div>
                 {% endif %}
@@ -84,8 +121,6 @@
               {% endif %}
               {% if item.slug == "private-services" %}
                 <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-cards' %}?service_id={{ obj.pk }}">+ Card</a>
-                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-pricing' %}?service_id={{ obj.pk }}">+ Pricing</a>
-                <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'service-estimates' %}?service_id={{ obj.pk }}">+ Estimate</a>
                 <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ obj.pk }}">+ Add-on</a>
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.slug %}" target="_blank">Open Page</a>
               {% endif %}
@@ -99,7 +134,7 @@
               {% if item.slug == "business-service-cards" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' obj.service.id %}" target="_blank">Open Page</a>
               {% endif %}
-              {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" %}
+              {% if item.slug == "service-cards" %}
                 <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' obj.service.slug %}" target="_blank">Open Page</a>
               {% endif %}
               {% if item.slug == "invoices" %}
@@ -142,6 +177,44 @@
       </ul>
     </nav>
   {% endif %}
+  <script>
+    (() => {
+      const key = `dashboard-list-state:${window.location.pathname}`;
+      const current = new URL(window.location.href);
+      const saved = sessionStorage.getItem(key);
+      if (!current.search && saved) {
+        window.location.replace(`${window.location.pathname}${saved}`);
+        return;
+      }
+      if (current.searchParams.has("page")) {
+        sessionStorage.setItem(key, current.search);
+      }
+    })();
+  </script>
+  <script>
+    (() => {
+      const key = `dashboard-columns:${window.location.pathname}`;
+      const columns = [...document.querySelectorAll("[data-column-index]")];
+      const hidden = JSON.parse(localStorage.getItem(key) || "[]");
+      const apply = () => columns.forEach((cell) => {
+        cell.style.display = hidden.includes(cell.dataset.columnIndex) ? "none" : "";
+      });
+      document.querySelectorAll("[data-column-toggle]").forEach((toggle) => {
+        toggle.checked = !hidden.includes(toggle.dataset.columnToggle);
+        toggle.addEventListener("change", () => {
+          if (toggle.checked) {
+            const index = hidden.indexOf(toggle.dataset.columnToggle);
+            if (index >= 0) hidden.splice(index, 1);
+          } else if (!hidden.includes(toggle.dataset.columnToggle)) {
+            hidden.push(toggle.dataset.columnToggle);
+          }
+          localStorage.setItem(key, JSON.stringify(hidden));
+          apply();
+        });
+      });
+      apply();
+    })();
+  </script>
 {% endblock %}
 
 

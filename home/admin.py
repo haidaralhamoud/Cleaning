@@ -831,7 +831,7 @@ class ScheduleRuleAdmin(admin.ModelAdmin):
 
 @admin.register(PrivateService)
 class PrivateServiceAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "display_order", "category", "slug", "price", "price_currency")
+    list_display = ("id", "title", "display_order", "category", "slug")
     prepopulated_fields = {"slug": ("title",)}
     fieldsets = (
         ("Basic Info", {
@@ -840,8 +840,6 @@ class PrivateServiceAdmin(admin.ModelAdmin):
                 "title",
                 "display_order",
                 "slug",
-                "price",
-                "price_currency",
                 "description",
                 "recommended",
                 "image",
@@ -853,7 +851,6 @@ class PrivateServiceAdmin(admin.ModelAdmin):
                 "background_image",
                 "hero_subtitle",
                 "intro_text",
-                "starting_price",
                 "hero_cta_text",
                 "hero_cta_url",
             ),
@@ -869,8 +866,6 @@ class PrivateServiceAdmin(admin.ModelAdmin):
         ServiceQuestionRuleInline,
         ServiceCardInline,
         ServiceRoomOptionInline,
-        ServicePricingInline,
-        ServiceEstimateInline,
     ]
 
 
@@ -892,13 +887,11 @@ class BusinessServiceCardAdmin(admin.ModelAdmin):
     list_display = ("service", "title", "order")
 
 
-@admin.register(ServicePricing)
 class ServicePricingAdmin(admin.ModelAdmin):
     list_display = ("service", "price_value", "price_note")
     fields = ("service", "price_value", "price_note")
 
 
-@admin.register(ServiceEstimate)
 class ServiceEstimateAdmin(admin.ModelAdmin):
     form = ServiceEstimateAdminForm
     list_display = ("service", "title")

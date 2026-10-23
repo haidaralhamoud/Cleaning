@@ -3016,7 +3016,7 @@
   <div class="hero-benefit"><span class="hero-benefit__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 4C10 4 5 9 5 16c5 1 11-1 15-12Z"/><path d="M4 20c3-5 7-8 13-11"/></svg></span><span><strong>{% trans "Flexible cleaning plans" %}</strong></span></div>
 </div>
 <div class="hero-price-card">
-  <span class="hero-price-card__label">{{ hero_price.label|default:"Home cleaning"|cut:" from" }}</span>
+  <span class="hero-price-card__label">{{ hero_price.label|default:"Home cleaning"|cut:" from" }} <span class="hero-price-card__from">From</span></span>
   <strong class="hero-price-card__price">{{ hero_price.hourly_price|default:240|floatformat:"-2" }} {{ hero_price.currency|default:"SEK" }} {{ hero_price.unit_label|default:"/ hour" }}</strong>
   <span class="hero-price-card__note">{{ hero_price.note|default:"after RUT deduction" }}</span>
 </div>

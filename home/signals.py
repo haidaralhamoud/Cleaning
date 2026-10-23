@@ -19,6 +19,8 @@ from accounts.models import (
     BookingRequestFix,
 )
 from home.models import (
+    Application,
+    CallRequest,
     Contact,
     PrivateBooking,
     BusinessBooking,
@@ -26,6 +28,7 @@ from home.models import (
     FeedbackRequest,
     HomeServiceInquiry,
     AirbnbManagementRequest,
+    NotAvailableZipRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -63,6 +66,112 @@ def _send_admin_alert(subject, body):
     except Exception:
         logger.exception("Failed to send admin alert email to %s (subject=%s)", recipient, subject)
         return False
+
+
+def _send_customer_email(recipient, subject, body, *, reference="customer request"):
+    recipient = (recipient or "").strip()
+    if not recipient or recipient.lower() == "no-reply@example.com":
+        return False
+    try:
+        return send_mail(
+            subject,
+            body,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient],
+            fail_silently=False,
+        ) == 1
+    except Exception:
+        logger.exception("Failed to send %s email to %s", reference, recipient)
+        return False
+
+
+@receiver(post_save, sender=Application)
+def notify_job_application(sender, instance, created, **kwargs):
+    """Acknowledge the candidate and alert the company about a new application."""
+    if not created:
+        return
+
+    role = instance.job.title if instance.job_id else (instance.area or "Open application")
+    candidate_email = (instance.email or "").strip()
+    if candidate_email:
+        customer_body = (
+            f"Hello {instance.full_name},\n\n"
+            "Thank you for your interest in joining Hembla Experten. "
+            "We have received your application and our team will review it.\n\n"
+            f"Application number: {instance.pk}\n"
+            f"Role: {role}\n"
+            f"Availability: {instance.availability or 'Not specified'}\n\n"
+            "We will contact you if your profile matches the role.\n\n"
+            "Best regards,\nHembla Experten"
+        )
+        try:
+            send_mail(
+                f"We received your application #{instance.pk}",
+                customer_body,
+                settings.DEFAULT_FROM_EMAIL,
+                [candidate_email],
+                fail_silently=False,
+            )
+        except Exception:
+            logger.exception("Failed to send application confirmation for application %s", instance.pk)
+
+    admin_body = (
+        "A new job application was received.\n\n"
+        f"Application ID: {instance.pk}\n"
+        f"Name: {instance.full_name}\n"
+        f"Email: {instance.email}\n"
+        f"Phone: {instance.phone}\n"
+        f"Role: {role}\n"
+        f"Preferred area: {instance.area or 'Not specified'}\n"
+        f"Availability: {instance.availability or 'Not specified'}\n"
+        f"Message: {instance.message or 'None'}\n\n"
+        "Dashboard: /dashboard/applications/"
+    )
+    _send_admin_alert(f"New Job Application #{instance.pk} - {instance.full_name}", admin_body)
+
+
+@receiver(post_save, sender=NotAvailableZipRequest)
+def notify_unavailable_zip_request(sender, instance, created, **kwargs):
+    if not created:
+        return
+    service = instance.service.title if instance.service_id else "Not specified"
+    _send_customer_email(
+        instance.email,
+        f"We received your service-area request #{instance.pk}",
+        (
+            f"Hello {instance.first_name},\n\n"
+            "Thank you for contacting Hembla Experten. We received your request and will review "
+            "service availability in your area.\n\n"
+            f"ZIP code: {instance.zip_code}\nService: {service}\n\n"
+            "Our team will contact you when we have an update.\n\nBest regards,\nHembla Experten"
+        ),
+        reference=f"unavailable ZIP request #{instance.pk}",
+    )
+    _send_admin_alert(
+        f"New Service-Area Request #{instance.pk}",
+        (
+            "A customer requested service in an unavailable ZIP code.\n\n"
+            f"Name: {instance.first_name} {instance.last_name}\nEmail: {instance.email}\n"
+            f"Phone: {instance.phone}\nZIP code: {instance.zip_code}\nService: {service}\n"
+            f"Message: {instance.message or 'None'}\n\nDashboard: /dashboard/not-available-zips/"
+        ),
+    )
+
+
+@receiver(post_save, sender=CallRequest)
+def notify_company_about_call_request(sender, instance, created, **kwargs):
+    if not created:
+        return
+    preferred_time = instance.preferred_time.strftime("%Y-%m-%d %H:%M") if instance.preferred_time else "Not specified"
+    _send_admin_alert(
+        f"New Call Request #{instance.pk}",
+        (
+            "A customer requested a call.\n\n"
+            f"Name: {instance.full_name}\nEmail: {instance.email}\nPhone: {instance.phone}\n"
+            f"Preferred time: {preferred_time}\nLanguage: {instance.language or 'Not specified'}\n"
+            f"Message: {instance.message or 'None'}\n\nDashboard: /dashboard/call-requests/"
+        ),
+    )
 
 
 @receiver(post_save, sender=HomeServiceInquiry)
@@ -384,6 +493,17 @@ def notify_business_booking(sender, instance, created, **kwargs):
 def notify_contact(sender, instance, created, **kwargs):
     if not created:
         return
+    _send_customer_email(
+        instance.email,
+        "We received your message",
+        (
+            f"Hello {instance.first_name or 'Customer'},\n\n"
+            "Thank you for contacting Hembla Experten. We have received your message and our team "
+            "will get back to you as soon as possible.\n\n"
+            f"Reference: Contact #{instance.pk}\n\nBest regards,\nHembla Experten"
+        ),
+        reference=f"contact confirmation #{instance.pk}",
+    )
     dashboard_link = "/dashboard/contacts/"
     subject = "New Contact Message"
     body = f"New contact received.\n\nName: {instance.first_name} {instance.last_name}\nEmail: {instance.email}\nType: {instance.inquiry_type}\nLink: {dashboard_link}"
@@ -406,6 +526,17 @@ def notify_contact(sender, instance, created, **kwargs):
 def notify_incident(sender, instance, created, **kwargs):
     if not created:
         return
+    customer_email = getattr(instance.customer, "email", "") if instance.customer_id else ""
+    _send_customer_email(
+        customer_email,
+        f"We received your incident report #{instance.id}",
+        (
+            "Your incident report has been received and will be reviewed by our team.\n\n"
+            f"Reference: Incident #{instance.id}\nSeverity: {instance.severity}\n\n"
+            "We will contact you if additional information is needed.\n\nBest regards,\nHembla Experten"
+        ),
+        reference=f"incident confirmation #{instance.id}",
+    )
     subject = f"New Incident #{instance.id}"
     body = f"New incident reported.\n\nIncident ID: {instance.id}\nSeverity: {instance.severity}\nLink: /dashboard/incidents/"
     _send_admin_alert(subject, body)
@@ -415,6 +546,17 @@ def notify_incident(sender, instance, created, **kwargs):
 def notify_review(sender, instance, created, **kwargs):
     if not created:
         return
+    customer_email = getattr(instance.customer, "email", "") if instance.customer_id else ""
+    _send_customer_email(
+        customer_email,
+        "Thank you for your review",
+        (
+            "Thank you for sharing your feedback with Hembla Experten.\n\n"
+            f"Service: {instance.service_title}\nRating: {instance.overall_rating}/5\n\n"
+            "Your feedback helps us improve our service.\n\nBest regards,\nHembla Experten"
+        ),
+        reference=f"service review #{instance.id}",
+    )
     subject = f"New Service Review ({instance.service_title})"
     body = f"A new review was submitted.\n\nService: {instance.service_title}\nRating: {instance.overall_rating}\nLink: /dashboard/service-reviews/"
     _send_admin_alert(subject, body)
@@ -424,6 +566,17 @@ def notify_review(sender, instance, created, **kwargs):
 def notify_feedback_request(sender, instance, created, **kwargs):
     if not created:
         return
+    _send_customer_email(
+        instance.email,
+        f"We received your feedback #{instance.pk}",
+        (
+            f"Hello {instance.customer_name or 'Customer'},\n\n"
+            "Thank you for contacting Hembla Experten. We received your feedback/request and "
+            "our team will review it.\n\n"
+            f"Reference: Feedback #{instance.pk}\n\nBest regards,\nHembla Experten"
+        ),
+        reference=f"feedback confirmation #{instance.pk}",
+    )
     subject = "New Feedback Pending Review"
     sender_label = (instance.customer_name or instance.email or f"Feedback #{instance.pk}").strip()
     preview = (instance.feedback_text or "").strip()
@@ -492,6 +645,19 @@ def notify_request_fix(sender, instance, created, **kwargs):
         subject = "New Booking Request Fix"
     body = f"Request fix update.\n\nBooking: {instance.booking_type} #{instance.booking_id}\nStatus: {instance.status}\nLink: /dashboard/request-fixes/"
     _send_admin_alert(subject, body)
+    if created:
+        customer_email = getattr(instance.customer, "email", "") if instance.customer_id else ""
+        _send_customer_email(
+            customer_email,
+            f"We received your booking correction request #{instance.id}",
+            (
+                "Your request to correct booking details has been received.\n\n"
+                f"Booking: {instance.booking_type.title()} #{instance.booking_id}\n"
+                f"Reference: Request #{instance.id}\n\n"
+                "Our team will review it and update you.\n\nBest regards,\nHembla Experten"
+            ),
+            reference=f"booking correction request #{instance.id}",
+        )
 
 
 @receiver(post_save, sender=CustomerNote)

@@ -54,7 +54,7 @@
         {% endif %}
       </div>
       {% if item.slug == "invoices" and object %}
-        <div class="mb-3 d-flex flex-wrap gap-2">
+        <div class="mb-3 d-flex flex-wrap gap-2 dash-quick-actions">
           <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_invoice_preview' object.pk %}" target="_blank" rel="noopener">
             <i class="fa-regular fa-eye me-1"></i> Preview Invoice
           </a>
@@ -68,8 +68,6 @@
       {% if item.slug == "private-services" and object %}
         <div class="mb-3 d-flex flex-wrap gap-2">
           <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-cards' %}?service_id={{ object.pk }}">Cards</a>
-          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-pricing' %}?service_id={{ object.pk }}">Pricing</a>
-          <a class="btn btn-sm btn-outline-info" href="{% url 'home:dashboard_model_list' 'service-estimates' %}?service_id={{ object.pk }}">Estimate</a>
           <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_model_create' 'private-addons' %}?service_id={{ object.pk }}">+ Add-on</a>
           <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.slug %}" target="_blank">Open Page</a>
         </div>
@@ -101,7 +99,7 @@
             <a class="btn btn-sm btn-outline-primary" href="{% url 'home:business_service_detail' object.service.id %}" target="_blank">Open Page</a>
           </div>
         {% endif %}
-        {% if item.slug == "service-cards" or item.slug == "service-pricing" or item.slug == "service-estimates" %}
+      {% if item.slug == "service-cards" %}
           <div class="mb-3 d-flex flex-wrap gap-2">
             <a class="btn btn-sm btn-outline-primary" href="{% url 'accounts:service_detail' object.service.slug %}" target="_blank">Open Page</a>
           </div>
@@ -138,14 +136,17 @@
         {% if item.slug == "schedule-rules" %}
           <div class="mb-3">
             <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="one_time">
+                Only this one 0%
+              </button>
               <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="weekly">
                 Weekly -15%
               </button>
               <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="biweekly">
                 Every 2 weeks -10%
               </button>
-              <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="monthly">
-                Monthly -5%
+              <button type="button" class="btn btn-sm btn-outline-primary" data-sr-prefill="four_weeks">
+                Every 4 weeks -5%
               </button>
               <button type="button" class="btn btn-sm btn-outline-secondary" data-sr-prefill="Sat">
                 Saturday +10%
@@ -653,13 +654,14 @@
         {% endif %}
           <div class="d-flex flex-wrap gap-2 mt-3">
             {% if mode != "view" %}
-              <button class="btn btn-primary" type="submit">Save</button>
+              <button class="btn btn-primary" type="submit" name="save_and_return" value="1" onclick="return confirm('Save these changes and return to the list?');">Save &amp; return</button>
+              <button class="btn btn-outline-primary" type="submit" name="save_and_stay" value="1">Save &amp; stay</button>
               {% if item.slug == "invoices" and object and not object.is_locked %}
-                <button class="btn btn-outline-secondary" type="submit" name="refresh_invoice_from_booking" value="1">Refresh Draft From Booking</button>
+                <button class="btn btn-outline-secondary" type="submit" name="refresh_invoice_from_booking" value="1" onclick="return confirm('Refresh this draft from the booking? Current line items will be replaced.');">Refresh Draft From Booking</button>
                 <a class="btn btn-outline-success" href="{% url 'home:dashboard_invoice_preview' object.pk %}" target="_blank" rel="noopener">
                   <i class="fa-regular fa-eye me-1"></i> Preview Before Sending
                 </a>
-                <button class="btn btn-success" type="submit" name="send_invoice" value="1">Send Invoice</button>
+                <button class="btn btn-success" type="submit" name="send_invoice" value="1" onclick="return confirm('Send this invoice now? It will be locked after sending.');">Send Invoice</button>
               {% endif %}
               <a class="btn btn-light" href="{% url 'home:dashboard_model_list' item.slug %}">Cancel</a>
             {% else %}
@@ -1442,7 +1444,7 @@
       if (!keyEl || !valueEl) return;
 
       const optionsByKey = {
-        frequency_type: ["weekly", "biweekly", "monthly"],
+        frequency_type: ["one_time", "weekly", "biweekly", "four_weeks", "monthly"],
         day: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
       };
 
@@ -1459,7 +1461,7 @@
         const values = optionsByKey[key] || [];
         datalist.innerHTML = values.map((v) => `<option value="${v}"></option>`).join("");
         if (key === "frequency_type") {
-          valueEl.placeholder = "weekly / biweekly / monthly";
+          valueEl.placeholder = "one_time / weekly / biweekly / four_weeks";
         } else if (key === "day") {
           valueEl.placeholder = "Mon, Tue, Wed...";
         } else {
@@ -1474,7 +1476,7 @@
       document.querySelectorAll("[data-sr-prefill]").forEach((btn) => {
         btn.addEventListener("click", () => {
           const val = btn.getAttribute("data-sr-prefill");
-          if (["weekly", "biweekly", "monthly"].includes(val)) {
+          if (["one_time", "weekly", "biweekly", "four_weeks", "monthly"].includes(val)) {
             keyEl.value = "frequency_type";
           } else {
             keyEl.value = "day";
@@ -1482,9 +1484,10 @@
           updateDatalist();
           valueEl.value = val;
           if (priceEl && !priceEl.value) {
+            if (val === "one_time") priceEl.value = "0";
             if (val === "weekly") priceEl.value = "-15";
             if (val === "biweekly") priceEl.value = "-10";
-            if (val === "monthly") priceEl.value = "-5";
+            if (val === "four_weeks" || val === "monthly") priceEl.value = "-5";
             if (val === "Sat" || val === "Sun") priceEl.value = "10";
           }
         });
@@ -1526,6 +1529,35 @@
         Object.values(fields).forEach((field) => field.addEventListener("input", calculate));
         calculate();
       });
+    </script>
+    <script>
+      window.updateInvoicePaymentTerms = function (dueDate) {
+        const paymentTerms = document.querySelector('input[name="payment_terms"]');
+        if (!dueDate || !paymentTerms) return;
+        if (!dueDate.value) {
+          paymentTerms.value = "";
+          return;
+        }
+        const start = new Date(`${dueDate.dataset.issuedDate || new Date().toISOString().slice(0, 10)}T00:00:00`);
+        const end = new Date(`${dueDate.value}T00:00:00`);
+        const days = Math.max(0, Math.round((end - start) / 86400000));
+        paymentTerms.value = `${days} days`;
+      };
+      (() => {
+        const initPaymentTerms = () => {
+          const dueDate = document.querySelector('input[name="due_date"]');
+          const paymentTerms = document.querySelector('input[name="payment_terms"]');
+          if (!dueDate || !paymentTerms) return;
+          dueDate.addEventListener("change", () => window.updateInvoicePaymentTerms(dueDate));
+          dueDate.addEventListener("input", () => window.updateInvoicePaymentTerms(dueDate));
+          window.updateInvoicePaymentTerms(dueDate);
+        };
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", initPaymentTerms);
+        } else {
+          initPaymentTerms();
+        }
+      })();
     </script>
   {% endif %}
   {% if item.slug == "invoices" and customer_number_map %}

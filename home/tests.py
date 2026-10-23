@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from home.models import AirbnbManagementRequest, BusinessBooking, CallRequest, EmailRequest, HomeServiceInquiry, PrivateBooking, PrivateMainCategory, PrivateService
+from home.models import Application, AirbnbManagementRequest, BusinessBooking, CallRequest, EmailRequest, FeedbackRequest, HomeServiceInquiry, Job, NotAvailableZipRequest, PrivateBooking, PrivateMainCategory, PrivateService
 from accounts.models import Customer, ProviderShift
 from home.models import Contact
 from home.availability_utils import generate_slots, provider_available_after_minutes, has_overlap
@@ -385,6 +385,32 @@ class BookingPricingDurationTests(TestCase):
         self.assertEqual(pricing["duration_minutes"], 120.0)
         self.assertTrue(pricing["duration_is_estimated"])
 
+    def test_service_base_price_is_ignored_and_question_price_is_used(self):
+        service = PrivateService.objects.create(
+            category=self.category,
+            title="Air Conditioner Cleaning",
+            slug="air-conditioner-cleaning",
+            price=999,
+            questions={
+                "units": {
+                    "label": "How many units?",
+                    "type": "select",
+                    "options": [
+                        {"label": "One unit", "value": "one", "price": 350, "duration": 60},
+                    ],
+                }
+            },
+        )
+        booking = PrivateBooking(
+            selected_services=[service.slug],
+            service_answers={service.slug: {"units": "one"}},
+        )
+
+        pricing = calculate_booking_price(booking)
+
+        self.assertEqual(pricing["services_total"], 350.0)
+        self.assertEqual(pricing["service_breakdown"][service.slug], 350.0)
+
     def test_multiple_services_without_option_durations_stack_default_duration(self):
         service_one = PrivateService.objects.create(
             category=self.category,
@@ -450,6 +476,37 @@ class BookingPricingDurationTests(TestCase):
     },
 )
 class BookingEmailSignalTests(TestCase):
+    def test_job_application_sends_candidate_and_company_emails_and_dashboard_notification(self):
+        job = Job.objects.create(title="Cleaning Specialist", description="Join our team")
+        application = Application.objects.create(
+            full_name="Sara Andersson",
+            email="sara@example.com",
+            phone="070 111 22 33",
+            job=job,
+            area="Stockholm",
+            availability="Immediately",
+            message="I have three years of experience.",
+        )
+
+        self.assertEqual(len(mail.outbox), 2)
+        candidate_email = next(email for email in mail.outbox if "sara@example.com" in email.to)
+        self.assertEqual(candidate_email.subject, f"We received your application #{application.pk}")
+        self.assertIn("Cleaning Specialist", candidate_email.body)
+
+        company_email = next(email for email in mail.outbox if "services@hembla-experten.se" in email.to)
+        self.assertEqual(company_email.subject, f"New Job Application #{application.pk} - Sara Andersson")
+        self.assertIn("I have three years of experience.", company_email.body)
+
+        staff = get_user_model().objects.create_user(username="careers-admin", password="pass123", is_staff=True)
+        self.client.force_login(staff)
+        response = self.client.get(reverse("home:dashboard_notifications_api"))
+        matching_items = [
+            item for item in response.json()["items"]
+            if item["title"] == f"New Job Application #{application.pk}"
+        ]
+        self.assertEqual(len(matching_items), 1)
+        self.assertEqual(matching_items[0]["url"], "/dashboard/applications/")
+
     def test_airbnb_request_sends_customer_and_company_emails_and_dashboard_notification(self):
         response = self.client.post(
             reverse("home:submit_airbnb_management_request"),
@@ -630,6 +687,62 @@ class BookingEmailSignalTests(TestCase):
             if "support@hembla-experten.se" in email.to and email.subject == "New Contact Message"
         ]
         self.assertEqual(len(support_emails), 1)
+        customer_emails = [
+            email for email in mail.outbox
+            if "lama@example.com" in email.to and email.subject == "We received your message"
+        ]
+        self.assertEqual(len(customer_emails), 1)
+
+    def test_unavailable_zip_request_sends_both_emails_and_dashboard_notification(self):
+        category = PrivateMainCategory.objects.create(title="Home")
+        service = PrivateService.objects.create(
+            category=category,
+            title="Standard Cleaning",
+            slug="zip-standard-cleaning",
+            price=100,
+        )
+        zip_request = NotAvailableZipRequest.objects.create(
+            service=service,
+            zip_code="12345",
+            first_name="Lama",
+            last_name="Hassan",
+            email="zip-customer@example.com",
+            phone="0700000000",
+            message="Please notify me.",
+        )
+
+        self.assertTrue(any("zip-customer@example.com" in email.to for email in mail.outbox))
+        self.assertTrue(any("services@hembla-experten.se" in email.to for email in mail.outbox))
+
+        staff = get_user_model().objects.create_user(username="zip-admin", password="pass123", is_staff=True)
+        self.client.force_login(staff)
+        response = self.client.get(reverse("home:dashboard_notifications_api"))
+        matching_items = [
+            item for item in response.json()["items"]
+            if item["title"] == f"New ZIP Request #{zip_request.pk}"
+        ]
+        self.assertEqual(len(matching_items), 1)
+        self.assertEqual(matching_items[0]["url"], "/dashboard/not-available-zips/")
+
+    def test_feedback_sends_customer_and_company_emails_and_dashboard_notification(self):
+        feedback = FeedbackRequest.objects.create(
+            customer_name="Lama Hassan",
+            email="feedback-customer@example.com",
+            feedback_text="The service was excellent.",
+            rating=5,
+        )
+
+        self.assertTrue(any("feedback-customer@example.com" in email.to for email in mail.outbox))
+        self.assertTrue(any("services@hembla-experten.se" in email.to for email in mail.outbox))
+
+        staff = get_user_model().objects.create_user(username="feedback-admin", password="pass123", is_staff=True)
+        self.client.force_login(staff)
+        response = self.client.get(reverse("home:dashboard_notifications_api"))
+        matching_items = [
+            item for item in response.json()["items"]
+            if item["title"] == "Pending Feedback: Lama Hassan"
+        ]
+        self.assertEqual(len(matching_items), 1)
 
     def test_contact_form_post_redirects_to_success_page(self):
         response = self.client.post(
@@ -731,3 +844,8 @@ class BookingEmailSignalTests(TestCase):
         self.assertIn("Appliance Installation Support", customer_emails[0].body)
         self.assertIn("April 20, 2026 at 14:30", customer_emails[0].body)
         self.assertIn("123456789", customer_emails[0].body)
+        company_emails = [
+            email for email in mail.outbox
+            if "services@hembla-experten.se" in email.to and "New Call Request" in email.subject
+        ]
+        self.assertEqual(len(company_emails), 1)

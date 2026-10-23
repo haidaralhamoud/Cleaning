@@ -217,6 +217,7 @@ def _options_duration(options, answers, details=None):
 
 def calculate_booking_price(booking):
     services_total = Decimal("0.00")
+    service_breakdown = {}
     addons_total = Decimal("0.00")
     duration_minutes = Decimal("0.00")
     duration_is_estimated = False
@@ -242,13 +243,15 @@ def calculate_booking_price(booking):
     rot_setting = RotSetting.objects.order_by("-updated_at").first()
 
     # --------------------------
-    # 1) SERVICE PRICES
+    # 1) QUESTION-BASED SERVICE PRICES
     # --------------------------
     default_service_duration = Decimal(str(getattr(booking, "DEFAULT_DURATION_MINUTES", 120)))
 
     for service in services:
-        source_currency = getattr(service, "price_currency", target_currency)
-        price = _convert_currency(service.price, source_currency, target_currency, currency_rates)
+        # A private service has no standalone/base price. Its amount is built
+        # exclusively from selected question/room options.
+        source_currency = target_currency
+        price = Decimal("0.00")
         answers = (booking.service_answers or {}).get(service.slug, {})
         service_duration = Decimal("0.00")
         service_mode = (getattr(booking, "service_modes", {}) or {}).get(service.slug) or "all_area"
@@ -291,6 +294,7 @@ def calculate_booking_price(booking):
                 duration_is_estimated = True
                 duration_minutes += service_duration
             services_total += price
+            service_breakdown[service.slug] = float(price)
             continue
 
         questions = service.questions or {}
@@ -311,6 +315,7 @@ def calculate_booking_price(booking):
         duration_minutes += service_duration
 
         services_total += price
+        service_breakdown[service.slug] = float(price)
 
     subtotal = services_total
 
@@ -373,6 +378,8 @@ def calculate_booking_price(booking):
         if booking.frequency_type:
             freq = booking.frequency_type.strip()
             rule = schedule_rules.get(("frequency_type", freq))
+            if rule is None and freq == "four_weeks":
+                rule = schedule_rules.get(("frequency_type", "monthly"))
             if rule:
                 schedule_extra += apply_percentage(subtotal, rule.price_change)
 
@@ -390,6 +397,8 @@ def calculate_booking_price(booking):
             freq = data.get("frequency")
             if freq:
                 rule = schedule_rules.get(("frequency_type", freq))
+                if rule is None and freq == "four_weeks":
+                    rule = schedule_rules.get(("frequency_type", "monthly"))
                 if rule:
                     schedule_extra += apply_percentage(subtotal, rule.price_change)
 
@@ -442,6 +451,7 @@ def calculate_booking_price(booking):
     duration_hours = float(duration_minutes) / 60 if duration_minutes else 0.0
     return {
         "services_total": float(services_total),
+        "service_breakdown": service_breakdown,
         "addons_total": float(addons_total),
         "subtotal": float(subtotal),
         "schedule_extra": float(schedule_extra),

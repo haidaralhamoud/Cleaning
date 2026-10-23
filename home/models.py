@@ -1389,6 +1389,26 @@ class PrivateBooking(BaseBooking):
     day_work_best = models.JSONField(blank=True, null=True)
     End_Date = models.DateField(blank=True, null=True)
 
+    @property
+    def frequency_label(self):
+        value = (self.frequency_type or "").strip()
+        labels = {
+            "one_time": "One-time",
+            "weekly": "Weekly",
+            "biweekly": "Every 2 weeks",
+            "four_weeks": "Every 4 weeks",
+            "monthly": "Every 4 weeks",
+        }
+        if value.startswith("custom:"):
+            parts = value.split(":", 2)
+            if len(parts) == 3 and parts[1].isdigit():
+                unit = parts[2]
+                if parts[1] == "1" and unit.endswith("s"):
+                    unit = unit[:-1]
+                return f"Every {parts[1]} {unit}"
+            return "Custom schedule"
+        return labels.get(value, value or "Not set")
+
     pricing_details = models.JSONField(blank=True, null=True)
 
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)

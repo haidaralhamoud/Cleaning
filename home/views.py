@@ -33,7 +33,7 @@ from urllib.parse import urlencode
 from .models import (
     BaseBooking, Job, Application, BookingNote, BusinessBooking, BusinessMainCategory, BusinessService, BusinessServiceCard, DateSurcharge, PrivateAddon,
     BusinessBundle, BusinessAddon, PrivateService, AvailableZipCode, PrivateBooking, PrivateBookingDraft, CallRequest, AirbnbManagementRequest, HomeServiceInquiry,
-    EmailRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
+    EmailRequest, NotAvailableZipRequest, PrivateMainCategory, FeedbackRequest, NoShowReport, BookingStatusHistory,
     Contact, FAQCategory, FAQItem, HomeHeroPrice, StripeWebhookEvent, ServiceCard, ServicePricing, ServiceEstimate,
     ServiceRoomOption,
     ScheduleRule,
@@ -955,14 +955,17 @@ def _serialize_private_payment_summary(summary):
 
 def _calculate_private_payment_summary(booking, currency):
     fresh_pricing = calculate_booking_price(booking)
-    base_total = Decimal(str(fresh_pricing.get("final", 0) or 0))
+    # ``final`` is already reduced by the pricing-layer RUT amount. Rebuild
+    # the pre-RUT amount so checkout can show the complete calculation.
+    net_total = Decimal(str(fresh_pricing.get("final", 0) or 0))
     subtotal = Decimal(str(fresh_pricing.get("subtotal", 0) or 0))
     rot_discount = Decimal(str(fresh_pricing.get("rot", 0) or 0))
+    base_total = net_total + rot_discount
     service_fee = PRIVATE_BOOKING_SERVICE_FEE if base_total > 0 else Decimal("0.00")
     vat_percent = PRIVATE_BOOKING_VAT_PERCENT
     vat_base = base_total + service_fee
-    vat_amount = Decimal("0.00")
-    total_before_discounts = vat_base
+    vat_amount = (vat_base * vat_percent / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_before_discounts = vat_base + vat_amount
 
     customer = None
     if booking.user_id:
@@ -982,7 +985,9 @@ def _calculate_private_payment_summary(booking, currency):
         and completed_bookings == 0
     )
 
-    final_amount = total_before_discounts
+    rot_percent = Decimal(str(fresh_pricing.get("rot_percent", 0) or 0)) if fresh_pricing.get("use_rot") else Decimal("0.00")
+    rot_amount = (total_before_discounts * rot_percent / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    final_amount = total_before_discounts - rot_amount
     discount_code = None
     discount_amount = Decimal("0.00")
     referral_discount_applied = False
@@ -1019,7 +1024,8 @@ def _calculate_private_payment_summary(booking, currency):
         "pricing": fresh_pricing,
         "base_total": base_total,
         "subtotal": subtotal,
-        "rot_discount": rot_discount,
+        "rot_discount": rot_amount,
+        "gross_before_rot": total_before_discounts,
         "service_fee": service_fee,
         "vat_percent": vat_percent,
         "vat_amount": vat_amount,
@@ -1096,7 +1102,7 @@ def _private_booking_summary_payload(request, draft, booking=None, pricing=None)
         "addons_total": pricing.get("addons_total", 0),
         "subtotal": pricing.get("subtotal", 0),
         "schedule_extra": pricing.get("schedule_extra", 0),
-        "rot": pricing.get("rot", 0),
+        "rot": float(payment_summary.get("rot_discount", 0) or 0),
         "rot_percent": pricing.get("rot_percent", 0),
         "use_rot": pricing.get("use_rot", True),
         "service_fee": float(payment_summary.get("service_fee", 0) or 0),
@@ -1311,9 +1317,9 @@ def _create_private_invoice_booking(request):
 
     messages.success(
         request,
-        "Booking created. The invoice draft is ready in the dashboard and will only be sent to the customer after review.",
+        "Your booking request has been received. Your invoice will be prepared after the service is completed and sent to you by our team.",
     )
-    return redirect("home:home")
+    return redirect("home:thank_you_page")
 
 
 def _mark_private_draft_failed(draft_record, status_value, error_message=None):
@@ -1577,6 +1583,8 @@ def _dashboard_notifications(request=None):
     new_private = PrivateBooking.objects.filter(created_at__gte=since).count()
     new_business = BusinessBooking.objects.filter(created_at__gte=since).count()
     new_contacts = Contact.objects.filter(created_at__gte=since).count()
+    new_applications = Application.objects.filter(created_at__gte=since).count()
+    new_zip_requests = NotAvailableZipRequest.objects.filter(created_at__gte=since).count()
     new_call_requests = CallRequest.objects.filter(created_at__gte=since).count()
     new_email_requests = EmailRequest.objects.filter(created_at__gte=since).count()
     new_home_inquiries = HomeServiceInquiry.objects.filter(created_at__gte=since).count()
@@ -1622,6 +1630,16 @@ def _dashboard_notifications(request=None):
     )
     recent_contacts = list(
         Contact.objects.filter(created_at__gte=since)
+        .order_by("-created_at")[:6]
+    )
+    recent_applications = list(
+        Application.objects.filter(created_at__gte=since)
+        .select_related("job")
+        .order_by("-created_at")[:6]
+    )
+    recent_zip_requests = list(
+        NotAvailableZipRequest.objects.filter(created_at__gte=since)
+        .select_related("service")
         .order_by("-created_at")[:6]
     )
     recent_call_requests = list(
@@ -1735,6 +1753,22 @@ def _dashboard_notifications(request=None):
             "time": contact.created_at,
             "url": "/dashboard/contacts/",
         })
+    for application in recent_applications:
+        role = application.job.title if application.job_id else (application.area or "Open application")
+        items.append({
+            "title": f"New Job Application #{application.id}",
+            "detail": f"{application.full_name} - {role}",
+            "time": application.created_at,
+            "url": "/dashboard/applications/",
+        })
+    for zip_request in recent_zip_requests:
+        service = zip_request.service.title if zip_request.service_id else "Service area request"
+        items.append({
+            "title": f"New ZIP Request #{zip_request.id}",
+            "detail": f"{zip_request.zip_code} - {service}",
+            "time": zip_request.created_at,
+            "url": "/dashboard/not-available-zips/",
+        })
     for call_request in recent_call_requests:
         items.append({
             "title": f"Call Request: {call_request.full_name}".strip() or f"Call Request #{call_request.id}",
@@ -1832,6 +1866,8 @@ def _dashboard_notifications(request=None):
         new_private
         + new_business
         + new_contacts
+        + new_applications
+        + new_zip_requests
         + new_call_requests
         + new_email_requests
         + new_home_inquiries
@@ -1863,6 +1899,8 @@ def _dashboard_notifications(request=None):
         "dashboard_new_email_requests": new_email_requests,
         "dashboard_new_home_inquiries": new_home_inquiries,
         "dashboard_new_airbnb_requests": new_airbnb_requests,
+        "dashboard_new_applications": new_applications,
+        "dashboard_new_zip_requests": new_zip_requests,
     }
 
 
@@ -2602,6 +2640,31 @@ class InvoiceDashboardForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["due_date"].widget = forms.DateInput(
+            format="%Y-%m-%d",
+            attrs={
+                "type": "date",
+                "oninput": "updateInvoicePaymentTerms(this)",
+                "onchange": "updateInvoicePaymentTerms(this)",
+            },
+        )
+        self.fields["payment_terms"].widget.attrs.update({
+            "readonly": "readonly",
+            "aria-readonly": "true",
+        })
+        issued_date = self.instance.issued_at.date() if self.instance.pk and self.instance.issued_at else timezone.localdate()
+        self.fields["due_date"].widget.attrs["data-issued-date"] = issued_date.isoformat()
+        payment_terms_update = (
+            "if(this.value){const s=new Date('"
+            + issued_date.isoformat()
+            + "T00:00:00'),e=new Date(this.value+'T00:00:00');"
+            + "this.form.elements['payment_terms'].value=Math.max(0,Math.round((e-s)/86400000))+' days';}"
+        )
+        self.fields["due_date"].widget.attrs["oninput"] = payment_terms_update
+        self.fields["due_date"].widget.attrs["onchange"] = payment_terms_update
+        due_date = self.instance.due_date
+        if due_date:
+            self.initial["payment_terms"] = f"{max(0, (due_date - issued_date).days)} days"
         number_field = self.fields["customer_number"]
         number_field.required = False
         number_field.widget.attrs.update({
@@ -2619,10 +2682,20 @@ class InvoiceDashboardForm(forms.ModelForm):
         customer = cleaned.get("customer")
         if customer:
             cleaned["customer_number"] = str(customer.customer_number or "")
+        due_date = cleaned.get("due_date")
+        issued_date = self.instance.issued_at.date() if self.instance.pk and self.instance.issued_at else timezone.localdate()
+        if due_date:
+            cleaned["payment_terms"] = f"{max(0, (due_date - issued_date).days)} days"
         return cleaned
 
 
 class InvoiceLineItemDashboardForm(forms.ModelForm):
+    invoice_date = forms.DateField(
+        label="Invoice date",
+        required=False,
+        widget=forms.DateInput(format="%Y-%m-%d", attrs={"type": "date"}),
+    )
+
     class Meta:
         model = InvoiceLineItem
         fields = (
@@ -2655,6 +2728,18 @@ class InvoiceLineItemDashboardForm(forms.ModelForm):
         invoice_id = self.initial.get("invoice") or getattr(self.instance, "invoice_id", None)
         if invoice_id:
             self.fields["invoice"].initial = invoice_id
+            invoice = Invoice.objects.filter(pk=invoice_id).first()
+            if invoice and invoice.issued_at:
+                self.initial["invoice_date"] = timezone.localtime(invoice.issued_at).date()
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        invoice_date = self.cleaned_data.get("invoice_date")
+        invoice = instance.invoice
+        if invoice_date and invoice.issued_at and timezone.localtime(invoice.issued_at).date() != invoice_date:
+            invoice.issued_at = timezone.make_aware(datetime.combine(invoice_date, dt_time.min))
+            invoice.save(update_fields=["issued_at"])
+        return instance
 
     def clean(self):
         cleaned = super().clean()
@@ -3272,6 +3357,8 @@ def _exclude_fields_for_form(model):
             excluded.append(f.name)
     if model.__name__ == "PrivateAddon":
         excluded.append("form_html")
+    if model == PrivateService:
+        excluded.extend(["price", "price_currency", "starting_price"])
     if model.__name__ == "ServiceRoomOption":
         excluded.append("short_label")
     if model.__name__ == "FeedbackRequest":
@@ -3382,8 +3469,23 @@ def dashboard_model_list(request, model):
             query |= Q(**{f"{name}__icontains": q})
         qs = qs.filter(query)
 
+    filter_values = {}
+    available_filters = [
+        name for name in ("status", "booking_type", "is_active")
+        if name in {f.name for f in item.model._meta.fields}
+    ]
+    for filter_name in available_filters:
+            value = request.GET.get(filter_name, "").strip()
+            if value:
+                filter_values[filter_name] = value
+                qs = qs.filter(**{filter_name: value})
+
     field_names = {f.name for f in item.model._meta.fields}
-    if "created_at" in field_names:
+    if item.model in {PrivateMainCategory, PrivateService}:
+        # These dashboard lists are explicitly managed by display_order.
+        # Do not let the generic newest-first fallback override that order.
+        qs = qs.order_by("display_order", "title", "pk")
+    elif "created_at" in field_names:
         qs = qs.order_by("-created_at", "-pk")
     elif "issued_at" in field_names:
         qs = qs.order_by("-issued_at", "-pk")
@@ -3405,7 +3507,7 @@ def dashboard_model_list(request, model):
         "business-service-cards": ["service", "title", "order"],
         "business-bundles": ["title", "discount", "short_description", "image"],
         "business-addons": ["title", "description", "emoji"],
-        "private-services": ["title", "display_order", "category", "price", "recommended", "image"],
+        "private-services": ["title", "display_order", "category", "recommended", "image"],
         "private-addons": ["title", "service", "price", "price_per_unit", "icon"],
         "service-cards": ["service", "title", "order"],
         "service-room-options": ["service", "title", "image", "unit_price", "price_currency", "display_order", "is_active"],
@@ -3435,6 +3537,8 @@ def dashboard_model_list(request, model):
         "objects": page,
         "display_fields": display_fields,
         "query": q,
+        "filter_values": filter_values,
+        "available_filters": available_filters,
         "service_id": service_id,
         "provider_id": provider_id,
         "invoice_id": invoice_id,
@@ -3550,6 +3654,8 @@ def dashboard_model_create(request, model):
                     if isinstance(obj, ProviderAdminMessage) and not obj.created_by_id:
                         obj.created_by = request.user
                     obj.save()
+                if request.POST.get("save_and_stay") and obj.pk:
+                    return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
                 if item.model == InvoiceLineItem:
                     return redirect("home:dashboard_model_edit", model="invoices", pk=obj.invoice_id)
             else:
@@ -3743,6 +3849,8 @@ def dashboard_model_edit(request, model, pk):
                     obj.approved_by = None
                     obj.approved_at = None
             obj.save()
+            if request.POST.get("save_and_stay"):
+                return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
             if item.model.__name__ == "BookingRequestFix":
                 new_status = getattr(obj, "status", None)
                 if prev_status and new_status and new_status != prev_status:
@@ -5063,6 +5171,28 @@ def private_booking_checkout(request):
 
             return redirect("home:private_booking_checkout")
 
+        # PRICE REVIEW FALLBACK
+        elif form_type == "price_review":
+            customer = Customer.objects.filter(user=request.user).first()
+            name_parts = (request.user.get_full_name() or request.user.username or "Guest").split(" ", 1)
+            Contact.objects.create(
+                first_name=(customer.first_name if customer else name_parts[0])[:100] or "Guest",
+                last_name=(customer.last_name if customer else (name_parts[1] if len(name_parts) > 1 else ""))[:100],
+                email=(customer.email if customer else request.user.email) or "no-reply@example.com",
+                country_code=(customer.country_code if customer else "+1") or "+1",
+                phone=(customer.phone if customer else "") or "",
+                inquiry_type="pricing", source="private", preferred_method="email",
+                message=(
+                    "Checkout price review requested. The calculated amount was zero or invalid.\n"
+                    f"Selected services: {', '.join(draft.get('selected_services') or [])}\n"
+                    f"Currency: {(settings.STRIPE_CURRENCY or 'sek').upper()}\n"
+                    f"Displayed amount: {payment_summary_data.get('amount', '0.00')}\n"
+                    "Please review the service price and contact the customer."
+                ),
+            )
+            messages.success(request, "Your request was sent to our team. We will review the price and contact you shortly.")
+            return redirect("home:private_booking_checkout")
+
         # 💳 CONFIRM PAYMENT
         elif form_type == "payment":
             if not _is_truthy(request.POST.get("accepted_terms"), default=False):
@@ -5258,6 +5388,7 @@ def private_booking_checkout(request):
         "points_balance": points_balance,
         "loyalty_snapshot": loyalty_snapshot,
         "final_preview_price": final_preview_price,
+        "gross_before_rot": payment_summary.get("total_before_discounts", 0),
         "pricing": pricing,
         "services_total": services_total,
         "addons_total": addons_total,
@@ -5269,7 +5400,7 @@ def private_booking_checkout(request):
         "service_fee": service_fee,
         "vat_amount": vat_amount,
         "vat_percent": vat_percent,
-        "rot_value": rot_value,
+        "rot_value": payment_summary.get("rot_discount", 0),
         "display_address": display_address,
         "display_area": display_area,
         "display_duration": display_duration,
@@ -5285,6 +5416,8 @@ def private_booking_checkout(request):
         "cash_invoice_download_url": reverse("home:private_booking_cash_invoice_pdf"),
         "reward_context": reward_context,
         "summary_data": summary_data,
+        "payment_summary_data": payment_summary_data,
+        "price_review_available": payment_summary["amount_cents"] <= 0,
         "payment_login_url": f"{reverse('login')}?{urlencode({'next': request.get_full_path()})}",
         "payment_signup_url": f"{reverse('accounts:sign_up')}?{urlencode({'next': request.get_full_path()})}",
     })
@@ -5626,7 +5759,11 @@ def private_zip_available(request, service_slug):
     })
 
 def private_thank_you(request):
-    return render(request, "home/thank_you_page.html")
+    booking = None
+    booking_id = request.session.get("latest_private_booking_id")
+    if booking_id:
+        booking = PrivateBooking.objects.filter(pk=booking_id, user=request.user).first()
+    return render(request, "home/thank_you_page.html", {"booking": booking})
 
 @login_required
 def payment_success(request):
@@ -6342,11 +6479,6 @@ def private_booking_schedule(request):
         temp_booking = _build_private_booking_from_draft(draft, request.user)
         pricing = calculate_booking_price(temp_booking)
         duration_minutes = int(pricing.get("duration_minutes") or 0)
-
-        invalid_price = any((service.price or 0) <= 0 for service in services)
-        if invalid_price:
-            messages.error(request, "This service is not bookable yet. Please choose another service.")
-            return _render_schedule_page(temp_booking, pricing)
 
         if duration_minutes <= 0:
             messages.error(request, "Please complete required options to calculate a valid duration.")

@@ -2518,17 +2518,17 @@ def download_invoice_pdf(request, invoice_id):
             subtotal_amount = Decimal(str(booking.subtotal or invoice.amount or 0))
             discount_amount = Decimal(str(booking.rot_discount or 0))
 
-            service_objects = {
-                service.slug: service
-                for service in PrivateService.objects.filter(slug__in=services)
-            }
             currency = (invoice.currency or "SEK").upper()
+            pricing_details = booking.pricing_details or {}
+            service_breakdown = pricing_details.get("service_breakdown") or {}
+            services_total = Decimal(str(pricing_details.get("services_total", 0) or 0))
+            fallback_service_amount = (
+                (services_total / Decimal(len(services))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                if services else Decimal("0.00")
+            )
             for service_slug in services:
-                service_obj = service_objects.get(service_slug)
                 service_name = service_title_map.get(service_slug, _humanize_service_name(service_slug))
-                unit_price = Decimal(str(getattr(service_obj, "price", 0) or 0))
-                if unit_price <= 0 and subtotal_amount > 0 and services:
-                    unit_price = (subtotal_amount / Decimal(len(services))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                unit_price = Decimal(str(service_breakdown.get(service_slug, fallback_service_amount) or 0))
                 line_items.append({
                     "description": service_name,
                     "quantity": "1",
@@ -3862,8 +3862,6 @@ def service_detail(request, slug):
     service = get_object_or_404(
         PrivateService.objects.select_related(
             "category",
-            "pricing",
-            "estimate",
         ).prefetch_related(
             "cards",
         ),
@@ -3909,31 +3907,6 @@ def service_detail(request, slug):
             "items": card.items(),
         })
 
-    pricing_obj = getattr(service, "pricing", None)
-    pricing = {
-        "title": "Transparent Pricing",
-        "subtitle": "Our pricing is straightforward. Get a personalized quote based on your home's size and needs.",
-        "card_title": service.title,
-        "price_label": "Starting from",
-        "price_value": getattr(pricing_obj, "price_value", "") or service.starting_price,
-        "price_note": getattr(pricing_obj, "price_note", ""),
-        "description": "Your final price depends on your selected service and details. You'll always see the full cost before confirming your booking.",
-        "cta_text": "BOOK NOW",
-        "cta_url": start_booking_url,
-    }
-
-    estimate_obj = getattr(service, "estimate", None)
-    estimate = {
-        "title": getattr(estimate_obj, "title", None) or "Get a Quick Estimate",
-        "property_label": "Property Size (m²)",
-        "bedrooms_label": getattr(estimate_obj, "bedrooms_label", None) or "Number of Bedrooms",
-        "cta_text": getattr(estimate_obj, "cta_text", None) or "Calculate Estimate",
-        "note": getattr(estimate_obj, "note", None) or "The estimated price above reflects a 50% RUT tax deduction. Final price may vary depending on property condition.",
-        "property_options": getattr(estimate_obj, "property_options", None) or [],
-        "bedrooms_options": getattr(estimate_obj, "bedrooms_options", None) or [],
-    }
-    estimate["property_label"] = getattr(estimate_obj, "property_label", None) or "Property Size (m²)"
-
     eco = {
         "title": "Our Eco-Friendly Promise",
         "subtitle": (
@@ -3967,8 +3940,6 @@ def service_detail(request, slug):
         "intro_text": service.intro_text or "",
         "checklist_title": f"Complete {service.title} Checklist",
         "checklist_cards": checklist_cards,
-        "pricing": pricing,
-        "estimate": estimate,
         "eco": eco,
     }
     return render(request, "accounts/services/service_detail.html", context)

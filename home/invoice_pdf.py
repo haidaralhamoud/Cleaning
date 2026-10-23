@@ -312,15 +312,15 @@ def _build_legacy_branded_invoice_pdf(document):
     image = Image.new("RGB", (page_width, page_height), colors["page"])
     draw = ImageDraw.Draw(image)
 
-    title_font = _invoice_font(F(S(60)), bold=True)
+    title_font = _invoice_font(F(S(52)), bold=True)
     brand_font = _invoice_font(F(S(50)), bold=False)
     tagline_font = _invoice_font(F(S(15)), bold=False)
     section_font = _invoice_font(F(S(19)), bold=True)
-    body_font = _invoice_font(F(S(20)), bold=False)
+    body_font = _invoice_font(F(S(19)), bold=False)
     body_bold_font = _invoice_font(F(S(21)), bold=True)
     small_font = _invoice_font(F(S(16)), bold=False)
     small_bold_font = _invoice_font(F(S(16)), bold=True)
-    meta_label_font = _invoice_font(F(S(14)), bold=True)
+    meta_label_font = _invoice_font(F(S(13)), bold=True)
     table_header_font = _invoice_font(F(S(12)), bold=True)
     script_font = _invoice_script_font(F(S(48)))
     total_font = _invoice_font(F(S(27)), bold=True)
@@ -456,7 +456,8 @@ def _build_legacy_branded_invoice_pdf(document):
         draw.text((left, top + S(26)), brand_name, font=fallback_logo_font, fill=colors["gold"])
         return (S(280), S(120))
 
-    header_h = S(400)
+    # Keep the invoice details panel compact so it does not dominate the header.
+    header_h = S(350)
     left_logo_w = S(520)
     top_divider_x = frame_left + left_logo_w + S(24)
     top_right_left = top_divider_x + S(30)
@@ -523,8 +524,8 @@ def _build_legacy_branded_invoice_pdf(document):
         ("PAYMENT TERMS", payment_terms),
         ("LATE PAYMENT INTEREST", late_interest),
     ]
-    meta_y = frame_top + S(102)
-    meta_value_x = top_right_left + S(270)
+    meta_y = frame_top + S(92)
+    meta_value_x = top_right_left + S(250)
     meta_label_x = top_right_left
     meta_value_width = due_badge_left - meta_value_x - S(28)
     for index, (label, value) in enumerate(meta_rows):
@@ -547,21 +548,21 @@ def _build_legacy_branded_invoice_pdf(document):
         else:
             value_lines = wrap(str(value), value_font, meta_value_width)
         draw_text_block(meta_value_x, meta_y - S(2), value_lines[:2], value_font, colors["ink"], S(24))
-        meta_y += S(43) if len(value_lines) == 1 else S(59)
+        meta_y += S(36) if len(value_lines) == 1 else S(50)
 
     cards_top = frame_top + header_h + S(26)
     card_gap = S(16)
-    card_w = int((frame_width - (card_gap * 2)) / 3)
+    customer_card_w = int((frame_width - card_gap) * 0.75)
+    thank_card_w = frame_width - card_gap - customer_card_w
 
     customer_card_left = frame_left
-    property_card_left = customer_card_left + card_w + card_gap
-    thank_card_left = property_card_left + card_w + card_gap
+    thank_card_left = customer_card_left + customer_card_w + card_gap
 
     customer_card_lines = []
     customer_name_lines = wrap(
         str(customer_details.get("name", "-")),
         body_bold_font,
-        card_w - S(36),
+        customer_card_w - S(36),
     )[:2]
     for line in [
         f"Customer No:  {customer_details.get('customer_number', '-')}",
@@ -571,20 +572,12 @@ def _build_legacy_branded_invoice_pdf(document):
         customer_details.get("email", "-"),
         customer_details.get("phone", "-"),
     ]:
-        customer_card_lines.append(wrap(str(line), body_font, card_w - S(36)))
-
-    property_address_lines = [
-        wrap(str(property_details.get("address", "-")), body_font, card_w - S(36)),
-        wrap(str(property_details.get("postal_city", "-")), body_font, card_w - S(36)),
-        wrap(str(property_details.get("country", "-")), body_font, card_w - S(36)),
-    ]
-    property_number_lines = wrap(str(property_details.get("property_number", "-")), body_bold_font, card_w - S(36))
-    property_note_lines = wrap("(Property designations as registered)", small_font, card_w - S(36))
+        customer_card_lines.append(wrap(str(line), body_font, customer_card_w - S(36)))
 
     thank_text = wrap(
         notes[0] if notes else "Thank you for choosing Hembla. We truly appreciate your trust and the opportunity to help keep your home beautiful.",
         body_font,
-        card_w - S(96),
+        thank_card_w - S(36),
     )
 
     customer_line_h = S(30)
@@ -592,48 +585,34 @@ def _build_legacy_branded_invoice_pdf(document):
         S(60)
         + block_height(customer_name_lines, customer_line_h)
         + S(12)
-        + sum(block_height(lines[:3], customer_line_h) + S(9) for lines in customer_card_lines)
+        + S(12)
+        + max(
+            block_height(customer_card_lines[index][:2], customer_line_h)
+            for index in range(0, len(customer_card_lines), 2)
+        )
+        + S(12)
         + S(16)
         + S(20)
     )
-    property_card_h = (
-        S(62) + S(30)
-        + sum(block_height(lines[:3], S(30)) + S(9) for lines in property_address_lines)
-        + S(14) + S(28) + block_height(property_number_lines[:2], S(30))
-        + S(10) + block_height(property_note_lines[:2], S(22)) + S(24)
-    )
     thank_card_h = S(34) + S(64) + block_height(thank_text[:6], S(32)) + S(36)
-    card_h = max(S(248), customer_card_h, property_card_h, thank_card_h)
+    card_h = max(S(248), customer_card_h, thank_card_h)
 
-    for left in [customer_card_left, property_card_left, thank_card_left]:
-        card_box(left, cards_top, card_w, card_h)
+    card_box(customer_card_left, cards_top, customer_card_w, card_h)
+    card_box(thank_card_left, cards_top, thank_card_w, card_h)
 
     section_title(customer_card_left + S(18), cards_top + S(14), _user_icon((S(24), S(24)), stroke=colors["gold"]), "CUSTOMER INFORMATION")
     cy = cards_top + S(60)
     draw_text_block(customer_card_left + S(18), cy, customer_name_lines, body_bold_font, colors["ink"], customer_line_h)
     cy += block_height(customer_name_lines, customer_line_h) + S(12)
-    for index, wrapped in enumerate(customer_card_lines):
-        visible_lines = wrapped[:3]
-        draw_text_block(customer_card_left + S(18), cy, visible_lines, body_font, colors["ink"], customer_line_h)
-        cy += block_height(visible_lines, customer_line_h) + S(9)
-        if index == 3:
-            cy += S(16)
-
-    section_title(property_card_left + S(18), cards_top + S(14), _house_icon((S(24), S(24)), stroke=colors["gold"]), "PROPERTY INFORMATION")
-    py = cards_top + S(62)
-    draw.text((property_card_left + S(18), py), "Property Address", font=small_bold_font, fill=colors["ink"])
-    py += S(28)
-    for wrapped in property_address_lines:
-        visible_lines = wrapped[:3]
-        draw_text_block(property_card_left + S(18), py, visible_lines, body_font, colors["ink"], S(30))
-        py += block_height(visible_lines, S(30)) + S(9)
-    divider_y = py + S(8)
-    draw.line([(property_card_left + S(18), divider_y), (property_card_left + card_w - S(18), divider_y)], fill=colors["line"], width=S(1))
-    draw.text((property_card_left + S(18), divider_y + S(20)), "Property Number", font=small_bold_font, fill=colors["ink"])
-    property_number_top = divider_y + S(50)
-    draw_text_block(property_card_left + S(18), property_number_top, property_number_lines[:2], body_bold_font, colors["ink"], S(30))
-    property_note_top = property_number_top + block_height(property_number_lines[:2], S(30)) + S(10)
-    draw_text_block(property_card_left + S(18), property_note_top, property_note_lines[:2], small_font, colors["muted"], S(22))
+    customer_col_w = int((customer_card_w - S(54)) / 2)
+    for index in range(0, len(customer_card_lines), 2):
+        row_y = cy
+        left_lines = wrap(" ".join(customer_card_lines[index]) or "-", body_font, customer_col_w)[:2]
+        draw_text_block(customer_card_left + S(18), row_y, left_lines, body_font, colors["ink"], customer_line_h)
+        if index + 1 < len(customer_card_lines):
+            right_lines = wrap(" ".join(customer_card_lines[index + 1]) or "-", body_font, customer_col_w)[:2]
+            draw_text_block(customer_card_left + S(36) + customer_col_w, row_y, right_lines, body_font, colors["ink"], customer_line_h)
+        cy += S(42)
 
     thank_title = "Thank you!"
     fitted_thank_font = fit_font_for_width(
@@ -644,82 +623,20 @@ def _build_legacy_branded_invoice_pdf(document):
             _invoice_script_font(F(S(34))),
             _invoice_script_font(F(S(30))),
         ],
-        card_w - S(36),
+        thank_card_w - S(24),
     )
-    centered_text(thank_card_left, card_w, cards_top + S(24), thank_title, fitted_thank_font, colors["gold"])
-    draw_text_block(thank_card_left + S(24), cards_top + S(140), thank_text[:6], body_font, colors["ink"], S(32))
+    centered_text(thank_card_left, thank_card_w, cards_top + S(24), thank_title, fitted_thank_font, colors["gold"])
+    draw_text_block(thank_card_left + S(18), cards_top + S(140), thank_text[:6], body_font, colors["ink"], S(30))
 
-    service_top = cards_top + card_h + S(24)
-    service_title_lines = wrap(str(service_details.get("title", "-")), body_bold_font, S(330))
-    service_category_lines = wrap(str(service_details.get("category", "-")), body_font, S(330))
-    service_description_lines = wrap(str(service_details.get("description", "-")), body_font, S(330))
-    mid_metric_lines = [wrap(str(value), body_font, S(170)) for _, _, value in [
-        (_calendar_icon((S(20), S(20)), stroke=colors["gold"]), "SERVICE DATE", service_details.get("date", "-")),
-        (_clock_icon((S(20), S(20)), stroke=colors["gold"]), "START TIME", service_details.get("start_time", "-")),
-        (_clock_icon((S(20), S(20)), stroke=colors["gold"]), "END TIME", service_details.get("end_time", "-")),
-    ]]
-    right_metric_lines = [wrap(str(value), body_font, S(166)) for _, _, value in [
-        (_clock_icon((S(20), S(20)), stroke=colors["gold"]), "TOTAL HOURS", service_details.get("total_hours", "-")),
-        (_user_icon((S(20), S(20)), stroke=colors["gold"]), "ASSIGNED STAFF", service_details.get("assigned_staff", "-")),
-        (_group_icon((S(20), S(20)), stroke=colors["gold"]), "PERFORMED BY", service_details.get("performed_by", "-")),
-    ]]
-    left_service_h = S(50) + S(26) + block_height(service_title_lines[:3], S(26)) + S(16) + S(26) + block_height(service_category_lines[:3], S(26)) + S(16) + S(26) + block_height(service_description_lines[:6], S(22)) + S(22)
-    mid_service_h = S(50) + sum((S(54) if len(lines) == 1 else S(66)) for lines in mid_metric_lines) + S(16)
-    right_service_h = S(50) + sum((S(54) if len(lines) == 1 else S(66)) for lines in right_metric_lines) + S(16)
-    service_h = max(S(208), left_service_h, mid_service_h, right_service_h)
-    card_box(frame_left, service_top, frame_width, service_h)
-    section_title(frame_left + S(18), service_top + S(14), _calendar_icon((S(24), S(24)), stroke=colors["gold"]), "SERVICE DETAILS")
-
-    service_col1_x = frame_left + S(24)
-    service_col2_x = frame_left + int(frame_width / 2) - S(48)
-    service_col3_x = frame_left + int(frame_width * 0.72)
-
-    def draw_labeled_block(x, y, label, value, width, value_font=None, line_height=None):
-        draw.text((x, y), label, font=small_bold_font, fill=colors["ink"])
-        lines = wrap(str(value), value_font or body_font, width)
-        draw_text_block(x, y + S(26), lines[:4], value_font or body_font, colors["ink"], line_height or S(26))
-
-    service_left_y = service_top + S(54)
-    draw_labeled_block(service_col1_x, service_left_y, "EXACT BOOKED SERVICE", service_details.get("title", "-"), S(330), body_bold_font, S(30))
-    service_left_y += S(26) + block_height(service_title_lines[:3], S(26)) + S(16)
-    draw_labeled_block(service_col1_x, service_left_y, "SERVICE CATEGORY", service_details.get("category", "-"), S(330), body_font, S(30))
-    service_left_y += S(26) + block_height(service_category_lines[:3], S(26)) + S(16)
-    draw_labeled_block(service_col1_x, service_left_y, "SERVICE DESCRIPTION", service_details.get("description", "-"), S(330), body_font, S(22))
-
-    icon_x = service_col2_x
-    icon_label_x = icon_x + S(34)
-    metric_y = service_top + S(54)
-    mid_metrics = [
-        (_calendar_icon((S(20), S(20)), stroke=colors["gold"]), "SERVICE DATE", service_details.get("date", "-")),
-        (_clock_icon((S(20), S(20)), stroke=colors["gold"]), "START TIME", service_details.get("start_time", "-")),
-        (_clock_icon((S(20), S(20)), stroke=colors["gold"]), "END TIME", service_details.get("end_time", "-")),
-    ]
-    for idx, (icon, label, value) in enumerate(mid_metrics):
-        image.paste(icon, (icon_x, metric_y + S(2)), icon)
-        draw.text((icon_label_x, metric_y), label, font=small_bold_font, fill=colors["ink"])
-        wrapped = mid_metric_lines[idx]
-        draw_text_block(icon_label_x, metric_y + S(26), wrapped[:2], body_font, colors["ink"], S(22))
-        metric_y += S(54) if len(wrapped) == 1 else S(66)
-
-    metric_y = service_top + S(54)
-    right_metrics = [
-        (_clock_icon((S(20), S(20)), stroke=colors["gold"]), "TOTAL HOURS", service_details.get("total_hours", "-")),
-        (_user_icon((S(20), S(20)), stroke=colors["gold"]), "ASSIGNED STAFF", service_details.get("assigned_staff", "-")),
-        (_group_icon((S(20), S(20)), stroke=colors["gold"]), "PERFORMED BY", service_details.get("performed_by", "-")),
-    ]
-    for idx, (icon, label, value) in enumerate(right_metrics):
-        image.paste(icon, (service_col3_x, metric_y + S(2)), icon)
-        draw.text((service_col3_x + S(34), metric_y), label, font=small_bold_font, fill=colors["ink"])
-        wrapped = right_metric_lines[idx]
-        draw_text_block(service_col3_x + S(34), metric_y + S(26), wrapped[:2], body_font, colors["ink"], S(22))
-        metric_y += S(54) if len(wrapped) == 1 else S(66)
-
-    main_top = service_top + service_h + S(24)
+    main_top = cards_top + card_h + S(24)
     breakdown_gap = S(16)
-    breakdown_w = S(300)
-    table_w = frame_width - breakdown_w - breakdown_gap
+    table_w = frame_width
     table_left = frame_left
-    breakdown_left = table_left + table_w + breakdown_gap
+    breakdown_w = int((frame_width - breakdown_gap) / 2)
+    # Keep the RUT summary on the left and the detailed price breakdown on the right.
+    rut_left = table_left
+    rut_w = breakdown_w
+    breakdown_left = rut_left + rut_w + breakdown_gap
 
     table_header_h = S(58)
     table_inner_left = table_left + S(18)
@@ -850,11 +767,12 @@ def _build_legacy_branded_invoice_pdf(document):
         breakdown_content_h += max(block_height(label_lines, S(24)), block_height(value_lines, S(24))) + S(12)
     total_box_h = max(S(142), S(24) + block_height(total_label_lines[:2], S(24)) + S(58) + S(34))
     breakdown_h = table_header_h + breakdown_content_h + S(16) + total_box_h
-    card_box(breakdown_left, main_top, breakdown_w, breakdown_h)
-    draw.rectangle((breakdown_left, main_top, breakdown_left + breakdown_w, main_top + table_header_h), fill=colors["soft_fill"], outline=colors["line"])
-    draw.text((breakdown_left + S(16), main_top + S(12)), "PRICE BREAKDOWN (INCL. VAT)", font=small_bold_font, fill=colors["ink"])
+    rut_top = main_top + table_h + S(22)
+    card_box(breakdown_left, rut_top, breakdown_w, breakdown_h)
+    draw.rectangle((breakdown_left, rut_top, breakdown_left + breakdown_w, rut_top + table_header_h), fill=colors["soft_fill"], outline=colors["line"])
+    draw.text((breakdown_left + S(16), rut_top + S(12)), "PRICE BREAKDOWN (INCL. VAT)", font=small_bold_font, fill=colors["ink"])
 
-    bd_y = main_top + table_header_h + S(18)
+    bd_y = rut_top + table_header_h + S(18)
     for label_lines, value_lines, fill in breakdown_specs:
         line_h = max(block_height(label_lines, S(24)), block_height(value_lines, S(24)))
         draw_text_block(breakdown_left + S(16), bd_y, label_lines, small_font, fill, S(24))
@@ -870,14 +788,13 @@ def _build_legacy_branded_invoice_pdf(document):
         bd_y += line_h + S(12)
 
     draw.line([(breakdown_left + S(16), bd_y + S(6)), (breakdown_left + breakdown_w - S(16), bd_y + S(6))], fill=colors["line_strong"], width=S(1))
-    total_box_top = main_top + breakdown_h - total_box_h
-    draw.rectangle((breakdown_left, total_box_top, breakdown_left + breakdown_w, main_top + breakdown_h), fill=colors["soft_fill"], outline=colors["line"])
+    total_box_top = rut_top + breakdown_h - total_box_h
+    draw.rectangle((breakdown_left, total_box_top, breakdown_left + breakdown_w, rut_top + breakdown_h), fill=colors["soft_fill"], outline=colors["line"])
     draw_text_block(breakdown_left + S(16), total_box_top + S(16), total_label_lines[:2], small_bold_font, colors["ink"], S(24))
     total_w = draw.textlength(total_clean, font=fitted_total_font)
     draw.text((breakdown_left + breakdown_w - S(18) - total_w, total_box_top + S(48)), total_clean, font=fitted_total_font, fill=colors["gold"])
     draw.text((breakdown_left + S(16), total_box_top + total_box_h - S(28)), "Amount to be paid by due date.", font=small_font, fill=colors["ink"])
 
-    rut_top = main_top + table_h + S(22)
     eligible_label = next((str(value) for label, value, _ in summary_rows if "ELIGIBLE" in str(label).upper()), "-")
     deduction_label = next((
         str(value) for label, value, _ in summary_rows
@@ -893,17 +810,17 @@ def _build_legacy_branded_invoice_pdf(document):
     except Exception:
         deduction_number = Decimal("0.00")
     rut_applied = deduction_number > 0
-    rut_note = wrap(notes[2] if len(notes) > 2 else "Hembla applies for the deduction from the Swedish Tax Agency on behalf of the customer.", small_font, table_w - S(44))
-    rut_h = S(194)
-    card_box(table_left, rut_top, table_w, rut_h)
+    rut_note = wrap(notes[2] if len(notes) > 2 else "Hembla applies for the deduction from the Swedish Tax Agency on behalf of the customer.", small_font, rut_w - S(44))
+    rut_h = max(S(194), breakdown_h)
+    card_box(rut_left, rut_top, rut_w, rut_h)
     fa_heading = _fa_solid_font(S(19))
     fa_metric = _fa_solid_font(S(18))
-    draw.text((table_left + S(18), rut_top + S(16)), "\uf058", font=fa_heading, fill=colors["gold"])
-    draw.text((table_left + S(48), rut_top + S(17)), "RUT DEDUCTION", font=section_font, fill=colors["gold"])
+    draw.text((rut_left + S(18), rut_top + S(16)), "\uf058", font=fa_heading, fill=colors["gold"])
+    draw.text((rut_left + S(48), rut_top + S(17)), "RUT DEDUCTION", font=section_font, fill=colors["gold"])
 
     badge_text = "APPLIED" if rut_applied else "NOT APPLIED"
     badge_w = S(92 if rut_applied else 118)
-    badge_left = table_left + table_w - badge_w - S(18)
+    badge_left = rut_left + rut_w - badge_w - S(18)
     draw.rounded_rectangle(
         (badge_left, rut_top + S(12), badge_left + badge_w, rut_top + S(42)),
         radius=S(15), fill="#edf5eb" if rut_applied else colors["soft_fill"],
@@ -912,28 +829,34 @@ def _build_legacy_branded_invoice_pdf(document):
 
     metric_top = rut_top + S(62)
     metric_gap = S(14)
-    metric_w = int((table_w - S(36) - (metric_gap * 2)) / 3)
+    metric_w = int((rut_w - S(36) - (metric_gap * 2)) / 3)
     metrics = [
         ("\uf0b1", "ELIGIBLE LABOR", _clean_money(eligible_label)),
         ("%", "RUT DEDUCTION", _clean_money(deduction_label)),
         ("\uf555", "CUSTOMER PAYS", _clean_money(final_label)),
     ]
     for index, (icon_char, label, value) in enumerate(metrics):
-        metric_left = table_left + S(18) + (index * (metric_w + metric_gap))
+        metric_left = rut_left + S(18) + (index * (metric_w + metric_gap))
         draw.rounded_rectangle(
             (metric_left, metric_top, metric_left + metric_w, metric_top + S(76)),
             radius=S(7), fill=colors["soft_fill"], outline=colors["line"], width=S(1),
         )
         draw.text((metric_left + S(13), metric_top + S(13)), icon_char, font=fa_metric, fill=colors["gold"])
-        draw.text((metric_left + S(43), metric_top + S(13)), label, font=small_bold_font, fill=colors["muted"])
+        metric_label_font = fit_font_for_width(
+            label,
+            small_bold_font,
+            [small_font, _invoice_font(F(S(14)), bold=True), _invoice_font(F(S(12)), bold=True)],
+            metric_w - S(58),
+        )
+        draw.text((metric_left + S(43), metric_top + S(13)), label, font=metric_label_font, fill=colors["muted"])
         value_text = str(value)
         value_font = body_bold_font if index == 2 else body_font
         value_w = draw.textlength(value_text, font=value_font)
         draw.text((metric_left + metric_w - S(13) - value_w, metric_top + S(42)), value_text, font=value_font, fill=colors["ink"])
 
-    draw_text_block(table_left + S(20), rut_top + S(151), rut_note[:2], small_font, colors["muted"], S(18))
+    draw_text_block(rut_left + S(20), rut_top + S(151), rut_note[:2], small_font, colors["muted"], S(18))
 
-    footer_top = max(rut_top + rut_h, main_top + breakdown_h) + S(34)
+    footer_top = max(rut_top + rut_h, rut_top + breakdown_h) + S(34)
     footer_col_gap = S(16)
     footer_col_w = int((frame_width - (footer_col_gap * 2)) / 3)
     footer_positions = [
@@ -942,6 +865,9 @@ def _build_legacy_branded_invoice_pdf(document):
         frame_left + (footer_col_w * 2) + (footer_col_gap * 2),
     ]
     footer_titles = ["PAYMENT INFORMATION", "COMPANY INFORMATION", "IMPORTANT INFORMATION"]
+    footer_title_font = _invoice_font(F(S(14)), bold=True)
+    footer_label_font = _invoice_font(F(S(12)), bold=True)
+    footer_value_font = _invoice_font(F(S(13)), bold=False)
     footer_icons = [
         _calendar_icon((S(22), S(22)), stroke=colors["gold"]),
         _house_icon((S(22), S(22)), stroke=colors["gold"]),
@@ -956,12 +882,13 @@ def _build_legacy_branded_invoice_pdf(document):
         ("BIC/SWIFT:", company_details.get("bic", "-")),
         ("Clearing no.:", company_details.get("bank_branch", "-")),
         ("Reference:", reference_number),
+        ("Bankgiro:", "54186531"),
     ]
     payment_label_w = max(
-        int(draw.textlength(label, font=small_bold_font))
+        int(draw.textlength(label, font=footer_label_font))
         for label, _value in payment_rows
     ) + S(16)
-    payment_value_lines = [wrap(str(value), small_font, footer_col_w - payment_label_w - S(32))[:2] for _, value in payment_rows]
+    payment_value_lines = [wrap(str(value), footer_value_font, footer_col_w - payment_label_w - S(32))[:2] for _, value in payment_rows]
     company_rows = [
         ("Legal entity:", company_details.get("legal_entity", "-")),
         ("Business name:", company_details.get("business_name", brand_name)),
@@ -972,13 +899,13 @@ def _build_legacy_branded_invoice_pdf(document):
         ("Email:", company_details.get("email", "-")),
     ]
     company_label_w = max(
-        int(draw.textlength(label, font=small_bold_font))
+        int(draw.textlength(label, font=footer_label_font))
         for label, _value in company_rows
     ) + S(12)
     company_value_w = max(S(90), footer_col_w - S(32) - company_label_w)
     company_row_specs = []
     for label, value in company_rows:
-        value_lines = wrap(str(value), small_font, company_value_w)[:3]
+        value_lines = wrap(str(value), footer_value_font, company_value_w)[:3]
         company_row_specs.append((label, value_lines))
     service_period = _invoice_month_year(service_details.get("date"), invoice_date)
     company_short_name = str(company_details.get("name") or brand_name).removesuffix(" AB")
@@ -998,57 +925,57 @@ def _build_legacy_branded_invoice_pdf(document):
             "please contact Hembla Experten before the due date.",
         ]
     important_wrapped_paragraphs = [
-        wrap(paragraph, small_font, footer_col_w - S(32))
+        wrap(paragraph, footer_value_font, footer_col_w - S(32))
         for paragraph in important_paragraphs
     ]
     # Keep this in sync with the row advances used while drawing below. Payment
     # details can contain several rows, so a fixed estimate would cause the
     # reference and terms to overlap in production PDFs.
-    payment_row_heights = [S(32) if len(lines) == 1 else S(52) for lines in payment_value_lines]
-    payment_h = S(58) + sum(payment_row_heights) + S(44)
-    company_line_height = S(24)
-    company_row_gap = S(6)
+    payment_row_heights = [S(28) if len(lines) == 1 else S(44) for lines in payment_value_lines]
+    payment_h = S(52) + sum(payment_row_heights) + S(32)
+    company_line_height = S(20)
+    company_row_gap = S(4)
     company_h = (
-        S(54)
+        S(50)
         + sum(max(1, len(lines)) * company_line_height for _label, lines in company_row_specs)
         + ((len(company_row_specs) - 1) * company_row_gap)
-        + S(26)
+        + S(20)
     )
-    important_line_height = S(27)
-    important_paragraph_gap = S(16)
+    important_line_height = S(22)
+    important_paragraph_gap = S(12)
     important_line_count = sum(len(lines) for lines in important_wrapped_paragraphs)
     important_h = (
-        S(54)
+        S(50)
         + (important_line_count * important_line_height)
         + ((len(important_wrapped_paragraphs) - 1) * important_paragraph_gap)
-        + S(24)
+        + S(18)
     )
-    footer_h = max(S(210), payment_h, company_h, important_h)
+    footer_h = max(S(190), payment_h, company_h, important_h)
 
     for left, title, icon in zip(footer_positions, footer_titles, footer_icons):
         card_box(left, footer_top, footer_col_w, footer_h)
         image.paste(icon, (left + S(16), footer_top + S(12)), icon)
-        draw.text((left + S(48), footer_top + S(14)), title, font=small_bold_font, fill=colors["gold"])
+        draw.text((left + S(48), footer_top + S(14)), title, font=footer_title_font, fill=colors["gold"])
 
     left = footer_positions[0] + S(16)
-    fy = footer_top + S(58)
+    fy = footer_top + S(50)
     for idx, (label, value) in enumerate(payment_rows):
-        draw.text((left, fy), label, font=small_bold_font, fill=colors["ink"])
+        draw.text((left, fy), label, font=footer_label_font, fill=colors["ink"])
         value_lines = payment_value_lines[idx]
-        draw_text_block(left + payment_label_w, fy, value_lines[:2], small_font, colors["ink"], S(20))
+        draw_text_block(left + payment_label_w, fy, value_lines[:2], footer_value_font, colors["ink"], S(18))
         fy += payment_row_heights[idx]
 
     left = footer_positions[1] + S(16)
-    fy = footer_top + S(58)
+    fy = footer_top + S(50)
     for label, value_lines in company_row_specs:
-        draw.text((left, fy), label, font=small_bold_font, fill=colors["ink"])
-        draw_text_block(left + company_label_w, fy, value_lines, small_font, colors["ink"], company_line_height)
+        draw.text((left, fy), label, font=footer_label_font, fill=colors["ink"])
+        draw_text_block(left + company_label_w, fy, value_lines, footer_value_font, colors["ink"], company_line_height)
         fy += (max(1, len(value_lines)) * company_line_height) + company_row_gap
 
     left = footer_positions[2] + S(16)
-    fy = footer_top + S(58)
+    fy = footer_top + S(50)
     for paragraph_lines in important_wrapped_paragraphs:
-        draw_text_block(left, fy, paragraph_lines, small_font, colors["ink"], important_line_height)
+        draw_text_block(left, fy, paragraph_lines, footer_value_font, colors["ink"], important_line_height)
         fy += (len(paragraph_lines) * important_line_height) + important_paragraph_gap
 
     bottom_y = footer_top + footer_h + S(52)

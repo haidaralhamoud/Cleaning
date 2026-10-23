@@ -99,6 +99,11 @@
             <span id="sum_service_fee">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.service_fee|default:"0"|floatformat:2 }}</span>
         </div>
 
+        <div class="item">
+            <span id="sum_vat_label">VAT ({{ summary_data.vat_percent|default:"25"|floatformat:2 }}%)</span>
+            <span id="sum_vat">{{ pricing.currency|default:"sek"|upper }} {{ summary_data.vat_amount|default:"0"|floatformat:2 }}</span>
+        </div>
+
         <div class="item item--accent">
             <span id="sum_rot_label">RUT Deduction ({{ pricing.rot_percent|default:"0"|floatformat:2 }}%)</span>
             <span id="sum_rot">{% if booking.use_rot %}-{% endif %}{{ pricing.currency|default:"sek"|upper }} {{ pricing.rot|default:"0"|floatformat:2 }}</span>
@@ -132,9 +137,9 @@
 
             <p class="summary-note" id="sum_total_note">
                 {% if booking.use_rot %}
-                  VAT is included in the service prices. Total includes RUT deduction.
+                  VAT is calculated at {{ summary_data.vat_percent|default:"25"|floatformat:2 }}%. Total includes RUT deduction.
                 {% else %}
-                  VAT is included in the service prices. Total shown without RUT deduction.
+                  VAT is calculated at {{ summary_data.vat_percent|default:"25"|floatformat:2 }}%. Total shown without RUT deduction.
                 {% endif %}
             </p>
         </div>

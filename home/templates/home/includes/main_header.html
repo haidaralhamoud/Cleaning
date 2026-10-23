@@ -143,11 +143,14 @@
           <a href="{% url 'accounts:provider_inbox' %}">Messages</a>
         {% endif %}
 
+        {% comment %}
+        My Profile is temporarily hidden while testing the profile section.
         {% if user|is_provider %}
           <a href="{% url 'accounts:provider_profile' %}">My Profile</a>
         {% else %}
           <a href="{% url 'accounts:customer_profile_view' %}">My Profile</a>
         {% endif %}
+        {% endcomment %}
         <form method="POST" action="{% url 'accounts:logout' %}" class="nav-mobile-logout">
           {% csrf_token %}
           <button type="submit">Log out</button>
@@ -220,13 +223,17 @@
               </span>
             {% endif %}
           </a>
+          {% comment %}
           <a href="{% url 'accounts:provider_profile' %}" class="btn-auth">
             My Profile
           </a>
+          {% endcomment %}
         {% else %}
+          {% comment %}
           <a href="{% url 'accounts:customer_profile_view' %}" class="btn-auth">
             My Profile
           </a>
+          {% endcomment %}
         {% endif %}
       {% elif user.is_superuser %}
         <a href="{% url 'home:dashboard_home' %}" class="btn-auth">
@@ -241,13 +248,17 @@
             </span>
           {% endif %}
         </a>
+        {% comment %}
         <a href="{% url 'accounts:provider_profile' %}" class="btn-auth">
           My Profile
         </a>
+        {% endcomment %}
       {% else %}
+        {% comment %}
         <a href="{% url 'accounts:customer_profile_view' %}" class="btn-auth">
           My Profile
         </a>
+        {% endcomment %}
       {% endif %}
       <form method="POST" action="{% url 'accounts:logout' %}" style="display:inline;">
         {% csrf_token %}
