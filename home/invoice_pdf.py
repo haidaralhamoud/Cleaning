@@ -882,7 +882,7 @@ def _build_legacy_branded_invoice_pdf(document):
         ("BIC/SWIFT:", company_details.get("bic", "-")),
         ("Clearing no.:", company_details.get("bank_branch", "-")),
         ("Reference:", reference_number),
-        ("Bankgiro:", "54186531"),
+        ("Bankgiro:", "5418-6531"),
     ]
     payment_label_w = max(
         int(draw.textlength(label, font=footer_label_font))
