@@ -1,5 +1,6 @@
 ﻿{% load static %}
 {% load bootstrap4 %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,6 +58,18 @@
 
   
 <script src="{% static 'js/main_header.js' %}" defer>
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var linguiseRoot = document.querySelector('.linguise_switcher_root');
+    var fallback = document.querySelector('[data-linguise-fallback]');
+    if (!linguiseRoot || !fallback) return;
+    var hideFallbackWhenReady = function () {
+      if (linguiseRoot.children.length) fallback.hidden = true;
+    };
+    hideFallbackWhenReady();
+    new MutationObserver(hideFallbackWhenReady).observe(linguiseRoot, { childList: true, subtree: true });
+  });
 </script>
 </body>
 </html>

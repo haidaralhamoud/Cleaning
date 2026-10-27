@@ -183,6 +183,29 @@
       <span>{% trans "Electrical Services" %}</span>
     </a>
     <div class="linguise_switcher_root linguise_menu_root" aria-label="Language"></div>
+    <div class="language-switcher-fallback" data-linguise-fallback>
+      {% get_current_language as CURRENT_LANGUAGE %}
+      <form action="{% url 'set_language' %}" method="post">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="language-switcher-fallback__toggle" type="button" aria-label="{% trans 'Language' %}">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M3 12h18M12 3c2.2 2.4 3.2 5.4 3.2 9s-1 6.6-3.2 9c-2.2-2.4-3.2-5.4-3.2-9S9.8 5.4 12 3Z"></path>
+          </svg>
+          <span>{{ CURRENT_LANGUAGE|upper }}</span>
+          <span class="language-switcher-fallback__caret" aria-hidden="true"></span>
+        </button>
+        <div class="language-switcher-fallback__menu">
+          {% get_available_languages as LANGUAGES %}
+          {% for lang in LANGUAGES %}
+            <button type="submit" name="language" value="{{ lang.0 }}"{% if lang.0 == CURRENT_LANGUAGE %} aria-current="true"{% endif %}>
+              <span>{{ lang.1 }}</span><small>{{ lang.0|upper }}</small>
+            </button>
+          {% endfor %}
+        </div>
+      </form>
+    </div>
     {% comment %}
     Language selector is temporarily hidden until multilingual support is ready.
     <div class="lang-dropdown">

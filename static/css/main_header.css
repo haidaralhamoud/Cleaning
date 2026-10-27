@@ -946,6 +946,10 @@ body.mobile-nav-open {
   z-index: 3200;
 }
 
+.main-header .linguise_switcher_root:empty {
+  display: none;
+}
+
 .main-header .linguise_switcher_root > *,
 .main-header .linguise_switcher_root button,
 .main-header .linguise_switcher_root select,
@@ -984,6 +988,98 @@ body.mobile-nav-open {
   max-height: 18px;
 }
 
+.language-switcher-fallback {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: #6f531b;
+  z-index: 3200;
+}
+
+.language-switcher-fallback form {
+  position: relative;
+  margin: 0;
+}
+
+.language-switcher-fallback__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 7px 11px;
+  border: 1px solid rgba(200, 167, 91, 0.34);
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fffdf8, #fbf7ee);
+  color: #6f531b;
+  cursor: pointer;
+  font: 700 12px/1 "Vesper Libre", serif;
+  box-shadow: 0 7px 18px rgba(168, 132, 50, 0.12);
+}
+
+.language-switcher-fallback__toggle svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.language-switcher-fallback__caret {
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.language-switcher-fallback__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 170px;
+  padding: 6px;
+  border: 1px solid rgba(200, 167, 91, 0.25);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 14px 30px rgba(23, 35, 66, 0.18);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.language-switcher-fallback form:hover .language-switcher-fallback__menu,
+.language-switcher-fallback form:focus-within .language-switcher-fallback__menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.language-switcher-fallback__menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 9px;
+  color: #26324e;
+  cursor: pointer;
+  font: 600 12px/1.2 "Vesper Libre", serif;
+  text-align: start;
+}
+
+.language-switcher-fallback__menu button:hover,
+.language-switcher-fallback__menu button[aria-current="true"] {
+  background: #fbf7ee;
+  color: #a88432;
+}
+
+.language-switcher-fallback__menu small {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
 @media (max-width: 768px) {
   /* Keep the switcher available beside the mobile menu and WhatsApp button. */
   .main-header .auth-buttons {
@@ -995,6 +1091,10 @@ body.mobile-nav-open {
 
   .main-header .auth-buttons > :not(.linguise_switcher_root) {
     display: none;
+  }
+
+  .main-header .auth-buttons > .language-switcher-fallback {
+    display: inline-flex;
   }
 
   .main-header .linguise_switcher_root {
