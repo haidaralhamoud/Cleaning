@@ -112,6 +112,51 @@
     box-shadow: 0 10px 22px rgba(17, 17, 17, 0.18);
   }
 
+  /* Critical contact styles prevent an unstyled WhatsApp SVG flash while the main header CSS loads. */
+  .header-contact-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px;
+    border: 1px solid rgba(200, 167, 91, 0.2);
+    border-radius: 999px;
+    background: rgba(251, 247, 238, 0.72);
+  }
+
+  .main-header .auth-buttons .header-contact-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 34px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .header-contact-button svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    fill: currentColor;
+  }
+
+  .main-header .auth-buttons .header-phone {
+    border: 1px solid rgba(168, 132, 50, 0.55);
+    background: #fff;
+    color: #8a6924;
+  }
+
+  .main-header .auth-buttons .header-whatsapp {
+    border: 1px solid #08795a;
+    background: linear-gradient(135deg, #128c6e, #08795a);
+    color: #fff;
+  }
+
   .btn-guest:hover {
     background: linear-gradient(135deg, #C8A75B, #A88432);
     color: #fff;

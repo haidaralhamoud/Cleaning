@@ -1021,6 +1021,56 @@ body.mobile-nav-open {
   }
 }
 
+/* Keep the desktop header stable when Linguise expands translated labels. */
+@media (min-width: 769px) {
+  .main-header {
+    min-width: 0;
+  }
+
+  .main-header .logo {
+    flex: 0 1 auto;
+    min-width: 128px;
+  }
+
+  .main-header .logo img {
+    width: clamp(128px, 10.2vw, 196px);
+  }
+
+  .main-header .nav-links {
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: center;
+    gap: clamp(12px, 1.5vw, 28px);
+  }
+
+  .main-header .nav-links > a,
+  .main-header .nav-links > .nav-dropdown > .dropdown-toggle {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .main-header .auth-buttons {
+    flex: 0 1 auto;
+    min-width: 0;
+    gap: clamp(7px, 0.8vw, 14px);
+  }
+
+  .main-header .auth-buttons .header-contact-actions {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .main-header .auth-buttons .header-contact-button {
+    padding-inline: clamp(7px, 0.55vw, 11px);
+    font-size: clamp(10px, 0.63vw, 12px);
+  }
+
+  .main-header .auth-buttons .nav-electric {
+    padding-inline: clamp(8px, 0.7vw, 14px);
+    font-size: clamp(10px, 0.68vw, 13px);
+  }
+}
+
 @media (max-width: 768px) {
   .main-header {
     gap: 10px;
