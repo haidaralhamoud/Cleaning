@@ -1,6 +1,5 @@
 ﻿{% load static %}
 {% load bootstrap4 %}
-{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +13,6 @@
 <link rel="preload" href="{% static 'css/main_header.css' %}" as="style" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="{% static 'css/main_header.css' %}"></noscript>
 <link rel="preconnect" href="https://static.linguise.com" crossorigin>
-<script async src="https://static.linguise.com/script-js/switcher.bundle.js?d=pk_eH4eZk22bRatwWe522ouN6khZt2Xv5em"></script>
 <style>
    a,
    button,
@@ -58,18 +56,6 @@
 
   
 <script src="{% static 'js/main_header.js' %}" defer>
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var linguiseRoot = document.querySelector('.linguise_switcher_root');
-    var fallback = document.querySelector('[data-linguise-fallback]');
-    if (!linguiseRoot || !fallback) return;
-    var hideFallbackWhenReady = function () {
-      if (linguiseRoot.children.length) fallback.hidden = true;
-    };
-    hideFallbackWhenReady();
-    new MutationObserver(hideFallbackWhenReady).observe(linguiseRoot, { childList: true, subtree: true });
-  });
 </script>
 </body>
 </html>
