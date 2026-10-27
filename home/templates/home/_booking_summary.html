@@ -137,9 +137,9 @@
 
             <p class="summary-note" id="sum_total_note">
                 {% if booking.use_rot %}
-                  VAT is calculated at {{ summary_data.vat_percent|default:"25"|floatformat:2 }}%. Total includes RUT deduction.
+                  Prices include {{ summary_data.vat_percent|default:"25"|floatformat:2 }}% VAT. Total includes RUT deduction.
                 {% else %}
-                  VAT is calculated at {{ summary_data.vat_percent|default:"25"|floatformat:2 }}%. Total shown without RUT deduction.
+                  Prices include {{ summary_data.vat_percent|default:"25"|floatformat:2 }}% VAT. Total shown without RUT deduction.
                 {% endif %}
             </p>
         </div>

@@ -238,7 +238,7 @@
 </div>
 </article>
 </div>
-<p class="services-note">VAT is calculated at {{ vat_percent|floatformat:0 }}%. {% if booking.use_rot %}RUT is then deducted at {{ rot_percent|floatformat:0 }}%, and you pay the final reduced amount.{% else %}RUT deduction is not applied.{% endif %}</p>
+<p class="services-note">Prices include {{ vat_percent|floatformat:0 }}% VAT. {% if booking.use_rot %}RUT is then deducted at {{ rot_percent|floatformat:0 }}%, and you pay the final reduced amount.{% else %}RUT deduction is not applied.{% endif %}</p>
 </section>
 <section class="card discount-card">
 <div class="card-header">

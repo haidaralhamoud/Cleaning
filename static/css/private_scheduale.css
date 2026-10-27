@@ -789,8 +789,17 @@ body {
 
 .custom-frequency-fields > label {
   display: block;
-  margin-bottom: 9px;
+  margin-bottom: 3px;
   font-weight: 700;
+}
+
+.custom-frequency-help {
+  display: block;
+  margin-bottom: 9px;
+  color: #687086;
+  font-size: 0.86rem;
+  font-weight: 400;
+  line-height: 1.35;
 }
 
 .custom-frequency-fields__controls {

@@ -185,6 +185,7 @@ def notify_home_service_inquiry(sender, instance, created, **kwargs):
     customer_body = (
         "Thank you for contacting Hembla Experten. We have received your cleaning request.\n\n"
         f"Request number: {instance.pk}\n"
+        f"Name: {instance.full_name}\n"
         f"Service: {instance.service}\n"
         f"Address: {instance.address}\n"
         f"Preferred date: {date_label}\n"
@@ -206,6 +207,7 @@ def notify_home_service_inquiry(sender, instance, created, **kwargs):
     admin_body = (
         f"A new home service request was received.\n\n"
         f"Request ID: {instance.pk}\n"
+        f"Name: {instance.full_name}\n"
         f"Service: {instance.service}\n"
         f"Address: {instance.address}\n"
         f"Email: {instance.email}\n"

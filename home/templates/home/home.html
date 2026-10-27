@@ -2132,11 +2132,10 @@
     position: absolute;
     top: 50%;
     inset-inline-end: 11px;
-    width: 7px;
-    height: 7px;
-    border-right: 2px solid #a66a0b;
-    border-bottom: 2px solid #a66a0b;
-    transform: translateY(-70%) rotate(45deg);
+    width: 18px;
+    height: 18px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2380612f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 7v5l3 2'/%3E%3C/svg%3E") center / contain no-repeat;
+    transform: translateY(-50%);
     pointer-events: none;
   }
   .hero-time-select {
@@ -3057,6 +3056,7 @@
   {% csrf_token %}
   <h2>{% trans "Let's Get Your Home Cleaned" %}</h2>
   <p>{% trans "Tell us what you need and we'll get back to you shortly." %}</p>
+  <div class="hero-request-field"><label for="hero-full-name">{% trans "Full Name" %} *</label><input id="hero-full-name" name="full_name" type="text" autocomplete="name" placeholder="{% trans 'Enter your full name' %}" maxlength="200" required></div>
   <fieldset>
     <legend>{% trans "Choose a service" %}</legend>
     <div class="hero-service-options">
@@ -3075,7 +3075,7 @@
       <label for="hero-time">{% trans "Preferred time" %}</label>
       <div class="hero-time-select-wrap" data-time-picker>
         <input id="hero-time" name="time" type="hidden">
-        <button class="hero-time-select" type="button" aria-haspopup="listbox" aria-expanded="false" data-time-toggle>{% trans "Select time" %}</button>
+        <button class="hero-time-select" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="{% trans 'Select preferred time' %}" data-time-toggle>08:00</button>
         <div class="hero-time-menu" role="listbox">
           <button class="hero-time-option" type="button" data-time="08:00">08:00</button><button class="hero-time-option" type="button" data-time="09:00">09:00</button>
           <button class="hero-time-option" type="button" data-time="10:00">10:00</button><button class="hero-time-option" type="button" data-time="11:00">11:00</button>
@@ -3185,7 +3185,7 @@
           successModal.querySelector('[data-request-success-close]').focus();
         }
         requestForm.reset();
-        if (timeToggle) timeToggle.textContent = '{% trans "Select time" %}';
+        if (timeToggle) timeToggle.textContent = '08:00';
         note.textContent = '{% trans "Thank you! Your request was sent. We will contact you shortly." %}';
         note.style.color = '#55753f';
         submitButton.textContent = '{% trans "Request Sent" %} ✓';

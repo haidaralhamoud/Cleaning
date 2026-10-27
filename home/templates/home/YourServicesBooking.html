@@ -1398,8 +1398,8 @@ function applySummaryData(data) {
     const totalNote = document.getElementById("sum_total_note");
     if (totalNote) {
         totalNote.innerText = data.use_rot
-            ? `VAT is calculated at ${Number(data.vat_percent || 0).toFixed(2)}%. Total includes RUT deduction.`
-            : `VAT is calculated at ${Number(data.vat_percent || 0).toFixed(2)}%. Total shown without RUT deduction.`;
+            ? `Prices include ${Number(data.vat_percent || 0).toFixed(2)}% VAT. Total includes RUT deduction.`
+            : `Prices include ${Number(data.vat_percent || 0).toFixed(2)}% VAT. Total shown without RUT deduction.`;
     }
 }
 

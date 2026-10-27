@@ -963,9 +963,17 @@ def _calculate_private_payment_summary(booking, currency):
     base_total = net_total + rot_discount
     service_fee = PRIVATE_BOOKING_SERVICE_FEE if base_total > 0 else Decimal("0.00")
     vat_percent = PRIVATE_BOOKING_VAT_PERCENT
-    vat_base = base_total + service_fee
-    vat_amount = (vat_base * vat_percent / Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-    total_before_discounts = vat_base + vat_amount
+    # Dashboard service/add-on prices are VAT-inclusive. Extract the VAT
+    # portion instead of adding 25% on top of the displayed price.
+    gross_total = base_total + service_fee
+    net_total_before_vat = (base_total / (Decimal("1.00") + (vat_percent / Decimal("100")))).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    # The fixed service fee is outside the Dashboard service prices. VAT is
+    # shown only for the VAT-inclusive service/add-on amount (e.g. 990 =>
+    # 792 net + 198 VAT), and is never added on top of the customer price.
+    vat_amount = (base_total - net_total_before_vat).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    total_before_discounts = gross_total
 
     customer = None
     if booking.user_id:
@@ -1029,6 +1037,7 @@ def _calculate_private_payment_summary(booking, currency):
         "service_fee": service_fee,
         "vat_percent": vat_percent,
         "vat_amount": vat_amount,
+        "net_total_before_vat": net_total_before_vat,
         "total_before_discounts": total_before_discounts,
         "amount": final_amount,
         "amount_cents": _stripe_amount_from_decimal(final_amount),
@@ -1786,7 +1795,7 @@ def _dashboard_notifications(request=None):
     for inquiry in recent_home_inquiries:
         items.append({
             "title": f"New Home Service Request #{inquiry.id}",
-            "detail": f"{inquiry.service} - {inquiry.phone}",
+            "detail": f"{inquiry.full_name or 'Customer'} - {inquiry.service} - {inquiry.phone}",
             "time": inquiry.created_at,
             "url": "/dashboard/home-service-inquiries/",
         })
@@ -5835,6 +5844,7 @@ def submit_call_request(request):
 
 @require_POST
 def submit_home_service_inquiry(request):
+    full_name = (request.POST.get("full_name") or "").strip()
     service = (request.POST.get("service") or "").strip()
     address = (request.POST.get("address") or "").strip()
     email = (request.POST.get("email") or "").strip()
@@ -5844,6 +5854,10 @@ def submit_home_service_inquiry(request):
     message_text = (request.POST.get("message") or "").strip()
 
     errors = {}
+    if not full_name:
+        errors["full_name"] = "Enter your full name."
+    elif len(full_name) > 200:
+        errors["full_name"] = "Full name must be 200 characters or fewer."
     if not service:
         errors["service"] = "Choose a service."
     if not address:
@@ -5858,6 +5872,7 @@ def submit_home_service_inquiry(request):
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
     HomeServiceInquiry.objects.create(
+        full_name=full_name,
         service=service,
         address=address,
         email=email,

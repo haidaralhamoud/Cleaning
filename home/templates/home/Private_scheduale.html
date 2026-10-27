@@ -158,6 +158,7 @@
 </div>
 <div class="custom-frequency-fields" id="customFrequencyFields" hidden>
 <label>How often should we visit?</label>
+<small class="custom-frequency-help">Choose the interval between each cleaning.</small>
 <div class="custom-frequency-fields__controls">
 <select id="customFrequencyInterval" aria-label="Custom frequency interval">
 <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
@@ -258,6 +259,7 @@
 </select>
 <div class="custom-frequency-fields svc-custom-frequency" hidden>
 <label>How often should we visit?</label>
+<small class="custom-frequency-help">Choose the interval between each cleaning.</small>
 <div class="custom-frequency-fields__controls">
 <select class="svc-custom-interval" aria-label="Custom frequency interval">
 <option value="1">1</option><option value="2">2</option><option value="3" selected>3</option>
@@ -456,9 +458,9 @@
 </div>
 <p class="summary-note" id="sum_total_note">
                     {% if booking.use_rot %}
-                      VAT is calculated at {{ summary_data.vat_percent|default:25|floatformat:2 }}%. Total includes the RUT deduction.
+                  Prices include {{ summary_data.vat_percent|default:25|floatformat:2 }}% VAT. Total includes the RUT deduction.
                     {% else %}
-                      VAT is calculated at {{ summary_data.vat_percent|default:25|floatformat:2 }}%. Total shown without RUT deduction.
+                  Prices include {{ summary_data.vat_percent|default:25|floatformat:2 }}% VAT. Total shown without RUT deduction.
                     {% endif %}
                 </p>
 </div>
@@ -1388,8 +1390,8 @@ function setSummaryValues(data) {
   const totalNote = document.getElementById("sum_total_note");
   if (totalNote) {
     totalNote.textContent = data.use_rot
-      ? `VAT is calculated at ${Number(data.vat_percent || 0).toFixed(2)}%. Total includes the RUT deduction.`
-      : `VAT is calculated at ${Number(data.vat_percent || 0).toFixed(2)}%. Total shown without RUT deduction.`;
+      ? `Prices include ${Number(data.vat_percent || 0).toFixed(2)}% VAT. Total includes the RUT deduction.`
+      : `Prices include ${Number(data.vat_percent || 0).toFixed(2)}% VAT. Total shown without RUT deduction.`;
   }
 }
 

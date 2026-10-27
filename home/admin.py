@@ -55,11 +55,11 @@ User = get_user_model()
 
 @admin.register(HomeServiceInquiry)
 class HomeServiceInquiryAdmin(admin.ModelAdmin):
-    list_display = ("email", "phone", "service", "address", "preferred_date", "preferred_time", "contacted", "created_at")
+    list_display = ("full_name", "email", "phone", "service", "address", "preferred_date", "preferred_time", "contacted", "created_at")
     list_filter = ("contacted", "service", "created_at")
-    search_fields = ("email", "phone", "address", "message")
+    search_fields = ("full_name", "email", "phone", "address", "message")
     list_editable = ("contacted",)
-    readonly_fields = ("service", "address", "email", "phone", "preferred_date", "preferred_time", "message", "created_at")
+    readonly_fields = ("full_name", "service", "address", "email", "phone", "preferred_date", "preferred_time", "message", "created_at")
 
     def has_add_permission(self, request):
         return False

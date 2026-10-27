@@ -1574,6 +1574,7 @@ class AirbnbManagementRequest(models.Model):
 
 
 class HomeServiceInquiry(models.Model):
+    full_name = models.CharField(max_length=200, default="")
     service = models.CharField(max_length=100)
     address = models.CharField(max_length=255)
     email = models.EmailField(blank=True, default="")

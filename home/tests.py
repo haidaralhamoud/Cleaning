@@ -546,6 +546,7 @@ class BookingEmailSignalTests(TestCase):
         response = self.client.post(
             reverse("home:submit_home_service_inquiry"),
             data={
+                "full_name": "Sara Andersson",
                 "service": "Deep cleaning",
                 "address": "Storgatan 12, Jarfalla",
                 "email": "requester@example.com",
@@ -573,6 +574,7 @@ class BookingEmailSignalTests(TestCase):
 
     def test_home_service_inquiry_appears_in_dashboard_notifications(self):
         inquiry = HomeServiceInquiry.objects.create(
+            full_name="Test Customer",
             service="Regular cleaning",
             address="Test address",
             email="dashboard@example.com",
