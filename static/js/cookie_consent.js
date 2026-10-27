@@ -2,7 +2,7 @@
   const STORAGE_KEY = "cookie_consent";
   const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
-  const GA_MEASUREMENT_ID = "G-R9XP0MPGV0";
+  const GA_MEASUREMENT_ID = "G-VBQSNSZG6L";
   const FB_PIXEL_ID = "FACEBOOK_PIXEL_ID";
 
   const state = {
