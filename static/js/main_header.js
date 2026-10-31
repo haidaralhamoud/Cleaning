@@ -687,6 +687,17 @@ const initHemblaCalendar = () => {
   document.body.appendChild(wrap);
 
   inputs.forEach((input) => {
+    if (input.hasAttribute("data-date-placeholder")) {
+      const syncDatePlaceholder = () => {
+        input.dataset.hasDate = String(Boolean(input.value));
+      };
+      syncDatePlaceholder();
+      input.addEventListener("input", syncDatePlaceholder);
+      input.addEventListener("change", syncDatePlaceholder);
+      if (input.form) {
+        input.form.addEventListener("reset", () => setTimeout(syncDatePlaceholder, 0));
+      }
+    }
     input.setAttribute("autocomplete", "off");
     input.readOnly = true;
     input.dataset.hemblaCalendarBound = "1";
