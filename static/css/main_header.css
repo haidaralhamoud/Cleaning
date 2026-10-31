@@ -926,10 +926,7 @@ body.mobile-nav-open {
 }
 
 /* Linguise language switcher — styled to match the Hembla Experten header. */
-/* Linguise also creates a default floating switcher. Keep only our header-mounted switcher. */
-body .linguise_switcher {
-  display: none !important;
-}
+/* Let Linguise control switcher visibility, including its language menu. */
 
 .main-header .linguise_switcher_root {
   position: relative;
