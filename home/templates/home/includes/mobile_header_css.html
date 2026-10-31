@@ -1,4 +1,9 @@
 <style>
+  /* Hide only Linguise's automatic floating copy; keep the header and language dialog. */
+  body > .linguise_switcher_wrapper {
+    display: none !important;
+  }
+
   /* Keep essential mobile controls available before the deferred stylesheet loads. */
   @media (max-width: 1100px) {
     body .main-header {
