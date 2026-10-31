@@ -51,7 +51,7 @@
 });
 
 const initHeaderServiceMegaMenu = () => {
-  if (window.matchMedia("(max-width: 768px)").matches) return;
+  if (window.matchMedia("(max-width: 1100px)").matches) return;
 
   document.querySelectorAll("[data-services-categories-menu]").forEach((menu) => {
     const categoryLinks = Array.from(menu.querySelectorAll("[data-category-target]"));
@@ -77,7 +77,7 @@ const initHeaderServiceMegaMenu = () => {
 };
 
 const initMobileHeaderMenus = (syncMobileNavState = () => {}) => {
-  const mobileQuery = window.matchMedia("(max-width: 768px)");
+  const mobileQuery = window.matchMedia("(max-width: 1100px)");
   const navLinks = document.getElementById("nav-links");
   const navDropdowns = Array.from(document.querySelectorAll(".nav-links .nav-dropdown"));
   const branchDropdowns = Array.from(document.querySelectorAll(".nav-links .dropdown-submenu"));
