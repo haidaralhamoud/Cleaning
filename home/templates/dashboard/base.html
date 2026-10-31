@@ -59,6 +59,8 @@
           {% block page_title %}Dashboard{% endblock %}
         </div>
         <div class="dash-actions">
+          <button class="btn btn-outline-secondary" id="dashEnableAlerts" type="button" aria-describedby="dashAlertsStatus">Enable desktop alerts</button>
+          <span id="dashAlertsStatus" class="visually-hidden" role="status"></span>
           <div class="dash-bell">
             <button class="dash-bell-btn" id="dashNotifBtn" type="button" aria-haspopup="true" aria-expanded="false">
               <i class="fa-regular fa-bell"></i>
@@ -209,16 +211,80 @@
     const notifBtn = document.getElementById("dashNotifBtn");
     const notifMenu = document.getElementById("dashNotifMenu");
     let dashNotifInitialized = false;
-    let dashLastNotifKey = "";
-    let dashLastNotifCount = Number(document.getElementById("dashNotifBadge")?.textContent || 0);
+    const dashSeenNotificationKeys = new Set();
     let dashAudioContext = null;
 
     function unlockDashboardAudio() {
-      if (dashAudioContext) return;
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (!AudioContextClass) return;
-      dashAudioContext = new AudioContextClass();
-      if (dashAudioContext.state === "suspended") dashAudioContext.resume().catch(() => {});
+      try {
+        if (!dashAudioContext || dashAudioContext.state === "closed") {
+          dashAudioContext = new AudioContextClass();
+        }
+        if (dashAudioContext.state === "suspended") dashAudioContext.resume().catch(() => {});
+      } catch (error) {
+        // Desktop alerts and the notification list still work without audio.
+      }
+    }
+
+    const dashAlertsButton = document.getElementById("dashEnableAlerts");
+    const dashAlertsStatus = document.getElementById("dashAlertsStatus");
+    const desktopAlertsSupported = () => "Notification" in window && window.isSecureContext;
+
+    function updateDesktopAlertsButton() {
+      if (!dashAlertsButton) return;
+      const supported = desktopAlertsSupported();
+      const granted = supported && Notification.permission === "granted";
+      dashAlertsButton.textContent = !supported ? "Desktop alerts unavailable" : granted ? "Test alerts" : "Enable desktop alerts";
+      dashAlertsButton.disabled = !supported;
+      dashAlertsButton.title = granted
+        ? "Desktop alerts are allowed. Click to test the notification sound."
+        : "Allow notifications to receive alerts while using another tab. Keep the dashboard open.";
+    }
+
+    if (dashAlertsButton) {
+      dashAlertsButton.addEventListener("click", async () => {
+        unlockDashboardAudio();
+        if (!desktopAlertsSupported()) return;
+        try {
+          const permission = Notification.permission === "default"
+            ? await Notification.requestPermission()
+            : Notification.permission;
+          const message = permission === "granted"
+            ? "Desktop alerts enabled. Keep the dashboard open; new activity will also alert you in another tab."
+            : permission === "denied"
+              ? "Notifications are blocked. Allow notifications in your browser's site settings, then try again."
+              : "Notifications were not enabled. Click Enable desktop alerts to try again.";
+          dashAlertsStatus.textContent = message;
+          dashShowToast(message, permission === "granted" ? "success" : "error");
+          if (permission === "granted") playDashboardNotificationSound();
+        } catch (error) {
+          dashAlertsStatus.textContent = "Could not enable desktop alerts in this browser.";
+          dashShowToast(dashAlertsStatus.textContent, "error");
+        }
+        updateDesktopAlertsButton();
+      });
+    }
+    updateDesktopAlertsButton();
+
+    function showDashboardDesktopNotification(item) {
+      if (!desktopAlertsSupported() || Notification.permission !== "granted") return;
+      if (!document.hidden && document.hasFocus()) return;
+      try {
+        const notification = new Notification(item?.title || "New dashboard activity", {
+          body: item?.detail || "Open the dashboard to see the details.",
+          icon: "{% static 'images/logo.png' %}",
+          tag: `hembla-${item?.title || "activity"}-${item?.time || ""}`,
+        });
+        notification.onclick = () => {
+          notification.close();
+          window.focus();
+          const target = new URL(item?.url || "{% url 'home:dashboard_home' %}", window.location.href);
+          if (target.origin === window.location.origin) window.location.assign(target.href);
+        };
+      } catch (error) {
+        // Browsers without desktop Notification support retain sound and in-page alerts.
+      }
     }
 
     function playDashboardNotificationSound() {
@@ -241,6 +307,7 @@
 
     function announceDashboardNotification(item) {
       playDashboardNotificationSound();
+      showDashboardDesktopNotification(item);
       if (notifBtn) {
         notifBtn.classList.remove("has-new-notification");
         void notifBtn.offsetWidth;
@@ -307,16 +374,13 @@
         if (!res.ok) return;
         const data = await res.json();
 
-        const newestItem = data.items && data.items.length ? data.items[0] : null;
-        const newestKey = newestItem
-          ? `${newestItem.title}|${newestItem.detail}|${newestItem.time}|${newestItem.url || ""}`
-          : "";
-        const currentCount = Number(data.count || 0);
-        if (dashNotifInitialized && newestKey && newestKey !== dashLastNotifKey && currentCount >= dashLastNotifCount) {
-          announceDashboardNotification(newestItem);
+        const notificationItems = Array.isArray(data.items) ? data.items : [];
+        const notificationKey = (item) => `${item.title}|${item.detail}|${item.time}|${item.url || ""}`;
+        const newItems = notificationItems.filter((item) => !dashSeenNotificationKeys.has(notificationKey(item)));
+        if (dashNotifInitialized && newItems.length) {
+          announceDashboardNotification(newItems[0]);
         }
-        dashLastNotifKey = newestKey;
-        dashLastNotifCount = currentCount;
+        notificationItems.forEach((item) => dashSeenNotificationKeys.add(notificationKey(item)));
         dashNotifInitialized = true;
 
         const newEl = document.getElementById("dashNotifNew");
@@ -370,7 +434,10 @@
     refreshDashboardNotifications();
     const dashboardNotificationTimer = setInterval(refreshDashboardNotifications, 10000);
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) refreshDashboardNotifications();
+      if (!document.hidden) {
+        updateDesktopAlertsButton();
+        refreshDashboardNotifications();
+      }
     });
   </script>
 
