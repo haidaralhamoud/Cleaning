@@ -1,4 +1,37 @@
 <style>
+  /* Size the WhatsApp link before the deferred stylesheets load. */
+.floating-whatsapp {
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 2900;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #087f5b;
+  color: #fff;
+  box-shadow: 0 6px 22px rgba(8, 121, 90, .3);
+  text-decoration: none;
+  transition: transform .2s ease;
+}
+
+.floating-whatsapp svg {
+  width: 28px;
+  height: 28px;
+  fill: currentColor;
+}
+
+.floating-whatsapp:hover,
+.floating-whatsapp:focus-visible {
+  color: #fff;
+  transform: translateY(-3px);
+  outline: 3px solid #c8a75b;
+  outline-offset: 3px;
+}
+
   /* Hide only Linguise's automatic floating copy; keep the header and language dialog. */
   body > .linguise_switcher_wrapper {
     display: none !important;
