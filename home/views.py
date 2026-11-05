@@ -1557,10 +1557,12 @@ def service_contact_submit(request):
 
 
 def _staff_required(user):
-    return user.is_authenticated and user.is_staff
+    return user.is_authenticated and user.is_active and user.is_staff
 
 
 def _dashboard_notifications(request=None):
+    if request is not None and not (request.user.is_superuser or request.user.has_perm("accounts.access_dashboard")):
+        return {"dashboard_notif_count": 0, "dashboard_notif_items": []}
     def _booking_dashboard_url(booking_type, booking_id):
         if booking_type == "business":
             slug = "business-bookings"
@@ -1738,14 +1740,14 @@ def _dashboard_notifications(request=None):
             "title": f"Request Fix #{fix.id}",
             "detail": f"{fix.booking_type.title()} booking #{fix.booking_id}",
             "time": fix.created_at,
-            "url": "/dashboard/request-fixes/",
+            "url": reverse("home:dashboard_model_view", args=["request-fixes", fix.pk]),
         })
     for fix in recent_open_fixes:
         items.append({
             "title": f"Open Request Fix #{fix.id}",
             "detail": f"{fix.booking_type.title()} booking #{fix.booking_id}",
             "time": fix.created_at,
-            "url": "/dashboard/request-fixes/",
+            "url": reverse("home:dashboard_model_view", args=["request-fixes", fix.pk]),
         })
     for report in recent_pending_no_show:
         provider_name = str(report.provider) if report.provider_id else "Unknown provider"
@@ -1753,14 +1755,14 @@ def _dashboard_notifications(request=None):
             "title": f"Pending No-Show #{report.id}",
             "detail": f"{report.booking_type.title()} booking #{report.booking_id} - {provider_name}",
             "time": report.created_at,
-            "url": f"{reverse('home:dashboard_model_list', args=['no-show'])}?{urlencode({'seen_no_show': report.id})}",
+            "url": f"{reverse('home:dashboard_model_view', args=['no-show', report.pk])}?{urlencode({'seen_no_show': report.id})}",
         })
     for contact in recent_contacts:
         items.append({
             "title": f"Contact: {contact.first_name} {contact.last_name}".strip(),
             "detail": contact.inquiry_type or "Contact form",
             "time": contact.created_at,
-            "url": "/dashboard/contacts/",
+            "url": reverse("home:dashboard_model_view", args=["contacts", contact.pk]),
         })
     for application in recent_applications:
         role = application.job.title if application.job_id else (application.area or "Open application")
@@ -1768,7 +1770,7 @@ def _dashboard_notifications(request=None):
             "title": f"New Job Application #{application.id}",
             "detail": f"{application.full_name} - {role}",
             "time": application.created_at,
-            "url": "/dashboard/applications/",
+            "url": reverse("home:dashboard_model_view", args=["applications", application.pk]),
         })
     for zip_request in recent_zip_requests:
         service = zip_request.service.title if zip_request.service_id else "Service area request"
@@ -1776,35 +1778,35 @@ def _dashboard_notifications(request=None):
             "title": f"New ZIP Request #{zip_request.id}",
             "detail": f"{zip_request.zip_code} - {service}",
             "time": zip_request.created_at,
-            "url": "/dashboard/not-available-zips/",
+            "url": reverse("home:dashboard_model_view", args=["not-available-zips", zip_request.pk]),
         })
     for call_request in recent_call_requests:
         items.append({
             "title": f"Call Request: {call_request.full_name}".strip() or f"Call Request #{call_request.id}",
             "detail": call_request.phone or call_request.email or "New call request",
             "time": call_request.created_at,
-            "url": "/dashboard/call-requests/",
+            "url": reverse("home:dashboard_model_view", args=["call-requests", call_request.pk]),
         })
     for email_request in recent_email_requests:
         items.append({
             "title": f"Email Request: {email_request.subject}".strip() or f"Email Request #{email_request.id}",
             "detail": email_request.email_from or "New email request",
             "time": email_request.created_at,
-            "url": "/dashboard/email-requests/",
+            "url": reverse("home:dashboard_model_view", args=["email-requests", email_request.pk]),
         })
     for inquiry in recent_home_inquiries:
         items.append({
             "title": f"New Home Service Request #{inquiry.id}",
             "detail": f"{inquiry.full_name or 'Customer'} - {inquiry.service} - {inquiry.phone}",
             "time": inquiry.created_at,
-            "url": "/dashboard/home-service-inquiries/",
+            "url": reverse("home:dashboard_model_view", args=["home-service-inquiries", inquiry.pk]),
         })
     for airbnb_request in recent_airbnb_requests:
         items.append({
             "title": f"New Airbnb Management Request #{airbnb_request.id}",
             "detail": f"{airbnb_request.name} - {airbnb_request.phone}",
             "time": airbnb_request.created_at,
-            "url": "/dashboard/airbnb-management-requests/",
+            "url": reverse("home:dashboard_model_view", args=["airbnb-management-requests", airbnb_request.pk]),
         })
     for customer in recent_customers:
         customer_name = f"{customer.first_name} {customer.last_name}".strip() or customer.email or str(customer)
@@ -1812,7 +1814,7 @@ def _dashboard_notifications(request=None):
             "title": "New Customer",
             "detail": customer_name,
             "time": customer.user.date_joined,
-            "url": "/dashboard/customers/",
+            "url": reverse("home:dashboard_model_view", args=["customers", customer.pk]),
         })
     for provider in recent_providers:
         provider_name = getattr(provider.user, "username", "") or str(provider.user)
@@ -1820,28 +1822,28 @@ def _dashboard_notifications(request=None):
             "title": "New Provider Signup",
             "detail": provider_name,
             "time": provider.user.date_joined,
-            "url": "/dashboard/provider-profiles/",
+            "url": reverse("home:dashboard_model_view", args=["provider-profiles", provider.pk]),
         })
     for note in recent_customer_notes:
         items.append({
             "title": "Customer Notes Updated",
             "detail": getattr(note.customer, "email", "") or str(note.customer),
             "time": note.updated_at,
-            "url": "/dashboard/customer-notes/",
+            "url": reverse("home:dashboard_model_view", args=["customer-notes", note.pk]),
         })
     for inc in recent_incidents:
         items.append({
             "title": f"Incident #{inc.id}",
             "detail": getattr(inc.customer, "email", "") or str(inc.customer),
             "time": inc.created_at,
-            "url": "/dashboard/incidents/",
+            "url": reverse("home:dashboard_model_view", args=["incidents", inc.pk]),
         })
     for rev in recent_reviews:
         items.append({
             "title": f"New Review: {rev.service_title}",
             "detail": getattr(rev.customer, "email", "") or str(rev.customer),
             "time": rev.created_at,
-            "url": "/dashboard/service-reviews/",
+            "url": reverse("home:dashboard_model_view", args=["service-reviews", rev.pk]),
         })
     for fb in recent_pending_feedback:
         feedback_label = (fb.customer_name or fb.email or f"Feedback #{fb.pk}").strip()
@@ -1852,7 +1854,7 @@ def _dashboard_notifications(request=None):
             "title": f"Pending Feedback: {feedback_label}",
             "detail": preview or "Awaiting admin review",
             "time": fb.created_at,
-            "url": "/dashboard/feedback/",
+            "url": reverse("home:dashboard_model_view", args=["feedback", fb.pk]),
         })
     for msg in recent_messages:
         booking_type = msg.thread.booking_type
@@ -3817,19 +3819,14 @@ def dashboard_model_edit(request, model, pk):
                 messages.error(request, "Preview the current invoice before sending. If you changed it, preview it again.")
                 return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
             try:
-                send_invoice_email(obj)
+                send_invoice_email(obj, sent_by=request.user)
             except Exception as exc:
                 logger.exception("Failed to send invoice %s", obj.invoice_number)
-                messages.error(request, f"Could not send invoice: {exc}")
+                messages.error(request, "Could not queue the invoice. Please try again.")
                 return redirect("home:dashboard_model_edit", model=item.slug, pk=obj.pk)
 
-            obj.status = "SENT"
-            obj.sent_at = timezone.now()
-            obj.sent_by = request.user
-            obj.is_locked = True
-            obj.save(update_fields=["status", "sent_at", "sent_by", "is_locked"])
             request.session.pop(f"invoice_preview_{obj.pk}", None)
-            messages.success(request, "Invoice sent and locked.")
+            messages.success(request, "Invoice queued for delivery and locked.")
             return redirect("home:dashboard_home")
 
         if item.model == PrivateBooking and "create_invoice_draft" in request.POST:

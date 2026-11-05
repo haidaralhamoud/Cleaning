@@ -518,7 +518,7 @@ def notify_contact(sender, instance, created, **kwargs):
             body,
             settings.DEFAULT_FROM_EMAIL,
             [recipient],
-            fail_silently=True,
+            fail_silently=False,
         )
     except Exception:
         logger.exception("Failed to send contact form email")

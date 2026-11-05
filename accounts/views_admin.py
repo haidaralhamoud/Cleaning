@@ -4,8 +4,11 @@ from django.contrib import messages
 
 from home.models import PrivateBooking, BusinessBooking
 from accounts.loyalty import award_points_for_booking
+from django.views.decorators.http import require_POST
+from django.core.exceptions import PermissionDenied
 
 @staff_member_required
+@require_POST
 def finalize_booking(request, booking_type, booking_id):
 
     if booking_type == "private":
@@ -15,6 +18,10 @@ def finalize_booking(request, booking_type, booking_id):
     else:
         messages.error(request, "Invalid booking type")
         return redirect("/admin/")
+
+    opts = booking._meta
+    if not request.user.has_perm(f"{opts.app_label}.change_{opts.model_name}"):
+        raise PermissionDenied
 
     success = award_points_for_booking(
         booking=booking,

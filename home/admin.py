@@ -1,4 +1,15 @@
-﻿from django import forms
+from django.utils.html import escape
+
+
+def _escape_json_display(value):
+    if isinstance(value, dict):
+        return {escape(str(key)): _escape_json_display(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_escape_json_display(item) for item in value]
+    return escape(str(value))
+
+
+from django import forms
 from django.utils import timezone 
 from django import forms
 from django.contrib import admin, messages
@@ -353,6 +364,7 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     # PRETTY JSON
     # =========================
     def pretty_json_colored(self, data):
+        data = _escape_json_display(data)
         if not data:
             return format_html("<span style='color:#6c757d;'>â€”</span>")
 
@@ -939,6 +951,7 @@ class PrivateBookingAdmin(admin.ModelAdmin):
     # PRETTY JSON (ظ…ط«ظ„ ط´ط؛ظ„ظƒ)
     # =========================
     def pretty_json_colored(self, data):
+        data = _escape_json_display(data)
         if not data:
             return mark_safe("<span style='color:#6c757d;'>â€”</span>")
 

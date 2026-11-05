@@ -1,3 +1,4 @@
+from home.upload_security import validate_attachment
 from decimal import Decimal, ROUND_HALF_UP
 
 from django.core.exceptions import ValidationError
@@ -122,7 +123,7 @@ class Customer(models.Model):
     optional_note = models.TextField(blank=True, null=True)
 
     preferred_language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
-    profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True, validators=[validate_attachment])
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True, unique=True)
 
     accepted_terms = models.BooleanField(default=False)
@@ -330,8 +331,7 @@ class Incident(models.Model):
     evidence = models.FileField(
         upload_to="incidents/",
         blank=True,
-        null=True
-    )
+        null=True, validators=[validate_attachment])
 
     status = models.CharField(
         max_length=20,
@@ -409,8 +409,7 @@ class ChatMessage(models.Model):
     file = models.FileField(
         upload_to="chat_files/",
         blank=True,
-        null=True
-    )
+        null=True, validators=[validate_attachment])
     created_at = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
@@ -550,6 +549,7 @@ def _invoice_number():
 class Invoice(models.Model):
     STATUS_CHOICES = [
         ("DRAFT", "Draft"),
+        ("QUEUED", "Queued"),
         ("SENT", "Sent"),
         ("PAID", "Paid"),
         ("PENDING", "Pending"),
@@ -571,7 +571,7 @@ class Invoice(models.Model):
     booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, blank=True)
     booking_id = models.PositiveIntegerField(null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    currency = models.CharField(max_length=5, default="USD")
+    currency = models.CharField(max_length=5, default="SEK")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="DRAFT")
     payment_method = models.ForeignKey(
         PaymentMethod,
@@ -644,11 +644,11 @@ class Invoice(models.Model):
         return vat_total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def discounts_total(self):
-        total = sum((item.discount_amount or Decimal("0.00")) for item in self.line_items.all())
+        total = sum((item.discount_amount or Decimal("0.00") for item in self.line_items.all()), Decimal("0.00"))
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def rot_rut_total(self):
-        total = sum((item.rot_rut_amount or Decimal("0.00")) for item in self.line_items.all())
+        total = sum((item.rot_rut_amount or Decimal("0.00") for item in self.line_items.all()), Decimal("0.00"))
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     def total_incl_vat_before_rot_rut(self):
@@ -902,8 +902,7 @@ class LoyaltyTier(models.Model):
     image = models.ImageField(
         upload_to="loyalty_tiers/",
         blank=True,
-        null=True
-    )
+        null=True, validators=[validate_attachment])
 
     description = models.CharField(max_length=255)
     benefits = models.TextField()
@@ -948,8 +947,7 @@ class Promotion(models.Model):
     image = models.ImageField(
         upload_to="promotions/",
         blank=True,
-        null=True
-    )
+        null=True, validators=[validate_attachment])
 
     # مثال: 2 = Double points
     points_multiplier = models.PositiveIntegerField(
@@ -1057,7 +1055,7 @@ class BookingRequestFixAttachment(models.Model):
         related_name="attachments",
         on_delete=models.CASCADE,
     )
-    file = models.ImageField(upload_to="request_fixes/")
+    file = models.ImageField(upload_to="request_fixes/", validators=[validate_attachment])
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
@@ -1140,6 +1138,13 @@ class PointsTransaction(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "booking_type", "booking_id"],
+                condition=models.Q(reason="BOOKING", booking_id__isnull=False),
+                name="unique_booking_loyalty_award",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.user} | {self.amount} pts"
@@ -1348,8 +1353,7 @@ class ProviderProfile(models.Model):
     photo = models.ImageField(
         upload_to="providers/",
         blank=True,
-        null=True
-    )
+        null=True, validators=[validate_attachment])
 
     bio = models.TextField(blank=True)
 
@@ -1466,9 +1470,13 @@ class UserAccessProfile(models.Model):
         on_delete=models.CASCADE,
         related_name="access_profile",
     )
+    signup_pending = models.BooleanField(default=False, editable=False)
     site = models.CharField(max_length=20, choices=SITE_CHOICES, default="main")
     role = models.CharField(max_length=30, choices=ROLE_CHOICES, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        permissions = [("access_dashboard", "Can manage the operations dashboard")]
 
     def __str__(self):
         return f"{self.user} | {self.site} | {self.role or 'no-role'}"
@@ -1540,3 +1548,21 @@ def create_access_profile(sender, instance, created, **kwargs):
             profile.role = "global_super"
             profile.site = "main"
             profile.save()
+
+
+class OutgoingEmail(models.Model):
+    STATUS_CHOICES = [("pending", "Pending"), ("sent", "Sent"), ("failed", "Failed")]
+    payload = models.JSONField(default=dict)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending", db_index=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    next_attempt_at = models.DateTimeField(default=timezone.now, db_index=True)
+    last_error = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    invoice = models.ForeignKey("Invoice", null=True, blank=True, on_delete=models.SET_NULL, related_name="email_deliveries")
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"Email #{self.pk} ({self.status})"

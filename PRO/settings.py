@@ -46,7 +46,10 @@ if env_path.exists():
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+TESTING = "test" in sys.argv or os.getenv("DJANGO_TESTING") == "1"
+DEBUG = os.getenv("DJANGO_DEBUG", "false").lower() == "true"
+if not SECRET_KEY or len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5 or SECRET_KEY.startswith(("django-insecure-", "REPLACE_")):
+    raise ImproperlyConfigured("Set DJANGO_SECRET_KEY to a strong random value of at least 50 characters.")
 
 
 ALLOWED_HOSTS = [
@@ -62,7 +65,20 @@ CSRF_TRUSTED_ORIGINS = [
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = not TESTING
+SECURE_HSTS_SECONDS = int(os.getenv("SECURE_HSTS_SECONDS", "3600"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+SESSION_COOKIE_HTTPONLY = True
+FILE_UPLOAD_MAX_MEMORY_SIZE = 2 * 1024 * 1024
+DATA_UPLOAD_MAX_MEMORY_SIZE = 12 * 1024 * 1024
+DATA_UPLOAD_MAX_NUMBER_FILES = 10
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024
+EMAIL_OUTBOX_EAGER = os.getenv("EMAIL_OUTBOX_EAGER", "false").lower() == "true"
+EMAIL_OUTBOX_MAX_ATTEMPTS = 8
+EMAIL_OUTBOX_RETENTION_DAYS = 30
+if TESTING:
+    EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/accounts/login/'
@@ -144,7 +160,9 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'home.upload_security.ValidateUploadsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'home.security.DashboardPermissionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'PRO.middleware.AdminSiteAccessGuard',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -184,16 +202,6 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('POSTGRES_DB', 'cleaning'),
-#         'USER': os.getenv('POSTGRES_USER', 'cleaning'),
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-#         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-#         'PORT': os.getenv('POSTGRES_PORT', '5432'),
-#     },
-# }  
     
 
       
@@ -204,17 +212,19 @@ WSGI_APPLICATION = 'PRO.wsgi.application'
 
     
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'hembla_db',
-        'USER': 'hembla_user',
-        'PASSWORD': 'Hembla123456789@',
-        'HOST': 'localhost',
-        'PORT': '5432',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "cleaning"),
+        "USER": os.getenv("POSTGRES_USER", "cleaning"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "HOST": os.getenv("POSTGRES_HOST", "localhost"),
+        "PORT": os.getenv("POSTGRES_PORT", "5432"),
+        "CONN_MAX_AGE": 60,
+        "OPTIONS": {"connect_timeout": 10},
     }
 }
    
-if "test" in sys.argv:
+if TESTING and os.getenv("TEST_DATABASE_ENGINE", "sqlite") == "sqlite":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -289,10 +299,10 @@ STORAGES = {
 
 MEDIA_URL='/media/'
 MEDIA_ROOT=os.path.join(BASE_DIR, "media")
-CORS_ALLOW_ALL_ORIGINS = True
 
 # Email (Hostinger SMTP)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_TRANSPORT_BACKEND = "django.core.mail.backends.locmem.EmailBackend" if TESTING else "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend" if TESTING else "accounts.mail_backend.ReliableEmailBackend"
 EMAIL_HOST = "smtp.hostinger.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -302,7 +312,7 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = "Hembla Experten <services@hembla-experten.se>"
 VERIFICATION_FROM_EMAIL = "Hembla Experten Verification <verification@hembla-experten.se>"
 EMAIL_TIMEOUT = 10
-VERIFICATION_EMAIL_BACKEND = EMAIL_BACKEND
+VERIFICATION_EMAIL_BACKEND = EMAIL_TRANSPORT_BACKEND
 VERIFICATION_EMAIL_HOST = os.getenv("VERIFICATION_EMAIL_HOST", EMAIL_HOST)
 VERIFICATION_EMAIL_PORT = int(os.getenv("VERIFICATION_EMAIL_PORT", EMAIL_PORT))
 VERIFICATION_EMAIL_USE_TLS = os.getenv("VERIFICATION_EMAIL_USE_TLS", str(EMAIL_USE_TLS)).lower() == "true"
@@ -419,6 +429,7 @@ LOGGING = {
             "level": "ERROR",
             "propagate": False,
         },
+        "home": {"handlers": ["console"], "level": "INFO", "propagate": False},
         "accounts": {
             "handlers": ["console"],
             "level": "INFO",
@@ -451,3 +462,14 @@ LOGGING = {
 # python manage.py collectstatic --noinput
 # sudo systemctl restart hembla
 #cp -r /var/www/hembla/Cleaning/media /root/media_backup
+
+FILE_UPLOAD_HANDLERS = [
+    "home.upload_security.UploadSizeLimitHandler",
+    "django.core.files.uploadhandler.MemoryFileUploadHandler",
+    "django.core.files.uploadhandler.TemporaryFileUploadHandler",
+]
+
+TRUSTED_PROXY_IPS = [value.strip() for value in os.getenv("TRUSTED_PROXY_IPS", "127.0.0.1,::1").split(",") if value.strip()]
+
+if TESTING:
+    STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}

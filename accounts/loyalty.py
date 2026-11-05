@@ -1,44 +1,32 @@
-from accounts.models import PointsTransaction
 from django.db import transaction
 
+from accounts.models import PointsTransaction
+
+
 def award_points_for_booking(booking, admin_user=None):
-    """
-    Award points manually decided by admin after booking completion.
-    """
-
-    # 1️⃣ شروط الأمان
-    if booking.status != "COMPLETED":
-        return False
-
-    if booking.points_processed:
-        return False
-
-    if booking.points_awarded is None:
-        return False
-
-    user = booking.user
-    if not user:
-        return False
-
-    booking_type = (
-        "private"
-        if booking.__class__.__name__ == "PrivateBooking"
-        else "business"
-    )
-
-    # 2️⃣ تنفيذ آمن
     with transaction.atomic():
+        locked = type(booking).objects.select_for_update().get(pk=booking.pk)
+        if (locked.status != "COMPLETED" or locked.points_processed
+                or locked.points_awarded is None or not locked.user_id):
+            return False
+        booking_type = "private" if locked._meta.model_name == "privatebooking" else "business"
+        if PointsTransaction.objects.filter(
+            user_id=locked.user_id, reason="BOOKING", booking_type=booking_type, booking_id=locked.pk
+        ).exists():
+            locked.points_processed = True
+            locked.save(update_fields=["points_processed"])
+            booking.points_processed = True
+            return False
         PointsTransaction.objects.create(
-            user=user,
-            amount=booking.points_awarded,
+            user_id=locked.user_id,
+            amount=locked.points_awarded,
             reason="BOOKING",
             booking_type=booking_type,
-            booking_id=booking.id,
-            note=booking.points_note or "",
-            created_by=admin_user
+            booking_id=locked.pk,
+            note=locked.points_note or "",
+            created_by=admin_user,
         )
-
+        locked.points_processed = True
+        locked.save(update_fields=["points_processed"])
         booking.points_processed = True
-        booking.save(update_fields=["points_processed"])
-
     return True

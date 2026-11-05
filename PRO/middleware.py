@@ -136,7 +136,8 @@ class StaticAssetCacheMiddleware:
             return response
 
         lower_path = path.lower()
-        if any(lower_path.endswith(ext) for ext in self.IMMUTABLE_EXTENSIONS):
+        import re
+        if any(lower_path.endswith(ext) for ext in self.IMMUTABLE_EXTENSIONS) and re.search(r"\.[0-9a-f]{12}\.", lower_path):
             response["Cache-Control"] = "public, max-age=31536000, immutable"
         else:
             response["Cache-Control"] = "public, max-age=3600"

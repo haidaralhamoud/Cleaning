@@ -1,0 +1,17 @@
+[Unit]
+Description=Hembla outgoing email delivery
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/hembla/Cleaning
+ExecStart=/var/www/hembla/venv/bin/python manage.py process_emails --limit 100
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/hembla/Cleaning

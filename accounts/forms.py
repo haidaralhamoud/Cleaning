@@ -506,8 +506,6 @@ class PasswordResetRequestForm(forms.Form):
 
     def clean_email(self):
         email = (self.cleaned_data.get("email") or "").strip().lower()
-        if not User.objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("No account found with this email.")
         return email
 
 

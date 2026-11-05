@@ -330,7 +330,7 @@ def _invoice_summary_rows(invoice: Invoice):
         ("NET (EXCL. VAT)", money(net_excl_vat), False),
         ("VAT", money(vat_amount), False),
         ("TOTAL (INCL. VAT)", money(total_incl_vat), False),
-        ("RUT ELIGIBLE LABOR", money(eligible_labor), False),
+        ("RUT ELIGIBLE LABOR", f"-{money(eligible_labor)}" if eligible_labor > 0 else money(0), False),
         ("ROT/RUT (INCL. VAT)", f"-{money(rot_rut_amount)}" if rot_rut_amount > 0 else money(0), False),
     ]
     summary.append((f"FINAL TOTAL ({currency})", money(invoice.total_amount()), True))
@@ -503,7 +503,7 @@ def render_invoice_pdf(invoice: Invoice) -> bytes:
     })
 
 
-def send_invoice_email(invoice: Invoice):
+def send_invoice_email(invoice: Invoice, *, sent_by=None):
     customer_email = (invoice.customer.email or getattr(invoice.customer.user, "email", "") or "").strip()
     if not customer_email:
         raise ValueError("Customer email is missing.")
@@ -522,24 +522,18 @@ def send_invoice_email(invoice: Invoice):
         "Best regards,\n"
         "Hembla Experten"
     )
-    connection = get_connection(fail_silently=False)
-    try:
-        connection.open()
-        if not getattr(connection, "connection", None):
-            raise ConnectionError("SMTP connection could not be established.")
+    from django.db import transaction
+    from .mail_delivery import enqueue_message
 
-        message = EmailMultiAlternatives(
-            subject,
-            body,
-            settings.DEFAULT_FROM_EMAIL,
-            [customer_email],
-            connection=connection,
-        )
+    with transaction.atomic():
+        locked = Invoice.objects.select_for_update().get(pk=invoice.pk)
+        if locked.is_locked:
+            raise ValueError("This invoice is already queued or sent.")
+        locked.status = "QUEUED"
+        locked.is_locked = True
+        locked.sent_by = sent_by
+        locked.save(update_fields=["status", "is_locked", "sent_by"])
+        message = EmailMultiAlternatives(subject, body, settings.DEFAULT_FROM_EMAIL, [customer_email])
         message.attach(f"{invoice.invoice_number}.pdf", pdf_bytes, "application/pdf")
-        message.send(fail_silently=False)
-    finally:
-        try:
-            connection.close()
-        except Exception:
-            pass
+        enqueue_message(message, invoice=locked)
     return pdf_bytes

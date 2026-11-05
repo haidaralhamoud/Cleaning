@@ -117,7 +117,7 @@ class InvoicePropertyDetailTests(TestCase):
         summary_rows = _invoice_summary_rows(invoice)
 
         summary = {label: value for label, value, _ in summary_rows}
-        self.assertEqual(summary["RUT ELIGIBLE LABOR"], "1000.00 SEK")
+        self.assertEqual(summary["RUT ELIGIBLE LABOR"], "-1000.00 SEK")
         self.assertEqual(summary["ROT/RUT (INCL. VAT)"], "-1000.00 SEK")
         self.assertEqual(summary["FINAL TOTAL (SEK)"], "1000.00 SEK")
 
@@ -129,12 +129,6 @@ class InvoicePropertyDetailTests(TestCase):
     VERIFICATION_EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     VERIFICATION_EMAIL_HOST_USER="verification@hembla-experten.se",
     VERIFICATION_EMAIL_HOST_PASSWORD="secret",
-    DATABASES={
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
-        }
-    },
 )
 class PasswordResetFlowTests(TestCase):
     def setUp(self):
@@ -259,10 +253,11 @@ class PasswordResetFlowTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(mail.outbox), 0)
 
-    def test_request_reset_rejects_unknown_email(self):
+    def test_request_reset_does_not_disclose_unknown_email(self):
         response = self.client.post(reverse("password_reset"), {"email": "missing@example.com"})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "No account found with this email.")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(mail.outbox), 0)
+        self.assertFalse(PasswordResetOTP.objects.filter(email="missing@example.com").exists())
 
     def test_success_marks_single_use(self):
         older = PasswordResetOTP.objects.create(
@@ -301,12 +296,6 @@ class PasswordResetFlowTests(TestCase):
     VERIFICATION_EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
     VERIFICATION_EMAIL_HOST_USER="verification@hembla-experten.se",
     VERIFICATION_EMAIL_HOST_PASSWORD="secret",
-    DATABASES={
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": ":memory:",
-        }
-    },
 )
 class SignUpVerificationFlowTests(TestCase):
     def _signup_payload(self, **overrides):

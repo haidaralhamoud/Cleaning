@@ -132,3 +132,20 @@ class UserAccessProfileAdmin(admin.ModelAdmin):
     list_display = ("user", "site", "role", "created_at")
     list_filter = ("site", "role")
     search_fields = ("user__username", "user__email")
+
+
+from .models import OutgoingEmail
+
+
+@admin.register(OutgoingEmail)
+class OutgoingEmailAdmin(admin.ModelAdmin):
+    list_display = ("id", "status", "attempts", "created_at", "sent_at", "last_error")
+    list_filter = ("status",)
+    readonly_fields = ("status", "attempts", "created_at", "sent_at", "last_error", "next_attempt_at", "invoice")
+    exclude = ("payload",)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

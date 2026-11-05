@@ -1,3 +1,4 @@
+from home.upload_security import validate_attachment
 from decimal import Decimal
 import re
 from datetime import timedelta, time, datetime
@@ -852,7 +853,7 @@ class Contact(models.Model):
     inquiry_type = models.CharField(max_length=50, choices=INQUIRY_CHOICES)
     source = models.CharField(max_length=20, choices=CONTACT_SOURCE_CHOICES, default="private")
     preferred_method = models.CharField(max_length=50, default='email')
-    file = models.FileField(upload_to='contact_files/', blank=True, null=True)
+    file = models.FileField(upload_to='contact_files/', blank=True, null=True, validators=[validate_attachment])
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -863,7 +864,7 @@ class Job(models.Model):
     title = models.CharField(max_length=200)
     description = models.TextField()
     job_type = models.CharField(max_length=50, default="Full Time")
-    image = models.ImageField(upload_to="jobs/", blank=True, null=True)
+    image = models.ImageField(upload_to="jobs/", blank=True, null=True, validators=[validate_attachment])
     is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
@@ -880,7 +881,7 @@ class Application(models.Model):
     phone = models.CharField(max_length=50)
     job = models.ForeignKey("Job", on_delete=models.SET_NULL, null=True, blank=True)
     message = models.TextField(blank=True, null=True)
-    cv = models.FileField(upload_to="applications/cv/", null=True, blank=True)
+    cv = models.FileField(upload_to="applications/cv/", null=True, blank=True, validators=[validate_attachment])
     area = models.CharField(max_length=200, null=True, blank=True)
     availability = models.CharField(max_length=50, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -916,15 +917,14 @@ class BusinessService(models.Model):
     description = models.TextField()
     detail_description = models.TextField(blank=True, null=True)
     recommended = models.CharField(max_length=200, blank=True, null=True)
-    image = models.ImageField(upload_to="business_services/")
-    hero_image = models.ImageField(upload_to="business_services/hero/", blank=True, null=True)
+    image = models.ImageField(upload_to="business_services/", validators=[validate_attachment])
+    hero_image = models.ImageField(upload_to="business_services/hero/", blank=True, null=True, validators=[validate_attachment])
     background_image = models.ImageField(
         upload_to="business_services/background/",
         blank=True,
         null=True,
-        verbose_name="Image for background",
-    )
-    icon = models.ImageField(upload_to="services/")
+        verbose_name="Image for background", validators=[validate_attachment])
+    icon = models.ImageField(upload_to="services/", validators=[validate_attachment])
     description_service_aviable = models.TextField()
 
     def save(self, *args, **kwargs):
@@ -971,7 +971,7 @@ class BusinessBundle(models.Model):
     why_choose = models.JSONField(blank=True, null=True)
     addons = models.JSONField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
-    image = models.ImageField(upload_to="bundles/", blank=True, null=True)
+    image = models.ImageField(upload_to="bundles/", blank=True, null=True, validators=[validate_attachment])
 
     def save(self, *args, **kwargs):
         optimize_uploaded_image_fields(self, ["image"], update_fields=kwargs.get("update_fields"))
@@ -1100,7 +1100,7 @@ class BusinessBooking(BaseBooking):
 class PrivateMainCategory(models.Model):
     title = models.CharField(max_length=200)
     display_order = models.PositiveIntegerField(default=0)
-    icon = models.ImageField(upload_to="private/categories/", blank=True, null=True)
+    icon = models.ImageField(upload_to="private/categories/", blank=True, null=True, validators=[validate_attachment])
     slug = models.SlugField(unique=True)
 
     def save(self, *args, **kwargs):
@@ -1121,15 +1121,14 @@ class PrivateService(models.Model):
     display_order = models.PositiveIntegerField(default=0)
     description = models.TextField(blank=True, null=True)
     recommended = models.CharField(max_length=200, blank=True, null=True)
-    image = models.ImageField(upload_to="private/services/", blank=True, null=True)
+    image = models.ImageField(upload_to="private/services/", blank=True, null=True, validators=[validate_attachment])
     slug = models.SlugField(unique=True, max_length=255)
-    hero_image = models.ImageField(upload_to="private/hero/", blank=True, null=True)
+    hero_image = models.ImageField(upload_to="private/hero/", blank=True, null=True, validators=[validate_attachment])
     background_image = models.ImageField(
         upload_to="private/background/",
         blank=True,
         null=True,
-        verbose_name="Image for background",
-    )
+        verbose_name="Image for background", validators=[validate_attachment])
     hero_subtitle = models.CharField(max_length=255, blank=True)
     hero_cta_text = models.CharField(max_length=60, blank=True)
     hero_cta_url = models.URLField(blank=True)
@@ -1261,7 +1260,7 @@ class ServiceRoomOption(models.Model):
     short_label = models.CharField(max_length=10, help_text="Short badge like BR, KT, BT")
     title = models.CharField(max_length=120)
     subtitle = models.CharField(max_length=150, default="Per room setup", blank=True)
-    image = models.ImageField(upload_to="private/room_options/", blank=True, null=True)
+    image = models.ImageField(upload_to="private/room_options/", blank=True, null=True, validators=[validate_attachment])
     unit_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_currency = models.CharField(
         max_length=3,
@@ -1598,7 +1597,7 @@ class EmailRequest(models.Model):
     email_from = models.EmailField()
     subject = models.CharField(max_length=255)
     message = models.TextField()
-    attachment = models.FileField(upload_to="email_attachments/", blank=True, null=True)
+    attachment = models.FileField(upload_to="email_attachments/", blank=True, null=True, validators=[validate_attachment])
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -1653,7 +1652,7 @@ class PrivateAddon(models.Model):
     )
     title = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, max_length=255)
-    icon = models.ImageField(upload_to="private/addons/", blank=True, null=True)
+    icon = models.ImageField(upload_to="private/addons/", blank=True, null=True, validators=[validate_attachment])
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     duration_minutes = models.PositiveIntegerField(
@@ -1995,7 +1994,7 @@ class BookingMedia(models.Model):
         choices=PHASE_CHOICES,
         default="before"
     )
-    file = models.ImageField(upload_to="booking_media/")
+    file = models.ImageField(upload_to="booking_media/", validators=[validate_attachment])
 
     uploaded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,

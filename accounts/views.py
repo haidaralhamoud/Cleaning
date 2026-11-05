@@ -304,8 +304,12 @@ class RememberMeLoginView(LoginView):
         return reverse("accounts:customer_profile_view")
 
     def _authenticated_redirect_target(self, next_url=""):
+        from django.utils.http import url_has_allowed_host_and_scheme
+
         target = (next_url or "").strip()
-        if not target:
+        if not target or not url_has_allowed_host_and_scheme(
+            target, allowed_hosts={self.request.get_host()}, require_https=self.request.is_secure()
+        ):
             return self._default_authenticated_redirect()
 
         target_path = urlsplit(target).path or target
@@ -571,10 +575,8 @@ def _normalize_email(email):
 
 
 def _get_client_ip(request):
-    forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.META.get("REMOTE_ADDR")
+    from home.security import client_ip
+    return client_ip(request)
 
 
 def _get_or_create_stripe_customer(customer):
@@ -663,11 +665,9 @@ def _send_reset_code(email, user, request):
     )
     message.attach_alternative(html_body, "text/html")
     try:
-        connection = verification_email_connection()
-        connection.open()
-        connection.close()
-        message.send(fail_silently=False)
-    except SMTPException:
+        if message.send(fail_silently=False) != 1:
+            raise SMTPException("Verification email was not accepted.")
+    except (SMTPException, OSError):
         logger.exception("SMTP error while sending password reset code to %s", email)
         raise
     return True
@@ -711,11 +711,9 @@ def _send_signup_code(email, user, request):
     )
     message.attach_alternative(html_body, "text/html")
     try:
-        connection = verification_email_connection()
-        connection.open()
-        connection.close()
-        message.send(fail_silently=False)
-    except SMTPException:
+        if message.send(fail_silently=False) != 1:
+            raise SMTPException("Verification email was not accepted.")
+    except (SMTPException, OSError):
         logger.exception("SMTP error while sending signup verification code to %s", email)
         raise
     return True
@@ -726,17 +724,15 @@ def password_reset_request(request):
     if request.method == "POST" and form.is_valid():
         email = _normalize_email(form.cleaned_data["email"])
         user = User.objects.filter(email__iexact=email).first()
-        if not user:
-            form.add_error("email", _("No account found with this email."))
-            return render(
-                request,
-                "accounts/password_reset_request.html",
-                {"form": form},
-            )
-        _send_reset_code(email, user, request)
+        if user:
+            try:
+                _send_reset_code(email, user, request)
+            except (SMTPException, OSError):
+                messages.error(request, _("Could not send a verification code right now. Please try again later."))
+                return render(request, "accounts/password_reset_request.html", {"form": form})
 
         request.session["password_reset_email"] = email
-        messages.success(request, _("We sent a verification code to your email."))
+        messages.success(request, _("If this email is registered, use the latest code or request another after one minute."))
         return redirect("password_reset_verify")
 
     return render(
@@ -763,9 +759,12 @@ def password_reset_verify(request):
 
         if request.POST.get("resend") == "1":
             user = User.objects.filter(email__iexact=email).first()
-            if user:
-                _send_reset_code(email, user, request)
-            messages.success(request, _("We sent a verification code to your email."))
+            try:
+                sent = bool(user) and _send_reset_code(email, user, request)
+            except (SMTPException, OSError):
+                messages.error(request, _("Could not send a verification code right now. Please try again later."))
+            else:
+                messages.info(request, _("A new code was sent.") if sent else _("Use the latest code or wait one minute before requesting another."))
             return redirect("password_reset_verify")
 
         if form.is_valid():
@@ -900,8 +899,21 @@ def sign_up(request):
                 form.add_error("email", "Email is already registered.")
                 return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
-            if existing_user and not existing_user.is_active:
-                existing_user.delete()
+            if existing_user:
+                profile = getattr(existing_user, "access_profile", None)
+                if (not existing_user.is_active and not existing_user.is_staff
+                        and profile and profile.signup_pending and existing_user.check_password(password)):
+                    request.session["signup_verification_email"] = email
+                    request.session["signup_next_url"] = next_url
+                    try:
+                        sent = _send_signup_code(email, existing_user, request)
+                    except (SMTPException, OSError):
+                        messages.error(request, _("Could not send the verification code right now."))
+                    else:
+                        messages.info(request, _("A new code was sent.") if sent else _("Use the latest code or wait one minute before requesting another."))
+                    return redirect("accounts:signup_verify")
+                form.add_error("email", "An account already exists. Use email verification or password recovery to continue.")
+                return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
             try:
                 with transaction.atomic():
@@ -914,6 +926,9 @@ def sign_up(request):
             except IntegrityError:
                 form.add_error("email", "Email is already registered.")
                 return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
+
+            user.access_profile.signup_pending = True
+            user.access_profile.save(update_fields=["signup_pending"])
 
             # 2️⃣ إنشاء Customer
             customer = form.save(commit=False)
@@ -965,8 +980,8 @@ def sign_up(request):
 
             try:
                 _send_signup_code(email, user, request)
-            except SMTPException:
-                user.delete()
+            except (SMTPException, OSError):
+                # Keep the pending account and data so the owner can resume safely.
                 messages.error(request, "Could not send the verification code right now. Please try again.")
                 return render(request, "registration/sign_up.html", {"form": form, "next": next_url})
 
@@ -986,7 +1001,7 @@ def signup_verify(request):
     if not email:
         return redirect("accounts:sign_up")
 
-    user = User.objects.filter(email__iexact=email, is_active=False).first()
+    user = User.objects.filter(email__iexact=email, is_active=False, access_profile__signup_pending=True).first()
     if not user:
         request.session.pop("signup_verification_email", None)
         request.session.pop("signup_next_url", None)
@@ -1009,11 +1024,11 @@ def signup_verify(request):
 
         if request.POST.get("resend") == "1":
             try:
-                _send_signup_code(email, user, request)
-            except SMTPException:
+                sent = _send_signup_code(email, user, request)
+            except (SMTPException, OSError):
                 messages.error(request, _("Could not send the verification code right now."))
             else:
-                messages.success(request, _("We sent a verification code to your email."))
+                messages.info(request, _("A new code was sent.") if sent else _("Use the latest code or wait one minute before requesting another."))
             return redirect("accounts:signup_verify")
 
         if form.is_valid():
@@ -1040,6 +1055,8 @@ def signup_verify(request):
                 PasswordResetOTP.objects.filter(email=email, is_used=False).update(is_used=True)
                 user.is_active = True
                 user.save(update_fields=["is_active"])
+                user.access_profile.signup_pending = False
+                user.access_profile.save(update_fields=["signup_pending"])
                 request.session.pop("signup_verification_email", None)
                 request.session.pop("signup_next_url", None)
                 messages.success(request, _("Your email has been verified. You can sign in now."))
@@ -2433,7 +2450,7 @@ def Payment_and_Billing(request):
     logger.info("[Payment & Billing] payment methods count=%s", payment_methods.count())
 
     invoices = Invoice.objects.exclude(
-        status="DRAFT"
+        status__in=["DRAFT", "QUEUED"]
     ).filter(
         customer=customer
     ).select_related("payment_method").order_by("-issued_at")[:20]
@@ -2490,7 +2507,7 @@ def download_invoice_pdf(request, invoice_id):
         id=invoice_id,
         customer=customer,
     )
-    if invoice.status == "DRAFT":
+    if invoice.status in {"DRAFT", "QUEUED"}:
         raise Http404("Invoice is not available yet.")
 
     booking_summary = ""

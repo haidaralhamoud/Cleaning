@@ -558,6 +558,7 @@ def _build_legacy_branded_invoice_pdf(document):
     customer_card_left = frame_left
     thank_card_left = customer_card_left + customer_card_w + card_gap
 
+    customer_col_w = int((customer_card_w - S(54)) / 2)
     customer_card_lines = []
     customer_name_lines = wrap(
         str(customer_details.get("name", "-")),
@@ -572,7 +573,7 @@ def _build_legacy_branded_invoice_pdf(document):
         customer_details.get("email", "-"),
         customer_details.get("phone", "-"),
     ]:
-        customer_card_lines.append(wrap(str(line), body_font, customer_card_w - S(36)))
+        customer_card_lines.append(wrap(str(line), body_font, customer_col_w))
 
     thank_text = wrap(
         notes[0] if notes else "Thank you for choosing Hembla. We truly appreciate your trust and the opportunity to help keep your home beautiful.",
@@ -585,13 +586,13 @@ def _build_legacy_branded_invoice_pdf(document):
         S(60)
         + block_height(customer_name_lines, customer_line_h)
         + S(12)
-        + S(12)
-        + max(
-            block_height(customer_card_lines[index][:2], customer_line_h)
+        + sum(
+            max(
+                block_height(lines, customer_line_h)
+                for lines in customer_card_lines[index:index + 2]
+            ) + S(12)
             for index in range(0, len(customer_card_lines), 2)
         )
-        + S(12)
-        + S(16)
         + S(20)
     )
     thank_card_h = S(34) + S(64) + block_height(thank_text[:6], S(32)) + S(36)
@@ -604,15 +605,14 @@ def _build_legacy_branded_invoice_pdf(document):
     cy = cards_top + S(60)
     draw_text_block(customer_card_left + S(18), cy, customer_name_lines, body_bold_font, colors["ink"], customer_line_h)
     cy += block_height(customer_name_lines, customer_line_h) + S(12)
-    customer_col_w = int((customer_card_w - S(54)) / 2)
     for index in range(0, len(customer_card_lines), 2):
         row_y = cy
-        left_lines = wrap(" ".join(customer_card_lines[index]) or "-", body_font, customer_col_w)[:2]
+        left_lines = customer_card_lines[index]
+        right_lines = customer_card_lines[index + 1] if index + 1 < len(customer_card_lines) else []
         draw_text_block(customer_card_left + S(18), row_y, left_lines, body_font, colors["ink"], customer_line_h)
         if index + 1 < len(customer_card_lines):
-            right_lines = wrap(" ".join(customer_card_lines[index + 1]) or "-", body_font, customer_col_w)[:2]
             draw_text_block(customer_card_left + S(36) + customer_col_w, row_y, right_lines, body_font, colors["ink"], customer_line_h)
-        cy += S(42)
+        cy += max(len(left_lines), len(right_lines)) * customer_line_h + S(12)
 
     thank_title = "Thank you!"
     fitted_thank_font = fit_font_for_width(
@@ -643,12 +643,13 @@ def _build_legacy_branded_invoice_pdf(document):
     table_inner_right = table_left + table_w - S(18)
     table_inner_w = table_inner_right - table_inner_left
     column_gap = S(14)
-    desc_w = S(255)
     date_w = S(105)
     qty_w = S(70)
     unit_w = S(100)
     vat_w = S(72)
-    amount_w = table_inner_w - desc_w - date_w - qty_w - unit_w - vat_w - (column_gap * 5)
+    amount_w = S(145)
+    # Give the description the remaining space; numeric columns stay compact.
+    desc_w = table_inner_w - date_w - qty_w - unit_w - vat_w - amount_w - (column_gap * 5)
     desc_x = table_inner_left
     date_x = desc_x + desc_w + column_gap
     qty_x = date_x + date_w + column_gap
@@ -727,7 +728,7 @@ def _build_legacy_branded_invoice_pdf(document):
         for i, line in enumerate(title_lines):
             draw.text((desc_x, text_y + (i * S(26))), line, font=small_bold_font if i == 0 else small_font, fill=colors["ink"])
         detail_y = text_y + len(title_lines) * S(26)
-        for i, line in enumerate(detail_lines[:3]):
+        for i, line in enumerate(detail_lines):
             draw.text((desc_x, detail_y + (i * S(22))), line, font=body_font, fill=colors["ink"])
         for i, line in enumerate(date_lines[:2]):
             centered_text(date_x, date_w, text_y + (i * S(24)), line, date_font, colors["ink"])
@@ -754,18 +755,19 @@ def _build_legacy_branded_invoice_pdf(document):
         breakdown_specs.append((label_lines, value_lines, fill))
 
     total_label, total_value = total_row or ("TOTAL TO PAY", "-")
-    total_label_lines = wrap(str(total_label).upper(), small_bold_font, breakdown_w - S(32))
+    total_value_w = int((breakdown_w - S(48)) / 2)
+    total_label_lines = wrap(str(total_label).upper(), small_bold_font, breakdown_w - S(48) - total_value_w)
     total_clean = _clean_money(total_value)
     fitted_total_font = fit_font_for_width(
         total_clean,
         total_font,
         [_invoice_font(F(S(25)), bold=True), _invoice_font(F(S(23)), bold=True), _invoice_font(F(S(21)), bold=True)],
-        breakdown_w - S(36),
+        total_value_w,
     )
     breakdown_content_h = S(18)
     for label_lines, value_lines, _fill in breakdown_specs:
         breakdown_content_h += max(block_height(label_lines, S(24)), block_height(value_lines, S(24))) + S(12)
-    total_box_h = max(S(142), S(24) + block_height(total_label_lines[:2], S(24)) + S(58) + S(34))
+    total_box_h = max(S(110), S(32) + max(block_height(total_label_lines, S(24)), S(48)) + S(34))
     breakdown_h = table_header_h + breakdown_content_h + S(16) + total_box_h
     rut_top = main_top + table_h + S(22)
     card_box(breakdown_left, rut_top, breakdown_w, breakdown_h)
@@ -790,9 +792,9 @@ def _build_legacy_branded_invoice_pdf(document):
     draw.line([(breakdown_left + S(16), bd_y + S(6)), (breakdown_left + breakdown_w - S(16), bd_y + S(6))], fill=colors["line_strong"], width=S(1))
     total_box_top = rut_top + breakdown_h - total_box_h
     draw.rectangle((breakdown_left, total_box_top, breakdown_left + breakdown_w, rut_top + breakdown_h), fill=colors["soft_fill"], outline=colors["line"])
-    draw_text_block(breakdown_left + S(16), total_box_top + S(16), total_label_lines[:2], small_bold_font, colors["ink"], S(24))
+    draw_text_block(breakdown_left + S(16), total_box_top + S(16), total_label_lines, small_bold_font, colors["ink"], S(24))
     total_w = draw.textlength(total_clean, font=fitted_total_font)
-    draw.text((breakdown_left + breakdown_w - S(18) - total_w, total_box_top + S(48)), total_clean, font=fitted_total_font, fill=colors["gold"])
+    draw.text((breakdown_left + breakdown_w - S(18) - total_w, total_box_top + S(16)), total_clean, font=fitted_total_font, fill=colors["gold"])
     draw.text((breakdown_left + S(16), total_box_top + total_box_h - S(28)), "Amount to be paid by due date.", font=small_font, fill=colors["ink"])
 
     eligible_label = next((str(value) for label, value, _ in summary_rows if "ELIGIBLE" in str(label).upper()), "-")

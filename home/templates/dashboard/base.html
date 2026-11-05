@@ -69,7 +69,10 @@
               {% endif %}
             </button>
             <div class="dash-bell-menu" id="dashNotifMenu" aria-hidden="true">
-              <div class="dash-bell-head">Notifications</div>
+              <div class="dash-bell-head">
+                <span>Notifications</span>
+                <button class="dash-bell-mark-read" id="dashMarkAllRead" type="button">Mark all read</button>
+              </div>
               <div class="dash-bell-summary">
                 <span>New bookings (24h): <b id="dashNotifNew">{{ dashboard_new_bookings }}</b></span>
                 <span>Pending no-shows: <b id="dashNotifNoShow">{{ dashboard_pending_no_show }}</b></span>
@@ -317,9 +320,11 @@
     }
 
     const dashboardReadNotifications = new Set(JSON.parse(localStorage.getItem("dashboard-read-notifications") || "[]"));
+    const dashMarkAllRead = document.getElementById("dashMarkAllRead");
     function updateDashboardNotificationBadge() {
       if (!notifBtn) return;
       const unreadCount = document.querySelectorAll("#dashNotifList .dash-bell-item.is-unread").length;
+      if (dashMarkAllRead) dashMarkAllRead.disabled = unreadCount === 0;
       const badge = document.getElementById("dashNotifBadge");
       if (unreadCount > 0) {
         if (badge) {
@@ -351,6 +356,20 @@
     }
     document.querySelectorAll(".dash-bell-item").forEach(decorateDashboardNotification);
     updateDashboardNotificationBadge();
+    if (dashMarkAllRead) {
+      dashMarkAllRead.addEventListener("click", (event) => {
+        event.stopPropagation();
+        document.querySelectorAll("#dashNotifList .dash-bell-item").forEach((element) => {
+          const key = element.dataset.notificationKey;
+          if (!key) return;
+          dashboardReadNotifications.add(key);
+          element.classList.remove("is-unread");
+          element.classList.add("is-read");
+        });
+        localStorage.setItem("dashboard-read-notifications", JSON.stringify([...dashboardReadNotifications].slice(-200)));
+        updateDashboardNotificationBadge();
+      });
+    }
 
     document.addEventListener("pointerdown", unlockDashboardAudio, { once: true });
     document.addEventListener("keydown", unlockDashboardAudio, { once: true });

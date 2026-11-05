@@ -1,7 +1,9 @@
 asgiref==3.10.0
 beautifulsoup4==4.14.2
 bootstrap4==0.1.0
-Django==5.2.7
+Django==5.2.19
+django-allauth[socialaccount]==65.14.0
+python-dotenv==1.2.1
 django-bootstrap4==25.2
 django-filter==25.2
 django-jazzmin==3.0.1

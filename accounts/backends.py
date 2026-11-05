@@ -4,12 +4,14 @@ from accounts.models import Customer
 
 class EmailPhoneUsernameBackend(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
+        if not username or not password:
+            return None
         user = None
 
         # 1) Email login
         try:
             user = User.objects.get(email=username)
-        except User.DoesNotExist:
+        except (User.DoesNotExist, User.MultipleObjectsReturned):
             pass
 
         # 2) Phone login (from Customer model)
@@ -17,7 +19,7 @@ class EmailPhoneUsernameBackend(ModelBackend):
             try:
                 customer = Customer.objects.get(phone=username)
                 user = customer.user
-            except Customer.DoesNotExist:
+            except (Customer.DoesNotExist, Customer.MultipleObjectsReturned):
                 pass
 
         # 3) Username login
@@ -28,7 +30,7 @@ class EmailPhoneUsernameBackend(ModelBackend):
                 return None
 
         # Check password
-        if user.check_password(password):
+        if user.check_password(password) and self.user_can_authenticate(user):
             return user
         
         return None

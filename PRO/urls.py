@@ -15,14 +15,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path , include
+from django.urls import path , include, re_path
 from django.conf.urls.static import static
 from django.conf import settings
 from django.contrib.auth import views as auth_views
 from accounts.views import RememberMeLoginView
 from accounts import views as account_views
 from home.seo_views import robots_txt, sitemap_xml
+from home.private_media import private_media
+
 urlpatterns = [
+    re_path(r"^media/(?P<path>(?:contact_files|applications/cv|incidents|chat_files|email_attachments|request_fixes|booking_media)/.+)$", private_media, name="private_media"),
     path("robots.txt", robots_txt, name="robots_txt"),
     path("sitemap.xml", sitemap_xml, name="sitemap"),
     path("accounts/login/", RememberMeLoginView.as_view(), name="login"),

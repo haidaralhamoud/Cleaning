@@ -330,7 +330,10 @@ body{
   padding:14px;display:none;z-index:20
 }
 .dash-bell-menu.open{display:block}
-.dash-bell-head{font-weight:800;margin-bottom:8px}
+.dash-bell-head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:800;margin-bottom:8px}
+.dash-bell-mark-read{border:0;background:transparent;color:#075985;font:inherit;font-size:12px;font-weight:600;cursor:pointer;padding:4px;white-space:nowrap}
+.dash-bell-mark-read:hover{color:#0369a1;text-decoration:underline}
+.dash-bell-mark-read:disabled{color:#94a3b8;cursor:default;text-decoration:none}
 .dash-bell-summary{display:flex;flex-direction:column;gap:4px;font-size:12px;color:#4b5563;margin-bottom:10px}
 .dash-bell-list{max-height:280px;overflow:auto;display:flex;flex-direction:column;gap:10px}
 .dash-bell-item{

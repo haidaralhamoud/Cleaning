@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission
 from datetime import datetime, time, timedelta
 from decimal import Decimal
 from django.core import mail
@@ -177,6 +178,7 @@ class CustomerDashboardFormTests(TestCase):
             password="pass123",
             is_staff=True,
         )
+        staff_user.user_permissions.add(Permission.objects.get(codename="access_dashboard", content_type__app_label="accounts"))
         self.client.force_login(staff_user)
 
         response = self.client.get(
@@ -498,6 +500,7 @@ class BookingEmailSignalTests(TestCase):
         self.assertIn("I have three years of experience.", company_email.body)
 
         staff = get_user_model().objects.create_user(username="careers-admin", password="pass123", is_staff=True)
+        staff.user_permissions.add(Permission.objects.get(codename="access_dashboard", content_type__app_label="accounts"))
         self.client.force_login(staff)
         response = self.client.get(reverse("home:dashboard_notifications_api"))
         matching_items = [
@@ -505,7 +508,7 @@ class BookingEmailSignalTests(TestCase):
             if item["title"] == f"New Job Application #{application.pk}"
         ]
         self.assertEqual(len(matching_items), 1)
-        self.assertEqual(matching_items[0]["url"], "/dashboard/applications/")
+        self.assertEqual(matching_items[0]["url"], reverse("home:dashboard_model_view", args=["applications", application.pk]))
 
     def test_airbnb_request_sends_customer_and_company_emails_and_dashboard_notification(self):
         response = self.client.post(
@@ -533,6 +536,7 @@ class BookingEmailSignalTests(TestCase):
         self.assertIn("Two city apartments.", company_email.body)
 
         staff = get_user_model().objects.create_user(username="airbnb-admin", password="pass123", is_staff=True)
+        staff.user_permissions.add(Permission.objects.get(codename="access_dashboard", content_type__app_label="accounts"))
         self.client.force_login(staff)
         dashboard_response = self.client.get(reverse("home:dashboard_notifications_api"))
         matching_items = [
@@ -540,7 +544,7 @@ class BookingEmailSignalTests(TestCase):
             if item["title"] == f"New Airbnb Management Request #{airbnb_request.pk}"
         ]
         self.assertEqual(len(matching_items), 1)
-        self.assertEqual(matching_items[0]["url"], "/dashboard/airbnb-management-requests/")
+        self.assertEqual(matching_items[0]["url"], reverse("home:dashboard_model_view", args=["airbnb-management-requests", airbnb_request.pk]))
 
     def test_home_service_inquiry_sends_customer_and_company_emails(self):
         response = self.client.post(
@@ -585,6 +589,7 @@ class BookingEmailSignalTests(TestCase):
             password="pass123",
             is_staff=True,
         )
+        staff.user_permissions.add(Permission.objects.get(codename="access_dashboard", content_type__app_label="accounts"))
         self.client.force_login(staff)
 
         response = self.client.get(reverse("home:dashboard_notifications_api"))
@@ -595,7 +600,7 @@ class BookingEmailSignalTests(TestCase):
             if item["title"] == f"New Home Service Request #{inquiry.pk}"
         ]
         self.assertEqual(len(matching_items), 1)
-        self.assertEqual(matching_items[0]["url"], "/dashboard/home-service-inquiries/")
+        self.assertEqual(matching_items[0]["url"], reverse("home:dashboard_model_view", args=["home-service-inquiries", inquiry.pk]))
 
     def test_private_booking_creation_sends_customer_confirmation_email(self):
         user_model = get_user_model()
@@ -717,6 +722,7 @@ class BookingEmailSignalTests(TestCase):
         self.assertTrue(any("services@hembla-experten.se" in email.to for email in mail.outbox))
 
         staff = get_user_model().objects.create_user(username="zip-admin", password="pass123", is_staff=True)
+        staff.user_permissions.add(Permission.objects.get(codename="access_dashboard", content_type__app_label="accounts"))
         self.client.force_login(staff)
         response = self.client.get(reverse("home:dashboard_notifications_api"))
         matching_items = [
@@ -724,7 +730,11 @@ class BookingEmailSignalTests(TestCase):
             if item["title"] == f"New ZIP Request #{zip_request.pk}"
         ]
         self.assertEqual(len(matching_items), 1)
-        self.assertEqual(matching_items[0]["url"], "/dashboard/not-available-zips/")
+        self.assertEqual(
+            matching_items[0]["url"],
+            reverse("home:dashboard_model_view", args=["not-available-zips", zip_request.pk]),
+        )
+        self.assertEqual(self.client.get(matching_items[0]["url"]).status_code, 200)
 
     def test_feedback_sends_customer_and_company_emails_and_dashboard_notification(self):
         feedback = FeedbackRequest.objects.create(
@@ -738,6 +748,7 @@ class BookingEmailSignalTests(TestCase):
         self.assertTrue(any("services@hembla-experten.se" in email.to for email in mail.outbox))
 
         staff = get_user_model().objects.create_user(username="feedback-admin", password="pass123", is_staff=True)
+        staff.user_permissions.add(Permission.objects.get(codename="access_dashboard", content_type__app_label="accounts"))
         self.client.force_login(staff)
         response = self.client.get(reverse("home:dashboard_notifications_api"))
         matching_items = [
@@ -745,6 +756,11 @@ class BookingEmailSignalTests(TestCase):
             if item["title"] == "Pending Feedback: Lama Hassan"
         ]
         self.assertEqual(len(matching_items), 1)
+        self.assertEqual(
+            matching_items[0]["url"],
+            reverse("home:dashboard_model_view", args=["feedback", feedback.pk]),
+        )
+        self.assertEqual(self.client.get(matching_items[0]["url"]).status_code, 200)
 
     def test_contact_form_post_redirects_to_success_page(self):
         response = self.client.post(
