@@ -461,7 +461,7 @@ LOGGING = {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": True,
-        },
+       
         "social_core": {
             "handlers": ["console"],
             "level": "DEBUG",
@@ -471,14 +471,6 @@ LOGGING = {
 }
 
 
-##################################################################SERVER
-
-# source venv/bin/activate   # إذا مو مفعّل
-# pip install -r requirements.txt
-# python manage.py migrate
-# python manage.py collectstatic --noinput
-# sudo systemctl restart hembla
-#cp -r /var/www/hembla/Cleaning/media /root/media_backup
 
 FILE_UPLOAD_HANDLERS = [
     "home.upload_security.UploadSizeLimitHandler",
@@ -490,3 +482,16 @@ TRUSTED_PROXY_IPS = [value.strip() for value in os.getenv("TRUSTED_PROXY_IPS", "
 
 if TESTING:
     STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+
+
+
+
+
+##################################################################SERVER
+
+# source venv/bin/activate   # إذا مو مفعّل
+# pip install -r requirements.txt
+# python manage.py migrate
+# python manage.py collectstatic --noinput
+# sudo systemctl restart hembla
+#cp -r /var/www/hembla/Cleaning/media /root/media_backup

@@ -84,11 +84,14 @@
           <div class="career-apply-field career-apply-field--full">
             <label for="{{ form.cv.id_for_label }}">CV / Resume</label>
             <div class="career-file-card">
-              <div>
+              <div class="career-file-copy">
                 <strong>Upload your file</strong>
-                <span id="careerFileName">No file selected yet</span>
+                <span id="careerFileName" aria-live="polite">No file selected yet</span>
               </div>
-              {{ form.cv }}
+              <div class="career-file-picker">
+                {{ form.cv }}
+                <label class="career-file-button" for="{{ form.cv.id_for_label }}">Choose file</label>
+              </div>
             </div>
           </div>
         </div>

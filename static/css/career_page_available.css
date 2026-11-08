@@ -160,6 +160,7 @@ body.career-popup-open {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
 .career-apply-field--full {
@@ -183,6 +184,51 @@ body.career-popup-open {
   font: inherit;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.career-apply-field input:not([type="file"]),
+.career-apply-field select {
+  min-height: 54px;
+}
+
+.career-apply-field select {
+  height: 54px;
+  appearance: none;
+  padding-right: 48px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%23686156' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 20px;
+  cursor: pointer;
+  text-overflow: ellipsis;
+}
+
+.career-apply-field .custom-select-toggle {
+  min-height: 54px;
+  padding: 15px 16px;
+  border-radius: 18px;
+  border-color: rgba(21, 21, 21, 0.1);
+  background: rgba(255,255,255,0.82);
+  color: var(--apply-ink);
+  font: inherit;
+  gap: 16px;
+}
+
+.career-apply-field .custom-select-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.career-apply-field .custom-select-arrow {
+  flex-shrink: 0;
+}
+
+.career-apply-field .custom-select-toggle:focus-visible {
+  outline: 2px solid var(--apply-gold-deep);
+  outline-offset: 3px;
 }
 
 .career-apply-field textarea {
@@ -218,13 +264,52 @@ body.career-popup-open {
   margin-top: 6px;
   color: var(--apply-soft);
   font-size: 0.92rem;
+  overflow-wrap: anywhere;
 }
 
-.career-file-card input[type="file"] {
-  max-width: 240px;
-  padding: 10px;
+.career-file-copy {
+  min-width: 0;
+}
+
+.career-file-picker {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.career-file-picker input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.career-apply-field .career-file-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 20px;
   border-radius: 14px;
-  background: #fff;
+  border: 1px solid rgba(199, 168, 106, 0.5);
+  background: var(--apply-cream);
+  color: var(--apply-ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.career-file-button:hover {
+  background: #f0e6d5;
+}
+
+.career-file-picker:focus-within .career-file-button {
+  outline: 2px solid var(--apply-gold-deep);
+  outline-offset: 3px;
 }
 
 .career-apply-submit,
@@ -402,7 +487,8 @@ body.career-popup-open {
     flex-direction: column;
   }
 
-  .career-file-card input[type="file"],
+  .career-file-picker,
+  .career-apply-field .career-file-button,
   .career-apply-submit,
   .career-success-btn {
     width: 100%;
