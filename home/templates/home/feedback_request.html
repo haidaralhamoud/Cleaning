@@ -44,6 +44,7 @@
 <div class="field-group">
 <label for="id_request_details">{% trans "Describe Your Request" %}</label>              {{ form.request_details }}              {{ form.request_details.errors }}            </div>
 </div>
+{% include 'home/includes/turnstile.html' with turnstile_action='feedback' %}
 <button type="submit" class="submit-btn">{% trans "Send Feedback / Request Service" %}</button>
 </form>
 </div>

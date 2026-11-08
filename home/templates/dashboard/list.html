@@ -35,7 +35,7 @@
           {% for field in display_fields %}
             <label class="d-block small text-nowrap">
               <input type="checkbox" data-column-toggle="{{ forloop.counter0 }}" checked>
-              {{ field|human_label }}
+              {% if item.slug == "applications" and field == "created_at" %}Submitted at{% else %}{{ field|human_label }}{% endif %}
             </label>
           {% endfor %}
         </div>
@@ -82,7 +82,7 @@
       <thead>
         <tr>
           {% for field in display_fields %}
-            <th data-column-index="{{ forloop.counter0 }}">{{ field|human_label }}</th>
+            <th data-column-index="{{ forloop.counter0 }}">{% if item.slug == "applications" and field == "created_at" %}Submitted at{% else %}{{ field|human_label }}{% endif %}</th>
           {% endfor %}
           <th class="text-end">Actions</th>
         </tr>
@@ -97,6 +97,8 @@
                   <div class="dash-file">
                     <img class="dash-thumb" src="{{ val.url }}" alt="">
                   </div>
+                {% elif item.slug == "applications" and field == "created_at" %}
+                  <time datetime="{{ val|date:'c' }}">{{ val|date:"Y-m-d H:i:s T" }}</time>
                 {% elif item.slug == "invoices" and field == "status" %}
                   <span class="badge rounded-pill {% if val == 'SENT' %}text-bg-success{% elif val == 'CANCELLED' %}text-bg-danger{% elif val == 'DRAFT' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">
                     {{ val|default:"Unknown" }}

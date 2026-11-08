@@ -1,0 +1,9 @@
+{% load static i18n %}
+{% if turnstile_enabled %}
+<div data-hembla-turnstile data-sitekey="{{ turnstile_site_key }}" data-action="{{ turnstile_action }}" style="grid-column:1 / -1; margin:12px 0; max-width:100%;">
+  <div data-turnstile-widget></div>
+  <p data-turnstile-error role="alert" style="color:#b42318;" hidden></p>
+  <noscript>{% trans "Please enable JavaScript to complete the security check before sending your request." %}</noscript>
+</div>
+<script src="{% static 'js/turnstile.js' %}" defer></script>
+{% endif %}

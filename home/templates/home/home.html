@@ -3106,6 +3106,7 @@
     </div>
   </div>
   <div class="hero-request-field"><label for="hero-info">{% trans "Additional information" %}</label><textarea id="hero-info" name="message" placeholder="{% trans 'Tell us anything we should know...' %}"></textarea></div>
+{% include 'home/includes/turnstile.html' with turnstile_action='home_inquiry' %}
   <button class="hero-request-submit" type="submit">{% trans "Send Request" %} →</button>
   <small class="hero-request-note" aria-live="polite">{% trans "Free request • No obligation" %}</small>
 </form>
@@ -3212,6 +3213,7 @@
         note.style.color = '#b42318';
         submitButton.innerHTML = defaultButton;
       } finally {
+        if (window.resetHemblaTurnstile) window.resetHemblaTurnstile(requestForm);
         submitButton.disabled = false;
       }
     });
@@ -3569,6 +3571,7 @@
         <div class="airbnb-modal-field"><label for="airbnbPhone">6. {% trans "Phone number" %} *</label><input id="airbnbPhone" name="phone" type="tel" autocomplete="tel" placeholder="e.g. 070 123 45 67" required></div>
         <div class="airbnb-modal-field"><label for="airbnbMessage">7. {% trans "Anything else we should know?" %} <small>({% trans "optional" %})</small></label><textarea id="airbnbMessage" name="message" placeholder="{% trans 'Tell us about your property or any specific requirements...' %}"></textarea></div>
         <div class="airbnb-modal__error" role="alert"></div>
+{% include 'home/includes/turnstile.html' with turnstile_action='airbnb_inquiry' %}
         <button class="airbnb-modal__submit" type="submit">{% trans "Send Request" %} →</button>
         <small class="airbnb-modal__note">{% trans "Free enquiry • No obligation • We'll contact you shortly." %}</small>
       </form>
@@ -3688,6 +3691,7 @@
       } catch (error) {
         errorBox.textContent = error.message || '{% trans "Unable to send your request. Please try again." %}';
       } finally {
+        if (window.resetHemblaTurnstile) window.resetHemblaTurnstile(form);
         submitButton.disabled = false;
       }
     });

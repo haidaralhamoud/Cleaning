@@ -63,6 +63,21 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.hembla-experten.se",
 ]
 
+# Turnstile secrets stay on the server; only the site key reaches templates.
+TURNSTILE_SITE_KEY = os.getenv("TURNSTILE_SITE_KEY", "").strip()
+TURNSTILE_SECRET_KEY = os.getenv("TURNSTILE_SECRET_KEY", "").strip()
+TURNSTILE_ENABLED = os.getenv(
+    "TURNSTILE_ENABLED",
+    "true" if (TURNSTILE_SITE_KEY or TURNSTILE_SECRET_KEY) and not TESTING else "false",
+).lower() == "true"
+TURNSTILE_ALLOWED_HOSTNAMES = [
+    host.strip().lower() for host in os.getenv(
+        "TURNSTILE_ALLOWED_HOSTNAMES", "hembla-experten.se,www.hembla-experten.se"
+    ).split(",") if host.strip()
+]
+if TURNSTILE_ENABLED and not (TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY):
+    raise ImproperlyConfigured("Turnstile requires both TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY.")
+
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_SSL_REDIRECT = not TESTING
@@ -163,6 +178,7 @@ MIDDLEWARE = [
     'home.upload_security.ValidateUploadsMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'home.security.DashboardPermissionsMiddleware',
+    'home.turnstile.TurnstileMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'PRO.middleware.AdminSiteAccessGuard',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -188,6 +204,7 @@ TEMPLATES = [
                  'accounts.context_processors.chat_notifications',
                  'home.context_processors.header_private_services',
                  'home.seo_context.seo_site',
+                 'home.turnstile.turnstile_context',
             ],
         },
     },

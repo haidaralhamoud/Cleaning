@@ -1,0 +1,35 @@
+{% load static i18n %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>{% trans "Security check" %} | Hembla</title>
+  <style>
+    body { margin:0; background:#fafaf8; color:#222; font:16px/1.6 system-ui,sans-serif; }
+    main { max-width:480px; margin:12vh auto; padding:28px; background:white; border:1px solid #ddd; border-radius:16px; }
+    button,a { color:#173e35; } button { padding:12px 22px; cursor:pointer; }
+    .error { color:#b42318; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>{% trans "Security check" %}</h1>
+  {% if checkout %}
+    <p>{% trans "Please complete this quick check to continue to checkout. Your booking details are saved." %}</p>
+    {% if failed %}<p class="error" role="alert">{{ error_message }}</p>{% endif %}
+    <form method="post" action="{{ retry_url }}">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="turnstile_checkout">
+      {% include 'home/includes/turnstile.html' with turnstile_action='private_checkout' %}
+      <button type="submit">{% trans "Continue to checkout" %}</button>
+    </form>
+  {% else %}
+    <p class="error" role="alert">{{ error_message }}</p>
+    <p>{% trans "Go back to your form, complete the security check, and submit again." %}</p>
+    <a href="{{ retry_url }}" onclick="if (history.length > 1) { history.back(); return false; }">{% trans "Back to form" %}</a>
+  {% endif %}
+</main>
+</body>
+</html>

@@ -129,6 +129,7 @@
             <label>Message</label>
             <textarea name="message" rows="5"></textarea>
           </div>
+          {% include 'home/includes/turnstile.html' with turnstile_action='contact' %}
           <button type="submit" class="primary-btn">Send Message</button>
         </form>
       </section>

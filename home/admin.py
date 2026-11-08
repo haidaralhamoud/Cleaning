@@ -657,8 +657,17 @@ admin.site.register(BusinessAddon)
 
 @admin.register(Application)
 class ApplicationAdmin(admin.ModelAdmin):
-    list_display = ["full_name", "email", "phone", "job", "application_type", "created_at"]
+    list_display = ["full_name", "email", "phone", "job", "application_type", "submitted_at"]
     list_filter = ["job", "created_at"]
+    ordering = ["created_at", "pk"]
+    readonly_fields = ["submitted_at"]
+    date_hierarchy = "created_at"
+
+    @admin.display(description="Submitted at", ordering="created_at")
+    def submitted_at(self, obj):
+        if not obj.created_at:
+            return "-"
+        return timezone.localtime(obj.created_at).strftime("%Y-%m-%d %H:%M:%S %Z")
 
     def application_type(self, obj):
         if obj.job:

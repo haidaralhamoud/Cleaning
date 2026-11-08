@@ -53,6 +53,12 @@
           <a class="btn btn-sm btn-outline-primary" href="{% url 'home:dashboard_model_edit' item.slug object.pk %}">Edit</a>
         {% endif %}
       </div>
+      {% if item.slug == "applications" and object %}
+        <p class="mb-3">
+          <strong>Submitted at:</strong>
+          <time datetime="{{ object.created_at|date:'c' }}">{{ object.created_at|date:"Y-m-d H:i:s T" }}</time>
+        </p>
+      {% endif %}
       {% if item.slug == "invoices" and object %}
         <div class="mb-3 d-flex flex-wrap gap-2 dash-quick-actions">
           <a class="btn btn-sm btn-outline-success" href="{% url 'home:dashboard_invoice_preview' object.pk %}" target="_blank" rel="noopener">

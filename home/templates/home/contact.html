@@ -108,6 +108,7 @@
         <a href="{% url 'home:Privacy_Policy' %}">{% trans "privacy policy" %}</a>
 </label>
 </div>
+{% include 'home/includes/turnstile.html' with turnstile_action='contact' %}
 <button class="send-btn" id="sendMessageBtn" type="button" onclick="validateAndSubmit()" disabled>{% trans "Send Message" %}</button>
 </form>
 </div>
@@ -186,7 +187,7 @@ function validateAndSubmit() {
     }
 
     // ط¥ط°ط§ ظƒظ„ط´ظٹ طھظ…ط§ظ… ' ط£ط±ط³ظ„ ط§ظ„ظپظˆط±ظ…
-    document.querySelector("form").submit();
+    document.querySelector("form").requestSubmit();
 }
 
 const agreeBox = document.getElementById("agree_terms");

@@ -121,6 +121,7 @@
             {{ not_available_form.zip_code }}  {# hidden #}
           </div>
 
+{% include 'home/includes/turnstile.html' with turnstile_action='zip_request' %}
           <button type="submit" name="contact-submit" class="submit-btn reveal">Submit</button>
         </div>
 

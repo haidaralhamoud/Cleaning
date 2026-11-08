@@ -3,10 +3,12 @@
   const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365;
 
   const GA_MEASUREMENT_ID = "G-VBQSNSZG6L";
+  const GOOGLE_ADS_ID = "AW-18522883331";
   const FB_PIXEL_ID = "FACEBOOK_PIXEL_ID";
 
   const state = {
     gaLoaded: false,
+    adsLoaded: false,
     fbLoaded: false,
     functionalLoaded: false
   };
@@ -55,6 +57,19 @@
     document.head.appendChild(script);
   }
 
+  function configureGoogleTag(measurementId) {
+    loadScriptOnce("https://www.googletagmanager.com/gtag/js?id=" + measurementId, "ga-gtag");
+
+    const inline = document.createElement("script");
+    inline.text =
+      (typeof window.gtag === "function" ? "" :
+        "window.dataLayer = window.dataLayer || [];" +
+        "function gtag(){dataLayer.push(arguments);} " +
+        "gtag('js', new Date());") +
+      "gtag('config', '" + measurementId + "');";
+    document.head.appendChild(inline);
+  }
+
   function loadGoogleAnalytics() {
     if (state.gaLoaded) {
       return;
@@ -62,16 +77,16 @@
     if (!GA_MEASUREMENT_ID || GA_MEASUREMENT_ID.indexOf("XXXX") !== -1) {
       return;
     }
-    loadScriptOnce("https://www.googletagmanager.com/gtag/js?id=" + GA_MEASUREMENT_ID, "ga-gtag");
-
-    const inline = document.createElement("script");
-    inline.text =
-      "window.dataLayer = window.dataLayer || [];" +
-      "function gtag(){dataLayer.push(arguments);} " +
-      "gtag('js', new Date());" +
-      "gtag('config', '" + GA_MEASUREMENT_ID + "');";
-    document.head.appendChild(inline);
+    configureGoogleTag(GA_MEASUREMENT_ID);
     state.gaLoaded = true;
+  }
+
+  function loadGoogleAds() {
+    if (state.adsLoaded) {
+      return;
+    }
+    configureGoogleTag(GOOGLE_ADS_ID);
+    state.adsLoaded = true;
   }
 
   function loadFacebookPixel() {
@@ -111,6 +126,7 @@
       loadGoogleAnalytics();
     }
     if (consent.marketing) {
+      loadGoogleAds();
       loadFacebookPixel();
     }
     if (consent.functional) {

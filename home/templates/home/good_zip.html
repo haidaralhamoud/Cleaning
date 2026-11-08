@@ -202,6 +202,7 @@
 <option value="Arabic">Arabic</option>
 <option value="English">English</option>
 </select>
+{% include 'home/includes/turnstile.html' with turnstile_action='call_request' %}
 <button type="submit" class="submit-btn">Request a Call</button>
 </form>
 </div>
@@ -234,6 +235,7 @@
 <span class="file-name" id="fileName">No file chosen</span>
 </label>
 </div>
+{% include 'home/includes/turnstile.html' with turnstile_action='email_request' %}
 <button type="submit" class="send-btn">Send Email</button>
 </form>
 </div>

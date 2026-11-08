@@ -3496,6 +3496,8 @@ def dashboard_model_list(request, model):
         # These dashboard lists are explicitly managed by display_order.
         # Do not let the generic newest-first fallback override that order.
         qs = qs.order_by("display_order", "title", "pk")
+    elif item.model == Application:
+        qs = qs.select_related("job").order_by("created_at", "pk")
     elif "created_at" in field_names:
         qs = qs.order_by("-created_at", "-pk")
     elif "issued_at" in field_names:
@@ -3511,6 +3513,7 @@ def dashboard_model_list(request, model):
     page = paginator.get_page(request.GET.get("page"))
 
     display_fields_map = {
+        "applications": ["full_name", "email", "phone", "job", "area", "created_at"],
         "contacts": ["first_name", "last_name", "email", "phone", "source"],
         "provider-profiles": ["user", "city", "region", "area", "nearby_areas", "is_active"],
         "provider-shifts": ["provider", "weekday", "start_time", "end_time", "is_active", "label"],
