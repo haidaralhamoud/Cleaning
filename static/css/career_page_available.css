@@ -147,6 +147,7 @@ body.career-popup-open {
 }
 
 .career-apply-form {
+  --apply-control-height: 54px;
   margin-top: 22px;
 }
 
@@ -188,11 +189,12 @@ body.career-popup-open {
 
 .career-apply-field input:not([type="file"]),
 .career-apply-field select {
-  min-height: 54px;
+  height: var(--apply-control-height);
+  min-height: var(--apply-control-height);
 }
 
 .career-apply-field select {
-  height: 54px;
+  height: var(--apply-control-height);
   appearance: none;
   padding-right: 48px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%23686156' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -204,7 +206,11 @@ body.career-popup-open {
 }
 
 .career-apply-field .custom-select-toggle {
-  min-height: 54px;
+  /* Override the global compact-button rule for this form control. */
+  height: var(--apply-control-height);
+  min-height: var(--apply-control-height) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
   padding: 15px 16px;
   border-radius: 18px;
   border-color: rgba(21, 21, 21, 0.1);

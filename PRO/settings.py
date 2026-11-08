@@ -461,7 +461,7 @@ LOGGING = {
             "handlers": ["console"],
             "level": "DEBUG",
             "propagate": True,
-       
+        },
         "social_core": {
             "handlers": ["console"],
             "level": "DEBUG",
